@@ -1,0 +1,23 @@
+---
+import GrammarReference from '../components/GrammarReference';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Grammar Reference"
+  description="Quick-reference paradigm tables for Koine Greek — noun declensions, verb conjugations, pronouns, prepositions, and accent rules."
+>
+  <div class="mb-8">
+    <h1
+      class="text-3xl font-bold mb-1"
+      style="color: var(--color-coral);"
+    >
+      Grammar Reference
+    </h1>
+    <p class="text-text-muted">
+      Paradigm tables for reading and translation work. Covers noun declensions, verb conjugations,
+      pronouns, prepositions, and accent rules.
+    </p>
+  </div>
+  <GrammarReference client:load />
+</Layout>

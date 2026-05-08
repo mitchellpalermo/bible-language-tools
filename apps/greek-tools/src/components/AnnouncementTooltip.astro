@@ -1,0 +1,135 @@
+---
+/**
+ * AnnouncementTooltip
+ *
+ * Shows a dismissable tooltip anchored to a nav element for returning visitors.
+ *
+ * Props:
+ *   dismissKey      — unique localStorage key; bump the suffix (e.g. "-v2") to re-show
+ *   title           — short label rendered in accent green above the message
+ *   message         — body text of the announcement
+ *   desktopAnchor   — CSS selector for the anchor element on desktop (≥768px)
+ *   mobileAnchor    — CSS selector for the anchor element on mobile (<768px)
+ *   visitedKey      — (optional) localStorage key that marks "has visited before";
+ *                     defaults to 'greek-tools-visited'
+ *
+ * Behaviour:
+ *   - First-time visitors: sets visitedKey, shows nothing.
+ *   - Returning visitors who haven't dismissed: shows the tooltip.
+ *   - After × click: sets dismissKey, never shows again.
+ */
+
+interface Props {
+  dismissKey: string;
+  title: string;
+  message: string;
+  desktopAnchor: string;
+  mobileAnchor: string;
+  visitedKey?: string;
+}
+
+const {
+  dismissKey,
+  title,
+  message,
+  desktopAnchor,
+  mobileAnchor,
+  visitedKey = 'greek-tools-visited',
+} = Astro.props;
+---
+
+<script
+  define:vars={{ dismissKey, title, message, desktopAnchor, mobileAnchor, visitedKey }}
+>
+  (function () {
+    try {
+      const hasVisited   = localStorage.getItem(visitedKey);
+      const hasDismissed = localStorage.getItem(dismissKey);
+      localStorage.setItem(visitedKey, '1');
+
+      if (!hasVisited || hasDismissed) return;
+
+      function show() {
+        const isMobile = window.innerWidth < 768;
+        const anchor   = document.querySelector(isMobile ? mobileAnchor : desktopAnchor);
+        if (!anchor) return;
+
+        const rect     = anchor.getBoundingClientRect();
+        const TIP_W    = 224;
+        const MARGIN   = 10;
+
+        const anchorCX = rect.left + rect.width / 2;
+        const rawLeft  = anchorCX - TIP_W / 2;
+        const left     = Math.max(MARGIN, Math.min(rawLeft, window.innerWidth - TIP_W - MARGIN));
+        const arrowOff = Math.max(10, Math.min(anchorCX - left - 7, TIP_W - 24));
+
+        const tip = document.createElement('div');
+        Object.assign(tip.style, {
+          position:     'fixed',
+          zIndex:       '9999',
+          width:        TIP_W + 'px',
+          left:         left + 'px',
+          background:   '#ffffff',
+          borderRadius: '10px',
+          filter:       'drop-shadow(0 4px 18px rgba(0,0,0,0.18))',
+          padding:      '14px 14px 12px',
+          color:        '#374151',
+          fontFamily:   'inherit',
+          fontSize:     '13px',
+          lineHeight:   '1.5',
+        });
+
+        const arrow = document.createElement('div');
+        Object.assign(arrow.style, {
+          position: 'absolute',
+          left:     arrowOff + 'px',
+          width:    '0',
+          height:   '0',
+        });
+
+        if (isMobile) {
+          tip.style.bottom = (window.innerHeight - rect.top + MARGIN) + 'px';
+          Object.assign(arrow.style, {
+            bottom:      '-7px',
+            borderLeft:  '7px solid transparent',
+            borderRight: '7px solid transparent',
+            borderTop:   '7px solid #ffffff',
+          });
+        } else {
+          tip.style.top = (rect.bottom + MARGIN) + 'px';
+          Object.assign(arrow.style, {
+            top:          '-7px',
+            borderLeft:   '7px solid transparent',
+            borderRight:  '7px solid transparent',
+            borderBottom: '7px solid #ffffff',
+          });
+        }
+
+        tip.innerHTML = [
+          '<button aria-label="Dismiss announcement" style="position:absolute;top:6px;right:8px;',
+          'background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:18px;',
+          'line-height:1;padding:2px 4px;font-family:inherit;">&times;</button>',
+          '<p style="margin:0 0 3px;font-weight:700;font-size:11px;text-transform:uppercase;',
+          'letter-spacing:0.06em;color:#059669;">' + title + '</p>',
+          '<p style="margin:0;">' + message + '</p>',
+        ].join('');
+
+        tip.appendChild(arrow);
+        document.body.appendChild(tip);
+
+        tip.querySelector('button').addEventListener('click', function () {
+          tip.remove();
+          try { localStorage.setItem(dismissKey, '1'); } catch (_) {}
+        });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', show);
+      } else {
+        show();
+      }
+    } catch (_) {
+      // localStorage unavailable — silently skip
+    }
+  })();
+</script>

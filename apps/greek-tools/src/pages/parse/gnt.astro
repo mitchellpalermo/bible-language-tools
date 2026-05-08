@@ -1,0 +1,25 @@
+---
+import GNTParseChallenge from '../../components/GNTParseChallenge';
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout
+  title="GNT Passage Parsing"
+  description="Parse verb forms from a chapter of the Greek New Testament — finite verbs, infinitives, and participles in context."
+>
+  <a href="/quiz" class="inline-flex items-center gap-1 text-sm text-text-muted hover:text-text transition-colors mb-4">
+    ← Back
+  </a>
+  <div class="mb-8">
+    <h1
+      class="text-3xl font-bold mb-1"
+      style="color: var(--color-primary);"
+    >
+      GNT Passage Parsing
+    </h1>
+    <p class="text-text-muted">
+      Select a book and chapter. Parse every verb — finite, infinitive, and participle — as it appears in the text.
+    </p>
+  </div>
+  <GNTParseChallenge client:load />
+</Layout>
