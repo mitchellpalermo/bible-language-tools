@@ -1,0 +1,17 @@
+{
+  "name": "@tools/shared",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./srs": "./src/srs.ts",
+    "./quiz-settings": "./src/quiz-settings.ts",
+    "./components/NumberToggle": "./src/components/NumberToggle.tsx",
+    "./components/EndingsToggle": "./src/components/EndingsToggle.tsx",
+    "./components/SectionHeading": "./src/components/SectionHeading.tsx",
+    "./components/DescriptionBar": "./src/components/DescriptionBar.tsx"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  }
+}

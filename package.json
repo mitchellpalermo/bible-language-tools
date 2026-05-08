@@ -1,0 +1,15 @@
+{
+  "name": "bible-language-tools",
+  "private": true,
+  "scripts": {
+    "dev:greek": "pnpm --filter greek-tools dev",
+    "dev:hebrew": "pnpm --filter hebrew-tools dev",
+    "build:greek": "pnpm --filter greek-tools build",
+    "build:hebrew": "pnpm --filter hebrew-tools build",
+    "test": "pnpm -r test:run",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "sharp", "simple-git-hooks", "workerd"]
+  }
+}
