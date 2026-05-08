@@ -1,0 +1,26 @@
+---
+import ParadigmQuiz from '../components/ParadigmQuiz';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Paradigm Quiz"
+  description="Quiz yourself on Greek paradigm tables — noun declensions, verb conjugations, pronouns, and more."
+>
+  <a href="/quiz" class="inline-flex items-center gap-1 text-sm text-text-muted hover:text-text transition-colors mb-4">
+    ← Back
+  </a>
+  <div class="mb-8">
+    <h1
+      class="text-3xl font-bold mb-1"
+      style="color: var(--color-coral);"
+    >
+      Paradigm Quiz
+    </h1>
+    <p class="text-text-muted">
+      Pick a paradigm, choose your difficulty, and fill in the blanks from memory.
+      Uses Beta Code input — type English letters to produce Greek.
+    </p>
+  </div>
+  <ParadigmQuiz client:load />
+</Layout>

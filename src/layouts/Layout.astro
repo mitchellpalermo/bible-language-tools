@@ -1,0 +1,335 @@
+---
+import '../styles/global.css';
+import AnnouncementTooltip from '../components/AnnouncementTooltip.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = 'Free tools for Koine Greek students — keyboard, flashcards, and more.',
+} = Astro.props;
+
+const navLinks = [
+  { href: '/keyboard', label: 'Type', tabLabel: 'Type' },
+  { href: '/flashcards', label: 'Flashcards', tabLabel: 'Cards' },
+  { href: '/daily', label: 'Daily', tabLabel: 'Daily' },
+  { href: '/reader', label: 'Reader', tabLabel: 'Reader' },
+  { href: '/grammar', label: 'Grammar', tabLabel: 'Grammar' },
+  { href: '/quiz', label: 'Quiz', tabLabel: 'Quiz' },
+];
+
+const currentPath = Astro.url.pathname;
+
+// Quiz section covers the picker and both quiz modes
+const QUIZ_PATHS = ['/quiz', '/paradigms', '/parse'];
+
+function isActive(href: string) {
+  if (href === '/quiz') return QUIZ_PATHS.some((p) => currentPath.startsWith(p));
+  return currentPath.startsWith(href);
+}
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title} | greek.tools</title>
+
+    <!-- Google Fonts: Plus Jakarta Sans (all UI) + Noto Sans (Greek text rendering) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- PostHog analytics — production only (no key in dev = no-op) -->
+    <script>
+      import posthog from 'posthog-js';
+      const key = import.meta.env.PUBLIC_POSTHOG_KEY;
+      const host = import.meta.env.PUBLIC_POSTHOG_HOST;
+      if (import.meta.env.PROD && key) {
+        posthog.init(key, {
+          api_host: host,
+          ui_host: 'https://us.posthog.com',
+          session_recording: { sample_rate: 0.2 },
+          capture_pageview: true,
+          capture_pageleave: false,
+          capture_exceptions: true,
+        });
+      }
+    </script>
+  </head>
+
+  <body class="bg-bg text-text min-h-screen flex flex-col">
+
+    <!-- ── Rainbow accent line at top of page ─────────────────────────── -->
+    <div
+      class="h-1 w-full"
+      style="background: linear-gradient(90deg, #1D4ED8 0%, #7C3AED 30%, #F43F5E 55%, #F59E0B 75%, #059669 100%);"
+    ></div>
+
+    <!-- ── Nav ────────────────────────────────────────────────────────── -->
+    <nav class="bg-primary text-white px-4 sm:px-6 py-4 shadow-md">
+      <div class="max-w-5xl mx-auto flex items-center justify-between">
+
+        <!-- Logo -->
+        <a
+          href="/"
+          class="group flex items-baseline gap-0 hover:opacity-90 transition-opacity"
+          aria-label="greek.tools home"
+        >
+          <span class="text-xl font-extrabold tracking-tight leading-none">
+            greek
+          </span>
+          <span class="text-xl font-extrabold tracking-tight leading-none text-accent-light">
+            .tools
+          </span>
+        </a>
+
+        <!-- Desktop nav links (hidden on mobile — replaced by bottom tab bar) -->
+        <div class="hidden md:flex gap-1">
+          {navLinks.map(({ href, label }) => (
+            <a
+              href={href}
+              class={[
+                'px-3 py-1.5 rounded-md text-sm font-semibold transition-colors',
+                isActive(href)
+                  ? 'bg-white/20 text-white'
+                  : 'text-white/80 hover:text-white hover:bg-white/10',
+              ].join(' ')}
+              aria-current={isActive(href) ? 'page' : undefined}
+            >
+              {label}
+            </a>
+          ))}
+        </div>
+
+      </div>
+    </nav>
+
+    <!-- ── Main content ────────────────────────────────────────────────── -->
+    <!-- pb-20 on mobile leaves room above the fixed bottom tab bar -->
+    <main class="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8 pb-20 md:pb-8">
+      <slot />
+    </main>
+
+    <!-- ── Footer (desktop only — bottom tab bar serves as nav on mobile) ── -->
+    <footer class="hidden md:block bg-primary text-white/60 text-sm text-center py-5">
+      <p>
+        <!-- "greek.tools" morphs into Greek translations on hover -->
+        <span class="group inline-block cursor-default select-none">
+          <span class="relative inline-block overflow-hidden align-bottom" style="height: 1.25em;">
+            <span class="absolute inset-0 flex items-center justify-center transition-all duration-300 group-hover:opacity-0 group-hover:-translate-y-full">greek</span>
+            <span class="absolute inset-0 flex items-center justify-center transition-all duration-300 opacity-0 translate-y-full group-hover:opacity-100 group-hover:translate-y-0 text-accent-light" style="font-family: var(--font-greek);">ἑλληνικά</span>
+            <span class="invisible">ἑλληνικά</span>
+          </span><span class="relative inline-block overflow-hidden align-bottom ml-1" style="height: 1.25em;">
+            <span class="absolute inset-0 flex items-center justify-center transition-all duration-300 group-hover:opacity-0 group-hover:-translate-y-full">tools</span>
+            <span class="absolute inset-0 flex items-center justify-center transition-all duration-300 opacity-0 translate-y-full group-hover:opacity-100 group-hover:translate-y-0 text-accent-light" style="font-family: var(--font-greek);">ὅπλα</span>
+            <span class="invisible">tools</span>
+          </span>
+        </span>
+        <span class="mx-2 opacity-40">—</span>
+        free utilities for Koine Greek students
+      </p>
+      <p class="mt-2 text-white/40">
+        Find something wrong? Something not working? Send me a note:
+        <a href="mailto:hello@greek.tools" class="text-white/60 hover:text-accent-light transition-colors underline underline-offset-2">hello@greek.tools</a>
+      </p>
+    </footer>
+
+    <!-- ── Mobile bottom tab bar (hidden on md+) ──────────────────────── -->
+    <nav
+      class="fixed bottom-0 inset-x-0 md:hidden z-50 bg-primary border-t border-white/10"
+      style="padding-bottom: env(safe-area-inset-bottom, 0px)"
+      aria-label="Main navigation"
+    >
+      <!-- Thin rainbow line mirrors the page top accent -->
+      <div
+        class="h-px w-full"
+        style="background: linear-gradient(90deg, #1D4ED8 0%, #7C3AED 30%, #F43F5E 55%, #F59E0B 75%, #059669 100%);"
+      ></div>
+
+      <div class="flex justify-around items-stretch h-[72px]">
+
+        <!-- Keyboard -->
+        <a
+          href="/keyboard"
+          class:list={["tab-item", isActive('/keyboard') ? "tab-active" : "tab-inactive"]}
+          aria-label="Greek Keyboard"
+          aria-current={isActive('/keyboard') ? 'page' : undefined}
+        >
+          <span class:list={["tab-pill", { "tab-pill-active": isActive('/keyboard') }]}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2" y="6" width="20" height="12" rx="2" ry="2"/>
+              <circle cx="6" cy="10" r="1" fill="currentColor" stroke="none"/>
+              <circle cx="10" cy="10" r="1" fill="currentColor" stroke="none"/>
+              <circle cx="14" cy="10" r="1" fill="currentColor" stroke="none"/>
+              <circle cx="18" cy="10" r="1" fill="currentColor" stroke="none"/>
+              <circle cx="8" cy="14" r="1" fill="currentColor" stroke="none"/>
+              <circle cx="12" cy="14" r="1" fill="currentColor" stroke="none"/>
+              <circle cx="16" cy="14" r="1" fill="currentColor" stroke="none"/>
+            </svg>
+            <span class="tab-label">Type</span>
+          </span>
+        </a>
+
+        <!-- Flashcards -->
+        <a
+          href="/flashcards"
+          class:list={["tab-item", isActive('/flashcards') ? "tab-active" : "tab-inactive"]}
+          aria-label="Flashcards"
+          aria-current={isActive('/flashcards') ? 'page' : undefined}
+        >
+          <span class:list={["tab-pill", { "tab-pill-active": isActive('/flashcards') }]}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2" y="6" width="20" height="14" rx="2"/>
+              <path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+              <line x1="12" y1="11" x2="12" y2="16"/>
+              <line x1="9.5" y1="13.5" x2="14.5" y2="13.5"/>
+            </svg>
+            <span class="tab-label">Cards</span>
+          </span>
+        </a>
+
+        <!-- Daily verse -->
+        <a
+          href="/daily"
+          class:list={["tab-item", isActive('/daily') ? "tab-active" : "tab-inactive"]}
+          aria-label="Daily Verse"
+          aria-current={isActive('/daily') ? 'page' : undefined}
+        >
+          <span class:list={["tab-pill", { "tab-pill-active": isActive('/daily') }]}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"/>
+              <line x1="12" y1="2" x2="12" y2="5"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+              <line x1="4.22" y1="4.22" x2="6.34" y2="6.34"/>
+              <line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/>
+              <line x1="2" y1="12" x2="5" y2="12"/>
+              <line x1="19" y1="12" x2="22" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/>
+              <line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/>
+            </svg>
+            <span class="tab-label">Daily</span>
+          </span>
+        </a>
+
+        <!-- Reader -->
+        <a
+          href="/reader"
+          class:list={["tab-item", isActive('/reader') ? "tab-active" : "tab-inactive"]}
+          aria-label="Reader"
+          aria-current={isActive('/reader') ? 'page' : undefined}
+        >
+          <span class:list={["tab-pill", { "tab-pill-active": isActive('/reader') }]}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+            <span class="tab-label">Reader</span>
+          </span>
+        </a>
+
+        <!-- Grammar -->
+        <a
+          href="/grammar"
+          class:list={["tab-item", isActive('/grammar') ? "tab-active" : "tab-inactive"]}
+          aria-label="Grammar Reference"
+          aria-current={isActive('/grammar') ? 'page' : undefined}
+        >
+          <span class:list={["tab-pill", { "tab-pill-active": isActive('/grammar') }]}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              <line x1="9" y1="7" x2="15" y2="7"/>
+              <line x1="9" y1="11" x2="15" y2="11"/>
+            </svg>
+            <span class="tab-label">Grammar</span>
+          </span>
+        </a>
+
+        <!-- Quiz -->
+        <a
+          href="/quiz"
+          class:list={["tab-item", isActive('/quiz') ? "tab-active" : "tab-inactive"]}
+          aria-label="Quiz"
+          aria-current={isActive('/quiz') ? 'page' : undefined}
+        >
+          <span class:list={["tab-pill", { "tab-pill-active": isActive('/quiz') }]}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <span class="tab-label">Quiz</span>
+          </span>
+        </a>
+
+      </div>
+    </nav>
+
+    <AnnouncementTooltip
+      dismissKey="greek-tools-quiz-announcement-v1"
+      title="New in Quiz"
+      message="Verb parsing is here — drill λύω forms or parse verbs straight from GNT passages."
+      desktopAnchor='nav:not([aria-label]) a[href="/quiz"]'
+      mobileAnchor='nav[aria-label="Main navigation"] a[href="/quiz"]'
+    />
+  </body>
+</html>
+
+<style>
+  .tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    text-decoration: none;
+    transition: color 150ms ease;
+    -webkit-tap-highlight-color: transparent;
+    min-width: 0;
+  }
+
+  .tab-active {
+    color: var(--color-accent-light);
+  }
+
+  .tab-inactive {
+    color: rgb(255 255 255 / 0.45);
+  }
+
+  .tab-inactive:hover {
+    color: rgb(255 255 255 / 0.75);
+  }
+
+  .tab-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 6px;
+    border-radius: 10px;
+    transition: background-color 150ms ease;
+    width: 100%;
+  }
+
+  .tab-pill-active {
+    background-color: rgb(245 158 11 / 0.18);
+  }
+
+  .tab-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    white-space: nowrap;
+  }
+</style>

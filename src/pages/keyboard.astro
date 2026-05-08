@@ -1,0 +1,19 @@
+---
+import GreekInputHub from '../components/GreekInputHub';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Greek Input" description="Type Koine Greek using your English keyboard, or convert between polytonic Greek and SBL romanized transliteration.">
+  <div class="mb-6">
+    <h1
+      class="text-3xl font-bold mb-1"
+      style="color: var(--color-primary);"
+    >
+      Greek Input
+    </h1>
+    <p class="text-text-muted">
+      Type in English to produce polytonic Greek, or convert between Greek and SBL romanized transliteration.
+    </p>
+  </div>
+  <GreekInputHub client:load />
+</Layout>

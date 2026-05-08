@@ -1,0 +1,19 @@
+---
+import Flashcards from '../components/Flashcards';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Flashcards" description="Study Koine Greek vocabulary with flashcards sorted by frequency in the Greek New Testament.">
+  <div class="mb-6">
+    <h1
+      class="text-3xl font-bold mb-1"
+      style="color: var(--color-grape);"
+    >
+      Vocabulary Flashcards
+    </h1>
+    <p class="text-text-muted">
+      Study the most common Koine Greek words from the New Testament. Cards are shuffled each session.
+    </p>
+  </div>
+  <Flashcards client:load />
+</Layout>

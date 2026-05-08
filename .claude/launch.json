@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "greek-tools",
+      "runtimeExecutable": "/bin/sh",
+      "runtimeArgs": ["/Users/mitch/code/greek-tools/.claude/worktrees/lucid-elion/.claude/dev.sh"],
+      "port": 4330,
+      "autoPort": true
+    }
+  ]
+}

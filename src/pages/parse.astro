@@ -1,0 +1,26 @@
+---
+import VerbParseChallenge from '../components/VerbParseChallenge';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Verb Parsing"
+  description="Practice parsing Greek verb forms — identify tense, voice, mood, person, and number for λύω paradigm forms."
+>
+  <a href="/quiz" class="inline-flex items-center gap-1 text-sm text-text-muted hover:text-text transition-colors mb-4">
+    ← Back
+  </a>
+  <div class="mb-8">
+    <h1
+      class="text-3xl font-bold mb-1"
+      style="color: var(--color-accent);"
+    >
+      Verb Parsing
+    </h1>
+    <p class="text-text-muted">
+      Given a single verb form, identify its tense, voice, mood, person, and number.
+      All forms are drawn from the standard λύω paradigms.
+    </p>
+  </div>
+  <VerbParseChallenge client:load />
+</Layout>
