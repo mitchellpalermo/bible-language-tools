@@ -1,0 +1,108 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Free tools for Biblical Hebrew students — coming soon." } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title} | hebrew.tools</title>
+
+    <!-- Google Fonts: Plus Jakarta Sans (all UI) + Noto Sans Hebrew (Hebrew text rendering) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Hebrew:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- PostHog analytics — production only (no key in dev = no-op) -->
+    <script>
+      import posthog from 'posthog-js';
+      const key = import.meta.env.PUBLIC_POSTHOG_KEY;
+      const host = import.meta.env.PUBLIC_POSTHOG_HOST;
+      if (import.meta.env.PROD && key) {
+        posthog.init(key, {
+          api_host: host,
+          ui_host: 'https://us.posthog.com',
+          session_recording: { sample_rate: 0.2 },
+          capture_pageview: true,
+          capture_pageleave: false,
+        });
+      }
+    </script>
+  </head>
+
+  <body class="bg-bg text-text min-h-screen flex flex-col">
+
+    <!-- ── Rainbow accent line at top of page ─────────────────────────── -->
+    <div
+      class="h-1 w-full"
+      style="background: linear-gradient(90deg, #15803D 0%, #7C3AED 30%, #F43F5E 55%, #F59E0B 75%, #059669 100%);"
+    ></div>
+
+    <!-- ── Nav ────────────────────────────────────────────────────────── -->
+    <nav class="bg-primary text-white px-4 sm:px-6 py-4 shadow-md">
+      <div class="max-w-5xl mx-auto flex items-center justify-between">
+
+        <!-- Logo -->
+        <a
+          href="/"
+          class="group flex items-baseline gap-0 hover:opacity-90 transition-opacity"
+          aria-label="hebrew.tools home"
+        >
+          <span class="text-xl font-extrabold tracking-tight leading-none">
+            hebrew
+          </span>
+          <span class="text-xl font-extrabold tracking-tight leading-none text-accent-light">
+            .tools
+          </span>
+        </a>
+
+      </div>
+    </nav>
+
+    <!-- ── Main content ────────────────────────────────────────────────── -->
+    <main class="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
+      <slot />
+    </main>
+
+    <!-- ── Footer ─────────────────────────────────────────────────────── -->
+    <footer class="bg-primary text-white/60 text-sm text-center py-5">
+      <p>
+        <!-- "hebrew.tools" morphs into Hebrew on hover -->
+        <span class="group inline-block cursor-default select-none">
+          <span class="relative inline-block overflow-hidden align-bottom" style="height: 1.25em;">
+            <span class="absolute inset-0 flex items-center justify-center transition-all duration-300 group-hover:opacity-0 group-hover:-translate-y-full">hebrew</span>
+            <span class="absolute inset-0 flex items-center justify-center transition-all duration-300 opacity-0 translate-y-full group-hover:opacity-100 group-hover:translate-y-0 text-accent-light" style="font-family: var(--font-hebrew);">עִבְרִית</span>
+            <span class="invisible">עִבְרִית</span>
+          </span><span class="relative inline-block overflow-hidden align-bottom ml-1" style="height: 1.25em;">
+            <span class="absolute inset-0 flex items-center justify-center transition-all duration-300 group-hover:opacity-0 group-hover:-translate-y-full">tools</span>
+            <span class="absolute inset-0 flex items-center justify-center transition-all duration-300 opacity-0 translate-y-full group-hover:opacity-100 group-hover:translate-y-0 text-accent-light" style="font-family: var(--font-hebrew);">כֵּלִים</span>
+            <span class="invisible">כֵּלִים</span>
+          </span>
+        </span>
+        <span class="mx-2 opacity-40">—</span>
+        free utilities for Biblical Hebrew students
+      </p>
+      <p class="mt-2 text-white/40">
+        Questions or ideas?
+        <a href="mailto:hello@hebrew.tools" class="text-white/60 hover:text-accent-light transition-colors underline underline-offset-2">hello@hebrew.tools</a>
+      </p>
+      <p class="mt-2 text-white/40">
+        Learning Biblical Greek? Check out <a href="https://greek.tools" class="text-white/60 hover:text-accent-light transition-colors underline underline-offset-2">greek.tools</a>
+      </p>
+    </footer>
+
+  </body>
+</html>

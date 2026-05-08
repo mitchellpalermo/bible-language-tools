@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+/* ─── Design Tokens ─────────────────────────────────────────────────────────
+   Single source of truth for the design system.
+   All --color-* values become Tailwind utilities (bg-*, text-*, border-*).
+   All --font-* values become Tailwind utilities (font-*).
+   ──────────────────────────────────────────────────────────────────────── */
+
+@theme {
+  /* ── Brand palette ──────────────────────────────────────────────────── */
+  --color-primary:        #15803D;   /* Forest green — nav, buttons, links       */
+  --color-primary-light:  #16A34A;   /* Medium green — hover state               */
+
+  --color-accent:         #F59E0B;   /* Amber gold — highlights                  */
+  --color-accent-light:   #FCD34D;   /* Pale gold — soft accents                 */
+
+  /* ── Vibrant accent palette ─────────────────────────────────────────── */
+  --color-coral:          #F43F5E;   /* Rose coral — danger / errors             */
+  --color-jade:           #059669;   /* Emerald green — correct / success        */
+  --color-grape:          #7C3AED;   /* Violet — tertiary accent                 */
+
+  /* ── Surfaces ───────────────────────────────────────────────────────── */
+  --color-bg:             #F0FDF4;   /* Green-tinted page background             */
+  --color-bg-card:        #FFFFFF;   /* Pure white cards                         */
+
+  /* ── Text ───────────────────────────────────────────────────────────── */
+  --color-text:           #14532D;   /* Deep green — primary text                */
+  --color-text-muted:     #6B7280;   /* Cool gray — secondary / hint text        */
+
+  /* ── Hebrew script color ────────────────────────────────────────────── */
+  --color-hebrew:         #15803D;   /* Forest green — Hebrew text rendering     */
+
+  /* ── Typography ─────────────────────────────────────────────────────── */
+  --font-sans:    'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-hebrew:  'Noto Sans Hebrew', system-ui, sans-serif;   /* Hebrew-script text */
+}
+
+/* ─── Base Styles ──────────────────────────────────────────────────────────
+   Keep this section minimal — component-specific styles live in the
+   components themselves via Tailwind utilities.
+   ──────────────────────────────────────────────────────────────────────── */
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+/* ─── Scroll fade indicator ────────────────────────────────────────────────
+   Apply to overflow-x containers to hint that more content exists off-screen.
+   Uses a pseudo-element gradient so it doesn't interfere with text selection.
+   ──────────────────────────────────────────────────────────────────────── */
+
+@layer utilities {
+  .scroll-fade-x {
+    position: relative;
+  }
+  .scroll-fade-x::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 40px;
+    background: linear-gradient(to right, transparent, var(--color-bg-card));
+    pointer-events: none;
+  }
+}

@@ -1,0 +1,20 @@
+/*
+  # Prevent clickjacking
+  X-Frame-Options: DENY
+
+  # Prevent MIME-type sniffing
+  X-Content-Type-Options: nosniff
+
+  # Limit referrer info sent to external sites
+  Referrer-Policy: strict-origin-when-cross-origin
+
+  # Enforce HTTPS (1 year). Add to https://hstspreload.org when ready to commit to preload.
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+  # Restrict browser features this site doesn't use
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+
+  # Content Security Policy
+  # script-src includes 'unsafe-inline' because Astro injects inline scripts for island hydration.
+  # style-src includes 'unsafe-inline' because React uses inline style attributes.
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://t.hebrew.tools https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://t.hebrew.tools https://beacon.cloudflareinsights.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';
