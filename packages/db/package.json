@@ -1,0 +1,27 @@
+{
+  "name": "@tools/db",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts"
+  },
+  "scripts": {
+    "generate": "drizzle-kit generate",
+    "migrate:local": "wrangler d1 migrations apply bible-language-tools --local",
+    "migrate:remote": "wrangler d1 migrations apply bible-language-tools --remote",
+    "test:run": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.44.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "better-sqlite3": "^12.10.0",
+    "drizzle-kit": "^0.31.1",
+    "vitest": "^4.1.8",
+    "wrangler": "^4.68.1"
+  }
+}
