@@ -1,0 +1,15 @@
+---
+export const prerender = false;
+
+import FocusPassageHub from '../../components/FocusPassageHub';
+import Layout from '../../layouts/Layout.astro';
+
+const { id } = Astro.params;
+---
+
+<Layout
+  title="Focus Passage"
+  description="Study this passage with vocabulary flashcards, parsing drills, and the GNT reader."
+>
+  <FocusPassageHub client:load passageId={id!} />
+</Layout>

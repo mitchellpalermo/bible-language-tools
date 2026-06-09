@@ -231,6 +231,22 @@ describe('participleParadigms', () => {
       expect(paradigm.forms.nom.sg.n).toBe(row?.n);
     });
   });
+
+  it('every paradigm has non-empty endings for all 5 cases × 2 numbers × 3 genders', () => {
+    const cases = ['nom', 'gen', 'dat', 'acc', 'voc'] as const;
+    const numbers = ['sg', 'pl'] as const;
+    const genders = ['m', 'f', 'n'] as const;
+    participleParadigms.forEach((p) => {
+      cases.forEach((c) => {
+        numbers.forEach((n) => {
+          genders.forEach((g) => {
+            expect(typeof p.endings[c][n][g]).toBe('string');
+            expect(p.endings[c][n][g].length).toBeGreaterThan(0);
+          });
+        });
+      });
+    });
+  });
 });
 
 // ─── pronouns ──────────────────────────────────────────────────────────────
