@@ -12,5 +12,13 @@
 	},
 	"observability": {
     "enabled": true
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bible-language-tools",
+      "database_id": "ab76178b-b59c-4290-b24d-43e1cb09e317",
+      "migrations_dir": "../../packages/db/migrations"
+    }
+  ]
 }
