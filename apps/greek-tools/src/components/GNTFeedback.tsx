@@ -7,6 +7,7 @@ import {
   GNT_PERSON_LABELS,
   GNT_TENSE_LABELS,
   GNT_VOICE_LABELS,
+  gntVoiceLabel,
 } from '../lib/gnt-parse';
 import { vocabLookup } from '../lib/vocab-lookup';
 
@@ -27,14 +28,16 @@ export default function GNTFeedback({
   const isFiniteVerb = item.type === 'finite';
   const isParticiple = item.type === 'participle';
 
+  const voiceLabel = gntVoiceLabel(item.tense, item.voice);
+
   const correctLabel = (() => {
     if (item.type === 'finite') {
-      return `${GNT_PERSON_LABELS[item.person]} ${GNT_TENSE_LABELS[item.tense]} ${GNT_VOICE_LABELS[item.voice]} ${GNT_MOOD_LABELS[item.mood]} ${GNT_NUMBER_LABELS[item.number]}`;
+      return `${GNT_PERSON_LABELS[item.person]} ${GNT_TENSE_LABELS[item.tense]} ${voiceLabel} ${GNT_MOOD_LABELS[item.mood]} ${GNT_NUMBER_LABELS[item.number]}`;
     }
     if (item.type === 'infinitive') {
-      return `${GNT_TENSE_LABELS[item.tense]} ${GNT_VOICE_LABELS[item.voice]} Infinitive`;
+      return `${GNT_TENSE_LABELS[item.tense]} ${voiceLabel} Infinitive`;
     }
-    return `${GNT_TENSE_LABELS[item.tense]} ${GNT_VOICE_LABELS[item.voice]} Participle — ${GNT_CASE_LABELS[item.parseCase]} ${GNT_NUMBER_LABELS[item.number]} ${GNT_GENDER_LABELS[item.gender]}`;
+    return `${GNT_TENSE_LABELS[item.tense]} ${voiceLabel} Participle — ${GNT_CASE_LABELS[item.parseCase]} ${GNT_NUMBER_LABELS[item.number]} ${GNT_GENDER_LABELS[item.gender]}`;
   })();
 
   return (
@@ -63,7 +66,7 @@ export default function GNTFeedback({
           property="Voice"
           correct={result.voice}
           given={answer.voice ? GNT_VOICE_LABELS[answer.voice] : '—'}
-          expected={GNT_VOICE_LABELS[item.voice]}
+          expected={voiceLabel}
         />
         <FeedbackRow
           property="Mood"

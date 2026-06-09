@@ -172,9 +172,40 @@ export interface GNTParseResult {
   allCorrect: boolean;
 }
 
+// Present and imperfect have identical middle and passive forms in Greek.
+// MorphGNT tags each occurrence as one or the other, but a student cannot
+// distinguish them from the form alone, so either answer is accepted.
+const MID_PASS_TENSES = new Set<GNTTense>(['present', 'imperfect', 'perfect', 'pluperfect']);
+
+/**
+ * Returns true when the given voice is correct for the item's tense.
+ * For present and imperfect, middle and passive are interchangeable.
+ */
+export function gradeGNTVoice(tense: GNTTense, correct: GNTVoice, given: GNTVoice | ''): boolean {
+  if (correct === given) return true;
+  if (
+    MID_PASS_TENSES.has(tense) &&
+    (correct === 'middle' || correct === 'passive') &&
+    (given === 'middle' || given === 'passive')
+  )
+    return true;
+  return false;
+}
+
+/**
+ * Returns the display label for a voice in context of its tense.
+ * For tenses where middle and passive are identical, returns "Middle/Passive".
+ */
+export function gntVoiceLabel(tense: GNTTense, voice: GNTVoice): string {
+  if (MID_PASS_TENSES.has(tense) && (voice === 'middle' || voice === 'passive')) {
+    return 'Middle/Passive';
+  }
+  return GNT_VOICE_LABELS[voice];
+}
+
 export function gradeGNTAnswer(item: GNTParseItem, answer: GNTParseAnswer): GNTParseResult {
   const tense = answer.tense === item.tense;
-  const voice = answer.voice === item.voice;
+  const voice = gradeGNTVoice(item.tense, item.voice, answer.voice);
   const mood = answer.mood === item.mood;
 
   if (item.type === 'finite') {
@@ -430,4 +461,30 @@ export function formatRangeRef(
 
 export function saveGNTSettings(s: GNTPassageSettings): void {
   localStorage.setItem(GNT_SETTINGS_KEY, JSON.stringify(s));
+}
+
+/**
+ * Extract verb parse items across a multi-chapter range (inclusive on both ends).
+ * For single-chapter passages, equivalent to extractVerbs.
+ */
+export function extractVerbsMultiChapter(
+  bookData: MorphBook,
+  startCh: number,
+  startVs: number,
+  endCh: number,
+  endVs: number,
+  bookName: string,
+): GNTParseItem[] {
+  const chapters = Object.keys(bookData)
+    .map(Number)
+    .sort((a, b) => a - b);
+
+  const items: GNTParseItem[] = [];
+  for (const ch of chapters) {
+    if (ch < startCh || ch > endCh) continue;
+    const vsStart = ch === startCh ? startVs : 1;
+    const vsEnd = ch === endCh ? endVs : Infinity;
+    items.push(...extractVerbs(bookData, String(ch), bookName, vsStart, vsEnd));
+  }
+  return items;
 }

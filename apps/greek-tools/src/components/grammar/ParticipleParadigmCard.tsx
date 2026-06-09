@@ -13,9 +13,11 @@ import {
   type ParticipleParadigm,
 } from '../../data/grammar';
 import DescriptionBar from './DescriptionBar';
+import EndingsToggle from './EndingsToggle';
 import NumberToggle from './NumberToggle';
 
 export default function ParticipleParadigmCard({ paradigm }: { paradigm: ParticipleParadigm }) {
+  const [showEndings, setShowEndings] = useState(false);
   const [description, setDescription] = useState<string | null>(null);
   const [activeNumber, setActiveNumber] = useState<NumKey>('sg');
 
@@ -32,7 +34,10 @@ export default function ParticipleParadigmCard({ paradigm }: { paradigm: Partici
         style={{ background: 'var(--color-primary)' }}
       >
         <span className="text-sm font-semibold text-white">{paradigm.label} Participle — λύω</span>
-        <NumberToggle activeNumber={activeNumber} onToggle={setActiveNumber} />
+        <div className="flex items-center gap-2">
+          <NumberToggle activeNumber={activeNumber} onToggle={setActiveNumber} />
+          <EndingsToggle showEndings={showEndings} onToggle={() => setShowEndings((v) => !v)} />
+        </div>
       </div>
 
       {/* Desktop: full 6-column table (Sg M/F/N + Pl M/F/N) */}
@@ -97,7 +102,7 @@ export default function ParticipleParadigmCard({ paradigm }: { paradigm: Partici
                       onMouseLeave={() => setDescription(null)}
                       onClick={() => handleCell(c, num, g)}
                     >
-                      {paradigm.forms[c][num][g]}
+                      {showEndings ? paradigm.endings[c][num][g] : paradigm.forms[c][num][g]}
                     </td>
                   )),
                 )}
@@ -147,7 +152,9 @@ export default function ParticipleParadigmCard({ paradigm }: { paradigm: Partici
                     style={{ color: 'var(--color-greek)' }}
                     onClick={() => handleCell(c, activeNumber, g)}
                   >
-                    {paradigm.forms[c][activeNumber][g]}
+                    {showEndings
+                      ? paradigm.endings[c][activeNumber][g]
+                      : paradigm.forms[c][activeNumber][g]}
                   </td>
                 ))}
               </tr>
