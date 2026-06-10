@@ -10,6 +10,7 @@
 		"binding": "ASSETS",
 		"directory": "./dist"
 	},
+  "workers_dev": false,
 	"observability": {
     "enabled": true
   }
