@@ -30,6 +30,7 @@
     "@types/react-dom": "^19.2.3",
     "astro": "^5.17.1",
     "better-auth": "^1.6.15",
+    "drizzle-orm": "^0.44.7",
     "posthog-js": "^1.240.4",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

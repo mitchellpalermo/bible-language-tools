@@ -1,9 +1,20 @@
+import { sql } from 'drizzle-orm';
 import { integer, primaryKey, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
+// Shape required by Better Auth's user model — name, email_verified, image,
+// and updated_at are managed by Better Auth. SQLite ALTER TABLE ADD COLUMN
+// needs constant defaults for NOT NULL columns, hence the defaults here;
+// Better Auth always writes explicit values on insert/update.
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
+  name: text('name').notNull().default(''),
   email: text('email').notNull().unique(),
+  emailVerified: integer('email_verified', { mode: 'boolean' }).notNull().default(false),
+  image: text('image'),
   createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .default(sql`0`),
 });
 
 // Managed by Better Auth — shape defined here so Drizzle owns the migration.
@@ -32,6 +43,7 @@ export const accounts = sqliteTable('accounts', {
   accessTokenExpiresAt: integer('access_token_expires_at', { mode: 'timestamp_ms' }),
   refreshTokenExpiresAt: integer('refresh_token_expires_at', { mode: 'timestamp_ms' }),
   scope: text('scope'),
+  idToken: text('id_token'),
   password: text('password'),
   createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull(),
@@ -79,6 +91,20 @@ export const studyStats = sqliteTable('study_stats', {
   totalReviewed: integer('total_reviewed').notNull().default(0),
   totalCorrect: integer('total_correct').notNull().default(0),
 });
+
+// One row per user+language, written on every successful progress PUT.
+// Its absence is the signal that the user has never synced (GET → data: null).
+export const syncState = sqliteTable(
+  'sync_state',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    language: text('language').$type<Language>().notNull(),
+    syncedAt: text('synced_at').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.language] })],
+);
 
 export const customDecks = sqliteTable('custom_decks', {
   id: text('id').primaryKey(),

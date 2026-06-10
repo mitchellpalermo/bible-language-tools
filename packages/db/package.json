@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./schema": "./src/schema.ts"
+    "./schema": "./src/schema.ts",
+    "./test-utils": "./src/test-utils.ts"
   },
   "scripts": {
     "generate": "drizzle-kit generate",
@@ -18,9 +19,12 @@
     "drizzle-orm": "^0.44.1"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260609.1",
     "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^25.9.2",
     "better-sqlite3": "^12.10.0",
     "drizzle-kit": "^0.31.1",
+    "typescript": "^5.9.3",
     "vitest": "^4.1.8",
     "wrangler": "^4.68.1"
   }
