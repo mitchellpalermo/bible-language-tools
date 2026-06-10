@@ -2,8 +2,6 @@
 dist/
 # generated types
 .astro/
-# Wrangler local state
-.wrangler/
 
 # dependencies
 node_modules/
@@ -18,7 +16,6 @@ pnpm-debug.log*
 # environment variables
 .env
 .env.production
-.dev.vars
 
 # macOS-specific files
 .DS_Store

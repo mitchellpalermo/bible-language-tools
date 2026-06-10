@@ -1,16 +1,8 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
-import { fileURLToPath } from 'node:url';
 
 export default defineConfig({
   plugins: [react()],
-  resolve: {
-    alias: {
-      'astro:middleware': fileURLToPath(
-        new URL('./src/test/mocks/astro-middleware.ts', import.meta.url),
-      ),
-    },
-  },
   test: {
     environment: 'happy-dom',
     setupFiles: ['./src/test/setup.ts'],
