@@ -67,12 +67,18 @@ pnpm wrangler d1 migrations apply bible-language-tools --local   # local SQLite 
 pnpm dev
 ```
 
-To run the full-flow e2e tests (they're `test.skip` by default because they need a D1-backed server):
+To preview the production build with real bindings (also what the e2e full-flow
+tests need — they're `test.skip` by default):
 
 ```bash
-pnpm build && pnpm wrangler dev   # serves dist with real bindings
-# then un-skip and run: pnpm test:e2e
+pnpm build && pnpm wrangler dev --local-protocol https
+# browse https://localhost:8787 and accept the self-signed cert warning
 ```
+
+The `--local-protocol https` flag matters: Better Auth's session cookie is
+`__Secure-` prefixed, and browsers silently drop it on a plain-HTTP origin —
+sign-in appears to succeed but the session never persists. (Plain `pnpm dev`
+on :4321 is fine; Better Auth uses non-secure cookies in dev mode.)
 
 ## 5. Phase 5 — OAuth (#56), when you decide to do it
 
