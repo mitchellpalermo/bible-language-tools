@@ -18,7 +18,7 @@ function makeContext(fields: Record<string, string>) {
   return {
     request,
     locals: {
-      runtime: { env: { DB: {} as D1Database, BETTER_AUTH_SECRET: 'test-secret' } },
+      runtime: { env: { DB: {} as D1Database, AUTH_SECRET: 'test-secret' } },
       user: null,
     },
     redirect: (path: string) => new Response(null, { status: 302, headers: { Location: path } }),
@@ -89,7 +89,7 @@ describe('POST /api/auth/signup', () => {
     expect(response.headers.get('Location')).toBe('/account/signup?error=error');
   });
 
-  it('calls createAuth with DB and BETTER_AUTH_SECRET from locals', async () => {
+  it('calls createAuth with DB and AUTH_SECRET from locals', async () => {
     mockAuth.api.signUpEmail.mockResolvedValue(new Response(null, { status: 200 }));
 
     const ctx = makeContext({ email: 'test@example.com', password: 'password123' });

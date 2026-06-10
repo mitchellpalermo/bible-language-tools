@@ -24,7 +24,7 @@ function makeContext(sessionUser?: { id: string; email: string } | null) {
   (createAuth as Mock).mockReturnValue(mockAuth);
 
   const locals: Record<string, unknown> = {
-    runtime: { env: { DB: {} as D1Database, BETTER_AUTH_SECRET: 'test-secret' } },
+    runtime: { env: { DB: {} as D1Database, AUTH_SECRET: 'test-secret' } },
     user: undefined,
   };
   const request = new Request('http://localhost/some-page');
@@ -63,7 +63,7 @@ describe('auth middleware', () => {
     expect(response).toBeInstanceOf(Response);
   });
 
-  it('calls createAuth with DB and BETTER_AUTH_SECRET from locals', async () => {
+  it('calls createAuth with DB and AUTH_SECRET from locals', async () => {
     const { locals, request, next } = makeContext(null);
 
     await onRequest({ locals, request } as never, next);

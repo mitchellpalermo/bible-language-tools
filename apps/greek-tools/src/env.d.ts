@@ -5,7 +5,7 @@ type Runtime = import('@astrojs/cloudflare').Runtime<Env>;
 
 interface Env {
   DB: D1Database;
-  BETTER_AUTH_SECRET: string;
+  AUTH_SECRET: string;
 }
 
 declare namespace App {

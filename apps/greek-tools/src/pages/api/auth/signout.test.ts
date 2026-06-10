@@ -16,7 +16,7 @@ function makeContext() {
   return {
     request,
     locals: {
-      runtime: { env: { DB: {} as D1Database, BETTER_AUTH_SECRET: 'test-secret' } },
+      runtime: { env: { DB: {} as D1Database, AUTH_SECRET: 'test-secret' } },
       user: null,
     },
   };
@@ -68,7 +68,7 @@ describe('POST /api/auth/signout', () => {
     );
   });
 
-  it('calls createAuth with DB and BETTER_AUTH_SECRET from locals', async () => {
+  it('calls createAuth with DB and AUTH_SECRET from locals', async () => {
     mockAuth.api.signOut.mockResolvedValue(new Response(null, { status: 200 }));
 
     const ctx = makeContext();
