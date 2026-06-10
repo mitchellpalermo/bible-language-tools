@@ -1,0 +1,78 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const modes = [
+  {
+    href: '/flashcards',
+    title: 'Flashcards',
+    description:
+      'Study vocabulary from the Greek New Testament with spaced-repetition. Learn the most common words first.',
+    accentColor: '#7C3AED',
+    bgColor: '#F5F3FF',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="11" x2="12" y2="16"/><line x1="9.5" y1="13.5" x2="14.5" y2="13.5"/></svg>`,
+    detail: 'Spaced repetition · GNT vocabulary',
+  },
+  {
+    href: '/quiz',
+    title: 'Quiz',
+    description:
+      'Drill paradigm tables or practice parsing individual verb forms — two modes for building fluency.',
+    accentColor: '#1D4ED8',
+    bgColor: '#EEF2FF',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+    detail: 'Paradigm drills · Verb parsing',
+  },
+  {
+    href: '/focus',
+    title: 'Focus Passages',
+    description:
+      'Pin a verse range and master it deeply — vocabulary flashcards, parsing drills, and reading all in one place.',
+    accentColor: '#059669',
+    bgColor: '#ECFDF5',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>`,
+    detail: 'Passage vocab · Parsing · Reading',
+  },
+] as const;
+---
+
+<Layout title="Study" description="Flashcards, quiz modes, and focus passages for Koine Greek study.">
+
+  <div class="pt-10 pb-4">
+    <h1 class="text-3xl font-extrabold" style="color: var(--color-primary);">Study</h1>
+    <p class="text-text-muted mt-1 text-sm">Pick a mode and get to work.</p>
+  </div>
+
+  <div class="grid sm:grid-cols-3 gap-5 max-w-3xl pb-16">
+    {modes.map(({ href, title, description, accentColor, bgColor, icon, detail }) => (
+      <a
+        href={href}
+        class="group block bg-bg-card rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-white hover:-translate-y-0.5"
+      >
+        <div class="h-1.5 w-full" style={`background: ${accentColor};`} />
+        <div class="p-6">
+          <div
+            class="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+            style={`background: ${bgColor}; color: ${accentColor};`}
+            set:html={icon}
+          />
+          <h2 class="text-lg font-bold mb-1 group-hover:opacity-80 transition-opacity" style={`color: ${accentColor};`}>
+            {title}
+          </h2>
+          <p class="text-text-muted text-xs font-medium mb-3" style={`color: ${accentColor}; opacity: 0.7;`}>
+            {detail}
+          </p>
+          <p class="text-text-muted text-sm leading-relaxed">
+            {description}
+          </p>
+        </div>
+        <div
+          class="px-6 pb-4 text-xs font-semibold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+          style={`color: ${accentColor};`}
+        >
+          Open →
+        </div>
+      </a>
+    ))}
+  </div>
+
+</Layout>
