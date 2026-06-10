@@ -4,8 +4,10 @@ import type { SRSCard, StudyStats } from '../data/srs';
 import {
   formatRelativeTime,
   getLastSyncedAt,
+  hasImportBeenOffered,
   hasLocalProgress,
   LAST_SYNCED_KEY,
+  markImportOffered,
   pullAndMerge,
   push,
   readLocalProgress,
@@ -70,6 +72,18 @@ describe('sync-manager', () => {
       setLastSyncedAt('2026-06-10T12:00:00.000Z');
       expect(getLastSyncedAt()).toBe('2026-06-10T12:00:00.000Z');
       expect(localStorage.getItem(LAST_SYNCED_KEY)).toBe('2026-06-10T12:00:00.000Z');
+    });
+  });
+
+  describe('import offered flag', () => {
+    it('is tracked per account, not per browser', () => {
+      expect(hasImportBeenOffered('user-a')).toBe(false);
+
+      markImportOffered('user-a');
+
+      expect(hasImportBeenOffered('user-a')).toBe(true);
+      // A different account in the same browser still gets the offer
+      expect(hasImportBeenOffered('user-b')).toBe(false);
     });
   });
 

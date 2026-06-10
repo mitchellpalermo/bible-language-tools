@@ -13,7 +13,26 @@ import { mergeProgress, type ProgressSnapshot } from './sync-merge';
 import type { ProgressPayload } from './sync-types';
 
 export const LAST_SYNCED_KEY = 'greek-tools-last-synced';
-export const IMPORT_OFFERED_KEY = 'greek-tools-import-offered';
+
+// Keyed by user id so the offer is once per account, not once per browser —
+// a second account created in the same browser still gets the offer.
+const IMPORT_OFFERED_PREFIX = 'greek-tools-import-offered';
+
+export function hasImportBeenOffered(userId: string): boolean {
+  try {
+    return localStorage.getItem(`${IMPORT_OFFERED_PREFIX}:${userId}`) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function markImportOffered(userId: string): void {
+  try {
+    localStorage.setItem(`${IMPORT_OFFERED_PREFIX}:${userId}`, '1');
+  } catch {
+    // localStorage unavailable — worst case the offer shows again
+  }
+}
 
 export function getLastSyncedAt(): string | null {
   try {

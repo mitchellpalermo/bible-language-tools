@@ -1,13 +1,19 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+
+export const prerender = false;
+
+// Post-sign-up interstitial: if this device already has study progress,
+// offer to import it into the new account. Server-rendered so the script
+// can key the once-per-account offer flag by user id.
+const user = Astro.locals.user;
+if (!user) {
+  return Astro.redirect('/account/signin?from=/account');
+}
 ---
 
-<!-- Post-sign-up interstitial: if this device already has study progress,
-     offer to import it into the new account. Static page — all logic is
-     client-side, gated by the greek-tools-import-offered flag so the offer
-     appears once per account. -->
 <Layout title="Welcome">
-  <div class="max-w-sm mx-auto mt-16">
+  <div class="max-w-sm mx-auto mt-16" data-welcome data-user-id={user.id}>
     <p id="welcome-loading" class="text-sm text-gray-500 text-center" aria-live="polite">
       Setting up your account…
     </p>
@@ -42,22 +48,23 @@ import Layout from '../../layouts/Layout.astro';
   import { CUSTOM_DECKS_KEY } from '../../data/customDecks';
   import {
     deleteServerProgress,
+    hasImportBeenOffered,
     hasLocalProgress,
-    IMPORT_OFFERED_KEY,
+    markImportOffered,
     push,
   } from '../../lib/sync-manager';
 
   const SRS_KEY = 'greek-tools-srs-v2';
   const STATS_KEY = 'greek-tools-stats-v1';
 
+  const userId = document.querySelector<HTMLElement>('[data-welcome]')?.dataset.userId ?? '';
+
   function finish() {
-    localStorage.setItem(IMPORT_OFFERED_KEY, '1');
+    markImportOffered(userId);
     location.replace('/account');
   }
 
-  const alreadyOffered = localStorage.getItem(IMPORT_OFFERED_KEY) === '1';
-
-  if (alreadyOffered || !hasLocalProgress()) {
+  if (hasImportBeenOffered(userId) || !hasLocalProgress()) {
     finish();
   } else {
     document.getElementById('welcome-loading')?.classList.add('hidden');
