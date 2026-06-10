@@ -1,0 +1,81 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<!-- Post-sign-up interstitial: if this device already has study progress,
+     offer to import it into the new account. Static page — all logic is
+     client-side, gated by the greek-tools-import-offered flag so the offer
+     appears once per account. -->
+<Layout title="Welcome">
+  <div class="max-w-sm mx-auto mt-16">
+    <p id="welcome-loading" class="text-sm text-gray-500 text-center" aria-live="polite">
+      Setting up your account…
+    </p>
+
+    <div id="import-offer" class="hidden border border-gray-200 rounded-lg p-5">
+      <h1 class="text-lg font-bold mb-2">Import your progress?</h1>
+      <p class="text-sm text-gray-500 mb-5">
+        You have existing study progress on this device. Import it to your account so it syncs
+        across all your devices?
+      </p>
+      <div class="flex gap-3">
+        <button
+          id="import-button"
+          type="button"
+          class="flex-1 bg-blue-600 text-white rounded-md px-4 py-2 text-sm font-semibold hover:bg-blue-700 transition-colors"
+        >
+          Import
+        </button>
+        <button
+          id="start-fresh-button"
+          type="button"
+          class="flex-1 border border-gray-300 rounded-md px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+        >
+          Start fresh
+        </button>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import { CUSTOM_DECKS_KEY } from '../../data/customDecks';
+  import {
+    deleteServerProgress,
+    hasLocalProgress,
+    IMPORT_OFFERED_KEY,
+    push,
+  } from '../../lib/sync-manager';
+
+  const SRS_KEY = 'greek-tools-srs-v2';
+  const STATS_KEY = 'greek-tools-stats-v1';
+
+  function finish() {
+    localStorage.setItem(IMPORT_OFFERED_KEY, '1');
+    location.replace('/account');
+  }
+
+  const alreadyOffered = localStorage.getItem(IMPORT_OFFERED_KEY) === '1';
+
+  if (alreadyOffered || !hasLocalProgress()) {
+    finish();
+  } else {
+    document.getElementById('welcome-loading')?.classList.add('hidden');
+    document.getElementById('import-offer')?.classList.remove('hidden');
+
+    document.getElementById('import-button')?.addEventListener('click', async () => {
+      await push();
+      finish();
+    });
+
+    document.getElementById('start-fresh-button')?.addEventListener('click', async () => {
+      await deleteServerProgress();
+      // Clear this device's progress too — otherwise the next automatic push
+      // would re-upload exactly what the user chose not to import.
+      localStorage.removeItem(SRS_KEY);
+      localStorage.removeItem(STATS_KEY);
+      localStorage.removeItem(CUSTOM_DECKS_KEY);
+      finish();
+    });
+  }
+</script>

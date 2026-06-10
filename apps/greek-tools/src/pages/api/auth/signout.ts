@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { createAuth } from '../../../lib/auth';
+import { authHintClearCookie } from '../../../lib/auth-cookie';
 
 export const prerender = false;
 
@@ -16,5 +17,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
   for (const cookie of response.headers.getSetCookie()) {
     dest.headers.append('Set-Cookie', cookie);
   }
+  dest.headers.append('Set-Cookie', authHintClearCookie());
   return dest;
 };

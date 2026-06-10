@@ -119,8 +119,9 @@ function isActive(href: string) {
             ].join(' ')}
             aria-current={currentPath.startsWith('/account') ? 'page' : undefined}
             aria-label={user ? 'My Account' : 'Sign in'}
+            data-account-link
           >
-            {user ? 'Account' : 'Sign in'}
+            <span data-account-label>{user ? 'Account' : 'Sign in'}</span>
           </a>
         </div>
 
@@ -274,18 +275,38 @@ function isActive(href: string) {
           class:list={["tab-item", currentPath.startsWith('/account') ? "tab-active" : "tab-inactive"]}
           aria-label={user ? 'My Account' : 'Sign in'}
           aria-current={currentPath.startsWith('/account') ? 'page' : undefined}
+          data-account-link
         >
           <span class:list={["tab-pill", { "tab-pill-active": currentPath.startsWith('/account') }]}>
             <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
               <circle cx="12" cy="7" r="4"/>
             </svg>
-            <span class="tab-label">{user ? 'Account' : 'Sign in'}</span>
+            <span class="tab-label" data-account-label>{user ? 'Account' : 'Sign in'}</span>
           </span>
         </a>
 
       </div>
     </nav>
+
+    <!-- Auth-aware nav + sync-on-hide. Most pages are prerendered with no
+         session, so the client corrects the account links from the gt-auth
+         hint cookie and registers the progress push for signed-in users. -->
+    <script>
+      import { hasAuthHint } from '../lib/auth-cookie';
+      import { registerSessionEndPush } from '../lib/sync-manager';
+
+      const signedIn = hasAuthHint();
+      for (const link of document.querySelectorAll<HTMLAnchorElement>('[data-account-link]')) {
+        link.href = signedIn ? '/account' : '/account/signin';
+        link.setAttribute('aria-label', signedIn ? 'My Account' : 'Sign in');
+      }
+      for (const label of document.querySelectorAll('[data-account-label]')) {
+        label.textContent = signedIn ? 'Account' : 'Sign in';
+      }
+
+      registerSessionEndPush();
+    </script>
   </body>
 </html>
 

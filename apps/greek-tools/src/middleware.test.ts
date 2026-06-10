@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('./lib/auth', () => ({
   createAuth: vi.fn(),
@@ -16,9 +16,7 @@ import { onRequest } from './middleware';
 function makeContext(sessionUser?: { id: string; email: string } | null) {
   const mockAuth = {
     api: {
-      getSession: vi.fn().mockResolvedValue(
-        sessionUser ? { user: sessionUser } : null,
-      ),
+      getSession: vi.fn().mockResolvedValue(sessionUser ? { user: sessionUser } : null),
     },
   };
   (createAuth as Mock).mockReturnValue(mockAuth);
