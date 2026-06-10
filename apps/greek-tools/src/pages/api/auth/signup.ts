@@ -8,8 +8,8 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
   const email = String(form.get('email') ?? '');
   const password = String(form.get('password') ?? '');
 
-  const { DB, AUTH_SECRET } = locals.runtime.env;
-  const auth = createAuth(DB, AUTH_SECRET);
+  const { DB, BETTER_AUTH_SECRET } = locals.runtime.env;
+  const auth = createAuth(DB, BETTER_AUTH_SECRET);
 
   const response = await auth.api.signUpEmail({
     body: { email, password, name: email },

@@ -4,8 +4,8 @@ import { createAuth } from '../../../lib/auth';
 export const prerender = false;
 
 const handler: APIRoute = async ({ request, locals }) => {
-  const { DB, AUTH_SECRET } = locals.runtime.env;
-  const auth = createAuth(DB, AUTH_SECRET);
+  const { DB, BETTER_AUTH_SECRET } = locals.runtime.env;
+  const auth = createAuth(DB, BETTER_AUTH_SECRET);
   return auth.handler(request);
 };
 
