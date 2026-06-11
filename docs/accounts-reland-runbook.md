@@ -1,114 +1,309 @@
 # Accounts Re-land — Steps for Mitch
 
-**Date:** 2026-06-10
-**PR:** [#57](https://github.com/mitchellpalermo/bible-language-tools/pull/57) — re-lands Phases 1–2 (issues #52, #53), implements Phases 3–4 (issues #54, #55), and password reset via email (#58). Phase 5 (#56) is documented below but intentionally not implemented.
+**Date:** 2026-06-11 (revised from 2026-06-10)
+**PR:** [#57](https://github.com/mitchellpalermo/bible-language-tools/pull/57) — re-lands Phases 1–2 (issues #52, #53), implements Phases 3–4 (issues #54, #55). Email/password auth and password reset (#58) have been **replaced with Google OAuth** before merging. See ADR 005 (`apps/greek-tools/docs/adr/005-oauth-as-sole-auth-provider.md`) for the rationale.
 
-Everything code-side is done: 897 tests pass, typecheck is clean, and `pnpm build` succeeds with no secrets in the environment (the failure mode that forced the original revert). The steps below are the things only you can do.
+**Current state as of 2026-06-11:**
+- `BETTER_AUTH_SECRET` has been added as a GitHub Actions secret. ✅
+- D1 migration journal verified: `0000` is applied, only `0001_futuristic_iron_patriot.sql` is pending. ✅
+- PR #57 is **not yet merged**. The code changes in section 2 must be applied to the branch before merging.
 
 ---
 
-## 1. Before merging PR #57
+## 1. Before merging: infrastructure setup
 
-### 1a. Add the `BETTER_AUTH_SECRET` GitHub secret (required)
+### 1a. Create a Google OAuth application (required)
 
-CI now runs `wrangler secret put BETTER_AUTH_SECRET` on every deploy, and this repo secret does not exist yet (`gh secret list` shows only the Cloudflare and PostHog secrets). Without it the deploy sets an empty secret.
+1. Go to [console.cloud.google.com/apis/credentials](https://console.cloud.google.com/apis/credentials) and create a project (or use an existing one).
+2. Enable the **Google Identity / OAuth 2.0** API.
+3. Create an **OAuth 2.0 Client ID** — application type: **Web application**.
+4. Add these authorized redirect URIs:
+   - `https://greek.tools/api/auth/callback/google`
+   - `http://localhost:4321/api/auth/callback/google`
+5. Note the **Client ID** and **Client Secret**.
 
-```bash
-openssl rand -base64 33 | gh secret set BETTER_AUTH_SECRET --repo mitchellpalermo/bible-language-tools
-```
+### 1b. Add Google secrets to the Cloudflare Worker (required)
 
-### 1b. Verify the remote D1 migration journal (required)
-
-CI now applies D1 migrations via `wrangler d1 migrations apply bible-language-tools --remote`. The monorepo migration doc says migrations were applied 2026-06-09, but if they were applied with `drizzle-kit migrate` rather than wrangler, wrangler's journal table won't know about `0000` and CI will try to re-apply it (and fail on `CREATE TABLE users`).
-
-Check from `apps/greek-tools/`:
-
-```bash
-pnpm wrangler d1 migrations list bible-language-tools --remote
-```
-
-- If `0000_broken_rocket_raccoon.sql` is listed as **applied** and only `0001_futuristic_iron_patriot.sql` is pending: you're done; merge away.
-- If `0000` shows as **unapplied** (but the tables exist), mark it applied without running it:
+From `apps/greek-tools/`:
 
 ```bash
-pnpm wrangler d1 execute bible-language-tools --remote \
-  --command "CREATE TABLE IF NOT EXISTS d1_migrations(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP); INSERT INTO d1_migrations (name) VALUES ('0000_broken_rocket_raccoon.sql');"
+echo "YOUR_CLIENT_ID" | pnpm wrangler secret put GOOGLE_CLIENT_ID
+echo "YOUR_CLIENT_SECRET" | pnpm wrangler secret put GOOGLE_CLIENT_SECRET
 ```
 
-### 1c. Enable Email Sending for greek.tools (required)
+### 1c. Add Google secrets to GitHub Actions (required)
 
-Password reset (#58) sends email through the Cloudflare Email Service binding
-(`EMAIL` in `wrangler.jsonc`, from address `no-reply@greek.tools`). The domain
-must be onboarded for sending before the first reset email goes out. From
-`apps/greek-tools/`:
+CI sets Cloudflare Worker secrets on every deploy. Add both so they survive re-deploys:
 
 ```bash
-pnpm wrangler email sending list                  # check current state
-pnpm wrangler email sending enable greek.tools    # onboard the domain
+gh secret set GOOGLE_CLIENT_ID --repo mitchellpalermo/bible-language-tools
+gh secret set GOOGLE_CLIENT_SECRET --repo mitchellpalermo/bible-language-tools
 ```
 
-Since greek.tools is on Cloudflare DNS, the required SPF/DKIM records are added
-automatically during onboarding. Locally no setup is needed — without the real
-binding, wrangler dev stubs the send and writes the email to a temp file
-(logged to the dev console), which is how the flow was verified.
+### 1d. Add Google secrets to `.dev.vars` for local dev
 
-### 1d. Review two decisions I made beyond the issue specs
+`apps/greek-tools/.dev.vars` (untracked) already has `BETTER_AUTH_SECRET`. Add:
 
-1. **"Start fresh" in the import flow also clears local progress** (`localStorage`), not just server progress. The issue only specified the server delete, but leaving local data means the next automatic push re-uploads exactly what the user declined to import. If you'd rather preserve local data, say so on the PR and I'll change it.
-2. **`syncedAt` lives in a new `sync_state` table** (one row per user+language). Its absence is the "never synced" signal for `GET /api/progress → { data: null }`.
+```
+GOOGLE_CLIENT_ID=your-client-id
+GOOGLE_CLIENT_SECRET=your-client-secret
+```
 
-## 2. Merge PR #57
+---
 
-Merging to main triggers the greek-tools workflow: tests → build → set secret → apply migration `0001` → deploy. Watch the run:
+## 2. Before merging: code changes to PR #57
+
+All changes are within `apps/greek-tools/`. The goal is to replace email/password auth with Google OAuth while leaving Phases 1–4 (D1 schema, sync API, client sync wiring) intact. No D1 migration is needed — the `accounts` table already carries `provider_id`, `access_token`, `id_token`, etc.
+
+### 2a. Update `src/env.d.ts`
+
+Remove the `EMAIL` binding and add the Google OAuth env vars:
+
+```typescript
+interface Env {
+  DB: D1Database;
+  BETTER_AUTH_SECRET: string;
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_SECRET: string;
+}
+```
+
+### 2b. Rewrite `src/lib/auth.ts`
+
+Remove `emailAndPassword`, `SendEmailFn`, and `resetPasswordEmail`. Add `socialProviders` with Google. `baseURL` is now required at every call site so Better Auth constructs the correct OAuth redirect URI.
+
+```typescript
+import { createDb } from '@tools/db';
+import { betterAuth } from 'better-auth';
+import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { SESSION_MAX_AGE_SECONDS } from './auth-cookie';
+
+type AuthDb = Parameters<typeof drizzleAdapter>[0];
+
+export interface CreateAuthOptions {
+  baseURL: string;
+  googleClientId: string;
+  googleClientSecret: string;
+}
+
+export function createAuthForDb(db: AuthDb, secret: string, options: CreateAuthOptions) {
+  return betterAuth({
+    database: drizzleAdapter(db, { provider: 'sqlite', usePlural: true }),
+    secret,
+    baseURL: options.baseURL,
+    socialProviders: {
+      google: {
+        clientId: options.googleClientId,
+        clientSecret: options.googleClientSecret,
+      },
+    },
+    session: { expiresIn: SESSION_MAX_AGE_SECONDS },
+    trustedOrigins: ['https://greek.tools', 'http://localhost:4321'],
+  });
+}
+
+export function createAuth(binding: D1Database, secret: string, options: CreateAuthOptions) {
+  return createAuthForDb(createDb(binding), secret, options);
+}
+
+export type Auth = ReturnType<typeof createAuth>;
+```
+
+Update `createAuthForDb`'s callers in tests to supply dummy values for `googleClientId`, `googleClientSecret`, and `baseURL`.
+
+### 2c. Update `src/pages/api/auth/[...all].ts`
+
+Pass Google credentials and `baseURL` from the live request:
+
+```typescript
+import type { APIRoute } from 'astro';
+import { createAuth } from '../../../lib/auth';
+
+export const prerender = false;
+
+const handler: APIRoute = async ({ request, locals }) => {
+  const { DB, BETTER_AUTH_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = locals.runtime.env;
+  const auth = createAuth(DB, BETTER_AUTH_SECRET, {
+    baseURL: new URL(request.url).origin,
+    googleClientId: GOOGLE_CLIENT_ID,
+    googleClientSecret: GOOGLE_CLIENT_SECRET,
+  });
+  return auth.handler(request);
+};
+
+export const GET = handler;
+export const POST = handler;
+```
+
+### 2d. Remove `send_email` from `wrangler.jsonc`
+
+Delete the entire `send_email` block — it is no longer used:
+
+```jsonc
+// Remove this:
+"send_email": [
+  {
+    "name": "EMAIL",
+    "allowed_sender_addresses": ["no-reply@greek.tools"]
+  }
+]
+```
+
+### 2e. Delete files that are no longer needed
+
+```
+src/lib/email.ts
+src/pages/account/forgot-password.astro
+src/pages/account/reset-password.astro
+src/pages/api/auth/forgot-password.ts
+src/pages/api/auth/reset-password.ts
+src/pages/api/auth/signin.ts
+src/pages/api/auth/signup.ts
+src/pages/api/auth/_forgot-password.test.ts
+src/pages/api/auth/_reset-password.test.ts
+src/pages/api/auth/_signin.test.ts
+src/pages/api/auth/_signup.test.ts
+```
+
+### 2f. Replace `src/pages/account/signin.astro`
+
+Replace the email/password form with a "Continue with Google" button. The existing page already handles the `?from=` redirect param and the already-signed-in redirect — keep that logic.
+
+Better Auth exposes a client-side `createAuthClient` factory (check the installed version of `better-auth` for the exact import — it is likely `better-auth/client`). The button triggers:
+
+```typescript
+authClient.signIn.social({
+  provider: 'google',
+  callbackURL: `/account/syncing?to=${encodeURIComponent(from || '/account')}`,
+});
+```
+
+`from` is read from `new URLSearchParams(location.search).get('from')` in a `<script>` block.
+
+The page no longer needs the `?error` or `?reset` query params — remove those handlers.
+
+### 2g. Replace `src/pages/account/signup.astro`
+
+There is no longer a distinct sign-up flow. Google OAuth creates the account on first sign-in. Replace this page's content with a redirect to `/account/signin`. A short note on the sign-in page is sufficient: "New? Just sign in with Google — your account will be created automatically."
+
+### 2h. Handle new-user routing after OAuth
+
+**The problem:** With email/password, `signup.ts` redirected new users to `/account/welcome` (import offer) while `signin.ts` redirected returning users to `/account/syncing` (pull-and-merge). With OAuth, both cases use the same `callbackURL`, so the routing must be determined at runtime.
+
+**The solution:** Update `pullAndMerge()` in `src/lib/sync-manager.ts` to return whether the server had any prior data:
+
+```typescript
+async function pullAndMerge(): Promise<{ hadServerData: boolean }>
+```
+
+Update `src/pages/account/syncing.astro` to use this return value:
+
+```typescript
+const { hadServerData } = await pullAndMerge();
+if (!hadServerData && hasLocalProgress()) {
+  location.replace('/account/welcome');
+} else {
+  location.replace(dest);
+}
+```
+
+This routes new users (no server data + local progress to offer) to the import flow and routes returning users straight to their destination. `hasLocalProgress()` is already exported from `sync-manager.ts`.
+
+### 2i. Update `.github/workflows/greek-tools.yml`
+
+Expand the "Set Cloudflare Worker secrets" step to include the Google credentials:
+
+```yaml
+- name: Set Cloudflare Worker secrets
+  run: |
+    echo "${{ secrets.BETTER_AUTH_SECRET }}" | pnpm wrangler secret put BETTER_AUTH_SECRET
+    echo "${{ secrets.GOOGLE_CLIENT_ID }}" | pnpm wrangler secret put GOOGLE_CLIENT_ID
+    echo "${{ secrets.GOOGLE_CLIENT_SECRET }}" | pnpm wrangler secret put GOOGLE_CLIENT_SECRET
+  env:
+    CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+```
+
+### 2j. Update tests
+
+The deleted files in 2e remove coverage for sign-in/sign-up/forgot-password/reset-password. Add a replacement integration test for the OAuth callback flow. Real Google OAuth cannot run in CI, so mock it:
+
+- Better Auth's `[...all].ts` catch-all handles `GET /api/auth/callback/google` — write an integration test that simulates the callback with a mocked token exchange and asserts a `users` row is created and a session cookie is set
+- Check Better Auth's testing utilities before writing a custom mock; they may provide a test OAuth server or helper
+
+The existing `_signout.test.ts` and `_progress.test.ts` are unaffected and must continue to pass.
+
+---
+
+## 3. Verify locally before merging
+
+```bash
+cd apps/greek-tools
+pnpm wrangler d1 migrations apply bible-language-tools --local
+pnpm dev
+```
+
+Walk through:
+1. Click "Continue with Google" on `/account/signin` — OAuth completes, lands on `/account`
+2. Sign out — nav flips to "Sign in"
+3. Visit `/account` while signed out — redirects to `/account/signin?from=/account`
+4. Sign in again — sync runs, redirects to `/account`
+5. Clear local storage, add some SRS cards manually, then sign in with a fresh account — import offer should appear at `/account/welcome`
+
+Run tests and typecheck:
+
+```bash
+pnpm test:run
+pnpm typecheck
+```
+
+---
+
+## 4. Merge PR #57
+
+Merging to main triggers the greek-tools workflow: tests → build → set secrets (BETTER_AUTH_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET) → apply migration `0001` → deploy.
 
 ```bash
 gh run watch --repo mitchellpalermo/bible-language-tools
 ```
 
-## 3. Verify in production (~5 minutes)
+---
 
-1. Go to https://greek.tools, study a few flashcards (so there's local progress), then **Sign up** from the nav.
-2. The import modal should appear — choose **Import**, land on `/account`, and confirm "Last synced just now".
-3. Open the site in a private window, sign in with the same account — after the brief "Syncing…" page your cards should be present (check `/flashcards` due counts or `/account`).
-4. Sign out; nav should flip back to "Sign in" everywhere, including static pages.
-5. Confirm rows landed in D1 (Cloudflare dashboard → D1 → bible-language-tools): `users`, `sessions`, `srs_cards`, `sync_state`.
-6. Test password reset with a real inbox: sign out, "Forgot password?" on the sign-in page, request a reset to your email, confirm the message arrives (and isn't in spam — if it is, check the deliverability notes in the Email Service dashboard), follow the link, set a new password, sign in with it.
+## 5. Verify in production (~5 minutes)
 
-If anything misbehaves, Workers logs are live: Cloudflare dashboard → Workers → greek-tools → Logs (observability is enabled with full sampling).
+1. Go to https://greek.tools, study a few flashcards (so there's local progress), then click "Sign in" in the nav.
+2. Click "Continue with Google" — complete the OAuth flow.
+3. The import offer should appear at `/account/welcome` — choose **Import**, land on `/account`, confirm "Last synced just now".
+4. Open the site in a private window, sign in with the same Google account — after the "Syncing…" page your cards should be present.
+5. Sign out — nav flips back to "Sign in" everywhere, including static pages.
+6. Confirm rows landed in D1 (Cloudflare dashboard → D1 → bible-language-tools): `users`, `accounts`, `sessions`, `srs_cards`, `sync_state`.
 
-## 4. Local development (when you next work on this)
+If anything misbehaves, Workers logs are live: Cloudflare dashboard → Workers → greek-tools → Logs.
+
+---
+
+## 6. Local development (when you next work on this)
 
 ```bash
-# apps/greek-tools/.dev.vars already has BETTER_AUTH_SECRET (untracked, kept)
+# apps/greek-tools/.dev.vars has BETTER_AUTH_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
 cd apps/greek-tools
-pnpm wrangler d1 migrations apply bible-language-tools --local   # local SQLite gets 0001
+pnpm wrangler d1 migrations apply bible-language-tools --local
 pnpm dev
+# browse http://localhost:4321
 ```
 
-To preview the production build with real bindings (also what the e2e full-flow
-tests need — they're `test.skip` by default):
+Note: `http://localhost:4321` is fine for local dev. Better Auth uses non-secure cookies in dev mode. The `__Secure-` prefixed cookie concern only applies when previewing the production build via `pnpm wrangler dev --local-protocol https`.
 
-```bash
-pnpm build && pnpm wrangler dev --local-protocol https
-# browse https://localhost:8787 and accept the self-signed cert warning
-```
+---
 
-The `--local-protocol https` flag matters: Better Auth's session cookie is
-`__Secure-` prefixed, and browsers silently drop it on a plain-HTTP origin —
-sign-in appears to succeed but the session never persists. (Plain `pnpm dev`
-on :4321 is fine; Better Auth uses non-secure cookies in dev mode.)
+## 7. GitHub OAuth (#56 feature 5.3) — when you decide to do it
 
-## 5. Phase 5 — OAuth (#56), when you decide to do it
+Not implemented. Add only if sign-up data suggests meaningful demand. The pattern is identical to Google: register an OAuth app at github.com/settings/developers, add `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` to wrangler secrets and GitHub secrets, and add `github` to `socialProviders` in `src/lib/auth.ts`.
 
-Not implemented, per the issue's own guidance ("implement only when there is evidence that email/password friction is reducing sign-ups"). When that day comes:
+---
 
-1. Create a Google OAuth app at https://console.cloud.google.com/apis/credentials — authorized redirect URI: `https://greek.tools/api/auth/callback/google`.
-2. `pnpm wrangler secret put GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (plus GitHub secrets + workflow steps, same pattern as `BETTER_AUTH_SECRET`).
-3. Add `socialProviders: { google: { clientId, clientSecret } }` to `createAuthForDb` in `src/lib/auth.ts` — the schema is already OAuth-ready (`accounts` has `provider_id`, `access_token`, `id_token`, etc.).
-4. The account-linking flow (same email, password confirmation) is Better Auth's `account.accountLinking` config — check their docs for the current API before building custom UI.
+## 8. Loose ends (not blockers)
 
-## 6. Loose ends I noticed (not blockers)
-
-- **Coverage thresholds fail on `main` already** (62.8% statements vs the 90% threshold; this branch improves it slightly to ~65%). CI doesn't run coverage so nothing breaks, but `pnpm test:coverage` is red. The gap is mostly the Focus Passage components. Worth a tracking issue.
-- **Root `CLAUDE.md` is stale**: it still says "Cloudflare Pages" and `wrangler pages deploy`; both apps deploy as Workers now (the migration doc has it right). Same for `apps/greek-tools/CLAUDE.md`.
-- **The home-directory git repo** (`/Users/mitch` is a git repo pointing at `hebrew-tools.git`, currently on branch `feat/accounts-phase-2-auth`) looks accidental and confused me at the start of this session. Worth cleaning up before it eats a `git clean` someday.
+- **Coverage thresholds fail on `main` already** (62.8% statements vs. the 90% threshold). CI does not run coverage so nothing breaks, but `pnpm test:coverage` is red. The gap is mostly the Focus Passage components. Worth a tracking issue.
+- **Root `CLAUDE.md` is stale**: still references `wrangler pages deploy`; both apps now deploy as Workers. Worth updating.
+- **The home-directory git repo** (`/Users/mitch` is a git repo pointing at `hebrew-tools.git`, on branch `feat/accounts-phase-2-auth`) looks accidental. Worth cleaning up before it eats a `git clean` someday.

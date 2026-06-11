@@ -34,13 +34,13 @@ describe('SyncControls', () => {
 
   it('enters a loading state and resolves to last-synced on success', async () => {
     const user = userEvent.setup();
-    let resolveSync: (ok: boolean) => void = () => {};
+    let resolveSync: (result: { hadServerData: boolean; ok: boolean }) => void = () => {};
     pullAndMergeMock.mockImplementation(
       () =>
-        new Promise<boolean>((resolve) => {
-          resolveSync = (ok) => {
-            localStorage.setItem('greek-tools-last-synced', new Date().toISOString());
-            resolve(ok);
+        new Promise<{ hadServerData: boolean; ok: boolean }>((resolve) => {
+          resolveSync = (result) => {
+            if (result.ok) localStorage.setItem('greek-tools-last-synced', new Date().toISOString());
+            resolve(result);
           };
         }),
     );
@@ -50,7 +50,7 @@ describe('SyncControls', () => {
 
     expect(screen.getByRole('button', { name: 'Syncing…' })).toBeDisabled();
 
-    resolveSync(true);
+    resolveSync({ hadServerData: true, ok: true });
     await waitFor(() => {
       expect(screen.getByText('Last synced just now')).toBeInTheDocument();
     });
@@ -59,7 +59,7 @@ describe('SyncControls', () => {
 
   it('shows an error message when sync fails', async () => {
     const user = userEvent.setup();
-    pullAndMergeMock.mockResolvedValue(false);
+    pullAndMergeMock.mockResolvedValue({ hadServerData: false, ok: false });
 
     render(<SyncControls />);
     await user.click(screen.getByRole('button', { name: 'Sync now' }));
