@@ -1,0 +1,26 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<!-- Post-sign-in interstitial: pull and merge server progress, then continue
+     to the original destination. Static page — all logic is client-side. -->
+<Layout title="Syncing">
+  <div class="max-w-sm mx-auto mt-16 text-center">
+    <p class="text-sm text-gray-500" aria-live="polite">Syncing your study progress…</p>
+  </div>
+</Layout>
+
+<script>
+  import { pullAndMerge } from '../../lib/sync-manager';
+
+  const params = new URLSearchParams(location.search);
+  const to = params.get('to') ?? '/account';
+  const dest = to.startsWith('/') ? to : '/account';
+
+  // Sync failure must never block sign-in: continue after the pull resolves
+  // or after 5 seconds, whichever comes first.
+  const timeout = new Promise<void>((resolve) => setTimeout(resolve, 5000));
+  Promise.race([pullAndMerge(), timeout]).finally(() => {
+    location.replace(dest);
+  });
+</script>

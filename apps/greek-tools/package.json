@@ -25,9 +25,12 @@
     "@astrojs/cloudflare": "^12.6.12",
     "@astrojs/react": "^4.4.2",
     "@tailwindcss/vite": "^4.1.18",
+    "@tools/db": "workspace:*",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "astro": "^5.17.1",
+    "better-auth": "^1.6.15",
+    "drizzle-orm": "^0.44.7",
     "posthog-js": "^1.240.4",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -35,6 +38,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.10",
+    "@cloudflare/workers-types": "^4.20260609.1",
     "@playwright/test": "^1.58.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -52,7 +56,9 @@
     "pre-commit": "pnpm lint-staged"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,mjs}": ["biome check --write --no-errors-on-unmatched"]
+    "*.{ts,tsx,js,mjs}": [
+      "biome check --write --no-errors-on-unmatched"
+    ]
   },
   "pnpm": {
     "onlyBuiltDependencies": [
