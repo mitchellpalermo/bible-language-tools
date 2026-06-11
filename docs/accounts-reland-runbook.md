@@ -1,9 +1,9 @@
 # Accounts Re-land — Steps for Mitch
 
 **Date:** 2026-06-10
-**PR:** [#57](https://github.com/mitchellpalermo/bible-language-tools/pull/57) — re-lands Phases 1–2 (issues #52, #53) and implements Phases 3–4 (issues #54, #55). Phase 5 (#56) is documented below but intentionally not implemented.
+**PR:** [#57](https://github.com/mitchellpalermo/bible-language-tools/pull/57) — re-lands Phases 1–2 (issues #52, #53), implements Phases 3–4 (issues #54, #55), and password reset via email (#58). Phase 5 (#56) is documented below but intentionally not implemented.
 
-Everything code-side is done: 887 tests pass, typecheck is clean, and `pnpm build` succeeds with no secrets in the environment (the failure mode that forced the original revert). The steps below are the things only you can do.
+Everything code-side is done: 897 tests pass, typecheck is clean, and `pnpm build` succeeds with no secrets in the environment (the failure mode that forced the original revert). The steps below are the things only you can do.
 
 ---
 
@@ -35,7 +35,24 @@ pnpm wrangler d1 execute bible-language-tools --remote \
   --command "CREATE TABLE IF NOT EXISTS d1_migrations(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP); INSERT INTO d1_migrations (name) VALUES ('0000_broken_rocket_raccoon.sql');"
 ```
 
-### 1c. Review two decisions I made beyond the issue specs
+### 1c. Enable Email Sending for greek.tools (required)
+
+Password reset (#58) sends email through the Cloudflare Email Service binding
+(`EMAIL` in `wrangler.jsonc`, from address `no-reply@greek.tools`). The domain
+must be onboarded for sending before the first reset email goes out. From
+`apps/greek-tools/`:
+
+```bash
+pnpm wrangler email sending list                  # check current state
+pnpm wrangler email sending enable greek.tools    # onboard the domain
+```
+
+Since greek.tools is on Cloudflare DNS, the required SPF/DKIM records are added
+automatically during onboarding. Locally no setup is needed — without the real
+binding, wrangler dev stubs the send and writes the email to a temp file
+(logged to the dev console), which is how the flow was verified.
+
+### 1d. Review two decisions I made beyond the issue specs
 
 1. **"Start fresh" in the import flow also clears local progress** (`localStorage`), not just server progress. The issue only specified the server delete, but leaving local data means the next automatic push re-uploads exactly what the user declined to import. If you'd rather preserve local data, say so on the PR and I'll change it.
 2. **`syncedAt` lives in a new `sync_state` table** (one row per user+language). Its absence is the "never synced" signal for `GET /api/progress → { data: null }`.
@@ -55,6 +72,7 @@ gh run watch --repo mitchellpalermo/bible-language-tools
 3. Open the site in a private window, sign in with the same account — after the brief "Syncing…" page your cards should be present (check `/flashcards` due counts or `/account`).
 4. Sign out; nav should flip back to "Sign in" everywhere, including static pages.
 5. Confirm rows landed in D1 (Cloudflare dashboard → D1 → bible-language-tools): `users`, `sessions`, `srs_cards`, `sync_state`.
+6. Test password reset with a real inbox: sign out, "Forgot password?" on the sign-in page, request a reset to your email, confirm the message arrives (and isn't in spam — if it is, check the deliverability notes in the Email Service dashboard), follow the link, set a new password, sign in with it.
 
 If anything misbehaves, Workers logs are live: Cloudflare dashboard → Workers → greek-tools → Logs (observability is enabled with full sampling).
 

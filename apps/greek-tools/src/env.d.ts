@@ -6,6 +6,8 @@ type Runtime = import('@astrojs/cloudflare').Runtime<Env>;
 interface Env {
   DB: D1Database;
   BETTER_AUTH_SECRET: string;
+  /** Email Service binding — may be absent in local dev. */
+  EMAIL?: SendEmail;
 }
 
 declare namespace App {

@@ -22,5 +22,11 @@
       "database_id": "ab76178b-b59c-4290-b24d-43e1cb09e317",
       "migrations_dir": "../../packages/db/migrations"
     }
+  ],
+  "send_email": [
+    {
+      "name": "EMAIL",
+      "allowed_sender_addresses": ["no-reply@greek.tools"]
+    }
   ]
 }

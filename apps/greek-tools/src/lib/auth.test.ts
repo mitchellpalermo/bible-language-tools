@@ -74,3 +74,76 @@ describe('createAuthForDb (real schema)', () => {
     expect(response.ok).toBe(false);
   });
 });
+
+describe('password reset (real schema)', () => {
+  it('completes the full reset round-trip', async () => {
+    const sentEmails: { to: string; subject: string; text: string }[] = [];
+    const auth = createAuthForDb(createTestDb() as never, SECRET, {
+      baseURL: 'https://greek.tools',
+      sendEmail: async (content) => {
+        sentEmails.push(content);
+      },
+    });
+
+    await auth.api.signUpEmail({ body: { email, password, name: email }, asResponse: true });
+
+    // Request a reset — the email goes through our sender
+    await auth.api.requestPasswordReset({
+      body: { email, redirectTo: '/account/reset-password' },
+    });
+    expect(sentEmails).toHaveLength(1);
+    expect(sentEmails[0].to).toBe(email);
+    expect(sentEmails[0].subject).toMatch(/reset/i);
+
+    // The emailed link must be absolute — a relative URL is useless in an inbox
+    expect(sentEmails[0].text).toContain('https://greek.tools/api/auth/reset-password/');
+
+    // Extract the token from the emailed link
+    const token = sentEmails[0].text.match(/reset-password\/([^?\s]+)/)?.[1];
+    expect(token).toBeTruthy();
+
+    // Set a new password with the token
+    const newPassword = 'brand-new-password';
+    const resetResponse = await auth.api.resetPassword({
+      body: { newPassword, token: token as string },
+      asResponse: true,
+    });
+    expect(resetResponse.ok).toBe(true);
+
+    // New password works, old one does not
+    const oldSignIn = await auth.api.signInEmail({ body: { email, password }, asResponse: true });
+    expect(oldSignIn.ok).toBe(false);
+    const newSignIn = await auth.api.signInEmail({
+      body: { email, password: newPassword },
+      asResponse: true,
+    });
+    expect(newSignIn.ok).toBe(true);
+  });
+
+  it('does not reveal whether an email is registered', async () => {
+    const sentEmails: unknown[] = [];
+    const auth = createAuthForDb(createTestDb() as never, SECRET, {
+      sendEmail: async (content) => {
+        sentEmails.push(content);
+      },
+    });
+
+    const response = await auth.api.requestPasswordReset({
+      body: { email: 'nobody@example.com', redirectTo: '/account/reset-password' },
+      asResponse: true,
+    });
+
+    // Same success response as for a registered email, and nothing sent
+    expect(response.ok).toBe(true);
+    expect(sentEmails).toHaveLength(0);
+  });
+
+  it('rejects an expired or forged token', async () => {
+    const auth = createAuthForDb(createTestDb() as never, SECRET);
+    const response = await auth.api.resetPassword({
+      body: { newPassword: 'whatever-password', token: 'forged-token' },
+      asResponse: true,
+    });
+    expect(response.ok).toBe(false);
+  });
+});
