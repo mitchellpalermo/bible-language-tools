@@ -103,25 +103,28 @@ export async function push(init: RequestInit = {}): Promise<boolean> {
 
 /**
  * Pull server progress, merge it with local state, and write the merged
- * result back to both sides. Returns true on success; never throws.
+ * result back to both sides. Returns `ok` (whether sync succeeded) and
+ * `hadServerData` (whether the server had prior progress for this account,
+ * used to route new vs. returning users after OAuth sign-in). Never throws.
  */
-export async function pullAndMerge(): Promise<boolean> {
+export async function pullAndMerge(): Promise<{ hadServerData: boolean; ok: boolean }> {
   try {
     const response = await fetch('/api/progress');
-    if (!response.ok) return false;
+    if (!response.ok) return { hadServerData: false, ok: false };
     const { data } = (await response.json()) as { data: ProgressPayload | null };
 
+    const hadServerData = data !== null;
     const local = readLocalProgress();
     const merged = data ? mergeProgress(local, data) : local;
 
     writeLocalProgress(merged);
 
     const syncedAt = await putProgress(merged);
-    if (!syncedAt) return false;
+    if (!syncedAt) return { hadServerData, ok: false };
     setLastSyncedAt(syncedAt);
-    return true;
+    return { hadServerData, ok: true };
   } catch {
-    return false;
+    return { hadServerData: false, ok: false };
   }
 }
 

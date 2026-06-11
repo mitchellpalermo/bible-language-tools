@@ -1,0 +1,188 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Privacy Policy"
+  description="Privacy policy for greek.tools — what data we collect, how we use it, and your rights."
+>
+  <div class="max-w-2xl pb-12">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold mb-1" style="color: var(--color-coral);">Privacy Policy</h1>
+      <p class="text-text-muted">Last updated: June 11, 2026</p>
+    </div>
+
+    <div class="prose-policy">
+      <p>
+        This policy covers <a href="https://greek.tools">greek.tools</a> and{' '}
+        <a href="https://hebrew.tools">hebrew.tools</a> (collectively, "the Sites"), operated by
+        Mitchell Palermo.
+      </p>
+
+      <h2>What we collect</h2>
+
+      <p>
+        <strong>Account information</strong><br />
+        When you sign in with Google, we receive your name, email address, and profile picture. We
+        store these to identify your account.
+      </p>
+
+      <p>
+        <strong>Study data</strong><br />
+        We store your spaced repetition (SRS) card progress (scheduling intervals, due dates, review
+        history), study statistics (streak, total reviews, accuracy), and any custom vocabulary decks
+        you create. This data is linked to your account and synced across your devices.
+      </p>
+
+      <p>
+        <strong>Session data</strong><br />
+        We store a session token along with your IP address and browser/device type (user agent
+        string) to keep you signed in. Sessions expire after 30 days.
+      </p>
+
+      <p>
+        <strong>Analytics</strong><br />
+        We use PostHog to collect page view counts, feature interaction events, and JavaScript error
+        reports. PostHog records sessions for approximately 20% of visits to help us diagnose bugs.
+        PostHog data is stored on servers in the United States.
+      </p>
+
+      <p>
+        <strong>Browser storage</strong><br />
+        Before you sign in, study data is saved in your browser's <code>localStorage</code> and
+        stays on your device. It is only uploaded to our servers when you explicitly sync.
+      </p>
+
+      <h2>How we use your data</h2>
+      <ul>
+        <li>To identify your account and keep you signed in</li>
+        <li>To sync your study progress across devices</li>
+        <li>To maintain your study streak and statistics</li>
+        <li>To diagnose errors and improve the app</li>
+      </ul>
+
+      <h2>What we don't do</h2>
+      <ul>
+        <li>We do not sell your data to third parties</li>
+        <li>We do not use your data to serve advertisements</li>
+        <li>We do not share your data with data brokers or advertising platforms</li>
+      </ul>
+
+      <h2>Third-party services</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>Purpose</th>
+            <th>Privacy policy</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Google</td>
+            <td>Sign-in via OAuth</td>
+            <td><a href="https://policies.google.com/privacy">policies.google.com/privacy</a></td>
+          </tr>
+          <tr>
+            <td>Cloudflare</td>
+            <td>Hosting and database</td>
+            <td
+              ><a href="https://www.cloudflare.com/privacypolicy/"
+                >cloudflare.com/privacypolicy</a
+              ></td
+            >
+          </tr>
+          <tr>
+            <td>PostHog</td>
+            <td>Analytics and session recording</td>
+            <td><a href="https://posthog.com/privacy">posthog.com/privacy</a></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Data retention</h2>
+      <p>
+        Your account and study data are retained for as long as your account is active. Session
+        tokens expire after 30 days.
+      </p>
+
+      <h2>Account deletion</h2>
+      <p>
+        To delete your account and all associated data, contact us at{' '}
+        <a href="mailto:hello@greek.tools">hello@greek.tools</a>.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+        Questions about this policy? Email{' '}
+        <a href="mailto:hello@greek.tools">hello@greek.tools</a>.
+      </p>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .prose-policy {
+    line-height: 1.75;
+    color: var(--color-text);
+  }
+
+  .prose-policy p {
+    margin-bottom: 1.25rem;
+  }
+
+  .prose-policy h2 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    color: var(--color-text);
+  }
+
+  .prose-policy ul {
+    list-style: disc;
+    padding-left: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .prose-policy li {
+    margin-bottom: 0.25rem;
+  }
+
+  .prose-policy a {
+    color: var(--color-coral);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .prose-policy a:hover {
+    opacity: 0.75;
+  }
+
+  .prose-policy code {
+    font-size: 0.875em;
+    background: var(--color-bg-card);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+  }
+
+  .prose-policy table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.25rem;
+    font-size: 0.9rem;
+  }
+
+  .prose-policy th {
+    text-align: left;
+    font-weight: 600;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 2px solid var(--color-border, #e5e7eb);
+  }
+
+  .prose-policy td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--color-border, #e5e7eb);
+    vertical-align: top;
+  }
+</style>

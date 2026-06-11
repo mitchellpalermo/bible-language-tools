@@ -15,7 +15,7 @@ function SyncControlsInner() {
 
   async function handleSync() {
     setStatus('syncing');
-    const ok = await pullAndMerge();
+    const { ok } = await pullAndMerge();
     setStatus(ok ? 'idle' : 'error');
     setLabel(lastSyncedLabel());
   }

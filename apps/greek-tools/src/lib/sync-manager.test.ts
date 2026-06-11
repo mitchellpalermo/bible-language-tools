@@ -146,7 +146,7 @@ describe('sync-manager', () => {
         .mockResolvedValueOnce(okJson({ data: null }))
         .mockResolvedValueOnce(okJson({ syncedAt: '2026-06-10T12:00:00.000Z' }));
 
-      expect(await pullAndMerge()).toBe(true);
+      expect(await pullAndMerge()).toEqual({ hadServerData: false, ok: true });
 
       expect(readLocalProgress().srsStore.a).toEqual(makeCard('a'));
       expect(getLastSyncedAt()).toBe('2026-06-10T12:00:00.000Z');
@@ -164,7 +164,7 @@ describe('sync-manager', () => {
         .mockResolvedValueOnce(okJson({ data: serverPayload }))
         .mockResolvedValueOnce(okJson({ syncedAt: '2026-06-10T12:00:00.000Z' }));
 
-      expect(await pullAndMerge()).toBe(true);
+      expect(await pullAndMerge()).toEqual({ hadServerData: true, ok: true });
 
       const local = readLocalProgress();
       expect(local.srsStore.a.repetition).toBe(5);
@@ -175,19 +175,19 @@ describe('sync-manager', () => {
       expect(pushed.srsStore.a.repetition).toBe(5);
     });
 
-    it('returns false and leaves local state untouched on network error', async () => {
+    it('leaves local state untouched on network error', async () => {
       seedLocal({ a: makeCard('a') });
       fetchMock.mockRejectedValue(new TypeError('network down'));
 
-      expect(await pullAndMerge()).toBe(false);
+      expect(await pullAndMerge()).toEqual({ hadServerData: false, ok: false });
 
       expect(readLocalProgress().srsStore.a).toEqual(makeCard('a'));
       expect(getLastSyncedAt()).toBeNull();
     });
 
-    it('returns false when the pull response is not OK', async () => {
+    it('returns ok: false when the pull response is not OK', async () => {
       fetchMock.mockResolvedValue(new Response(null, { status: 401 }));
-      expect(await pullAndMerge()).toBe(false);
+      expect(await pullAndMerge()).toEqual({ hadServerData: false, ok: false });
     });
   });
 

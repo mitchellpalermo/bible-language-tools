@@ -52,7 +52,10 @@ jobs:
           PUBLIC_POSTHOG_KEY: ${{ secrets.PUBLIC_POSTHOG_KEY }}
           PUBLIC_POSTHOG_HOST: ${{ secrets.PUBLIC_POSTHOG_HOST }}
       - name: Set Cloudflare Worker secrets
-        run: echo "${{ secrets.BETTER_AUTH_SECRET }}" | pnpm wrangler secret put BETTER_AUTH_SECRET
+        run: |
+          echo "${{ secrets.BETTER_AUTH_SECRET }}" | pnpm wrangler secret put BETTER_AUTH_SECRET
+          echo "${{ secrets.GOOGLE_CLIENT_ID }}" | pnpm wrangler secret put GOOGLE_CLIENT_ID
+          echo "${{ secrets.GOOGLE_CLIENT_SECRET }}" | pnpm wrangler secret put GOOGLE_CLIENT_SECRET
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

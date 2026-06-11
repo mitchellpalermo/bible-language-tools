@@ -1,3 +1,4 @@
+// @vitest-environment node
 import type { Mock } from 'vitest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -13,7 +14,10 @@ vi.mock('astro:middleware', () => ({
 import { createAuth } from './lib/auth';
 import { onRequest } from './middleware';
 
-function makeContext(sessionUser?: { id: string; email: string } | null) {
+function makeContext(
+  sessionUser?: { id: string; email: string } | null,
+  { cookies = '' } = {},
+) {
   const mockAuth = {
     api: {
       getSession: vi.fn().mockResolvedValue(sessionUser ? { user: sessionUser } : null),
@@ -22,10 +26,19 @@ function makeContext(sessionUser?: { id: string; email: string } | null) {
   (createAuth as Mock).mockReturnValue(mockAuth);
 
   const locals: Record<string, unknown> = {
-    runtime: { env: { DB: {} as D1Database, BETTER_AUTH_SECRET: 'test-secret' } },
+    runtime: {
+      env: {
+        DB: {} as D1Database,
+        BETTER_AUTH_SECRET: 'test-secret',
+        GOOGLE_CLIENT_ID: 'test-client-id',
+        GOOGLE_CLIENT_SECRET: 'test-client-secret',
+      },
+    },
     user: undefined,
   };
-  const request = new Request('http://localhost/some-page');
+  const headers = new Headers();
+  if (cookies) headers.set('cookie', cookies);
+  const request = new Request('http://localhost/some-page', { headers });
   const next = vi.fn().mockResolvedValue(new Response('ok'));
 
   return { locals, request, next, mockAuth };
@@ -61,7 +74,7 @@ describe('auth middleware', () => {
     expect(response).toBeInstanceOf(Response);
   });
 
-  it('calls createAuth with DB and BETTER_AUTH_SECRET from locals', async () => {
+  it('calls createAuth with DB, BETTER_AUTH_SECRET, and Google credentials from locals', async () => {
     const { locals, request, next } = makeContext(null);
 
     await onRequest({ locals, request } as never, next);
@@ -69,6 +82,10 @@ describe('auth middleware', () => {
     expect(createAuth).toHaveBeenCalledWith(
       (locals.runtime as { env: { DB: D1Database } }).env.DB,
       'test-secret',
+      expect.objectContaining({
+        googleClientId: 'test-client-id',
+        googleClientSecret: 'test-client-secret',
+      }),
     );
   });
 
@@ -80,5 +97,40 @@ describe('auth middleware', () => {
     expect(mockAuth.api.getSession).toHaveBeenCalledWith(
       expect.objectContaining({ headers: request.headers }),
     );
+  });
+
+  it('sets the gt-auth hint cookie when a session is active and the cookie is absent', async () => {
+    const { locals, request, next } = makeContext({ id: 'user-123', email: 'me@example.com' });
+
+    const response = (await onRequest({ locals, request } as never, next)) as Response;
+
+    expect(response.headers.get('set-cookie')).toContain('gt-auth=1');
+  });
+
+  it('does not set the hint cookie when a session is active and the cookie is already present', async () => {
+    const { locals, request, next } = makeContext(
+      { id: 'user-123', email: 'me@example.com' },
+      { cookies: 'gt-auth=1' },
+    );
+
+    const response = (await onRequest({ locals, request } as never, next)) as Response;
+
+    expect(response.headers.get('set-cookie')).toBeNull();
+  });
+
+  it('clears the hint cookie when no session but the cookie is present', async () => {
+    const { locals, request, next } = makeContext(null, { cookies: 'gt-auth=1' });
+
+    const response = (await onRequest({ locals, request } as never, next)) as Response;
+
+    expect(response.headers.get('set-cookie')).toContain('Max-Age=0');
+  });
+
+  it('does nothing to cookies when no session and no hint cookie', async () => {
+    const { locals, request, next } = makeContext(null);
+
+    const response = (await onRequest({ locals, request } as never, next)) as Response;
+
+    expect(response.headers.get('set-cookie')).toBeNull();
   });
 });

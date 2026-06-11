@@ -16,7 +16,14 @@ function makeContext() {
   return {
     request,
     locals: {
-      runtime: { env: { DB: {} as D1Database, BETTER_AUTH_SECRET: 'test-secret' } },
+      runtime: {
+        env: {
+          DB: {} as D1Database,
+          BETTER_AUTH_SECRET: 'test-secret',
+          GOOGLE_CLIENT_ID: 'test-client-id',
+          GOOGLE_CLIENT_SECRET: 'test-client-secret',
+        },
+      },
       user: null,
     },
   };
@@ -77,12 +84,19 @@ describe('POST /api/auth/signout', () => {
     );
   });
 
-  it('calls createAuth with DB and BETTER_AUTH_SECRET from locals', async () => {
+  it('calls createAuth with DB, BETTER_AUTH_SECRET, and Google credentials from locals', async () => {
     mockAuth.api.signOut.mockResolvedValue(new Response(null, { status: 200 }));
 
     const ctx = makeContext();
     await POST(ctx as never);
 
-    expect(createAuth).toHaveBeenCalledWith(ctx.locals.runtime.env.DB, 'test-secret');
+    expect(createAuth).toHaveBeenCalledWith(
+      ctx.locals.runtime.env.DB,
+      'test-secret',
+      expect.objectContaining({
+        googleClientId: 'test-client-id',
+        googleClientSecret: 'test-client-secret',
+      }),
+    );
   });
 });
