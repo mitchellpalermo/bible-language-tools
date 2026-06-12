@@ -12,6 +12,8 @@ const STUB_ITEM: ParseItem = {
   mood: 'indicative',
   person: '1st',
   number: 'singular',
+  paradigmLabel: 'Present Active Indicative — λύω',
+  lemma: 'λύω',
 };
 
 function renderQuestion(answer: ParseAnswer = emptyAnswer(), onChange = vi.fn(), onSubmit = vi.fn()) {
