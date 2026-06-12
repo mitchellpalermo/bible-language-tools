@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted — Auth section amended by [ADR 005](005-oauth-as-sole-auth-provider.md) (2026-06-11)
 
 ## Date
 
@@ -28,9 +28,11 @@ Three data shapes need to be synced per user:
 
 ## Decision
 
-### Auth: Better Auth
+### Auth: Better Auth with Google OAuth
 
-Use **Better Auth** for authentication. It is TypeScript-first, has a native Astro integration, and ships a Cloudflare D1 adapter that manages its own session and user tables. Supports email/password and OAuth providers without introducing a paid external service dependency.
+Use **Better Auth** for authentication. It is TypeScript-first, has a native Astro integration, and ships a Cloudflare D1 adapter that manages its own session and user tables.
+
+**Authentication method: Google OAuth only.** Email/password was removed before shipping. The reason: email/password requires a password reset flow, which requires outbound email sending, which requires Cloudflare Email Service, which is only available on the Workers Paid plan ($5/month). There is no capacity pressure justifying that cost. Google OAuth runs entirely on Google's servers and stays on the free plan. See [ADR 005](005-oauth-as-sole-auth-provider.md) for the full rationale.
 
 Clerk was the main alternative. It has excellent DX and a generous free tier (10k MAU), but introduces a hard dependency on a third-party auth vendor — pricing risk for a tool that is intended to remain free and self-sustaining.
 
@@ -68,7 +70,7 @@ The rationale: a merge that favors more progress is always safe. The worst outco
 
 ## Cost
 
-All utilities in this stack are either open-source or included within the Cloudflare platform. The only hard cost is the Workers Paid plan, which is required solely to unlock outbound email sending for password resets.
+All utilities in this stack are either open-source or free within the Cloudflare platform. There is no recurring cost.
 
 | Utility | Role | Free tier | Paid |
 |---|---|---|---|
@@ -76,9 +78,9 @@ All utilities in this stack are either open-source or included within the Cloudf
 | **Drizzle** | ORM | Free (open source) | Free |
 | **Cloudflare Workers** | Hosts the app | 100k req/day | $5/mo (10M req/mo included) |
 | **Cloudflare D1** | Stores user/SRS/sync data | 5M row reads/day, 100k writes/day, 5 GB | Included in Workers Paid — 25B reads + 50M writes/mo |
-| **Cloudflare Email Service** | Password reset emails | Not available on free plan | Included in Workers Paid — 3,000/mo, then $0.35/1,000 |
+| **Google OAuth** | Identity provider | Free | Free |
 
-The Workers Paid plan ($5/mo) is the only recurring cost introduced by this decision. D1 and Email Service are both included within that plan at usage levels well above what a personal project would reach. If OAuth is added later (Phase 5), most users will never trigger the email/password reset flow, which reduces the pressure to pay for email sending and may make the free plan viable again depending on overall request volume.
+Switching to OAuth-only (ADR 005) eliminated the only line item that required Workers Paid. Email/password auth required Cloudflare Email Service (Workers Paid only) for password reset; Google OAuth has no such dependency. The entire stack runs on the free tier at current and anticipated traffic levels.
 
 ## Consequences
 
