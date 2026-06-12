@@ -63,13 +63,16 @@ Only add to `packages/shared` if the code is genuinely language-agnostic. Stylin
 
 Each app's localStorage storage functions stay app-specific (different key namespaces). Only the pure algorithm and UI components belong in shared.
 
-## Cloudflare Pages deployment
+## Cloudflare Workers deployment
 
-Each app deploys to its own Pages project. CI runs `wrangler pages deploy` from each app's directory after a successful build — no dashboard configuration needed.
+Each app deploys to its own Worker. CI runs `wrangler deploy` from each app's directory after a successful build — no dashboard configuration needed.
 
 Secrets required in GitHub repo settings:
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
+- `BETTER_AUTH_SECRET`
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
 - `ANTHROPIC_API_KEY` (for `@claude` automation)
 
 ## CI

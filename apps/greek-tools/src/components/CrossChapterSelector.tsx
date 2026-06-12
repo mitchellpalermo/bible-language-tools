@@ -94,8 +94,9 @@ export default function CrossChapterSelector({ value, onChange }: Props) {
     <div className="space-y-4">
       {/* Book */}
       <div>
-        <label className={labelClass}>Book</label>
+        <label htmlFor="book" className={labelClass}>Book</label>
         <select
+          id="book"
           value={value.book}
           onChange={(e) => handleBookChange(e.target.value)}
           className={selectClass}
@@ -119,8 +120,9 @@ export default function CrossChapterSelector({ value, onChange }: Props) {
         <p className={labelClass}>Start</p>
         <div className="flex gap-2">
           <div className="flex-1">
-            <label className="block text-xs text-text-muted mb-1">Chapter</label>
+            <label htmlFor="start-chapter" className="block text-xs text-text-muted mb-1">Chapter</label>
             <select
+              id="start-chapter"
               value={value.startChapter}
               onChange={(e) => handleStartChapterChange(Number(e.target.value))}
               className={selectClass}
@@ -133,8 +135,9 @@ export default function CrossChapterSelector({ value, onChange }: Props) {
             </select>
           </div>
           <div className="flex-1">
-            <label className="block text-xs text-text-muted mb-1">Verse</label>
+            <label htmlFor="start-verse" className="block text-xs text-text-muted mb-1">Verse</label>
             <select
+              id="start-verse"
               value={value.startVerse}
               onChange={(e) => handleStartVerseChange(Number(e.target.value))}
               className={selectClass}
@@ -154,8 +157,9 @@ export default function CrossChapterSelector({ value, onChange }: Props) {
         <p className={labelClass}>End</p>
         <div className="flex gap-2">
           <div className="flex-1">
-            <label className="block text-xs text-text-muted mb-1">Chapter</label>
+            <label htmlFor="end-chapter" className="block text-xs text-text-muted mb-1">Chapter</label>
             <select
+              id="end-chapter"
               value={value.endChapter}
               onChange={(e) => handleEndChapterChange(Number(e.target.value))}
               className={selectClass}
@@ -170,8 +174,9 @@ export default function CrossChapterSelector({ value, onChange }: Props) {
             </select>
           </div>
           <div className="flex-1">
-            <label className="block text-xs text-text-muted mb-1">Verse</label>
+            <label htmlFor="end-verse" className="block text-xs text-text-muted mb-1">Verse</label>
             <select
+              id="end-verse"
               value={value.endVerse}
               onChange={(e) => handleEndVerseChange(Number(e.target.value))}
               className={selectClass}

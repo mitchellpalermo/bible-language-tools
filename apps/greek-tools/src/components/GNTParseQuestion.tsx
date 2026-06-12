@@ -233,12 +233,14 @@ function GNTSelect<T extends string>({
   onChange,
   className = '',
 }: SelectProps<T>) {
+  const id = label.toLowerCase();
   return (
     <div className={className}>
-      <label className="block text-xs font-semibold uppercase tracking-wide text-text-muted mb-1">
+      <label htmlFor={id} className="block text-xs font-semibold uppercase tracking-wide text-text-muted mb-1">
         {label}
       </label>
       <select
+        id={id}
         value={value}
         onChange={(e) => onChange(e.target.value as T)}
         className="w-full rounded-lg border border-bg-card bg-bg-card px-3 py-2 text-sm text-text focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] appearance-none"

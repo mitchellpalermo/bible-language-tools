@@ -71,10 +71,11 @@ export default function PassageSelector({
         <div className="flex gap-3">
           {/* Book */}
           <div className="flex-1">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-text-muted mb-1">
+            <label htmlFor="book" className="block text-xs font-semibold uppercase tracking-wide text-text-muted mb-1">
               Book
             </label>
             <select
+              id="book"
               value={settings.book}
               onChange={(e) => handleBookChange(e.target.value)}
               className="w-full rounded-lg border border-bg-card bg-bg-card px-3 py-2 text-sm text-text focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] appearance-none"
@@ -89,10 +90,11 @@ export default function PassageSelector({
 
           {/* Chapter */}
           <div className="w-28">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-text-muted mb-1">
+            <label htmlFor="chapter" className="block text-xs font-semibold uppercase tracking-wide text-text-muted mb-1">
               Chapter
             </label>
             <select
+              id="chapter"
               value={settings.chapter}
               onChange={(e) => handleChapterChange(Number(e.target.value))}
               className="w-full rounded-lg border border-bg-card bg-bg-card px-3 py-2 text-sm text-text focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] appearance-none"
@@ -109,10 +111,11 @@ export default function PassageSelector({
         {/* Verse range */}
         <div className="flex items-end gap-2 mt-3">
           <div className="w-24">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-text-muted mb-1">
+            <label htmlFor="verse" className="block text-xs font-semibold uppercase tracking-wide text-text-muted mb-1">
               Verse
             </label>
             <select
+              id="verse"
               value={settings.verseStart}
               disabled={loading || verseCount === null}
               onChange={(e) => handleVerseStartChange(Number(e.target.value))}
