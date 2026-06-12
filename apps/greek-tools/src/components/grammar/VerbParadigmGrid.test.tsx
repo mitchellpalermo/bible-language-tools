@@ -80,13 +80,13 @@ describe('VerbParadigmGrid', () => {
     expect(screen.queryByText('Fut')).not.toBeInTheDocument();
   });
 
-  it('renders Act and Pass columns for subjunctive (no Mid)', () => {
+  it('renders Act, Mid, and Pass columns for subjunctive', () => {
     render(
       <VerbParadigmGrid {...defaultProps} activeMood="subjunctive" selectedId="pres-act-subj" />,
     );
     expect(screen.getByText('Act')).toBeInTheDocument();
+    expect(screen.getByText('Mid')).toBeInTheDocument();
     expect(screen.getByText('Pass')).toBeInTheDocument();
-    expect(screen.queryByText('Mid')).not.toBeInTheDocument();
   });
 
   // ─── Imperative grid ─────────────────────────────────────────────────────

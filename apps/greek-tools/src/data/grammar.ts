@@ -651,6 +651,19 @@ export const verbParadigms: VerbParadigm[] = [
     },
   },
   {
+    id: 'aor-mid-subj',
+    label: 'Aorist Middle Subjunctive',
+    group: 'subjunctive',
+    forms: {
+      '1sg': 'λύσωμαι',
+      '2sg': 'λύσῃ',
+      '3sg': 'λύσηται',
+      '1pl': 'λυσώμεθα',
+      '2pl': 'λύσησθε',
+      '3pl': 'λύσωνται',
+    },
+  },
+  {
     id: 'aor-pass-subj',
     label: 'Aorist Passive Subjunctive',
     group: 'subjunctive',
