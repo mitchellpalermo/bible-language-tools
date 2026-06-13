@@ -158,6 +158,8 @@ describe('sync-manager', () => {
         srsStore: { a: makeCard('a', { repetition: 5 }), b: makeCard('b') },
         studyStats: { ...stats, totalReviewed: 999 },
         customDecks: [],
+        focusPassages: [],
+        parseHistory: {},
         syncedAt: '2026-06-09T00:00:00.000Z',
       };
       fetchMock

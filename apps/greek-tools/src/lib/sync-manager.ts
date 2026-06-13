@@ -7,6 +7,12 @@
 // (only the account page does).
 
 import { loadCustomDecks, saveCustomDecks } from '../data/customDecks';
+import {
+  loadFocusPassages,
+  loadParseHistoryStore,
+  saveFocusPassages,
+  saveParseHistoryStore,
+} from '../data/focusPassages';
 import { loadSRSStore, loadStats, saveSRSStore, saveStats } from '../data/srs';
 import { hasAuthHint } from './auth-cookie';
 import { mergeProgress, type ProgressSnapshot } from './sync-merge';
@@ -55,6 +61,8 @@ export function readLocalProgress(): ProgressSnapshot {
     srsStore: loadSRSStore(),
     studyStats: loadStats(),
     customDecks: loadCustomDecks(),
+    focusPassages: loadFocusPassages(),
+    parseHistory: loadParseHistoryStore(),
   };
 }
 
@@ -62,6 +70,8 @@ export function writeLocalProgress(snapshot: ProgressSnapshot): void {
   saveSRSStore(snapshot.srsStore);
   saveStats(snapshot.studyStats);
   saveCustomDecks(snapshot.customDecks);
+  saveFocusPassages(snapshot.focusPassages);
+  saveParseHistoryStore(snapshot.parseHistory);
 }
 
 /** Does this device have any study progress worth importing? */

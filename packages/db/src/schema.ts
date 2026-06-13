@@ -116,3 +116,34 @@ export const customDecks = sqliteTable('custom_decks', {
   wordKeys: text('word_keys').notNull(),
   createdAt: text('created_at').notNull(),
 });
+
+export const focusPassages = sqliteTable(
+  'focus_passages',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    id: text('id').notNull(),
+    label: text('label'),
+    book: text('book').notNull(),
+    startChapter: integer('start_chapter').notNull(),
+    startVerse: integer('start_verse').notNull(),
+    endChapter: integer('end_chapter').notNull(),
+    endVerse: integer('end_verse').notNull(),
+    createdAt: text('created_at').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.id] })],
+);
+
+export const focusParseHistory = sqliteTable(
+  'focus_parse_history',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    passageId: text('passage_id').notNull(),
+    correct: integer('correct').notNull().default(0),
+    total: integer('total').notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.passageId] })],
+);

@@ -9,6 +9,8 @@
 import type * as schema from '@tools/db/schema';
 import {
   customDecks as customDecksTable,
+  focusParseHistory as focusParseHistoryTable,
+  focusPassages as focusPassagesTable,
   type Language,
   srsCards as srsCardsTable,
   studyStats as studyStatsTable,
@@ -17,6 +19,7 @@ import {
 import { and, eq } from 'drizzle-orm';
 import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
 import type { CustomDeck } from '../data/customDecks';
+import type { FocusPassage, ParseHistory } from '../data/focusPassages';
 import type { SRSCard, StudyStats } from '../data/srs';
 import type { ProgressPayload } from './sync-types';
 
@@ -25,9 +28,12 @@ export type ProgressDb = BaseSQLiteDatabase<'sync' | 'async', unknown, typeof sc
 const LANGUAGE: Language = 'greek';
 
 // D1 allows at most 100 bound parameters per statement, so bulk inserts are
-// chunked: srs_cards has 8 columns (12 rows/statement), custom_decks has 6.
+// chunked by column count: srs_cards (8 cols → 12/stmt), custom_decks (6 cols → 16/stmt),
+// focus_passages (9 cols → 11/stmt), focus_parse_history (4 cols → 25/stmt).
 const SRS_CHUNK = 12;
 const DECK_CHUNK = 16;
+const PASSAGE_CHUNK = 11;
+const PARSE_HISTORY_CHUNK = 25;
 
 function chunk<T>(items: T[], size: number): T[][] {
   const out: T[][] = [];
@@ -76,6 +82,14 @@ export async function getProgress(db: ProgressDb, userId: string): Promise<Progr
     .select()
     .from(customDecksTable)
     .where(and(eq(customDecksTable.userId, userId), eq(customDecksTable.language, LANGUAGE)));
+  const passageRows = await db
+    .select()
+    .from(focusPassagesTable)
+    .where(eq(focusPassagesTable.userId, userId));
+  const parseHistoryRows = await db
+    .select()
+    .from(focusParseHistoryTable)
+    .where(eq(focusParseHistoryTable.userId, userId));
 
   const srsStore: Record<string, SRSCard> = {};
   for (const row of cardRows) {
@@ -107,7 +121,23 @@ export async function getProgress(db: ProgressDb, userId: string): Promise<Progr
     createdAt: row.createdAt,
   }));
 
-  return { srsStore, studyStats, customDecks, syncedAt: state.syncedAt };
+  const focusPassages: FocusPassage[] = passageRows.map((row) => ({
+    id: row.id,
+    ...(row.label !== null ? { label: row.label } : {}),
+    book: row.book,
+    startChapter: row.startChapter,
+    startVerse: row.startVerse,
+    endChapter: row.endChapter,
+    endVerse: row.endVerse,
+    createdAt: row.createdAt,
+  }));
+
+  const parseHistory: Record<string, ParseHistory> = {};
+  for (const row of parseHistoryRows) {
+    parseHistory[row.passageId] = { correct: row.correct, total: row.total };
+  }
+
+  return { srsStore, studyStats, customDecks, focusPassages, parseHistory, syncedAt: state.syncedAt };
 }
 
 /**
@@ -117,7 +147,7 @@ export async function getProgress(db: ProgressDb, userId: string): Promise<Progr
 export async function putProgress(
   db: ProgressDb,
   userId: string,
-  payload: Pick<ProgressPayload, 'srsStore' | 'studyStats' | 'customDecks'>,
+  payload: Pick<ProgressPayload, 'srsStore' | 'studyStats' | 'customDecks' | 'focusPassages' | 'parseHistory'>,
 ): Promise<string> {
   const syncedAt = new Date().toISOString();
   const userLang = { userId, language: LANGUAGE };
@@ -140,6 +170,25 @@ export async function putProgress(
     createdAt: deck.createdAt,
   }));
 
+  const passageRows = payload.focusPassages.map((p) => ({
+    userId,
+    id: p.id,
+    label: p.label ?? null,
+    book: p.book,
+    startChapter: p.startChapter,
+    startVerse: p.startVerse,
+    endChapter: p.endChapter,
+    endVerse: p.endVerse,
+    createdAt: p.createdAt,
+  }));
+
+  const parseHistoryRows = Object.entries(payload.parseHistory).map(([passageId, entry]) => ({
+    userId,
+    passageId,
+    correct: entry.correct,
+    total: entry.total,
+  }));
+
   const statements: unknown[] = [
     db
       .delete(srsCardsTable)
@@ -153,6 +202,12 @@ export async function putProgress(
       .delete(customDecksTable)
       .where(and(eq(customDecksTable.userId, userId), eq(customDecksTable.language, LANGUAGE))),
     ...chunk(deckRows, DECK_CHUNK).map((rows) => db.insert(customDecksTable).values(rows)),
+    db.delete(focusPassagesTable).where(eq(focusPassagesTable.userId, userId)),
+    ...chunk(passageRows, PASSAGE_CHUNK).map((rows) => db.insert(focusPassagesTable).values(rows)),
+    db.delete(focusParseHistoryTable).where(eq(focusParseHistoryTable.userId, userId)),
+    ...chunk(parseHistoryRows, PARSE_HISTORY_CHUNK).map((rows) =>
+      db.insert(focusParseHistoryTable).values(rows),
+    ),
     db
       .delete(syncStateTable)
       .where(and(eq(syncStateTable.userId, userId), eq(syncStateTable.language, LANGUAGE))),
@@ -175,6 +230,8 @@ export async function deleteProgress(db: ProgressDb, userId: string): Promise<vo
     db
       .delete(customDecksTable)
       .where(and(eq(customDecksTable.userId, userId), eq(customDecksTable.language, LANGUAGE))),
+    db.delete(focusPassagesTable).where(eq(focusPassagesTable.userId, userId)),
+    db.delete(focusParseHistoryTable).where(eq(focusParseHistoryTable.userId, userId)),
     db
       .delete(syncStateTable)
       .where(and(eq(syncStateTable.userId, userId), eq(syncStateTable.language, LANGUAGE))),

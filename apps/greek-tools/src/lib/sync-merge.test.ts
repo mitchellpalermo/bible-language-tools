@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import type { CustomDeck } from '../data/customDecks';
+import type { FocusPassage, ParseHistory } from '../data/focusPassages';
 import type { SRSCard, StudyStats } from '../data/srs';
-import { mergeCustomDecks, mergeProgress, mergeSRSStores, mergeStudyStats } from './sync-merge';
+import {
+  mergeCustomDecks,
+  mergeFocusPassages,
+  mergeParseHistory,
+  mergeProgress,
+  mergeSRSStores,
+  mergeStudyStats,
+} from './sync-merge';
 
 function makeCard(key: string, overrides: Partial<SRSCard> = {}): SRSCard {
   return {
@@ -35,6 +43,23 @@ function makeDeck(id: string, overrides: Partial<CustomDeck> = {}): CustomDeck {
     createdAt: '2026-06-01T12:00:00.000Z',
     ...overrides,
   };
+}
+
+function makePassage(id: string, overrides: Partial<FocusPassage> = {}): FocusPassage {
+  return {
+    id,
+    book: 'JHN',
+    startChapter: 1,
+    startVerse: 1,
+    endChapter: 1,
+    endVerse: 14,
+    createdAt: '2026-06-01T12:00:00.000Z',
+    ...overrides,
+  };
+}
+
+function makeParseHistory(overrides: Partial<ParseHistory> = {}): ParseHistory {
+  return { correct: 8, total: 10, ...overrides };
 }
 
 describe('mergeSRSStores', () => {
@@ -131,17 +156,76 @@ describe('mergeCustomDecks', () => {
   });
 });
 
+describe('mergeFocusPassages', () => {
+  it('unions passages by id', () => {
+    const merged = mergeFocusPassages([makePassage('p1')], [makePassage('p2')]);
+    expect(merged.map((p) => p.id).sort()).toEqual(['p1', 'p2']);
+  });
+
+  it('resolves duplicate ids by the later createdAt', () => {
+    const older = makePassage('p1', { label: 'Old', createdAt: '2026-05-01T00:00:00.000Z' });
+    const newer = makePassage('p1', { label: 'New', createdAt: '2026-06-01T00:00:00.000Z' });
+    expect(mergeFocusPassages([older], [newer])).toEqual([newer]);
+    expect(mergeFocusPassages([newer], [older])).toEqual([newer]);
+  });
+
+  it('keeps the first entry when createdAt values are identical', () => {
+    const a = makePassage('p1', { label: 'A' });
+    const b = makePassage('p1', { label: 'B' });
+    expect(mergeFocusPassages([a], [b])).toEqual([a]);
+  });
+
+  it('merges empty lists', () => {
+    expect(mergeFocusPassages([], [])).toEqual([]);
+  });
+});
+
+describe('mergeParseHistory', () => {
+  it('keeps entries present in only one store', () => {
+    const merged = mergeParseHistory({ p1: makeParseHistory() }, { p2: makeParseHistory() });
+    expect(Object.keys(merged).sort()).toEqual(['p1', 'p2']);
+  });
+
+  it('takes the entry with the higher total', () => {
+    const few = makeParseHistory({ correct: 5, total: 10 });
+    const more = makeParseHistory({ correct: 18, total: 20 });
+    expect(mergeParseHistory({ p1: few }, { p1: more }).p1).toEqual(more);
+    expect(mergeParseHistory({ p1: more }, { p1: few }).p1).toEqual(more);
+  });
+
+  it('breaks total ties with the higher correct count', () => {
+    const lower = makeParseHistory({ correct: 7, total: 10 });
+    const higher = makeParseHistory({ correct: 9, total: 10 });
+    expect(mergeParseHistory({ p1: lower }, { p1: higher }).p1).toEqual(higher);
+    expect(mergeParseHistory({ p1: higher }, { p1: lower }).p1).toEqual(higher);
+  });
+
+  it('keeps the first entry when total and correct are identical', () => {
+    const a = makeParseHistory({ correct: 8, total: 10 });
+    const b = makeParseHistory({ correct: 8, total: 10 });
+    expect(mergeParseHistory({ p1: a }, { p1: b }).p1).toEqual(a);
+  });
+
+  it('merges empty stores', () => {
+    expect(mergeParseHistory({}, {})).toEqual({});
+  });
+});
+
 describe('mergeProgress', () => {
-  it('merges all three sections', () => {
+  it('merges all five sections', () => {
     const local = {
       srsStore: { a: makeCard('a', { repetition: 5 }) },
       studyStats: makeStats({ streak: 7 }),
       customDecks: [makeDeck('1')],
+      focusPassages: [makePassage('p1')],
+      parseHistory: { p1: makeParseHistory({ total: 20 }) },
     };
     const remote = {
       srsStore: { b: makeCard('b') },
       studyStats: makeStats({ totalReviewed: 500 }),
       customDecks: [makeDeck('2')],
+      focusPassages: [makePassage('p2')],
+      parseHistory: { p1: makeParseHistory({ total: 10 }), p2: makeParseHistory() },
     };
 
     const merged = mergeProgress(local, remote);
@@ -149,5 +233,9 @@ describe('mergeProgress', () => {
     expect(merged.studyStats.streak).toBe(7);
     expect(merged.studyStats.totalReviewed).toBe(500);
     expect(merged.customDecks).toHaveLength(2);
+    expect(merged.focusPassages.map((p) => p.id).sort()).toEqual(['p1', 'p2']);
+    // local p1 had total 20, remote had 10 — local wins
+    expect(merged.parseHistory['p1']?.total).toBe(20);
+    expect(merged.parseHistory['p2']).toBeDefined();
   });
 });

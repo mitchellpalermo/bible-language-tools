@@ -32,10 +32,10 @@ const STATS_STRING_FIELDS = ['lastStreakDate', 'lastStudyDate'] as const;
 
 function validatePayload(
   body: unknown,
-): Pick<ProgressPayload, 'srsStore' | 'studyStats' | 'customDecks'> | null {
+): Pick<ProgressPayload, 'srsStore' | 'studyStats' | 'customDecks' | 'focusPassages' | 'parseHistory'> | null {
   if (!isRecord(body)) return null;
 
-  const { srsStore, studyStats, customDecks } = body;
+  const { srsStore, studyStats, customDecks, focusPassages, parseHistory } = body;
   if (!isRecord(srsStore)) return null;
 
   if (!isRecord(studyStats)) return null;
@@ -62,7 +62,35 @@ function validatePayload(
     }
   }
 
-  return body as unknown as Pick<ProgressPayload, 'srsStore' | 'studyStats' | 'customDecks'>;
+  // focusPassages defaults to [] for old clients that predate this field.
+  const passages = Array.isArray(focusPassages) ? focusPassages : [];
+  for (const p of passages) {
+    if (!isRecord(p)) return null;
+    if (typeof p.id !== 'string' || typeof p.book !== 'string') return null;
+    if (
+      typeof p.startChapter !== 'number' ||
+      typeof p.startVerse !== 'number' ||
+      typeof p.endChapter !== 'number' ||
+      typeof p.endVerse !== 'number'
+    ) {
+      return null;
+    }
+    if (typeof p.createdAt !== 'string') return null;
+    if (p.label !== undefined && p.label !== null && typeof p.label !== 'string') return null;
+  }
+
+  // parseHistory defaults to {} for old clients that predate this field.
+  const history = isRecord(parseHistory) ? parseHistory : {};
+  for (const entry of Object.values(history)) {
+    if (!isRecord(entry)) return null;
+    if (typeof entry.correct !== 'number' || typeof entry.total !== 'number') return null;
+  }
+
+  return {
+    ...(body as object),
+    focusPassages: passages,
+    parseHistory: history,
+  } as Pick<ProgressPayload, 'srsStore' | 'studyStats' | 'customDecks' | 'focusPassages' | 'parseHistory'>;
 }
 
 export const GET: APIRoute = async ({ locals }) => {
