@@ -40,6 +40,19 @@ const validPayload = {
   customDecks: [
     { id: 'deck-1', name: 'John 1', wordKeys: ['λόγος'], createdAt: '2026-06-01T12:00:00.000Z' },
   ],
+  focusPassages: [
+    {
+      id: 'p-1',
+      label: 'John 1:1-14',
+      book: 'JHN',
+      startChapter: 1,
+      startVerse: 1,
+      endChapter: 1,
+      endVerse: 14,
+      createdAt: '2026-06-01T12:00:00.000Z',
+    },
+  ],
+  parseHistory: { 'p-1': { correct: 8, total: 10 } },
 };
 
 function makeContext({

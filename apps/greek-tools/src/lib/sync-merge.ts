@@ -4,6 +4,7 @@
 // "More progress wins" is the guiding rule throughout.
 
 import type { CustomDeck } from '../data/customDecks';
+import type { FocusPassage, ParseHistory } from '../data/focusPassages';
 import type { SRSCard, StudyStats } from '../data/srs';
 
 /**
@@ -63,10 +64,50 @@ export function mergeCustomDecks(a: CustomDeck[], b: CustomDeck[]): CustomDeck[]
   return [...byId.values()];
 }
 
+/** Union by passage id; duplicate ids resolved by the later createdAt. */
+export function mergeFocusPassages(a: FocusPassage[], b: FocusPassage[]): FocusPassage[] {
+  const byId = new Map<string, FocusPassage>();
+  for (const passage of a) byId.set(passage.id, passage);
+  for (const passage of b) {
+    const existing = byId.get(passage.id);
+    if (!existing || passage.createdAt > existing.createdAt) {
+      byId.set(passage.id, passage);
+    }
+  }
+  return [...byId.values()];
+}
+
+/**
+ * Per passage id: take the entry with the higher total attempts (more sessions
+ * = more complete cumulative record). Ties broken by higher correct count.
+ */
+export function mergeParseHistory(
+  a: Record<string, ParseHistory>,
+  b: Record<string, ParseHistory>,
+): Record<string, ParseHistory> {
+  const merged: Record<string, ParseHistory> = { ...a };
+  for (const [id, entry] of Object.entries(b)) {
+    const existing = merged[id];
+    if (!existing) {
+      merged[id] = entry;
+      continue;
+    }
+    if (
+      entry.total > existing.total ||
+      (entry.total === existing.total && entry.correct > existing.correct)
+    ) {
+      merged[id] = entry;
+    }
+  }
+  return merged;
+}
+
 export interface ProgressSnapshot {
   srsStore: Record<string, SRSCard>;
   studyStats: StudyStats;
   customDecks: CustomDeck[];
+  focusPassages: FocusPassage[];
+  parseHistory: Record<string, ParseHistory>;
 }
 
 export function mergeProgress(a: ProgressSnapshot, b: ProgressSnapshot): ProgressSnapshot {
@@ -74,5 +115,7 @@ export function mergeProgress(a: ProgressSnapshot, b: ProgressSnapshot): Progres
     srsStore: mergeSRSStores(a.srsStore, b.srsStore),
     studyStats: mergeStudyStats(a.studyStats, b.studyStats),
     customDecks: mergeCustomDecks(a.customDecks, b.customDecks),
+    focusPassages: mergeFocusPassages(a.focusPassages, b.focusPassages),
+    parseHistory: mergeParseHistory(a.parseHistory, b.parseHistory),
   };
 }
