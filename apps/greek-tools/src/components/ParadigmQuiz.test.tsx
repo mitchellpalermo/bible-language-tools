@@ -5,7 +5,7 @@
  * and scoring feedback.
  */
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 import ParadigmQuiz from './ParadigmQuiz';
@@ -461,5 +461,103 @@ describe('ParadigmQuiz — keyboard reference chart', () => {
     expect(screen.getByText(/rough breathing/i)).toBeInTheDocument();
     expect(screen.getByText(/acute accent/i)).toBeInTheDocument();
     expect(screen.getByText(/iota subscript/i)).toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Hints (peek at answers)
+// ---------------------------------------------------------------------------
+
+describe('ParadigmQuiz — hints', () => {
+  it('shows hint trigger in quiz phase', async () => {
+    render(<ParadigmQuiz />);
+    await startQuizWithFirstNoun();
+    expect(screen.getByRole('button', { name: /Peek at answers/i })).toBeInTheDocument();
+  });
+
+  it('does not show hint trigger in select phase', () => {
+    render(<ParadigmQuiz />);
+    expect(screen.queryByRole('button', { name: /Peek at answers/i })).not.toBeInTheDocument();
+  });
+
+  it('does not show hint trigger in results phase', async () => {
+    const user = userEvent.setup();
+    render(<ParadigmQuiz />);
+    const cards = screen.getAllByRole('button', { name: /Decl\./i });
+    await user.click(cards[0]);
+    await user.click(screen.getByRole('button', { name: /Full Recall/i }));
+    await user.click(screen.getByRole('button', { name: /Start Quiz/i }));
+    await user.click(screen.getByRole('button', { name: /Submit Answers/i }));
+    expect(screen.queryByRole('button', { name: /Peek at answers/i })).not.toBeInTheDocument();
+  });
+
+  it('replaces blank inputs with correct answers on mouse move', async () => {
+    const user = userEvent.setup();
+    render(<ParadigmQuiz />);
+    const cards = screen.getAllByRole('button', { name: /Decl\./i });
+    await user.click(cards[0]);
+    await user.click(screen.getByRole('button', { name: /Full Recall/i }));
+    await user.click(screen.getByRole('button', { name: /Start Quiz/i }));
+
+    // All 10 cells are blank inputs in Full Recall
+    expect(screen.getAllByRole('textbox').length).toBe(10);
+
+    const trigger = screen.getByRole('button', { name: /Peek at answers/i });
+    fireEvent.mouseMove(trigger);
+
+    // Inputs replaced by hint divs
+    expect(screen.queryAllByRole('textbox').length).toBe(0);
+  });
+
+  it('restores blank inputs after mouse leave', async () => {
+    const user = userEvent.setup();
+    render(<ParadigmQuiz />);
+    const cards = screen.getAllByRole('button', { name: /Decl\./i });
+    await user.click(cards[0]);
+    await user.click(screen.getByRole('button', { name: /Full Recall/i }));
+    await user.click(screen.getByRole('button', { name: /Start Quiz/i }));
+
+    const trigger = screen.getByRole('button', { name: /Peek at answers/i });
+    fireEvent.mouseMove(trigger);
+    expect(screen.queryAllByRole('textbox').length).toBe(0);
+
+    fireEvent.mouseLeave(trigger);
+    expect(screen.getAllByRole('textbox').length).toBe(10);
+  });
+
+  it('preserves user input after hint is hidden', async () => {
+    const user = userEvent.setup();
+    render(<ParadigmQuiz />);
+    const cards = screen.getAllByRole('button', { name: /Decl\./i });
+    await user.click(cards[0]);
+    await user.click(screen.getByRole('button', { name: /Full Recall/i }));
+    await user.click(screen.getByRole('button', { name: /Start Quiz/i }));
+
+    // Type something in the first input
+    const inputs = screen.getAllByRole('textbox');
+    await user.click(inputs[0]);
+    await user.keyboard('l'); // λ
+
+    const trigger = screen.getByRole('button', { name: /Peek at answers/i });
+    fireEvent.mouseMove(trigger);
+    fireEvent.mouseLeave(trigger);
+
+    // The first input should still contain the typed letter
+    const restored = screen.getAllByRole('textbox');
+    expect((restored[0] as HTMLInputElement).value).toMatch(/λ/);
+  });
+
+  it('does not show hints in submitted (results) state even if showHints were true', async () => {
+    const user = userEvent.setup();
+    render(<ParadigmQuiz />);
+    const cards = screen.getAllByRole('button', { name: /Decl\./i });
+    await user.click(cards[0]);
+    await user.click(screen.getByRole('button', { name: /Full Recall/i }));
+    await user.click(screen.getByRole('button', { name: /Start Quiz/i }));
+
+    // Submit without hovering — results phase shows result cells, not inputs or hint divs
+    await user.click(screen.getByRole('button', { name: /Submit Answers/i }));
+    expect(screen.queryAllByRole('textbox').length).toBe(0);
+    expect(screen.queryByRole('button', { name: /Peek at answers/i })).not.toBeInTheDocument();
   });
 });

@@ -384,6 +384,50 @@ function AccentToggle({ accentStrict, onChange, compact }: AccentToggleProps) {
 }
 
 // ---------------------------------------------------------------------------
+// HintTrigger — hover (desktop) or hold (mobile) to reveal correct answers
+// ---------------------------------------------------------------------------
+
+interface HintTriggerProps {
+  onShow: () => void;
+  onHide: () => void;
+}
+
+function HintTrigger({ onShow, onHide }: HintTriggerProps) {
+  return (
+    <button
+      type="button"
+      aria-label="Peek at answers"
+      onMouseMove={onShow}
+      onMouseLeave={onHide}
+      onTouchStart={(e) => {
+        e.preventDefault();
+        onShow();
+      }}
+      onTouchEnd={onHide}
+      onTouchCancel={onHide}
+      onKeyDown={(e) => {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          onShow();
+        }
+      }}
+      onKeyUp={onHide}
+      onBlur={onHide}
+      className="w-full flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 select-none text-sm font-medium transition-colors"
+      style={{
+        border: '1px dashed var(--color-accent)',
+        background: 'transparent',
+        color: 'var(--color-text-muted)',
+        cursor: 'default',
+      }}
+    >
+      Peek at answers
+      <span className="text-xs opacity-60">(hover on desktop · hold on mobile)</span>
+    </button>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // ParadigmSelector — phase 1
 // ---------------------------------------------------------------------------
 
@@ -598,6 +642,7 @@ interface QuizTableProps {
   submitted: boolean;
   results: Record<number, CellResult>;
   accentStrict: boolean;
+  showHints?: boolean;
 }
 
 function QuizTable({
@@ -608,6 +653,7 @@ function QuizTable({
   submitted,
   results,
   accentStrict,
+  showHints = false,
 }: QuizTableProps) {
   const blankSet = useMemo(
     () => new Set(cells.filter((c) => c.isBlank).map((c) => c.index)),
@@ -742,6 +788,25 @@ function QuizTable({
                   );
                 }
 
+                if (showHints) {
+                  return (
+                    <td key={colIndex} className="px-2 py-1.5 text-center">
+                      <div
+                        className="text-center text-base rounded border-2 px-1 py-0.5"
+                        style={{
+                          color: 'var(--color-greek)',
+                          fontFamily: 'var(--font-greek)',
+                          borderColor: 'rgba(245,158,11,0.4)',
+                          background: 'rgba(245,158,11,0.08)',
+                          minWidth: '5rem',
+                        }}
+                      >
+                        {answer}
+                      </div>
+                    </td>
+                  );
+                }
+
                 return (
                   <td key={colIndex} className="px-2 py-1.5 text-center">
                     <CellInput
@@ -814,6 +879,7 @@ function ParadigmQuizInner() {
   const [phase, setPhase] = useState<Phase>({ name: 'select' });
   const [inputs, setInputs] = useState<InputMap>({});
   const [results, setResults] = useState<Record<number, CellResult>>({});
+  const [showHints, setShowHints] = useState(false);
   // Settings persist to localStorage across sessions
   const [accentStrict, setAccentStrict] = useState(() => loadQuizSettings().accentStrict);
   const [density, setDensity] = useState<Density>(() => loadQuizSettings().density);
@@ -829,6 +895,7 @@ function ParadigmQuizInner() {
     const cells = applyDensity(allCells, density);
     setInputs({});
     setResults({});
+    setShowHints(false);
     setPhase({ name: 'quiz', table, cells, density });
     posthog.capture('paradigm_quiz_started', { quiz_type: table.label });
   }, []);
@@ -854,6 +921,7 @@ function ParadigmQuizInner() {
       total: vals.length,
     });
     setResults(newResults);
+    setShowHints(false);
     setPhase({ name: 'results', table, cells, density, inputs });
   }, [phase, inputs]);
 
@@ -866,6 +934,7 @@ function ParadigmQuizInner() {
     setPhase({ name: 'select' });
     setInputs({});
     setResults({});
+    setShowHints(false);
   }, []);
 
   // Score computation — always from raw results; accentStrict affects display
@@ -963,7 +1032,13 @@ function ParadigmQuizInner() {
         submitted={submitted}
         results={results}
         accentStrict={accentStrict}
+        showHints={showHints}
       />
+
+      {/* Hint trigger (quiz phase only) */}
+      {phase.name === 'quiz' && (
+        <HintTrigger onShow={() => setShowHints(true)} onHide={() => setShowHints(false)} />
+      )}
 
       {/* Legend (results phase) */}
       {phase.name === 'results' && (
@@ -999,7 +1074,7 @@ function ParadigmQuizInner() {
         {phase.name === 'quiz' && (
           <button
             onClick={handleSubmit}
-            className="px-6 py-2.5 rounded-xl font-bold text-sm transition-colors"
+            className="w-full px-6 py-2.5 rounded-xl font-bold text-sm transition-colors"
             style={{ background: 'var(--color-coral)', color: '#fff' }}
           >
             Submit Answers
