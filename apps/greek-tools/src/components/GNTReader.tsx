@@ -255,6 +255,15 @@ function GNTReaderInner() {
         >
           {showGlosses ? 'Hide glosses' : 'Show glosses'}
         </button>
+
+        {/* Export to PDF */}
+        <a
+          href={`/export?ref=${book}.${chapter}`}
+          onClick={(e) => e.stopPropagation()}
+          className="px-3 py-1.5 rounded-lg text-sm border border-gray-200 text-text-muted hover:border-gray-300 hover:text-text transition-colors"
+        >
+          Export PDF
+        </a>
       </div>
 
       {/* ── Chapter heading ────────────────────────────────────────────────── */}

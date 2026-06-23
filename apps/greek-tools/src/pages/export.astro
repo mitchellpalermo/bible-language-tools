@@ -1,0 +1,11 @@
+---
+import TranslationPDFExport from '../components/TranslationPDFExport';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Export for Translation Practice"
+  description="Export a Greek passage as a printable PDF with space for your translation and parsing notes."
+>
+  <TranslationPDFExport client:load />
+</Layout>
