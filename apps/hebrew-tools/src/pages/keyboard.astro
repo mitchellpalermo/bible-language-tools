@@ -1,0 +1,23 @@
+---
+import HebrewKeyboard from '../components/HebrewKeyboard';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Hebrew Input"
+  description="Type Biblical Hebrew using your English keyboard — SBL-style phonetic mapping with nikud (vowel points) support."
+>
+  <div class="mb-6">
+    <h1
+      class="text-3xl font-bold mb-1"
+      style="color: var(--color-primary);"
+    >
+      Hebrew Input
+    </h1>
+    <p class="text-text-muted">
+      Type in English to produce Biblical Hebrew with nikud. Final letter forms are applied automatically.
+    </p>
+  </div>
+
+  <HebrewKeyboard client:load />
+</Layout>
