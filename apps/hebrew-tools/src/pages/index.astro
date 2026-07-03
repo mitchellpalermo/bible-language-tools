@@ -1,13 +1,63 @@
 ---
 import Layout from '../layouts/Layout.astro';
+
+const liveTools = [
+  {
+    href: '/keyboard',
+    icon: '⌨',
+    title: 'Type',
+    description:
+      'Type Biblical Hebrew on your English keyboard using SBL-style phonetic mapping — with nikud (vowel points), dagesh, and automatic final letter forms.',
+    accentColor: '#15803D',
+    bgColor: '#DCFCE7',
+  },
+] as const;
+
+const comingTools = [
+  {
+    title: 'Flashcards',
+    description: 'Study Biblical Hebrew vocabulary with spaced repetition. Learn the most frequent words first.',
+    accentColor: '#7C3AED',
+    bgColor: '#F5F3FF',
+  },
+  {
+    title: 'Daily Verse',
+    description: 'One Hebrew Bible verse per day. Build a reading habit with streak tracking.',
+    accentColor: '#D97706',
+    bgColor: '#FFFBEB',
+  },
+  {
+    title: 'Hebrew Bible Reader',
+    description: 'Read the Hebrew Bible chapter by chapter with word-by-word morphological analysis.',
+    accentColor: '#0369A1',
+    bgColor: '#EFF6FF',
+  },
+  {
+    title: 'Grammar Reference',
+    description: 'Paradigm tables for nouns, verbs (all 7 binyanim), pronouns, and prepositions.',
+    accentColor: '#F43F5E',
+    bgColor: '#FFF1F2',
+  },
+  {
+    title: 'Paradigm Quiz',
+    description: 'Drill Hebrew paradigms — fill in the blank for verb forms and noun declensions.',
+    accentColor: '#7C3AED',
+    bgColor: '#F5F3FF',
+  },
+  {
+    title: 'Transliteration',
+    description: 'Convert between pointed Hebrew text and SBL romanized transliteration.',
+    accentColor: '#059669',
+    bgColor: '#ECFDF5',
+  },
+] as const;
 ---
 
-<Layout title="Coming Soon">
+<Layout title="Home">
 
   <!-- ── Hero ──────────────────────────────────────────────────────────── -->
-  <div class="text-center pt-16 pb-12">
+  <div class="text-center pt-12 pb-10">
 
-    <!-- Hebrew ornament -->
     <p
       class="text-5xl mb-4 select-none opacity-20"
       style="font-family: var(--font-hebrew); color: var(--color-primary);"
@@ -24,53 +74,71 @@ import Layout from '../layouts/Layout.astro';
     </h1>
 
     <p class="text-lg text-text-muted max-w-xl mx-auto leading-relaxed">
-      Free, simple utilities for Biblical Hebrew students. Coming soon.
+      Free, simple utilities for Biblical Hebrew students. Type, study, and
+      strengthen your reading of the Hebrew Bible.
     </p>
   </div>
 
-  <!-- ── Coming soon card ──────────────────────────────────────────────── -->
-  <div class="max-w-md mx-auto pb-20">
-    <div class="bg-bg-card rounded-2xl shadow-sm border border-white overflow-hidden">
-
-      <!-- Green accent strip -->
-      <div class="h-1.5 w-full" style="background: var(--color-primary);" />
-
-      <div class="p-8 text-center">
-        <!-- Hebrew letter badge -->
-        <div
-          class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6"
-          style="background: #DCFCE7; color: var(--color-primary); font-family: var(--font-hebrew);"
-          aria-hidden="true"
+  <!-- ── Live tools ────────────────────────────────────────────────────── -->
+  <div class="max-w-4xl mx-auto mb-12">
+    <div class="grid md:grid-cols-3 gap-6">
+      {liveTools.map(({ href, icon, title, description, accentColor, bgColor }) => (
+        <a
+          href={href}
+          class="group block bg-bg-card rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-white hover:-translate-y-0.5"
         >
-          א
-        </div>
-
-        <h2
-          class="text-2xl font-bold mb-3"
-          style="color: var(--color-primary);"
-        >
-          Under Construction
-        </h2>
-
-        <p class="text-text-muted leading-relaxed mb-6">
-          Tools for studying the Hebrew Bible are in the works.
-          Check back soon.
-        </p>
-
-        <!-- Divider -->
-        <div class="border-t border-gray-100 pt-6">
-          <p class="text-sm text-text-muted">
-            In the meantime, check out
-            <a
-              href="https://greek.tools"
-              class="font-semibold underline underline-offset-2 transition-opacity hover:opacity-70"
-              style="color: var(--color-primary);"
+          <div class="h-1.5 w-full" style={`background: ${accentColor};`} />
+          <div class="p-6">
+            <div
+              class="w-12 h-12 rounded-xl flex items-center justify-center text-xl mb-4 font-mono font-bold"
+              style={`background: ${bgColor}; color: ${accentColor};`}
             >
-              greek.tools
-            </a>
-          </p>
+              {icon}
+            </div>
+            <h2
+              class="text-lg font-bold mb-2 group-hover:opacity-80 transition-opacity"
+              style={`color: ${accentColor};`}
+            >
+              {title}
+            </h2>
+            <p class="text-text-muted text-sm leading-relaxed">
+              {description}
+            </p>
+          </div>
+          <div
+            class="px-6 pb-4 text-xs font-semibold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+            style={`color: ${accentColor};`}
+          >
+            Open →
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+
+  <!-- ── Coming soon ───────────────────────────────────────────────────── -->
+  <div class="max-w-4xl mx-auto pb-16">
+    <p class="text-xs font-bold uppercase tracking-widest text-text-muted mb-4">Coming soon</p>
+    <div class="grid md:grid-cols-3 gap-6">
+      {comingTools.map(({ title, description, accentColor, bgColor }) => (
+        <div class="bg-bg-card rounded-2xl shadow-sm overflow-hidden border border-white opacity-60">
+          <div class="h-1.5 w-full" style={`background: ${accentColor};`} />
+          <div class="p-6">
+            <div
+              class="w-12 h-12 rounded-xl flex items-center justify-center text-xl mb-4 font-mono font-bold"
+              style={`background: ${bgColor}; color: ${accentColor};`}
+            >
+              ✦
+            </div>
+            <h2 class="text-lg font-bold mb-2" style={`color: ${accentColor};`}>
+              {title}
+            </h2>
+            <p class="text-text-muted text-sm leading-relaxed">
+              {description}
+            </p>
+          </div>
         </div>
-      </div>
+      ))}
     </div>
   </div>
 
