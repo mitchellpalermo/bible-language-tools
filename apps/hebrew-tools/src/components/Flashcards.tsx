@@ -19,6 +19,15 @@ import ErrorBoundary from './ErrorBoundary';
 // Phase 2b scope only: SRS + "all" study modes, flip answer mode, Hebrew ->
 // English direction, and a frequency-band filter. Typing mode, the reverse
 // direction, and part-of-speech/root filters are Phase 2c (issue #74).
+//
+// TODO(#87): the session/queue state machine below (buildQueue, shuffle,
+// startSession, handleReview, handleFlip, the stats bar, the session-complete
+// screen) is structurally near-identical to greek-tools' Flashcards.tsx --
+// only the SM-2 algorithm is shared today (@tools/shared/srs). Once Phase 2c
+// (#74) lands and this component's final shape is known, extract a generic
+// useFlashcardSession<T>() hook (+ maybe StatsBar/SessionCompleteScreen) into
+// packages/shared, with front/back rendering and answer-checking left as
+// per-app callbacks since those are genuinely script-specific. See #87.
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
