@@ -3,6 +3,12 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
   "exports": {
     "./srs": "./src/srs.ts",
     "./quiz-settings": "./src/quiz-settings.ts",
@@ -13,5 +19,13 @@
   },
   "peerDependencies": {
     "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@vitejs/plugin-react": "^5.1.4",
+    "@vitest/coverage-v8": "^4.0.18",
+    "happy-dom": "^20.7.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   }
 }

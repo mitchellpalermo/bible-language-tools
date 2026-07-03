@@ -1,0 +1,22 @@
+---
+import Flashcards from '../components/Flashcards';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Flashcards"
+  description="Study Biblical Hebrew vocabulary with spaced repetition. Learn the most frequent words first."
+>
+  <div class="mb-6">
+    <h1
+      class="text-3xl font-bold mb-1"
+      style="color: var(--color-primary);"
+    >
+      Vocabulary Flashcards
+    </h1>
+    <p class="text-text-muted">
+      Study the most common Biblical Hebrew words. Cards are shuffled each session.
+    </p>
+  </div>
+  <Flashcards client:load />
+</Layout>
