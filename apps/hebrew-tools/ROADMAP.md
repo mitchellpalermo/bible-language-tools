@@ -36,7 +36,9 @@ Before planning features, it helps to understand where Biblical Hebrew diverges 
 
 ---
 
-## Phase 1 — Foundation: Hebrew Keyboard
+## Phase 1 — Foundation: Hebrew Keyboard — ✅ Done
+
+Merged in PR #71 (`src/lib/hebrew-input.ts` + `src/components/HebrewKeyboard.tsx`). Uses the SBL-style phonetic mapping (Option A below). Kept for reference — everything past this point builds on it.
 
 **greek.tools analog:** `/keyboard` — `GreekKeyboard.tsx` + `src/lib/greek-input.ts`
 
@@ -151,6 +153,30 @@ interface HebrewVocabWord {
 **localStorage keys (new namespace):**
 - `hebrew-tools-srs-v1` — SRS card store
 - `hebrew-tools-stats-v1` — study stats
+
+### Bite-sized PR breakdown
+
+This phase is scoped as three sequential PRs rather than one, so each is small enough to land on its own:
+
+| PR | Scope | Issue |
+|----|-------|-------|
+| 2a | Vocabulary dataset only — ~50 hand-curated, high-confidence words. No UI. | #72 |
+| 2b | Core flashcards UI — SRS + "all" study modes, flip mode only, Hebrew→English only, frequency filter | #73 |
+| 2c | Typing answer mode (via Phase 1 keyboard), English→Hebrew and transliteration→Hebrew directions, POS/root filters | #74 |
+
+The custom deck builder that greek.tools' `Flashcards.tsx` also has (generate a deck from a passage) is explicitly out of scope here — it's tied to a Focus-Passage-equivalent feature that doesn't exist yet for Hebrew.
+
+**Note on frequency data:** greek.tools' `vocabulary.ts` is a generated file, produced from MorphGNT by `build-vocabulary.mjs`. Hebrew has no equivalent pipeline yet, so PR 2a's frequency numbers are approximate (sourced from standard published frequency lists, not computed). See the OSHB data pipeline task below — once it exists, it becomes the authoritative source and PR 2a's numbers should be regenerated from it.
+
+---
+
+## OSHB Data Pipeline (elevated out of Phases 3/4)
+
+**Issue:** #75
+
+Originally described inline under Phases 3 and 4 below, but promoted to its own standalone task: both of those phases need it, and it's a self-contained, mechanical PR on its own (mirrors `apps/greek-tools/scripts/build-morphgnt.mjs`) rather than something that should be built twice or bundled into a larger feature PR. Do this once, early, after Phase 2 lands and before starting Phase 3.
+
+It also computes real per-lemma frequency counts, which become the authoritative source for `vocabulary.ts` (see Phase 2 note above).
 
 ---
 
@@ -460,17 +486,22 @@ The following modules from greek.tools can be copied with minimal or zero change
 
 ## Suggested Build Order
 
-| Phase | Feature | Complexity | Dependency |
-|-------|---------|------------|------------|
-| 1 | Hebrew Keyboard | Medium | None |
-| 2 | Vocabulary Flashcards | Low (logic ports directly) | Phase 1 (for typing mode) |
-| 3 | Daily Verse | Medium | OSHB data pipeline |
-| 4 | Hebrew Bible Reader | High | OSHB data pipeline |
-| 5 | Transliteration | Medium | None |
-| 6 | Grammar Reference | High (content-heavy) | None |
-| 7 | Paradigm Quiz | Medium (ports from greek.tools) | Phase 1, Phase 6 |
-| 8A | Root Lookup | Medium | Phase 4 data |
-| 8B | Parsing Practice | Medium | Phase 4 data |
-| 8C | Binyan Guide | Low (content) | None |
+| Order | Phase | Feature | Complexity | Dependency | Status | Issue |
+|-------|-------|---------|------------|------------|--------|-------|
+| 1 | 1 | Hebrew Keyboard | Medium | None | ✅ Done | #71 (PR) |
+| 2 | 2a | Vocabulary dataset | Low | None | Next up | #72 |
+| 3 | 2b | Core flashcards UI | Low | 2a | Queued | #73 |
+| 4 | 2c | Flashcards: typing + directions + filters | Low–Medium | 2b, Phase 1 | Queued | #74 |
+| 5 | — | OSHB data pipeline | Medium (mechanical) | None | Queued | #75 |
+| 6 | 3 | Daily Verse | Medium | OSHB pipeline | Queued | #76 |
+| 7 | 5 | Transliteration | Medium | None | Queued (independent — can float earlier if a break is wanted) | #78 |
+| 8 | 4 | Hebrew Bible Reader | High — needs its own sub-breakdown at pickup time | OSHB pipeline, gloss dataset decision | Queued | #77 |
+| 9 | 6 | Grammar Reference | High (content-heavy) — needs its own sub-breakdown by section | None | Queued (independent — can float earlier) | #79 |
+| 10 | 7 | Paradigm Quiz | Medium | Phase 1, Phase 6 | Queued | #80 |
+| 11 | 8C | Binyan Guide | Low (content) | None | Queued (independent — can float earlier) | #83 |
+| 12 | 8A | Root Lookup | Medium | Phase 4 data | Queued | #81 |
+| 13 | 8B | Parsing Practice | Medium | Phase 4 data | Queued | #82 |
 
-The OSHB data pipeline (needed for Phases 3 and 4) is the most important early investment — it unblocks the two highest-value features.
+Every row above is one GitHub issue, and every issue is scoped to land as a single PR except Phase 4 and Phase 6, which are large enough that they'll be decomposed into their own bite-sized sub-issues (same pattern as Phase 2) once they're picked up. Rows marked "independent" have no hard dependency on the row above them — they're placed here for logical flow (data-pipeline-dependent work grouped together) but can be pulled earlier as a change of pace between heavier phases.
+
+The OSHB data pipeline (needed for Phases 3 and 4, and for accurate Flashcards frequency data) is the most important early infrastructure investment — see the standalone section above.
