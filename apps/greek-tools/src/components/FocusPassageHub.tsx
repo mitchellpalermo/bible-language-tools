@@ -105,10 +105,9 @@ function FocusPassageHubInner({ passageId }: { passageId: string }) {
         </div>
         <button
           onClick={handleDelete}
-          aria-label="Delete passage"
-          className="p-1.5 rounded hover:bg-red-50 text-text-muted hover:text-red-600 transition-colors shrink-0"
+          className="px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 border border-red-200 hover:bg-red-50 transition-colors shrink-0"
         >
-          🗑
+          Delete Passage
         </button>
       </div>
 

@@ -32,6 +32,7 @@
     "astro": "^5.17.1",
     "better-auth": "^1.6.15",
     "drizzle-orm": "^0.44.7",
+    "lucide-react": "^1.23.0",
     "pdf-lib": "^1.17.1",
     "posthog-js": "^1.240.4",
     "react": "^19.2.4",
