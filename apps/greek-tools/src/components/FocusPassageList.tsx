@@ -1,3 +1,4 @@
+import { Pencil, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import {
   deletePassage,
@@ -111,14 +112,14 @@ function PassageCard({
               aria-label="Rename"
               className="p-1 rounded hover:bg-gray-100 text-text-muted hover:text-text transition-colors"
             >
-              ✏
+              <Pencil size={16} />
             </button>
             <button
               onClick={handleDelete}
               aria-label="Delete"
               className="p-1 rounded hover:bg-red-50 text-text-muted hover:text-red-600 transition-colors"
             >
-              🗑
+              <Trash2 size={16} />
             </button>
           </div>
         </div>
