@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FocusPassage } from '../data/focusPassages';
-import { saveFocusPassages } from '../data/focusPassages';
+import { loadFocusPassages, saveFocusPassages } from '../data/focusPassages';
 import type { MorphBook } from '../data/morphgnt';
 import FocusPassageHub from './FocusPassageHub';
 
@@ -51,6 +51,7 @@ const STUB_PASSAGE: FocusPassage = {
 beforeEach(() => {
   localStorage.clear();
   vi.clearAllMocks();
+  vi.unstubAllGlobals();
   mockFetchBooks.mockResolvedValue(STUB_BOOKS);
   mockFetchBook.mockResolvedValue(STUB_BOOK);
 });
@@ -120,5 +121,36 @@ describe('FocusPassageHub', () => {
     );
     await user.click(screen.getByRole('button', { name: 'Progress' }));
     await waitFor(() => expect(screen.getByText(/parse grade/i)).toBeInTheDocument());
+  });
+
+  describe('delete', () => {
+    it('removes the passage and redirects to /focus when confirmed', async () => {
+      const user = userEvent.setup();
+      vi.stubGlobal('confirm', vi.fn().mockReturnValue(true));
+      saveFocusPassages([STUB_PASSAGE]);
+      render(<FocusPassageHub passageId="hub-test-1" />);
+      await waitFor(() =>
+        expect(screen.getByRole('button', { name: /delete passage/i })).toBeInTheDocument(),
+      );
+
+      await user.click(screen.getByRole('button', { name: /delete passage/i }));
+
+      expect(loadFocusPassages()).toHaveLength(0);
+      expect(window.location.href).toContain('/focus');
+    });
+
+    it('keeps the passage when delete is cancelled', async () => {
+      const user = userEvent.setup();
+      vi.stubGlobal('confirm', vi.fn().mockReturnValue(false));
+      saveFocusPassages([STUB_PASSAGE]);
+      render(<FocusPassageHub passageId="hub-test-1" />);
+      await waitFor(() =>
+        expect(screen.getByRole('button', { name: /delete passage/i })).toBeInTheDocument(),
+      );
+
+      await user.click(screen.getByRole('button', { name: /delete passage/i }));
+
+      expect(loadFocusPassages()).toHaveLength(1);
+    });
   });
 });

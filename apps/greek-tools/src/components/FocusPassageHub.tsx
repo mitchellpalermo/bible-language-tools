@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { type FocusPassage, loadFocusPassages } from '../data/focusPassages';
+import { deletePassage, type FocusPassage, loadFocusPassages } from '../data/focusPassages';
 import { fetchBooks } from '../data/morphgnt';
 import { formatPassageRef } from '../lib/passage-deck';
 import ErrorBoundary from './ErrorBoundary';
@@ -84,15 +84,32 @@ function FocusPassageHubInner({ passageId }: { passageId: string }) {
       )
     : '';
 
+  function handleDelete() {
+    if (!passage) return;
+    const title = passage.label ?? ref;
+    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+    deletePassage(passage.id);
+    window.location.href = '/focus';
+  }
+
   return (
     <div>
       {/* Header */}
-      <div className="mb-6">
-        <a href="/focus" className="text-xs text-text-muted hover:text-text mb-2 inline-block">
-          ← Focus Passages
-        </a>
-        <h1 className="text-2xl font-bold text-text">{passage.label ?? ref}</h1>
-        {passage.label && ref && <p className="text-sm text-text-muted mt-0.5">{ref}</p>}
+      <div className="mb-6 flex items-start justify-between gap-2">
+        <div>
+          <a href="/focus" className="text-xs text-text-muted hover:text-text mb-2 inline-block">
+            ← Focus Passages
+          </a>
+          <h1 className="text-2xl font-bold text-text">{passage.label ?? ref}</h1>
+          {passage.label && ref && <p className="text-sm text-text-muted mt-0.5">{ref}</p>}
+        </div>
+        <button
+          onClick={handleDelete}
+          aria-label="Delete passage"
+          className="p-1.5 rounded hover:bg-red-50 text-text-muted hover:text-red-600 transition-colors shrink-0"
+        >
+          🗑
+        </button>
       </div>
 
       {/* Tab bar */}
