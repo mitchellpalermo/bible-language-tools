@@ -172,6 +172,15 @@ describe('verbParadigms', () => {
       });
     });
   });
+
+  it('includes the future passive indicative with θησ forms', () => {
+    const futPass = verbParadigms.find((p) => p.id === 'fut-pass-ind');
+    expect(futPass).toBeDefined();
+    expect(futPass?.label).toBe('Future Passive Indicative');
+    expect(futPass?.group).toBe('indicative');
+    expect(futPass?.forms['1sg']).toBe('λυθήσομαι');
+    expect(futPass?.forms['3pl']).toBe('λυθήσονται');
+  });
 });
 
 // ─── infinitives and participles ───────────────────────────────────────────

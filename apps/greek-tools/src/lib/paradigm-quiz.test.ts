@@ -120,6 +120,7 @@ describe('buildTableModels', () => {
     const verbs = tables.filter((t) => t.category === 'verb');
     const ids = verbs.map((v) => v.id);
     expect(ids).toContain('verb-infinitives');
+    expect(ids).toContain('verb-fut-pass-ind');
     expect(ids).toContain('participle-pres-act-ptc');
     expect(ids).toContain('participle-aor-pass-ptc');
     expect(ids).toContain('participle-perf-mid-pass-ptc');

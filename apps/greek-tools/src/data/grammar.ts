@@ -546,6 +546,19 @@ export const verbParadigms: VerbParadigm[] = [
     },
   },
   {
+    id: 'fut-pass-ind',
+    label: 'Future Passive Indicative',
+    group: 'indicative',
+    forms: {
+      '1sg': 'λυθήσομαι',
+      '2sg': 'λυθήσῃ',
+      '3sg': 'λυθήσεται',
+      '1pl': 'λυθησόμεθα',
+      '2pl': 'λυθήσεσθε',
+      '3pl': 'λυθήσονται',
+    },
+  },
+  {
     id: 'aor-act-ind',
     label: 'Aorist Active Indicative',
     group: 'indicative',

@@ -153,6 +153,24 @@ describe('buildSession', () => {
     }
   });
 
+  it('future passive indicative filter returns fut-pass-ind forms', () => {
+    const settings: ParseSettings = {
+      tenses: ['future'],
+      voices: ['passive'],
+      moods: ['indicative'],
+      sessionLength: 10,
+    };
+    const items = buildSession(settings, 30);
+    expect(items.length).toBeGreaterThan(0);
+    for (const item of items) {
+      expect(item.tense).toBe('future');
+      expect(item.voice).toBe('passive');
+      expect(item.mood).toBe('indicative');
+    }
+    const forms = items.map((i) => i.form);
+    expect(forms).toContain('λυθήσομαι');
+  });
+
   it('de-duplicates forms that appear in multiple paradigms', () => {
     const items = buildSession(DEFAULT_PARSE_SETTINGS, 200);
     const forms = items.map((i) => normalizeForm(i.form));
