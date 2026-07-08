@@ -61,9 +61,18 @@ describe('VerbParadigmGrid', () => {
     expect(mpCells.length).toBeGreaterThanOrEqual(2); // Present M/P + Imperfect M/P
   });
 
+  it('renders a selectable cell for Future Passive Indicative', () => {
+    const onSelect = vi.fn();
+    render(<VerbParadigmGrid {...defaultProps} onSelect={onSelect} />);
+    fireEvent.click(screen.getByTitle('Future Passive Indicative'));
+    expect(onSelect).toHaveBeenCalledWith('fut-pass-ind');
+  });
+
   it('renders empty dash cells for non-existent paradigms', () => {
-    render(<VerbParadigmGrid {...defaultProps} />);
-    // Perfect only has Active, so Mid and Pass should be dashes
+    render(
+      <VerbParadigmGrid {...defaultProps} activeMood="subjunctive" selectedId="pres-act-subj" />,
+    );
+    // There is no Present Middle Subjunctive paradigm, so that cell is a dash
     const dashes = screen.getAllByText('—');
     expect(dashes.length).toBeGreaterThanOrEqual(1);
   });
