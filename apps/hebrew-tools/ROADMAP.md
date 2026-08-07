@@ -143,7 +143,10 @@ interface HebrewVocabWord {
 - By frequency band (same as greek.tools)
 - By part of speech
 - By root (group cards by the same triliteral root)
-- By vocabulary source (e.g., "Pratico & Van Pelt Ch. 1–5")
+- ~~By vocabulary source (e.g., "Pratico & Van Pelt Ch. 1–5")~~ — shipped as textbook
+  chapter decks. Words carry a `chapters` tag; `src/data/textbooks.ts` turns those
+  tags into decks. Garrett & DeRouchie ch. 1 is populated; chapters 2+ are added by
+  tagging words in `vocabulary.ts`, no UI change needed.
 
 **Direction modes:**
 - Hebrew → English gloss (same as Greek → English)
@@ -160,8 +163,9 @@ This phase is scoped as three sequential PRs rather than one, so each is small e
 
 | PR | Scope | Issue |
 |----|-------|-------|
-| 2a | Vocabulary dataset only — ~50 hand-curated, high-confidence words. No UI. | #72 |
-| 2b | Core flashcards UI — SRS + "all" study modes, flip mode only, Hebrew→English only, frequency filter | #73 |
+| 2a | Vocabulary dataset only — ~50 hand-curated, high-confidence words. No UI. | #72 — ✅ done |
+| 2b | Core flashcards UI — SRS + "all" study modes, flip mode only, Hebrew→English only, frequency filter | #73 — ✅ done |
+| 2b′ | Textbook chapter decks (`src/data/textbooks.ts`) + noun gender on cards | — ✅ done |
 | 2c | Typing answer mode (via Phase 1 keyboard), English→Hebrew and transliteration→Hebrew directions, POS/root filters | #74 |
 
 The custom deck builder that greek.tools' `Flashcards.tsx` also has (generate a deck from a passage) is explicitly out of scope here — it's tied to a Focus-Passage-equivalent feature that doesn't exist yet for Hebrew.

@@ -18,6 +18,21 @@
 // standardly taught (mostly verbs). Many nouns in Biblical Hebrew (bən, yād,
 // šēm, ʿayin, rōʾš...) have no verbal root that's pedagogically useful to cite,
 // so it's left undefined rather than guessed.
+//
+// `chapters` tags an entry as belonging to a textbook's chapter vocabulary list,
+// which is what `textbooks.ts` turns into study decks. A word can carry several
+// tags; it still has one entry, and therefore one SRS card, no matter how many
+// chapters or textbooks assign it. Glosses on tagged words follow the wording of
+// the textbook that assigns them, since that's what the quiz expects.
+
+import type { TextbookChapterRef } from './textbooks';
+
+/**
+ * Grammatical gender as the standard lexica and grammars list it. `fm` marks
+ * nouns attested as both (e.g. חָצֵר). Proper names and non-nominals are left
+ * undefined.
+ */
+export type HebrewGender = 'm' | 'f' | 'fm';
 
 export interface HebrewVocabWord {
   hebrew: string; // fully pointed form (BHS standard)
@@ -26,8 +41,15 @@ export interface HebrewVocabWord {
   gloss: string;
   frequency: number; // approximate — see file header
   partOfSpeech: string;
+  gender?: HebrewGender; // nouns (and textbook-listed adjectives) only
   binyan?: string; // for verbs: Qal, Niphal, Piel, etc.
+  chapters?: TextbookChapterRef[]; // textbook chapter vocabulary lists
 }
+
+/** Shorthand for tagging a word as Garrett & DeRouchie chapter vocabulary. */
+const gd = (chapter: number): TextbookChapterRef[] => [
+  { textbook: 'garrett-derouchie', chapter },
+];
 
 export const vocabulary: HebrewVocabWord[] = [
   // Core particles, conjunctions, prepositions
@@ -52,35 +74,46 @@ export const vocabulary: HebrewVocabWord[] = [
   { hebrew: 'שָׁם', transliteration: 'šām', gloss: 'there', frequency: 800, partOfSpeech: 'adverb' },
 
   // Common nouns
-  { hebrew: 'אֱלֹהִים', transliteration: 'ʾĕlōhîm', gloss: 'God, gods', frequency: 2600, partOfSpeech: 'noun' },
+  { hebrew: 'אֱלֹהִים', transliteration: 'ʾĕlōhîm', gloss: 'God, gods', frequency: 2600, partOfSpeech: 'noun', gender: 'm' },
   { hebrew: 'יְהוָה', transliteration: 'YHWH', gloss: 'LORD (the divine name / tetragrammaton)', frequency: 6800, partOfSpeech: 'noun' },
-  { hebrew: 'בֵּן', transliteration: 'bēn', gloss: 'son', frequency: 4900, partOfSpeech: 'noun' },
-  { hebrew: 'בַּת', transliteration: 'bat', gloss: 'daughter', frequency: 590, partOfSpeech: 'noun' },
-  { hebrew: 'בַּיִת', root: 'בית', transliteration: 'bayit', gloss: 'house', frequency: 2000, partOfSpeech: 'noun' },
-  { hebrew: 'מֶלֶךְ', root: 'מלך', transliteration: 'melek', gloss: 'king', frequency: 2600, partOfSpeech: 'noun' },
-  { hebrew: 'אֶרֶץ', root: 'ארץ', transliteration: 'ʾereṣ', gloss: 'land, earth', frequency: 2500, partOfSpeech: 'noun' },
-  { hebrew: 'יוֹם', transliteration: 'yôm', gloss: 'day', frequency: 2300, partOfSpeech: 'noun' },
-  { hebrew: 'אִישׁ', transliteration: 'ʾîš', gloss: 'man, husband', frequency: 2160, partOfSpeech: 'noun' },
-  { hebrew: 'אִשָּׁה', transliteration: 'ʾiššâ', gloss: 'woman, wife', frequency: 780, partOfSpeech: 'noun' },
-  { hebrew: 'עִיר', transliteration: 'ʿîr', gloss: 'city', frequency: 1090, partOfSpeech: 'noun' },
-  { hebrew: 'פָּנִים', root: 'פנה', transliteration: 'pānîm', gloss: 'face, presence', frequency: 2100, partOfSpeech: 'noun' },
-  { hebrew: 'יָד', transliteration: 'yād', gloss: 'hand', frequency: 1600, partOfSpeech: 'noun' },
-  { hebrew: 'עַם', root: 'עמם', transliteration: 'ʿam', gloss: 'people, nation', frequency: 1850, partOfSpeech: 'noun' },
-  { hebrew: 'שָׁמַיִם', transliteration: 'šāmayim', gloss: 'heaven, sky', frequency: 420, partOfSpeech: 'noun' },
-  { hebrew: 'דָּבָר', root: 'דבר', transliteration: 'dābār', gloss: 'word, thing, matter', frequency: 1400, partOfSpeech: 'noun' },
-  { hebrew: 'עֶבֶד', root: 'עבד', transliteration: 'ʿebed', gloss: 'servant, slave', frequency: 800, partOfSpeech: 'noun' },
-  { hebrew: 'שֵׁם', transliteration: 'šēm', gloss: 'name', frequency: 860, partOfSpeech: 'noun' },
-  { hebrew: 'עַיִן', transliteration: 'ʿayin', gloss: 'eye, spring', frequency: 870, partOfSpeech: 'noun' },
-  { hebrew: 'רֹאשׁ', transliteration: 'rōʾš', gloss: 'head, top, chief', frequency: 600, partOfSpeech: 'noun' },
-  { hebrew: 'נֶפֶשׁ', transliteration: 'nepeš', gloss: 'soul, life, person, self', frequency: 750, partOfSpeech: 'noun' },
-  { hebrew: 'קוֹל', transliteration: 'qôl', gloss: 'voice, sound', frequency: 500, partOfSpeech: 'noun' },
-  { hebrew: 'לֵב', transliteration: 'lēb', gloss: 'heart, mind', frequency: 600, partOfSpeech: 'noun' },
+  { hebrew: 'בֵּן', transliteration: 'bēn', gloss: 'son', frequency: 4900, partOfSpeech: 'noun', gender: 'm' },
+  { hebrew: 'בַּת', transliteration: 'bat', gloss: 'daughter', frequency: 590, partOfSpeech: 'noun', gender: 'f' },
+  { hebrew: 'בַּיִת', root: 'בית', transliteration: 'bayit', gloss: 'house', frequency: 2000, partOfSpeech: 'noun', gender: 'm' },
+  { hebrew: 'מֶלֶךְ', root: 'מלך', transliteration: 'melek', gloss: 'king', frequency: 2600, partOfSpeech: 'noun', gender: 'm', chapters: gd(1) },
+  { hebrew: 'אֶרֶץ', root: 'ארץ', transliteration: 'ʾereṣ', gloss: 'earth, land', frequency: 2500, partOfSpeech: 'noun', gender: 'f', chapters: gd(1) },
+  { hebrew: 'יוֹם', transliteration: 'yôm', gloss: 'day', frequency: 2300, partOfSpeech: 'noun', gender: 'm' },
+  { hebrew: 'אִישׁ', transliteration: 'ʾîš', gloss: 'man, husband', frequency: 2160, partOfSpeech: 'noun', gender: 'm' },
+  { hebrew: 'אִשָּׁה', transliteration: 'ʾiššâ', gloss: 'woman, wife', frequency: 780, partOfSpeech: 'noun', gender: 'f' },
+  { hebrew: 'עִיר', transliteration: 'ʿîr', gloss: 'city', frequency: 1090, partOfSpeech: 'noun', gender: 'f' },
+  { hebrew: 'פָּנִים', root: 'פנה', transliteration: 'pānîm', gloss: 'face, presence', frequency: 2100, partOfSpeech: 'noun', gender: 'm' },
+  { hebrew: 'יָד', transliteration: 'yād', gloss: 'hand', frequency: 1600, partOfSpeech: 'noun', gender: 'f' },
+  { hebrew: 'עַם', root: 'עמם', transliteration: 'ʿam', gloss: 'people, nation', frequency: 1850, partOfSpeech: 'noun', gender: 'm' },
+  { hebrew: 'שָׁמַיִם', transliteration: 'šāmayim', gloss: 'heaven, sky', frequency: 420, partOfSpeech: 'noun', gender: 'm' },
+  { hebrew: 'דָּבָר', root: 'דבר', transliteration: 'dābār', gloss: 'word, thing', frequency: 1400, partOfSpeech: 'noun', gender: 'm', chapters: gd(1) },
+  { hebrew: 'עֶבֶד', root: 'עבד', transliteration: 'ʿebed', gloss: 'servant, slave', frequency: 800, partOfSpeech: 'noun', gender: 'm', chapters: gd(1) },
+  { hebrew: 'שֵׁם', transliteration: 'šēm', gloss: 'name', frequency: 860, partOfSpeech: 'noun', gender: 'm' },
+  { hebrew: 'עַיִן', transliteration: 'ʿayin', gloss: 'eye, spring', frequency: 870, partOfSpeech: 'noun', gender: 'f' },
+  { hebrew: 'רֹאשׁ', transliteration: 'rōʾš', gloss: 'head, top, chief', frequency: 600, partOfSpeech: 'noun', gender: 'm' },
+  { hebrew: 'נֶפֶשׁ', transliteration: 'nepeš', gloss: 'soul, life, person, self', frequency: 750, partOfSpeech: 'noun', gender: 'f' },
+  { hebrew: 'קוֹל', transliteration: 'qôl', gloss: 'voice, sound', frequency: 500, partOfSpeech: 'noun', gender: 'm' },
+  { hebrew: 'לֵב', transliteration: 'lēb', gloss: 'heart, mind', frequency: 600, partOfSpeech: 'noun', gender: 'm' },
+
+  // Garrett & DeRouchie chapter 1 — the rest of the chapter's list. The four
+  // words above already tagged gd(1) (מֶלֶךְ, אֶרֶץ, דָּבָר, עֶבֶד) are also on it.
+  { hebrew: 'אָדָם', transliteration: 'ʾādām', gloss: 'human, Adam', frequency: 550, partOfSpeech: 'noun', gender: 'm', chapters: gd(1) },
+  { hebrew: 'אֵשׁ', transliteration: 'ʾēš', gloss: 'fire', frequency: 380, partOfSpeech: 'noun', gender: 'f', chapters: gd(1) },
+  { hebrew: 'דַּעַת', root: 'ידע', transliteration: 'daʿat', gloss: 'knowledge', frequency: 90, partOfSpeech: 'noun', gender: 'f', chapters: gd(1) },
+  { hebrew: 'חָצֵר', transliteration: 'ḥāṣēr', gloss: 'village, courtyard', frequency: 190, partOfSpeech: 'noun', gender: 'fm', chapters: gd(1) },
+  { hebrew: 'צֹאן', transliteration: 'ṣōʾn', gloss: 'flock (of sheep or goats)', frequency: 275, partOfSpeech: 'noun', gender: 'f', chapters: gd(1) },
+  { hebrew: 'שַׂר', transliteration: 'śar', gloss: 'ruler, leader, prince', frequency: 420, partOfSpeech: 'noun', gender: 'm', chapters: gd(1) },
+  { hebrew: 'שֹׁפֵט', root: 'שפט', transliteration: 'šōpēṭ', gloss: 'judge, leader', frequency: 60, partOfSpeech: 'noun', gender: 'm', chapters: gd(1) },
 
   // Adjectives
   { hebrew: 'גָּדוֹל', root: 'גדל', transliteration: 'gādôl', gloss: 'great, big', frequency: 525, partOfSpeech: 'adjective' },
   { hebrew: 'טוֹב', root: 'טוב', transliteration: 'ṭôb', gloss: 'good', frequency: 530, partOfSpeech: 'adjective' },
   { hebrew: 'קָטֹן', root: 'קטן', transliteration: 'qāṭōn', gloss: 'small, young', frequency: 100, partOfSpeech: 'adjective' },
   { hebrew: 'רַע', root: 'רעע', transliteration: 'raʿ', gloss: 'evil, bad', frequency: 310, partOfSpeech: 'adjective' },
+  { hebrew: 'זָקֵן', root: 'זקן', transliteration: 'zāqēn', gloss: 'old (adjective); elder, old man (noun)', frequency: 180, partOfSpeech: 'adjective', gender: 'm', chapters: gd(1) },
 
   // High-frequency Qal perfect 3ms verbs
   { hebrew: 'אָמַר', root: 'אמר', transliteration: 'ʾāmar', gloss: 'he said', frequency: 5300, partOfSpeech: 'verb', binyan: 'Qal' },

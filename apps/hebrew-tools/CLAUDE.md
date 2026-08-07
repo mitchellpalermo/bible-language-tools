@@ -98,7 +98,18 @@ See `ROADMAP.md` for the full feature plan and build order.
 - **Root system:** Triliteral (3-letter) root system — pedagogy centers on roots, not lemmas.
 - **Morphological data:** Open Scriptures Hebrew Bible (OSHB) — `github.com/openscriptures/morphhb`, CC BY 4.0. XML per book, parsed into `public/data/morphhb/{BOOK}.json` by a build script.
 - **Lenient comparison:** Strip U+05B0–U+05C7 (nikud) for lenient grading; also strip U+0591–U+05AF (cantillation) when fully stripping diacritics.
-- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`.
+- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`. There is no account/sync layer in this app (greek.tools has one; hebrew.tools does not) — all study progress is per-browser only.
+
+### Textbook chapter decks
+
+Seminary vocabulary quizzes are scoped to a textbook chapter, not a frequency band. `src/data/vocabulary.ts` entries carry an optional `chapters: TextbookChapterRef[]` tag, and `src/data/textbooks.ts` derives study decks from those tags.
+
+**To add a chapter's vocabulary:** tag the words in `vocabulary.ts` with `gd(n)` (adding entries that don't exist yet). Nothing else is required — the deck chip, its count, and its label all fall out of the tags. Words shared across chapters or textbooks stay a single entry, so they keep a single SRS card.
+
+Rules that the data tests enforce:
+- No cantillation marks (U+0591–U+05AF) in the `hebrew` field — including the stress accent that Garrett & DeRouchie print over the tonic syllable. Vocabulary entries are pointed but unaccented.
+- Glosses on tagged words follow the wording of the textbook that assigns them, since that's what the quiz expects.
+- Every chapter-tagged noun carries a `gender` (`m` / `f` / `fm`); verbs never do.
 
 ### Unicode blocks
 
