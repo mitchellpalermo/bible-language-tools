@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { loadSRSStore, loadStats } from '../data/srs';
+import { type ChapterDeck, chapterDecks, TEXTBOOKS } from '../data/textbooks';
 import { vocabulary } from '../data/vocabulary';
 import Flashcards, { FREQ_FILTERS, matchFreq } from './Flashcards';
 
@@ -169,16 +170,9 @@ describe('Flashcards', () => {
     expect(screen.getByTestId('card-progress').textContent).toBe(`1/${expectedCount}`);
   });
 
-  it('shows an empty state when a filter matches no cards', async () => {
-    const user = userEvent.setup();
-    renderFlashcards();
-    await user.click(getStudyAllButton());
-    // No entries in the current vocabulary fall under 100 occurrences.
-    await user.click(screen.getByRole('button', { name: /^<100/ }));
-    expect(screen.getByText(/no cards match the current filter/i)).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: /clear filter/i }));
-    expect(screen.queryByText(/no cards match the current filter/i)).not.toBeInTheDocument();
-  });
+  // The empty-filter state is covered in Flashcards.empty-state.test.tsx, which
+  // stubs the vocabulary module — asserting it here would mean betting that some
+  // frequency band stays permanently empty as words are added.
 
   it('resets SRS progress when confirmed', async () => {
     const user = userEvent.setup();
@@ -262,5 +256,91 @@ describe('Flashcards', () => {
     await user.click(screen.getByRole('button', { name: /got it/i }));
     await user.click(screen.getByRole('button', { name: /restart session/i }));
     expect(screen.getByTestId('card-progress').textContent).toMatch(/^1\//);
+  });
+});
+
+// ─── Textbook chapter decks ───────────────────────────────────────────────────
+
+describe('Flashcards chapter decks', () => {
+  const decks = chapterDecks();
+  const firstDeck = decks[0];
+
+  function selectDeck(user: ReturnType<typeof userEvent.setup>, deck: ChapterDeck) {
+    return user.click(screen.getByRole('button', { name: deck.label }));
+  }
+
+  it('renders a chip for every chapter deck that has words', () => {
+    renderFlashcards();
+    for (const deck of decks) {
+      expect(screen.getByRole('button', { name: deck.label })).toBeInTheDocument();
+    }
+  });
+
+  it('defaults to the whole vocabulary', () => {
+    renderFlashcards();
+    expect(screen.getByRole('button', { name: /^All vocabulary/ })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+  });
+
+  it('scopes the session to the chapter list when a deck is selected', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(getStudyAllButton());
+    await selectDeck(user, firstDeck);
+    expect(screen.getByTestId('card-progress').textContent).toBe(`1/${firstDeck.words.length}`);
+  });
+
+  it('only draws cards from the selected chapter', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(getStudyAllButton());
+    await selectDeck(user, firstDeck);
+
+    const inDeck = new Set(firstDeck.words.map((w) => w.hebrew));
+    for (let i = 0; i < firstDeck.words.length; i++) {
+      const front = screen.getByText((_, el) => el?.getAttribute('dir') === 'rtl');
+      expect(inDeck.has(front.textContent ?? '')).toBe(true);
+      await user.click(screen.getByText('tap to reveal'));
+      await user.click(screen.getByRole('button', { name: /got it/i }));
+    }
+    expect(screen.getByText('Session Complete')).toBeInTheDocument();
+  });
+
+  it('replaces the frequency bands with the textbook attribution', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    expect(screen.getByRole('button', { name: /^2000\+/ })).toBeInTheDocument();
+    await selectDeck(user, firstDeck);
+    expect(screen.queryByRole('button', { name: /^2000\+/ })).not.toBeInTheDocument();
+    expect(screen.getByText(new RegExp(TEXTBOOKS[firstDeck.textbook].title))).toBeInTheDocument();
+  });
+
+  it('deselects the deck when its chip is clicked again', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(getStudyAllButton());
+    await selectDeck(user, firstDeck);
+    await selectDeck(user, firstDeck);
+    expect(screen.getByTestId('card-progress').textContent).toBe(`1/${vocabulary.length}`);
+  });
+
+  it('returns to the whole vocabulary via the "All vocabulary" chip', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(getStudyAllButton());
+    await selectDeck(user, firstDeck);
+    await user.click(screen.getByRole('button', { name: /^All vocabulary/ }));
+    expect(screen.getByTestId('card-progress').textContent).toBe(`1/${vocabulary.length}`);
+  });
+
+  it('shows gender on the back of a card that has one', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    await selectDeck(user, firstDeck);
+    await user.click(getCard());
+    // Every Garrett & DeRouchie ch. 1 entry is listed with a gender.
+    expect(screen.getByText(/masculine|feminine/)).toBeInTheDocument();
   });
 });

@@ -1,6 +1,7 @@
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { type HebrewVocabWord, vocabulary } from '../data/vocabulary';
+import { chapterDecks, chapterDecksByTextbook, TEXTBOOKS } from '../data/textbooks';
+import { type HebrewGender, type HebrewVocabWord, vocabulary } from '../data/vocabulary';
 import {
   isDue,
   loadSRSStore,
@@ -16,9 +17,9 @@ import {
 } from '../data/srs';
 import ErrorBoundary from './ErrorBoundary';
 
-// Phase 2b scope only: SRS + "all" study modes, flip answer mode, Hebrew ->
-// English direction, and a frequency-band filter. Typing mode, the reverse
-// direction, and part-of-speech/root filters are Phase 2c (issue #74).
+// Phase 2b scope: SRS + "all" study modes, flip answer mode, Hebrew -> English
+// direction, a frequency-band filter, and textbook chapter decks. Typing mode,
+// the reverse direction, and part-of-speech/root filters are Phase 2c (#74).
 //
 // TODO(#87): the session/queue state machine below (buildQueue, shuffle,
 // startSession, handleReview, handleFlip, the stats bar, the session-complete
@@ -41,6 +42,18 @@ export const FREQ_FILTERS: { filter: FreqFilter; label: string }[] = [
   { filter: '100-499', label: '100–499' },
   { filter: '<100', label: '<100' },
 ];
+
+/** Gender is quizzed alongside the gloss, so it's spelled out rather than abbreviated. */
+export const GENDER_LABELS: Record<HebrewGender, string> = {
+  m: 'masculine',
+  f: 'feminine',
+  fm: 'masculine or feminine',
+};
+
+// Textbook chapter decks are derived from static vocabulary data, so they're
+// computed once at module scope rather than on every render.
+const CHAPTER_DECKS = chapterDecks();
+const DECK_GROUPS = chapterDecksByTextbook();
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -88,7 +101,10 @@ function FlashcardsInner() {
   // Mode
   const [studyMode, setStudyMode] = useState<StudyMode>('srs');
 
-  // Filter
+  // Deck: null = the whole vocabulary, otherwise a textbook chapter deck id.
+  const [activeDeckId, setActiveDeckId] = useState<string | null>(null);
+
+  // Filter (only meaningful for the whole-vocabulary deck)
   const [freqFilter, setFreqFilter] = useState<FreqFilter>('all');
 
   // Session state
@@ -104,9 +120,16 @@ function FlashcardsInner() {
 
   // ─── Filtered vocabulary ────────────────────────────────────────────────────
 
+  const activeDeck = useMemo(
+    () => CHAPTER_DECKS.find((d) => d.id === activeDeckId) ?? null,
+    [activeDeckId],
+  );
+
+  // A chapter list is already a deliberate ~12-word set, so the frequency bands
+  // don't apply to it — they only narrow the whole-vocabulary deck.
   const filteredVocab = useMemo(
-    () => vocabulary.filter((w) => matchFreq(w.frequency, freqFilter)),
-    [freqFilter],
+    () => activeDeck?.words ?? vocabulary.filter((w) => matchFreq(w.frequency, freqFilter)),
+    [activeDeck, freqFilter],
   );
 
   const dueCount = useMemo(
@@ -131,8 +154,11 @@ function FlashcardsInner() {
     setFlipped(false);
     setSessionScore({ known: 0, learning: 0 });
     setSessionDone(false);
-    posthog.capture('hebrew_flashcard_session_started', { deck_size: nextQueue.length });
-  }, [filteredVocab, studyMode]);
+    posthog.capture('hebrew_flashcard_session_started', {
+      deck_size: nextQueue.length,
+      deck: activeDeckId ?? 'all-vocabulary',
+    });
+  }, [filteredVocab, studyMode, activeDeckId]);
 
   // Mount: start initial session
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -140,14 +166,20 @@ function FlashcardsInner() {
     startSession();
   }, [startSession]);
 
-  // Restart when mode or filter changes (not on srsStore changes)
+  // Restart when mode, deck, or filter changes (not on srsStore changes)
   const prevStudyMode = useRef(studyMode);
   const prevFreqFilter = useRef(freqFilter);
+  const prevActiveDeckId = useRef(activeDeckId);
 
   useEffect(() => {
-    if (studyMode !== prevStudyMode.current || freqFilter !== prevFreqFilter.current) {
+    if (
+      studyMode !== prevStudyMode.current ||
+      freqFilter !== prevFreqFilter.current ||
+      activeDeckId !== prevActiveDeckId.current
+    ) {
       prevStudyMode.current = studyMode;
       prevFreqFilter.current = freqFilter;
+      prevActiveDeckId.current = activeDeckId;
       startSession();
     }
   });
@@ -283,10 +315,13 @@ function FlashcardsInner() {
             Study ahead anyway
           </button>
         )}
-        {studyMode === 'all' && freqFilter !== 'all' && (
+        {studyMode === 'all' && (freqFilter !== 'all' || activeDeck !== null) && (
           <button
             type="button"
-            onClick={() => setFreqFilter('all')}
+            onClick={() => {
+              setFreqFilter('all');
+              setActiveDeckId(null);
+            }}
             className="px-5 py-2.5 border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-medium"
           >
             Clear filter
@@ -300,6 +335,58 @@ function FlashcardsInner() {
 
   return (
     <div className="space-y-4">
+      {/* ── Deck selector ─────────────────────────────────────────────────── */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <span className="text-xs font-bold text-text-muted uppercase tracking-wider shrink-0">
+          Deck
+        </span>
+        <button
+          type="button"
+          onClick={() => setActiveDeckId(null)}
+          aria-pressed={activeDeck === null}
+          className={`px-3 py-1 rounded-full text-sm border-2 font-medium transition-colors ${
+            activeDeck === null
+              ? 'bg-primary text-white border-primary'
+              : 'border-primary/10 text-text-muted hover:border-primary/40 hover:text-text'
+          }`}
+        >
+          All vocabulary{' '}
+          <span className={`text-xs ${activeDeck === null ? 'text-white/70' : 'text-text-muted'}`}>
+            ({vocabulary.length})
+          </span>
+        </button>
+
+        {DECK_GROUPS.map(({ textbook, decks }) => (
+          <div key={textbook.id} className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-text-muted shrink-0" title={textbook.title}>
+              {textbook.shortTitle}
+            </span>
+            {decks.map((deck) => {
+              const active = activeDeckId === deck.id;
+              return (
+                <button
+                  type="button"
+                  key={deck.id}
+                  onClick={() => setActiveDeckId(active ? null : deck.id)}
+                  aria-pressed={active}
+                  aria-label={deck.label}
+                  className={`px-3 py-1 rounded-full text-sm border-2 font-medium transition-colors ${
+                    active
+                      ? 'bg-primary text-white border-primary'
+                      : 'border-primary/10 text-text-muted hover:border-primary/40 hover:text-text'
+                  }`}
+                >
+                  {deck.shortLabel}{' '}
+                  <span className={`text-xs ${active ? 'text-white/70' : 'text-text-muted'}`}>
+                    ({deck.words.length})
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+
       {/* ── Top controls bar ──────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Study mode */}
@@ -320,31 +407,38 @@ function FlashcardsInner() {
           ))}
         </div>
 
-        {/* Frequency filter */}
-        <div className="flex flex-wrap gap-2">
-          {FREQ_FILTERS.map(({ filter, label }) => {
-            const active = freqFilter === filter;
-            const count = vocabulary.filter((w) => matchFreq(w.frequency, filter)).length;
-            return (
-              <button
-                type="button"
-                key={filter}
-                onClick={() => setFreqFilter(filter)}
-                aria-pressed={active}
-                className={`px-3 py-1 rounded-full text-sm border-2 font-medium transition-colors ${
-                  active
-                    ? 'bg-primary text-white border-primary'
-                    : 'border-primary/10 text-text-muted hover:border-primary/40 hover:text-text'
-                }`}
-              >
-                {label}{' '}
-                <span className={`text-xs ${active ? 'text-white/70' : 'text-text-muted'}`}>
-                  ({count})
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        {/* Frequency filter — only applies to the whole-vocabulary deck */}
+        {activeDeck !== null ? (
+          <p className="text-sm text-text-muted">
+            {activeDeck.words.length} words &middot; {TEXTBOOKS[activeDeck.textbook].shortTitle},{' '}
+            {TEXTBOOKS[activeDeck.textbook].title}
+          </p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {FREQ_FILTERS.map(({ filter, label }) => {
+              const active = freqFilter === filter;
+              const count = vocabulary.filter((w) => matchFreq(w.frequency, filter)).length;
+              return (
+                <button
+                  type="button"
+                  key={filter}
+                  onClick={() => setFreqFilter(filter)}
+                  aria-pressed={active}
+                  className={`px-3 py-1 rounded-full text-sm border-2 font-medium transition-colors ${
+                    active
+                      ? 'bg-primary text-white border-primary'
+                      : 'border-primary/10 text-text-muted hover:border-primary/40 hover:text-text'
+                  }`}
+                >
+                  {label}{' '}
+                  <span className={`text-xs ${active ? 'text-white/70' : 'text-text-muted'}`}>
+                    ({count})
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* ── Stats bar ─────────────────────────────────────────────────────── */}
@@ -431,6 +525,7 @@ function FlashcardsInner() {
             <p className="leading-tight text-2xl font-semibold text-text">{card.gloss}</p>
             <p className="text-text-muted text-xs mt-2 uppercase tracking-wide font-medium" dir="ltr">
               {card.transliteration}
+              {card.gender && <span> &middot; {GENDER_LABELS[card.gender]}</span>}
               {card.root && <span> &middot; root {card.root}</span>}
             </p>
           </div>
