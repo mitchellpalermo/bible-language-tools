@@ -101,6 +101,22 @@ describe('Flashcards', () => {
     expect(screen.getByRole('button', { name: /still learning/i })).toBeInTheDocument();
   });
 
+  it('renders the transliteration without the uppercase transform', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(getCard());
+
+    // CSS text-transform leaves textContent untouched, so the class list is the
+    // only observable signal that SBL romanization is being visually uppercased.
+    // Asserting on it is deliberate here — the defect is purely presentational.
+    const transliterations = new Set(vocabulary.map((w) => w.transliteration));
+    const shown = screen.getByText(
+      (_, el) => el?.tagName === 'P' && transliterations.has(el.textContent ?? ''),
+    );
+    expect(shown.className).not.toMatch(/\buppercase\b/);
+    expect(shown.className).toMatch(/\bitalic\b/);
+  });
+
   it('flips via the space key', async () => {
     const user = userEvent.setup();
     renderFlashcards();

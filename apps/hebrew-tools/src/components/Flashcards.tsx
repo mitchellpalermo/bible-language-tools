@@ -523,11 +523,32 @@ function FlashcardsInner() {
         {flipped && (
           <div className="mt-4 pt-4 border-t-2 border-primary/5 w-full text-center">
             <p className="leading-tight text-2xl font-semibold text-text">{card.gloss}</p>
-            <p className="text-text-muted text-xs mt-2 uppercase tracking-wide font-medium" dir="ltr">
+
+            {/* Transliteration is content, not a label: SBL romanization is
+                case-bearing (ʾādām, not ʾĀDĀM), so it must never pick up the
+                `uppercase` transform the surrounding micro-labels use.
+                Italic is the standard convention for transliterated text. */}
+            <p className="text-text-muted text-sm mt-2 italic" dir="ltr">
               {card.transliteration}
-              {card.gender && <span> &middot; {GENDER_LABELS[card.gender]}</span>}
-              {card.root && <span> &middot; root {card.root}</span>}
             </p>
+
+            {(card.gender || card.root) && (
+              <p className="text-text-muted text-xs mt-1 uppercase tracking-wide font-medium" dir="ltr">
+                {card.gender && GENDER_LABELS[card.gender]}
+                {card.gender && card.root && ' · '}
+                {card.root && (
+                  <>
+                    root{' '}
+                    <span
+                      dir="rtl"
+                      style={{ fontFamily: 'var(--font-hebrew)', unicodeBidi: 'isolate' }}
+                    >
+                      {card.root}
+                    </span>
+                  </>
+                )}
+              </p>
+            )}
           </div>
         )}
       </div>
