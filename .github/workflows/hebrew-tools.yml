@@ -26,7 +26,10 @@ jobs:
           node-version: 22
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @tools/shared test:run
+      - run: pnpm --filter @tools/shared typecheck
       - run: pnpm --filter hebrew-tools test:run
+      - run: pnpm --filter hebrew-tools typecheck
 
   deploy:
     needs: test
