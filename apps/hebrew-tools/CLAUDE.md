@@ -157,6 +157,9 @@ Things that will bite if changed carelessly:
 - **Writes are delete-then-insert of the full per-language set**, not upserts.
 - **Keepalive bodies are capped at 64 KB by browsers.** An oversized store makes the session-end push fail silently; the next sign-in pull or manual "Sync now" covers it.
 - **Merge rule is "more progress wins":** higher `repetition` wins per card, ties broken by later `dueDate`; stats counters take the max.
+- **The session-end push is a blind overwrite.** `registerSessionEndPush` calls `push()`, not `pullAndMerge()`, and `putProgress` replaces the whole per-language row set. Nothing pulls on ordinary page load. A device with stale local state can therefore overwrite newer server progress — see the "Known gap" section of `docs/sync-test-plan.md` before changing anything in this area.
+
+Cross-device behaviour can't be covered by unit tests. `docs/sync-test-plan.md` is the manual plan; run test 15 (greek.tools isolation) after any change to `progress-store.ts`.
 
 ### Textbook chapter decks
 
