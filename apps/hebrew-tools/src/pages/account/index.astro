@@ -1,4 +1,5 @@
 ---
+import SyncControls from '../../components/SyncControls';
 import Layout from '../../layouts/Layout.astro';
 
 export const prerender = false;
@@ -15,11 +16,8 @@ if (!user) {
     <p class="text-sm text-text-muted mb-6">{user.email}</p>
 
     <div class="border-2 border-primary/10 rounded-2xl p-4 mb-6 bg-bg-card">
-      <h2 class="text-sm font-bold text-text mb-1">Study sync</h2>
-      <p class="text-sm text-text-muted">
-        Not available yet. Your flashcard progress is currently saved in this browser only —
-        cross-device sync is the next piece of work on accounts.
-      </p>
+      <h2 class="text-sm font-bold text-text mb-2">Study sync</h2>
+      <SyncControls client:load />
     </div>
 
     <form method="POST" action="/api/auth/signout">

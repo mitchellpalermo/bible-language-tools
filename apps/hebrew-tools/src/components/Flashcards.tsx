@@ -1,6 +1,8 @@
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { chapterDecks, chapterDecksByTextbook, TEXTBOOKS } from '../data/textbooks';
+import { hasAuthHint } from '../lib/auth-cookie';
+import { deleteServerProgress } from '../lib/sync-manager';
 import { type HebrewGender, type HebrewVocabWord, vocabulary } from '../data/vocabulary';
 import {
   isDue,
@@ -606,6 +608,11 @@ function FlashcardsInner() {
               if (confirm('Reset all SRS progress? This cannot be undone.')) {
                 setSrsStore({});
                 saveSRSStore({});
+                // PUT merges server-side, so clearing localStorage alone would
+                // be undone by the next sync. Destruction has to go through
+                // DELETE. Fire-and-forget: a failure here must not block the
+                // reset the user already sees locally.
+                if (hasAuthHint()) void deleteServerProgress();
                 startSession();
               }
             }}

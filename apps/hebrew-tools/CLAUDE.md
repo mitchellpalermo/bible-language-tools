@@ -135,6 +135,33 @@ Running `pnpm dev` on a **non-default port** produces an unregistered callback a
 
 Local secrets go in `.dev.vars` (gitignored): `BETTER_AUTH_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`. In production the deploy workflow pushes them with `wrangler secret put`.
 
+Console setup, exact-match traps, and failure modes: `docs/google-oauth-setup.md`.
+
+### Study sync
+
+Signed-in users get their SRS cards and study stats persisted server-side and merged across devices.
+
+**localStorage stays the working copy.** The server is a sync target and a backup, never the read path during a study session. `src/lib/sync-manager.ts` is a layer on top of `src/data/srs.ts`, not a replacement for it — every network call there is caught and returns a boolean, because **a sync failure must never interrupt studying**. Only the account page surfaces errors.
+
+| File | Role |
+|---|---|
+| `src/lib/sync-merge.ts` | Pure merge rules. Symmetric — `merge(a,b)` and `merge(b,a)` agree |
+| `src/lib/sync-manager.ts` | Client lifecycle: push, pullAndMerge, session-end push |
+| `src/lib/progress-store.ts` | Server persistence. **Every statement scoped by `LANGUAGE`** |
+| `src/pages/api/progress.ts` | GET/PUT/DELETE, with full payload validation |
+
+Things that will bite if changed carelessly:
+
+- **`sync_state` is the "has ever synced" signal.** Its absence makes `getProgress` return `null`, which routes new vs. returning users after sign-in. Write it last, after the data it describes.
+- **D1 caps bound parameters at 100 per statement.** `srs_cards` has 8 columns, so inserts chunk at 12 rows (`SRS_CHUNK`). Recompute if the table gains a column.
+- **Writes are delete-then-insert of the full per-language set**, not upserts.
+- **Keepalive bodies are capped at 64 KB by browsers.** An oversized store makes the session-end push fail silently; the next sign-in pull or manual "Sync now" covers it.
+- **Merge rule is "more progress wins":** higher `repetition` wins per card, ties broken by later `dueDate`; stats counters take the max.
+- **`PUT /api/progress` merges server-side; it never replaces.** This is load-bearing. The session-end push is a one-shot keepalive request that cannot pull first, so a device with week-old localStorage will PUT exactly that. Merging on the server means such a push can only add or hold, never regress another device's work — and it holds even for a client that misbehaves, which no client-side fix can. **Do not "optimise" `putProgress` back into a replace.**
+- **Therefore `PUT` can never remove a card.** Deletion goes through `DELETE` only. "Reset SRS" in `Flashcards.tsx` calls `deleteServerProgress()` when signed in for exactly this reason; clearing localStorage alone would be undone by the next sync.
+
+Cross-device behaviour can't be covered by unit tests. `docs/sync-test-plan.md` is the manual plan; run test 15 (greek.tools isolation) after any change to `progress-store.ts`.
+
 ### Textbook chapter decks
 
 Seminary vocabulary quizzes are scoped to a textbook chapter, not a frequency band. `src/data/vocabulary.ts` entries carry an optional `chapters: TextbookChapterRef[]` tag, and `src/data/textbooks.ts` derives study decks from those tags.
