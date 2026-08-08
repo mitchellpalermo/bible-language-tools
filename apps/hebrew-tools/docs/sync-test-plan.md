@@ -116,12 +116,32 @@ Server now shows the same cards as local. Nothing lost.
 `hasLocalProgress()` returned false — check that some card has `repetition > 0`,
 not just that cards exist.
 
+Mitch: This works on mobile. Desktop seems to have bypassed the "Import your progress" offer. Maybe I didn't have any progress? 
+
+Moving on to the next one. 
+
+**Result — 2026-08-08 (PASS on mobile; desktop behaviour explained, not a defect)**
+
+Desktop most likely took the *test 3* path rather than skipping anything. Mobile
+imported first, so the server then had data; desktop's sign-in got
+`hadServerData: true`, which routes straight to the destination and never
+renders `/account/welcome`. The offer only appears when the server has nothing
+**and** this device has a card with `repetition > 0`.
+
+The alternative — desktop genuinely having no graded cards — is also consistent
+with what was seen. To tell them apart on a future run, check
+`localStorage['hebrew-tools-srs-v1']` for any `repetition > 0` *before* signing
+in. Either way the code behaved correctly.
+
 ### 2. First sign-in with no local progress
 
 1. Fresh profile, sign in without studying.
 
 **Expect:** no import offer; straight to `/account`. Server returns
 `{"data":null}` until something is pushed.
+
+I think this is probably what just happened?
+
 
 ### 3. Second device pulls existing progress
 
@@ -294,10 +314,26 @@ Direct check:
 
 ```bash
 pnpm wrangler d1 execute bible-language-tools --remote \
-  --command "SELECT language, COUNT(*) FROM srs_cards GROUP BY language"
+  --command "SELECT language, COUNT(*) AS cards, MAX(last_reviewed) AS newest FROM srs_cards GROUP BY language"
 ```
 
 Hebrew activity must never change the greek count.
+
+**Result — 2026-08-08, first run against production (PASS)**
+
+| language | cards | newest review |
+|---|---|---|
+| greek | 76 | 2026-06-17 |
+| hebrew | 21 | 2026-08-08 |
+
+No greek card touched despite a full day of Hebrew sync activity. Three
+independent sources agree: server `MAX(last_reviewed)` on greek rows, the
+`lastStudyDate` in greek's browser localStorage, and greek's own counters (76
+cards against 175 total reviews ≈ 2.3 reviews per card — a coherent history, not
+an inflated one). Language scoping confirmed working in production, not just
+against SQLite in the test runner.
+
+Re-run this after test 10; that is the point of maximum write pressure.
 
 ---
 
