@@ -25,6 +25,9 @@ importers:
       '@tools/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@tools/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@types/react':
         specifier: ^19.2.14
         version: 19.2.17

@@ -12,6 +12,9 @@
   "exports": {
     "./srs": "./src/srs.ts",
     "./quiz-settings": "./src/quiz-settings.ts",
+    "./nav": "./src/nav.ts",
+    "./nav-menu": "./src/nav-menu.ts",
+    "./components/SiteNav.astro": "./src/components/SiteNav.astro",
     "./components/NumberToggle": "./src/components/NumberToggle.tsx",
     "./components/EndingsToggle": "./src/components/EndingsToggle.tsx",
     "./components/SectionHeading": "./src/components/SectionHeading.tsx",
