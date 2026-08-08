@@ -39,6 +39,31 @@ test 16 cover those paths.
 - Sign in to the **same Google account** on both.
 - Keep DevTools → Console open on each.
 
+**Verify the accounts match before anything else.** Sync is per-account, so two
+devices on different Google logins share nothing and every cross-device test
+silently measures nothing:
+
+```bash
+cd apps/hebrew-tools
+pnpm wrangler d1 execute bible-language-tools --remote \
+  --command "SELECT u.email, COUNT(*) AS cards FROM srs_cards c JOIN users u ON u.id = c.user_id WHERE c.language='hebrew' GROUP BY u.email"
+```
+
+More than one row means more than one account has Hebrew progress. Pick one and
+make sure both devices are on it. This bit us on the first run — a personal and
+a student Google account, and the symptom was duplicate `word_key` rows in an
+unscoped query rather than anything that looked like an account problem.
+
+**Study mode matters.** "Study All" is a cram mode: `handleReview` only writes to
+the SRS store when the mode is `srs` (see `Flashcards.tsx`). Grading cards in
+Study All moves the stats but creates **no cards**, so any test below that says
+"study N cards" means **SRS Review** mode. Verify before relying on it:
+
+```js
+Object.values(JSON.parse(localStorage.getItem('hebrew-tools-srs-v1') || '{}'))
+  .filter(c => c.lastReviewed === new Date().toISOString().slice(0,10)).length
+```
+
 ### Inspecting state
 
 **Local**, in the console:
@@ -70,12 +95,22 @@ returns the raw payload, or `{"data":null}` if the account has never synced.
 })()
 ```
 
-**Ground truth in D1**, if you ever distrust the API:
+**Ground truth in D1**, if you ever distrust the API. **Scope it to one account** —
+an unscoped query pools every user's rows together and produces what look like
+impossible duplicate `word_key`s:
 
 ```bash
+cd apps/hebrew-tools
 pnpm wrangler d1 execute bible-language-tools --remote \
-  --command "SELECT language, word_key, repetition, due_date FROM srs_cards ORDER BY language, word_key"
+  --command "SELECT c.word_key, c.repetition, c.due_date FROM srs_cards c JOIN users u ON u.id = c.user_id WHERE c.language='hebrew' AND u.email='YOUR_EMAIL' ORDER BY c.word_key"
 ```
+
+> **wrangler needs a TTY.** It refuses the interactive OAuth flow when stdout is
+> not a terminal, so `| grep`, `> file`, and `--json` all fail with "In a
+> non-interactive environment, it's necessary to set a CLOUDFLARE_API_TOKEN" —
+> and a redirect swallows the error, leaving a silent 0-byte file. Run these
+> plain and read the table, or set `CLOUDFLARE_API_TOKEN` in your environment,
+> or wrap with `script -q /dev/null <cmd> | tr -d '\r'` to fake a terminal.
 
 ### Seeding a known state
 
@@ -104,7 +139,8 @@ Object.keys(localStorage).filter(k => k.startsWith('hebrew-tools-')).forEach(k =
 **Why:** the riskiest moment for a real user. They have weeks of anonymous
 study and are about to attach it to an account.
 
-1. On **A**, signed out, study 10+ cards so several have `repetition > 0`.
+1. On **A**, signed out, study 10+ cards **in SRS Review mode** so several have
+   `repetition > 0`. (Study All writes no cards — see Setup.)
 2. Record the local state.
 3. Sign in.
 
@@ -153,7 +189,7 @@ the server had data, so `hadServerData` was true.
 ### 4. Divergent study — the core case
 
 1. **A** and **B** both synced and identical.
-2. On **A**, study 5 cards; do *not* touch B.
+2. On **A**, study 5 cards **in SRS Review mode**; do *not* touch B.
 3. On **A**, click **Sync now**.
 4. On **B**, study 5 *different* cards.
 5. On **B**, click **Sync now**.
@@ -196,7 +232,7 @@ later, far from the cause.
 
 ### 8. Start fresh
 
-1. Fresh profile **C**, study a few cards signed out, sign in, choose
+1. Fresh profile **C**, study a few cards signed out **in SRS Review mode**, sign in, choose
    **Start fresh**.
 
 **Expect:** server progress deleted *and* C's localStorage cleared. Reload — no
@@ -224,7 +260,7 @@ a real deployment rather than against SQLite in a test runner.
 
 1. Get **A** and **B** both signed in and synced identically.
 2. On **B**, close the tab and leave it alone.
-3. On **A**, study 10 cards. Wait for a tab-hide push (switch tabs) or click
+3. On **A**, study 10 cards **in SRS Review mode**. Wait for a tab-hide push (switch tabs) or click
    **Sync now**. Confirm the server has A's 10.
 4. On **B**, open hebrew.tools — **do not sign in again, do not click Sync now**
    (B is already signed in, so no pull happens).
@@ -238,19 +274,49 @@ merged in and changed nothing, because merging happens server-side.
 server here, the server-side merge is not doing its job and nothing else in this
 plan matters. Capture the `/api/progress` response before and after B's push.
 
-**Then confirm the reverse:** study 3 cards on B, hide the tab, and check that
+**Then confirm the reverse:** study 3 cards on B **in SRS Review mode**, hide the tab, and check that
 those 3 *do* appear on the server. A guard that blocks stale data is only
 correct if it still lets new data through.
 
 > greek.tools still replaces rather than merges on write, so it has the original
 > behaviour. Worth porting this fix there — see the note in issue #91.
 
+**Result — 2026-08-08, against production (PASS)**
+
+Setup: server held 24 cards for the test account, one of them `דָּבָר` at
+`repetition: 1, dueDate: 2026-08-08`. Device B was seeded with a deliberately
+stale **2-card** store — `דָּבָר` regressed to `repetition: 0, dueDate:
+2026-08-01`, plus `מֶלֶךְ` which the server had never seen — then B's tab was
+hidden to fire the keepalive push. Device A was closed throughout.
+
+| Check | Result |
+|---|---|
+| Rows lost | **0** — all 24 survived a push containing 2 cards |
+| Rows regressed | **0** — `דָּבָר` held at `repetition: 1` |
+| Rows added | **1** — `מֶלֶךְ` at the stale values |
+
+All three properties confirmed at once:
+
+1. **Nothing deleted.** Under the previous replace-on-write behaviour the server
+   would have been left holding exactly B's 2 cards, losing 22.
+2. **Nothing regressed.** `דָּבָר` was the trap: B pushed it strictly behind the
+   stored row, and "higher repetition wins" held.
+3. **New data still landed.** `מֶלֶךְ` was absent server-side, so a stale device's
+   unknown card is new information, not a regression — and it was accepted. This
+   is what distinguishes a correct guard from one that simply rejects everything
+   from a behind-the-times client. A blanket rejection would also have shown
+   "0 rows lost" and would have been wrong.
+
+Point 3 also satisfies the "confirm the reverse" step for new *keys*. Still worth
+running it for new *reviews on existing keys* — a card going `repetition: 0 → 1`
+in the direction that should win.
+
 ### 11. Timed-out sync reaching the import offer
 
 **Why:** a plausible route to the same overwrite through the UI.
 
 1. On a **fresh profile** for a **returning** account (one that already has
-   server progress), study a few cards signed out.
+   server progress), study a few cards signed out **in SRS Review mode**.
 2. Sign in with the network throttled hard (DevTools → Network → Slow 3G) so
    `/account/syncing` hits its 5s timeout.
 
