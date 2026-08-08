@@ -84,6 +84,25 @@ Things to know before changing it:
 
 `initNavMenu` (`packages/shared/src/nav-menu.ts`) is framework-free DOM wiring against the `data-nav-*` attributes, which is what makes it directly testable without a renderer. Its tests are the coverage for the menu's behaviour; the Playwright specs in each app's `e2e/navigation.spec.ts` cover the parts only a real browser can show.
 
+## Pull requests
+
+### Screenshots are required for any UI-affecting change
+
+If a change alters what the app looks like, **capture screenshots and attach them to the PR**. This applies to layout, styling, component markup, new or changed pages, and anything responsive. It does not apply to pure logic, data, or build changes.
+
+What to capture:
+
+- **Both viewports** when the change touches responsive behaviour — mobile (390px) and desktop (1280px). A change that only shows up at one breakpoint still needs the other, to prove nothing regressed there.
+- **Before and after**, when changing something that already existed. The "before" is the point — a lone "after" shot doesn't show what moved.
+- **Both apps**, when the change touches `packages/shared`. It ships to greek.tools and hebrew.tools at once.
+
+How to capture: drive a Playwright script against `pnpm dev` rather than taking manual screenshots — it is repeatable, and it gets exact viewport sizes. Two things to remember:
+
+- **Hide the Astro dev toolbar**, or it floats over the bottom of every shot: `page.addStyleTag({ content: 'astro-dev-toolbar { display: none !important; }' })`.
+- **Only one dev server can hold port 4321.** Both apps use it, and Playwright's `reuseExistingServer` means a stale server from the other app will silently serve the wrong site. Kill it between runs: `lsof -ti:4321 | xargs -r kill -9`.
+
+How to attach: GitHub's image upload is web-UI only — there is no API for it, so `gh` cannot upload to it. Commit the images to an orphan branch (`assets/pr-<N>`) and reference them from the PR body by their `raw.githubusercontent.com` URL. That keeps binaries out of `main`'s history, and the branch can be deleted after the merge. The repo is public, so raw URLs render for everyone.
+
 ## Cloudflare Workers deployment
 
 Each app deploys to its own Worker. CI runs `wrangler deploy` from each app's directory after a successful build — no dashboard configuration needed.
