@@ -6,12 +6,14 @@ on:
     paths:
       - 'apps/greek-tools/**'
       - 'packages/shared/**'
+      - 'packages/db/**'
       - 'package.json'
       - 'pnpm-workspace.yaml'
   pull_request:
     paths:
       - 'apps/greek-tools/**'
       - 'packages/shared/**'
+      - 'packages/db/**'
 
 jobs:
   test:
@@ -28,6 +30,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @tools/shared test:run
       - run: pnpm --filter @tools/shared typecheck
+      - run: pnpm --filter @tools/db test:run
+      - run: pnpm --filter @tools/db typecheck
       - run: pnpm --filter greek-tools test:run
       - run: pnpm --filter greek-tools typecheck
 

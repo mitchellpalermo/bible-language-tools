@@ -98,7 +98,22 @@ See `ROADMAP.md` for the full feature plan and build order.
 - **Root system:** Triliteral (3-letter) root system — pedagogy centers on roots, not lemmas.
 - **Morphological data:** Open Scriptures Hebrew Bible (OSHB) — `github.com/openscriptures/morphhb`, CC BY 4.0. XML per book, parsed into `public/data/morphhb/{BOOK}.json` by a build script.
 - **Lenient comparison:** Strip U+05B0–U+05C7 (nikud) for lenient grading; also strip U+0591–U+05AF (cantillation) when fully stripping diacritics.
-- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`. There is no account/sync layer in this app (greek.tools has one; hebrew.tools does not) — all study progress is per-browser only.
+- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`. There is still no auth or sync in this app — **all study progress is per-browser only.** The D1 plumbing exists (see below), but nothing reads or writes it yet.
+
+### Database (accounts groundwork — issue #91)
+
+This app has a `DB` binding to the D1 database `bible-language-tools`, **shared with greek-tools**. Schema and migrations live in `packages/db`; `src/lib/db.ts` is the single import site and defines `LANGUAGE = 'hebrew'`.
+
+**The rule that matters:** one database backs both apps, and a user who signs in to both is one `users` row. Their progress is kept apart only by the `language` column on `srs_cards`, `study_stats`, and `sync_state`. **Every read and write must be scoped by `LANGUAGE`** — a query that forgets the filter reaches into greek-tools' data. `src/lib/db.test.ts` guards this; extend it rather than replacing it when the sync layer lands.
+
+Auth (`better-auth`, Google OAuth) and the sync layer are not built yet — see issue #91 for the full plan.
+
+```bash
+pnpm wrangler d1 migrations apply bible-language-tools --local   # set up the local DB
+pnpm wrangler d1 migrations list bible-language-tools --local    # check pending
+```
+
+Never run migrations with `--remote` by hand; the deploy workflow does it.
 
 ### Textbook chapter decks
 
