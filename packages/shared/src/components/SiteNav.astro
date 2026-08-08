@@ -1,0 +1,393 @@
+---
+// The one navigation implementation for greek.tools and hebrew.tools.
+//
+// Renders the desktop header nav (md and up) and, below that breakpoint, a
+// hamburger trigger with a slide-in drawer. Both apps pass their own link list
+// and their own accent gradient; nothing else differs between them.
+//
+// The account link carries `data-account-link` / `data-account-label` so each
+// app's inline auth-hint script keeps correcting it on prerendered pages. The
+// hint cookie has no authority — it only swaps the label and href.
+import { isNavLinkActive, isNavLinkCurrent, type NavLink } from '../nav';
+
+interface Props {
+  links: NavLink[];
+  currentPath: string;
+  /** SSR value; the auth-hint script corrects it on prerendered pages. */
+  accountHref: string;
+  /** SSR value; likewise corrected client-side. */
+  accountLabel: string;
+  /** Per-app rainbow line, mirroring the one at the top of the page. */
+  accentGradient: string;
+  /** e.g. "greek.tools" — used in the trigger and panel labels. */
+  siteName: string;
+}
+
+const { links, currentPath, accountHref, accountLabel, accentGradient, siteName } = Astro.props;
+
+const accountActive = currentPath.startsWith('/account');
+---
+
+<div class="site-nav">
+
+  <!-- ── Desktop nav (md and up) ──────────────────────────────────────── -->
+  <nav class="site-nav-desktop" aria-label={`${siteName} navigation`}>
+    {links.map((link) => (
+      <a
+        href={link.href}
+        class:list={['site-nav-item', { 'site-nav-item-active': isNavLinkActive(link, currentPath) }]}
+        aria-current={isNavLinkActive(link, currentPath) ? 'page' : undefined}
+      >
+        {link.label}
+      </a>
+    ))}
+    <div class="site-nav-divider"></div>
+    <a
+      href={accountHref}
+      class:list={['site-nav-item', { 'site-nav-item-active': accountActive }]}
+      aria-current={accountActive ? 'page' : undefined}
+      aria-label={accountLabel}
+      data-account-link
+    >
+      <span data-account-label>{accountLabel}</span>
+    </a>
+  </nav>
+
+  <!-- ── Hamburger trigger (below md) ─────────────────────────────────── -->
+  <button
+    type="button"
+    class="site-nav-trigger"
+    aria-label={`Open ${siteName} menu`}
+    aria-expanded="false"
+    aria-controls="site-nav-panel"
+    data-nav-trigger
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <line x1="4" y1="7" x2="20" y2="7"></line>
+      <line x1="4" y1="12" x2="20" y2="12"></line>
+      <line x1="4" y1="17" x2="20" y2="17"></line>
+    </svg>
+  </button>
+
+  <div class="site-nav-backdrop" aria-hidden="true" data-nav-backdrop></div>
+
+  <!-- ── Drawer ───────────────────────────────────────────────────────── -->
+  <nav
+    id="site-nav-panel"
+    class="site-nav-panel"
+    aria-label={`${siteName} menu`}
+    data-nav-panel
+  >
+    <div class="site-nav-panel-accent" style={`background: ${accentGradient};`}></div>
+
+    <div class="site-nav-panel-head">
+      <span class="site-nav-panel-title">Menu</span>
+      <button type="button" class="site-nav-close" aria-label="Close menu" data-nav-close>
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <ul class="site-nav-list">
+      {links.map((link) => (
+        <li>
+          <a
+            href={link.href}
+            class:list={['site-nav-link', { 'site-nav-link-active': isNavLinkActive(link, currentPath) }]}
+            aria-current={isNavLinkCurrent(link, currentPath) ? 'page' : undefined}
+          >
+            {link.label}
+          </a>
+          {link.children && link.children.length > 0 && (
+            <ul class="site-nav-sublist">
+              {link.children.map((child) => (
+                <li>
+                  <a
+                    href={child.href}
+                    class:list={[
+                      'site-nav-link',
+                      'site-nav-sublink',
+                      { 'site-nav-link-active': isNavLinkActive(child, currentPath) },
+                    ]}
+                    aria-current={isNavLinkCurrent(child, currentPath) ? 'page' : undefined}
+                  >
+                    {child.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </li>
+      ))}
+    </ul>
+
+    <div class="site-nav-account">
+      <a
+        href={accountHref}
+        class:list={['site-nav-link', 'site-nav-account-link', { 'site-nav-link-active': accountActive }]}
+        aria-current={accountActive ? 'page' : undefined}
+        aria-label={accountLabel}
+        data-account-link
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <span data-account-label>{accountLabel}</span>
+      </a>
+    </div>
+  </nav>
+
+</div>
+
+<script>
+  import { initNavMenu } from '../nav-menu';
+
+  initNavMenu();
+</script>
+
+<style>
+  .site-nav {
+    display: flex;
+    align-items: center;
+  }
+
+  /* ── Desktop nav ─────────────────────────────────────────────────────
+     Hidden below md, where the hamburger takes over. Matches the header
+     nav greek.tools shipped before the shared component existed.
+     ─────────────────────────────────────────────────────────────────── */
+
+  .site-nav-desktop {
+    display: none;
+    gap: 0.25rem;
+    align-items: center;
+  }
+
+  .site-nav-item {
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 600;
+    color: rgb(255 255 255 / 0.8);
+    text-decoration: none;
+    transition:
+      color 150ms ease,
+      background-color 150ms ease;
+  }
+
+  .site-nav-item:hover {
+    color: #fff;
+    background-color: rgb(255 255 255 / 0.1);
+  }
+
+  .site-nav-item-active,
+  .site-nav-item-active:hover {
+    color: #fff;
+    background-color: rgb(255 255 255 / 0.2);
+  }
+
+  .site-nav-divider {
+    width: 1px;
+    height: 1.25rem;
+    margin: 0 0.25rem;
+    background-color: rgb(255 255 255 / 0.2);
+  }
+
+  /* ── Hamburger trigger ───────────────────────────────────────────── */
+
+  .site-nav-trigger,
+  .site-nav-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    border: 0;
+    border-radius: 0.5rem;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 150ms ease;
+  }
+
+  .site-nav-trigger {
+    /* Pull the icon back to the nav's own padding edge. */
+    margin-right: -0.5rem;
+  }
+
+  .site-nav-trigger:hover,
+  .site-nav-close:hover {
+    background-color: rgb(255 255 255 / 0.1);
+  }
+
+  /* ── Backdrop ────────────────────────────────────────────────────── */
+
+  .site-nav-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background: rgb(0 0 0 / 0.5);
+    opacity: 0;
+    visibility: hidden;
+    /* See the note on .site-nav-panel for why visibility is stepped, not eased. */
+    transition:
+      opacity 200ms ease,
+      visibility 0s linear 200ms;
+  }
+
+  .site-nav-backdrop[data-nav-open] {
+    opacity: 1;
+    visibility: visible;
+    transition:
+      opacity 200ms ease,
+      visibility 0s linear 0s;
+  }
+
+  /* ── Drawer ──────────────────────────────────────────────────────────
+     `visibility: hidden` while closed keeps the links out of the tab
+     order and out of the accessibility tree, which `transform` alone
+     would not do.
+
+     Visibility is stepped with a delay rather than eased alongside the
+     transform: on open it must flip to `visible` in the same style
+     recalc, because the script moves focus into the panel immediately
+     and a hidden element cannot take focus. On close the delay holds it
+     visible for the full slide-out.
+     ─────────────────────────────────────────────────────────────────── */
+
+  .site-nav-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 70;
+    display: flex;
+    flex-direction: column;
+    width: min(20rem, 85vw);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--color-primary);
+    color: #fff;
+    box-shadow: -8px 0 24px rgb(0 0 0 / 0.25);
+    transform: translateX(100%);
+    visibility: hidden;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    transition:
+      transform 220ms ease,
+      visibility 0s linear 220ms;
+  }
+
+  .site-nav-panel[data-nav-open] {
+    transform: translateX(0);
+    visibility: visible;
+    transition:
+      transform 220ms ease,
+      visibility 0s linear 0s;
+  }
+
+  .site-nav-panel-accent {
+    flex: none;
+    height: 3px;
+    width: 100%;
+  }
+
+  .site-nav-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem 0.375rem;
+  }
+
+  .site-nav-panel-title {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.5);
+  }
+
+  .site-nav-close {
+    margin-right: -0.5rem;
+  }
+
+  .site-nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0 0.75rem 0.5rem;
+  }
+
+  .site-nav-link {
+    display: block;
+    padding: 0.625rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: rgb(255 255 255 / 0.8);
+    text-decoration: none;
+    transition:
+      color 150ms ease,
+      background-color 150ms ease;
+  }
+
+  .site-nav-link:hover {
+    color: #fff;
+    background-color: rgb(255 255 255 / 0.1);
+  }
+
+  .site-nav-link-active,
+  .site-nav-link-active:hover {
+    color: var(--color-accent-light);
+    background-color: rgb(255 255 255 / 0.1);
+  }
+
+  .site-nav-sublist {
+    list-style: none;
+    margin: 0.125rem 0 0.375rem 0.75rem;
+    padding: 0 0 0 0.5rem;
+    border-left: 1px solid rgb(255 255 255 / 0.15);
+  }
+
+  .site-nav-sublink {
+    padding: 0.4375rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  /* Pushed to the bottom of the drawer, away from the content routes. */
+  .site-nav-account {
+    margin-top: auto;
+    padding: 0.75rem;
+    border-top: 1px solid rgb(255 255 255 / 0.15);
+  }
+
+  .site-nav-account-link {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-nav-backdrop,
+    .site-nav-panel {
+      transition: none;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .site-nav-desktop {
+      display: flex;
+    }
+
+    /* Nothing mobile-only should exist at all above the breakpoint. */
+    .site-nav-trigger,
+    .site-nav-backdrop,
+    .site-nav-panel {
+      display: none;
+    }
+  }
+</style>

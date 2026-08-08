@@ -1,4 +1,6 @@
 ---
+import type { NavLink } from '@tools/shared/nav';
+import SiteNav from '@tools/shared/components/SiteNav.astro';
 import '../styles/global.css';
 
 interface Props {
@@ -7,6 +9,16 @@ interface Props {
 }
 
 const { title, description = "Free tools for Biblical Hebrew students — coming soon." } = Astro.props;
+
+// Add roadmap routes here as they ship — the desktop nav and the mobile menu
+// both read this list, so neither needs touching again.
+const navLinks: NavLink[] = [
+  { href: '/keyboard', label: 'Type' },
+  { href: '/flashcards', label: 'Flashcards' },
+];
+
+const ACCENT_GRADIENT =
+  'linear-gradient(90deg, #15803D 0%, #7C3AED 30%, #F43F5E 55%, #F59E0B 75%, #059669 100%)';
 
 const currentPath = Astro.url.pathname;
 // Undefined on prerendered pages, which is most of them — the inline script at
@@ -51,13 +63,10 @@ const user = Astro.locals.user;
   <body class="bg-bg text-text min-h-screen flex flex-col">
 
     <!-- ── Rainbow accent line at top of page ─────────────────────────── -->
-    <div
-      class="h-1 w-full"
-      style="background: linear-gradient(90deg, #15803D 0%, #7C3AED 30%, #F43F5E 55%, #F59E0B 75%, #059669 100%);"
-    ></div>
+    <div class="h-1 w-full" style={`background: ${ACCENT_GRADIENT};`}></div>
 
     <!-- ── Nav ────────────────────────────────────────────────────────── -->
-    <nav class="bg-primary text-white px-4 sm:px-6 py-4 shadow-md">
+    <header class="bg-primary text-white px-4 sm:px-6 py-4 shadow-md">
       <div class="max-w-5xl mx-auto flex items-center justify-between">
 
         <!-- Logo -->
@@ -74,39 +83,18 @@ const user = Astro.locals.user;
           </span>
         </a>
 
-        <!-- Nav links -->
-        <nav class="flex items-center gap-1">
-          <a
-            href="/keyboard"
-            class="px-3 py-1.5 rounded-lg text-sm font-semibold text-white/80 hover:text-white hover:bg-white/10 transition-colors"
-          >
-            Type
-          </a>
-          <a
-            href="/flashcards"
-            class="px-3 py-1.5 rounded-lg text-sm font-semibold text-white/80 hover:text-white hover:bg-white/10 transition-colors"
-          >
-            Flashcards
-          </a>
-          <div class="w-px h-5 bg-white/20 mx-1"></div>
-          <a
-            href={user ? '/account' : '/account/signin'}
-            class:list={[
-              'px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors',
-              currentPath.startsWith('/account')
-                ? 'bg-white/20 text-white'
-                : 'text-white/80 hover:text-white hover:bg-white/10',
-            ]}
-            aria-current={currentPath.startsWith('/account') ? 'page' : undefined}
-            aria-label={user ? 'My Account' : 'Sign in'}
-            data-account-link
-          >
-            <span data-account-label>{user ? 'Account' : 'Sign in'}</span>
-          </a>
-        </nav>
+        <!-- Desktop links at md+, hamburger below it -->
+        <SiteNav
+          links={navLinks}
+          currentPath={currentPath}
+          accountHref={user ? '/account' : '/account/signin'}
+          accountLabel={user ? 'Account' : 'Sign in'}
+          accentGradient={ACCENT_GRADIENT}
+          siteName="hebrew.tools"
+        />
 
       </div>
-    </nav>
+    </header>
 
     <!-- ── Main content ────────────────────────────────────────────────── -->
     <main class="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
@@ -114,7 +102,7 @@ const user = Astro.locals.user;
     </main>
 
     <!-- ── Footer ─────────────────────────────────────────────────────── -->
-    <footer class="bg-primary text-white/60 text-sm text-center py-5">
+    <footer class="bg-primary text-white/60 text-sm text-center px-4 py-5">
       <p>
         <!-- "hebrew.tools" morphs into Hebrew on hover -->
         <span class="group inline-block cursor-default select-none">

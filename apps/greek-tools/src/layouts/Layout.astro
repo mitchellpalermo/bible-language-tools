@@ -1,4 +1,6 @@
 ---
+import SiteNav from '@tools/shared/components/SiteNav.astro';
+import type { NavLink } from '@tools/shared/nav';
 import '../styles/global.css';
 
 interface Props {
@@ -11,24 +13,34 @@ const {
   description = 'Free tools for Koine Greek students — keyboard, flashcards, and more.',
 } = Astro.props;
 
-const navLinks = [
-  { href: '/keyboard', label: 'Type', tabLabel: 'Type' },
-  { href: '/daily', label: 'Daily', tabLabel: 'Daily' },
-  { href: '/reader', label: 'Reader', tabLabel: 'Reader' },
-  { href: '/grammar', label: 'Grammar', tabLabel: 'Grammar' },
-  { href: '/study', label: 'Study', tabLabel: 'Study' },
+// Study keeps its own landing page and lists its five sub-routes, so the
+// mobile menu reaches them in one tap instead of three. The children double as
+// the active-path list that lights Study up on /flashcards and friends.
+const navLinks: NavLink[] = [
+  { href: '/keyboard', label: 'Type' },
+  { href: '/daily', label: 'Daily' },
+  { href: '/reader', label: 'Reader' },
+  { href: '/grammar', label: 'Grammar' },
+  {
+    href: '/study',
+    label: 'Study',
+    children: [
+      { href: '/flashcards', label: 'Flashcards' },
+      { href: '/quiz', label: 'Quiz' },
+      { href: '/paradigms', label: 'Paradigms' },
+      { href: '/parse', label: 'Parse' },
+      { href: '/focus', label: 'Focus Passages' },
+    ],
+  },
 ];
 
+const ACCENT_GRADIENT =
+  'linear-gradient(90deg, #1D4ED8 0%, #7C3AED 30%, #F43F5E 55%, #F59E0B 75%, #059669 100%)';
+
 const currentPath = Astro.url.pathname;
+// Undefined on prerendered pages, which is most of them — the inline script at
+// the bottom corrects the account link from the gt-auth hint cookie.
 const user = Astro.locals.user;
-
-// Study section covers flashcards, quiz modes, and focus passages
-const STUDY_PATHS = ['/study', '/flashcards', '/quiz', '/paradigms', '/parse', '/focus'];
-
-function isActive(href: string) {
-  if (href === '/study') return STUDY_PATHS.some((p) => currentPath.startsWith(p));
-  return currentPath.startsWith(href);
-}
 ---
 
 <!doctype html>
@@ -69,13 +81,10 @@ function isActive(href: string) {
   <body class="bg-bg text-text min-h-screen flex flex-col">
 
     <!-- ── Rainbow accent line at top of page ─────────────────────────── -->
-    <div
-      class="h-1 w-full"
-      style="background: linear-gradient(90deg, #1D4ED8 0%, #7C3AED 30%, #F43F5E 55%, #F59E0B 75%, #059669 100%);"
-    ></div>
+    <div class="h-1 w-full" style={`background: ${ACCENT_GRADIENT};`}></div>
 
     <!-- ── Nav ────────────────────────────────────────────────────────── -->
-    <nav class="bg-primary text-white px-4 sm:px-6 py-4 shadow-md">
+    <header class="bg-primary text-white px-4 sm:px-6 py-4 shadow-md">
       <div class="max-w-5xl mx-auto flex items-center justify-between">
 
         <!-- Logo -->
@@ -92,50 +101,26 @@ function isActive(href: string) {
           </span>
         </a>
 
-        <!-- Desktop nav links (hidden on mobile — replaced by bottom tab bar) -->
-        <div class="hidden md:flex gap-1 items-center">
-          {navLinks.map(({ href, label }) => (
-            <a
-              href={href}
-              class={[
-                'px-3 py-1.5 rounded-md text-sm font-semibold transition-colors',
-                isActive(href)
-                  ? 'bg-white/20 text-white'
-                  : 'text-white/80 hover:text-white hover:bg-white/10',
-              ].join(' ')}
-              aria-current={isActive(href) ? 'page' : undefined}
-            >
-              {label}
-            </a>
-          ))}
-          <div class="w-px h-5 bg-white/20 mx-1"></div>
-          <a
-            href={user ? '/account' : '/account/signin'}
-            class={[
-              'px-3 py-1.5 rounded-md text-sm font-semibold transition-colors',
-              currentPath.startsWith('/account')
-                ? 'bg-white/20 text-white'
-                : 'text-white/80 hover:text-white hover:bg-white/10',
-            ].join(' ')}
-            aria-current={currentPath.startsWith('/account') ? 'page' : undefined}
-            aria-label={user ? 'My Account' : 'Sign in'}
-            data-account-link
-          >
-            <span data-account-label>{user ? 'Account' : 'Sign in'}</span>
-          </a>
-        </div>
+        <!-- Desktop links at md+, hamburger below it -->
+        <SiteNav
+          links={navLinks}
+          currentPath={currentPath}
+          accountHref={user ? '/account' : '/account/signin'}
+          accountLabel={user ? 'Account' : 'Sign in'}
+          accentGradient={ACCENT_GRADIENT}
+          siteName="greek.tools"
+        />
 
       </div>
-    </nav>
+    </header>
 
     <!-- ── Main content ────────────────────────────────────────────────── -->
-    <!-- pb-24 on mobile leaves room above the fixed bottom tab bar -->
-    <main class="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 pt-6 sm:pt-8 pb-24 md:pb-8">
+    <main class="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 pt-6 sm:pt-8 pb-8">
       <slot />
     </main>
 
-    <!-- ── Footer (desktop only — bottom tab bar serves as nav on mobile) ── -->
-    <footer class="hidden md:block bg-primary text-white/60 text-sm text-center py-5">
+    <!-- ── Footer ─────────────────────────────────────────────────────── -->
+    <footer class="bg-primary text-white/60 text-sm text-center px-4 py-5">
       <p>
         <!-- "greek.tools" morphs into Greek translations on hover -->
         <span class="group inline-block cursor-default select-none">
@@ -161,137 +146,6 @@ function isActive(href: string) {
       </p>
     </footer>
 
-    <!-- ── Mobile bottom tab bar (hidden on md+) ──────────────────────── -->
-    <nav
-      class="fixed bottom-0 inset-x-0 md:hidden z-50 bg-primary border-t border-white/10"
-      style="padding-bottom: env(safe-area-inset-bottom, 0px)"
-      aria-label="Main navigation"
-    >
-      <!-- Thin rainbow line mirrors the page top accent -->
-      <div
-        class="h-px w-full"
-        style="background: linear-gradient(90deg, #1D4ED8 0%, #7C3AED 30%, #F43F5E 55%, #F59E0B 75%, #059669 100%);"
-      ></div>
-
-      <div class="flex justify-around items-stretch h-[72px]">
-
-        <!-- Keyboard -->
-        <a
-          href="/keyboard"
-          class:list={["tab-item", isActive('/keyboard') ? "tab-active" : "tab-inactive"]}
-          aria-label="Greek Keyboard"
-          aria-current={isActive('/keyboard') ? 'page' : undefined}
-        >
-          <span class:list={["tab-pill", { "tab-pill-active": isActive('/keyboard') }]}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <rect x="2" y="6" width="20" height="12" rx="2" ry="2"/>
-              <circle cx="6" cy="10" r="1" fill="currentColor" stroke="none"/>
-              <circle cx="10" cy="10" r="1" fill="currentColor" stroke="none"/>
-              <circle cx="14" cy="10" r="1" fill="currentColor" stroke="none"/>
-              <circle cx="18" cy="10" r="1" fill="currentColor" stroke="none"/>
-              <circle cx="8" cy="14" r="1" fill="currentColor" stroke="none"/>
-              <circle cx="12" cy="14" r="1" fill="currentColor" stroke="none"/>
-              <circle cx="16" cy="14" r="1" fill="currentColor" stroke="none"/>
-            </svg>
-            <span class="tab-label">Type</span>
-          </span>
-        </a>
-
-        <!-- Daily verse -->
-        <a
-          href="/daily"
-          class:list={["tab-item", isActive('/daily') ? "tab-active" : "tab-inactive"]}
-          aria-label="Daily Verse"
-          aria-current={isActive('/daily') ? 'page' : undefined}
-        >
-          <span class:list={["tab-pill", { "tab-pill-active": isActive('/daily') }]}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <circle cx="12" cy="12" r="4"/>
-              <line x1="12" y1="2" x2="12" y2="5"/>
-              <line x1="12" y1="19" x2="12" y2="22"/>
-              <line x1="4.22" y1="4.22" x2="6.34" y2="6.34"/>
-              <line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/>
-              <line x1="2" y1="12" x2="5" y2="12"/>
-              <line x1="19" y1="12" x2="22" y2="12"/>
-              <line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/>
-              <line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/>
-            </svg>
-            <span class="tab-label">Daily</span>
-          </span>
-        </a>
-
-        <!-- Reader -->
-        <a
-          href="/reader"
-          class:list={["tab-item", isActive('/reader') ? "tab-active" : "tab-inactive"]}
-          aria-label="Reader"
-          aria-current={isActive('/reader') ? 'page' : undefined}
-        >
-          <span class:list={["tab-pill", { "tab-pill-active": isActive('/reader') }]}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-            </svg>
-            <span class="tab-label">Reader</span>
-          </span>
-        </a>
-
-        <!-- Grammar -->
-        <a
-          href="/grammar"
-          class:list={["tab-item", isActive('/grammar') ? "tab-active" : "tab-inactive"]}
-          aria-label="Grammar Reference"
-          aria-current={isActive('/grammar') ? 'page' : undefined}
-        >
-          <span class:list={["tab-pill", { "tab-pill-active": isActive('/grammar') }]}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-              <line x1="9" y1="7" x2="15" y2="7"/>
-              <line x1="9" y1="11" x2="15" y2="11"/>
-            </svg>
-            <span class="tab-label">Grammar</span>
-          </span>
-        </a>
-
-        <!-- Study (Flashcards + Quiz + Focus) -->
-        <a
-          href="/study"
-          class:list={["tab-item", isActive('/study') ? "tab-active" : "tab-inactive"]}
-          aria-label="Study"
-          aria-current={isActive('/study') ? 'page' : undefined}
-        >
-          <span class:list={["tab-pill", { "tab-pill-active": isActive('/study') }]}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-              <line x1="6" y1="8" x2="8" y2="8"/>
-              <line x1="6" y1="12" x2="8" y2="12"/>
-            </svg>
-            <span class="tab-label">Study</span>
-          </span>
-        </a>
-
-        <!-- Account / Sign in -->
-        <a
-          href={user ? '/account' : '/account/signin'}
-          class:list={["tab-item", currentPath.startsWith('/account') ? "tab-active" : "tab-inactive"]}
-          aria-label={user ? 'My Account' : 'Sign in'}
-          aria-current={currentPath.startsWith('/account') ? 'page' : undefined}
-          data-account-link
-        >
-          <span class:list={["tab-pill", { "tab-pill-active": currentPath.startsWith('/account') }]}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-            <span class="tab-label" data-account-label>{user ? 'Account' : 'Sign in'}</span>
-          </span>
-        </a>
-
-      </div>
-    </nav>
-
     <!-- Auth-aware nav + sync-on-hide. Most pages are prerendered with no
          session, so the client corrects the account links from the gt-auth
          hint cookie and registers the progress push for signed-in users. -->
@@ -312,52 +166,3 @@ function isActive(href: string) {
     </script>
   </body>
 </html>
-
-<style>
-  .tab-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    text-decoration: none;
-    transition: color 150ms ease;
-    -webkit-tap-highlight-color: transparent;
-    min-width: 0;
-  }
-
-  .tab-active {
-    color: var(--color-accent-light);
-  }
-
-  .tab-inactive {
-    color: rgb(255 255 255 / 0.45);
-  }
-
-  .tab-inactive:hover {
-    color: rgb(255 255 255 / 0.75);
-  }
-
-  .tab-pill {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    padding: 4px 6px;
-    border-radius: 10px;
-    transition: background-color 150ms ease;
-    width: 100%;
-  }
-
-  .tab-pill-active {
-    background-color: rgb(245 158 11 / 0.18);
-  }
-
-  .tab-label {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    line-height: 1;
-    white-space: nowrap;
-  }
-</style>
