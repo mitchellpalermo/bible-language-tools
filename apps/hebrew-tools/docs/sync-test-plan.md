@@ -307,9 +307,42 @@ All three properties confirmed at once:
    from a behind-the-times client. A blanket rejection would also have shown
    "0 rows lost" and would have been wrong.
 
-Point 3 also satisfies the "confirm the reverse" step for new *keys*. Still worth
-running it for new *reviews on existing keys* — a card going `repetition: 0 → 1`
-in the direction that should win.
+**Second half — same session (PASS)**
+
+Studied more cards on B in SRS Review mode and hid the tab again. Compared
+against the 25-row state above:
+
+| Check | Result |
+|---|---|
+| Rows lost | **0** |
+| Rows regressed | **0** |
+| Rows added | **9** new cards |
+| Existing rows advanced | **1** — `מֶלֶךְ` |
+
+`מֶלֶךְ` is the one that matters. It was the stale card B had pushed at
+`repetition: 0, dueDate: 2026-08-01`. Studying it moved local to
+`dueDate: 2026-08-09` with `repetition` still 0, so repetitions tied and the
+merge fell through to "later `dueDate` wins" — which it did. That closes the gap
+the first half left open: not just new *keys*, but new *reviews on existing
+keys*, flow through the guard.
+
+It also exercises test 6's tie-break rule against production for free.
+
+**Caveat on the data used.** Grading "Still Learning" (quality 1) resets
+`repetition` to 0 and sets a 1-day interval, so a run where everything is marked
+"Still Learning" only ever exercises the **dueDate tie-break**, never the "higher
+repetition wins" branch. Only `דָּבָר` reached `repetition: 1` here. To confirm
+that branch against production, use test 5's seeded values or mark some cards
+"Got It".
+
+**Diffing this output.** Hebrew combining marks may normalize differently between
+two captures, so `sort`/`comm`/`diff` can report nonsense — words that are
+plainly present get flagged as added. Compare with NFC normalization applied:
+
+```python
+import unicodedata as ud
+key = ud.normalize('NFC', word_key)
+```
 
 ### 11. Timed-out sync reaching the import offer
 
