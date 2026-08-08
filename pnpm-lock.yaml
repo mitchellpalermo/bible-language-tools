@@ -113,6 +113,9 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.18
         version: 4.3.0(vite@6.4.3(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
+      '@tools/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@tools/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -125,6 +128,9 @@ importers:
       astro:
         specifier: ^5.17.1
         version: 5.18.2(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(typescript@5.9.3)(yaml@2.9.0)
+      drizzle-orm:
+        specifier: ^0.44.7
+        version: 0.44.7(@cloudflare/workers-types@4.20260609.1)(@types/better-sqlite3@7.6.13)(better-sqlite3@12.10.0)(kysely@0.29.2)
       posthog-js:
         specifier: ^1.240.4
         version: 1.383.2
@@ -138,6 +144,9 @@ importers:
         specifier: ^4.1.18
         version: 4.3.0
     devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^4.20260609.1
+        version: 4.20260609.1
       '@playwright/test':
         specifier: ^1.58.2
         version: 1.60.0
