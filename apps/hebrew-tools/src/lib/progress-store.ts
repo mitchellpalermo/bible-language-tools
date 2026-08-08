@@ -20,6 +20,7 @@ import { and, eq } from 'drizzle-orm';
 import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
 import type { SRSCard, StudyStats } from '../data/srs';
 import { LANGUAGE } from './db';
+import { mergeProgress } from './sync-merge';
 import type { ProgressPayload } from './sync-types';
 
 export type ProgressDb = BaseSQLiteDatabase<'sync' | 'async', unknown, typeof schema>;
@@ -101,8 +102,21 @@ export async function getProgress(db: ProgressDb, userId: string): Promise<Progr
 }
 
 /**
- * Replace the user's Hebrew progress with the given payload.
+ * Merge the given payload into the user's stored Hebrew progress.
  * Returns the server-assigned syncedAt timestamp.
+ *
+ * MERGES, does not replace. This is the guard that makes a stale client
+ * harmless: the session-end push (see registerSessionEndPush) is a one-shot
+ * keepalive request that cannot pull first, so a device carrying week-old
+ * localStorage will happily PUT it. Merging server-side means such a push can
+ * only ever add or hold — never regress another device's work.
+ *
+ * A client-side fix could not close this: it would only protect clients that
+ * behave. The server is the one place the rule holds unconditionally.
+ *
+ * Deliberate consequence: PUT can never remove a card. Intentional destruction
+ * goes through deleteProgress() instead — that is what "Reset SRS" and the
+ * "Start fresh" import option call.
  *
  * sync_state is written last: its presence is what marks the account as having
  * synced, so it must not appear before the data it describes.
@@ -115,7 +129,13 @@ export async function putProgress(
   const syncedAt = new Date().toISOString();
   const userLang = { userId, language: LANGUAGE };
 
-  const cardRows = Object.entries(payload.srsStore).map(([wordKey, card]) => ({
+  const existing = await getProgress(db, userId);
+  // mergeProgress is symmetric, so argument order carries no meaning here.
+  const merged = existing
+    ? mergeProgress({ srsStore: existing.srsStore, studyStats: existing.studyStats }, payload)
+    : payload;
+
+  const cardRows = Object.entries(merged.srsStore).map(([wordKey, card]) => ({
     ...userLang,
     wordKey,
     interval: card.interval,
@@ -133,7 +153,7 @@ export async function putProgress(
     db
       .delete(studyStatsTable)
       .where(and(eq(studyStatsTable.userId, userId), eq(studyStatsTable.language, LANGUAGE))),
-    db.insert(studyStatsTable).values({ ...userLang, ...payload.studyStats }),
+    db.insert(studyStatsTable).values({ ...userLang, ...merged.studyStats }),
     db
       .delete(syncStateTable)
       .where(and(eq(syncStateTable.userId, userId), eq(syncStateTable.language, LANGUAGE))),

@@ -157,7 +157,8 @@ Things that will bite if changed carelessly:
 - **Writes are delete-then-insert of the full per-language set**, not upserts.
 - **Keepalive bodies are capped at 64 KB by browsers.** An oversized store makes the session-end push fail silently; the next sign-in pull or manual "Sync now" covers it.
 - **Merge rule is "more progress wins":** higher `repetition` wins per card, ties broken by later `dueDate`; stats counters take the max.
-- **The session-end push is a blind overwrite.** `registerSessionEndPush` calls `push()`, not `pullAndMerge()`, and `putProgress` replaces the whole per-language row set. Nothing pulls on ordinary page load. A device with stale local state can therefore overwrite newer server progress — see the "Known gap" section of `docs/sync-test-plan.md` before changing anything in this area.
+- **`PUT /api/progress` merges server-side; it never replaces.** This is load-bearing. The session-end push is a one-shot keepalive request that cannot pull first, so a device with week-old localStorage will PUT exactly that. Merging on the server means such a push can only add or hold, never regress another device's work — and it holds even for a client that misbehaves, which no client-side fix can. **Do not "optimise" `putProgress` back into a replace.**
+- **Therefore `PUT` can never remove a card.** Deletion goes through `DELETE` only. "Reset SRS" in `Flashcards.tsx` calls `deleteServerProgress()` when signed in for exactly this reason; clearing localStorage alone would be undone by the next sync.
 
 Cross-device behaviour can't be covered by unit tests. `docs/sync-test-plan.md` is the manual plan; run test 15 (greek.tools isolation) after any change to `progress-store.ts`.
 

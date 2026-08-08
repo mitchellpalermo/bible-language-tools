@@ -16,14 +16,20 @@ explains almost every surprising result:
 |---|---|---|
 | Sign-in (`/account/syncing`) | `pullAndMerge()` | server → merge → both |
 | "Sync now" on `/account` | `pullAndMerge()` | server → merge → both |
-| Tab hidden (any page, signed in) | `push()` | **local → server, no merge** |
+| Tab hidden (any page, signed in) | `push()` | local → server, no client-side merge |
 
-The third one is a **blind overwrite**. `push()` sends this browser's
-localStorage as-is, and the server replaces the whole per-language row set with
-it. Nothing pulls on ordinary page load — only on sign-in and on "Sync now."
+The third sends this browser's localStorage as-is — it is a one-shot keepalive
+request and cannot pull first. Nothing pulls on ordinary page load either, only
+on sign-in and "Sync now."
 
-That asymmetry is the source of most of the risk below. Tests 10 and 11 target
-it directly.
+**The server merges on write**, which is what makes that safe. `PUT
+/api/progress` merges the incoming payload into what is stored rather than
+replacing it, so a stale push can only ever add or hold — never regress another
+device's work. Tests 10 and 11 exist to confirm that in the real world.
+
+**Corollary: `PUT` can never remove a card.** Deletion goes through `DELETE`
+only, which is what "Reset SRS" and the "Start fresh" option call. Test 8 and
+test 16 cover those paths.
 
 ## Setup
 
@@ -190,10 +196,11 @@ time. Off-by-one in chunking only shows up above the boundary.
 
 **Expect:** all 40 present, values intact. Spot-check the last one.
 
-### 10. Stale device overwrite — **the one I most want probed**
+### 10. Stale device push — **the one I most want probed**
 
-**Why:** `push()` on tab-hide is a blind overwrite. This test asks whether that
-can destroy another device's work.
+**Why:** the session-end push sends stale local state with no client-side merge.
+Server-side merge is what should make that harmless. This test proves it against
+a real deployment rather than against SQLite in a test runner.
 
 1. Get **A** and **B** both signed in and synced identically.
 2. On **B**, close the tab and leave it alone.
@@ -204,17 +211,19 @@ can destroy another device's work.
 5. On **B**, switch to another tab to trigger the session-end push.
 6. Check the server.
 
-**Expect (honest prediction):** the server now holds **B's stale state**, and
-A's 10 reviews are gone from it.
+**Expect:** the server still holds **all** of A's 10 reviews. B's stale push
+merged in and changed nothing, because merging happens server-side.
 
-**Is that data loss?** Usually not permanently — A's localStorage still has
-them, so A's next sync merges them back. It becomes real loss only if A's
-browser data is cleared, or A never returns, or a *third* device pulls in
-between and propagates the stale state.
+**This is the failure mode to hunt for.** If A's reviews disappear from the
+server here, the server-side merge is not doing its job and nothing else in this
+plan matters. Capture the `/api/progress` response before and after B's push.
 
-**Record what you observe.** If it behaves as predicted, that's a design gap to
-fix, not a mystery — see "Known gap" below. greek.tools has the identical
-behavior today, so it isn't a regression this PR introduces.
+**Then confirm the reverse:** study 3 cards on B, hide the tab, and check that
+those 3 *do* appear on the server. A guard that blocks stale data is only
+correct if it still lets new data through.
+
+> greek.tools still replaces rather than merges on write, so it has the original
+> behaviour. Worth porting this fix there — see the note in issue #91.
 
 ### 11. Timed-out sync reaching the import offer
 
@@ -225,12 +234,14 @@ behavior today, so it isn't a regression this PR introduces.
 2. Sign in with the network throttled hard (DevTools → Network → Slow 3G) so
    `/account/syncing` hits its 5s timeout.
 
-**Expect:** the timeout treats the account as having no server data. If the
-import offer appears and you click **Import**, that pushes only this browser's
-few cards — overwriting the account's real history.
+**Expect:** the timeout treats the account as having no server data, so the
+import offer may appear when it should not. Clicking **Import** now only merges
+this browser's few cards into the account rather than replacing it, so the
+history survives — but the *prompt itself* is still wrong.
 
-**Record what happens.** If the offer appears here, the fix is to distinguish
-"server has no data" from "we could not reach the server."
+**Record whether the offer appears.** If it does, the remaining fix is to
+distinguish "server has no data" from "we could not reach the server" — a UI
+correctness issue now rather than a data-loss one.
 
 ### 12. Failure never interrupts studying
 
@@ -290,28 +301,47 @@ Hebrew activity must never change the greek count.
 
 ---
 
-## Known gap: blind push on tab-hide
+### 16. Reset SRS reaches the server
 
-Tests 10 and 11 probe the same underlying issue. `registerSessionEndPush` calls
-`push()`, not `pullAndMerge()`, and `putProgress` replaces the full per-language
-row set. A device with stale local state can therefore overwrite newer
-server-side progress.
+**Why:** since `PUT` merges, clearing localStorage alone would be undone by the
+next sync. Reset has to call `DELETE`.
 
-It is mitigated in practice — each device keeps its own localStorage, so the
-next merge usually restores what was overwritten — but it is not airtight.
+1. On **A**, signed in with synced progress, click **Reset SRS** and confirm.
+2. Check `/api/progress`.
 
-Three possible fixes, if testing confirms it matters:
+**Expect:** `{"data":null}` — the account's Hebrew progress is gone, not just
+this browser's.
 
-1. **Guard server-side.** Reject a `PUT` whose payload is strictly smaller than
-   what is stored (fewer cards *and* lower `totalReviewed`), or merge on the
-   server instead of replacing. Cheapest, and closes the hole regardless of
-   which client is at fault.
-2. **Pull on load, not just on sign-in.** A signed-in page load does a
-   `pullAndMerge()` before any push can fire. Costs a request per session.
-3. **Make the session-end push a merge.** Cleanest conceptually, but keepalive
-   is one-shot and cannot do a reliable round trip during unload.
+3. On **B** (still holding the old cards), click **Sync now**.
 
-I would take (1). It is the only one that holds even when a client misbehaves.
+**Expect:** B's local progress uploads and the account is repopulated from B.
+That is correct behaviour for a per-device reset, not a bug — but know that it
+happens, because it surprises people.
+
+---
+
+## Why the fix lives on the server
+
+The session-end push is a one-shot keepalive request. It cannot pull, merge, and
+put during unload — the page may be gone before the first response arrives. So
+the client cannot be made to sync safely at that moment.
+
+Three options were on the table:
+
+1. **Merge server-side on `PUT`.** ← chosen
+2. Pull on every page load, not just sign-in. Costs a request per session and
+   still leaves a window between load and the first study action.
+3. Make the session-end push a merge. Not reliably possible, per above.
+
+(1) is the only one that holds even when a client misbehaves — an old cached
+build, a second tab with stale state, or a hand-crafted request. The others only
+protect clients that cooperate.
+
+The cost is that `PUT` can no longer remove anything, which is why deletion
+moved to `DELETE` (test 16).
+
+**Still open:** the timeout-vs-empty ambiguity in test 11. It is now a wrong
+prompt rather than data loss, so it is worth fixing but not urgent.
 
 ## Reporting
 

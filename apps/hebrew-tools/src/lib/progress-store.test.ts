@@ -88,7 +88,7 @@ describe('getProgress', () => {
 });
 
 describe('putProgress', () => {
-  it('replaces rather than accumulates', async () => {
+  it('merges with what is already stored rather than replacing it', async () => {
     await putProgress(db, USER, {
       srsStore: { מֶלֶךְ: card(), דָּבָר: card({ key: 'דָּבָר' }) },
       studyStats: stats(),
@@ -96,7 +96,7 @@ describe('putProgress', () => {
     await putProgress(db, USER, { srsStore: { אֵשׁ: card({ key: 'אֵשׁ' }) }, studyStats: stats() });
 
     const payload = await getProgress(db, USER);
-    expect(Object.keys(payload?.srsStore ?? {})).toEqual(['אֵשׁ']);
+    expect(Object.keys(payload?.srsStore ?? {}).sort()).toEqual(['אֵשׁ', 'דָּבָר', 'מֶלֶךְ'].sort());
   });
 
   it('round-trips a store larger than one insert chunk', async () => {
@@ -135,6 +135,75 @@ describe('putProgress', () => {
     });
 
     expect((await getProgress(db, USER))?.srsStore.מֶלֶךְ.easeFactor).toBeCloseTo(2.36);
+  });
+});
+
+describe('a stale client cannot regress stored progress', () => {
+  // The session-end push is a one-shot keepalive PUT that cannot pull first, so
+  // a device carrying week-old localStorage will send exactly that. These are
+  // the tests that say such a push is harmless.
+
+  it('does not drop cards the stale client has never seen', async () => {
+    await putProgress(db, USER, {
+      srsStore: { מֶלֶךְ: card(), דָּבָר: card({ key: 'דָּבָר' }), אֵשׁ: card({ key: 'אֵשׁ' }) },
+      studyStats: stats({ totalReviewed: 200 }),
+    });
+
+    // Stale device knows about one card and nothing else.
+    await putProgress(db, USER, {
+      srsStore: { מֶלֶךְ: card({ repetition: 1 }) },
+      studyStats: stats({ totalReviewed: 5, streak: 0, lastStreakDate: '' }),
+    });
+
+    const payload = await getProgress(db, USER);
+    expect(Object.keys(payload?.srsStore ?? {})).toHaveLength(3);
+  });
+
+  it('does not roll a card back to fewer repetitions', async () => {
+    await putProgress(db, USER, { srsStore: { מֶלֶךְ: card({ repetition: 8 }) }, studyStats: stats() });
+    await putProgress(db, USER, { srsStore: { מֶלֶךְ: card({ repetition: 1 }) }, studyStats: stats() });
+
+    expect((await getProgress(db, USER))?.srsStore.מֶלֶךְ.repetition).toBe(8);
+  });
+
+  it('does not roll cumulative stats backwards', async () => {
+    await putProgress(db, USER, {
+      srsStore: {},
+      studyStats: stats({ totalReviewed: 500, totalCorrect: 400, streak: 12 }),
+    });
+    await putProgress(db, USER, {
+      srsStore: {},
+      studyStats: stats({ totalReviewed: 3, totalCorrect: 2, streak: 1 }),
+    });
+
+    const merged = (await getProgress(db, USER))?.studyStats;
+    expect(merged?.totalReviewed).toBe(500);
+    expect(merged?.totalCorrect).toBe(400);
+    expect(merged?.streak).toBe(12);
+  });
+
+  it('still accepts genuinely new progress from that client', async () => {
+    await putProgress(db, USER, { srsStore: { מֶלֶךְ: card({ repetition: 2 }) }, studyStats: stats() });
+    await putProgress(db, USER, {
+      srsStore: { מֶלֶךְ: card({ repetition: 6 }), צֹאן: card({ key: 'צֹאן' }) },
+      studyStats: stats(),
+    });
+
+    const payload = await getProgress(db, USER);
+    expect(payload?.srsStore.מֶלֶךְ.repetition).toBe(6);
+    expect(payload?.srsStore.צֹאן).toBeDefined();
+  });
+
+  it('leaves deleteProgress as the only way to remove anything', async () => {
+    await putProgress(db, USER, { srsStore: { מֶלֶךְ: card() }, studyStats: stats() });
+
+    // An empty PUT cannot clear the account...
+    await putProgress(db, USER, { srsStore: {}, studyStats: stats() });
+    expect(Object.keys((await getProgress(db, USER))?.srsStore ?? {})).toHaveLength(1);
+
+    // ...but DELETE can.
+    await deleteProgress(db, USER);
+    expect(await getProgress(db, USER)).toBeNull();
   });
 });
 

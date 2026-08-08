@@ -2,6 +2,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { loadSRSStore, loadStats } from '../data/srs';
+import { hasAuthHint } from '../lib/auth-cookie';
+import { deleteServerProgress } from '../lib/sync-manager';
 import { type ChapterDeck, chapterDecks, TEXTBOOKS } from '../data/textbooks';
 import { vocabulary } from '../data/vocabulary';
 import Flashcards, { FREQ_FILTERS, matchFreq } from './Flashcards';
@@ -11,6 +13,9 @@ import Flashcards, { FREQ_FILTERS, matchFreq } from './Flashcards';
 vi.mock('posthog-js', () => ({
   default: { capture: vi.fn(), init: vi.fn(), identify: vi.fn(), captureException: vi.fn() },
 }));
+
+vi.mock('../lib/sync-manager', () => ({ deleteServerProgress: vi.fn() }));
+vi.mock('../lib/auth-cookie', () => ({ hasAuthHint: vi.fn(() => false) }));
 
 beforeEach(() => {
   localStorage.clear();
@@ -200,6 +205,41 @@ describe('Flashcards', () => {
 
     await user.click(screen.getByRole('button', { name: /reset srs/i }));
     expect(loadSRSStore()).toEqual({});
+  });
+
+  it('clears server progress on reset when signed in', async () => {
+    // PUT merges server-side, so clearing localStorage alone would be undone by
+    // the next sync. DELETE is the only path that actually removes anything.
+    const user = userEvent.setup();
+    vi.mocked(hasAuthHint).mockReturnValue(true);
+    vi.stubGlobal('confirm', vi.fn().mockReturnValue(true));
+    renderFlashcards();
+
+    await user.click(screen.getByRole('button', { name: /reset srs/i }));
+
+    expect(deleteServerProgress).toHaveBeenCalledOnce();
+  });
+
+  it('does not call the server on reset when signed out', async () => {
+    const user = userEvent.setup();
+    vi.mocked(hasAuthHint).mockReturnValue(false);
+    vi.stubGlobal('confirm', vi.fn().mockReturnValue(true));
+    renderFlashcards();
+
+    await user.click(screen.getByRole('button', { name: /reset srs/i }));
+
+    expect(deleteServerProgress).not.toHaveBeenCalled();
+  });
+
+  it('does not clear server progress when the reset is declined', async () => {
+    const user = userEvent.setup();
+    vi.mocked(hasAuthHint).mockReturnValue(true);
+    vi.stubGlobal('confirm', vi.fn().mockReturnValue(false));
+    renderFlashcards();
+
+    await user.click(screen.getByRole('button', { name: /reset srs/i }));
+
+    expect(deleteServerProgress).not.toHaveBeenCalled();
   });
 
   it('does not reset SRS progress when the confirm dialog is declined', async () => {
