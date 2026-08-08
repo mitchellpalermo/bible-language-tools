@@ -7,6 +7,11 @@ interface Props {
 }
 
 const { title, description = "Free tools for Biblical Hebrew students — coming soon." } = Astro.props;
+
+const currentPath = Astro.url.pathname;
+// Undefined on prerendered pages, which is most of them — the inline script at
+// the bottom corrects the account link from the hint cookie after hydration.
+const user = Astro.locals.user;
 ---
 
 <!doctype html>
@@ -83,6 +88,21 @@ const { title, description = "Free tools for Biblical Hebrew students — coming
           >
             Flashcards
           </a>
+          <div class="w-px h-5 bg-white/20 mx-1"></div>
+          <a
+            href={user ? '/account' : '/account/signin'}
+            class:list={[
+              'px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors',
+              currentPath.startsWith('/account')
+                ? 'bg-white/20 text-white'
+                : 'text-white/80 hover:text-white hover:bg-white/10',
+            ]}
+            aria-current={currentPath.startsWith('/account') ? 'page' : undefined}
+            aria-label={user ? 'My Account' : 'Sign in'}
+            data-account-link
+          >
+            <span data-account-label>{user ? 'Account' : 'Sign in'}</span>
+          </a>
         </nav>
 
       </div>
@@ -122,6 +142,22 @@ const { title, description = "Free tools for Biblical Hebrew students — coming
         <a href="/privacy" class="text-white/40 hover:text-white/60 transition-colors underline underline-offset-2">Privacy Policy</a>
       </p>
     </footer>
+
+    <!-- Auth-aware nav. Most pages are prerendered with no session available,
+         so the account link is corrected client-side from the ht-auth hint
+         cookie. The sync-on-hide push registers here too once #91 part 3 lands. -->
+    <script>
+      import { hasAuthHint } from '../lib/auth-cookie';
+
+      const signedIn = hasAuthHint();
+      for (const link of document.querySelectorAll<HTMLAnchorElement>('[data-account-link]')) {
+        link.href = signedIn ? '/account' : '/account/signin';
+        link.setAttribute('aria-label', signedIn ? 'My Account' : 'Sign in');
+      }
+      for (const label of document.querySelectorAll('[data-account-label]')) {
+        label.textContent = signedIn ? 'Account' : 'Sign in';
+      }
+    </script>
 
   </body>
 </html>
