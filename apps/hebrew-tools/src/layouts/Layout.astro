@@ -143,11 +143,13 @@ const user = Astro.locals.user;
       </p>
     </footer>
 
-    <!-- Auth-aware nav. Most pages are prerendered with no session available,
-         so the account link is corrected client-side from the ht-auth hint
-         cookie. The sync-on-hide push registers here too once #91 part 3 lands. -->
+    <!-- Auth-aware nav + sync-on-hide. Most pages are prerendered with no
+         session available, so the account link is corrected client-side from
+         the ht-auth hint cookie, and the progress push is registered here so it
+         covers every page a study session might end on. -->
     <script>
       import { hasAuthHint } from '../lib/auth-cookie';
+      import { registerSessionEndPush } from '../lib/sync-manager';
 
       const signedIn = hasAuthHint();
       for (const link of document.querySelectorAll<HTMLAnchorElement>('[data-account-link]')) {
@@ -157,6 +159,8 @@ const user = Astro.locals.user;
       for (const label of document.querySelectorAll('[data-account-label]')) {
         label.textContent = signedIn ? 'Account' : 'Sign in';
       }
+
+      registerSessionEndPush();
     </script>
 
   </body>

@@ -1,0 +1,88 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+export const prerender = false;
+
+// Post-sign-up interstitial: if this device already has study progress, offer to
+// import it into the new account. Server-rendered so the script can key the
+// once-per-account offer flag by user id.
+const user = Astro.locals.user;
+if (!user) {
+  return Astro.redirect('/account/signin?from=/account');
+}
+---
+
+<Layout title="Welcome" description="Set up study sync on hebrew.tools.">
+  <div class="max-w-sm mx-auto mt-16" data-welcome data-user-id={user.id}>
+    <p id="welcome-loading" class="text-sm text-text-muted text-center" aria-live="polite">
+      Setting up your account…
+    </p>
+
+    <div id="import-offer" class="hidden border-2 border-primary/10 rounded-2xl p-5 bg-bg-card">
+      <h1 class="text-lg font-bold mb-2" style="color: var(--color-primary);">
+        Import your progress?
+      </h1>
+      <p class="text-sm text-text-muted mb-5">
+        You have existing study progress on this device. Import it to your account so it syncs
+        across all your devices?
+      </p>
+      <div class="flex gap-3">
+        <button
+          id="import-button"
+          type="button"
+          class="flex-1 bg-primary text-white rounded-xl px-4 py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity"
+        >
+          Import
+        </button>
+        <button
+          id="start-fresh-button"
+          type="button"
+          class="flex-1 border-2 border-primary/20 rounded-xl px-4 py-2.5 text-sm font-semibold text-text hover:bg-primary/5 transition-colors"
+        >
+          Start fresh
+        </button>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import {
+    deleteServerProgress,
+    hasImportBeenOffered,
+    hasLocalProgress,
+    markImportOffered,
+    push,
+  } from '../../lib/sync-manager';
+
+  const SRS_KEY = 'hebrew-tools-srs-v1';
+  const STATS_KEY = 'hebrew-tools-stats-v1';
+
+  const userId = document.querySelector<HTMLElement>('[data-welcome]')?.dataset.userId ?? '';
+
+  function finish() {
+    markImportOffered(userId);
+    location.replace('/account');
+  }
+
+  if (hasImportBeenOffered(userId) || !hasLocalProgress()) {
+    finish();
+  } else {
+    document.getElementById('welcome-loading')?.classList.add('hidden');
+    document.getElementById('import-offer')?.classList.remove('hidden');
+
+    document.getElementById('import-button')?.addEventListener('click', async () => {
+      await push();
+      finish();
+    });
+
+    document.getElementById('start-fresh-button')?.addEventListener('click', async () => {
+      await deleteServerProgress();
+      // Clear this device's progress too — otherwise the next automatic push
+      // would re-upload exactly what the user chose not to import.
+      localStorage.removeItem(SRS_KEY);
+      localStorage.removeItem(STATS_KEY);
+      finish();
+    });
+  }
+</script>

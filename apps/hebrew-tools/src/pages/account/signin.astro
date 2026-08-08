@@ -35,8 +35,8 @@ const from = Astro.url.searchParams.get('from') ?? '';
     </button>
 
     <p class="text-xs text-text-muted mt-6">
-      Signing in does not change how studying works — your progress is still saved in this browser.
-      Syncing it across devices is coming next.
+      Studying still works signed out — your progress is saved in this browser either way. Signing
+      in adds a backup and keeps your cards in step across devices.
     </p>
   </div>
 </Layout>
@@ -50,8 +50,11 @@ const from = Astro.url.searchParams.get('from') ?? '';
   const dest = from.startsWith('/') ? from : '/account';
 
   button?.addEventListener('click', () => {
-    // The post-sign-in interstitial that pulls and merges server progress
-    // arrives with the sync layer (#91); until then, land on the destination.
-    authClient.signIn.social({ provider: 'google', callbackURL: dest });
+    // Route through the interstitial so server progress is pulled and merged
+    // before the user reaches anything that reads localStorage.
+    authClient.signIn.social({
+      provider: 'google',
+      callbackURL: `/account/syncing?to=${encodeURIComponent(dest)}`,
+    });
   });
 </script>

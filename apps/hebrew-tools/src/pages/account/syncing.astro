@@ -1,0 +1,36 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+export const prerender = false;
+---
+
+<!-- Post-sign-in interstitial: pull and merge server progress, then route to
+     welcome (new account that has local progress) or the original destination. -->
+<Layout title="Syncing" description="Syncing your hebrew.tools study progress.">
+  <div class="max-w-sm mx-auto mt-16 text-center">
+    <p class="text-sm text-text-muted" aria-live="polite">Syncing your study progress…</p>
+  </div>
+</Layout>
+
+<script>
+  import { hasLocalProgress, pullAndMerge } from '../../lib/sync-manager';
+
+  const params = new URLSearchParams(location.search);
+  const to = params.get('to') ?? '/account';
+  // Only same-origin paths — `to` comes from the query string.
+  const dest = to.startsWith('/') ? to : '/account';
+
+  // Never strand the user on this page: if sync hangs, carry on after 5s and
+  // let the next push or manual "Sync now" catch up.
+  const timeout = new Promise<{ hadServerData: boolean; ok: boolean }>((resolve) =>
+    setTimeout(() => resolve({ hadServerData: false, ok: false }), 5000),
+  );
+
+  const { hadServerData } = await Promise.race([pullAndMerge(), timeout]);
+
+  if (!hadServerData && hasLocalProgress()) {
+    location.replace('/account/welcome');
+  } else {
+    location.replace(dest);
+  }
+</script>
