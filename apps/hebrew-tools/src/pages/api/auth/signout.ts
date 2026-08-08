@@ -1,0 +1,28 @@
+import type { APIRoute } from 'astro';
+import { createAuth } from '../../../lib/auth';
+import { authHintClearCookie } from '../../../lib/auth-cookie';
+
+export const prerender = false;
+
+export const POST: APIRoute = async ({ request, locals }) => {
+  const { DB, BETTER_AUTH_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = locals.runtime.env;
+  const auth = createAuth(DB, BETTER_AUTH_SECRET, {
+    baseURL: new URL(request.url).origin,
+    googleClientId: GOOGLE_CLIENT_ID,
+    googleClientSecret: GOOGLE_CLIENT_SECRET,
+  });
+
+  const response = await auth.api.signOut({
+    headers: request.headers,
+    asResponse: true,
+  });
+
+  // Redirect home, carrying Better Auth's session-clearing cookies along with
+  // our own hint cookie so the nav flips immediately.
+  const dest = new Response(null, { status: 302, headers: { Location: '/' } });
+  for (const cookie of response.headers.getSetCookie()) {
+    dest.headers.append('Set-Cookie', cookie);
+  }
+  dest.headers.append('Set-Cookie', authHintClearCookie());
+  return dest;
+};

@@ -106,7 +106,7 @@ This app has a `DB` binding to the D1 database `bible-language-tools`, **shared 
 
 **The rule that matters:** one database backs both apps, and a user who signs in to both is one `users` row. Their progress is kept apart only by the `language` column on `srs_cards`, `study_stats`, and `sync_state`. **Every read and write must be scoped by `LANGUAGE`** — a query that forgets the filter reaches into greek-tools' data. `src/lib/db.test.ts` guards this; extend it rather than replacing it when the sync layer lands.
 
-Auth (`better-auth`, Google OAuth) and the sync layer are not built yet — see issue #91 for the full plan.
+The sync layer is not built yet — see issue #91 for the full plan.
 
 ```bash
 pnpm wrangler d1 migrations apply bible-language-tools --local   # set up the local DB
@@ -114,6 +114,26 @@ pnpm wrangler d1 migrations list bible-language-tools --local    # check pending
 ```
 
 Never run migrations with `--remote` by hand; the deploy workflow does it.
+
+### Auth
+
+Better Auth with **Google OAuth only** — no email/password. See `apps/greek-tools/docs/adr/005-oauth-as-sole-auth-provider.md` for why (a reset flow needs outbound email, which needs the Workers Paid plan).
+
+- `src/lib/auth.ts` — Better Auth config. `trustedOrigins` must list every origin the app is served from.
+- `src/middleware.ts` — resolves `Astro.locals.user` on SSR requests. If the bindings are missing it degrades to signed-out rather than throwing, which is what keeps `pnpm dev` working without `.dev.vars`.
+- `src/pages/api/auth/[...all].ts` — Better Auth's catch-all handler.
+- Account pages are `prerender = false`; everything else stays prerendered.
+
+**The `ht-auth` hint cookie** (`src/lib/auth-cookie.ts`) is a non-httpOnly companion to the real session cookie. Prerendered pages can't read the session server-side, so the client reads this to render signed-in nav. **It carries no authority — never gate anything server-side on it.** greek-tools uses `gt-auth`; the names are deliberately distinct.
+
+**Google OAuth redirect URIs are an exact-match allowlist** on the Google Cloud client (shared with greek-tools, app name "bible-language-tools"). `baseURL` is derived from the request origin, so the callback is `<origin>/api/auth/callback/google`. Registered today:
+
+- `https://hebrew.tools/api/auth/callback/google`
+- `http://localhost:4321/api/auth/callback/google`
+
+Running `pnpm dev` on a **non-default port** produces an unregistered callback and Google rejects it with `redirect_uri_mismatch` before any of our code runs. Use the default 4321 when testing sign-in.
+
+Local secrets go in `.dev.vars` (gitignored): `BETTER_AUTH_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`. In production the deploy workflow pushes them with `wrangler secret put`.
 
 ### Textbook chapter decks
 

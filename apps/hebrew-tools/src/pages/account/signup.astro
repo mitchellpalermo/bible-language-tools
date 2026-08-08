@@ -1,0 +1,7 @@
+---
+// There is no separate sign-up: Google OAuth creates the account on first
+// sign-in. This route exists so a guessed/bookmarked /account/signup lands
+// somewhere sensible.
+export const prerender = false;
+return Astro.redirect('/account/signin');
+---
