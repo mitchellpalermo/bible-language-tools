@@ -6,7 +6,9 @@ Biblical Hebrew vocabulary, grammar, and reading tools for seminary students. Bu
 
 The project is currently a styled placeholder page. All real tools are planned — see `ROADMAP.md` for the full feature roadmap and build order.
 
-Planned routes (per roadmap): `/` (home), `/keyboard`, `/flashcards`, `/daily`, `/reader`, `/transliteration`, `/grammar`, `/paradigms`, `/parse`, `/roots`.
+Planned routes (per roadmap): `/` (home), `/keyboard`, `/flashcards`, `/write`, `/daily`, `/reader`, `/transliteration`, `/grammar`, `/paradigms`, `/parse`, `/roots`.
+
+`/write` is stylus handwriting practice, built on `@tools/shared/ink`. The engine is language-agnostic; everything Hebrew about it lives in `src/data/script-pack.ts`. See the repo CLAUDE.md for the engine's invariants and `ROADMAP.md` Phase 9 for what is still to come (issues #99–#105).
 
 ## Tech Stack
 
@@ -98,6 +100,7 @@ See `ROADMAP.md` for the full feature plan and build order.
 - **Root system:** Triliteral (3-letter) root system — pedagogy centers on roots, not lemmas.
 - **Morphological data:** Open Scriptures Hebrew Bible (OSHB) — `github.com/openscriptures/morphhb`, CC BY 4.0. XML per book, parsed into `public/data/morphhb/{BOOK}.json` by a build script.
 - **Lenient comparison:** Strip U+05B0–U+05C7 (nikud) for lenient grading; also strip U+0591–U+05AF (cantillation) when fully stripping diacritics.
+- **SRS key namespace:** the SRS store is shared across features. Vocabulary cards are keyed by bare lemma (`normalizeKey(word.hebrew)`), so **every non-vocabulary card must carry a prefix** or the two collide on a single-letter word. Handwriting practice uses `write:letter:<char>` (`src/data/writing.ts`). Add the prefix to that file when a new card type appears; do not invent one at a call site.
 - **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`. There is still no auth or sync in this app — **all study progress is per-browser only.** The D1 plumbing exists (see below), but nothing reads or writes it yet.
 
 ### Database (accounts groundwork — issue #91)

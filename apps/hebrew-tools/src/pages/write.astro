@@ -1,0 +1,24 @@
+---
+import WritingPractice from '../components/WritingPractice';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Writing Practice"
+  description="Practice writing the Hebrew alphabet by hand with a stylus — trace, copy, then write from memory."
+>
+  <div class="mb-6">
+    <h1
+      class="text-3xl font-bold mb-1"
+      style="color: var(--color-primary);"
+    >
+      Writing Practice
+    </h1>
+    <p class="text-text-muted">
+      Write the letters by hand, then compare against the reference. Best with a stylus —
+      an Apple Pencil gives pressure-sensitive ink and lets you rest your palm on the screen.
+    </p>
+  </div>
+
+  <WritingPractice client:load />
+</Layout>
