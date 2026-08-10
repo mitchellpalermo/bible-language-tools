@@ -452,6 +452,123 @@ This is the most-requested feature for seminary Hebrew students and has no Greek
 
 ---
 
+## Phase 9 — Stylus Writing Practice (`/write`)
+
+**greek.tools analog:** none yet — this phase builds the shared engine and greek.tools inherits it (9g).
+
+`/keyboard` is labeled **Type**. This is its sibling, **Write**: a stylus surface for handwriting Hebrew, aimed squarely at an iPad and Apple Pencil. Handwriting is how the alphabet, the nikud, and the paradigms actually get learned, and it is the one part of a first-year Hebrew course that no web tool covers.
+
+The pedagogy is the spine, not the stylus: every drill runs **trace → copy → recall**. Trace a ghosted glyph, then copy one shown beside an empty box, then produce it from the letter's name or an English gloss alone.
+
+### Modes
+
+| Mode | Content source | Notes |
+|------|---------------|-------|
+| **Letters** | Script pack | 22 consonants, 5 final forms, begadkephat dagesh variants. A separate deck interleaves the confusable pairs — ב/כ, ד/ר, ה/ח/ת, ו/ז/ן, ס/ם, ע/צ — since that is where beginners actually lose marks |
+| **Nikud** | Script pack | Vowel points on a host consonant. *Placement* is most of the skill (qamets centered below, holem above-left), and the mask grading below scores placement natively because it grades the rendered consonant-plus-point as one image |
+| **Words** | `vocabulary.ts`, `textbooks.ts` | RTL grid of guide boxes, one per consonant cluster. Prompted by gloss or transliteration |
+| **Paradigms** | `TableModel` (Phase 7) | Handwrite into blanked cells instead of typing. Same density picker, same result colors. This is the exam-prep mode |
+| **Scribal copying** | Daily Verse / reader text | Long-form, lightly graded. Fill a column of a page over successive days |
+
+Writing into per-letter guide boxes is a deliberate design choice: it removes ink segmentation from the problem entirely. The student says where each letter ends, so the engine never has to guess.
+
+### Grading — three layers that degrade gracefully
+
+**Layer 0 — self-assessment.** Write, reveal the reference overlaid on the ink, grade Again/Hard/Good/Easy. No new data and no new failure modes, and it feeds `nextSRS` from `@tools/shared/srs` unchanged. Shippable on its own.
+
+**Layer 1 — geometric scoring against a font-rendered mask.** No hand-authored glyph outlines are needed, because the app already loads Noto Sans Hebrew:
+
+1. Rasterize the target glyph to an offscreen canvas (256×256), centered on the em box.
+2. Take the alpha channel as a binary mask; run a two-pass chamfer distance transform.
+3. Normalize the ink into the same box and score three numbers:
+   - **Accuracy** — fraction of ink points within tolerance of the glyph (≈ 8% of em width)
+   - **Coverage** — fraction of glyph pixels near some ink point; catches a half-drawn ה
+   - **Spill** — mean distance of the worst decile of ink points; catches stray marks
+
+Deterministic, sub-millisecond, no network and no model, and identical for Greek — the only inputs are a font family and a glyph string.
+
+Two traps: `await document.fonts.load(...)` before rasterizing or the grading runs against a fallback font, and cache masks per glyph.
+
+**Known limitation:** this grades shape *occupancy*, not letter identity or stroke order. A ד drawn as a ר plus a stray tick scores decently. Layer 2 is what closes that.
+
+**Layer 2 — stroke order and direction.** A hand-authored `StrokeTemplate` per glyph: ordered polylines in a normalized 0–1 box, each with a direction. Hebrew needs ~45 entries (22 consonants + 5 finals + shin/sin dots + ~13 nikud); Greek ~60. Bootstrap the data with the app itself — an internal authoring route where each glyph is drawn once with the stylus and saved as JSON.
+
+Matching resamples both user and template stroke to 32 points and compares mean distance, with direction from the endpoint vector's sign. The payoff is coaching text rather than a number: *"Stroke 2 went bottom-to-top — ד draws the roof right-to-left first, then the leg down."* It also gives nearest-template classification nearly free, which turns "you scored 61" into "you wrote a ר."
+
+### Stylus specifics
+
+Apple Pencil reaches the page through standard Pointer Events — `pointerType === 'pen'`, with real `pressure` and `altitudeAngle`/`azimuthAngle`. No native code and no App Store. What the engine has to get right:
+
+- **`getCoalescedEvents()`.** The Pencil samples far faster than `pointermove` fires; without the coalesced samples, fast strokes render visibly polygonal. Feature-detect it and fall back to the single event.
+- **Palm rejection.** Once any `pen` event is seen, `touch` pointers stop drawing and go back to scrolling. A small state machine, and a pure one.
+- **Pressure-driven width**, built as an offset ribbon rather than `lineWidth` (which cannot vary mid-path). This is the single biggest factor in whether the surface feels like a pen.
+- **A one-euro filter** on input plus Catmull-Rom on render — Pencil jitter at slow speeds is real.
+- **Safari hygiene:** `touch-action: none`, `-webkit-touch-callout: none`, `user-select: none`, `overscroll-behavior: contain`, and `setPointerCapture` so a stroke leaving the canvas keeps tracking.
+- **Write-big-place-small.** A 44px paradigm cell is unwritable. Tapping a cell opens an oversized surface below the grid and the graded result renders back into the cell. This also answers right-hand occlusion, a genuine problem when writing right-to-left.
+- **Replay.** Timestamps are captured anyway, so scrubbing a stroke back costs almost nothing — and replaying it against the reference stroke order animating alongside is the best teaching moment in the feature.
+
+Mouse input works through the same code path with constant pressure, which is what makes desktop development and Playwright coverage possible.
+
+**Not available to web pages:** Pencil double-tap and Pencil Pro squeeze. Tool switching must be on-screen.
+
+### Portability to greek.tools
+
+Everything language-specific collapses into one interface, and greek.tools gets `/write` by authoring a single data file plus one `navLinks` entry.
+
+```ts
+export interface ScriptPack {
+  id: 'hebrew' | 'greek';
+  direction: 'rtl' | 'ltr';
+  fontFamily: string;
+  fontLoadSpec: string;              // for document.fonts.load()
+  glyphs: WritableGlyph[];           // char, name, phonetic, group, confusableWith
+  strokes?: Record<string, StrokeTemplate>;
+  combining?: { hostChar: string; marks: WritableGlyph[] };  // nikud / breathings + accents
+  metrics: { emBox: number; baseline: number; ascender: number; descender: number };
+}
+```
+
+```
+packages/shared/src/ink/
+  stroke.ts       Stroke/Point types, resample, normalize, bbox
+  smooth.ts       one-euro filter, Catmull-Rom
+  capture.ts      pointer → strokes, palm rejection, coalesced sampling
+  render.ts       variable-width ribbon → Path2D
+  script-pack.ts  the types above
+  score/mask.ts   glyph → coverage mask + distance transform
+  score/geom.ts   accuracy / coverage / spill → 0–100
+  score/order.ts  stroke-order matcher
+  components/     InkCanvas, TracePanel, WritingGrid
+```
+
+Components added to `packages/shared` must be self-styled with plain CSS and design tokens — Tailwind's content detection is per-app and does not scan the package.
+
+### Storage
+
+Ship v1 with **no schema change.** Writing attempts become ordinary SRS cards in the existing store under a `write:` key prefix (`write:letter:א`, `write:cell:qal-perf:3ms`), so they sync through `/api/progress` on day one and streaks and stats work immediately. The key-namespace convention needs documenting, since those keys are bare lemmas today.
+
+Ink stays local in IndexedDB, quantized to int16 — roughly 2 KB per letter, so keeping several attempts per glyph is free. Syncing ink is a separate, later decision: extending `ProgressPayload` means touching `packages/db` schema, `sync-merge`, and `progress-store`, all governed by the D1 language-scoping invariant. Not free, and not needed for v1.
+
+### Testing
+
+The architecture is shaped so the interesting parts are pure functions over typed arrays, testable without a canvas: resampling, mask generation, the distance transform, the scoring formula (synthetic perfect ink ≈ 100, scribble ≈ low), the stroke-order matcher, and the palm-rejection state machine. Integration tests drive `InkCanvas` with synthetic `PointerEvent`s in happy-dom. Playwright covers one flow end to end: draw, score, advance.
+
+### Bite-sized PR breakdown
+
+| PR | Scope |
+|----|-------|
+| 9a | Ink capture + render in shared; `/write` letters, trace mode, Layer 0 self-grading, SRS wired |
+| 9b | Layer 1 mask scoring + numeric feedback |
+| 9c | Nikud drills and confusable-pair decks |
+| 9d | `WritingGrid` + word mode from `vocabulary.ts` / `textbooks.ts` |
+| 9e | Stroke templates + authoring route + Layer 2 coaching |
+| 9f | Paradigm writing over `TableModel` |
+| 9g | greek.tools `ScriptPack` + `/write` |
+
+9a is usable on its own for alphabet drilling. 9f depends on Phase 7's `TableModel` existing.
+
+---
+
 ## Technical Notes
 
 ### Right-to-Left (RTL) layout
@@ -505,7 +622,16 @@ The following modules from greek.tools can be copied with minimal or zero change
 | 11 | 8C | Binyan Guide | Low (content) | None | Queued (independent — can float earlier) | #83 |
 | 12 | 8A | Root Lookup | Medium | Phase 4 data | Queued | #81 |
 | 13 | 8B | Parsing Practice | Medium | Phase 4 data | Queued | #82 |
+| 14 | 9a | Writing: ink engine + `/write` letters | Medium | None | In progress | #99 |
+| 15 | 9b | Writing: mask scoring | Low–Medium | 9a | Queued | #100 |
+| 16 | 9c | Writing: nikud + confusable decks | Low | 9b | Queued | #101 |
+| 17 | 9d | Writing: word mode + guide grid | Low–Medium | 9b | Queued | #102 |
+| 18 | 9e | Writing: stroke order + coaching | Medium | 9a | Queued (independent of 9b–9d) | #103 |
+| 19 | 9f | Writing: handwritten paradigms | Medium | 9d, Phase 7 | Queued | #104 |
+| 20 | 9g | Writing: port to greek.tools | Low | 9b (9e for coaching) | Queued | #105 |
 
 Every row above is one GitHub issue, and every issue is scoped to land as a single PR except Phase 4 and Phase 6, which are large enough that they'll be decomposed into their own bite-sized sub-issues (same pattern as Phase 2) once they're picked up. Rows marked "independent" have no hard dependency on the row above them — they're placed here for logical flow (data-pipeline-dependent work grouped together) but can be pulled earlier as a change of pace between heavier phases.
 
 The OSHB data pipeline (needed for Phases 3 and 4, and for accurate Flashcards frequency data) is the most important early infrastructure investment — see the standalone section above.
+
+Phase 9 sits at the end of the table for logical flow, but only 9f has a hard dependency on earlier phases (Phase 7's `TableModel`). 9a through 9e need nothing that does not already exist, so the whole writing track can be pulled forward — and 9a on its own is useful for alphabet drilling the day it lands.
