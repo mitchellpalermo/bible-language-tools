@@ -115,7 +115,25 @@ const CONSONANTS: WritableGlyph[] = [
     confusableWith: ['ד'],
     note: 'Rounded shoulder with no projecting corner. ד has the square corner.',
   },
-  { char: 'ש', name: 'shin', phonetic: 'š', group: 'consonant', note: 'Three arms rising from one base.' },
+  // Shin and sin are one letter of the alphabet distinguished only by which
+  // side the dot sits on, and placing that dot is the motor skill. They get a
+  // card each; a BARE ש is neither of them and occurs nowhere in the text.
+  {
+    char: 'שׁ',
+    name: 'shin',
+    phonetic: 'š',
+    group: 'consonant',
+    confusableWith: ['שׂ'],
+    note: 'Three arms rising from one base, with the dot over the RIGHT arm.',
+  },
+  {
+    char: 'שׂ',
+    name: 'sin',
+    phonetic: 'ś',
+    group: 'consonant',
+    confusableWith: ['שׁ'],
+    note: 'The same three arms as שׁ — only the dot moves, to the LEFT arm.',
+  },
   {
     char: 'ת',
     name: 'tav',
@@ -134,7 +152,17 @@ const CONSONANTS: WritableGlyph[] = [
  * which is a distinct motor skill.
  */
 const FINALS: WritableGlyph[] = [
-  { char: 'ך', name: 'kaf sofit', phonetic: 'k', group: 'final', note: 'Descends below the baseline.' },
+  // Final kaf closes a syllable, so it carries a silent sheva essentially
+  // everywhere it occurs — מֶלֶךְ, הָלַךְ, מָלַךְ. The two dots are part of what a
+  // student writes, so they are part of what gets traced and graded.
+  {
+    char: 'ך',
+    referenceForm: 'ךְ',
+    name: 'kaf sofit',
+    phonetic: 'k',
+    group: 'final',
+    note: 'Descends below the baseline, and takes a silent sheva — the two dots underneath.',
+  },
   {
     char: 'ם',
     name: 'mem sofit',

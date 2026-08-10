@@ -464,7 +464,7 @@ The pedagogy is the spine, not the stylus: every drill runs **trace → copy →
 
 | Mode | Content source | Notes |
 |------|---------------|-------|
-| **Letters** | Script pack | 22 consonants, 5 final forms, begadkephat dagesh variants. A separate deck interleaves the confusable pairs — ב/כ, ד/ר, ה/ח/ת, ו/ז/ן, ס/ם, ע/צ — since that is where beginners actually lose marks |
+| **Letters** | Script pack | The 22 letters as 23 cards (shin and sin are drilled apart, since the dot's side is the skill), 5 final forms, begadkephat dagesh variants. A separate deck interleaves the confusable pairs — ב/כ, ד/ר, ה/ח/ת, ו/ז/ן, ס/ם, ע/צ — since that is where beginners actually lose marks. **Glyphs are drilled in the form they are actually written**: final kaf carries its silent sheva (ךְ), shin and sin their dots. A chart built from bare codepoints teaches forms that occur nowhere in the text |
 | **Nikud** | Script pack | Vowel points on a host consonant. *Placement* is most of the skill (qamets centered below, holem above-left), and the mask grading below scores placement natively because it grades the rendered consonant-plus-point as one image |
 | **Words** | `vocabulary.ts`, `textbooks.ts` | RTL grid of guide boxes, one per consonant cluster. Prompted by gloss or transliteration |
 | **Paradigms** | `TableModel` (Phase 7) | Handwrite into blanked cells instead of typing. Same density picker, same result colors. This is the exam-prep mode |

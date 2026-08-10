@@ -60,7 +60,10 @@ export function buildDecks(pack: ScriptPack = hebrewScriptPack): WritingDeck[] {
   const finals = glyphsInGroup(pack, 'final');
 
   return [
-    { id: 'alphabet', label: 'The 22 letters', glyphs: consonants },
+    // 23 cards, not 22: the alphabet has 22 letters, but shin and sin are
+    // drilled separately because writing the dot on the correct side is the
+    // whole skill.
+    { id: 'alphabet', label: 'The alphabet', glyphs: consonants },
     { id: 'finals', label: 'Final forms', glyphs: finals },
     { id: 'all-consonants', label: 'Letters + finals', glyphs: [...consonants, ...finals] },
   ];

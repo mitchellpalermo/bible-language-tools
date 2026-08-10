@@ -42,11 +42,11 @@ describe('deck and mode selection', () => {
   it('starts on the alphabet deck at alef, in trace mode', () => {
     render(<WritingPractice />);
 
-    expect(screen.getByRole('button', { name: /The 22 letters/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: /The alphabet/ })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('button', { name: 'Trace' })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByText('alef')).toBeInTheDocument();
     // The counter shares its element with the "new" tally, so match loosely.
-    expect(screen.getByText(/1 \/ 22/)).toBeInTheDocument();
+    expect(screen.getByText(/1 \/ 23/)).toBeInTheDocument();
   });
 
   it('shows the letter itself only in copy mode', async () => {
@@ -75,8 +75,8 @@ describe('deck and mode selection', () => {
 
   it('offers every deck with its size', () => {
     render(<WritingPractice />);
-    expect(screen.getByRole('button', { name: /Letters \+ finals/ })).toHaveTextContent('27');
-    expect(ALPHABET.glyphs).toHaveLength(22);
+    expect(screen.getByRole('button', { name: /Letters \+ finals/ })).toHaveTextContent('28');
+    expect(ALPHABET.glyphs).toHaveLength(23);
   });
 });
 
@@ -149,7 +149,7 @@ describe('grading', () => {
     expect(store['א']).toBeUndefined();
 
     expect(screen.getByText('bet')).toBeInTheDocument();
-    expect(screen.getByText(/2 \/ 22/)).toBeInTheDocument();
+    expect(screen.getByText(/2 \/ 23/)).toBeInTheDocument();
   });
 
   it('counts a lapse without advancing the repetition count', async () => {

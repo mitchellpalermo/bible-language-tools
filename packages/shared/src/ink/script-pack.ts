@@ -9,11 +9,27 @@
 /** A single practiceable mark: a letter, a final form, or a vowel point. */
 export interface WritableGlyph {
   /**
-   * The character(s) rendered as the reference. Combining marks are stored
-   * bare (e.g. the qamets alone); the pack's `combining.hostChar` supplies the
-   * consonant they are drawn on.
+   * The glyph's identity — what it IS, and what its SRS card is keyed by.
+   * Combining marks are stored bare (e.g. the qamets alone); the pack's
+   * `combining.hostChar` supplies the consonant they are drawn on.
+   *
+   * This is not necessarily what gets drawn. See `referenceForm`.
    */
   char: string;
+
+  /**
+   * What the student actually writes, when that differs from `char`.
+   *
+   * Some letters effectively never appear bare in running text, so a chart
+   * built from bare codepoints teaches a form nobody writes. Hebrew's final
+   * kaf is the case in point: it closes a syllable, so it carries a silent
+   * sheva (ךְ) essentially everywhere it occurs.
+   *
+   * Resolve this through `renderableText()` rather than reading `char`
+   * directly — that keeps one place to get it right, for display now and for
+   * mask rasterization and stroke templates later.
+   */
+  referenceForm?: string;
   /** Conventional name, as a textbook would say it aloud — 'alef', 'qamets'. */
   name: string;
   /** Transliteration or sound value. Used as the recall-mode prompt. */
@@ -66,10 +82,17 @@ export function allGlyphs(pack: ScriptPack): WritableGlyph[] {
   return pack.combining ? [...pack.glyphs, ...pack.combining.marks] : [...pack.glyphs];
 }
 
-/** The string to render for a glyph — combining marks get their host prefixed. */
+/**
+ * The string to draw for a glyph.
+ *
+ * The single place that decides what a student sees and traces: combining
+ * marks get their host consonant prefixed, and anything with a `referenceForm`
+ * renders that instead of its bare identity. Every consumer — the canvas, the
+ * prompt, and later the scoring rasterizer — must go through here.
+ */
 export function renderableText(pack: ScriptPack, glyph: WritableGlyph): string {
-  if (glyph.group !== 'vowel' || !pack.combining) return glyph.char;
-  return pack.combining.hostChar + glyph.char;
+  if (glyph.group === 'vowel' && pack.combining) return pack.combining.hostChar + glyph.char;
+  return glyph.referenceForm ?? glyph.char;
 }
 
 /** Glyphs in a named group, in pack order. */

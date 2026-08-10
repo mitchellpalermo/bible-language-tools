@@ -1,4 +1,4 @@
-import type { WritableGlyph } from '@tools/shared/ink';
+import { renderableText, type WritableGlyph } from '@tools/shared/ink';
 import { describe, expect, it } from 'vitest';
 import { hebrewScriptPack } from './script-pack';
 import { newCard, type SRSCard } from './srs';
@@ -49,11 +49,22 @@ describe('buildDecks', () => {
     expect(decks.map(d => d.id)).toEqual(['alphabet', 'finals', 'all-consonants']);
   });
 
-  it('has 22 consonants and 5 final forms', () => {
+  it('has 23 consonant cards for the 22 letters, plus 5 final forms', () => {
+    // 23, not 22: shin and sin share a letter but are drilled separately,
+    // because putting the dot on the correct side is the skill.
     const [alphabet, finals, all] = buildDecks();
-    expect(alphabet.glyphs).toHaveLength(22);
+    expect(alphabet.glyphs).toHaveLength(23);
     expect(finals.glyphs).toHaveLength(5);
-    expect(all.glyphs).toHaveLength(27);
+    expect(all.glyphs).toHaveLength(28);
+  });
+
+  it('drills shin and sin as separate, pointed cards', () => {
+    const [alphabet] = buildDecks();
+    const chars = alphabet.glyphs.map(g => g.char);
+    expect(chars).toContain('\u05E9\u05C1');
+    expect(chars).toContain('\u05E9\u05C2');
+    // A bare shin is neither letter and appears nowhere in the Hebrew Bible.
+    expect(chars).not.toContain('\u05E9');
   });
 
   it('excludes vowel points, which are their own deck', () => {
@@ -64,7 +75,48 @@ describe('buildDecks', () => {
   it('starts the alphabet at alef and ends at tav', () => {
     const [alphabet] = buildDecks();
     expect(alphabet.glyphs[0].char).toBe('א');
-    expect(alphabet.glyphs[21].char).toBe('ת');
+    expect(alphabet.glyphs[22].char).toBe('ת');
+  });
+});
+
+describe('pointed reference forms', () => {
+  const finals = buildDecks()[1].glyphs;
+  const byName = (n: string) => finals.find(g => g.name === n)!;
+
+  it('traces final kaf with its silent sheva, keyed by the bare letter', () => {
+    // Final kaf closes a syllable, so it carries a sheva essentially wherever
+    // it occurs (מֶלֶךְ, הָלַךְ, מָלַךְ). Tracing a bare ך teaches a form that is
+    // not written. The card's identity stays the letter itself.
+    const kaf = byName('kaf sofit');
+    expect(kaf.char).toBe('ך');
+    expect(writingCardKey(kaf.char)).toBe('write:letter:ך');
+    expect(renderableText(hebrewScriptPack, kaf)).toBe('ךְ');
+  });
+
+  it('leaves the other finals bare, which is how they occur', () => {
+    for (const name of ['mem sofit', 'nun sofit', 'pe sofit', 'tsade sofit']) {
+      const g = byName(name);
+      expect(renderableText(hebrewScriptPack, g)).toBe(g.char);
+    }
+  });
+
+  it('renders shin and sin with their dots already on', () => {
+    const [alphabet] = buildDecks();
+    const shin = alphabet.glyphs.find(g => g.name === 'shin')!;
+    const sin = alphabet.glyphs.find(g => g.name === 'sin')!;
+    expect(renderableText(hebrewScriptPack, shin)).toBe('שׁ');
+    expect(renderableText(hebrewScriptPack, sin)).toBe('שׂ');
+    expect(shin.confusableWith).toContain(sin.char);
+  });
+
+  it('never presents a consonant or final as a bare form it lacks', () => {
+    // The regression guard: every drilled glyph must render as something a
+    // student would actually write.
+    const drilled = buildDecks()[2].glyphs;
+    for (const g of drilled) {
+      expect(renderableText(hebrewScriptPack, g).length).toBeGreaterThan(0);
+      if (g.referenceForm) expect(g.referenceForm).not.toBe(g.char);
+    }
   });
 });
 

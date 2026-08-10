@@ -1,5 +1,5 @@
 import InkCanvas from '@tools/shared/components/InkCanvas';
-import type { Stroke, WritableGlyph } from '@tools/shared/ink';
+import { renderableText, type Stroke, type WritableGlyph } from '@tools/shared/ink';
 import posthog from 'posthog-js';
 import { useCallback, useMemo, useState } from 'react';
 import { hebrewScriptPack } from '../data/script-pack';
@@ -117,9 +117,12 @@ function WritingPracticeInner() {
   // Trace mode ghosts it from the start; the other modes only show it once the
   // student has committed to an answer, which is what makes them harder.
   const showGhost = mode === 'trace' || revealed;
+  // renderableText, never glyph.char — some letters are written in a pointed
+  // form that differs from their bare identity (final kaf takes its sheva).
+  const referenceText = glyph ? renderableText(hebrewScriptPack, glyph) : '';
   const reference = showGhost
     ? {
-        text: glyph?.char ?? '',
+        text: referenceText,
         fontFamily: hebrewScriptPack.fontFamily,
         opacity: revealed ? 0.38 : 0.13,
       }
@@ -198,7 +201,7 @@ function WritingPracticeInner() {
             className="text-6xl leading-none"
             style={{ fontFamily: hebrewScriptPack.fontFamily, color: 'var(--color-primary)' }}
           >
-            {glyph.char}
+            {referenceText}
           </span>
         )}
         <div className="min-w-0">

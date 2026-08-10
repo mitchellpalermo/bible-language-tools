@@ -39,6 +39,20 @@ describe('renderableText', () => {
     // mark, so the pack supplies the host the student writes it under.
     expect(renderableText(pack, pack.combining!.marks[0])).toBe('פָ');
   });
+
+  it('prefers referenceForm over the bare identity', () => {
+    // Some letters are never written bare — Hebrew's final kaf carries a
+    // silent sheva wherever it occurs. The card stays keyed by the letter;
+    // only what gets drawn changes.
+    const kaf = { char: 'ך', referenceForm: 'ךְ', name: 'kaf sofit', group: 'final' as const };
+    expect(renderableText({ ...pack, glyphs: [kaf] }, kaf)).toBe('ךְ');
+    expect(kaf.char).toBe('ך');
+  });
+
+  it('ignores referenceForm on a combining mark, which needs its host', () => {
+    const mark = { char: 'ָ', referenceForm: 'ignored', name: 'qamets', group: 'vowel' as const };
+    expect(renderableText(pack, mark)).toBe('פָ');
+  });
 });
 
 describe('glyphsInGroup', () => {
