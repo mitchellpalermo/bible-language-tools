@@ -1,7 +1,16 @@
 import InkCanvas from '@tools/shared/components/InkCanvas';
-import { renderableText, type Stroke, type WritableGlyph } from '@tools/shared/ink';
+import {
+  type GlyphMask,
+  type InkScore,
+  loadGlyphMask,
+  renderableText,
+  scoreInk,
+  type Stroke,
+  type Verdict,
+  type WritableGlyph,
+} from '@tools/shared/ink';
 import posthog from 'posthog-js';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { hebrewScriptPack } from '../data/script-pack';
 import {
   loadSRSStore,
@@ -19,6 +28,7 @@ import {
   countNew,
   isPassingGrade,
   qualityFor,
+  suggestedGrade,
   WRITING_GRADES,
   WRITING_MODES,
   type WritingGrade,
@@ -61,6 +71,39 @@ function WritingPracticeInner() {
 
   const glyph: WritableGlyph | undefined = queue[index];
 
+  // renderableText, never glyph.char — some letters are written in a pointed
+  // form that differs from their bare identity (final kaf takes its sheva), and
+  // the mask has to be built from what the student was actually asked to write.
+  const referenceText = glyph ? renderableText(hebrewScriptPack, glyph) : '';
+
+  // ── Scoring reference ─────────────────────────────────────────────────────
+  // The font is the answer key: the glyph is rasterized to a mask once and
+  // scored against. Null means no canvas or no font, in which case the feedback
+  // panel falls back to plain self-assessment.
+  const [mask, setMask] = useState<GlyphMask | null>(null);
+  useEffect(() => {
+    if (!referenceText) return;
+    let cancelled = false;
+    setMask(null);
+    loadGlyphMask(referenceText, {
+      fontFamily: hebrewScriptPack.fontFamily,
+      fontLoadSpec: hebrewScriptPack.fontLoadSpec,
+      direction: hebrewScriptPack.direction,
+    }).then(next => {
+      if (!cancelled) setMask(next);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [referenceText]);
+
+  // Scored only once the student has committed to an answer, so nothing is
+  // graded mid-stroke.
+  const result: InkScore | null = useMemo(
+    () => (revealed && mask && strokes.length > 0 ? scoreInk(strokes, mask) : null),
+    [revealed, mask, strokes],
+  );
+
   const handleStrokeComplete = useCallback((stroke: Stroke) => {
     setStrokes(prev => [...prev, stroke]);
   }, []);
@@ -100,6 +143,10 @@ function WritingPracticeInner() {
       mode,
       grade: which,
       strokes: strokes.length,
+      // Null when no mask was available, which is the signal that the student
+      // graded blind rather than that they scored zero.
+      score: result?.score ?? null,
+      followed_suggestion: result ? suggestedGrade(result.score) === which : null,
     });
 
     setSessionScore(s => ({
@@ -117,9 +164,6 @@ function WritingPracticeInner() {
   // Trace mode ghosts it from the start; the other modes only show it once the
   // student has committed to an answer, which is what makes them harder.
   const showGhost = mode === 'trace' || revealed;
-  // renderableText, never glyph.char — some letters are written in a pointed
-  // form that differs from their bare identity (final kaf takes its sheva).
-  const referenceText = glyph ? renderableText(hebrewScriptPack, glyph) : '';
   const reference = showGhost
     ? {
         text: referenceText,
@@ -130,6 +174,7 @@ function WritingPracticeInner() {
 
   const hasInk = strokes.length > 0;
   const newCount = countNew(deck.glyphs, srsStore);
+  const suggested = result ? suggestedGrade(result.score) : null;
 
   if (done || !glyph) {
     return (
@@ -265,38 +310,100 @@ function WritingPracticeInner() {
         )}
       </div>
 
-      {/* Self-assessment. Layer 0 — a real score arrives with issue #100. */}
+      {/* Feedback. The score is a suggestion; the student always has the final say. */}
       {revealed && (
         <div className="bg-bg-card rounded-xl border p-4 shadow-sm space-y-3" style={{ borderColor: '#D1FAE5' }}>
-          <p className="text-sm text-text-muted">
-            The letter is overlaid on your ink. How close was it?
-          </p>
+          {result ? <ScoreReadout result={result} /> : (
+            <p className="text-sm text-text-muted">
+              The letter is overlaid on your ink. How close was it?
+            </p>
+          )}
           {glyph.note && (
             <p className="text-sm" style={{ color: 'var(--color-primary)' }}>
               {glyph.note}
             </p>
           )}
           <div className="flex flex-wrap gap-2">
-            {WRITING_GRADES.map(g => (
-              <button
-                key={g.id}
-                type="button"
-                onClick={() => grade(g.id)}
-                className="px-4 py-2 rounded-lg font-semibold border transition-colors flex-1 min-w-[5rem]"
-                style={
-                  g.id === 'again'
-                    ? { background: 'var(--color-coral)', color: '#fff', borderColor: 'var(--color-coral)' }
-                    : g.id === 'easy'
-                      ? { background: 'var(--color-jade)', color: '#fff', borderColor: 'var(--color-jade)' }
-                      : { background: 'var(--color-bg-card)', color: 'var(--color-text)', borderColor: '#D1FAE5' }
-                }
-              >
-                {g.label}
-              </button>
-            ))}
+            {WRITING_GRADES.map(g => {
+              const isSuggested = suggested === g.id;
+              return (
+                <button
+                  key={g.id}
+                  type="button"
+                  onClick={() => grade(g.id)}
+                  className="px-4 py-2 rounded-lg font-semibold border transition-colors flex-1 min-w-[5rem]"
+                  style={{
+                    ...(g.id === 'again'
+                      ? { background: 'var(--color-coral)', color: '#fff', borderColor: 'var(--color-coral)' }
+                      : g.id === 'easy'
+                        ? { background: 'var(--color-jade)', color: '#fff', borderColor: 'var(--color-jade)' }
+                        : { background: 'var(--color-bg-card)', color: 'var(--color-text)', borderColor: '#D1FAE5' }),
+                    // A ring rather than a different fill: the four buttons keep
+                    // their fixed colours, so the suggestion reads as a hint and
+                    // not as the only enabled choice.
+                    ...(isSuggested ? { outline: '2px solid var(--color-primary)', outlineOffset: '2px' } : {}),
+                  }}
+                >
+                  {g.label}
+                  {isSuggested && <span className="sr-only"> (suggested)</span>}
+                </button>
+              );
+            })}
           </div>
+          {suggested && (
+            <p className="text-xs text-text-muted">
+              Suggested from the score. Pick whichever matches what you know — the score reads shape
+              only, not which letter you drew.
+            </p>
+          )}
         </div>
       )}
+    </div>
+  );
+}
+
+const VERDICT_COPY: Record<Verdict, { label: string; color: string }> = {
+  pass: { label: 'Good match', color: 'var(--color-jade)' },
+  close: { label: 'Close', color: 'var(--color-primary)' },
+  miss: { label: 'Not there yet', color: 'var(--color-coral)' },
+};
+
+/**
+ * The score and the three measurements behind it.
+ *
+ * All three are shown, not just the total, because they fail differently and
+ * the student can only act on the specific one: low coverage means part of the
+ * letter is missing, stray ink means an extra mark, and low accuracy means the
+ * shape itself is off.
+ */
+function ScoreReadout({ result }: { result: InkScore }) {
+  const { label, color } = VERDICT_COPY[result.verdict];
+  const pct = (v: number) => `${Math.round(v * 100)}%`;
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-baseline gap-3">
+        <span className="text-3xl font-bold leading-none" style={{ color }}>
+          {result.score}
+        </span>
+        <span className="text-sm font-semibold" style={{ color }}>
+          {label}
+        </span>
+      </div>
+      <dl className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-text-muted">
+        <div className="flex gap-1.5">
+          <dt>Accuracy</dt>
+          <dd className="font-semibold text-text">{pct(result.accuracy)}</dd>
+        </div>
+        <div className="flex gap-1.5">
+          <dt>Coverage</dt>
+          <dd className="font-semibold text-text">{pct(result.coverage)}</dd>
+        </div>
+        <div className="flex gap-1.5">
+          <dt>Stray ink</dt>
+          <dd className="font-semibold text-text">{pct(result.spill)}</dd>
+        </div>
+      </dl>
     </div>
   );
 }

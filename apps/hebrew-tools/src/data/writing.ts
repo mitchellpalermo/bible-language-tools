@@ -10,7 +10,13 @@
 // (`normalizeKey(word.hebrew)`), so every non-vocabulary card MUST carry a
 // prefix or the two features will collide on a single-letter word.
 
-import { allGlyphs, glyphsInGroup, type ScriptPack, type WritableGlyph } from '@tools/shared/ink';
+import {
+  allGlyphs,
+  glyphsInGroup,
+  type ScriptPack,
+  VERDICT_THRESHOLDS,
+  type WritableGlyph,
+} from '@tools/shared/ink';
 import { hebrewScriptPack } from './script-pack';
 import { isDue, type SRSCard } from './srs';
 
@@ -108,6 +114,30 @@ export const WRITING_GRADES: { id: WritingGrade; label: string; quality: number 
 
 export function qualityFor(grade: WritingGrade): number {
   return WRITING_GRADES.find(g => g.id === grade)?.quality ?? 1;
+}
+
+/**
+ * Where the geometric score starts to look like effortless recall.
+ *
+ * Above the pass threshold but not yet here, "Good" is the honest answer: the
+ * letterform is right and SM-2 should schedule it normally. `easy` stretches
+ * the interval hard, so it needs more than merely passing.
+ */
+const EFFORTLESS_SCORE = 92;
+
+/**
+ * The grade a score suggests.
+ *
+ * Only ever a suggestion. Geometric scoring grades shape occupancy, so it can
+ * be confidently wrong in both directions — a ד drawn as a ר scores well, and a
+ * correct letter written unusually small can score badly. The student is the
+ * one who knows which happened, so every grade button stays live.
+ */
+export function suggestedGrade(score: number): WritingGrade {
+  if (score >= EFFORTLESS_SCORE) return 'easy';
+  if (score >= VERDICT_THRESHOLDS.pass) return 'good';
+  if (score >= VERDICT_THRESHOLDS.close) return 'hard';
+  return 'again';
 }
 
 /**

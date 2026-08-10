@@ -1,4 +1,4 @@
-import { renderableText, type WritableGlyph } from '@tools/shared/ink';
+import { renderableText, VERDICT_THRESHOLDS, type WritableGlyph } from '@tools/shared/ink';
 import { describe, expect, it } from 'vitest';
 import { hebrewScriptPack } from './script-pack';
 import { newCard, type SRSCard } from './srs';
@@ -10,6 +10,7 @@ import {
   isWritingKey,
   practiceableGlyphs,
   qualityFor,
+  suggestedGrade,
   WRITING_GRADES,
   WRITING_KEY_PREFIX,
   writingCardKey,
@@ -177,6 +178,25 @@ describe('grading', () => {
 
   it('exposes exactly four grades', () => {
     expect(WRITING_GRADES).toHaveLength(4);
+  });
+
+  it('suggests a grade across the whole score range', () => {
+    expect(suggestedGrade(100)).toBe('easy');
+    expect(suggestedGrade(92)).toBe('easy');
+    expect(suggestedGrade(91)).toBe('good');
+    expect(suggestedGrade(VERDICT_THRESHOLDS.pass)).toBe('good');
+    expect(suggestedGrade(VERDICT_THRESHOLDS.pass - 1)).toBe('hard');
+    expect(suggestedGrade(VERDICT_THRESHOLDS.close)).toBe('hard');
+    expect(suggestedGrade(VERDICT_THRESHOLDS.close - 1)).toBe('again');
+    expect(suggestedGrade(0)).toBe('again');
+  });
+
+  it('never suggests a lapse for a passing score', () => {
+    // The scorer's pass threshold and SM-2's are separate numbers that have to
+    // agree, or a letter the app called a good match still resets its interval.
+    for (let score = VERDICT_THRESHOLDS.pass; score <= 100; score++) {
+      expect(isPassingGrade(suggestedGrade(score))).toBe(true);
+    }
   });
 });
 
