@@ -54,6 +54,8 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/quiz-settings` | `createQuizSettings(storageKey)` factory for persisting quiz difficulty |
 | `@tools/shared/nav` | `NavLink` type and the active-route predicates the nav renders with |
 | `@tools/shared/nav-menu` | `initNavMenu()` — DOM controller for the mobile drawer |
+| `@tools/shared/ink` | Stylus writing engine — stroke capture, palm rejection, smoothing, variable-width rendering, and the `ScriptPack` type |
+| `@tools/shared/components/InkCanvas` | The writing surface (React) |
 | `@tools/shared/components/SiteNav.astro` | The site navigation for both apps (see below) |
 | `@tools/shared/components/NumberToggle` | Sg/Pl pill toggle (mobile only) |
 | `@tools/shared/components/EndingsToggle` | Full forms / Endings only toggle |
@@ -83,6 +85,19 @@ Things to know before changing it:
 - **The component is self-styled with plain CSS in a scoped `<style>` block**, not Tailwind utilities. Tailwind's content detection is per-app and does not scan `packages/shared`, so utility classes there would emit no CSS. Design tokens still work — they are CSS variables (`var(--color-primary)`), and the accent gradient is passed in per app.
 
 `initNavMenu` (`packages/shared/src/nav-menu.ts`) is framework-free DOM wiring against the `data-nav-*` attributes, which is what makes it directly testable without a renderer. Its tests are the coverage for the menu's behaviour; the Playwright specs in each app's `e2e/navigation.spec.ts` cover the parts only a real browser can show.
+
+### The ink engine (`packages/shared/src/ink`)
+
+Powers `/write` — handwriting practice with a stylus. `InkCanvas.tsx` owns only DOM wiring (listeners, coalesced samples, canvas sizing, drawing); every decision worth testing lives in framework-free modules beside it, the same split as `nav-menu.ts`. Roadmap and remaining phases: `apps/hebrew-tools/ROADMAP.md` Phase 9, issues #99–#105.
+
+Things to know before changing it:
+
+- **Nothing in `ink/` may mention a specific language.** A script is a `ScriptPack` data file (`apps/hebrew-tools/src/data/script-pack.ts`). If a port needs an engine change, generalize it in shared — do not special-case the app.
+- **Joint circles must wind opposite to the default `arc()` direction.** Segment quads emit their corners along the travel direction, which always winds one way; a default arc winds the other. Under the nonzero fill rule the overlap cancels to a hole, and every stroke renders as a dashed line. `render.ts`'s `JOINT_WINDING` and its regression test pin this.
+- **Palm rejection latches.** Once any `pointerType === 'pen'` event is seen, touch stops drawing for the life of the `InkCapture`. A pen landing mid-stroke *preempts* a touch stroke and discards it — that is the hand-lands-first case, not an edge case.
+- **`document.fonts.load()` must resolve before the reference glyph is drawn.** The reference is the answer key; rendering it early shows the student a fallback letterform. This gets stricter in 9b, where the same glyph is rasterized for scoring.
+- **Ink is stored in CSS pixels, not device pixels.** The canvas scales by `devicePixelRatio` at draw time; baking that in would make saved strokes resolution-dependent.
+- **Smoothing at capture time and interpolation at render time are separate on purpose.** Do not merge them — a render-grade spline applied to incoming samples rounds off real corners, and the square corner of ד is exactly what distinguishes it from ר.
 
 ## Pull requests
 
