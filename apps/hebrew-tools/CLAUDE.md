@@ -198,6 +198,8 @@ Rules that the data tests enforce:
 
 **Regenerating `vocabulary-garrett.ts`:** it came from a one-time extraction of the course's `.docx` handout, which is copyrighted course material and is deliberately not in the repo. The file is committed output; hand-edits to it will be lost if it is ever regenerated. Fix the extractor, not the artifact.
 
+**The handout is not meant to stay the authority on Hebrew orthography** — see issue #109. A retyped Word document is the worst available source for pointed text, and the 19-item `CORRECTIONS` list is the evidence. Once the OSHB pipeline (#75) lands, `hebrew`, `root`, `partOfSpeech`, `gender` and `frequency` come from the Westminster Leningrad Codex, and the handout keeps only what it alone knows: the chapter/category mapping and the gloss wording. **Glosses do not move to a lexicon** — Strong's gives חָצֵר as "a yard, a hamlet, enclosure, court, tower, village" where Garrett gives "village, courtyard", and the quiz is marked against Garrett. That split of authority is the target state; do not "simplify" it back to a single source.
+
 ### Unicode blocks
 
 | Block | Range | Contents |

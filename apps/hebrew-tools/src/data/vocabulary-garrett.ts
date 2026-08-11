@@ -21,6 +21,14 @@
 // corrected here and listed in `CORRECTIONS` below, with the reason, so the
 // divergence from the printed page is auditable rather than silent.
 //
+// PLANNED CHANGE (issue #109): the handout should not be the authority on Hebrew
+// orthography -- a retyped Word document is the worst available source for it,
+// which is what the CORRECTIONS list below is evidence of. Once the OSHB
+// pipeline (#75) exists, `hebrew`, `root`, `partOfSpeech`, `gender` and
+// `frequency` come from the Westminster Leningrad Codex, and this file keeps
+// only what the handout alone knows: the chapter/category mapping and the gloss
+// wording, which is what the chapter quizzes are marked against.
+//
 // Regenerating: this file was produced by a one-time extraction from the .docx.
 // The handout is course material and is not in the repo; re-running the
 // extraction means re-running it against your own copy.
