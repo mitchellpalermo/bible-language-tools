@@ -1,57 +1,99 @@
-// Hand-curated starter vocabulary — NOT generated.
+// Hebrew vocabulary — the curated starter set, merged with the textbook import.
 //
-// Unlike greek-tools' vocabulary.ts (generated from MorphGNT + Dodson), there is
-// no OSHB build pipeline yet (tracked separately — see ROADMAP.md "OSHB Data
-// Pipeline"). This is a small, high-confidence set of the most standard
-// first-year Biblical Hebrew vocabulary (the kind taught in Pratico & Van Pelt,
-// Kelley, or Futato chapters 1-10): core function words, the most frequent
-// strong-verb Qal perfect 3ms forms, and a handful of very common nouns and
-// adjectives.
+// Two sources feed this file:
 //
-// Frequency numbers are APPROXIMATE — rounded ballpark figures from standard
-// published Biblical Hebrew frequency lists, not exact counts. Once the OSHB
-// data pipeline exists, this file should be regenerated (or at least its
-// frequency column corrected) from real per-lemma counts computed off the
+//   1. `CURATED` below — a small, hand-written, high-confidence set of standard
+//      first-year vocabulary, plus Garrett & DeRouchie chapter 1 (which the
+//      course's vocabulary handout does not cover). These entries carry
+//      transliterations and approximate frequencies.
+//   2. `GARRETT_VOCABULARY` — generated from the course handout, chapters 2–31.
+//      No transliterations and no frequencies; see that file's header.
+//
+// `mergeVocabulary` folds the second into the first. The two overlap heavily —
+// most of the curated set is also Garrett vocabulary — and the merge is what
+// keeps that overlap a single entry, and therefore a single SRS card.
+//
+// Frequency numbers on curated entries are APPROXIMATE — rounded ballpark
+// figures from standard published Biblical Hebrew frequency lists, not exact
+// counts. Once the OSHB data pipeline exists (issue #75), this file's frequency
+// column should be regenerated from real per-lemma counts computed off the
 // Westminster Leningrad Codex.
 //
 // `root` is only populated where the triliteral root is unambiguous and
 // standardly taught (mostly verbs). Many nouns in Biblical Hebrew (bən, yād,
 // šēm, ʿayin, rōʾš...) have no verbal root that's pedagogically useful to cite,
 // so it's left undefined rather than guessed.
-//
-// `chapters` tags an entry as belonging to a textbook's chapter vocabulary list,
-// which is what `textbooks.ts` turns into study decks. A word can carry several
-// tags; it still has one entry, and therefore one SRS card, no matter how many
-// chapters or textbooks assign it. Glosses on tagged words follow the wording of
-// the textbook that assigns them, since that's what the quiz expects.
 
-import type { TextbookChapterRef } from './textbooks';
+import { GARRETT_VOCABULARY } from './vocabulary-garrett';
+import { cardKey, gd, type HebrewVocabWord } from './vocabulary-types';
+
+export { cardKey, gd };
+export type { HebrewGender, HebrewVocabWord, VerbStemGloss } from './vocabulary-types';
+
+/** Optional fields an imported entry may contribute to a curated one. */
+const MERGEABLE_FIELDS = [
+  'root',
+  'gender',
+  'binyan',
+  'construct',
+  'plural',
+  'alternates',
+  'stems',
+  'note',
+] as const;
 
 /**
- * Grammatical gender as the standard lexica and grammars list it. `fm` marks
- * nouns attested as both (e.g. חָצֵר). Proper names and non-nominals are left
- * undefined.
+ * Fold textbook entries into the curated list, keyed by `cardKey`.
+ *
+ * Matching is on the exact Hebrew string, deliberately — not on the root. Five
+ * curated nouns (מֶלֶךְ, דָּבָר, עֶבֶד, דַּעַת, שֹׁפֵט) share a root with a
+ * Garrett verb entry, and collapsing a noun into its cognate verb would be
+ * wrong in both directions.
+ *
+ * On a match the curated entry wins for anything it already states: its gloss
+ * and transliteration are hand-checked, and its frequency is the only one there
+ * is. The import contributes the chapter tags, plus any field the curated entry
+ * left undefined.
  */
-export type HebrewGender = 'm' | 'f' | 'fm';
+export function mergeVocabulary(
+  curated: HebrewVocabWord[],
+  imported: HebrewVocabWord[],
+): HebrewVocabWord[] {
+  const merged = curated.map((word) => ({ ...word }));
+  const byKey = new Map(merged.map((word) => [cardKey(word), word]));
 
-export interface HebrewVocabWord {
-  hebrew: string; // fully pointed form (BHS standard)
-  root?: string; // triliteral root, when unambiguous
-  transliteration: string; // SBL general-purpose transliteration
-  gloss: string;
-  frequency: number; // approximate — see file header
-  partOfSpeech: string;
-  gender?: HebrewGender; // nouns (and textbook-listed adjectives) only
-  binyan?: string; // for verbs: Qal, Niphal, Piel, etc.
-  chapters?: TextbookChapterRef[]; // textbook chapter vocabulary lists
+  for (const word of imported) {
+    const existing = byKey.get(cardKey(word));
+    if (!existing) {
+      const copy = { ...word };
+      merged.push(copy);
+      byKey.set(cardKey(copy), copy);
+      continue;
+    }
+
+    existing.chapters = [...(existing.chapters ?? []), ...(word.chapters ?? [])].filter(
+      (ref, i, all) =>
+        all.findIndex(
+          (other) =>
+            other.textbook === ref.textbook &&
+            other.chapter === ref.chapter &&
+            other.category === ref.category,
+        ) === i,
+    );
+
+    for (const field of MERGEABLE_FIELDS) {
+      if (existing[field] === undefined && word[field] !== undefined) {
+        // Each field is assigned to its own key, so the union type is safe here
+        // even though TypeScript cannot correlate the two indexed accesses.
+        (existing as Record<string, unknown>)[field] = word[field];
+      }
+    }
+  }
+
+  return merged;
 }
 
-/** Shorthand for tagging a word as Garrett & DeRouchie chapter vocabulary. */
-const gd = (chapter: number): TextbookChapterRef[] => [
-  { textbook: 'garrett-derouchie', chapter },
-];
-
-export const vocabulary: HebrewVocabWord[] = [
+const CURATED: HebrewVocabWord[] = [
   // Core particles, conjunctions, prepositions
   { hebrew: 'וְ', transliteration: 'wə', gloss: 'and', frequency: 50000, partOfSpeech: 'conjunction' },
   { hebrew: 'הַ', transliteration: 'ha', gloss: 'the (definite article)', frequency: 30000, partOfSpeech: 'particle' },
@@ -79,8 +121,8 @@ export const vocabulary: HebrewVocabWord[] = [
   { hebrew: 'בֵּן', transliteration: 'bēn', gloss: 'son', frequency: 4900, partOfSpeech: 'noun', gender: 'm' },
   { hebrew: 'בַּת', transliteration: 'bat', gloss: 'daughter', frequency: 590, partOfSpeech: 'noun', gender: 'f' },
   { hebrew: 'בַּיִת', root: 'בית', transliteration: 'bayit', gloss: 'house', frequency: 2000, partOfSpeech: 'noun', gender: 'm' },
-  { hebrew: 'מֶלֶךְ', root: 'מלך', transliteration: 'melek', gloss: 'king', frequency: 2600, partOfSpeech: 'noun', gender: 'm', chapters: gd(1) },
-  { hebrew: 'אֶרֶץ', root: 'ארץ', transliteration: 'ʾereṣ', gloss: 'earth, land', frequency: 2500, partOfSpeech: 'noun', gender: 'f', chapters: gd(1) },
+  { hebrew: 'מֶלֶךְ', root: 'מלך', transliteration: 'melek', gloss: 'king', frequency: 2600, partOfSpeech: 'noun', gender: 'm', chapters: [gd(1, 'core')] },
+  { hebrew: 'אֶרֶץ', root: 'ארץ', transliteration: 'ʾereṣ', gloss: 'earth, land', frequency: 2500, partOfSpeech: 'noun', gender: 'f', chapters: [gd(1, 'core')] },
   { hebrew: 'יוֹם', transliteration: 'yôm', gloss: 'day', frequency: 2300, partOfSpeech: 'noun', gender: 'm' },
   { hebrew: 'אִישׁ', transliteration: 'ʾîš', gloss: 'man, husband', frequency: 2160, partOfSpeech: 'noun', gender: 'm' },
   { hebrew: 'אִשָּׁה', transliteration: 'ʾiššâ', gloss: 'woman, wife', frequency: 780, partOfSpeech: 'noun', gender: 'f' },
@@ -89,8 +131,8 @@ export const vocabulary: HebrewVocabWord[] = [
   { hebrew: 'יָד', transliteration: 'yād', gloss: 'hand', frequency: 1600, partOfSpeech: 'noun', gender: 'f' },
   { hebrew: 'עַם', root: 'עמם', transliteration: 'ʿam', gloss: 'people, nation', frequency: 1850, partOfSpeech: 'noun', gender: 'm' },
   { hebrew: 'שָׁמַיִם', transliteration: 'šāmayim', gloss: 'heaven, sky', frequency: 420, partOfSpeech: 'noun', gender: 'm' },
-  { hebrew: 'דָּבָר', root: 'דבר', transliteration: 'dābār', gloss: 'word, thing', frequency: 1400, partOfSpeech: 'noun', gender: 'm', chapters: gd(1) },
-  { hebrew: 'עֶבֶד', root: 'עבד', transliteration: 'ʿebed', gloss: 'servant, slave', frequency: 800, partOfSpeech: 'noun', gender: 'm', chapters: gd(1) },
+  { hebrew: 'דָּבָר', root: 'דבר', transliteration: 'dābār', gloss: 'word, thing', frequency: 1400, partOfSpeech: 'noun', gender: 'm', chapters: [gd(1, 'core')] },
+  { hebrew: 'עֶבֶד', root: 'עבד', transliteration: 'ʿebed', gloss: 'servant, slave', frequency: 800, partOfSpeech: 'noun', gender: 'm', chapters: [gd(1, 'core')] },
   { hebrew: 'שֵׁם', transliteration: 'šēm', gloss: 'name', frequency: 860, partOfSpeech: 'noun', gender: 'm' },
   { hebrew: 'עַיִן', transliteration: 'ʿayin', gloss: 'eye, spring', frequency: 870, partOfSpeech: 'noun', gender: 'f' },
   { hebrew: 'רֹאשׁ', transliteration: 'rōʾš', gloss: 'head, top, chief', frequency: 600, partOfSpeech: 'noun', gender: 'm' },
@@ -100,20 +142,22 @@ export const vocabulary: HebrewVocabWord[] = [
 
   // Garrett & DeRouchie chapter 1 — the rest of the chapter's list. The four
   // words above already tagged gd(1) (מֶלֶךְ, אֶרֶץ, דָּבָר, עֶבֶד) are also on it.
-  { hebrew: 'אָדָם', transliteration: 'ʾādām', gloss: 'human, Adam', frequency: 550, partOfSpeech: 'noun', gender: 'm', chapters: gd(1) },
-  { hebrew: 'אֵשׁ', transliteration: 'ʾēš', gloss: 'fire', frequency: 380, partOfSpeech: 'noun', gender: 'f', chapters: gd(1) },
-  { hebrew: 'דַּעַת', root: 'ידע', transliteration: 'daʿat', gloss: 'knowledge', frequency: 90, partOfSpeech: 'noun', gender: 'f', chapters: gd(1) },
-  { hebrew: 'חָצֵר', transliteration: 'ḥāṣēr', gloss: 'village, courtyard', frequency: 190, partOfSpeech: 'noun', gender: 'fm', chapters: gd(1) },
-  { hebrew: 'צֹאן', transliteration: 'ṣōʾn', gloss: 'flock (of sheep or goats)', frequency: 275, partOfSpeech: 'noun', gender: 'f', chapters: gd(1) },
-  { hebrew: 'שַׂר', transliteration: 'śar', gloss: 'ruler, leader, prince', frequency: 420, partOfSpeech: 'noun', gender: 'm', chapters: gd(1) },
-  { hebrew: 'שֹׁפֵט', root: 'שפט', transliteration: 'šōpēṭ', gloss: 'judge, leader', frequency: 60, partOfSpeech: 'noun', gender: 'm', chapters: gd(1) },
+  // Chapter 1 is hand-written because the course's vocabulary handout starts at
+  // chapter 2; every later chapter comes from `vocabulary-garrett.ts`.
+  { hebrew: 'אָדָם', transliteration: 'ʾādām', gloss: 'human, Adam', frequency: 550, partOfSpeech: 'noun', gender: 'm', chapters: [gd(1, 'core')] },
+  { hebrew: 'אֵשׁ', transliteration: 'ʾēš', gloss: 'fire', frequency: 380, partOfSpeech: 'noun', gender: 'f', chapters: [gd(1, 'core')] },
+  { hebrew: 'דַּעַת', root: 'ידע', transliteration: 'daʿat', gloss: 'knowledge', frequency: 90, partOfSpeech: 'noun', gender: 'f', chapters: [gd(1, 'core')] },
+  { hebrew: 'חָצֵר', transliteration: 'ḥāṣēr', gloss: 'village, courtyard', frequency: 190, partOfSpeech: 'noun', gender: 'fm', chapters: [gd(1, 'core')] },
+  { hebrew: 'צֹאן', transliteration: 'ṣōʾn', gloss: 'flock (of sheep or goats)', frequency: 275, partOfSpeech: 'noun', gender: 'f', chapters: [gd(1, 'core')] },
+  { hebrew: 'שַׂר', transliteration: 'śar', gloss: 'ruler, leader, prince', frequency: 420, partOfSpeech: 'noun', gender: 'm', chapters: [gd(1, 'core')] },
+  { hebrew: 'שֹׁפֵט', root: 'שפט', transliteration: 'šōpēṭ', gloss: 'judge, leader', frequency: 60, partOfSpeech: 'noun', gender: 'm', chapters: [gd(1, 'core')] },
 
   // Adjectives
   { hebrew: 'גָּדוֹל', root: 'גדל', transliteration: 'gādôl', gloss: 'great, big', frequency: 525, partOfSpeech: 'adjective' },
   { hebrew: 'טוֹב', root: 'טוב', transliteration: 'ṭôb', gloss: 'good', frequency: 530, partOfSpeech: 'adjective' },
   { hebrew: 'קָטֹן', root: 'קטן', transliteration: 'qāṭōn', gloss: 'small, young', frequency: 100, partOfSpeech: 'adjective' },
   { hebrew: 'רַע', root: 'רעע', transliteration: 'raʿ', gloss: 'evil, bad', frequency: 310, partOfSpeech: 'adjective' },
-  { hebrew: 'זָקֵן', root: 'זקן', transliteration: 'zāqēn', gloss: 'old (adjective); elder, old man (noun)', frequency: 180, partOfSpeech: 'adjective', gender: 'm', chapters: gd(1) },
+  { hebrew: 'זָקֵן', root: 'זקן', transliteration: 'zāqēn', gloss: 'old (adjective); elder, old man (noun)', frequency: 180, partOfSpeech: 'adjective', gender: 'm', chapters: [gd(1, 'core')] },
 
   // High-frequency Qal perfect 3ms verbs
   { hebrew: 'אָמַר', root: 'אמר', transliteration: 'ʾāmar', gloss: 'he said', frequency: 5300, partOfSpeech: 'verb', binyan: 'Qal' },
@@ -126,7 +170,7 @@ export const vocabulary: HebrewVocabWord[] = [
   { hebrew: 'שָׁמַע', root: 'שמע', transliteration: 'šāmaʿ', gloss: 'he heard, listened, obeyed', frequency: 1160, partOfSpeech: 'verb', binyan: 'Qal' },
   { hebrew: 'יָדַע', root: 'ידע', transliteration: 'yādaʿ', gloss: 'he knew', frequency: 950, partOfSpeech: 'verb', binyan: 'Qal' },
   { hebrew: 'יָצָא', root: 'יצא', transliteration: 'yāṣāʾ', gloss: 'he went out', frequency: 1070, partOfSpeech: 'verb', binyan: 'Qal' },
-  { hebrew: 'קָרָא', root: 'קרא', transliteration: 'qārāʾ', gloss: 'he called, read, proclaimed', frequency: 730, partOfSpeech: 'verb', binyan: 'Qal' },
+  { hebrew: 'קָרָא', sense: 'I', root: 'קרא', transliteration: 'qārāʾ', gloss: 'he called, read, proclaimed', frequency: 730, partOfSpeech: 'verb', binyan: 'Qal' },
   { hebrew: 'עָלָה', root: 'עלה', transliteration: 'ʿālâ', gloss: 'he went up', frequency: 890, partOfSpeech: 'verb', binyan: 'Qal' },
   { hebrew: 'יָשַׁב', root: 'ישב', transliteration: 'yāšab', gloss: 'he sat, dwelt, remained', frequency: 1080, partOfSpeech: 'verb', binyan: 'Qal' },
   { hebrew: 'שָׁב', root: 'שוב', transliteration: 'šāb', gloss: 'he returned, turned back', frequency: 1075, partOfSpeech: 'verb', binyan: 'Qal' },
@@ -137,3 +181,5 @@ export const vocabulary: HebrewVocabWord[] = [
   { hebrew: 'קָם', root: 'קום', transliteration: 'qām', gloss: 'he arose, stood up', frequency: 630, partOfSpeech: 'verb', binyan: 'Qal' },
   { hebrew: 'מָלַךְ', root: 'מלך', transliteration: 'mālak', gloss: 'he reigned, became king', frequency: 350, partOfSpeech: 'verb', binyan: 'Qal' },
 ];
+
+export const vocabulary: HebrewVocabWord[] = mergeVocabulary(CURATED, GARRETT_VOCABULARY);

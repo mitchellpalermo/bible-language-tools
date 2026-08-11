@@ -18,9 +18,15 @@ vi.mock('posthog-js', () => ({
 }));
 
 // Two high-frequency words and no chapter tags: the "<100" band matches nothing
-// and no chapter deck chips are rendered. The stub is built inside the factory
+// and no chapter picker is rendered. The stub is built inside the factory
 // because vi.mock is hoisted above any top-level declaration in this file.
+//
+// `cardKey` is re-exported by the vocabulary module and used by the component to
+// key the SRS store, so the stub has to provide it too — a partial mock would
+// leave the component calling undefined.
 vi.mock('../data/vocabulary', () => ({
+  cardKey: (word: { hebrew: string; sense?: string }) =>
+    word.sense ? `${word.hebrew}#${word.sense}` : word.hebrew,
   vocabulary: [
     {
       hebrew: 'דָּבָר',
