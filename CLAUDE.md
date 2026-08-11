@@ -54,7 +54,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/quiz-settings` | `createQuizSettings(storageKey)` factory for persisting quiz difficulty |
 | `@tools/shared/nav` | `NavLink` type and the active-route predicates the nav renders with |
 | `@tools/shared/nav-menu` | `initNavMenu()` — DOM controller for the mobile drawer |
-| `@tools/shared/ink` | Stylus writing engine — stroke capture, palm rejection, smoothing, variable-width rendering, and the `ScriptPack` type |
+| `@tools/shared/ink` | Stylus writing engine — stroke capture, palm rejection, smoothing, variable-width rendering, geometric scoring, and the `ScriptPack` type |
 | `@tools/shared/components/InkCanvas` | The writing surface (React) |
 | `@tools/shared/components/SiteNav.astro` | The site navigation for both apps (see below) |
 | `@tools/shared/components/NumberToggle` | Sg/Pl pill toggle (mobile only) |
@@ -95,7 +95,13 @@ Things to know before changing it:
 - **Nothing in `ink/` may mention a specific language.** A script is a `ScriptPack` data file (`apps/hebrew-tools/src/data/script-pack.ts`). If a port needs an engine change, generalize it in shared — do not special-case the app.
 - **Joint circles must wind opposite to the default `arc()` direction.** Segment quads emit their corners along the travel direction, which always winds one way; a default arc winds the other. Under the nonzero fill rule the overlap cancels to a hole, and every stroke renders as a dashed line. `render.ts`'s `JOINT_WINDING` and its regression test pin this.
 - **Palm rejection latches.** Once any `pointerType === 'pen'` event is seen, touch stops drawing for the life of the `InkCapture`. A pen landing mid-stroke *preempts* a touch stroke and discards it — that is the hand-lands-first case, not an edge case.
-- **`document.fonts.load()` must resolve before the reference glyph is drawn.** The reference is the answer key; rendering it early shows the student a fallback letterform. This gets stricter in 9b, where the same glyph is rasterized for scoring.
+- **`document.fonts.load()` must resolve before the reference glyph is drawn or rasterized.** The reference is the answer key; rendering it early shows the student a fallback letterform, and rasterizing it early *scores* against one — silently, in a way nothing downstream can detect. `loadGlyphMask()` exists to own that await; do not call `rasterizeGlyph()` directly from app code.
+
+- **`score/` is pure except for one function.** `rasterizeGlyph` is the only thing in the scoring path that touches a canvas, and it returns `null` rather than throwing when there is none — the app must fall back to self-assessment, because a missing canvas is not a reason to stop studying. Everything that decides anything takes a `Uint8Array` and is tested without a renderer.
+
+- **Ink and mask must normalize identically, so `GlyphMask` carries its own `padding`.** Both are fitted to their own bounds and centered, preserving aspect ratio. That convention is what lets a student write anywhere on the surface at any size; a mask normalized on different terms from the ink silently scores placement instead of letterform.
+
+- **Scoring grades shape occupancy, not letter identity.** A ד drawn as a ר scores well, and shin's dot is under 1% of the glyph's area so the wrong side barely registers. This is by design and is issue #103's job (stroke templates). Do not add heuristics to `geom.ts` that try to close it — the suggested SRS grade is a suggestion for exactly this reason, and every grade button stays live.
 - **Ink is stored in CSS pixels, not device pixels.** The canvas scales by `devicePixelRatio` at draw time; baking that in would make saved strokes resolution-dependent.
 - **Smoothing at capture time and interpolation at render time are separate on purpose.** Do not merge them — a render-grade spline applied to incoming samples rounds off real corners, and the square corner of ד is exactly what distinguishes it from ר.
 

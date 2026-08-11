@@ -476,18 +476,24 @@ Writing into per-letter guide boxes is a deliberate design choice: it removes in
 
 **Layer 0 — self-assessment.** Write, reveal the reference overlaid on the ink, grade Again/Hard/Good/Easy. No new data and no new failure modes, and it feeds `nextSRS` from `@tools/shared/srs` unchanged. Shippable on its own.
 
-**Layer 1 — geometric scoring against a font-rendered mask.** No hand-authored glyph outlines are needed, because the app already loads Noto Sans Hebrew:
+**Layer 1 — geometric scoring against a font-rendered mask.** *Shipped in 9b.* No hand-authored glyph outlines are needed, because the app already loads Noto Sans Hebrew:
 
-1. Rasterize the target glyph to an offscreen canvas (256×256), centered on the em box.
+1. Rasterize the target glyph to an offscreen canvas, fit to its own bounds and centered.
 2. Take the alpha channel as a binary mask; run a two-pass chamfer distance transform.
 3. Normalize the ink into the same box and score three numbers:
-   - **Accuracy** — fraction of ink points within tolerance of the glyph (≈ 8% of em width)
+   - **Accuracy** — fraction of ink points within tolerance of the glyph (≈ 8% of the box)
    - **Coverage** — fraction of glyph pixels near some ink point; catches a half-drawn ה
    - **Spill** — mean distance of the worst decile of ink points; catches stray marks
 
 Deterministic, sub-millisecond, no network and no model, and identical for Greek — the only inputs are a font family and a glyph string.
 
 Two traps: `await document.fonts.load(...)` before rasterizing or the grading runs against a fallback font, and cache masks per glyph.
+
+Three things the build settled that the plan above did not:
+
+- **The grid is 128, not 256.** A mask's distance transform is cached, but the *ink's* is rebuilt every attempt, and both are linear in cell count — so the grid side lands quadratically on per-attempt cost (256 measures ~1.15 ms against 128's ~0.32 ms). At 128 a stem is still ~15 cells across, far more than an occupancy metric can use.
+- **The three numbers combine as a geometric mean, not a weighted sum.** Under any fixed weighting, accuracy can buy off coverage: half a ה scores 84/100 because "every mark is in the right place" banks the whole accuracy term. Requiring *both* to be good is what the three metrics were for.
+- **Coverage runs through a response curve first.** Linear coverage is far too forgiving — a ה missing its roof reads as 65% covered, which sounds like a near miss and is very nearly a different letter.
 
 **Known limitation:** this grades shape *occupancy*, not letter identity or stroke order. A ד drawn as a ר plus a stray tick scores decently. Layer 2 is what closes that.
 

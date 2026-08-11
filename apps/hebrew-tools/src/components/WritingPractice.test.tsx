@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { type GlyphMask, maskFromAlpha } from '@tools/shared/ink';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { daysFromNow, loadSRSStore, loadStats, newCard, saveSRSStore } from '../data/srs';
 import { buildDecks, writingCardKey } from '../data/writing';
@@ -9,9 +10,35 @@ vi.mock('posthog-js', () => ({
   default: { capture: vi.fn(), init: vi.fn(), identify: vi.fn(), captureException: vi.fn() },
 }));
 
+// happy-dom has no canvas, so the real `loadGlyphMask` always returns null and
+// the scoring path would never run. Only the rasterizer is faked: `scoreInk`
+// runs for real against a mask built by the real `maskFromAlpha`.
+const scoring = vi.hoisted(() => ({ mask: null as GlyphMask | null }));
+
+vi.mock('@tools/shared/ink', async importOriginal => {
+  const actual = await importOriginal<typeof import('@tools/shared/ink')>();
+  return { ...actual, loadGlyphMask: vi.fn(async () => scoring.mask) };
+});
+
+const MASK_SOURCE = 64;
+
+/** A mask of a single bar, so `drawOn`'s horizontal stroke can hit or miss it. */
+function barMask(orientation: 'horizontal' | 'vertical'): GlyphMask {
+  const alpha = new Uint8Array(MASK_SOURCE * MASK_SOURCE);
+  for (let y = 0; y < MASK_SOURCE; y++) {
+    for (let x = 0; x < MASK_SOURCE; x++) {
+      const along = orientation === 'horizontal' ? x : y;
+      const across = orientation === 'horizontal' ? y : x;
+      if (along >= 8 && along < 56 && across >= 30 && across < 34) alpha[y * MASK_SOURCE + x] = 255;
+    }
+  }
+  return maskFromAlpha(alpha, MASK_SOURCE, MASK_SOURCE, { size: MASK_SOURCE });
+}
+
 beforeEach(() => {
   localStorage.clear();
   vi.clearAllMocks();
+  scoring.mask = null;
 });
 
 const [ALPHABET, FINALS] = buildDecks();
@@ -180,6 +207,77 @@ describe('grading', () => {
     await gradeCurrent(user);
 
     expect(screen.getByRole('button', { name: 'Undo stroke' })).toBeDisabled();
+  });
+});
+
+describe('scoring', () => {
+  it('scores the attempt and suggests a grade', async () => {
+    const user = userEvent.setup();
+    scoring.mask = barMask('horizontal');
+    render(<WritingPractice />);
+
+    drawOn(canvas());
+    await user.click(await screen.findByRole('button', { name: 'Compare' }));
+
+    expect(await screen.findByText('100')).toBeInTheDocument();
+    expect(screen.getByText('Good match')).toBeInTheDocument();
+    expect(screen.getByText('Accuracy')).toBeInTheDocument();
+    expect(screen.getByText('Coverage')).toBeInTheDocument();
+    expect(screen.getByText('Stray ink')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Easy \(suggested\)/ })).toBeInTheDocument();
+  });
+
+  it('suggests a lapse when the shape is wrong', async () => {
+    const user = userEvent.setup();
+    // The same horizontal stroke against a vertical bar.
+    scoring.mask = barMask('vertical');
+    render(<WritingPractice />);
+
+    drawOn(canvas());
+    await user.click(await screen.findByRole('button', { name: 'Compare' }));
+
+    expect(await screen.findByText('Not there yet')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Again \(suggested\)/ })).toBeInTheDocument();
+  });
+
+  it('leaves every grade button live so the student can override', async () => {
+    // The score reads shape occupancy, not letter identity — a ד drawn as a ר
+    // scores well. The student is the only one who knows which happened.
+    const user = userEvent.setup();
+    scoring.mask = barMask('horizontal');
+    render(<WritingPractice />);
+
+    drawOn(canvas());
+    await user.click(await screen.findByRole('button', { name: 'Compare' }));
+    await user.click(await screen.findByRole('button', { name: 'Again' }));
+
+    expect(loadSRSStore()[writingCardKey('א')].repetition).toBe(0);
+  });
+
+  it('does not score an untouched surface', async () => {
+    const user = userEvent.setup();
+    scoring.mask = barMask('horizontal');
+    render(<WritingPractice />);
+
+    await user.click(screen.getByRole('button', { name: 'Compare' }));
+
+    expect(screen.queryByText('Accuracy')).not.toBeInTheDocument();
+    expect(screen.getByText(/How close was it\?/)).toBeInTheDocument();
+  });
+
+  it('falls back to self-assessment when no mask is available', async () => {
+    // No canvas, a blocked one, or a font that never resolved. Studying must
+    // continue; only the score goes away.
+    const user = userEvent.setup();
+    scoring.mask = null;
+    render(<WritingPractice />);
+
+    drawOn(canvas());
+    await user.click(await screen.findByRole('button', { name: 'Compare' }));
+
+    expect(screen.getByText(/How close was it\?/)).toBeInTheDocument();
+    expect(screen.queryByText('Accuracy')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Good' })).toBeEnabled();
   });
 });
 

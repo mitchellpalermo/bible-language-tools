@@ -16,6 +16,26 @@ export {
 } from './capture';
 export { appendStroke, appendStrokes, type PathSink, type RibbonOptions, segmentQuad, widthAt } from './render';
 export {
+  DEFAULT_TOLERANCE,
+  type InkScore,
+  scoreInk,
+  type ScoreOptions,
+  type Verdict,
+  VERDICT_THRESHOLDS,
+  verdictFor,
+} from './score/geom';
+export {
+  clearGlyphMaskCache,
+  distanceTransform,
+  type GlyphMask,
+  loadGlyphMask,
+  type LoadMaskOptions,
+  maskFromAlpha,
+  type MaskOptions,
+  rasterizeGlyph,
+  type RasterizeOptions,
+} from './score/mask';
+export {
   allGlyphs,
   glyphsInGroup,
   renderableText,
