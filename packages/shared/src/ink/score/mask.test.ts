@@ -1,12 +1,15 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  alphaBounds,
   clearGlyphMaskCache,
   DEFAULT_MASK_PADDING,
   DEFAULT_MASK_SIZE,
   distanceTransform,
   type GlyphMask,
+  loadCompositeMask,
   loadGlyphMask,
   maskFromAlpha,
+  rasterizeComposite,
   rasterizeGlyph,
 } from './mask';
 
@@ -272,5 +275,289 @@ describe('loadGlyphMask', () => {
 
     expect(createElement).toHaveBeenCalledTimes(2);
     vi.unstubAllGlobals();
+  });
+});
+
+describe('alphaBounds', () => {
+  it('reports the inclusive box of everything at or above the threshold', () => {
+    const alpha = alphaGrid(16, 16, (x, y) => x >= 3 && x <= 9 && y >= 5 && y <= 6);
+    expect(alphaBounds(alpha, 16, 16)).toEqual({ minX: 3, minY: 5, maxX: 9, maxY: 6 });
+  });
+
+  it('is null for a blank raster', () => {
+    expect(alphaBounds(new Uint8Array(256), 16, 16)).toBeNull();
+  });
+
+  it('honours the threshold', () => {
+    const faint = new Uint8Array(256).fill(100);
+    expect(alphaBounds(faint, 16, 16, 128)).toBeNull();
+    expect(alphaBounds(faint, 16, 16, 64)).not.toBeNull();
+  });
+});
+
+describe('maskFromAlpha with explicit bounds', () => {
+  // The mechanism behind placement scoring. Fitted to its own bounds a mark is
+  // "a bar filling the grid" and says nothing about where it was written;
+  // fitted to the composed glyph's bounds it is a bar in one place.
+  const MARK = { minX: 0, minY: 24, maxX: 31, maxY: 31 };
+
+  it('fits to the given box rather than the alpha it is handed', () => {
+    // Ink in the bottom eighth of a 32-square, framed by the whole square.
+    const alpha = alphaGrid(32, 32, (_, y) => y >= 24);
+    const own = maskFromAlpha(alpha, 32, 32, { size: 64, padding: 0 });
+    const framed = maskFromAlpha(alpha, 32, 32, {
+      size: 64,
+      padding: 0,
+      bounds: { minX: 0, minY: 0, maxX: 31, maxY: 31 },
+    });
+
+    // Fitted to itself, the bar is centred — it has forgotten where it was.
+    expect(bitsBox(own)?.minY).toBe(24);
+    expect(bitsBox(own)?.maxY).toBe(39);
+    // Framed by the square, it stays in the bottom quarter where it belongs.
+    expect(bitsBox(framed)?.minY).toBe(48);
+    expect(bitsBox(framed)?.maxY).toBe(63);
+  });
+
+  it('clips anything outside the frame', () => {
+    // A stray mark beyond the composed glyph's box is not part of the glyph.
+    const alpha = alphaGrid(32, 32, (_, y) => y >= 24);
+    const mask = maskFromAlpha(alpha, 32, 32, { size: 64, padding: 0, bounds: MARK });
+    const clipped = maskFromAlpha(alpha, 32, 32, {
+      size: 64,
+      padding: 0,
+      bounds: { minX: 0, minY: 0, maxX: 31, maxY: 15 },
+    });
+
+    expect(mask.filled).toBeGreaterThan(0);
+    expect(clipped.filled).toBe(0);
+  });
+
+  it('still returns a well-formed empty mask for an empty region', () => {
+    const mask = maskFromAlpha(new Uint8Array(1024), 32, 32, { size: 16, bounds: MARK });
+    expect(mask.filled).toBe(0);
+    expect(mask.size).toBe(16);
+    expect(mask.distance).toHaveLength(256);
+  });
+});
+
+// ── A stand-in renderer ──────────────────────────────────────────────────────
+// Lays glyphs out right-to-left from an anchor, with combining marks drawn
+// under the preceding letter and taking no advance of their own. That is the
+// one property of real text layout `rasterizeComposite` depends on, and the
+// one that breaks under a centred anchor.
+
+const COMPOSITE_SOURCE = 400;
+const CHAR_W = 40;
+const CHAR_H = 100;
+const MARK_W = 20;
+const MARK_H = 10;
+const COMBINING = new Set(['ָ']); // qamets
+
+type Rect = [number, number, number, number];
+
+function layout(text: string, x: number, align: string): Rect[] {
+  const advance = [...text].filter(c => !COMBINING.has(c)).length * CHAR_W;
+  const right = align === 'right' ? x : align === 'left' ? x + advance : x + advance / 2;
+  const top = COMPOSITE_SOURCE / 2 - CHAR_H / 2;
+
+  const rects: Rect[] = [];
+  let cursor = right;
+  for (const ch of text) {
+    if (COMBINING.has(ch)) {
+      rects.push([cursor + (CHAR_W - MARK_W) / 2, top + CHAR_H, MARK_W, MARK_H]);
+    } else {
+      cursor -= CHAR_W;
+      rects.push([cursor, top, CHAR_W, CHAR_H]);
+    }
+  }
+  return rects;
+}
+
+/** Install a canvas that paints via `layout`, returning the recorded calls. */
+function stubRenderer() {
+  const calls: { text: string; x: number; align: string; direction: string }[] = [];
+  const createElement = vi.fn(() => {
+    const data = new Uint8ClampedArray(COMPOSITE_SOURCE * COMPOSITE_SOURCE * 4);
+    const ctx = {
+      textAlign: 'center',
+      textBaseline: '',
+      direction: 'rtl',
+      font: '',
+      fillStyle: '',
+      clearRect: vi.fn(),
+      getImageData: () => ({ data }),
+      fillText(text: string, x: number) {
+        calls.push({ text, x, align: ctx.textAlign, direction: ctx.direction });
+        for (const [rx, ry, w, h] of layout(text, x, ctx.textAlign)) {
+          for (let y = Math.round(ry); y < ry + h; y++) {
+            for (let px = Math.round(rx); px < rx + w; px++) {
+              data[(y * COMPOSITE_SOURCE + px) * 4 + 3] = 255;
+            }
+          }
+        }
+      },
+    };
+    return { getContext: () => ctx };
+  });
+  vi.stubGlobal('document', { ...document, fonts: undefined, createElement });
+  return calls;
+}
+
+const COMPOSITE_OPTIONS = {
+  fontFamily: 'serif',
+  sourceSize: COMPOSITE_SOURCE,
+  size: 128,
+  padding: 0,
+} as const;
+
+describe('rasterizeComposite', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('anchors both renderings on the same edge', () => {
+    // The load-bearing detail. Centring would put the pe of 'פָ' and the pe of
+    // 'פ' on different pixels, and the difference between them would be a
+    // pe-shaped ghost rather than a vowel point.
+    const calls = stubRenderer();
+    rasterizeComposite('פָ', 'פ', COMPOSITE_OPTIONS);
+
+    expect(calls).toHaveLength(2);
+    expect(calls[0].x).toBe(calls[1].x);
+    expect(calls.every(c => c.align === 'right')).toBe(true);
+  });
+
+  it('anchors on the left edge under ltr', () => {
+    const calls = stubRenderer();
+    rasterizeComposite('ab', 'a', { ...COMPOSITE_OPTIONS, direction: 'ltr' });
+
+    expect(calls.every(c => c.align === 'left')).toBe(true);
+    expect(calls[0].x).toBe(calls[1].x);
+  });
+
+  it('isolates the mark and drops the base it was drawn on', () => {
+    stubRenderer();
+    const composite = rasterizeComposite('פָ', 'פ', COMPOSITE_OPTIONS);
+    if (!composite) throw new Error('expected a composite mask');
+
+    // The mark is 20x10 against the letter's 40x100 — a couple of percent of
+    // the whole, which is precisely why it needs measuring separately.
+    expect(composite.mark.filled).toBeGreaterThan(0);
+    expect(composite.mark.filled / composite.whole.filled).toBeLessThan(0.1);
+  });
+
+  it('places the mark within the whole glyph rather than fitting it to itself', () => {
+    stubRenderer();
+    const composite = rasterizeComposite('פָ', 'פ', COMPOSITE_OPTIONS);
+    const box = bitsBox(composite?.mark as GlyphMask);
+    if (!box) throw new Error('expected mark ink');
+
+    // A qamets sits below the letter and centred on it. Fitted to its own
+    // bounds it would fill the grid, and every position would score alike.
+    expect(box.minY).toBeGreaterThan(0.85 * 128);
+    expect(box.maxY).toBeLessThanOrEqual(127);
+    expect(Math.abs((box.minX + box.maxX) / 2 - 64)).toBeLessThan(6);
+  });
+
+  it('isolates an advancing mark, which a centred anchor could not', () => {
+    // Shureq is a vav carrying a dagesh: the composed form is *wider* than its
+    // base, so a centred layout shifts the base between the two renderings.
+    stubRenderer();
+    const composite = rasterizeComposite('פו', 'פ', COMPOSITE_OPTIONS);
+    const box = bitsBox(composite?.mark as GlyphMask);
+    if (!box) throw new Error('expected mark ink');
+
+    // Exactly one of the two letters survives the subtraction, on the left.
+    expect(composite?.mark.filled).toBeGreaterThan(0);
+    expect(box.maxX).toBeLessThan(64);
+  });
+
+  it('reports an empty mark when the two render identically', () => {
+    // Callers must read this as "not graded", not as a failed attempt.
+    stubRenderer();
+    const composite = rasterizeComposite('פ', 'פ', COMPOSITE_OPTIONS);
+
+    expect(composite?.whole.filled).toBeGreaterThan(0);
+    expect(composite?.mark.filled).toBe(0);
+  });
+
+  it('returns null when no 2D context is available', () => {
+    expect(rasterizeComposite('פָ', 'פ', { fontFamily: 'serif' })).toBeNull();
+  });
+
+  it('returns null when the composed form renders blank', () => {
+    vi.stubGlobal('document', {
+      ...document,
+      createElement: () => ({
+        getContext: () => ({
+          clearRect: vi.fn(),
+          fillText: vi.fn(),
+          getImageData: () => ({ data: new Uint8ClampedArray(16 * 16 * 4) }),
+        }),
+      }),
+    });
+
+    expect(
+      rasterizeComposite('פָ', 'פ', { fontFamily: 'serif', sourceSize: 16 }),
+    ).toBeNull();
+  });
+});
+
+describe('loadCompositeMask', () => {
+  beforeEach(() => {
+    clearGlyphMaskCache();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('awaits the webfont before rasterizing', async () => {
+    // Sharper here than for a single glyph: a mark is *defined* as the
+    // difference between two renderings, so a fallback face does not give a
+    // worse answer, it gives an arbitrary one.
+    const order: string[] = [];
+    const load = vi.fn(async () => {
+      order.push('font');
+      return [];
+    });
+    vi.stubGlobal('document', {
+      ...document,
+      fonts: { load },
+      createElement: () => {
+        order.push('raster');
+        return { getContext: () => null };
+      },
+    });
+
+    await loadCompositeMask('פָ', 'פ', {
+      fontFamily: 'serif',
+      fontLoadSpec: '16px serif',
+    });
+
+    expect(order[0]).toBe('font');
+    expect(order).toContain('raster');
+  });
+
+  it('keys the cache by the base as well as the composed form', async () => {
+    const calls = stubRenderer();
+
+    await loadCompositeMask('פָ', 'פ', COMPOSITE_OPTIONS);
+    await loadCompositeMask('פָ', 'פ', COMPOSITE_OPTIONS);
+    await loadCompositeMask('פָ', 'פָ', COMPOSITE_OPTIONS);
+
+    // Two rasterizations per uncached call, and the third differs only by base.
+    expect(calls).toHaveLength(4);
+  });
+
+  it('does not collide with the plain mask cached under the same text', async () => {
+    stubRenderer();
+
+    const plain = await loadGlyphMask('פָ', COMPOSITE_OPTIONS);
+    const composite = await loadCompositeMask('פָ', 'פ', COMPOSITE_OPTIONS);
+
+    expect(plain?.filled).toBeGreaterThan(0);
+    expect(composite?.mark.filled).toBeGreaterThan(0);
   });
 });

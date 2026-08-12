@@ -25,18 +25,23 @@ export {
   verdictFor,
 } from './score/geom';
 export {
+  alphaBounds,
   clearGlyphMaskCache,
+  type CompositeMask,
   distanceTransform,
   type GlyphMask,
+  loadCompositeMask,
   loadGlyphMask,
   type LoadMaskOptions,
   maskFromAlpha,
   type MaskOptions,
+  rasterizeComposite,
   rasterizeGlyph,
   type RasterizeOptions,
 } from './score/mask';
 export {
   allGlyphs,
+  baseText,
   glyphsInGroup,
   renderableText,
   type ScriptMetrics,

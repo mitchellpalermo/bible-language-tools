@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Stroke } from '../stroke';
-import { type GlyphMask, maskFromAlpha } from './mask';
+import { alphaBounds, type GlyphMask, maskFromAlpha } from './mask';
 import { DEFAULT_TOLERANCE, scoreInk, verdictFor, VERDICT_THRESHOLDS } from './geom';
 
 type Poly = [number, number][];
@@ -212,6 +212,109 @@ describe('scoreInk', () => {
     const per = (performance.now() - started) / runs;
 
     expect(per).toBeLessThan(5);
+  });
+});
+
+// ── Placement ────────────────────────────────────────────────────────────────
+// A vowel point on a host consonant. The point is a couple of percent of the
+// composed glyph's area, so the three area metrics cannot see where it went —
+// which is the entire skill the vowel deck drills.
+
+/** A qamets: a short bar centred below the letter. */
+const POINT: Poly = [
+  [85, 185],
+  [115, 185],
+];
+/** The same bar under the letter's left edge instead — a wrong qamets. */
+const POINT_LEFT: Poly = [
+  [45, 185],
+  [75, 185],
+];
+const POINTED: Poly[] = [...LETTER, POINT];
+
+/**
+ * The whole-and-mark pair, built the way `rasterizeComposite` builds it:
+ * both fitted to the composed form's bounds, so they share one frame.
+ */
+function compositeFrom(whole: Poly[], base: Poly[]): { whole: GlyphMask; mark: GlyphMask } {
+  const wholeAlpha = alphaFrom(whole);
+  const baseAlpha = alphaFrom(base);
+  const bounds = alphaBounds(wholeAlpha, SOURCE, SOURCE);
+  if (!bounds) throw new Error('expected ink');
+
+  const markAlpha = new Uint8Array(wholeAlpha.length);
+  for (let i = 0; i < markAlpha.length; i++) {
+    markAlpha[i] = baseAlpha[i] >= 128 ? 0 : wholeAlpha[i];
+  }
+
+  return {
+    whole: maskFromAlpha(wholeAlpha, SOURCE, SOURCE, { size: 128, bounds }),
+    mark: maskFromAlpha(markAlpha, SOURCE, SOURCE, { size: 128, bounds }),
+  };
+}
+
+describe('scoreInk placement', () => {
+  const composite = compositeFrom(POINTED, LETTER);
+
+  it('is null when the caller nominates no sub-region', () => {
+    // Null and zero are different answers, and the readout depends on it.
+    expect(scoreInk(inkFrom(POINTED), composite.whole).placement).toBeNull();
+  });
+
+  it('is high for a point written where it belongs', () => {
+    const result = scoreInk(inkFrom(POINTED), composite.whole, { part: composite.mark });
+
+    expect(result.placement).toBeGreaterThan(0.85);
+    expect(result.score).toBeGreaterThanOrEqual(90);
+  });
+
+  it('collapses for a correctly-shaped point in the wrong place', () => {
+    // The acceptance criterion for the vowel deck, and the reason this metric
+    // exists at all: everything about this attempt is right except *where* the
+    // qamets went, and it has to read as a miss.
+    const misplaced = [...LETTER, POINT_LEFT];
+    const result = scoreInk(inkFrom(misplaced), composite.whole, { part: composite.mark });
+
+    expect(result.placement).toBeLessThan(0.2);
+    expect(result.verdict).toBe('miss');
+  });
+
+  it('is the only metric that notices, which is why it is not optional', () => {
+    // Without the part mask the same misplaced attempt still passes: the point
+    // is a rounding error against the host consonant's area.
+    const misplaced = inkFrom([...LETTER, POINT_LEFT]);
+    const blind = scoreInk(misplaced, composite.whole);
+    const graded = scoreInk(misplaced, composite.whole, { part: composite.mark });
+
+    expect(blind.verdict).toBe('pass');
+    expect(graded.score).toBeLessThan(blind.score - 30);
+  });
+
+  it('falls when the point is omitted entirely', () => {
+    const result = scoreInk(inkFrom(LETTER), composite.whole, { part: composite.mark });
+
+    expect(result.placement).toBeLessThan(0.2);
+    expect(result.verdict).toBe('miss');
+  });
+
+  it('ignores an empty sub-region rather than failing every attempt', () => {
+    // A font that draws no difference between the composed form and its base
+    // must degrade to plain shape scoring, not mark everything wrong.
+    const empty = maskFromAlpha(new Uint8Array(SOURCE * SOURCE), SOURCE, SOURCE, { size: 128 });
+    const result = scoreInk(inkFrom(POINTED), composite.whole, { part: empty });
+
+    expect(result.placement).toBeNull();
+    expect(result.score).toBe(scoreInk(inkFrom(POINTED), composite.whole).score);
+  });
+
+  it('ignores a sub-region from a different grid', () => {
+    // Two grids are two frames, and comparing across them would be nonsense.
+    const other = maskFromAlpha(alphaFrom([POINT]), SOURCE, SOURCE, { size: 64 });
+    expect(scoreInk(inkFrom(POINTED), composite.whole, { part: other }).placement).toBeNull();
+  });
+
+  it('leaves the empty-ink result unplaced', () => {
+    expect(scoreInk([], composite.whole, { part: composite.mark }).placement).toBeNull();
   });
 });
 
