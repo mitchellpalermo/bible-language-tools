@@ -218,6 +218,12 @@ export function scoreInk(
   // ── Placement: coverage again, restricted to the cells the caller nominated.
   // Same question, same tolerance — the difference is only that these cells are
   // no longer outvoted by the thousands belonging to the host consonant.
+  //
+  // If issue #114 lands a best-of-placements translation search, this has to be
+  // evaluated at the winning offset along with everything else. Left behind at
+  // the unaligned position it would contradict the rest of the score — the
+  // metric that exists to say "the mark is in the wrong place" would be
+  // reporting a displacement the other three had already forgiven.
   const part = options.part;
   let placement: number | null = null;
   if (part && part.filled > 0 && part.size === size) {
