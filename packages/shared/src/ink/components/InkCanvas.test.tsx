@@ -71,7 +71,11 @@ describe('InkCanvas', () => {
     // coordinates: the stroke must run left to right at a constant height.
     const xs = stroke.points.map(p => p.x);
     expect(xs).toEqual([...xs].sort((a, b) => a - b));
-    expect(stroke.points.every(p => p.y === 10)).toBe(true);
+    // `toBeCloseTo`, not `===`: the filter computes `a * value + (1 - a) * prev`,
+    // and for a constant y that is 10 in real arithmetic but lands a ULP either
+    // side of it in floating point for ~8% of the timestamp deltas a DOM happens
+    // to produce. Exact equality made this pass locally and fail in CI.
+    for (const p of stroke.points) expect(p.y).toBeCloseTo(10, 6);
   });
 
   it('reports the first stylus contact', () => {

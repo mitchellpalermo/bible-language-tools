@@ -104,6 +104,7 @@ Things to know before changing it:
 - **Scoring grades shape occupancy, not letter identity.** A ד drawn as a ר scores well, and shin's dot is under 1% of the glyph's area so the wrong side barely registers. This is by design and is issue #103's job (stroke templates). Do not add heuristics to `geom.ts` that try to close it — the suggested SRS grade is a suggestion for exactly this reason, and every grade button stays live.
 - **Ink is stored in CSS pixels, not device pixels.** The canvas scales by `devicePixelRatio` at draw time; baking that in would make saved strokes resolution-dependent.
 - **Smoothing at capture time and interpolation at render time are separate on purpose.** Do not merge them — a render-grade spline applied to incoming samples rounds off real corners, and the square corner of ד is exactly what distinguishes it from ר.
+- **Never assert exact equality on a smoothed coordinate.** `OneEuroFilter` computes `a * value + (1 - a) * prev`, which for a constant input is that constant in real arithmetic but lands a ULP either side of it in floating point, for roughly 8% of the timestamp deltas a DOM happens to produce. `InkCanvas.test.tsx` asserted `p.y === 10` on a horizontal stroke and duly passed locally while failing in CI. Use `toBeCloseTo`. Exact equality is still right for values the engine only *copies* — `stroke.test.ts`'s zero-length resample case is asserting that they are copies.
 
 ## Pull requests
 
