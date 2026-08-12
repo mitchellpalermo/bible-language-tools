@@ -1,6 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { type GlyphMask, maskFromAlpha } from '@tools/shared/ink';
+import {
+  type CompositeMask,
+  type GlyphMask,
+  maskFromAlpha,
+  type WritableGlyph,
+} from '@tools/shared/ink';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { daysFromNow, loadSRSStore, loadStats, newCard, saveSRSStore } from '../data/srs';
 import { buildDecks, writingCardKey } from '../data/writing';
@@ -10,41 +15,77 @@ vi.mock('posthog-js', () => ({
   default: { capture: vi.fn(), init: vi.fn(), identify: vi.fn(), captureException: vi.fn() },
 }));
 
-// happy-dom has no canvas, so the real `loadGlyphMask` always returns null and
-// the scoring path would never run. Only the rasterizer is faked: `scoreInk`
-// runs for real against a mask built by the real `maskFromAlpha`.
-const scoring = vi.hoisted(() => ({ mask: null as GlyphMask | null }));
+// happy-dom has no canvas, so the real rasterizers always return null and the
+// scoring path would never run. Only rasterization is faked: `scoreInk` runs
+// for real against masks built by the real `maskFromAlpha`.
+const scoring = vi.hoisted(() => ({
+  mask: null as GlyphMask | null,
+  composite: null as CompositeMask | null,
+}));
 
 vi.mock('@tools/shared/ink', async importOriginal => {
   const actual = await importOriginal<typeof import('@tools/shared/ink')>();
-  return { ...actual, loadGlyphMask: vi.fn(async () => scoring.mask) };
+  return {
+    ...actual,
+    loadGlyphMask: vi.fn(async () => scoring.mask),
+    loadCompositeMask: vi.fn(async () => scoring.composite),
+  };
 });
 
 const MASK_SOURCE = 64;
 
-/** A mask of a single bar, so `drawOn`'s horizontal stroke can hit or miss it. */
-function barMask(orientation: 'horizontal' | 'vertical'): GlyphMask {
+/** A horizontal or vertical bar in the source raster. */
+function barAlpha(orientation: 'horizontal' | 'vertical', from = 8, to = 56): Uint8Array {
   const alpha = new Uint8Array(MASK_SOURCE * MASK_SOURCE);
   for (let y = 0; y < MASK_SOURCE; y++) {
     for (let x = 0; x < MASK_SOURCE; x++) {
       const along = orientation === 'horizontal' ? x : y;
       const across = orientation === 'horizontal' ? y : x;
-      if (along >= 8 && along < 56 && across >= 30 && across < 34) alpha[y * MASK_SOURCE + x] = 255;
+      if (along >= from && along < to && across >= 30 && across < 34) alpha[y * MASK_SOURCE + x] = 255;
     }
   }
-  return maskFromAlpha(alpha, MASK_SOURCE, MASK_SOURCE, { size: MASK_SOURCE });
+  return alpha;
+}
+
+/** A mask of a single bar, so `drawOn`'s horizontal stroke can hit or miss it. */
+function barMask(orientation: 'horizontal' | 'vertical'): GlyphMask {
+  return maskFromAlpha(barAlpha(orientation), MASK_SOURCE, MASK_SOURCE, { size: MASK_SOURCE });
+}
+
+/**
+ * A bar, plus a slice of it nominated as the mark — both framed by the bar's
+ * bounds, which is the contract `rasterizeComposite` satisfies for real.
+ */
+function barComposite(): CompositeMask {
+  const bounds = { minX: 8, minY: 30, maxX: 55, maxY: 33 };
+  const geometry = { size: MASK_SOURCE, bounds };
+  return {
+    whole: maskFromAlpha(barAlpha('horizontal'), MASK_SOURCE, MASK_SOURCE, geometry),
+    mark: maskFromAlpha(barAlpha('horizontal', 20, 32), MASK_SOURCE, MASK_SOURCE, geometry),
+  };
 }
 
 beforeEach(() => {
   localStorage.clear();
   vi.clearAllMocks();
   scoring.mask = null;
+  scoring.composite = null;
 });
 
-const [ALPHABET, FINALS] = buildDecks();
+const DECKS = buildDecks();
+const [ALPHABET, FINALS] = DECKS;
+const deckById = (id: string) => DECKS.find(d => d.id === id) as (typeof DECKS)[number];
+
+/** Writing cards are keyed by glyph; letters and finals share a prefix. */
+const letterKey = (char: string) =>
+  writingCardKey({ char, name: char, group: 'consonant' } as WritableGlyph);
 
 function canvas() {
-  return screen.getByLabelText(/Write the Hebrew letter/);
+  return screen.getByLabelText(/^Write the Hebrew letter/);
+}
+
+function vowelCanvas() {
+  return screen.getByLabelText(/^Write the Hebrew vowel point/);
 }
 
 /** Lay down one stroke on the surface. */
@@ -170,8 +211,8 @@ describe('grading', () => {
     await gradeCurrent(user);
 
     const store = loadSRSStore();
-    expect(store[writingCardKey('א')]).toBeDefined();
-    expect(store[writingCardKey('א')].repetition).toBe(1);
+    expect(store[letterKey('א')]).toBeDefined();
+    expect(store[letterKey('א')].repetition).toBe(1);
     // The bare lemma key belongs to vocabulary; writing must not touch it.
     expect(store['א']).toBeUndefined();
 
@@ -184,7 +225,7 @@ describe('grading', () => {
     render(<WritingPractice />);
 
     await gradeCurrent(user, 'Again');
-    expect(loadSRSStore()[writingCardKey('א')].repetition).toBe(0);
+    expect(loadSRSStore()[letterKey('א')].repetition).toBe(0);
   });
 
   it('records the review in the shared study stats', async () => {
@@ -251,7 +292,7 @@ describe('scoring', () => {
     await user.click(await screen.findByRole('button', { name: 'Compare' }));
     await user.click(await screen.findByRole('button', { name: 'Again' }));
 
-    expect(loadSRSStore()[writingCardKey('א')].repetition).toBe(0);
+    expect(loadSRSStore()[letterKey('א')].repetition).toBe(0);
   });
 
   it('does not score an untouched surface', async () => {
@@ -310,7 +351,7 @@ describe('session end', () => {
     saveSRSStore(
       Object.fromEntries(
         FINALS.glyphs.map(g => {
-          const key = writingCardKey(g.char);
+          const key = writingCardKey(g);
           return [key, { ...newCard(key), dueDate: daysFromNow(5) }];
         }),
       ),
@@ -322,5 +363,202 @@ describe('session end', () => {
 
     await user.click(screen.getByRole('button', { name: /Final forms/ }));
     expect(screen.getByText('Nothing due in this deck')).toBeInTheDocument();
+  });
+});
+
+describe('the vowel deck', () => {
+  it('drills a point on its host consonant', async () => {
+    const user = userEvent.setup();
+    render(<WritingPractice />);
+
+    await user.click(screen.getByRole('button', { name: /All vowel points/ }));
+
+    expect(screen.getByText('patah')).toBeInTheDocument();
+    // The surface asks for the pair, because the point alone is a stray tick.
+    expect(vowelCanvas()).toBeInTheDocument();
+    expect(screen.getByText(/1 \/ 13/)).toBeInTheDocument();
+  });
+
+  it('shows the host consonant with the point in copy mode', async () => {
+    const user = userEvent.setup();
+    render(<WritingPractice />);
+
+    await user.click(screen.getByRole('button', { name: /All vowel points/ }));
+    await user.click(screen.getByRole('button', { name: 'Copy' }));
+
+    expect(screen.getByText('פַ')).toBeInTheDocument();
+    expect(screen.getByText(/the פ as well as the point/)).toBeInTheDocument();
+  });
+
+  it('asks for the host from memory in recall mode', async () => {
+    const user = userEvent.setup();
+    render(<WritingPractice />);
+
+    await user.click(screen.getByRole('button', { name: /All vowel points/ }));
+    await user.click(screen.getByRole('button', { name: 'Recall' }));
+
+    expect(screen.queryByText('פַ')).not.toBeInTheDocument();
+    expect(screen.getByText(/Write פ from memory/)).toBeInTheDocument();
+  });
+
+  it('keys vowel cards apart from letter cards', async () => {
+    // Same store, different namespace. Reviewing patah must not touch a letter.
+    const user = userEvent.setup();
+    render(<WritingPractice />);
+
+    await user.click(screen.getByRole('button', { name: /All vowel points/ }));
+    await gradeCurrent(user);
+
+    const store = loadSRSStore();
+    expect(store['write:nikud:ַ']).toBeDefined();
+    expect(store['write:letter:ַ']).toBeUndefined();
+  });
+
+  it('tells the student where the point goes once they have compared', async () => {
+    const user = userEvent.setup();
+    render(<WritingPractice />);
+
+    await user.click(screen.getByRole('button', { name: /All vowel points/ }));
+    await user.click(screen.getByRole('button', { name: 'Compare' }));
+
+    expect(screen.getByText(/A horizontal stroke centred beneath/)).toBeInTheDocument();
+  });
+
+  it('scores where the mark landed, not only the shape of the pair', async () => {
+    // The vowel deck's reason for existing. `placement` is the fourth number,
+    // and it only appears where there was a mark to place.
+    const user = userEvent.setup();
+    scoring.composite = barComposite();
+    render(<WritingPractice />);
+
+    await user.click(screen.getByRole('button', { name: /All vowel points/ }));
+    drawOn(vowelCanvas());
+    await user.click(await screen.findByRole('button', { name: 'Compare' }));
+
+    expect(await screen.findByText('Placement')).toBeInTheDocument();
+  });
+
+  it('omits placement for a letter written whole', async () => {
+    // Rendering 0% for a letter with no mark would read as failing something
+    // that was never asked for.
+    const user = userEvent.setup();
+    scoring.mask = barMask('horizontal');
+    render(<WritingPractice />);
+
+    drawOn(canvas());
+    await user.click(await screen.findByRole('button', { name: 'Compare' }));
+
+    expect(await screen.findByText('Accuracy')).toBeInTheDocument();
+    expect(screen.queryByText('Placement')).not.toBeInTheDocument();
+  });
+
+  it('falls back to self-assessment when the mark cannot be rasterized', async () => {
+    const user = userEvent.setup();
+    scoring.composite = null;
+    render(<WritingPractice />);
+
+    await user.click(screen.getByRole('button', { name: /All vowel points/ }));
+    drawOn(vowelCanvas());
+    await user.click(await screen.findByRole('button', { name: 'Compare' }));
+
+    expect(screen.getByText(/How close was it\?/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Good' })).toBeEnabled();
+  });
+});
+
+describe('the confusable decks', () => {
+  it('alternates the members of a pair rather than blocking them', async () => {
+    const user = userEvent.setup();
+    render(<WritingPractice />);
+
+    await user.click(screen.getByRole('button', { name: /dalet \/ resh/ }));
+    expect(screen.getByText('dalet')).toBeInTheDocument();
+
+    await gradeCurrent(user);
+    expect(screen.getByText('resh')).toBeInTheDocument();
+
+    await gradeCurrent(user);
+    expect(screen.getByText('dalet')).toBeInTheDocument();
+  });
+
+  it('names the letter it is not, before the student writes', async () => {
+    // The contrast has to be present at the moment of recall. Waiting for the
+    // reveal teaches the letter and nothing about telling the two apart.
+    const user = userEvent.setup();
+    render(<WritingPractice />);
+
+    await user.click(screen.getByRole('button', { name: /dalet \/ resh/ }));
+
+    expect(screen.getByText('Not')).toBeInTheDocument();
+    expect(screen.getByText('ר')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Good' })).not.toBeInTheDocument();
+  });
+
+  it('leaves the contrast off the ordinary letter decks', async () => {
+    const user = userEvent.setup();
+    render(<WritingPractice />);
+
+    // bet is confusable with kaf, but the alphabet deck is not drilling that.
+    await gradeCurrent(user);
+    expect(screen.getByText('bet')).toBeInTheDocument();
+    expect(screen.queryByText('Not')).not.toBeInTheDocument();
+  });
+
+  it('reviews the same card the alphabet deck does', async () => {
+    const user = userEvent.setup();
+    render(<WritingPractice />);
+
+    await user.click(screen.getByRole('button', { name: /dalet \/ resh/ }));
+    await gradeCurrent(user);
+
+    expect(loadSRSStore()[letterKey('ד')].repetition).toBe(1);
+  });
+
+  it('does not let a repeat within one session stretch the interval', async () => {
+    // Three passing grades minutes apart are not three spaced repetitions, and
+    // SM-2 has no way to know that on its own.
+    const user = userEvent.setup();
+    render(<WritingPractice />);
+
+    await user.click(screen.getByRole('button', { name: /dalet \/ resh/ }));
+    await gradeCurrent(user); // dalet
+    await gradeCurrent(user); // resh
+    await gradeCurrent(user); // dalet again
+
+    expect(loadSRSStore()[letterKey('ד')].repetition).toBe(1);
+  });
+
+  it('still records a repeat lapse, which can only pull the schedule in', async () => {
+    const user = userEvent.setup();
+    render(<WritingPractice />);
+
+    await user.click(screen.getByRole('button', { name: /dalet \/ resh/ }));
+    await gradeCurrent(user); // dalet, good
+    await gradeCurrent(user); // resh, good
+    await gradeCurrent(user, 'Again'); // dalet, lapsed
+
+    expect(loadSRSStore()[letterKey('ד')].repetition).toBe(0);
+  });
+
+  it('counts every presentation toward the study streak', async () => {
+    // The student did the review whether or not it moved the schedule.
+    const user = userEvent.setup();
+    render(<WritingPractice />);
+
+    await user.click(screen.getByRole('button', { name: /dalet \/ resh/ }));
+    await gradeCurrent(user);
+    await gradeCurrent(user);
+    await gradeCurrent(user);
+
+    expect(loadStats().totalReviewed).toBe(3);
+  });
+
+  it('offers a combined deck that never repeats a letter', async () => {
+    const user = userEvent.setup();
+    render(<WritingPractice />);
+
+    await user.click(screen.getByRole('button', { name: /All pairs/ }));
+    expect(screen.getByText(/1 \/ 16/)).toBeInTheDocument();
+    expect(deckById('confusable-all').glyphs).toHaveLength(16);
   });
 });

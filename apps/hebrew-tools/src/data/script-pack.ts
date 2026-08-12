@@ -118,8 +118,14 @@ const CONSONANTS: WritableGlyph[] = [
   // Shin and sin are one letter of the alphabet distinguished only by which
   // side the dot sits on, and placing that dot is the motor skill. They get a
   // card each; a BARE ש is neither of them and occurs nowhere in the text.
+  //
+  // `baseForm` is the bare ש, which is what makes the dot's side actually
+  // count. It is under 1% of the letter's cells, so an area metric over the
+  // whole glyph scores שׂ written for שׁ as very nearly correct; graded as a
+  // mark in the letter's frame, the wrong arm misses outright.
   {
     char: 'שׁ',
+    baseForm: 'ש',
     name: 'shin',
     phonetic: 'š',
     group: 'consonant',
@@ -128,6 +134,7 @@ const CONSONANTS: WritableGlyph[] = [
   },
   {
     char: 'שׂ',
+    baseForm: 'ש',
     name: 'sin',
     phonetic: 'ś',
     group: 'consonant',
@@ -186,24 +193,127 @@ const FINALS: WritableGlyph[] = [
 /**
  * Nikud, on a host consonant.
  *
- * Not yet surfaced in the UI — the vowel deck is issue #101. They live here now
- * because a vowel point rendered alone is a stray mark with nothing to attach
- * to, and `renderableText()` already knows to compose them onto `hostChar`.
+ * Thirteen cards: nine full vowels, three hatephs, and the sheva. פ is the
+ * conventional host in teaching charts, and `renderableText()` composes every
+ * mark onto it — a vowel point rendered alone is a stray tick with nothing to
+ * attach to.
  *
- * פ is the conventional host in teaching charts.
+ * **Every note here is about placement, because placement is what is being
+ * drilled.** Hireq, sheva and holem are the same handful of dots; what makes
+ * them different vowels is that one sits below, one below in a stack, and one
+ * above and to the left. Scoring reads this the same way the student does —
+ * `baseText()` resolves to the bare פ, and the mark is graded as a mark, in the
+ * composed glyph's frame. See `rasterizeComposite` in `@tools/shared/ink`.
+ *
+ * Two are vowel *letters* rather than points, and they are here rather than
+ * with the consonants because that is where the textbook's vowel chart puts
+ * them and because writing them is the same skill: a mark in a fixed position
+ * relative to a consonant.
+ *
+ * **Qamets qatan is deliberately absent.** It is a distinct vowel and it has a
+ * Unicode codepoint of its own (U+05C7), but the WLC writes it with the
+ * ordinary qamets and it is drawn identically either way. A handwriting card
+ * whose reference is pixel-for-pixel another card's is not a card — telling
+ * the two apart is a syllable-structure lesson, not a motor one.
  */
 const NIKUD: WritableGlyph[] = [
-  { char: 'ַ', name: 'patah', phonetic: 'a', group: 'vowel' },
-  { char: 'ָ', name: 'qamets', phonetic: 'ā', group: 'vowel' },
-  { char: 'ֶ', name: 'segol', phonetic: 'e', group: 'vowel' },
-  { char: 'ֵ', name: 'tsere', phonetic: 'ē', group: 'vowel' },
-  { char: 'ִ', name: 'hireq', phonetic: 'i', group: 'vowel' },
-  { char: 'ֹ', name: 'holem', phonetic: 'ō', group: 'vowel' },
-  { char: 'ֻ', name: 'qibbuts', phonetic: 'u', group: 'vowel' },
-  { char: 'ְ', name: 'sheva', phonetic: 'ə', group: 'vowel' },
-  { char: 'ֲ', name: 'hateph patah', phonetic: 'ă', group: 'vowel' },
-  { char: 'ֱ', name: 'hateph segol', phonetic: 'ĕ', group: 'vowel' },
-  { char: 'ֳ', name: 'hateph qamets', phonetic: 'ŏ', group: 'vowel' },
+  {
+    char: 'ַ',
+    name: 'patah',
+    phonetic: 'a',
+    group: 'vowel',
+    note: 'A horizontal stroke centred beneath the consonant.',
+  },
+  {
+    char: 'ָ',
+    name: 'qamets',
+    phonetic: 'ā',
+    group: 'vowel',
+    note: 'A patah with a short tail dropping from the middle of it.',
+  },
+  {
+    char: 'ֶ',
+    name: 'segol',
+    phonetic: 'e',
+    group: 'vowel',
+    note: 'Three dots beneath, in a triangle pointing down.',
+  },
+  {
+    char: 'ֵ',
+    name: 'tsere',
+    phonetic: 'ē',
+    group: 'vowel',
+    note: 'Two dots beneath, side by side and level.',
+  },
+  {
+    char: 'ִ',
+    name: 'hireq',
+    phonetic: 'i',
+    group: 'vowel',
+    note: 'A single dot directly beneath the consonant.',
+  },
+  {
+    char: 'ֹ',
+    name: 'holem',
+    phonetic: 'ō',
+    group: 'vowel',
+    note: 'The one point written ABOVE — up and to the left, not centred over the letter.',
+  },
+  {
+    char: 'ֻ',
+    name: 'qibbuts',
+    phonetic: 'u',
+    group: 'vowel',
+    note: 'Three dots beneath on a diagonal. A tsere is two dots level; this is three, sloping.',
+  },
+  // Vav + dagesh. Not a point at all — the vowel is a letter of its own,
+  // written after the consonant it sounds with.
+  {
+    char: 'וּ',
+    name: 'shureq',
+    phonetic: 'û',
+    group: 'vowel',
+    note: 'A vav following the consonant, with a dot in the middle of its stem.',
+  },
+  // Vav + holem, in that order. The WLC's own encoding puts the point first;
+  // written that way it lands on the preceding consonant instead of the vav.
+  {
+    char: 'וֹ',
+    name: 'holem male',
+    phonetic: 'ô',
+    group: 'vowel',
+    note: 'A vav following the consonant, with the holem dot above and left of it.',
+  },
+  {
+    char: 'ְ',
+    name: 'sheva',
+    phonetic: 'ə',
+    group: 'vowel',
+    note: 'Two dots beneath, stacked vertically. A hireq is one dot; this is two.',
+  },
+  // The hatephs are single codepoints that render as a sheva beside their
+  // vowel. Which side each sits on is the font's business, not the student's.
+  {
+    char: 'ֲ',
+    name: 'hateph patah',
+    phonetic: 'ă',
+    group: 'vowel',
+    note: 'A sheva and a patah together beneath the consonant.',
+  },
+  {
+    char: 'ֱ',
+    name: 'hateph segol',
+    phonetic: 'ĕ',
+    group: 'vowel',
+    note: 'A sheva and a segol together beneath the consonant.',
+  },
+  {
+    char: 'ֳ',
+    name: 'hateph qamets',
+    phonetic: 'ŏ',
+    group: 'vowel',
+    note: 'A sheva and a qamets together beneath the consonant.',
+  },
 ];
 
 export const hebrewScriptPack: ScriptPack = {

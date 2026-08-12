@@ -8,7 +8,12 @@ The project is currently a styled placeholder page. All real tools are planned �
 
 Planned routes (per roadmap): `/` (home), `/keyboard`, `/flashcards`, `/write`, `/daily`, `/reader`, `/transliteration`, `/grammar`, `/paradigms`, `/parse`, `/roots`.
 
-`/write` is stylus handwriting practice, built on `@tools/shared/ink`. The engine is language-agnostic; everything Hebrew about it lives in `src/data/script-pack.ts`. See the repo CLAUDE.md for the engine's invariants and `ROADMAP.md` Phase 9 for what is still to come (issues #99–#105).
+`/write` is stylus handwriting practice, built on `@tools/shared/ink`. The engine is language-agnostic; everything Hebrew about it lives in `src/data/script-pack.ts`, and deck construction in `src/data/writing.ts`. See the repo CLAUDE.md for the engine's invariants and `ROADMAP.md` Phase 9 for what is still to come (issues #99–#105).
+
+Two things about the decks that are pedagogy rather than plumbing, and will look like arbitrary complexity if changed without reading them:
+
+- **A confusable deck's order IS the deck.** Members are dealt round-robin so ד and ר alternate; `WritingDeck.order: 'as-built'` is what stops `buildQueue` hoisting due cards to the front and reassembling exactly the blocked presentation the deck exists to avoid.
+- **A repeat within one session can demote a card but not promote it** (`shouldUpdateCard`). A pair deck shows ד three times in five minutes, and SM-2 would read three passes as three spaced repetitions. Stats still count every presentation — the student did the review either way.
 
 ## Tech Stack
 
@@ -102,7 +107,9 @@ See `ROADMAP.md` for the full feature plan and build order.
 - **Root system:** Triliteral (3-letter) root system — pedagogy centers on roots, not lemmas.
 - **Morphological data:** Open Scriptures Hebrew Bible (OSHB) — `github.com/openscriptures/morphhb`, CC BY 4.0. Built into `public/data/morphhb/` by `scripts/build-morphhb.mjs`; see "OSHB data pipeline" below.
 - **Lenient comparison:** Strip U+05B0–U+05C7 (nikud) for lenient grading; also strip U+0591–U+05AF (cantillation) when fully stripping diacritics.
-- **SRS key namespace:** the SRS store is shared across features. Vocabulary cards are keyed by `normalizeKey(cardKey(word))` — the bare lemma, plus `#<sense>` for the handful of homographs that would otherwise share a card (see "Textbook chapter decks"). **Every non-vocabulary card must carry a prefix** or the two collide on a single-letter word. Handwriting practice uses `write:letter:<char>` (`src/data/writing.ts`). Add the prefix to that file when a new card type appears; do not invent one at a call site.
+- **SRS key namespace:** the SRS store is shared across features. Vocabulary cards are keyed by `normalizeKey(cardKey(word))` — the bare lemma, plus `#<sense>` for the handful of homographs that would otherwise share a card (see "Textbook chapter decks"). **Every non-vocabulary card must carry a prefix** or the two collide on a single-letter word. Handwriting practice spends two, both in `src/data/writing.ts`: `write:letter:<char>` for consonants and finals, `write:nikud:<char>` for vowel points. They are separate because the skills are separate, and because the namespaces would otherwise collide outright — shureq's card is keyed by וּ, which is also a vav with a dagesh. `writingCardKey` takes the *glyph* and picks the prefix from its group; add new prefixes to `KEY_PREFIX` and `WRITING_KEY_PREFIXES` together, and never build one at a call site.
+
+The confusable decks deliberately get no prefix of their own — they drill the same letters the alphabet deck does, so grading ד in one must move the card the other sees.
 - **Deck selection is persisted separately from the SRS store** (`hebrew-tools-deck-v1`, `src/lib/deck-selection.ts`) and is never synced. It decides which due cards you see, not what is due, so it stays local to the browser.
 - **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`. There is still no auth or sync in this app — **all study progress is per-browser only.** The D1 plumbing exists (see below), but nothing reads or writes it yet.
 

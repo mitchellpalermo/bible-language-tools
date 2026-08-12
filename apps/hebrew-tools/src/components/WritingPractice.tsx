@@ -1,7 +1,9 @@
 import InkCanvas from '@tools/shared/components/InkCanvas';
 import {
+  baseText,
   type GlyphMask,
   type InkScore,
+  loadCompositeMask,
   loadGlyphMask,
   renderableText,
   scoreInk,
@@ -10,7 +12,7 @@ import {
   type WritableGlyph,
 } from '@tools/shared/ink';
 import posthog from 'posthog-js';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { hebrewScriptPack } from '../data/script-pack';
 import {
   loadSRSStore,
@@ -28,9 +30,12 @@ import {
   countNew,
   isPassingGrade,
   qualityFor,
+  shouldUpdateCard,
   suggestedGrade,
+  WRITING_DECK_CATEGORIES,
   WRITING_GRADES,
   WRITING_MODES,
+  type WritingDeck,
   type WritingGrade,
   type WritingMode,
   writingCardKey,
@@ -38,6 +43,17 @@ import {
 import ErrorBoundary from './ErrorBoundary';
 
 const DECKS = buildDecks();
+
+/** The reference masks an attempt is scored against. */
+interface ScoringMasks {
+  whole: GlyphMask;
+  /**
+   * The mark that distinguishes this glyph, in `whole`'s frame — a vowel
+   * point, or the dot that makes a ש a שׁ. Null where the glyph is written
+   * whole, in which case scoring falls back to shape alone.
+   */
+  mark: GlyphMask | null;
+}
 
 function WritingPracticeInner() {
   const [srsStore, setSrsStore] = useState<Record<string, SRSCard>>(() => loadSRSStore());
@@ -62,12 +78,17 @@ function WritingPracticeInner() {
   // no other dependency changes.
   const [session, setSession] = useState(0);
 
+  // Glyphs already graded this session. The confusable decks present the same
+  // letter several times over, and SM-2 reads consecutive passes as spaced
+  // repetitions when they are minutes apart — see `shouldUpdateCard`.
+  const reviewedRef = useRef<Set<string>>(new Set());
+
   const deck = DECKS.find(d => d.id === deckId) ?? DECKS[0];
 
   // Built once per session, not per review. It reads the store directly rather
   // than depending on `srsStore` so that grading a card cannot reorder the
   // letters still ahead of the student.
-  const queue = useMemo(() => buildQueue(deck.glyphs, loadSRSStore()), [deck, session]);
+  const queue = useMemo(() => buildQueue(deck, loadSRSStore()), [deck, session]);
 
   const glyph: WritableGlyph | undefined = queue[index];
 
@@ -75,33 +96,52 @@ function WritingPracticeInner() {
   // form that differs from their bare identity (final kaf takes its sheva), and
   // the mask has to be built from what the student was actually asked to write.
   const referenceText = glyph ? renderableText(hebrewScriptPack, glyph) : '';
+  // What is on the page before this glyph's own mark: the host פ under a vowel
+  // point, the bare ש under a shin dot. Null for a glyph written whole.
+  const underlyingText = glyph ? baseText(hebrewScriptPack, glyph) : null;
 
   // ── Scoring reference ─────────────────────────────────────────────────────
   // The font is the answer key: the glyph is rasterized to a mask once and
   // scored against. Null means no canvas or no font, in which case the feedback
   // panel falls back to plain self-assessment.
-  const [mask, setMask] = useState<GlyphMask | null>(null);
+  //
+  // A glyph with an underlying form is rasterized twice, and the difference is
+  // graded separately. Without that, a qamets under the wrong side of the פ
+  // costs about three points out of a hundred — it is 4% of the composed
+  // glyph's area and 100% of the mistake.
+  const [masks, setMasks] = useState<ScoringMasks | null>(null);
   useEffect(() => {
     if (!referenceText) return;
     let cancelled = false;
-    setMask(null);
-    loadGlyphMask(referenceText, {
+    setMasks(null);
+
+    const options = {
       fontFamily: hebrewScriptPack.fontFamily,
       fontLoadSpec: hebrewScriptPack.fontLoadSpec,
       direction: hebrewScriptPack.direction,
-    }).then(next => {
-      if (!cancelled) setMask(next);
+    };
+    const pending: Promise<ScoringMasks | null> = underlyingText
+      ? loadCompositeMask(referenceText, underlyingText, options).then(c =>
+          c ? { whole: c.whole, mark: c.mark } : null,
+        )
+      : loadGlyphMask(referenceText, options).then(m => (m ? { whole: m, mark: null } : null));
+
+    pending.then(next => {
+      if (!cancelled) setMasks(next);
     });
     return () => {
       cancelled = true;
     };
-  }, [referenceText]);
+  }, [referenceText, underlyingText]);
 
   // Scored only once the student has committed to an answer, so nothing is
   // graded mid-stroke.
   const result: InkScore | null = useMemo(
-    () => (revealed && mask && strokes.length > 0 ? scoreInk(strokes, mask) : null),
-    [revealed, mask, strokes],
+    () =>
+      revealed && masks && strokes.length > 0
+        ? scoreInk(strokes, masks.whole, { part: masks.mark })
+        : null,
+    [revealed, masks, strokes],
   );
 
   const handleStrokeComplete = useCallback((stroke: Stroke) => {
@@ -118,20 +158,29 @@ function WritingPracticeInner() {
     setRevealed(false);
     setSessionScore({ passed: 0, missed: 0 });
     setDone(false);
+    reviewedRef.current = new Set();
   };
 
   const grade = (which: WritingGrade) => {
     if (!glyph) return;
     const passed = isPassingGrade(which);
-    const key = writingCardKey(glyph.char);
+    const key = writingCardKey(glyph);
 
-    setSrsStore(prev => {
-      const updated = nextSRS(prev[key] ?? newCard(key), qualityFor(which));
-      const next = { ...prev, [key]: updated };
-      saveSRSStore(next);
-      return next;
-    });
+    // A repeat within the same session can demote the card but not promote it.
+    const repeat = reviewedRef.current.has(key);
+    reviewedRef.current.add(key);
 
+    if (shouldUpdateCard(repeat, which)) {
+      setSrsStore(prev => {
+        const updated = nextSRS(prev[key] ?? newCard(key), qualityFor(which));
+        const next = { ...prev, [key]: updated };
+        saveSRSStore(next);
+        return next;
+      });
+    }
+
+    // Stats are not conditional: the student did the review either way, and it
+    // should count toward the streak whether or not it moved the schedule.
     setStats(prev => {
       const next = recordReview(prev, passed);
       saveStats(next);
@@ -140,12 +189,16 @@ function WritingPracticeInner() {
 
     posthog.capture('hebrew_writing_reviewed', {
       glyph: glyph.name,
+      deck: deck.id,
       mode,
       grade: which,
+      repeat,
       strokes: strokes.length,
       // Null when no mask was available, which is the signal that the student
       // graded blind rather than that they scored zero.
       score: result?.score ?? null,
+      // Null when the glyph carries no distinguishing mark to place.
+      placement: result?.placement ?? null,
       followed_suggestion: result ? suggestedGrade(result.score) === which : null,
     });
 
@@ -175,6 +228,11 @@ function WritingPracticeInner() {
   const hasInk = strokes.length > 0;
   const newCount = countNew(deck.glyphs, srsStore);
   const suggested = result ? suggestedGrade(result.score) : null;
+  const isVowel = glyph?.group === 'vowel';
+  // Surfaced before the student writes, not after: a confusable deck's whole
+  // job is to make the contrast present at the moment of recall.
+  const partners =
+    deck.category === 'confusables' ? (glyph?.confusableWith ?? []) : [];
 
   if (done || !glyph) {
     return (
@@ -254,13 +312,20 @@ function WritingPracticeInner() {
             {glyph.name}
             {glyph.phonetic && <span className="text-text-muted font-normal"> · {glyph.phonetic}</span>}
           </p>
-          <p className="text-sm text-text-muted">
-            {mode === 'trace'
-              ? 'Draw over the ghosted letter.'
-              : mode === 'copy'
-                ? 'Write the letter shown.'
-                : 'Write this letter from memory.'}
-          </p>
+          <p className="text-sm text-text-muted">{promptFor(mode, isVowel)}</p>
+          {partners.length > 0 && (
+            <p className="text-sm text-text-muted mt-0.5">
+              Not{' '}
+              <span
+                dir="rtl"
+                lang="he"
+                className="text-lg align-middle"
+                style={{ fontFamily: hebrewScriptPack.fontFamily }}
+              >
+                {partners.join(' ')}
+              </span>
+            </p>
+          )}
         </div>
       </div>
 
@@ -273,7 +338,11 @@ function WritingPracticeInner() {
         direction={hebrewScriptPack.direction}
         inkColor="var(--color-text)"
         height={320}
-        ariaLabel={`Write the Hebrew letter ${glyph.name}`}
+        ariaLabel={
+          isVowel
+            ? `Write the Hebrew vowel point ${glyph.name} on its host consonant`
+            : `Write the Hebrew letter ${glyph.name}`
+        }
       />
 
       {/* Surface controls */}
@@ -362,6 +431,20 @@ function WritingPracticeInner() {
   );
 }
 
+/**
+ * The instruction under the glyph's name.
+ *
+ * A vowel card asks for the host consonant too, and says so — the point alone
+ * is a stray tick, and the mask it is scored against is of the pair.
+ */
+function promptFor(mode: WritingMode, isVowel: boolean): string {
+  if (mode === 'trace') return 'Draw over the ghosted form.';
+  if (mode === 'copy') {
+    return isVowel ? 'Write the form shown — the פ as well as the point.' : 'Write the letter shown.';
+  }
+  return isVowel ? 'Write פ from memory and place the point on it.' : 'Write this letter from memory.';
+}
+
 const VERDICT_COPY: Record<Verdict, { label: string; color: string }> = {
   pass: { label: 'Good match', color: 'var(--color-jade)' },
   close: { label: 'Close', color: 'var(--color-primary)' },
@@ -371,10 +454,15 @@ const VERDICT_COPY: Record<Verdict, { label: string; color: string }> = {
 /**
  * The score and the three measurements behind it.
  *
- * All three are shown, not just the total, because they fail differently and
- * the student can only act on the specific one: low coverage means part of the
- * letter is missing, stray ink means an extra mark, and low accuracy means the
- * shape itself is off.
+ * All are shown, not just the total, because they fail differently and the
+ * student can only act on the specific one: low coverage means part of the
+ * letter is missing, stray ink means an extra mark, low accuracy means the
+ * shape itself is off, and low placement means the mark is well drawn and in
+ * the wrong place.
+ *
+ * Placement appears only when there was a mark to place. Rendering it as 0%
+ * for an ordinary letter would read as a failure at something that was never
+ * asked for.
  */
 function ScoreReadout({ result }: { result: InkScore }) {
   const { label, color } = VERDICT_COPY[result.verdict];
@@ -403,6 +491,12 @@ function ScoreReadout({ result }: { result: InkScore }) {
           <dt>Stray ink</dt>
           <dd className="font-semibold text-text">{pct(result.spill)}</dd>
         </div>
+        {result.placement !== null && (
+          <div className="flex gap-1.5">
+            <dt>Placement</dt>
+            <dd className="font-semibold text-text">{pct(result.placement)}</dd>
+          </div>
+        )}
       </dl>
     </div>
   );
@@ -410,25 +504,51 @@ function ScoreReadout({ result }: { result: InkScore }) {
 
 function DeckPicker({ deckId, onPick }: { deckId: string; onPick: (id: string) => void }) {
   return (
-    <div className="flex flex-wrap gap-2">
-      {DECKS.map(d => (
-        <button
-          key={d.id}
-          type="button"
-          onClick={() => onPick(d.id)}
-          aria-pressed={deckId === d.id}
-          className="px-3 py-1.5 rounded-full text-sm font-medium border transition-colors"
-          style={
-            deckId === d.id
-              ? { background: 'var(--color-primary)', color: '#fff', borderColor: 'var(--color-primary)' }
-              : { background: 'var(--color-bg-card)', color: 'var(--color-text-muted)', borderColor: '#D1FAE5' }
-          }
-        >
-          {d.label}
-          <span className="opacity-70"> · {d.glyphs.length}</span>
-        </button>
-      ))}
+    <div className="space-y-3">
+      {WRITING_DECK_CATEGORIES.map(category => {
+        const decks = DECKS.filter(d => d.category === category.id);
+        if (decks.length === 0) return null;
+        return (
+          <div key={category.id}>
+            <p className="text-xs font-semibold uppercase tracking-wide text-text-muted mb-1.5">
+              {category.label}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {decks.map(d => (
+                <DeckChip key={d.id} deck={d} active={deckId === d.id} onPick={onPick} />
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </div>
+  );
+}
+
+function DeckChip({
+  deck,
+  active,
+  onPick,
+}: {
+  deck: WritingDeck;
+  active: boolean;
+  onPick: (id: string) => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onPick(deck.id)}
+      aria-pressed={active}
+      className="px-3 py-1.5 rounded-full text-sm font-medium border transition-colors"
+      style={
+        active
+          ? { background: 'var(--color-primary)', color: '#fff', borderColor: 'var(--color-primary)' }
+          : { background: 'var(--color-bg-card)', color: 'var(--color-text-muted)', borderColor: '#D1FAE5' }
+      }
+    >
+      {deck.label}
+      <span className="opacity-70"> · {deck.glyphs.length}</span>
+    </button>
   );
 }
 
