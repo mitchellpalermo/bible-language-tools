@@ -1,13 +1,32 @@
 import { describe, expect, it } from 'vitest';
 import { CATEGORY_IDS, TEXTBOOK_IDS } from './textbooks';
 import { cardKey, type HebrewVocabWord, mergeVocabulary, vocabulary } from './vocabulary';
-import { CORRECTIONS, EDITORIAL_NOTES, GARRETT_VOCABULARY } from './vocabulary-garrett';
+import {
+  CORRECTIONS,
+  EDITORIAL_NOTES,
+  GARRETT_VOCABULARY,
+  GENDER_DIVERGENCES,
+  OSHB_RESPELLINGS,
+  OSHB_UNMATCHED,
+} from './vocabulary-garrett';
 
-// Hebrew consonants (U+05D0-05EA) + nikud (U+05B0-05C7) + shin/sin dots
-// (U+05C1-U+05C2). Cantillation is intentionally excluded — vocabulary entries
-// should never contain te'amim.
-const VALID_HEBREW_CHARS = /^[א-תְ-ׂ]+$/;
-const VALID_ROOT_CHARS = /^[א-ת]{3}$/;
+// Hebrew consonants (U+05D0-05EA) + nikud (U+05B0-U+05BD, U+05C7) + shin/sin
+// dots (U+05C1-U+05C2) + maqqef (U+05BE). Cantillation is intentionally
+// excluded — vocabulary entries should never contain te'amim.
+//
+// Maqqef is in the set because two proper names are compounds the WLC joins with
+// one: בַּת־שֶׁבַע and בֶּן־יְמִינִי. The handout's extraction dropped the mark and the
+// OSHB form restores it; see `OSHB_RESPELLINGS`.
+const VALID_HEBREW_CHARS = /^[א-תְ-ׇׂ]+$/;
+
+// Three consonants, each optionally carrying its shin or sin dot. OSHB writes
+// roots pointed to that extent — שׂמח and שׁמח are different roots and the dot is
+// the only thing that says so.
+const VALID_ROOT_CHARS = /^(?:[א-ת][ׁׂ]?){3}$/;
+
+// An augmented Strong's number (`1121a`), or the single letter OSHB uses for an
+// inseparable prefix (`b`, `l`, `c`).
+const VALID_STRONG = /^(?:\d+[a-z]?|[a-z])$/;
 
 const VALID_GENDERS = new Set(['m', 'f', 'fm']);
 
@@ -196,10 +215,11 @@ describe('Garrett & DeRouchie import', () => {
     });
   });
 
-  it('carries no transliteration or frequency, rather than inventing them', () => {
+  it('carries no transliteration, rather than inventing one', () => {
+    // OSHB has no romanization to give, and ~500 hand-written SBL forms would be
+    // errors the data tests cannot catch.
     GARRETT_VOCABULARY.forEach((word) => {
       expect(word.transliteration).toBeUndefined();
-      expect(word.frequency).toBeUndefined();
     });
   });
 
@@ -236,6 +256,115 @@ describe('Garrett & DeRouchie import', () => {
         ),
         `Correction not applied: ${correction.printed} -> ${correction.corrected}`,
       ).toBe(true);
+    }
+  });
+
+  it('gives every resolved entry a well-formed Strong\'s number', () => {
+    GARRETT_VOCABULARY.forEach((word) => {
+      if (word.strong === undefined) return;
+      expect(VALID_STRONG.test(word.strong), `Bad Strong's on ${word.hebrew}: ${word.strong}`).toBe(
+        true,
+      );
+    });
+  });
+
+  it('resolves all but the documented handful against OSHB', () => {
+    const unresolved = GARRETT_VOCABULARY.filter((w) => w.strong === undefined);
+    expect(unresolved.length).toBe(OSHB_UNMATCHED.length);
+    for (const word of unresolved) {
+      expect(
+        OSHB_UNMATCHED.some((u) => u.entry === cardKey(word)),
+        `Unresolved entry with no recorded reason: ${cardKey(word)}`,
+      ).toBe(true);
+    }
+  });
+
+  it('gives a reason for every unmatched headword, and keeps the list current', () => {
+    for (const entry of OSHB_UNMATCHED) {
+      expect(entry.reason.trim().length, `No reason for ${entry.entry}`).toBeGreaterThan(0);
+      const word = GARRETT_VOCABULARY.find((w) => cardKey(w) === entry.entry);
+      expect(word, `Exception names an absent entry: ${entry.entry}`).toBeDefined();
+      expect(word?.strong, `${entry.entry} resolves and no longer needs an exception`).toBeUndefined();
+    }
+  });
+
+  it('carries a real occurrence count on every entry that is a citation form', () => {
+    // The point of the exercise: before this, `matchFreq` returned false for every
+    // textbook word on every band but "all", because none of them had a number.
+    const withFrequency = GARRETT_VOCABULARY.filter((w) => w.frequency !== undefined);
+    expect(withFrequency.length).toBeGreaterThan(350);
+    withFrequency.forEach((word) => {
+      expect(Number.isInteger(word.frequency), `Non-integer frequency on ${word.hebrew}`).toBe(true);
+      expect(word.frequency).toBeGreaterThan(0);
+      expect(word.strong, `Frequency without a lemma on ${word.hebrew}`).toBeDefined();
+    });
+  });
+
+  it('never puts a frequency on a card that shows an inflected or reading form', () => {
+    // Those cards test recognition of a form. The count belongs to the lexeme, and
+    // printing it against a form would be a number about a different thing.
+    GARRETT_VOCABULARY.filter((word) => {
+      const categories = (word.chapters ?? []).map((c) => c.category);
+      return categories.length > 0 && categories.every((c) => c === 'inflected' || c === 'reading');
+    }).forEach((word) => {
+      expect(word.frequency, `Frequency on a form card: ${word.hebrew}`).toBeUndefined();
+    });
+  });
+
+  it('separates every homograph by Strong\'s number, not only by hand-written sense', () => {
+    const byHebrew = new Map<string, HebrewVocabWord[]>();
+    for (const word of GARRETT_VOCABULARY) {
+      byHebrew.set(word.hebrew, [...(byHebrew.get(word.hebrew) ?? []), word]);
+    }
+    for (const [hebrew, words] of byHebrew) {
+      if (words.length === 1) continue;
+      const strongs = words.map((w) => w.strong).filter((s) => s !== undefined);
+      expect(new Set(strongs).size, `${hebrew} repeats a Strong's number`).toBe(strongs.length);
+    }
+  });
+
+  it('agrees with OSHB on every correction made by reading the handout alone', () => {
+    // This is the test the whole re-sourcing exists to make possible. Each
+    // correction was originally inferred from the entry's own construct form or
+    // gloss; a corrected spelling that resolves against OSHB is attested, and one
+    // that does not would be a correction that was wrong.
+    const unresolvable = new Set(OSHB_UNMATCHED.map((u) => u.entry.split('#')[0]));
+    const headwordCorrections = CORRECTIONS.filter((c) =>
+      GARRETT_VOCABULARY.some((w) => w.hebrew === c.corrected),
+    );
+    expect(headwordCorrections.length).toBeGreaterThan(20);
+    for (const correction of headwordCorrections) {
+      if (unresolvable.has(correction.corrected)) continue;
+      const word = GARRETT_VOCABULARY.find((w) => w.hebrew === correction.corrected);
+      expect(
+        word?.strong,
+        `Corrected to a form OSHB does not know: ${correction.printed} -> ${correction.corrected}`,
+      ).toBeDefined();
+    }
+  });
+
+  it('records every spelling it takes from OSHB against the printed page', () => {
+    for (const respelling of OSHB_RESPELLINGS) {
+      expect(respelling.printed).not.toBe(respelling.oshb);
+      expect(
+        GARRETT_VOCABULARY.some((w) => w.hebrew === respelling.oshb),
+        `Respelling not applied: ${respelling.printed} -> ${respelling.oshb}`,
+      ).toBe(true);
+      expect(
+        GARRETT_VOCABULARY.some((w) => w.hebrew === respelling.printed),
+        `Printed spelling still present: ${respelling.printed}`,
+      ).toBe(false);
+    }
+  });
+
+  it('keeps the textbook\'s gender where the corpus disagrees, and says where', () => {
+    for (const divergence of GENDER_DIVERGENCES) {
+      expect(divergence.textbook).not.toBe(divergence.corpus);
+      const word = GARRETT_VOCABULARY.find((w) => w.hebrew === divergence.hebrew);
+      expect(word, `Divergence names an absent headword: ${divergence.hebrew}`).toBeDefined();
+      expect(word?.gender, `${divergence.hebrew} does not carry the textbook's gender`).toBe(
+        divergence.textbook,
+      );
     }
   });
 

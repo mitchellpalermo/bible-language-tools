@@ -98,10 +98,13 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 /**
- * Frequency bands only apply to words that have a count. The textbook import
- * has none (see `vocabulary-garrett.ts`), so a band narrows to the curated set
- * by design — an unranked word is not "rare", it is unmeasured, and putting it
- * in the `<100` bucket would assert something the data does not say.
+ * Frequency bands only apply to words that have a count. Most now do — the
+ * textbook import carries real occurrence counts over the Westminster Leningrad
+ * Codex (see `vocabulary-garrett.ts`) — but the inflected and reading-vocabulary
+ * cards deliberately do not, because their front is a form and the count would
+ * be a fact about the lexeme behind it. Such a word is not "rare", it is
+ * unmeasured, and putting it in the `<100` bucket would assert something the
+ * data does not say.
  */
 export function matchFreq(freq: number | undefined, f: FreqFilter): boolean {
   if (f === 'all') return true;

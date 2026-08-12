@@ -168,3 +168,12 @@ Skipped in dev if the data is already present. `pnpm build:data` regenerates
 without a full build, `pnpm build:data:force` refetches. The parser's invariants
 are in `apps/hebrew-tools/CLAUDE.md` under "OSHB data pipeline" — read those
 before changing it.
+
+A second script, `scripts/build-vocabulary.mjs`, merges the course vocabulary
+handout with that corpus to produce `src/data/vocabulary-garrett.ts`. It is **not**
+part of `pnpm build` — its output is committed source, so the app never needs a
+24 MB corpus to know what a word means. Run it with `pnpm build:vocab` (after
+`pnpm build:data`), and `pnpm build:vocab:check` to verify the committed file is
+current. The split of authority between the handout and OSHB is load-bearing and
+documented in `apps/hebrew-tools/CLAUDE.md` under "Split authority: the handout
+and OSHB".

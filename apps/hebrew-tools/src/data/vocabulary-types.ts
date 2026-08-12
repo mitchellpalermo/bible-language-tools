@@ -48,6 +48,17 @@ export interface HebrewVocabWord {
   /** Triliteral root, when unambiguous. */
   root?: string;
   /**
+   * Augmented Strong's number — the key into `public/data/morphhb/lemmas.json`,
+   * and the lexeme's identity.
+   *
+   * Present on every entry OSHB could resolve. It is what makes `sense` checkable
+   * rather than merely asserted: two entries that share a headword and carry
+   * different Strong's numbers are demonstrably different words, which is the
+   * thing `sense` was hand-claiming before. `sense` still drives `cardKey`,
+   * because re-keying the SRS store would throw away the progress on those cards.
+   */
+  strong?: string;
+  /**
    * SBL general-purpose transliteration. Optional: the textbook import has no
    * romanization, and guessing ~500 of them would bake in errors the data tests
    * cannot catch. Render it only when present.

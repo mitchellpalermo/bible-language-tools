@@ -170,7 +170,7 @@ This phase is scoped as three sequential PRs rather than one, so each is small e
 
 The custom deck builder that greek.tools' `Flashcards.tsx` also has (generate a deck from a passage) is explicitly out of scope here — it's tied to a Focus-Passage-equivalent feature that doesn't exist yet for Hebrew.
 
-**Note on frequency data:** greek.tools' `vocabulary.ts` is a generated file, produced from MorphGNT by `build-vocabulary.mjs`. PR 2a's Hebrew frequency numbers are approximate — sourced from published frequency lists rather than computed — and the ~546 textbook entries have none at all. The OSHB pipeline below now publishes real per-lemma counts; regenerating `vocabulary.ts` from them is issue #109.
+**Note on frequency data:** greek.tools' `vocabulary.ts` is a generated file, produced from MorphGNT by `build-vocabulary.mjs`. Hebrew now has its own `scripts/build-vocabulary.mjs` (issue #109): the 546 textbook entries carry real per-lemma counts over the WLC, along with roots, Strong's numbers and parts of speech, while the handout keeps the chapter map and the gloss wording. The remaining approximate numbers are on the hand-curated entries in `vocabulary.ts` that no textbook chapter tags.
 
 ---
 
@@ -202,8 +202,9 @@ that first need them:
   the quiz-facing glosses stay Garrett's regardless (see `CLAUDE.md`).
 
 The per-lemma counts are real occurrence counts over the WLC and are the
-authoritative frequency source going forward; re-sourcing `vocabulary.ts` from
-them is issue #109.
+authoritative frequency source going forward. The textbook vocabulary is
+re-sourced from them by `scripts/build-vocabulary.mjs` (issue #109); see
+`CLAUDE.md`, "Split authority: the handout and OSHB".
 
 ---
 
