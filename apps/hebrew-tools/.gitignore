@@ -1,5 +1,7 @@
 # build output
 dist/
+# Generated OSHB data files (produced by scripts/build-morphhb.mjs)
+public/data/
 # generated types
 .astro/
 # Wrangler local state (includes the local D1 database)

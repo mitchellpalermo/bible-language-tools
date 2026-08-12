@@ -156,4 +156,14 @@ These are skipped in dev. Run `pnpm build:data` to regenerate without a full bui
 
 ## Hebrew-tools app notes
 
-See `apps/hebrew-tools/ROADMAP.md` for the full feature roadmap. Phase 1 (Hebrew Keyboard) is the starting point. The data pipeline (`build-morphhb.mjs` + OSHB data) is the critical dependency for Phases 3 and 4.
+See `apps/hebrew-tools/ROADMAP.md` for the full feature roadmap.
+
+The production build runs the OSHB data pipeline before `astro build`:
+- `scripts/build-morphhb.mjs` — fetches the Westminster Leningrad Codex and the
+  OSHB Hebrew Lexicon, outputs per-book JSON, a book index and a lemma index to
+  `public/data/morphhb/`
+
+Skipped in dev if the data is already present. `pnpm build:data` regenerates
+without a full build, `pnpm build:data:force` refetches. The parser's invariants
+are in `apps/hebrew-tools/CLAUDE.md` under "OSHB data pipeline" — read those
+before changing it.

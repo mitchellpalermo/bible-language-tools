@@ -11,6 +11,7 @@ import {
   processHebrewKey,
   SHEVA,
   stripAllDiacritics,
+  stripCantillation,
   stripNikud,
   translateHebrewInput,
 } from './hebrew-input';
@@ -274,6 +275,42 @@ describe('stripAllDiacritics', () => {
 
   it('handles empty string', () => {
     expect(stripAllDiacritics('')).toBe('');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// stripCantillation
+// ---------------------------------------------------------------------------
+
+describe('stripCantillation', () => {
+  it('removes the accents and keeps the vowel points', () => {
+    // בְּרֵאשִׁ֖ית as the WLC writes it, with a tipcha over the last syllable
+    expect(stripCantillation('בְּרֵאשִׁ֖ית')).toBe('בְּרֵאשִׁית');
+  });
+
+  it('removes the accents that stray outside the U+0591–U+05AF block', () => {
+    // אַבְדָ֑ן — etnahta, U+05BD meteg, and U+05C3 sof pasuq
+    expect(stripCantillation('אַבְדָ֑ן׃')).toBe('אַבְדָן');
+  });
+
+  it('keeps maqqef, which joins two words rather than accenting one', () => {
+    expect(stripCantillation('שְׁנֵֽי־בָנָ֣יו')).toBe('שְׁנֵי־בָנָיו');
+  });
+
+  it('keeps the shin and sin dots, which distinguish letters', () => {
+    expect(stripCantillation('שֻׁלְחָ֫ן')).toBe('שֻׁלְחָן');
+    expect(stripCantillation('שָׂדֶ֥ה')).toBe('שָׂדֶה');
+  });
+
+  it('is the complement of stripNikud', () => {
+    const pointed = 'בְּרֵאשִׁ֖ית';
+    // between them they account for every diacritic in the word
+    expect(stripNikud(stripCantillation(pointed))).toBe(stripAllDiacritics(pointed));
+  });
+
+  it('leaves an unaccented word and an empty string alone', () => {
+    expect(stripCantillation('שָׁלוֹם')).toBe('שָׁלוֹם');
+    expect(stripCantillation('')).toBe('');
   });
 });
 
