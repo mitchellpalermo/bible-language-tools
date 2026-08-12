@@ -4,8 +4,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { loadSRSStore, loadStats } from '../data/srs';
 import { hasAuthHint } from '../lib/auth-cookie';
 import { deleteServerProgress } from '../lib/sync-manager';
-import { type ChapterDeck, chapterDecks, TEXTBOOKS } from '../data/textbooks';
-import { vocabulary } from '../data/vocabulary';
+import { chapterStats, TEXTBOOKS, wordsInChapters } from '../data/textbooks';
+import { cardKey, vocabulary } from '../data/vocabulary';
 import Flashcards, { FREQ_FILTERS, matchFreq } from './Flashcards';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
@@ -109,12 +109,17 @@ describe('Flashcards', () => {
   it('renders the transliteration without the uppercase transform', async () => {
     const user = userEvent.setup();
     renderFlashcards();
+    // Only curated words carry a transliteration, and only curated words carry a
+    // frequency — so any band but "all" guarantees the drawn card has one.
+    await user.click(screen.getByRole('button', { name: /^2000\+/ }));
     await user.click(getCard());
 
     // CSS text-transform leaves textContent untouched, so the class list is the
     // only observable signal that SBL romanization is being visually uppercased.
     // Asserting on it is deliberate here — the defect is purely presentational.
-    const transliterations = new Set(vocabulary.map((w) => w.transliteration));
+    const transliterations = new Set(
+      vocabulary.map((w) => w.transliteration).filter((t) => t !== undefined),
+    );
     const shown = screen.getByText(
       (_, el) => el?.tagName === 'P' && transliterations.has(el.textContent ?? ''),
     );
@@ -174,7 +179,11 @@ describe('Flashcards', () => {
     const user = userEvent.setup();
     renderFlashcards();
     await user.click(getStudyAllButton());
-    for (let i = 0; i < vocabulary.length; i++) {
+    // Narrowed to a band: walking the whole vocabulary is hundreds of clicks and
+    // exercises nothing the band does not.
+    await user.click(screen.getByRole('button', { name: /^2000\+/ }));
+    const deckSize = vocabulary.filter((w) => matchFreq(w.frequency, '2000+')).length;
+    for (let i = 0; i < deckSize; i++) {
       await user.click(screen.getByText('tap to reveal'));
       await user.click(screen.getByRole('button', { name: /got it/i }));
     }
@@ -259,8 +268,8 @@ describe('Flashcards', () => {
     // Simulate a fully-reviewed, not-yet-due store by pre-seeding localStorage.
     const store: Record<string, unknown> = {};
     for (const w of vocabulary) {
-      store[w.hebrew] = {
-        key: w.hebrew,
+      store[cardKey(w)] = {
+        key: cardKey(w),
         interval: 30,
         repetition: 3,
         easeFactor: 2.5,
@@ -279,8 +288,8 @@ describe('Flashcards', () => {
     const user = userEvent.setup();
     const store: Record<string, unknown> = {};
     for (const w of vocabulary) {
-      store[w.hebrew] = {
-        key: w.hebrew,
+      store[cardKey(w)] = {
+        key: cardKey(w),
         interval: 30,
         repetition: 3,
         easeFactor: 2.5,
@@ -318,19 +327,20 @@ describe('Flashcards', () => {
 // ─── Textbook chapter decks ───────────────────────────────────────────────────
 
 describe('Flashcards chapter decks', () => {
-  const decks = chapterDecks();
-  const firstDeck = decks[0];
+  const book = TEXTBOOKS['garrett-derouchie'];
+  const stats = chapterStats('garrett-derouchie');
 
-  function selectDeck(user: ReturnType<typeof userEvent.setup>, deck: ChapterDeck) {
-    return user.click(screen.getByRole('button', { name: deck.label }));
+  function selectTextbook(user: ReturnType<typeof userEvent.setup>) {
+    return user.click(screen.getByRole('button', { name: book.shortTitle }));
   }
 
-  it('renders a chip for every chapter deck that has words', () => {
-    renderFlashcards();
-    for (const deck of decks) {
-      expect(screen.getByRole('button', { name: deck.label })).toBeInTheDocument();
-    }
-  });
+  function openPicker(user: ReturnType<typeof userEvent.setup>) {
+    return user.click(screen.getByRole('button', { expanded: false }));
+  }
+
+  function chapterButton(chapter: number) {
+    return screen.getByRole('button', { name: new RegExp(`^${book.unitLabel} ${chapter} —`) });
+  }
 
   it('defaults to the whole vocabulary', () => {
     renderFlashcards();
@@ -340,22 +350,47 @@ describe('Flashcards chapter decks', () => {
     );
   });
 
-  it('scopes the session to the chapter list when a deck is selected', async () => {
+  it('offers one chip per textbook rather than one per chapter', () => {
+    renderFlashcards();
+    expect(screen.getByRole('button', { name: book.shortTitle })).toBeInTheDocument();
+    // The old flat chip row put every chapter in the deck bar; the picker
+    // replaces it, so no bare chapter chip should be reachable while collapsed.
+    expect(screen.queryByRole('button', { name: `${book.unitLabel} 2` })).not.toBeInTheDocument();
+  });
+
+  it('scopes the session to the textbook, core vocabulary by default', async () => {
     const user = userEvent.setup();
     renderFlashcards();
     await user.click(getStudyAllButton());
-    await selectDeck(user, firstDeck);
-    expect(screen.getByTestId('card-progress').textContent).toBe(`1/${firstDeck.words.length}`);
+    await selectTextbook(user);
+
+    const expected = wordsInChapters('garrett-derouchie', [], ['core']).length;
+    expect(screen.getByTestId('card-progress').textContent).toBe(`1/${expected}`);
+  });
+
+  it('narrows to a single chapter through the picker', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(getStudyAllButton());
+    await selectTextbook(user);
+    await openPicker(user);
+    await user.click(chapterButton(2));
+
+    const expected = wordsInChapters('garrett-derouchie', [2], ['core']).length;
+    expect(screen.getByTestId('card-progress').textContent).toBe(`1/${expected}`);
   });
 
   it('only draws cards from the selected chapter', async () => {
     const user = userEvent.setup();
     renderFlashcards();
     await user.click(getStudyAllButton());
-    await selectDeck(user, firstDeck);
+    await selectTextbook(user);
+    await openPicker(user);
+    await user.click(chapterButton(2));
 
-    const inDeck = new Set(firstDeck.words.map((w) => w.hebrew));
-    for (let i = 0; i < firstDeck.words.length; i++) {
+    const words = wordsInChapters('garrett-derouchie', [2], ['core']);
+    const inDeck = new Set(words.map((w) => w.hebrew));
+    for (let i = 0; i < words.length; i++) {
       const front = screen.getByText((_, el) => el?.getAttribute('dir') === 'rtl');
       expect(inDeck.has(front.textContent ?? '')).toBe(true);
       await user.click(screen.getByText('tap to reveal'));
@@ -364,39 +399,107 @@ describe('Flashcards chapter decks', () => {
     expect(screen.getByText('Session Complete')).toBeInTheDocument();
   });
 
-  it('replaces the frequency bands with the textbook attribution', async () => {
-    const user = userEvent.setup();
-    renderFlashcards();
-    expect(screen.getByRole('button', { name: /^2000\+/ })).toBeInTheDocument();
-    await selectDeck(user, firstDeck);
-    expect(screen.queryByRole('button', { name: /^2000\+/ })).not.toBeInTheDocument();
-    expect(screen.getByText(new RegExp(TEXTBOOKS[firstDeck.textbook].title))).toBeInTheDocument();
-  });
-
-  it('deselects the deck when its chip is clicked again', async () => {
+  it('"Through Ch. N" selects every chapter up to the furthest one picked', async () => {
     const user = userEvent.setup();
     renderFlashcards();
     await user.click(getStudyAllButton());
-    await selectDeck(user, firstDeck);
-    await selectDeck(user, firstDeck);
-    expect(screen.getByTestId('card-progress').textContent).toBe(`1/${vocabulary.length}`);
+    await selectTextbook(user);
+    await openPicker(user);
+    await user.click(chapterButton(4));
+    await user.click(screen.getByRole('button', { name: `Through ${book.unitLabel} 4` }));
+
+    const expected = wordsInChapters('garrett-derouchie', [1, 2, 3, 4], ['core']).length;
+    expect(screen.getByTestId('card-progress').textContent).toBe(`1/${expected}`);
+  });
+
+  it('"All chapters" clears the narrowing without emptying the deck', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(getStudyAllButton());
+    await selectTextbook(user);
+    await openPicker(user);
+    await user.click(chapterButton(2));
+    await user.click(screen.getByRole('button', { name: 'All chapters' }));
+
+    const expected = wordsInChapters('garrett-derouchie', [], ['core']).length;
+    expect(screen.getByTestId('card-progress').textContent).toBe(`1/${expected}`);
+  });
+
+  it('adds a category to the study set when its chip is switched on', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(getStudyAllButton());
+    await selectTextbook(user);
+    await user.click(screen.getByRole('button', { name: /^Proper names/ }));
+
+    const expected = wordsInChapters('garrett-derouchie', [], ['core', 'proper']).length;
+    expect(screen.getByTestId('card-progress').textContent).toBe(`1/${expected}`);
+  });
+
+  it('refuses to switch off the last remaining category', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(getStudyAllButton());
+    await selectTextbook(user);
+
+    const before = screen.getByTestId('card-progress').textContent;
+    await user.click(screen.getByRole('button', { name: /^Core/ }));
+    expect(screen.getByTestId('card-progress').textContent).toBe(before);
+    expect(screen.getByRole('button', { name: /^Core/ })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('replaces the frequency bands with the chapter summary', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    expect(screen.getByRole('button', { name: /^2000\+/ })).toBeInTheDocument();
+    await selectTextbook(user);
+    expect(screen.queryByRole('button', { name: /^2000\+/ })).not.toBeInTheDocument();
+    expect(screen.getAllByText(/All chapters/).length).toBeGreaterThan(0);
   });
 
   it('returns to the whole vocabulary via the "All vocabulary" chip', async () => {
     const user = userEvent.setup();
     renderFlashcards();
     await user.click(getStudyAllButton());
-    await selectDeck(user, firstDeck);
+    await selectTextbook(user);
     await user.click(screen.getByRole('button', { name: /^All vocabulary/ }));
     expect(screen.getByTestId('card-progress').textContent).toBe(`1/${vocabulary.length}`);
+  });
+
+  it('restores the previous selection on a later visit', async () => {
+    const user = userEvent.setup();
+    const { unmount } = renderFlashcards();
+    await user.click(getStudyAllButton());
+    await selectTextbook(user);
+    await openPicker(user);
+    await user.click(chapterButton(3));
+    unmount();
+
+    renderFlashcards();
+    await user.click(getStudyAllButton());
+    const expected = wordsInChapters('garrett-derouchie', [3], ['core']).length;
+    expect(screen.getByTestId('card-progress').textContent).toBe(`1/${expected}`);
+  });
+
+  it('labels every chapter cell with its word count', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    await selectTextbook(user);
+    await openPicker(user);
+    for (const { chapter, total } of stats) {
+      expect(
+        screen.getByRole('button', { name: `${book.unitLabel} ${chapter} — ${total} words` }),
+      ).toBeInTheDocument();
+    }
   });
 
   it('shows gender on the back of a card that has one', async () => {
     const user = userEvent.setup();
     renderFlashcards();
-    await selectDeck(user, firstDeck);
+    await selectTextbook(user);
+    await openPicker(user);
+    await user.click(chapterButton(2));
     await user.click(getCard());
-    // Every Garrett & DeRouchie ch. 1 entry is listed with a gender.
-    expect(screen.getByText(/masculine|feminine/)).toBeInTheDocument();
+    expect(screen.getAllByText(/masculine|feminine/).length).toBeGreaterThan(0);
   });
 });

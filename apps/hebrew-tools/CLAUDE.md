@@ -100,7 +100,8 @@ See `ROADMAP.md` for the full feature plan and build order.
 - **Root system:** Triliteral (3-letter) root system — pedagogy centers on roots, not lemmas.
 - **Morphological data:** Open Scriptures Hebrew Bible (OSHB) — `github.com/openscriptures/morphhb`, CC BY 4.0. XML per book, parsed into `public/data/morphhb/{BOOK}.json` by a build script.
 - **Lenient comparison:** Strip U+05B0–U+05C7 (nikud) for lenient grading; also strip U+0591–U+05AF (cantillation) when fully stripping diacritics.
-- **SRS key namespace:** the SRS store is shared across features. Vocabulary cards are keyed by bare lemma (`normalizeKey(word.hebrew)`), so **every non-vocabulary card must carry a prefix** or the two collide on a single-letter word. Handwriting practice uses `write:letter:<char>` (`src/data/writing.ts`). Add the prefix to that file when a new card type appears; do not invent one at a call site.
+- **SRS key namespace:** the SRS store is shared across features. Vocabulary cards are keyed by `normalizeKey(cardKey(word))` — the bare lemma, plus `#<sense>` for the handful of homographs that would otherwise share a card (see "Textbook chapter decks"). **Every non-vocabulary card must carry a prefix** or the two collide on a single-letter word. Handwriting practice uses `write:letter:<char>` (`src/data/writing.ts`). Add the prefix to that file when a new card type appears; do not invent one at a call site.
+- **Deck selection is persisted separately from the SRS store** (`hebrew-tools-deck-v1`, `src/lib/deck-selection.ts`) and is never synced. It decides which due cards you see, not what is due, so it stays local to the browser.
 - **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`. There is still no auth or sync in this app — **all study progress is per-browser only.** The D1 plumbing exists (see below), but nothing reads or writes it yet.
 
 ### Database (accounts groundwork — issue #91)
@@ -167,14 +168,37 @@ Cross-device behaviour can't be covered by unit tests. `docs/sync-test-plan.md` 
 
 ### Textbook chapter decks
 
-Seminary vocabulary quizzes are scoped to a textbook chapter, not a frequency band. `src/data/vocabulary.ts` entries carry an optional `chapters: TextbookChapterRef[]` tag, and `src/data/textbooks.ts` derives study decks from those tags.
+Seminary vocabulary quizzes are scoped to a textbook chapter, not a frequency band. Vocabulary entries carry an optional `chapters: TextbookChapterRef[]` tag, and `src/data/textbooks.ts` derives study selections from those tags.
 
-**To add a chapter's vocabulary:** tag the words in `vocabulary.ts` with `gd(n)` (adding entries that don't exist yet). Nothing else is required — the deck chip, its count, and its label all fall out of the tags. Words shared across chapters or textbooks stay a single entry, so they keep a single SRS card.
+The vocabulary is split across four modules, and the split is load-bearing:
+
+| File | Role |
+|---|---|
+| `src/data/vocabulary-types.ts` | `HebrewVocabWord`, `cardKey`, and `gd()`. Imports **types only** |
+| `src/data/vocabulary-garrett.ts` | Generated — Garrett & DeRouchie chapters 2–31 (~546 entries) |
+| `src/data/vocabulary.ts` | The hand-curated set (incl. chapter 1) + `mergeVocabulary` → `vocabulary` |
+| `src/data/textbooks.ts` | Textbook metadata, categories, and every query over the merged list |
+
+**The import graph is a line, not a cycle, and it must stay that way.** `textbooks.ts` reads `vocabulary` at module scope, so `gd()` cannot live there — `vocabulary-garrett.ts` calls it while its own literals evaluate, and a cycle makes it `undefined` at exactly that moment. That is why `gd` sits in `vocabulary-types.ts` (which imports nothing but types) and is merely re-exported from `textbooks.ts`. Symptom if this is broken: `TypeError: gd is not a function` at import time, in every test that touches vocabulary.
+
+**A chapter tag carries a category**, not just a number — `gd(20, 'core')`. The textbook prints Core, Reading, Inflected, Proper Names, derived-stem and Special sections per chapter, and a word can sit in different sections in different chapters (Core in ch. 9, derived stems in ch. 20). Category belongs on the tag; it is not a property of the word.
+
+**To add a chapter's vocabulary:** tag the words with `gd(n, category)`. Nothing else is required — the chapter grid, its counts, the category chips and the summary label all fall out of the tags.
+
+**`transliteration` and `frequency` are optional.** The textbook handout has neither, and ~546 invented romanizations would be errors the data tests cannot catch. The card back omits the line when it is absent. Real frequency counts arrive with the OSHB pipeline (issue #75); until then a word without one is simply outside the frequency bands, which is why `matchFreq` returns `false` for `undefined` on every band but "all" — an unmeasured word is not a rare one.
+
+**Homographs are separated by `sense`, and the SRS key is `cardKey(word)`, not `word.hebrew`.** בָּרוּךְ the name and בָּרוּךְ "blessed" are different cards; so are אַף "also" and אַף "nose". Without a sense they would share one SRS card and reviewing one would mark the other. `cardKey` appends `#<sense>` only where a clash exists, so every other word keeps the bare-lemma key its progress is already stored under. **Anything that keys the SRS store off a word must call `cardKey`** — `normalizeKey(word.hebrew)` is the bug this replaced.
 
 Rules that the data tests enforce:
-- No cantillation marks (U+0591–U+05AF) in the `hebrew` field — including the stress accent that Garrett & DeRouchie print over the tonic syllable. Vocabulary entries are pointed but unaccented.
+- No cantillation marks (U+0591–U+05AF) in `hebrew`, `construct`, `plural`, `alternates`, or stem forms — including the stress accent Garrett & DeRouchie print over the tonic syllable. Vocabulary entries are pointed but unaccented.
+- Holam male is written `vav + holam`, never the WLC's `holam + vav`. The handout mixes both; rendered as printed, the vowel lands on the wrong consonant.
 - Glosses on tagged words follow the wording of the textbook that assigns them, since that's what the quiz expects.
-- Every chapter-tagged noun carries a `gender` (`m` / `f` / `fm`); verbs never do.
+- Chapter-tagged nouns carry a `gender` (`m` / `f` / `fm`) wherever the textbook prints one; verbs never do.
+- Every divergence from the printed page is listed in `CORRECTIONS` (respellings) or `EDITORIAL_NOTES` (a stem printed in the wrong cell, a gloss left blank), with its reason. Silent divergence is the thing to avoid — a student comparing the app to the book must be able to find out why they differ.
+
+**Regenerating `vocabulary-garrett.ts`:** it came from a one-time extraction of the course's `.docx` handout, which is copyrighted course material and is deliberately not in the repo. The file is committed output; hand-edits to it will be lost if it is ever regenerated. Fix the extractor, not the artifact.
+
+**The handout is not meant to stay the authority on Hebrew orthography** — see issue #109. A retyped Word document is the worst available source for pointed text, and the 19-item `CORRECTIONS` list is the evidence. Once the OSHB pipeline (#75) lands, `hebrew`, `root`, `partOfSpeech`, `gender` and `frequency` come from the Westminster Leningrad Codex, and the handout keeps only what it alone knows: the chapter/category mapping and the gloss wording. **Glosses do not move to a lexicon** — Strong's gives חָצֵר as "a yard, a hamlet, enclosure, court, tower, village" where Garrett gives "village, courtyard", and the quiz is marked against Garrett. That split of authority is the target state; do not "simplify" it back to a single source.
 
 ### Unicode blocks
 

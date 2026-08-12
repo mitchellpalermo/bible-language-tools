@@ -1,9 +1,21 @@
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { chapterDecks, chapterDecksByTextbook, TEXTBOOKS } from '../data/textbooks';
+import {
+  categoryCounts,
+  categoryLabel,
+  chapterStats,
+  describeChapters,
+  TEXTBOOK_IDS,
+  TEXTBOOKS,
+  type TextbookId,
+  VOCAB_CATEGORIES,
+  type VocabCategory,
+  wordsInChapters,
+} from '../data/textbooks';
 import { hasAuthHint } from '../lib/auth-cookie';
+import { type DeckSelection, loadSelection, saveSelection } from '../lib/deck-selection';
 import { deleteServerProgress } from '../lib/sync-manager';
-import { type HebrewGender, type HebrewVocabWord, vocabulary } from '../data/vocabulary';
+import { cardKey, type HebrewGender, type HebrewVocabWord, vocabulary } from '../data/vocabulary';
 import {
   isDue,
   loadSRSStore,
@@ -17,6 +29,7 @@ import {
   saveStats,
   STREAK_THRESHOLD,
 } from '../data/srs';
+import ChapterPicker from './ChapterPicker';
 import ErrorBoundary from './ErrorBoundary';
 
 // Phase 2b scope: SRS + "all" study modes, flip answer mode, Hebrew -> English
@@ -37,6 +50,21 @@ import ErrorBoundary from './ErrorBoundary';
 type StudyMode = 'srs' | 'all';
 type FreqFilter = 'all' | '2000+' | '500-1999' | '100-499' | '<100';
 
+/** The SRS store key for a word. Homographs are separated by `cardKey`. */
+const srsKey = (word: HebrewVocabWord) => normalizeKey(cardKey(word));
+
+/**
+ * Hebrew quoted inside an English line. `unicode-bidi: isolate` is what keeps a
+ * right-to-left run from dragging the surrounding label's punctuation with it.
+ */
+function HebrewInline({ children }: { children: string }) {
+  return (
+    <span dir="rtl" style={{ fontFamily: 'var(--font-hebrew)', unicodeBidi: 'isolate' }}>
+      {children}
+    </span>
+  );
+}
+
 export const FREQ_FILTERS: { filter: FreqFilter; label: string }[] = [
   { filter: 'all', label: 'All' },
   { filter: '2000+', label: '2000+' },
@@ -52,10 +80,11 @@ export const GENDER_LABELS: Record<HebrewGender, string> = {
   fm: 'masculine or feminine',
 };
 
-// Textbook chapter decks are derived from static vocabulary data, so they're
+// Chapter statistics are derived from static vocabulary data, so they're
 // computed once at module scope rather than on every render.
-const CHAPTER_DECKS = chapterDecks();
-const DECK_GROUPS = chapterDecksByTextbook();
+const CHAPTER_STATS = Object.fromEntries(
+  TEXTBOOK_IDS.map((id) => [id, chapterStats(id)]),
+) as Record<TextbookId, ReturnType<typeof chapterStats>>;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -68,8 +97,15 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-export function matchFreq(freq: number, f: FreqFilter): boolean {
+/**
+ * Frequency bands only apply to words that have a count. The textbook import
+ * has none (see `vocabulary-garrett.ts`), so a band narrows to the curated set
+ * by design — an unranked word is not "rare", it is unmeasured, and putting it
+ * in the `<100` bucket would assert something the data does not say.
+ */
+export function matchFreq(freq: number | undefined, f: FreqFilter): boolean {
   if (f === 'all') return true;
+  if (freq === undefined) return false;
   if (f === '2000+') return freq >= 2000;
   if (f === '500-1999') return freq >= 500 && freq < 2000;
   if (f === '100-499') return freq >= 100 && freq < 500;
@@ -85,7 +121,7 @@ function buildQueue(
   const due: HebrewVocabWord[] = [];
   const fresh: HebrewVocabWord[] = [];
   for (const w of vocab) {
-    const c = store[normalizeKey(w.hebrew)];
+    const c = store[srsKey(w)];
     if (!c) fresh.push(w);
     else if (isDue(c)) due.push(w);
   }
@@ -103,11 +139,19 @@ function FlashcardsInner() {
   // Mode
   const [studyMode, setStudyMode] = useState<StudyMode>('srs');
 
-  // Deck: null = the whole vocabulary, otherwise a textbook chapter deck id.
-  const [activeDeckId, setActiveDeckId] = useState<string | null>(null);
+  // Deck, chapters and categories — persisted across visits.
+  const [selection, setSelection] = useState<DeckSelection>(() => loadSelection());
 
   // Filter (only meaningful for the whole-vocabulary deck)
   const [freqFilter, setFreqFilter] = useState<FreqFilter>('all');
+
+  const updateSelection = useCallback((patch: Partial<DeckSelection>) => {
+    setSelection((prev) => {
+      const next = { ...prev, ...patch };
+      saveSelection(next);
+      return next;
+    });
+  }, []);
 
   // Session state
   const [queue, setQueue] = useState<HebrewVocabWord[]>([]);
@@ -122,28 +166,35 @@ function FlashcardsInner() {
 
   // ─── Filtered vocabulary ────────────────────────────────────────────────────
 
-  const activeDeck = useMemo(
-    () => CHAPTER_DECKS.find((d) => d.id === activeDeckId) ?? null,
-    [activeDeckId],
+  const textbookId = selection.deck === 'all' ? null : selection.deck;
+
+  // A textbook selection is already a deliberate chapter set, so the frequency
+  // bands don't apply to it — they only narrow the whole-vocabulary deck.
+  const filteredVocab = useMemo(
+    () =>
+      textbookId
+        ? wordsInChapters(textbookId, selection.chapters, selection.categories)
+        : vocabulary.filter((w) => matchFreq(w.frequency, freqFilter)),
+    [textbookId, selection.chapters, selection.categories, freqFilter],
   );
 
-  // A chapter list is already a deliberate ~12-word set, so the frequency bands
-  // don't apply to it — they only narrow the whole-vocabulary deck.
-  const filteredVocab = useMemo(
-    () => activeDeck?.words ?? vocabulary.filter((w) => matchFreq(w.frequency, freqFilter)),
-    [activeDeck, freqFilter],
+  // Counts for the category chips reflect the chapters currently selected, so
+  // switching a category on shows exactly how many cards it would add.
+  const catCounts = useMemo(
+    () => (textbookId ? categoryCounts(textbookId, selection.chapters) : null),
+    [textbookId, selection.chapters],
   );
 
   const dueCount = useMemo(
     () =>
       filteredVocab.filter((w) => {
-        const c = srsStore[normalizeKey(w.hebrew)];
+        const c = srsStore[srsKey(w)];
         return c ? isDue(c) : false;
       }).length,
     [filteredVocab, srsStore],
   );
   const newCount = useMemo(
-    () => filteredVocab.filter((w) => !srsStore[normalizeKey(w.hebrew)]).length,
+    () => filteredVocab.filter((w) => !srsStore[srsKey(w)]).length,
     [filteredVocab, srsStore],
   );
 
@@ -158,9 +209,11 @@ function FlashcardsInner() {
     setSessionDone(false);
     posthog.capture('hebrew_flashcard_session_started', {
       deck_size: nextQueue.length,
-      deck: activeDeckId ?? 'all-vocabulary',
+      deck: selection.deck === 'all' ? 'all-vocabulary' : selection.deck,
+      chapters: selection.chapters.length > 0 ? selection.chapters.length : 'all',
+      categories: selection.categories.join(','),
     });
-  }, [filteredVocab, studyMode, activeDeckId]);
+  }, [filteredVocab, studyMode, selection]);
 
   // Mount: start initial session
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -171,17 +224,17 @@ function FlashcardsInner() {
   // Restart when mode, deck, or filter changes (not on srsStore changes)
   const prevStudyMode = useRef(studyMode);
   const prevFreqFilter = useRef(freqFilter);
-  const prevActiveDeckId = useRef(activeDeckId);
+  const prevSelection = useRef(selection);
 
   useEffect(() => {
     if (
       studyMode !== prevStudyMode.current ||
       freqFilter !== prevFreqFilter.current ||
-      activeDeckId !== prevActiveDeckId.current
+      selection !== prevSelection.current
     ) {
       prevStudyMode.current = studyMode;
       prevFreqFilter.current = freqFilter;
-      prevActiveDeckId.current = activeDeckId;
+      prevSelection.current = selection;
       startSession();
     }
   });
@@ -194,11 +247,11 @@ function FlashcardsInner() {
     (correct: boolean) => {
       if (!card) return;
 
-      const intervalDays = srsStore[normalizeKey(card.hebrew)]?.interval ?? 0;
+      const intervalDays = srsStore[srsKey(card)]?.interval ?? 0;
 
       if (studyMode === 'srs') {
         setSrsStore((prev) => {
-          const k = normalizeKey(card.hebrew);
+          const k = srsKey(card);
           const existing = prev[k] ?? newCard(k);
           const updated = nextSRS(existing, correct ? 4 : 1);
           const next = { ...prev, [k]: updated };
@@ -317,12 +370,12 @@ function FlashcardsInner() {
             Study ahead anyway
           </button>
         )}
-        {studyMode === 'all' && (freqFilter !== 'all' || activeDeck !== null) && (
+        {studyMode === 'all' && (freqFilter !== 'all' || textbookId !== null) && (
           <button
             type="button"
             onClick={() => {
               setFreqFilter('all');
-              setActiveDeckId(null);
+              updateSelection({ deck: 'all', chapters: [] });
             }}
             className="px-5 py-2.5 border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-medium"
           >
@@ -344,50 +397,97 @@ function FlashcardsInner() {
         </span>
         <button
           type="button"
-          onClick={() => setActiveDeckId(null)}
-          aria-pressed={activeDeck === null}
+          onClick={() => updateSelection({ deck: 'all' })}
+          aria-pressed={textbookId === null}
           className={`px-3 py-1 rounded-full text-sm border-2 font-medium transition-colors ${
-            activeDeck === null
+            textbookId === null
               ? 'bg-primary text-white border-primary'
               : 'border-primary/10 text-text-muted hover:border-primary/40 hover:text-text'
           }`}
         >
           All vocabulary{' '}
-          <span className={`text-xs ${activeDeck === null ? 'text-white/70' : 'text-text-muted'}`}>
+          <span className={`text-xs ${textbookId === null ? 'text-white/70' : 'text-text-muted'}`}>
             ({vocabulary.length})
           </span>
         </button>
 
-        {DECK_GROUPS.map(({ textbook, decks }) => (
-          <div key={textbook.id} className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-text-muted shrink-0" title={textbook.title}>
-              {textbook.shortTitle}
+        {TEXTBOOK_IDS.map((id) => {
+          const active = selection.deck === id;
+          return (
+            <button
+              type="button"
+              key={id}
+              onClick={() => updateSelection({ deck: id })}
+              aria-pressed={active}
+              title={TEXTBOOKS[id].title}
+              className={`px-3 py-1 rounded-full text-sm border-2 font-medium transition-colors ${
+                active
+                  ? 'bg-primary text-white border-primary'
+                  : 'border-primary/10 text-text-muted hover:border-primary/40 hover:text-text'
+              }`}
+            >
+              {TEXTBOOKS[id].shortTitle}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ── Chapter picker and category filter (textbook decks only) ──────── */}
+      {textbookId !== null && catCounts !== null && (
+        <div className="space-y-3">
+          <ChapterPicker
+            textbook={TEXTBOOKS[textbookId]}
+            chapters={CHAPTER_STATS[textbookId]}
+            selected={selection.chapters}
+            onChange={(chapters) => updateSelection({ chapters })}
+            wordCount={filteredVocab.length}
+          />
+
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <span className="text-xs font-bold text-text-muted uppercase tracking-wider shrink-0">
+              Show
             </span>
-            {decks.map((deck) => {
-              const active = activeDeckId === deck.id;
+            {VOCAB_CATEGORIES.map(({ id, label, description }) => {
+              const active = selection.categories.includes(id);
+              const count = catCounts[id];
               return (
                 <button
                   type="button"
-                  key={deck.id}
-                  onClick={() => setActiveDeckId(active ? null : deck.id)}
+                  key={id}
+                  disabled={count === 0}
+                  onClick={() => {
+                    const next = active
+                      ? selection.categories.filter((c) => c !== id)
+                      : [...selection.categories, id];
+                    // Every category off yields an empty deck with no visible
+                    // cause; the last one on cannot be switched off.
+                    if (next.length > 0) updateSelection({ categories: next });
+                  }}
                   aria-pressed={active}
-                  aria-label={deck.label}
-                  className={`px-3 py-1 rounded-full text-sm border-2 font-medium transition-colors ${
+                  title={description}
+                  className={`px-3 py-1 rounded-full text-sm border-2 font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
                     active
                       ? 'bg-primary text-white border-primary'
                       : 'border-primary/10 text-text-muted hover:border-primary/40 hover:text-text'
                   }`}
                 >
-                  {deck.shortLabel}{' '}
+                  {label}{' '}
                   <span className={`text-xs ${active ? 'text-white/70' : 'text-text-muted'}`}>
-                    ({deck.words.length})
+                    ({count})
                   </span>
                 </button>
               );
             })}
+            <button
+              type="button"
+              onClick={() => updateSelection({ categories: VOCAB_CATEGORIES.map((c) => c.id) })}
+              className="text-xs text-text-muted hover:text-primary transition-colors font-medium underline underline-offset-2"
+            >
+              All categories
+            </button>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
       {/* ── Top controls bar ──────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -410,10 +510,9 @@ function FlashcardsInner() {
         </div>
 
         {/* Frequency filter — only applies to the whole-vocabulary deck */}
-        {activeDeck !== null ? (
+        {textbookId !== null ? (
           <p className="text-sm text-text-muted">
-            {activeDeck.words.length} words &middot; {TEXTBOOKS[activeDeck.textbook].shortTitle},{' '}
-            {TEXTBOOKS[activeDeck.textbook].title}
+            {filteredVocab.length} words &middot; {describeChapters(textbookId, selection.chapters)}
           </p>
         ) : (
           <div className="flex flex-wrap gap-2">
@@ -529,10 +628,13 @@ function FlashcardsInner() {
             {/* Transliteration is content, not a label: SBL romanization is
                 case-bearing (ʾādām, not ʾĀDĀM), so it must never pick up the
                 `uppercase` transform the surrounding micro-labels use.
-                Italic is the standard convention for transliterated text. */}
-            <p className="text-text-muted text-sm mt-2 italic" dir="ltr">
-              {card.transliteration}
-            </p>
+                Italic is the standard convention for transliterated text.
+                Absent on textbook-imported words — see `vocabulary-garrett.ts`. */}
+            {card.transliteration && (
+              <p className="text-text-muted text-sm mt-2 italic" dir="ltr">
+                {card.transliteration}
+              </p>
+            )}
 
             {(card.gender || card.root) && (
               <p className="text-text-muted text-xs mt-1 uppercase tracking-wide font-medium" dir="ltr">
@@ -549,6 +651,54 @@ function FlashcardsInner() {
                     </span>
                   </>
                 )}
+              </p>
+            )}
+
+            {/* Forms the textbook prints alongside the headword. These are what
+                the chapter quizzes actually ask for on nouns. */}
+            {(card.construct || card.plural) && (
+              <p className="text-text-muted text-xs mt-1.5 uppercase tracking-wide font-medium" dir="ltr">
+                {card.construct && (
+                  <>
+                    construct{' '}
+                    <HebrewInline>{card.construct}</HebrewInline>
+                  </>
+                )}
+                {card.construct && card.plural && ' · '}
+                {card.plural && (
+                  <>
+                    plural{' '}
+                    <HebrewInline>{card.plural}</HebrewInline>
+                  </>
+                )}
+              </p>
+            )}
+
+            {card.stems && card.stems.length > 0 && (
+              <ul className="mt-3 space-y-0.5 text-sm text-text-muted" dir="ltr">
+                {card.stems.map((s) => (
+                  <li key={s.stem}>
+                    <span className="font-semibold text-text">{s.stem}</span>
+                    {s.form && <> <HebrewInline>{s.form}</HebrewInline></>} &mdash; {s.gloss}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {card.note && (
+              <p className="text-text-muted text-xs mt-3 leading-snug" dir="ltr">
+                {card.note}
+              </p>
+            )}
+
+            {card.chapters && card.chapters.length > 0 && (
+              <p className="text-text-muted/70 text-[11px] mt-3 uppercase tracking-wide font-medium" dir="ltr">
+                {card.chapters
+                  .map(
+                    (ref) =>
+                      `${TEXTBOOKS[ref.textbook].unitLabel} ${ref.chapter} ${categoryLabel(ref.category)}`,
+                  )
+                  .join(' · ')}
               </p>
             )}
           </div>
