@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { loadSRSStore, loadStats } from '../data/srs';
+import { loadSRSStore, loadStats, newCard, normalizeKey, saveSRSStore } from '../data/srs';
 import { hasAuthHint } from '../lib/auth-cookie';
 import { deleteServerProgress } from '../lib/sync-manager';
 import { chapterStats, TEXTBOOKS, wordsInChapters } from '../data/textbooks';
-import { cardKey, vocabulary } from '../data/vocabulary';
+import { cardKey, type HebrewVocabWord, vocabulary } from '../data/vocabulary';
 import Flashcards, { FREQ_FILTERS, GENDER_LABELS, matchFreq } from './Flashcards';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
@@ -34,6 +34,19 @@ function getCard() {
 
 function getStudyAllButton() {
   return screen.getByRole('button', { name: 'Study All' });
+}
+
+/**
+ * Put one card at the front of the SRS queue, so a test can assert about a
+ * *chosen* card rather than a dealt one.
+ *
+ * `buildQueue` puts due cards ahead of new ones, and a store holding exactly one
+ * card leaves exactly one due — so the shuffle inside each group has nothing to
+ * reorder.
+ */
+function seedDueCard(word: HebrewVocabWord) {
+  const key = normalizeKey(cardKey(word));
+  saveSRSStore({ [key]: newCard(key) });
 }
 
 // ─── matchFreq ────────────────────────────────────────────────────────────────
@@ -107,22 +120,25 @@ describe('Flashcards', () => {
   });
 
   it('renders the transliteration without the uppercase transform', async () => {
+    // This used to click the "2000+" band, on the reasoning that only curated
+    // words carried a frequency and only curated words carry a transliteration —
+    // so any band but "all" had to deal a card with one. Re-sourcing the textbook
+    // vocabulary from OSHB (#109) put real counts on 382 textbook entries, none
+    // of which have a transliteration, so the band stopped implying anything and
+    // the test failed on whichever shuffle dealt one of them first. Seed the card
+    // instead of hoping for it.
+    const word = vocabulary.find((w) => w.transliteration !== undefined);
+    expect(word, 'no vocabulary entry carries a transliteration').toBeDefined();
+    seedDueCard(word as HebrewVocabWord);
+
     const user = userEvent.setup();
     renderFlashcards();
-    // Only curated words carry a transliteration, and only curated words carry a
-    // frequency — so any band but "all" guarantees the drawn card has one.
-    await user.click(screen.getByRole('button', { name: /^2000\+/ }));
     await user.click(getCard());
 
     // CSS text-transform leaves textContent untouched, so the class list is the
     // only observable signal that SBL romanization is being visually uppercased.
     // Asserting on it is deliberate here — the defect is purely presentational.
-    const transliterations = new Set(
-      vocabulary.map((w) => w.transliteration).filter((t) => t !== undefined),
-    );
-    const shown = screen.getByText(
-      (_, el) => el?.tagName === 'P' && transliterations.has(el.textContent ?? ''),
-    );
+    const shown = screen.getByText(word?.transliteration as string);
     expect(shown.className).not.toMatch(/\buppercase\b/);
     expect(shown.className).toMatch(/\bitalic\b/);
   });
