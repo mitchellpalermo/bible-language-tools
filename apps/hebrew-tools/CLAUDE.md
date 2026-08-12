@@ -40,7 +40,9 @@ docs/adr/         # Architecture Decision Records (to be created as decisions ar
 
 ```bash
 pnpm dev            # Start dev server at localhost:4321
-pnpm build          # Build (will run data scripts first once pipeline exists)
+pnpm build          # Build (runs the OSHB data script first)
+pnpm build:data     # Fetch/rebuild public/data/morphhb/ only
+pnpm build:vocab    # Regenerate src/data/vocabulary-garrett.ts from the handout + OSHB
 pnpm test           # Vitest (watch mode)
 pnpm test:run       # Vitest (single run)
 pnpm test:coverage  # Coverage report (must stay ≥ thresholds)
@@ -119,8 +121,9 @@ gitignored — it is 24 MB regenerated from upstream, not source.
 
 `src/data/morphhb.ts` is the client side: types, cached fetches, and the text
 helpers. **`lemmas.json` is the app's authoritative frequency source** — real
-occurrence counts over the WLC, which is what `vocabulary.ts` is meant to be
-re-sourced from (issue #109).
+occurrence counts over the WLC. `scripts/build-vocabulary.mjs` consumes it, and
+the per-book JSON, to re-source the textbook vocabulary (issue #109); see
+"Textbook chapter decks" below.
 
 Two sources, both CC BY 4.0: `openscriptures/morphhb` tracks `master` (a living
 critical edition, same as greek-tools consumes MorphGNT), and
@@ -235,7 +238,7 @@ The vocabulary is split across four modules, and the split is load-bearing:
 | File | Role |
 |---|---|
 | `src/data/vocabulary-types.ts` | `HebrewVocabWord`, `cardKey`, and `gd()`. Imports **types only** |
-| `src/data/vocabulary-garrett.ts` | Generated — Garrett & DeRouchie chapters 2–31 (~546 entries) |
+| `src/data/vocabulary-garrett.ts` | Generated — Garrett & DeRouchie chapters 2–31 (546 entries) |
 | `src/data/vocabulary.ts` | The hand-curated set (incl. chapter 1) + `mergeVocabulary` → `vocabulary` |
 | `src/data/textbooks.ts` | Textbook metadata, categories, and every query over the merged list |
 
@@ -245,20 +248,85 @@ The vocabulary is split across four modules, and the split is load-bearing:
 
 **To add a chapter's vocabulary:** tag the words with `gd(n, category)`. Nothing else is required — the chapter grid, its counts, the category chips and the summary label all fall out of the tags.
 
-**`transliteration` and `frequency` are optional.** The textbook handout has neither, and ~546 invented romanizations would be errors the data tests cannot catch. The card back omits the line when it is absent. Real frequency counts now exist in `public/data/morphhb/lemmas.json` (issue #75) but nothing re-sources `vocabulary.ts` from them yet — that is issue #109. Until then a word without a frequency is simply outside the frequency bands, which is why `matchFreq` returns `false` for `undefined` on every band but "all" — an unmeasured word is not a rare one.
+**`transliteration` is absent by design; `frequency` is present wherever a card front is a citation form.** OSHB carries no romanization, and ~546 invented ones would be errors the data tests cannot catch, so the card back omits that line. Frequencies are real occurrence counts over the WLC. The ~125 cards whose front is an inflected or reading-vocabulary *form* carry none, deliberately: the count is a fact about the lexeme behind the form, not about the form. `matchFreq` still returns `false` for `undefined` on every band but "all" — an unmeasured word is not a rare one.
 
-**Homographs are separated by `sense`, and the SRS key is `cardKey(word)`, not `word.hebrew`.** בָּרוּךְ the name and בָּרוּךְ "blessed" are different cards; so are אַף "also" and אַף "nose". Without a sense they would share one SRS card and reviewing one would mark the other. `cardKey` appends `#<sense>` only where a clash exists, so every other word keeps the bare-lemma key its progress is already stored under. **Anything that keys the SRS store off a word must call `cardKey`** — `normalizeKey(word.hebrew)` is the bug this replaced.
+**Homographs are separated by `sense`, checked by `strong`, and the SRS key is `cardKey(word)`, not `word.hebrew`.** בָּרוּךְ the name and בָּרוּךְ "blessed" are different cards; so are אַף "also" and אַף "nose". Without a sense they would share one SRS card and reviewing one would mark the other. `cardKey` appends `#<sense>` only where a clash exists, so every other word keeps the bare-lemma key its progress is already stored under. **Anything that keys the SRS store off a word must call `cardKey`** — `normalizeKey(word.hebrew)` is the bug this replaced.
+
+`sense` stayed a hand-written string rather than becoming the Strong's number, because `cardKey` is the SRS store's key and re-keying would throw away the progress on exactly those cards. What changed is that the claim is now checkable: `strong` comes from OSHB, and both `build-vocabulary.mjs` and the data tests reject two entries that share a headword and resolve to the same lemma. That is what caught קָרָא I and II collapsing onto 7121.
 
 Rules that the data tests enforce:
 - No cantillation marks (U+0591–U+05AF) in `hebrew`, `construct`, `plural`, `alternates`, or stem forms — including the stress accent Garrett & DeRouchie print over the tonic syllable. Vocabulary entries are pointed but unaccented.
 - Holam male is written `vav + holam`, never the WLC's `holam + vav`. The handout mixes both; rendered as printed, the vowel lands on the wrong consonant.
 - Glosses on tagged words follow the wording of the textbook that assigns them, since that's what the quiz expects.
 - Chapter-tagged nouns carry a `gender` (`m` / `f` / `fm`) wherever the textbook prints one; verbs never do.
-- Every divergence from the printed page is listed in `CORRECTIONS` (respellings) or `EDITORIAL_NOTES` (a stem printed in the wrong cell, a gloss left blank), with its reason. Silent divergence is the thing to avoid — a student comparing the app to the book must be able to find out why they differ.
+- Every divergence from the printed page is listed, with its reason, in `CORRECTIONS` (respellings), `EDITORIAL_NOTES` (a stem printed in the wrong cell, a gloss left blank), `OSHB_RESPELLINGS` (a spelling taken from OSHB where the handout is not wrong, only less precise) or `OSHB_UNMATCHED` (a headword OSHB cannot place, and why). Silent divergence is the thing to avoid — a student comparing the app to the book must be able to find out why they differ.
 
-**Regenerating `vocabulary-garrett.ts`:** it came from a one-time extraction of the course's `.docx` handout, which is copyrighted course material and is deliberately not in the repo. The file is committed output; hand-edits to it will be lost if it is ever regenerated. Fix the extractor, not the artifact.
+#### Split authority: the handout and OSHB (issue #109)
 
-**The handout is not meant to stay the authority on Hebrew orthography** — see issue #109. A retyped Word document is the worst available source for pointed text, and the 19-item `CORRECTIONS` list is the evidence. The OSHB pipeline (#75) has landed, so `lemmas.json` can now supply `hebrew`, `root`, `partOfSpeech`, `gender` and `frequency`, leaving the handout only what it alone knows: the chapter/category mapping and the gloss wording. **Glosses do not move to a lexicon** — Strong's gives חָצֵר as "a yard, a hamlet, enclosure, court, tower, village" where Garrett gives "village, courtyard", and the quiz is marked against Garrett. That split of authority is the target state; do not "simplify" it back to a single source.
+`vocabulary-garrett.ts` is generated by `scripts/build-vocabulary.mjs` from two
+inputs, and **which one owns which field is the whole design**:
+
+| Source | Owns |
+|---|---|
+| `scripts/data/garrett-handout.json` | chapter and section tags, gloss wording, `construct`, `plural`, `alternates`, `stems`, `note`, `sense`, `binyan` |
+| OSHB (`public/data/morphhb/`) | `hebrew`, `root`, `strong`, `partOfSpeech`, `frequency`, and `gender` where the handout prints none |
+
+A retyped Word document is the worst available authority on pointed text and the
+best available authority on what the quiz expects. **Glosses do not move to a
+lexicon** — Strong's gives חָצֵר as "a yard, a hamlet, enclosure, court, tower,
+village" where Garrett gives "village, courtyard", and the quiz is marked against
+Garrett. Do not "simplify" the split back to a single source.
+
+```bash
+pnpm build:data     # the corpus and lexicon must exist first (24 MB, gitignored)
+pnpm build:vocab    # regenerate src/data/vocabulary-garrett.ts
+pnpm build:vocab:check   # fail if the committed file is stale
+```
+
+Neither runs in `pnpm build`. The output is committed source, so the app never
+needs a 24 MB corpus to know what חֶסֶד means, and a drifting upstream corpus
+cannot break a deploy.
+
+Things to know before changing it:
+
+- **A headword resolves against the corpus, not only against the lexicon.** A
+  lexicon hit means the headword is a citation form, which is the only case where
+  a frequency makes sense. Failing that, `buildFormIndex` asks whether the
+  spelling occurs in the Westminster Leningrad Codex at all — which is what turns
+  a correction like `בְּרִיח → בְּרִית` from "inferred from the entry's own
+  construct form" into "attested, and the other one is not." Fourteen of the
+  original nineteen corrections were confirmed that way and fifteen more were
+  found, including three more of the same he-for-het slip.
+- **The build fails rather than guessing.** An unresolved entry must be listed in
+  `scripts/data/garrett-oshb.json` with a reason; a homograph whose two readings
+  are within a factor of `AMBIGUITY_RATIO` must be pinned to a Strong's number.
+  An unmatched Core entry is a *signal* — a handout typo the corpus can see, or a
+  lemma form worth a look — and passing it through silently is the failure mode
+  the script exists to prevent.
+- **The handout's own `partOfSpeech` is a hint, never a gate.** It was inferred
+  from the shape of the gloss and calls עַם a preposition and אֵם a conjunction,
+  so it breaks ties and never rejects a candidate. The one hard rule: an entry the
+  handout calls a verb will not match a lemma that is only a proper name, which is
+  what keeps הִלֵּל the Piel off Hillel's occurrence count.
+- **The textbook wins on `gender` where the two disagree**, and every such case is
+  exported as `GENDER_DIVERGENCES`. All fifteen are the corpus attesting a noun
+  both ways where Garrett prints one — יָד, נֶפֶשׁ, עַיִן. The gender card is marked
+  against Garrett, same rule as the gloss.
+- **Inflected and Reading cards keep the handout's spelling, part of speech and
+  no frequency.** Their front is a form from a passage: תֹּר is the right citation
+  form for the turtle-dove and the wrong thing to show a student reading a plene
+  text, and שֹׁפְטִים "judges" inflects a lemma OSHB codes as a verb. They still take
+  the root and the Strong's number — knowing that וַיֹּאמֶר is אמר is what the card
+  teaches.
+- **Frequencies add across a lexeme's BDB sense splits and never across
+  homographs.** `5892a` + `5892b` are both עִיר "city" and their counts sum; `5893`
+  is a different word spelled the same and its count does not.
+- **The handout JSON is the artifact to fix, not the `.ts`.** The `.docx` is
+  copyrighted course material and deliberately not in the repo, so the extraction
+  is checked in as its output. Hand-edits to `vocabulary-garrett.ts` are lost on
+  the next regeneration; a new correction means editing
+  `scripts/data/garrett-handout.json` and adding the printed form to its
+  `corrections` list, so the divergence from the page stays on the record.
 
 ### Unicode blocks
 

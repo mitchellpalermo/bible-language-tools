@@ -1,0 +1,60 @@
+{
+  "_readme": [
+    "Hand adjudications for build-vocabulary.mjs. Everything here is a decision a",
+    "count cannot make, and the build fails rather than guessing in its place.",
+    "",
+    "pins:      headword (or headword#sense) -> the Strong's number it means, for",
+    "           homographs whose readings are close enough in frequency that the",
+    "           larger one is not evidence. A pin may name a lemma that is not",
+    "           spelled like the headword: תּוֹר 'turtle-dove' is a plene spelling of",
+    "           תֹּר (8449), and all three lexemes the lexicon writes תּוֹר are other",
+    "           words.",
+    "unmatched: entries that resolve to no lemma, keyed the way a pin is (headword,",
+    "           is a fact about the lexicon or the corpus — a citation form the",
+    "           corpus never uses, a paradigm slot it never fills, a spelling that",
+    "           collides with a proper name. A handout typo does not belong here;",
+    "           it belongs in the handout's own corrections list, where the printed",
+    "           form stays on record."
+  ],
+
+  "pins": {
+    "אוֹר": "216",
+    "הֶבֶל": "1893",
+    "אוּר": "218",
+    "אֶת": "854",
+    "אַף#adverb": "637",
+    "אַף#noun": "639",
+    "בַּעַל": "1167",
+    "טָמֵא#verb": "2930",
+    "טָמֵא#adjective": "2931",
+    "יוֹנָה": "3124",
+    "כָּבֵד#verb": "3513",
+    "כָּבֵד#adjective": "3515",
+    "לָבָן": "3837",
+    "נָבָל": "5036",
+    "עָנָה": "6030",
+    "תַּחַת": "8478",
+    "קָרָא#I": "7121",
+    "קָרָא#II": "7122",
+    "פֶּלֶג": "6388",
+    "רָעָה": "7462",
+    "תּוֹר": "8449"
+  },
+
+  "unmatched": [
+    { "entry": "יְרוּשָׁלַיִם", "reason": "the WLC writes the ketiv יְרוּשָׁלִַם; this is the reading spelling the grammars teach" },
+    { "entry": "תִּירַשׁ", "reason": "a paradigm slot the corpus never fills — the Qal yiqtol 3ms יִירַשׁ is attested, the 3fs is not" },
+    { "entry": "יָשׁוּב", "reason": "an inflected form whose spelling collides with the name Jashub (3437)" },
+    { "entry": "בָּרוּךְ#participle", "reason": "the Qal passive participle of ברך, which is no lemma; the spelling collides with Baruch (1263)" },
+    { "entry": "בָּבְלִי", "reason": "the WLC attests this gentilic only in its Aramaic plural, בָּבְלָיֵא" },
+    { "entry": "נָכוֹן", "reason": "the Niphal participle of כון, which is no lemma; the spelling collides with Nacon (5225)" },
+    { "entry": "נִצַּל", "reason": "the Niphal citation form of נצל; the corpus uses the stem but never this perfect 3ms" },
+    { "entry": "רָם", "reason": "the Qal of רום, whose spelling collides with Ram (7410)" },
+    { "entry": "מִשְׁלָח", "reason": "the absolute of a noun the WLC attests only in construct, מִשְׁלַח" },
+    { "entry": "חַי#verb", "reason": "the Qal of חיה listed by its 3ms; every חַי in the corpus is the adjective" },
+    { "entry": "הִלֵּל", "reason": "the Piel of הלל, whose spelling collides with Hillel (1985)" },
+    { "entry": "ירד", "reason": "listed by bare root, which is unpointed and so cannot be attested as a form" },
+    { "entry": "שַׁ", "reason": "the relative prefix; the lexicon cites it as שֶׁ and the corpus only ever writes it attached" },
+    { "entry": "נָח", "reason": "the Qal of נוח, which the corpus uses only in the wayyiqtol; the spelling collides with Noah (5146)" }
+  ]
+}

@@ -33,6 +33,7 @@ export type { HebrewGender, HebrewVocabWord, VerbStemGloss } from './vocabulary-
 /** Optional fields an imported entry may contribute to a curated one. */
 const MERGEABLE_FIELDS = [
   'root',
+  'strong',
   'gender',
   'binyan',
   'construct',
@@ -80,6 +81,12 @@ export function mergeVocabulary(
             other.category === ref.category,
         ) === i,
     );
+
+    // The one field the import wins outright. A curated frequency is a rounded
+    // figure copied out of a published list; an imported one is an occurrence
+    // count over the Westminster Leningrad Codex, and there is no sense in
+    // preferring the estimate to the measurement.
+    if (word.frequency !== undefined) existing.frequency = word.frequency;
 
     for (const field of MERGEABLE_FIELDS) {
       if (existing[field] === undefined && word[field] !== undefined) {

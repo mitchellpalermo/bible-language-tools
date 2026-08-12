@@ -8,6 +8,8 @@
     "build": "node scripts/build-morphhb.mjs && astro build",
     "build:data": "node scripts/build-morphhb.mjs",
     "build:data:force": "node scripts/build-morphhb.mjs --force",
+    "build:vocab": "node scripts/build-vocabulary.mjs",
+    "build:vocab:check": "node scripts/build-vocabulary.mjs --check",
     "preview": "astro preview",
     "astro": "astro",
     "typecheck": "tsc --noEmit",
@@ -48,6 +50,10 @@
     "wrangler": "^4.68.1"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild", "sharp", "workerd"]
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp",
+      "workerd"
+    ]
   }
 }
