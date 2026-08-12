@@ -6,7 +6,7 @@ import { hasAuthHint } from '../lib/auth-cookie';
 import { deleteServerProgress } from '../lib/sync-manager';
 import { chapterStats, TEXTBOOKS, wordsInChapters } from '../data/textbooks';
 import { cardKey, vocabulary } from '../data/vocabulary';
-import Flashcards, { FREQ_FILTERS, matchFreq } from './Flashcards';
+import Flashcards, { FREQ_FILTERS, GENDER_LABELS, matchFreq } from './Flashcards';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
@@ -493,13 +493,37 @@ describe('Flashcards chapter decks', () => {
     }
   });
 
-  it('shows gender on the back of a card that has one', async () => {
+  // The deck is shuffled, so which card comes up first is not knowable from the
+  // test. Asserting "gender is on screen" therefore only held when the shuffle
+  // happened to deal a noun — chapter 2's core list is 9 nouns and 3 particles,
+  // which made this fail one run in four. The invariant that does hold for every
+  // card is that the line appears exactly when the word has a gender, so the
+  // expectation is read off whichever card was dealt.
+  it('shows gender on the back of a card exactly when the word has one', async () => {
+    const deck = wordsInChapters('garrett-derouchie', [2], ['core']);
+    // guards against the test passing vacuously if the chapter's data changes
+    expect(deck.some((w) => w.gender)).toBe(true);
+    expect(deck.some((w) => !w.gender)).toBe(true);
+
     const user = userEvent.setup();
     renderFlashcards();
     await selectTextbook(user);
     await openPicker(user);
     await user.click(chapterButton(2));
-    await user.click(getCard());
-    expect(screen.getAllByText(/masculine|feminine/).length).toBeGreaterThan(0);
+
+    const card = getCard();
+    const hebrew = card.querySelector('p[dir="rtl"]')?.textContent;
+    const matches = deck.filter((w) => w.hebrew === hebrew);
+    // a homograph would make the lookup ambiguous rather than merely wrong
+    expect(matches).toHaveLength(1);
+    const { gender } = matches[0];
+
+    await user.click(card);
+
+    if (gender) {
+      expect(screen.getByText(GENDER_LABELS[gender], { exact: false })).toBeInTheDocument();
+    } else {
+      expect(screen.queryByText(/masculine|feminine/)).not.toBeInTheDocument();
+    }
   });
 });

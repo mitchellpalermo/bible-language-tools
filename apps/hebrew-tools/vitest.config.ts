@@ -7,12 +7,14 @@ export default defineConfig({
     environment: 'happy-dom',
     setupFiles: ['./src/test/setup.ts'],
     globals: true,
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    // `scripts/lib` holds the pure parsing behind `build-morphhb.mjs` — the build
+    // script itself is only fetch and write, so everything worth testing is here.
+    include: ['src/**/*.{test,spec}.{ts,tsx}', 'scripts/lib/**/*.{test,spec}.mjs'],
     passWithNoTests: true,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['src/**/*.{ts,tsx}'],
+      include: ['src/**/*.{ts,tsx}', 'scripts/lib/**/*.mjs'],
       exclude: [
         'src/test/**',
         'src/**/*.d.ts',

@@ -98,11 +98,71 @@ See `ROADMAP.md` for the full feature plan and build order.
 - **Keyboard input:** Phase 1 deliverable. SBL-style phonetic mapping (ASCII → Hebrew). See `ROADMAP.md` Phase 1 for the full key mapping.
 - **Verb system:** Seven binyanim (stems) — Qal, Niphal, Piel, Pual, Hiphil, Hophal, Hithpael. Every verbal analysis includes the stem.
 - **Root system:** Triliteral (3-letter) root system — pedagogy centers on roots, not lemmas.
-- **Morphological data:** Open Scriptures Hebrew Bible (OSHB) — `github.com/openscriptures/morphhb`, CC BY 4.0. XML per book, parsed into `public/data/morphhb/{BOOK}.json` by a build script.
+- **Morphological data:** Open Scriptures Hebrew Bible (OSHB) — `github.com/openscriptures/morphhb`, CC BY 4.0. Built into `public/data/morphhb/` by `scripts/build-morphhb.mjs`; see "OSHB data pipeline" below.
 - **Lenient comparison:** Strip U+05B0–U+05C7 (nikud) for lenient grading; also strip U+0591–U+05AF (cantillation) when fully stripping diacritics.
 - **SRS key namespace:** the SRS store is shared across features. Vocabulary cards are keyed by `normalizeKey(cardKey(word))` — the bare lemma, plus `#<sense>` for the handful of homographs that would otherwise share a card (see "Textbook chapter decks"). **Every non-vocabulary card must carry a prefix** or the two collide on a single-letter word. Handwriting practice uses `write:letter:<char>` (`src/data/writing.ts`). Add the prefix to that file when a new card type appears; do not invent one at a call site.
 - **Deck selection is persisted separately from the SRS store** (`hebrew-tools-deck-v1`, `src/lib/deck-selection.ts`) and is never synced. It decides which due cards you see, not what is due, so it stays local to the browser.
 - **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`. There is still no auth or sync in this app — **all study progress is per-browser only.** The D1 plumbing exists (see below), but nothing reads or writes it yet.
+
+### OSHB data pipeline (issue #75)
+
+`scripts/build-morphhb.mjs` fetches the Westminster Leningrad Codex and the OSHB
+Hebrew Lexicon and writes `public/data/morphhb/`. It runs ahead of `astro build`
+(`pnpm build:data` to run it alone, `build:data:force` to refetch). Output is
+gitignored — it is 24 MB regenerated from upstream, not source.
+
+| File | Contents |
+|---|---|
+| `{CODE}.json` | one per book — `{ [chapter]: { [verse]: HebrewWord[] } }` |
+| `books.json` | the 39 books in Tanakh order, with `section`, chapter and word counts |
+| `lemmas.json` | 9,256 lemmas → `{ count, hebrew?, xlit?, pos?, gender?, root? }` |
+
+`src/data/morphhb.ts` is the client side: types, cached fetches, and the text
+helpers. **`lemmas.json` is the app's authoritative frequency source** — real
+occurrence counts over the WLC, which is what `vocabulary.ts` is meant to be
+re-sourced from (issue #109).
+
+Two sources, both CC BY 4.0: `openscriptures/morphhb` tracks `master` (a living
+critical edition, same as greek-tools consumes MorphGNT), and
+`openscriptures/HebrewLexicon` is **pinned to a commit** (reference data, same as
+greek-tools consumes Dodson). The output is not committed, so upstream drift in
+the lexicon would otherwise be invisible.
+
+Parsing lives in `scripts/lib/oshb.mjs` — pure functions, no I/O, tested by
+`oshb.test.mjs`; the build script is only fetch, orchestrate and write. Same split
+as `nav-menu.ts` and `ink/`, and the reason `vitest.config.ts` includes
+`scripts/lib/**`.
+
+Things that will bite if changed carelessly:
+
+- **`<w>` appears in two places.** A `<w>` inside `<note type="variant">` is a
+  *qere* reading, not running text. Scanning for `<w>` without excluding notes
+  silently adds 1,254 phantom words to the corpus.
+- **The head morpheme is the last segment that is neither a suffix nor `Td`.**
+  Excluding `Td` by name is not cosmetic: **in Aramaic the article is
+  postpositive**, so מַלְכָּא is `ANcmsd/Td` and a plain "last non-suffix" rule
+  labels every determined noun in Daniel and Ezra an article.
+- **`text` keeps OSHB's `/` morpheme boundaries.** They are real information —
+  that וַיְהִי is וַ + יְהִי is a first-year skill — and discarding them at build time
+  makes the split unrecoverable. **Never render `text` raw**; go through
+  `displayText`, `readingText` or `morphemes`.
+- **Frequency is counted per morpheme, not per word.** An inseparable preposition
+  is counted every time it is prefixed, so בְּ is 15,782 rather than the few hundred
+  times it stands alone. The compound-proper-name marker (`1035+`, the בֵּית of
+  בֵּית לֶחֶם) is skipped, or every Bethlehem would count twice.
+- **Gender comes from the corpus, not the lexicon.** Hebrew nouns do not inflect
+  for gender, so a common-noun code's gender *is* the lemma's. OSHB's `b` ("both")
+  and a lemma attested both ways both resolve to `fm`. Proper nouns and adjectives
+  are not witnesses — the former carry no gender code, the latter agree with their
+  head rather than declaring one.
+- **Seven lemmas are absent from the lexicon** (20 occurrences). OSHB writes a
+  few homographs without their disambiguating letter — bare `7451` where the
+  corpus otherwise uses `7451 a` / `7451 b`. They keep their counts and get no
+  lexical fields. **Do not "fix" this by falling back to the `a` variant**; that
+  silently attributes the occurrences to whichever homograph we guessed.
+- **Chapter divisions are the Tanakh's, not an English Bible's.** Joel has 4
+  chapters and Malachi 3. Verse numbering diverges from English Bibles in places
+  too; the osisID in the XML is authoritative.
 
 ### Database (accounts groundwork — issue #91)
 
@@ -185,7 +245,7 @@ The vocabulary is split across four modules, and the split is load-bearing:
 
 **To add a chapter's vocabulary:** tag the words with `gd(n, category)`. Nothing else is required — the chapter grid, its counts, the category chips and the summary label all fall out of the tags.
 
-**`transliteration` and `frequency` are optional.** The textbook handout has neither, and ~546 invented romanizations would be errors the data tests cannot catch. The card back omits the line when it is absent. Real frequency counts arrive with the OSHB pipeline (issue #75); until then a word without one is simply outside the frequency bands, which is why `matchFreq` returns `false` for `undefined` on every band but "all" — an unmeasured word is not a rare one.
+**`transliteration` and `frequency` are optional.** The textbook handout has neither, and ~546 invented romanizations would be errors the data tests cannot catch. The card back omits the line when it is absent. Real frequency counts now exist in `public/data/morphhb/lemmas.json` (issue #75) but nothing re-sources `vocabulary.ts` from them yet — that is issue #109. Until then a word without a frequency is simply outside the frequency bands, which is why `matchFreq` returns `false` for `undefined` on every band but "all" — an unmeasured word is not a rare one.
 
 **Homographs are separated by `sense`, and the SRS key is `cardKey(word)`, not `word.hebrew`.** בָּרוּךְ the name and בָּרוּךְ "blessed" are different cards; so are אַף "also" and אַף "nose". Without a sense they would share one SRS card and reviewing one would mark the other. `cardKey` appends `#<sense>` only where a clash exists, so every other word keeps the bare-lemma key its progress is already stored under. **Anything that keys the SRS store off a word must call `cardKey`** — `normalizeKey(word.hebrew)` is the bug this replaced.
 
@@ -198,7 +258,7 @@ Rules that the data tests enforce:
 
 **Regenerating `vocabulary-garrett.ts`:** it came from a one-time extraction of the course's `.docx` handout, which is copyrighted course material and is deliberately not in the repo. The file is committed output; hand-edits to it will be lost if it is ever regenerated. Fix the extractor, not the artifact.
 
-**The handout is not meant to stay the authority on Hebrew orthography** — see issue #109. A retyped Word document is the worst available source for pointed text, and the 19-item `CORRECTIONS` list is the evidence. Once the OSHB pipeline (#75) lands, `hebrew`, `root`, `partOfSpeech`, `gender` and `frequency` come from the Westminster Leningrad Codex, and the handout keeps only what it alone knows: the chapter/category mapping and the gloss wording. **Glosses do not move to a lexicon** — Strong's gives חָצֵר as "a yard, a hamlet, enclosure, court, tower, village" where Garrett gives "village, courtyard", and the quiz is marked against Garrett. That split of authority is the target state; do not "simplify" it back to a single source.
+**The handout is not meant to stay the authority on Hebrew orthography** — see issue #109. A retyped Word document is the worst available source for pointed text, and the 19-item `CORRECTIONS` list is the evidence. The OSHB pipeline (#75) has landed, so `lemmas.json` can now supply `hebrew`, `root`, `partOfSpeech`, `gender` and `frequency`, leaving the handout only what it alone knows: the chapter/category mapping and the gloss wording. **Glosses do not move to a lexicon** — Strong's gives חָצֵר as "a yard, a hamlet, enclosure, court, tower, village" where Garrett gives "village, courtyard", and the quiz is marked against Garrett. That split of authority is the target state; do not "simplify" it back to a single source.
 
 ### Unicode blocks
 

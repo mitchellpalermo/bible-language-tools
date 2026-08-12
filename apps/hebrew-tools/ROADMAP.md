@@ -170,17 +170,40 @@ This phase is scoped as three sequential PRs rather than one, so each is small e
 
 The custom deck builder that greek.tools' `Flashcards.tsx` also has (generate a deck from a passage) is explicitly out of scope here — it's tied to a Focus-Passage-equivalent feature that doesn't exist yet for Hebrew.
 
-**Note on frequency data:** greek.tools' `vocabulary.ts` is a generated file, produced from MorphGNT by `build-vocabulary.mjs`. Hebrew has no equivalent pipeline yet, so PR 2a's frequency numbers are approximate (sourced from standard published frequency lists, not computed). See the OSHB data pipeline task below — once it exists, it becomes the authoritative source and PR 2a's numbers should be regenerated from it.
+**Note on frequency data:** greek.tools' `vocabulary.ts` is a generated file, produced from MorphGNT by `build-vocabulary.mjs`. PR 2a's Hebrew frequency numbers are approximate — sourced from published frequency lists rather than computed — and the ~546 textbook entries have none at all. The OSHB pipeline below now publishes real per-lemma counts; regenerating `vocabulary.ts` from them is issue #109.
 
 ---
 
-## OSHB Data Pipeline (elevated out of Phases 3/4)
+## OSHB Data Pipeline (elevated out of Phases 3/4) — ✅ Done
 
 **Issue:** #75
 
-Originally described inline under Phases 3 and 4 below, but promoted to its own standalone task: both of those phases need it, and it's a self-contained, mechanical PR on its own (mirrors `apps/greek-tools/scripts/build-morphgnt.mjs`) rather than something that should be built twice or bundled into a larger feature PR. Do this once, early, after Phase 2 lands and before starting Phase 3.
+Originally described inline under Phases 3 and 4 below, but promoted to its own standalone task: both of those phases need it, and it's a self-contained, mechanical PR on its own (mirrors `apps/greek-tools/scripts/build-morphgnt.mjs`) rather than something that should be built twice or bundled into a larger feature PR.
 
-It also computes real per-lemma frequency counts, which become the authoritative source for `vocabulary.ts` (see Phase 2 note above).
+`scripts/build-morphhb.mjs` now writes three things to `public/data/morphhb/`:
+
+| File | Contents |
+|------|----------|
+| `{CODE}.json` | per book — `{ [chapter]: { [verse]: HebrewWord[] } }`, 305,516 words across 39 books |
+| `books.json` | the book index in Tanakh order, with `section`, chapter and word counts |
+| `lemmas.json` | 9,256 lemmas → `{ count, hebrew?, xlit?, pos?, gender?, root? }` |
+
+`src/data/morphhb.ts` is the client side. Invariants and traps are recorded in
+`CLAUDE.md` under "OSHB data pipeline" — read those before touching the parser.
+
+Two things it deliberately does **not** do, both because they belong to the phases
+that first need them:
+
+- **No parse-code formatter.** Turning `HC/Vqw3ms` into "Conjunction; Qal
+  wayyiqtol 3ms" wants its own tables and tests, and Phases 3 and 4 need it
+  together. `parsing` carries the full OSHB string, losslessly, until then.
+- **No glosses.** `lemmas.json` carries orthography, POS, gender, root and
+  frequency — not meaning. The gloss-dataset decision below is still open, and
+  the quiz-facing glosses stay Garrett's regardless (see `CLAUDE.md`).
+
+The per-lemma counts are real occurrence counts over the WLC and are the
+authoritative frequency source going forward; re-sourcing `vocabulary.ts` from
+them is issue #109.
 
 ---
 
@@ -593,11 +616,12 @@ Noto Sans Hebrew (already loaded) renders nikud and cantillation correctly. No f
 - When stripping nikud for lenient comparison, strip U+05B0–U+05C7 (keep consonants)
 - When stripping all cantillation, also strip U+0591–U+05AF
 
-### OSHB data pipeline
-- Source: `https://github.com/openscriptures/morphhb` (XML per book)
-- Build script (analog to `scripts/build-morphgnt.mjs`): fetch XML → parse → output `public/data/morphhb/{BOOK}.json`
-- Book codes: GEN, EXO, LEV, NUM, DEU, JOS, JDG, RUT, 1SA, 2SA, 1KI, 2KI, 1CH, 2CH, EZR, NEH, EST, JOB, PSA, PRO, ECC, SNG, ISA, JER, LAM, EZK, DAN, HOS, JOL, AMO, OBA, JON, MIC, NAH, HAB, ZEP, HAG, ZEC, MAL
-- Full Hebrew Bible: 39 books (~305,000 words)
+### OSHB data pipeline — built, see the section above
+- Sources: `openscriptures/morphhb` (`wlc/*.xml`) and `openscriptures/HebrewLexicon` (`AugIndex.xml`, `LexicalIndex.xml`), both CC BY 4.0
+- Build script: `scripts/build-morphhb.mjs`, parsing in `scripts/lib/oshb.mjs`, client access in `src/data/morphhb.ts`
+- Book codes: GEN, EXO, LEV, NUM, DEU, JOS, JDG, RUT, 1SA, 2SA, 1KI, 2KI, 1CH, 2CH, EZR, NEH, EST, JOB, PSA, PRO, ECC, SNG, ISA, JER, LAM, EZK, DAN, HOS, JOL, AMO, OBA, JON, MIC, NAH, HAB, ZEP, HAG, ZEC, MAL — the table in `scripts/lib/books.mjs` is the source of truth, in Tanakh order
+- Full Hebrew Bible: 39 books, 305,516 words, 9,256 lemmas
+- Chapter divisions are the Tanakh's: Joel has 4 chapters, Malachi 3
 
 ### Shared code candidates from greek.tools
 The following modules from greek.tools can be copied with minimal or zero changes:
@@ -619,7 +643,7 @@ The following modules from greek.tools can be copied with minimal or zero change
 | 2 | 2a | Vocabulary dataset | Low | None | Next up | #72 |
 | 3 | 2b | Core flashcards UI | Low | 2a | Queued | #73 |
 | 4 | 2c | Flashcards: typing + directions + filters | Low–Medium | 2b, Phase 1 | Queued | #74 |
-| 5 | — | OSHB data pipeline | Medium (mechanical) | None | Queued | #75 |
+| 5 | — | OSHB data pipeline | Medium (mechanical) | None | ✅ Done | #75 |
 | 6 | 3 | Daily Verse | Medium | OSHB pipeline | Queued | #76 |
 | 7 | 5 | Transliteration | Medium | None | Queued (independent — can float earlier if a break is wanted) | #78 |
 | 8 | 4 | Hebrew Bible Reader | High — needs its own sub-breakdown at pickup time | OSHB pipeline, gloss dataset decision | Queued | #77 |

@@ -177,6 +177,26 @@ export function stripAllDiacritics(s: string): string {
   return s.replace(/[֑-ׇ]/g, '');
 }
 
+/**
+ * Strip cantillation marks (te'amim) while keeping the vowel points — the
+ * complement of `stripNikud`.
+ *
+ * This is what the WLC text needs: beginners read pointed Hebrew without the
+ * accents, and the lexicon prints a few headwords with a stray accent on them
+ * (`אַבְדָ֑ן`) that has no business in a lexical form.
+ *
+ * The set is U+0591–U+05AF plus the strays outside that block: U+05BD meteg,
+ * U+05BF rafe, U+05C0 paseq, U+05C3 sof pasuq, U+05C6 nun hafukha. Written as
+ * escapes because a character class of bare combining marks is unreadable — and
+ * unreviewable — in source. Maqqef (U+05BE) is punctuation that joins words, not
+ * an accent, so it stays.
+ */
+const CANTILLATION = /[\u0591-\u05AF\u05BD\u05BF\u05C0\u05C3\u05C6]/g;
+
+export function stripCantillation(s: string): string {
+  return s.replace(CANTILLATION, '');
+}
+
 export type AnswerResult = 'correct' | 'nikud-only' | 'wrong';
 
 /**
