@@ -317,12 +317,19 @@ interface HebrewMorphWord {
 
 ### Gloss dataset
 
-Unlike greek.tools (which uses a hand-curated 50-word vocabulary as the gloss source), the Hebrew Bible Reader needs glosses for the full Hebrew vocabulary (~8,000 unique lemmas). Options:
+Unlike greek.tools (which uses a hand-curated 50-word vocabulary as the gloss source), the Hebrew Bible Reader needs glosses for the full Hebrew vocabulary (~8,000 unique lemmas). Options considered:
 
 1. **BDB (public domain):** Brown-Driver-Briggs Hebrew Lexicon — scanned/digitized versions exist; no clean machine-readable form without cleanup work
-2. **OpenHebrew / STEPBible TIPNR:** STEPBible project provides open-licensed lemma → gloss mappings — best option for machine-readable glosses
-3. **OSHB embedded glosses:** The OSHB XML includes Strong's definitions — sufficient for a first version
+2. **OpenHebrew / STEPBible TIPNR:** STEPBible project provides open-licensed lemma → gloss mappings — machine-readable, but a second upstream to pin and track
+3. **OSHB embedded glosses:** The OSHB lexicon ships `HebrewStrong.xml` — Strong's definitions, already fetched and already pinned by the build
 4. **Hand-curated for top-frequency words:** Same approach as greek.tools — start with the top 500 words and expand
+
+**Decided: 3, with 4 layered over it** (issue #118). Strong's is the only option that adds no upstream, no licence question and no pinning decision — the pipeline already fetches that repository at a fixed commit. Curated Garrett glosses win for the ~550 course words, joined at lookup time rather than merged into the generated index, since the generated file is gitignored and the curated one is committed source.
+
+Two things that shape the implementation:
+
+- Prefer the `<def>` elements inside `<meaning>` over `<usage>`. `<usage>` is the KJV's translation words with all the apparatus — H1 reads `chief, (fore-) father(-less), × patrimony, principal.` where the `<def>` reads `father`.
+- BDB sense splits collapse: `5892a` and `5892b` both resolve to H5892 and get the same gloss, because Strong's draws no distinction there. Frequency deliberately behaves the other way — counts sum across sense splits and never across homographs.
 
 ---
 
@@ -647,7 +654,12 @@ The following modules from greek.tools can be copied with minimal or zero change
 | 5 | — | OSHB data pipeline | Medium (mechanical) | None | ✅ Done | #75 |
 | 6 | 3 | Daily Verse | Medium | OSHB pipeline | Queued | #76 |
 | 7 | 5 | Transliteration | Medium | None | Queued (independent — can float earlier if a break is wanted) | #78 |
-| 8 | 4 | Hebrew Bible Reader | High — needs its own sub-breakdown at pickup time | OSHB pipeline, gloss dataset decision | Queued | #77 |
+| 8 | 4 | Hebrew Bible Reader | High — broken into 4a–4e | OSHB pipeline, gloss dataset decision | In progress | #77 |
+| 8a | 4a | Reader: OSHB morph-code formatter | Low | OSHB pipeline | In progress | #117 |
+| 8b | 4b | Reader: gloss source (Strong's, from the pinned OSHB lexicon) | Low | OSHB pipeline | Queued | #118 |
+| 8c | 4c | Reader: shell — book/chapter nav, RTL verses | Medium | OSHB pipeline | Queued | #119 |
+| 8d | 4d | Reader: word popup — morphemes, parse, gloss | Medium | 4a, 4b, 4c | Queued | #120 |
+| 8e | 4e | Reader: cantillation toggle + studied-word highlighting | Low | 4c | Queued | #121 |
 | 9 | 6 | Grammar Reference | High (content-heavy) — needs its own sub-breakdown by section | None | Queued (independent — can float earlier) | #79 |
 | 10 | 7 | Paradigm Quiz | Medium | Phase 1, Phase 6 | Queued | #80 |
 | 11 | 8C | Binyan Guide | Low (content) | None | Queued (independent — can float earlier) | #83 |
@@ -661,7 +673,7 @@ The following modules from greek.tools can be copied with minimal or zero change
 | 19 | 9f | Writing: handwritten paradigms | Medium | 9d, Phase 7 | Queued | #104 |
 | 20 | 9g | Writing: port to greek.tools | Low | 9b (9e for coaching) | Queued | #105 |
 
-Every row above is one GitHub issue, and every issue is scoped to land as a single PR except Phase 4 and Phase 6, which are large enough that they'll be decomposed into their own bite-sized sub-issues (same pattern as Phase 2) once they're picked up. Rows marked "independent" have no hard dependency on the row above them — they're placed here for logical flow (data-pipeline-dependent work grouped together) but can be pulled earlier as a change of pace between heavier phases.
+Every row above is one GitHub issue, and every issue is scoped to land as a single PR. Phase 4 and Phase 6 were too large for that and get their own bite-sized sub-issues (same pattern as Phase 2) once picked up — Phase 4 has been, and its five sub-issues are listed as rows 8a–8e. Rows marked "independent" have no hard dependency on the row above them — they're placed here for logical flow (data-pipeline-dependent work grouped together) but can be pulled earlier as a change of pace between heavier phases.
 
 The OSHB data pipeline (needed for Phases 3 and 4, and for accurate Flashcards frequency data) is the most important early infrastructure investment — see the standalone section above.
 
