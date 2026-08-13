@@ -10,10 +10,22 @@
 // Accuracy alone would reward a single confident dot in the middle of the
 // letter; coverage alone would reward scribbling over the whole box.
 //
+// A fourth measurement applies only where the caller supplies a `part` mask:
+//
+//   placement did the ink reach THAT bit of it?   (catches a qamets drawn high)
+//
+// It exists because the three above are area measurements, and area is exactly
+// what a diacritic does not have. A vowel point is some 4% of a pointed
+// consonant's cells, so writing it in the wrong place moves the combined score
+// by about three points — while being, pedagogically, the entire error.
+//
 // Known limitation, and it is a real one: this grades shape occupancy, not
 // letter identity or stroke order. A ד drawn as a ר plus a stray tick scores
 // respectably. Closing that gap is issue #103's job — stroke templates — and
-// this module should not grow heuristics that try to do it here.
+// this module should not grow heuristics that try to do it here. `placement`
+// is not that heuristic sneaking in: it decides nothing about what was drawn,
+// it asks the same "were these cells reached" question the coverage pass
+// already asks, over a set of cells the caller nominated.
 
 import { normalizeStrokes, resample, type Stroke, strokeLength } from '../stroke';
 import { distanceTransform, type GlyphMask } from './mask';
@@ -33,6 +45,15 @@ export interface InkScore {
    * is decided by a single sample.
    */
   spill: number;
+  /**
+   * Fraction of the nominated sub-region reached by ink, or null when the
+   * caller nominated none.
+   *
+   * Null and zero mean different things and the UI must not conflate them:
+   * null is "placement was not graded", zero is "you did not put the mark
+   * anywhere near where it goes".
+   */
+  placement: number | null;
   /** The combined 0–100 score. */
   score: number;
   verdict: Verdict;
@@ -60,6 +81,18 @@ export const DEFAULT_TOLERANCE = 0.08;
 const COVERAGE_FLOOR = 0.25;
 const COVERAGE_CEILING = 0.95;
 
+/**
+ * The same window, for the nominated sub-region.
+ *
+ * The ceiling is lower than coverage's. A diacritic is a handful of cells and
+ * tolerance is generous relative to its size, so a student who has genuinely
+ * put the point in the right place reaches nearly all of it — demanding 95%
+ * would be grading the mark's shape a second time, which the coverage term
+ * already does.
+ */
+const PLACEMENT_FLOOR = 0.2;
+const PLACEMENT_CEILING = 0.85;
+
 /** Spill is a multiplier, not a term: it can only take away from a good shape. */
 const SPILL_WEIGHT = 0.35;
 /** Spill beyond this many tolerances is as bad as spill gets. */
@@ -76,9 +109,29 @@ export function verdictFor(score: number): Verdict {
 export interface ScoreOptions {
   /** Overrides `DEFAULT_TOLERANCE`. Fraction of the box, not pixels. */
   tolerance?: number;
+  /**
+   * A sub-region of `mask` that has to be hit on its own terms.
+   *
+   * Must be normalized in the *same frame* as `mask` — which is what
+   * `rasterizeComposite` returns a pair for. A mask fitted to its own bounds
+   * would be scored as though the mark were the whole glyph, silently turning
+   * a placement test into a shape test.
+   *
+   * Ignored when it is empty, so a font that draws no difference between the
+   * composed form and its base degrades to plain shape scoring rather than
+   * failing every attempt.
+   */
+  part?: GlyphMask | null;
 }
 
-const EMPTY: InkScore = { accuracy: 0, coverage: 0, spill: 1, score: 0, verdict: 'miss' };
+const EMPTY: InkScore = {
+  accuracy: 0,
+  coverage: 0,
+  spill: 1,
+  placement: null,
+  score: 0,
+  verdict: 'miss',
+};
 
 function clamp01(value: number): number {
   return value < 0 ? 0 : value > 1 ? 1 : value;
@@ -162,6 +215,25 @@ export function scoreInk(
   }
   const coverage = reached / mask.filled;
 
+  // ── Placement: coverage again, restricted to the cells the caller nominated.
+  // Same question, same tolerance — the difference is only that these cells are
+  // no longer outvoted by the thousands belonging to the host consonant.
+  //
+  // If issue #114 lands a best-of-placements translation search, this has to be
+  // evaluated at the winning offset along with everything else. Left behind at
+  // the unaligned position it would contradict the rest of the score — the
+  // metric that exists to say "the mark is in the wrong place" would be
+  // reporting a displacement the other three had already forgiven.
+  const part = options.part;
+  let placement: number | null = null;
+  if (part && part.filled > 0 && part.size === size) {
+    let hit = 0;
+    for (let i = 0; i < part.bits.length; i++) {
+      if (part.bits[i] && inkDistance[i] <= tolerancePx) hit++;
+    }
+    placement = hit / part.filled;
+  }
+
   // Combined as a geometric mean, not a weighted sum. A sum lets one metric buy
   // off the other: at any fixed weighting, a single confident dot in the middle
   // of the letter still banks the whole accuracy term. The geometric mean says
@@ -173,9 +245,19 @@ export function scoreInk(
   const covered = clamp01((coverage - COVERAGE_FLOOR) / (COVERAGE_CEILING - COVERAGE_FLOOR));
   const shape = Math.sqrt(clamp01(accuracy) * covered);
 
+  // Placement folds in the same way and for the same reason: a beautiful פ must
+  // not be able to buy off a qamets written where the holem goes. It weighs as
+  // much as the whole shape term, which is the claim the vowel deck makes — for
+  // these cards the point IS the card, and the host consonant is scaffolding.
+  const placed =
+    placement === null
+      ? 1
+      : clamp01((placement - PLACEMENT_FLOOR) / (PLACEMENT_CEILING - PLACEMENT_FLOOR));
+  const graded = placement === null ? shape : Math.sqrt(shape * placed);
+
   const excess = Math.max(0, spill - tolerance);
   const penalty = clamp01(excess / (SPILL_RANGE * tolerance));
-  const score = Math.round(100 * shape * (1 - SPILL_WEIGHT * penalty));
+  const score = Math.round(100 * graded * (1 - SPILL_WEIGHT * penalty));
 
-  return { accuracy, coverage, spill, score, verdict: verdictFor(score) };
+  return { accuracy, coverage, spill, placement, score, verdict: verdictFor(score) };
 }

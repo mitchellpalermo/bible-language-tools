@@ -5,10 +5,12 @@
 // it into a square box, and precompute a distance transform. No hand-authored
 // outline data and no model.
 //
-// The split here is the same one the rest of `ink/` uses: `rasterizeGlyph` is
+// The split here is the same one the rest of `ink/` uses: `rasterizeAlpha` is
 // the only function that touches a canvas, and everything that decides
 // anything — normalization, thresholding, the distance transform — is pure and
 // operates on a plain `Uint8Array`.
+
+import type { BoundingBox } from '../stroke';
 
 /** A glyph reduced to a square binary grid, with distances precomputed. */
 export interface GlyphMask {
@@ -129,6 +131,44 @@ export interface MaskOptions {
   threshold?: number;
   /** Fraction of a cell's source pixels that must be ink to set the cell. */
   cellCoverage?: number;
+  /**
+   * Fit to this source-pixel box instead of the alpha's own ink bounds.
+   *
+   * The escape hatch from "every mask is fitted to itself", and the whole
+   * mechanism behind placement scoring. A vowel point fitted to its own bounds
+   * is a qamets filling the grid — indistinguishable from the same qamets
+   * written anywhere else on the page. Fitted to the bounds of the *composed*
+   * פָ, it is a qamets in one specific place, and putting it somewhere else
+   * misses. Anything outside the box is clipped, which is the intended reading:
+   * it fell outside the frame.
+   */
+  bounds?: BoundingBox;
+}
+
+/**
+ * Inclusive pixel bounds of everything at or above `threshold`, or null when
+ * the raster is blank.
+ */
+export function alphaBounds(
+  alpha: Uint8Array,
+  width: number,
+  height: number,
+  threshold: number = DEFAULT_ALPHA_THRESHOLD,
+): BoundingBox | null {
+  let minX = width;
+  let minY = height;
+  let maxX = -1;
+  let maxY = -1;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (alpha[y * width + x] < threshold) continue;
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+    }
+  }
+  return maxX < 0 ? null : { minX, minY, maxX, maxY };
 }
 
 /** Build an all-empty mask of the given geometry. */
@@ -148,6 +188,9 @@ function emptyMask(size: number, padding: number): GlyphMask {
  *
  * Downsampling measures each output cell's area coverage rather than point-
  * sampling it, so a stem narrower than the sampling stride still survives.
+ *
+ * Pass `options.bounds` to fit to somebody else's box instead of this alpha's
+ * own — see that option's note.
  */
 export function maskFromAlpha(
   alpha: Uint8Array,
@@ -160,20 +203,9 @@ export function maskFromAlpha(
   const threshold = options.threshold ?? DEFAULT_ALPHA_THRESHOLD;
   const cellCoverage = options.cellCoverage ?? DEFAULT_CELL_COVERAGE;
 
-  let minX = sourceWidth;
-  let minY = sourceHeight;
-  let maxX = -1;
-  let maxY = -1;
-  for (let y = 0; y < sourceHeight; y++) {
-    for (let x = 0; x < sourceWidth; x++) {
-      if (alpha[y * sourceWidth + x] < threshold) continue;
-      if (x < minX) minX = x;
-      if (y < minY) minY = y;
-      if (x > maxX) maxX = x;
-      if (y > maxY) maxY = y;
-    }
-  }
-  if (maxX < 0) return emptyMask(size, padding);
+  const box = options.bounds ?? alphaBounds(alpha, sourceWidth, sourceHeight, threshold);
+  if (!box) return emptyMask(size, padding);
+  const { minX, minY, maxX, maxY } = box;
 
   // Bounds are inclusive cell indices; the covered region is one cell wider.
   const width = maxX - minX + 1;
@@ -254,29 +286,56 @@ function createSurface(side: number): CanvasRenderingContext2D | null {
 }
 
 /**
- * Rasterize a glyph and reduce it to a mask.
+ * Where the text is anchored in the raster.
+ *
+ * `center` centers the string, which is what a single glyph wants. `edge`
+ * pins the string's leading edge — the right edge under RTL — so that two
+ * strings sharing a prefix put that prefix on the same pixels. That is what
+ * makes `rasterizeComposite` able to subtract one from the other; centering
+ * 'פ' and 'פוּ' would shift the pe between them and the difference would be
+ * a pe-shaped ghost rather than a vowel.
+ */
+type Anchor = 'center' | 'edge';
+
+/** Fraction of the raster left clear beyond the anchored edge. */
+const EDGE_MARGIN = 0.12;
+
+/**
+ * Draw text and return its alpha channel.
  *
  * The only canvas-touching function in the scoring path. Returns null when no
  * 2D context is available, which callers should treat as "fall back to
  * self-assessment" rather than as an error.
- *
- * The caller is responsible for having awaited the webfont — see
- * `loadGlyphMask`, which is the entry point that gets that right.
  */
-export function rasterizeGlyph(text: string, options: RasterizeOptions): GlyphMask | null {
+function rasterizeAlpha(
+  text: string,
+  options: RasterizeOptions,
+  anchor: Anchor = 'center',
+): Uint8Array | null {
   const source = options.sourceSize ?? DEFAULT_SOURCE_SIZE;
   const ctx = createSurface(source);
   if (!ctx) return null;
 
+  const direction = options.direction ?? 'rtl';
   ctx.clearRect(0, 0, source, source);
   ctx.fillStyle = '#000';
-  ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   // 0.6em leaves room for a descender (ק, ן) and for combining marks below the
   // baseline without either clipping at the raster's edge.
   ctx.font = `${Math.round(source * 0.6)}px ${options.fontFamily}`;
-  ctx.direction = options.direction ?? 'rtl';
-  ctx.fillText(text, source / 2, source / 2);
+  ctx.direction = direction;
+
+  let x = source / 2;
+  if (anchor === 'center') {
+    ctx.textAlign = 'center';
+  } else {
+    // 'right'/'left' rather than 'start'/'end': the explicit values do not
+    // depend on the context resolving `direction`, which Safari has been
+    // unreliable about.
+    ctx.textAlign = direction === 'rtl' ? 'right' : 'left';
+    x = direction === 'rtl' ? source * (1 - EDGE_MARGIN) : source * EDGE_MARGIN;
+  }
+  ctx.fillText(text, x, source / 2);
 
   let data: Uint8ClampedArray;
   try {
@@ -287,10 +346,81 @@ export function rasterizeGlyph(text: string, options: RasterizeOptions): GlyphMa
 
   const alpha = new Uint8Array(source * source);
   for (let i = 0; i < alpha.length; i++) alpha[i] = data[i * 4 + 3];
-  return maskFromAlpha(alpha, source, source, options);
+  return alpha;
 }
 
-const cache = new Map<string, GlyphMask | null>();
+/**
+ * Rasterize a glyph and reduce it to a mask.
+ *
+ * Returns null when no 2D context is available. The caller is responsible for
+ * having awaited the webfont — see `loadGlyphMask`, the entry point that gets
+ * that right.
+ */
+export function rasterizeGlyph(text: string, options: RasterizeOptions): GlyphMask | null {
+  const source = options.sourceSize ?? DEFAULT_SOURCE_SIZE;
+  const alpha = rasterizeAlpha(text, options);
+  return alpha ? maskFromAlpha(alpha, source, source, options) : null;
+}
+
+/**
+ * A composed glyph, plus the part of it that one specific mark contributes.
+ *
+ * Both are normalized in the *whole's* frame, so they can be scored against
+ * one set of ink samples.
+ */
+export interface CompositeMask {
+  /** The full composed form — פָ — fitted to its own bounds, as usual. */
+  whole: GlyphMask;
+  /**
+   * Only what `text` adds to `base`, positioned within `whole`.
+   *
+   * `filled` is zero when the two render identically, which is the honest
+   * answer for a mark this font does not draw. Callers must check it rather
+   * than reading a placement of zero as "the student missed".
+   */
+  mark: GlyphMask;
+}
+
+/**
+ * Split a composed glyph into the whole and the mark that distinguishes it.
+ *
+ * Rasterize `text` and `base` with a shared anchor, and the mark is what the
+ * first has and the second does not — no per-glyph outline data, exactly as
+ * the whole-glyph mask needs none. Both come out of one rasterization pass so
+ * the two masks cannot drift into different frames.
+ *
+ * This is what lets scoring ask "is the qamets under the middle of the pe"
+ * rather than only "is this pe-with-something-under-it shaped". Under the
+ * whole mask alone a vowel point is some 4% of the glyph's cells, so writing
+ * it in the wrong place costs about three points out of a hundred.
+ */
+export function rasterizeComposite(
+  text: string,
+  base: string,
+  options: RasterizeOptions,
+): CompositeMask | null {
+  const source = options.sourceSize ?? DEFAULT_SOURCE_SIZE;
+  const threshold = options.threshold ?? DEFAULT_ALPHA_THRESHOLD;
+
+  const whole = rasterizeAlpha(text, options, 'edge');
+  const under = rasterizeAlpha(base, options, 'edge');
+  if (!whole || !under) return null;
+
+  const bounds = alphaBounds(whole, source, source, threshold);
+  if (!bounds) return null;
+
+  const mark = new Uint8Array(whole.length);
+  for (let i = 0; i < mark.length; i++) {
+    mark[i] = under[i] >= threshold ? 0 : whole[i];
+  }
+
+  return {
+    whole: maskFromAlpha(whole, source, source, { ...options, bounds }),
+    mark: maskFromAlpha(mark, source, source, { ...options, bounds }),
+  };
+}
+
+const cache = new Map<string, GlyphMask | CompositeMask | null>();
 
 function cacheKey(text: string, options: RasterizeOptions): string {
   return [
@@ -323,15 +453,41 @@ export async function loadGlyphMask(
   text: string,
   options: LoadMaskOptions,
 ): Promise<GlyphMask | null> {
-  const key = cacheKey(text, options);
+  return withFont(cacheKey(text, options), options, () => rasterizeGlyph(text, options));
+}
+
+/**
+ * The whole-and-mark masks for a composed glyph, rasterized once and reused.
+ *
+ * The `loadGlyphMask` of composed forms, and it awaits the webfont for the
+ * same reason — with one extra edge. A mark is *defined* as the difference
+ * between two renderings, so under a fallback face the difference is not a
+ * worse answer but an arbitrary one: the two faces need not even place the
+ * base glyph on the same pixels.
+ */
+export async function loadCompositeMask(
+  text: string,
+  base: string,
+  options: LoadMaskOptions,
+): Promise<CompositeMask | null> {
+  const key = `composite|${base}|${cacheKey(text, options)}`;
+  return withFont(key, options, () => rasterizeComposite(text, base, options));
+}
+
+/** Await the webfont, then rasterize — once per key. */
+async function withFont<T extends GlyphMask | CompositeMask>(
+  key: string,
+  options: LoadMaskOptions,
+  rasterize: () => T | null,
+): Promise<T | null> {
   const hit = cache.get(key);
-  if (hit !== undefined) return hit;
+  if (hit !== undefined) return hit as T | null;
 
   if (options.fontLoadSpec && typeof document !== 'undefined' && document.fonts) {
     await document.fonts.load(options.fontLoadSpec).catch(() => undefined);
   }
 
-  const mask = rasterizeGlyph(text, options);
+  const mask = rasterize();
   cache.set(key, mask);
   return mask;
 }
