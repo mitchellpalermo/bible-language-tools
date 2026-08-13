@@ -128,6 +128,7 @@ How to capture: drive a Playwright script against `pnpm dev` rather than taking 
 
 - **Hide the Astro dev toolbar**, or it floats over the bottom of every shot: `page.addStyleTag({ content: 'astro-dev-toolbar { display: none !important; }' })`.
 - **Only one dev server can hold port 4321.** Both apps use it, and Playwright's `reuseExistingServer` means a stale server from the other app will silently serve the wrong site. Kill it between runs: `lsof -ti:4321 | xargs -r kill -9`.
+- **Check that the webfont actually loaded before trusting a shot of Hebrew or Greek.** Both apps load their script face from Google Fonts, and if the browser cannot reach that host the page renders in a system fallback — which looks plausible in a thumbnail and is not what the app ships. Nikud land wrong and the letterforms differ. Where the browser has no route to the CDN, fetch the CSS and its `woff2` files once with `curl` and serve them to the page with `context.route('https://fonts.googleapis.com/**', ...)` and the same for `fonts.gstatic.com`.
 
 How to attach: GitHub's image upload is web-UI only — there is no API for it, so `gh` cannot upload to it. Commit the images to an orphan branch (`assets/pr-<N>`) and reference them from the PR body by their `raw.githubusercontent.com` URL. That keeps binaries out of `main`'s history, and the branch can be deleted after the merge. The repo is public, so raw URLs render for everyone.
 

@@ -1,0 +1,20 @@
+---
+import HebrewReader from '../components/HebrewReader';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Hebrew Bible Reader"
+  description="Read the Hebrew Bible in the Westminster Leningrad Codex, chapter by chapter, with the pointed and accented text."
+>
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold mb-1" style="color: var(--color-primary);">
+      Hebrew Bible Reader
+    </h1>
+    <p class="text-text-muted">
+      The Westminster Leningrad Codex — all 39 books, pointed and accented, in Tanakh order.
+    </p>
+  </div>
+
+  <HebrewReader client:load />
+</Layout>
