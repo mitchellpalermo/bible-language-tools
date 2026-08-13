@@ -76,9 +76,8 @@ export interface LemmaEntry {
   root?: string;
   /**
    * A short gloss, from Strong's. Absent only for the inseparable prefixes,
-   * which have no lexicon entry at all. **Read it through `src/lib/gloss.ts`**,
-   * not from here — the course vocabulary's own wording wins where it has an
-   * entry, and that join is the whole reason the module exists.
+   * which have no lexicon entry at all — `src/lib/gloss.ts` supplies those, and
+   * is the call a reader should make rather than reading this field directly.
    */
   gloss?: string;
 }

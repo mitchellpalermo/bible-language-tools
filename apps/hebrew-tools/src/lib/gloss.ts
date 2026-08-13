@@ -1,22 +1,25 @@
 /**
  * What a word means, for a reader popup.
  *
- * Three sources, in this order, and the order is the whole design:
+ * **Strong's, everywhere.** `lemmas.json` carries a gloss for 9,248 of the
+ * corpus's 9,256 lemmas, lifted from `HebrewStrong.xml` in the pinned OSHB
+ * lexicon. The eight it cannot reach are the inseparable prefixes, which have
+ * no Strong's entry at all — they are letter codes rather than numbers — and
+ * they are supplied by the table below.
  *
- * 1. **The course vocabulary** (`src/data/vocabulary.ts`), where it has an
- *    entry. Committed, hand-checked, worded as Garrett & DeRouchie word it.
- * 2. **Strong's**, from the OSHB lexicon, via `lemmas.json`. 9,248 of the
- *    corpus's 9,256 lemmas.
- * 3. **A two-entry table below**, for the inseparable prefixes that neither has.
+ * **The textbook is deliberately not a source here**, and that is a decision
+ * rather than an oversight. Garrett & DeRouchie's wording is authoritative for
+ * the thing it is: the answer key for the deck built from that textbook, where
+ * a quiz is marked against the page. It is not a general-purpose lexicon, and
+ * letting it win across the whole Hebrew Bible would mean a word's meaning
+ * changed depending on whether a course happened to teach it — the reader would
+ * say one thing about חֶסֶד in Genesis and the lexicon another in Isaiah.
  *
- * This is the split the repo already documents for the vocabulary build: a
- * retyped handout is the best available authority on what the course expects,
- * and Strong's is the only authority available for the other 8,700 lemmas.
- *
- * **The join happens here rather than in the pipeline**, and that is deliberate.
- * `lemmas.json` is generated and gitignored; `vocabulary.ts` is committed source.
- * Folding the second into the first would put course wording behind a 24 MB
- * build step, and hand-editing the result would lose it on the next build.
+ * So the split is by *use*, not by source quality: `Flashcards` reads
+ * `word.gloss` off the vocabulary and is marked against the textbook; the
+ * reader reads this module and is answerable to the lexicon. Nothing here
+ * imports `vocabulary.ts`, which is what keeps the two from drifting into each
+ * other.
  *
  * Two things Strong's does that will look like bugs and are not:
  *
@@ -31,61 +34,33 @@
  */
 
 import type { LemmaIndex } from '../data/morphhb';
-import { vocabulary } from '../data/vocabulary';
 
 /**
- * The two inseparable prefixes that no source covers.
+ * The eight inseparable prefixes, which no lexicon entry covers.
  *
- * All eight are letter codes rather than Strong's numbers — the lexicon has no
- * entry for any of them — but six are course vocabulary and come through the
- * curated join above: `b`, `c`, `d`, `i`, `k`, `l`. These two are not, and they
- * are far too common to leave a popup blank on.
+ * They are 121,669 of the corpus's 305,516 tokens — the most-read letters on
+ * the page — so a blank popup on a ל is not an option. These are the ordinary
+ * lexicon glosses for them, and they are here rather than borrowed from the
+ * course vocabulary for the reason above: the reader does not read the
+ * textbook.
  */
 const PREFIX_GLOSSES: Record<string, string> = {
+  b: 'in, at, by, with',
+  c: 'and',
+  d: 'the',
+  i: '(introduces a question)',
+  k: 'like, as',
+  l: 'to, for',
   m: 'from, out of',
   s: 'that, which, who',
 };
 
-let curated: Map<string, string> | null = null;
-
-/**
- * Course glosses by lemma key, built once.
- *
- * **Only citation forms count, and `frequency` is what says a card is one.**
- * An Inflected or Reading card's front is a form lifted from a passage, and its
- * gloss is a gloss of *that form*: מְלָכִים is "kings", and a reader hovering
- * מֶלֶךְ wants "king". Those cards deliberately carry no frequency — the repo's
- * existing marker for the distinction, since a count is a fact about the lexeme
- * and not about the form — so excluding them costs nothing and asking for them
- * would put a plural where a singular belongs.
- *
- * A lexeme with two citation cards keeps the first; there is no such case
- * today, and the data tests reject two entries that share a headword and
- * resolve to the same lemma.
- */
-function curatedGlosses(): Map<string, string> {
-  if (curated) return curated;
-  const map = new Map<string, string>();
-  for (const word of vocabulary) {
-    if (word.strong && word.frequency !== undefined && !map.has(word.strong)) {
-      map.set(word.strong, word.gloss);
-    }
-  }
-  curated = map;
-  return map;
-}
-
-/** Drop the built lookup. Exists for tests. */
-export function clearGlossCache(): void {
-  curated = null;
-}
-
 /**
  * The gloss for a lemma key, or `undefined` when nothing has one.
  *
- * `lemmas` may be `null` — the index is ~140 KB and fetched lazily, and a word
- * the course teaches is glossable before it arrives.
+ * `lemmas` may be `null` — the index is ~140 KB and fetched lazily, and the
+ * prefixes are answerable without it.
  */
 export function glossFor(lemma: string, lemmas: LemmaIndex | null = null): string | undefined {
-  return curatedGlosses().get(lemma) ?? lemmas?.[lemma]?.gloss ?? PREFIX_GLOSSES[lemma];
+  return lemmas?.[lemma]?.gloss ?? PREFIX_GLOSSES[lemma];
 }
