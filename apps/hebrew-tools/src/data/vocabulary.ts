@@ -103,7 +103,11 @@ export function mergeVocabulary(
 const CURATED: HebrewVocabWord[] = [
   // Core particles, conjunctions, prepositions
   { hebrew: 'וְ', transliteration: 'wə', gloss: 'and', frequency: 50000, partOfSpeech: 'conjunction' },
-  { hebrew: 'הַ', transliteration: 'ha', gloss: 'the (definite article)', frequency: 30000, partOfSpeech: 'particle' },
+  // `strong: 'd'` is the article's lemma key in OSHB — a letter code, not a
+  // number, since the inseparable prefixes have no Strong's entry. It is here so
+  // the reader's gloss lookup finds this wording rather than falling through to
+  // a second one; see `src/lib/gloss.ts`.
+  { hebrew: 'הַ', strong: 'd', transliteration: 'ha', gloss: 'the (definite article)', frequency: 30000, partOfSpeech: 'particle' },
   { hebrew: 'בְּ', transliteration: 'bə', gloss: 'in, with, by', frequency: 15000, partOfSpeech: 'preposition' },
   { hebrew: 'לְ', transliteration: 'lə', gloss: 'to, for', frequency: 20000, partOfSpeech: 'preposition' },
   { hebrew: 'כְּ', transliteration: 'kə', gloss: 'like, as', frequency: 3000, partOfSpeech: 'preposition' },

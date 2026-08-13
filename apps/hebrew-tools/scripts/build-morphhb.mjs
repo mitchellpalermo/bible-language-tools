@@ -7,7 +7,7 @@
  * Output:
  *   {CODE}.json   per book — { [chapter]: { [verse]: HebrewWord[] } }
  *   books.json    the 39-book index, in Tanakh order
- *   lemmas.json   lemma → { count, hebrew?, xlit?, pos?, gender?, root? }
+ *   lemmas.json   lemma → { count, hebrew?, xlit?, pos?, gender?, root?, gloss? }
  *
  * `lemmas.json` is the authoritative frequency source for the app. Its counts are
  * real occurrence counts over the Westminster Leningrad Codex, computed per
@@ -31,6 +31,7 @@ import {
   parseAugIndex,
   parseBook,
   parseLexicalIndex,
+  parseStrongGlosses,
 } from './lib/oshb.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -117,20 +118,45 @@ async function main() {
 
   await writeFile(join(OUT_DIR, 'books.json'), JSON.stringify(bookIndex, null, 2), 'utf-8');
 
-  const [augXml, lexXml] = await Promise.all([
+  const [augXml, lexXml, strongXml] = await Promise.all([
     fetchText(`${LEXICON_BASE}/AugIndex.xml`),
     fetchText(`${LEXICON_BASE}/LexicalIndex.xml`),
+    fetchText(`${LEXICON_BASE}/HebrewStrong.xml`),
   ]);
-  const { lemmas, unresolved } = buildLemmaIndex(
+  const { lemmas, unresolved, glossless, strongConflicts } = buildLemmaIndex(
     stats,
     parseAugIndex(augXml),
     parseLexicalIndex(lexXml),
+    parseStrongGlosses(strongXml),
   );
 
   await writeFile(join(OUT_DIR, 'lemmas.json'), JSON.stringify(lemmas), 'utf-8');
 
   const lemmaCount = Object.keys(lemmas).length;
+  const glossed = lemmaCount - glossless.length;
   log(`morphhb: ${totalWords} words, ${lemmaCount} lemmas across ${bookIndex.length} books`);
+  log(`  ${glossed} lemmas glossed (${((glossed / lemmaCount) * 100).toFixed(1)}%)`);
+
+  // The eight that never resolve are the inseparable prefixes — letter codes
+  // with no Strong's entry behind them. They are the most-read words on the
+  // page, so `src/lib/gloss.ts` supplies them by hand rather than leaving the
+  // popup blank on a ל.
+  if (glossless.length > 0) {
+    warn(
+      `  ${glossless.length} lemmas without a gloss: ` +
+        glossless
+          .slice(0, 10)
+          .map((g) => `${g.lemma}×${g.count}`)
+          .join(', '),
+    );
+  }
+
+  if (strongConflicts.length > 0) {
+    warn(
+      `  ${strongConflicts.length} lemmas whose key and lexicon disagree on a Strong's number: ` +
+        strongConflicts.map((c) => `${c.lemma} vs ${c.lexicon}`).join(', '),
+    );
+  }
 
   if (unresolved.length > 0) {
     const tokens = unresolved.reduce((sum, u) => sum + u.count, 0);

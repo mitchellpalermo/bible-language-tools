@@ -117,7 +117,7 @@ gitignored — it is 24 MB regenerated from upstream, not source.
 |---|---|
 | `{CODE}.json` | one per book — `{ [chapter]: { [verse]: HebrewWord[] } }` |
 | `books.json` | the 39 books in Tanakh order, with `section`, chapter and word counts |
-| `lemmas.json` | 9,256 lemmas → `{ count, hebrew?, xlit?, pos?, gender?, root? }` |
+| `lemmas.json` | 9,256 lemmas → `{ count, hebrew?, xlit?, pos?, gender?, root?, gloss? }` |
 
 `src/data/morphhb.ts` is the client side: types, cached fetches, and the text
 helpers. **`lemmas.json` is the app's authoritative frequency source** — real
@@ -166,6 +166,53 @@ Things that will bite if changed carelessly:
 - **Chapter divisions are the Tanakh's, not an English Bible's.** Joel has 4
   chapters and Malachi 3. Verse numbering diverges from English Bibles in places
   too; the osisID in the XML is authoritative.
+
+### Glosses (issue #118)
+
+**Read a gloss through `src/lib/gloss.ts`, never straight off `LemmaEntry`.**
+Three sources, in this order, and the order is the design:
+
+1. **The course vocabulary**, where it has an entry — committed, hand-checked,
+   worded as Garrett & DeRouchie word it.
+2. **Strong's**, from `HebrewStrong.xml` in the pinned OSHB lexicon, joined into
+   `lemmas.json` at build time. 9,248 of the corpus's 9,256 lemmas.
+3. **A two-entry table** in `gloss.ts` for `m` and `s`, the only inseparable
+   prefixes that neither source covers.
+
+Same split of authority as the vocabulary build: a retyped handout is the best
+available authority on what the course expects, and Strong's is the only
+authority available for the other 8,700 lemmas. **The join happens in the app,
+not the pipeline** — `lemmas.json` is generated and gitignored, `vocabulary.ts`
+is committed source, and folding the second into the first would put course
+wording behind a 24 MB build step.
+
+Things that will bite if changed carelessly:
+
+- **`<def>` inside `<meaning>` is the gloss; `<usage>` is not.** `<usage>` is
+  the KJV's translation words with all the apparatus — H1 reads `chief, (fore-)
+  father(-less), × patrimony, principal.` where the `<def>` reads `father`.
+  Usage is the fallback for the 245 entries carrying no `<meaning>`, trimmed to
+  four alternatives.
+- **A card with no `frequency` contributes no gloss.** Inflected and Reading
+  cards front a form from a passage, so their gloss is a gloss of *that form* —
+  מְלָכִים is "kings", and a reader hovering מֶלֶךְ wants "king". `frequency` is
+  the repo's existing marker for "this front is a citation form", which is why
+  it is the test. This was a real bug caught by a test, not a hypothetical.
+- **BDB sense splits share a gloss.** `5892a` and `5892b` both resolve to H5892
+  because Strong's draws no distinction. Frequency deliberately behaves the
+  other way — counts sum across sense splits and never across homographs.
+- **Proper names keep Strong's romanizations**, so H3478 reads "he will rule as
+  God, Jisraël". A normalization rule for archaic spellings would break more
+  than it fixed; the popup shows the pointed lemma beside the gloss.
+- **The eight inseparable prefixes have no Strong's entry at all** — they are
+  letter codes, not numbers. Six are course vocabulary and join through step 1
+  (the article carries `strong: 'd'` in `vocabulary.ts` for exactly this
+  reason). Do not "fix" a blank prefix gloss by inventing a ninth source.
+- **A lemma key's digits are its Strong's number**, since OSHB's `lemma`
+  attribute is an augmented Strong's number by construction. The lexicon's own
+  `<xref strong>` agrees for 9,240 of the 9,241 lemmas carrying both; the build
+  reports the one disagreement (`2007` vs `2004`) rather than resolving it
+  silently.
 
 ### Database (accounts groundwork — issue #91)
 
