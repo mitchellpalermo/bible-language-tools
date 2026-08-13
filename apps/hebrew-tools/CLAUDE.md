@@ -212,6 +212,56 @@ Things that will bite if changed carelessly:
   Counts are deliberately not recorded — `morphhb` tracks `master`, so a single
   corrected word would churn the file for no reason.
 
+### Glosses (issue #118)
+
+**Read a gloss through `src/lib/gloss.ts`.** It is Strong's, from
+`HebrewStrong.xml` in the pinned OSHB lexicon, joined into `lemmas.json` at
+build time — 9,248 of the corpus's 9,256 lemmas — plus an eight-entry table in
+`gloss.ts` for the inseparable prefixes, which are letter codes with no Strong's
+entry at all.
+
+**The textbook is deliberately not a source there.** Garrett & DeRouchie's
+wording is authoritative for the thing it is: the answer key for the deck built
+from that textbook, where a quiz is marked against the printed page. It is not a
+general-purpose lexicon, and letting it win across the whole Hebrew Bible would
+make a word's meaning depend on whether a course happened to teach it — the
+reader would say one thing about חֶסֶד in Genesis and the lexicon another in
+Isaiah.
+
+So the split is by **use**, not by source quality:
+
+| Feature | Gloss source | Answerable to |
+|---|---|---|
+| Flashcards | `word.gloss` off the vocabulary | the textbook |
+| Reader, Daily Verse | `glossFor()` | the lexicon |
+
+`gloss.ts` imports nothing from `vocabulary.ts`, and that is what keeps the two
+from drifting into each other. Do not add a fallback between them in either
+direction.
+
+Things that will bite if changed carelessly:
+
+- **`<def>` inside `<meaning>` is the gloss; `<usage>` is not.** `<usage>` is
+  the KJV's translation words with all the apparatus — H1 reads `chief, (fore-)
+  father(-less), × patrimony, principal.` where the `<def>` reads `father`.
+  Usage is the fallback for the 245 entries carrying no `<meaning>`, trimmed to
+  four alternatives.
+- **BDB sense splits share a gloss.** `5892a` and `5892b` both resolve to H5892
+  because Strong's draws no distinction. Frequency deliberately behaves the
+  other way — counts sum across sense splits and never across homographs.
+- **Proper names keep Strong's romanizations**, so H3478 reads "he will rule as
+  God, Jisraël". A normalization rule for archaic spellings would break more
+  than it fixed; the popup shows the pointed lemma beside the gloss.
+- **The eight inseparable prefixes have no Strong's entry** — they are letter
+  codes, not numbers — and they are 121,669 of the corpus's 305,516 tokens, so a
+  blank popup on a ל is not an option. `PREFIX_GLOSSES` covers all eight. Do not
+  "fix" one by reaching into the vocabulary for it.
+- **A lemma key's digits are its Strong's number**, since OSHB's `lemma`
+  attribute is an augmented Strong's number by construction. The lexicon's own
+  `<xref strong>` agrees for 9,240 of the 9,241 lemmas carrying both; the build
+  reports the one disagreement (`2007` vs `2004`) rather than resolving it
+  silently.
+
 ### Database (accounts groundwork — issue #91)
 
 This app has a `DB` binding to the D1 database `bible-language-tools`, **shared with greek-tools**. Schema and migrations live in `packages/db`; `src/lib/db.ts` is the single import site and defines `LANGUAGE = 'hebrew'`.

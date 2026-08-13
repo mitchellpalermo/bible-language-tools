@@ -74,6 +74,12 @@ export interface LemmaEntry {
   gender?: 'm' | 'f' | 'fm';
   /** Triliteral root, where the lexicon's etymology reaches one. */
   root?: string;
+  /**
+   * A short gloss, from Strong's. Absent only for the inseparable prefixes,
+   * which have no lexicon entry at all — `src/lib/gloss.ts` supplies those, and
+   * is the call a reader should make rather than reading this field directly.
+   */
+  gloss?: string;
 }
 
 export type LemmaIndex = Record<string, LemmaEntry>;

@@ -324,7 +324,9 @@ Unlike greek.tools (which uses a hand-curated 50-word vocabulary as the gloss so
 3. **OSHB embedded glosses:** The OSHB lexicon ships `HebrewStrong.xml` — Strong's definitions, already fetched and already pinned by the build
 4. **Hand-curated for top-frequency words:** Same approach as greek.tools — start with the top 500 words and expand
 
-**Decided: 3, with 4 layered over it** (issue #118). Strong's is the only option that adds no upstream, no licence question and no pinning decision — the pipeline already fetches that repository at a fixed commit. Curated Garrett glosses win for the ~550 course words, joined at lookup time rather than merged into the generated index, since the generated file is gitignored and the curated one is committed source.
+**Decided: 3** (issue #118). Strong's is the only option that adds no upstream, no licence question and no pinning decision — the pipeline already fetches that repository at a fixed commit.
+
+**The textbook is deliberately not layered over it.** Garrett & DeRouchie's wording is the answer key for the deck built from that textbook, where a quiz is marked against the page. It is not a general-purpose lexicon, and letting it win across the whole Hebrew Bible would make a word's meaning depend on whether a course happened to teach it — the reader would say one thing about חֶסֶד in Genesis and the lexicon another in Isaiah. The split is by use: Flashcards reads the vocabulary, the reader reads the lexicon.
 
 Two things that shape the implementation:
 

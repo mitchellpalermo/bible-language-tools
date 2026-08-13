@@ -10,6 +10,7 @@
  *   - openscriptures/morphhb        `wlc/*.xml`      — WLC text + morphology
  *   - openscriptures/HebrewLexicon  `AugIndex.xml`   — augmented Strong's → lexical index id
  *                                   `LexicalIndex.xml` — pointed lexical form, POS, root
+ *                                   `HebrewStrong.xml` — glosses
  */
 
 // ─── Unicode ─────────────────────────────────────────────────────────────────
@@ -368,18 +369,31 @@ export function createLemmaStats() {
  * uses `7451 a` / `7451 b`), and picking one would silently attribute the
  * occurrences to whichever homograph we chose.
  */
-export function buildLemmaIndex(stats, augIndex, lexicalIndex) {
+export function buildLemmaIndex(stats, augIndex, lexicalIndex, glosses = new Map()) {
   /** @type {Record<string, object>} */
   const lemmas = {};
   const unresolved = [];
+  const glossless = [];
+  const strongConflicts = [];
 
   for (const [key, { count, genders }] of stats) {
     const id = augIndex.get(key);
     const entry = id ? lexicalIndex.get(id) : undefined;
     if (!entry) unresolved.push({ lemma: key, count });
 
+    const strong = strongOf(key);
+    // The lexicon's own cross-reference agrees with the key's digits for 9,240
+    // of the 9,241 lemmas that carry both, so a disagreement is upstream news
+    // rather than a rule — reported, not silently resolved either way.
+    if (strong && entry?.strong && entry.strong !== strong) {
+      strongConflicts.push({ lemma: key, lexicon: entry.strong });
+    }
+
     const gender = resolveGender(genders);
     const root = id ? resolveRoot(lexicalIndex, id) : undefined;
+    const gloss = strong ? glosses.get(strong) : undefined;
+    if (!gloss) glossless.push({ lemma: key, count });
+
     lemmas[key] = {
       count,
       ...(entry?.hebrew ? { hebrew: entry.hebrew } : {}),
@@ -387,11 +401,26 @@ export function buildLemmaIndex(stats, augIndex, lexicalIndex) {
       ...(entry?.pos ? { pos: entry.pos } : {}),
       ...(gender ? { gender } : {}),
       ...(root ? { root } : {}),
+      ...(gloss ? { gloss } : {}),
     };
   }
 
-  unresolved.sort((a, b) => b.count - a.count);
-  return { lemmas, unresolved };
+  const byCount = (a, b) => b.count - a.count;
+  unresolved.sort(byCount);
+  glossless.sort(byCount);
+  return { lemmas, unresolved, glossless, strongConflicts };
+}
+
+/**
+ * The Strong's number a lemma key names: `1121a` → `1121`.
+ *
+ * OSHB's `lemma` attribute *is* an augmented Strong's number, so the digits are
+ * the number by construction. The inseparable prefixes are the exception —
+ * `l`, `b`, `c` and the rest are letter codes with no Strong's entry behind
+ * them, and they get no number here.
+ */
+export function strongOf(lemmaKey) {
+  return /^(\d+)/.exec(lemmaKey)?.[1];
 }
 
 // ─── Lexicon parsing ─────────────────────────────────────────────────────────
@@ -425,6 +454,9 @@ export function parseLexicalIndex(xml) {
       hebrew: headword ? stripCantillation(headword[2].trim()) : undefined,
       xlit: headword?.[1],
       pos: /<pos>([^<]*)<\/pos>/.exec(body)?.[1]?.trim(),
+      // The lexicon's own link to Strong's. Only used to check the number the
+      // lemma key already carries — see `buildLemmaIndex`.
+      strong: /<xref[^>]*strong="([^"]*)"/.exec(body)?.[1]?.trim(),
       root: etym ? attr(etym[1], 'root') : undefined,
       parents: etym
         ? etym[2]
@@ -435,6 +467,94 @@ export function parseLexicalIndex(xml) {
     });
   }
   return entries;
+}
+
+/**
+ * `HebrewStrong.xml`: Strong's number (bare, no `H`) → a short gloss.
+ *
+ * **The `<def>` elements inside `<meaning>` are the gloss, not `<usage>`.**
+ * `<usage>` is the KJV's translation words with all the apparatus attached —
+ * H1 reads `chief, (fore-) father(-less), × patrimony, principal.` where the
+ * `<def>` reads `father`. Strong's marks the definitional words inside a
+ * discursive sentence, and lifting exactly those out is what turns "to do or
+ * make, in the broadest sense and widest application" into "do, make".
+ *
+ * 9,002 of the 9,256 lemmas in the corpus resolve that way. `<usage>` is the
+ * fallback for the 245 that carry no `<meaning>` — almost all of them the
+ * Aramaic "corresponding to H*n*" entries, whose usage lines are already short
+ * ("destroy, perish.").
+ *
+ * Known limitation: proper names keep Strong's own romanizations, so H3478 is
+ * "he will rule as God, Jisraël". The popup shows the pointed lemma beside it,
+ * and inventing a normalization rule for archaic spellings would break more
+ * than it fixed.
+ */
+export function parseStrongGlosses(xml) {
+  const glosses = new Map();
+  /** Entries that define themselves as another entry's counterpart. @type {Map<string,string>} */
+  const counterparts = new Map();
+
+  for (const m of xml.matchAll(/<entry id="H(\d+)">([\s\S]*?)<\/entry>/g)) {
+    const gloss = glossFromEntry(m[2]);
+    if (gloss) glosses.set(m[1], gloss);
+    else {
+      // "(Aramaic) corresponding to H3389" is the whole entry for a handful of
+      // words — Aramaic Jerusalem among them, which a student reading Daniel
+      // will hover. Taking the counterpart's gloss is what the entry says to do.
+      const source = /<source>([\s\S]*?)<\/source>/.exec(m[2]);
+      const ref = source && /corresponding to\s*<w src="H(\d+)"/.exec(source[1]);
+      if (ref) counterparts.set(m[1], ref[1]);
+    }
+  }
+
+  // One hop only. A counterpart of a counterpart does not occur, and following
+  // a chain would need cycle detection for no gain.
+  for (const [id, target] of counterparts) {
+    const gloss = glosses.get(target);
+    if (gloss) glosses.set(id, gloss);
+  }
+  return glosses;
+}
+
+function glossFromEntry(body) {
+  const meaning = /<meaning>([\s\S]*?)<\/meaning>/.exec(body);
+  if (meaning) {
+    const defs = [...meaning[1].matchAll(/<def>([\s\S]*?)<\/def>/g)]
+      .map((d) => collapse(stripTags(d[1])))
+      .filter(Boolean);
+    // Strong's repeats a word across senses often enough to be worth deduping.
+    const unique = [...new Set(defs)];
+    if (unique.length) return unique.join(', ');
+  }
+  const usage = /<usage>([\s\S]*?)<\/usage>/.exec(body);
+  return usage ? cleanUsage(stripTags(usage[1])) : undefined;
+}
+
+const stripTags = (s) => s.replace(/<[^>]*>/g, '');
+const collapse = (s) => s.replace(/\s+/g, ' ').trim();
+
+/** How many of `<usage>`'s comma-separated alternatives are worth showing. */
+const USAGE_ALTERNATIVES = 4;
+
+/**
+ * `<usage>` cleaned down to something a popup can hold.
+ *
+ * `×` and `+` are Strong's markers for "the KJV supplies this word" and "this
+ * is part of a phrase"; `Compare 3050, 3069.` is a cross-reference, not a
+ * gloss. What is left is a comma-separated list, and the first few of it are
+ * the useful part.
+ */
+function cleanUsage(text) {
+  const parts = text
+    .replace(/\bCompare[^.]*\.?/g, '')
+    .replace(/[×+]/g, '')
+    .replace(/\.\s*$/, '')
+    .split(',')
+    .map((part) => collapse(part))
+    .filter(Boolean);
+  // An entry whose usage line is nothing but apparatus has said nothing, and
+  // an empty string would render as a gloss.
+  return parts.length ? parts.slice(0, USAGE_ALTERNATIVES).join(', ') : undefined;
 }
 
 /** Walk `etym type="sub"` links up to the main entry that declares the root. */

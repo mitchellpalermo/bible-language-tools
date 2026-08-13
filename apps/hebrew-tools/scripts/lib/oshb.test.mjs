@@ -10,6 +10,7 @@ import {
   parseAugIndex,
   parseBook,
   parseLexicalIndex,
+  parseStrongGlosses,
   parseVerse,
   posOf,
   normalizeLemmaKey,
@@ -17,6 +18,7 @@ import {
   resolveRoot,
   splitMorph,
   stripCantillation,
+  strongOf,
 } from './oshb.mjs';
 
 describe('stripCantillation', () => {
@@ -454,5 +456,211 @@ describe('the lexicon', () => {
         { lemma: '9999', count: 1 },
       ]);
     });
+
+    describe('glosses', () => {
+      const glosses = new Map([
+        ['1', 'father'],
+        ['6', 'perish'],
+      ]);
+
+      it('joins a gloss on by the number the lemma key carries', () => {
+        const { stats, record } = createLemmaStats();
+        record('1', 'Ncmsa');
+        record('6', 'Vqp3ms');
+
+        const { lemmas } = buildLemmaIndex(stats, aug, li, glosses);
+        expect(lemmas['1'].gloss).toBe('father');
+        expect(lemmas['6'].gloss).toBe('perish');
+      });
+
+      // BDB splits a lexeme's senses where Strong's does not, so both halves
+      // resolve to one entry and share its gloss. Frequency deliberately
+      // behaves the other way: counts sum across sense splits, never across
+      // homographs.
+      it('gives both halves of a sense split the same gloss', () => {
+        const { stats, record } = createLemmaStats();
+        record('1a', 'Ncmsa');
+        record('1b', 'Ncmsa');
+
+        const { lemmas } = buildLemmaIndex(stats, aug, li, glosses);
+        expect(lemmas['1a'].gloss).toBe('father');
+        expect(lemmas['1b'].gloss).toBe('father');
+      });
+
+      it('reports what it could not gloss, most frequent first', () => {
+        const { stats, record } = createLemmaStats();
+        record('l', 'R');
+        record('l', 'R');
+        record('c', 'C');
+        record('1', 'Ncmsa');
+
+        const { lemmas, glossless } = buildLemmaIndex(stats, aug, li, glosses);
+        expect(lemmas.l.gloss).toBeUndefined();
+        expect(glossless).toEqual([
+          { lemma: 'l', count: 2 },
+          { lemma: 'c', count: 1 },
+        ]);
+      });
+
+      it('carries no gloss at all when none is supplied', () => {
+        const { stats, record } = createLemmaStats();
+        record('1', 'Ncmsa');
+
+        const { lemmas, glossless } = buildLemmaIndex(stats, aug, li);
+        expect(lemmas['1'].gloss).toBeUndefined();
+        expect(glossless).toEqual([{ lemma: '1', count: 1 }]);
+      });
+    });
+
+    // The lexicon's own `<xref strong>` agrees with the key's digits for 9,240
+    // of the 9,241 lemmas carrying both. The one disagreement is upstream news,
+    // so it is reported rather than silently resolved either way.
+    it('reports a lemma whose key and lexicon name different Strong’s numbers', () => {
+      const conflicting = parseLexicalIndex(`<index><part>
+        <entry id="aac">
+          <w xlit="ʾāb">אָב</w> <pos>N</pos>
+          <xref bdb="a.ae.ab" strong="2004"/>
+        </entry>
+      </part></index>`);
+      const { stats, record } = createLemmaStats();
+      record('1', 'Ncmsa');
+
+      const { strongConflicts } = buildLemmaIndex(stats, aug, conflicting);
+      expect(strongConflicts).toEqual([{ lemma: '1', lexicon: '2004' }]);
+    });
+
+    it('has nothing to report when the two agree', () => {
+      const { stats, record } = createLemmaStats();
+      record('1', 'Ncmsa');
+
+      const { strongConflicts } = buildLemmaIndex(stats, aug, li);
+      expect(strongConflicts).toEqual([]);
+    });
+  });
+});
+
+// ─── Strong's glosses ────────────────────────────────────────────────────────
+
+describe('strongOf', () => {
+  it('reads the number a lemma key carries', () => {
+    expect(strongOf('1121a')).toBe('1121');
+    expect(strongOf('853')).toBe('853');
+    expect(strongOf('5892b')).toBe('5892');
+  });
+
+  // The inseparable prefixes are letter codes with no Strong's entry behind
+  // them. They are glossed on the app side; see `src/lib/gloss.ts`.
+  it('gives an inseparable prefix no number', () => {
+    expect(strongOf('l')).toBeUndefined();
+    expect(strongOf('c')).toBeUndefined();
+  });
+});
+
+describe('parseStrongGlosses', () => {
+  const xml = `<lexicon>
+    <entry id="H1">
+      <w pos="n-m" xlit="ʼâb">אָב</w>
+      <source>a primitive word;</source>
+      <meaning><def>father</def>, in a literal and immediate, or figurative and remote application</meaning>
+      <usage>chief, (fore-) father(-less), × patrimony, principal. Compare names in 'Abi-'.</usage>
+    </entry>
+    <entry id="H2">
+      <w pos="n-m" xlit="ʼab">אַב</w>
+      <source>(Aramaic) corresponding to <w src="H1">1</w></source>
+      <usage>father.</usage>
+    </entry>
+    <entry id="H6">
+      <w pos="v" xlit="ʼâbad">אָבַד</w>
+      <meaning>properly, to <def>wander</def> away, i.e. <def>lose</def> oneself; by implication to <def>perish</def> (causative, <def>destroy</def>)</meaning>
+      <usage>break, destroy(-uction), not escape, fail.</usage>
+    </entry>
+    <entry id="H47">
+      <w pos="a" xlit="ʼabbîyr">אַבִּיר</w>
+      <usage>angel, bull, chiefest, mighty (one), stout(-hearted), strong (one), valiant.</usage>
+    </entry>
+    <entry id="H3390">
+      <w pos="n-pr-loc" xlit="Yᵉrûwshâlêm">יְרוּשָׁלֵם</w>
+      <source>(Aramaic) corresponding to <w src="H3389">3389</w></source>
+    </entry>
+    <entry id="H3389">
+      <w pos="n-pr-loc" xlit="Yᵉrûwshâlaim">יְרוּשָׁלִַם</w>
+      <meaning><def>Jerusalem</def>, the capital city of Palestine</meaning>
+    </entry>
+    <entry id="H9998">
+      <w pos="n-m" xlit="nothing">נ</w>
+      <source>of uncertain derivation</source>
+    </entry>
+  </lexicon>`;
+
+  const glosses = parseStrongGlosses(xml);
+
+  // `<usage>` is the KJV's translation words with all the apparatus attached.
+  // Strong's marks the definitional words inside `<meaning>`, and lifting
+  // exactly those out is the difference between "father" and
+  // "chief, (fore-) father(-less), × patrimony, principal."
+  it('takes the definition markers, not the KJV usage line', () => {
+    expect(glosses.get('1')).toBe('father');
+    expect(glosses.get('6')).toBe('wander, lose, perish, destroy');
+  });
+
+  it('falls back to usage for an entry with no meaning', () => {
+    expect(glosses.get('2')).toBe('father');
+  });
+
+  it('trims a usage line down to something a popup can hold', () => {
+    expect(glosses.get('47')).toBe('angel, bull, chiefest, mighty (one)');
+  });
+
+  // "(Aramaic) corresponding to H3389" is the whole entry for Aramaic
+  // Jerusalem, a word a student reading Daniel will hover.
+  it('follows a counterpart reference when the entry defines nothing itself', () => {
+    expect(glosses.get('3390')).toBe('Jerusalem');
+  });
+
+  it('leaves an entry with nothing to say out entirely', () => {
+    expect(glosses.has('9998')).toBe(false);
+  });
+
+  it('strips the cross-reference apparatus out of a usage line', () => {
+    const stray = parseStrongGlosses(
+      `<lexicon><entry id="H5"><usage>× stone, + wall. Compare 68.</usage></entry></lexicon>`,
+    );
+    expect(stray.get('5')).toBe('stone, wall');
+  });
+
+  it('does not repeat a word Strong’s defines twice', () => {
+    const repeated = parseStrongGlosses(
+      `<lexicon><entry id="H7"><meaning>to <def>go</def>, i.e. <def>go</def> out</meaning></entry></lexicon>`,
+    );
+    expect(repeated.get('7')).toBe('go');
+  });
+});
+
+describe('parseStrongGlosses, degrading', () => {
+  it('falls through to usage when a meaning marks no definitions', () => {
+    const glosses = parseStrongGlosses(
+      `<lexicon><entry id="H9">
+        <meaning>see the note at the end of this article</meaning>
+        <usage>bow, arrow.</usage>
+      </entry></lexicon>`,
+    );
+    expect(glosses.get('9')).toBe('bow, arrow');
+  });
+
+  it('yields nothing rather than an empty string when a usage line is all apparatus', () => {
+    const glosses = parseStrongGlosses(
+      `<lexicon><entry id="H10"><usage>× + . Compare 11.</usage></entry></lexicon>`,
+    );
+    expect(glosses.has('10')).toBe(false);
+  });
+
+  it('leaves a counterpart unglossed when the entry it points at has none either', () => {
+    const glosses = parseStrongGlosses(
+      `<lexicon>
+        <entry id="H11"><source>(Aramaic) corresponding to <w src="H12">12</w></source></entry>
+        <entry id="H12"><source>of uncertain derivation</source></entry>
+      </lexicon>`,
+    );
+    expect(glosses.has('11')).toBe(false);
   });
 });
