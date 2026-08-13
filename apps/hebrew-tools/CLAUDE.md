@@ -48,6 +48,7 @@ pnpm dev            # Start dev server at localhost:4321
 pnpm build          # Build (runs the OSHB data script first)
 pnpm build:data     # Fetch/rebuild public/data/morphhb/ only
 pnpm build:vocab    # Regenerate src/data/vocabulary-garrett.ts from the handout + OSHB
+pnpm build:morph-codes  # Regenerate src/lib/morph-codes.json from the corpus
 pnpm test           # Vitest (watch mode)
 pnpm test:run       # Vitest (single run)
 pnpm test:coverage  # Coverage report (must stay ≥ thresholds)
@@ -173,6 +174,43 @@ Things that will bite if changed carelessly:
 - **Chapter divisions are the Tanakh's, not an English Bible's.** Joel has 4
   chapters and Malachi 3. Verse numbering diverges from English Bibles in places
   too; the osisID in the XML is authoritative.
+
+### Morph codes → readable parses (issue #117)
+
+`src/lib/morph-parse.ts` turns an OSHB morph code into something a student can
+read: `HC/Vqw3ms` into "Conjunction + Qal wayyiqtol 3ms". It is pure and has no
+imports beyond `morphhb.ts`'s text helpers. Daily Verse (#76) and the Reader
+(#77) share it; nothing renders it yet.
+
+Two labels per code, and both are load-bearing. `detail` spells the parse out
+("Qal sequential imperfect 3rd masculine singular") for a popup line; `brief`
+compacts it ("Qal wayyiqtol 3ms") for the inline label under a morpheme, where a
+word with three morphemes has no room for the long form. The brief uses the
+Hebrew names for the four indicative conjugations — a sequential imperfect has no
+short English name worth the space — and ordinary English abbreviations
+elsewhere.
+
+Things that will bite if changed carelessly:
+
+- **The stem letters mean different things in Hebrew and Aramaic.** `Vp` is Piel
+  against Pael, `Vh` is Hiphil against Haphel. Every entry point takes a
+  language and none infers one, because Daniel and Ezra are read in the same
+  reader as Genesis. `isAramaic()` reads the marker off `parsing`.
+- **`x` is a value, not a gap.** A demonstrative is `Pdxms` because it inflects
+  for gender and number and has no person; `Nxxxa` leaves the sub-type slot empty
+  too. It is accepted in every slot and contributes nothing to the output.
+- **One unreadable letter fails the whole code.** `analyzeMorph` returns `null`
+  and callers render the raw code. A parse with a hole in it is undetectable
+  downstream — "masculine singular" that should have read "masculine dual" looks
+  exactly like a correct parse.
+- **`src/lib/morph-codes.json` is the corpus standing as a second witness.** The
+  OSHB spec is a table of letters and says nothing about which combinations
+  occur, or about the shapes that only turn up in the text. The inventory is the
+  898 codes the WLC actually uses, and `morph-parse.test.ts` asserts every one of
+  them parses. Regenerate with `pnpm build:morph-codes`; `pnpm
+  build:morph-codes:check` fails if it is stale and names the codes that moved.
+  Counts are deliberately not recorded — `morphhb` tracks `master`, so a single
+  corrected word would churn the file for no reason.
 
 ### Database (accounts groundwork — issue #91)
 

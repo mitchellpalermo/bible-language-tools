@@ -10,6 +10,8 @@
     "build:data:force": "node scripts/build-morphhb.mjs --force",
     "build:vocab": "node scripts/build-vocabulary.mjs",
     "build:vocab:check": "node scripts/build-vocabulary.mjs --check",
+    "build:morph-codes": "node scripts/extract-morph-codes.mjs",
+    "build:morph-codes:check": "node scripts/extract-morph-codes.mjs --check",
     "preview": "astro preview",
     "astro": "astro",
     "typecheck": "tsc --noEmit",
