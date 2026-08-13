@@ -317,12 +317,19 @@ interface HebrewMorphWord {
 
 ### Gloss dataset
 
-Unlike greek.tools (which uses a hand-curated 50-word vocabulary as the gloss source), the Hebrew Bible Reader needs glosses for the full Hebrew vocabulary (~8,000 unique lemmas). Options:
+Unlike greek.tools (which uses a hand-curated 50-word vocabulary as the gloss source), the Hebrew Bible Reader needs glosses for the full Hebrew vocabulary (~8,000 unique lemmas). Options considered:
 
 1. **BDB (public domain):** Brown-Driver-Briggs Hebrew Lexicon — scanned/digitized versions exist; no clean machine-readable form without cleanup work
-2. **OpenHebrew / STEPBible TIPNR:** STEPBible project provides open-licensed lemma → gloss mappings — best option for machine-readable glosses
-3. **OSHB embedded glosses:** The OSHB XML includes Strong's definitions — sufficient for a first version
+2. **OpenHebrew / STEPBible TIPNR:** STEPBible project provides open-licensed lemma → gloss mappings — machine-readable, but a second upstream to pin and track
+3. **OSHB embedded glosses:** The OSHB lexicon ships `HebrewStrong.xml` — Strong's definitions, already fetched and already pinned by the build
 4. **Hand-curated for top-frequency words:** Same approach as greek.tools — start with the top 500 words and expand
+
+**Decided: 3, with 4 layered over it** (issue #118). Strong's is the only option that adds no upstream, no licence question and no pinning decision — the pipeline already fetches that repository at a fixed commit. Curated Garrett glosses win for the ~550 course words, joined at lookup time rather than merged into the generated index, since the generated file is gitignored and the curated one is committed source.
+
+Two things that shape the implementation:
+
+- Prefer the `<def>` elements inside `<meaning>` over `<usage>`. `<usage>` is the KJV's translation words with all the apparatus — H1 reads `chief, (fore-) father(-less), × patrimony, principal.` where the `<def>` reads `father`.
+- BDB sense splits collapse: `5892a` and `5892b` both resolve to H5892 and get the same gloss, because Strong's draws no distinction there. Frequency deliberately behaves the other way — counts sum across sense splits and never across homographs.
 
 ---
 
@@ -489,7 +496,7 @@ The pedagogy is the spine, not the stylus: every drill runs **trace → copy →
 | Mode | Content source | Notes |
 |------|---------------|-------|
 | **Letters** | Script pack | The 22 letters as 23 cards (shin and sin are drilled apart, since the dot's side is the skill), 5 final forms, begadkephat dagesh variants. A separate deck interleaves the confusable pairs — ב/כ, ד/ר, ה/ח/ת, ו/ז/ן, ס/ם, ע/צ — since that is where beginners actually lose marks. **Glyphs are drilled in the form they are actually written**: final kaf carries its silent sheva (ךְ), shin and sin their dots. A chart built from bare codepoints teaches forms that occur nowhere in the text |
-| **Nikud** | Script pack | Vowel points on a host consonant. *Placement* is most of the skill (qamets centered below, holem above-left), and the mask grading below scores placement natively because it grades the rendered consonant-plus-point as one image |
+| **Nikud** | Script pack | Vowel points on a host consonant. *Placement* is most of the skill (qamets centered below, holem above-left). Shipped in 9c — and it needed a scoring change, see below |
 | **Words** | `vocabulary.ts`, `textbooks.ts` | RTL grid of guide boxes, one per consonant cluster. Prompted by gloss or transliteration |
 | **Paradigms** | `TableModel` (Phase 7) | Handwrite into blanked cells instead of typing. Same density picker, same result colors. This is the exam-prep mode |
 | **Scribal copying** | Daily Verse / reader text | Long-form, lightly graded. Fill a column of a page over successive days |
@@ -519,7 +526,13 @@ Three things the build settled that the plan above did not:
 - **The three numbers combine as a geometric mean, not a weighted sum.** Under any fixed weighting, accuracy can buy off coverage: half a ה scores 84/100 because "every mark is in the right place" banks the whole accuracy term. Requiring *both* to be good is what the three metrics were for.
 - **Coverage runs through a response curve first.** Linear coverage is far too forgiving — a ה missing its roof reads as 65% covered, which sounds like a near miss and is very nearly a different letter.
 
-**Known limitation:** this grades shape *occupancy*, not letter identity or stroke order. A ד drawn as a ר plus a stray tick scores decently. Layer 2 is what closes that.
+**Layer 1b — placement, for glyphs that are "another glyph plus a mark".** *Shipped in 9c.* The plan above assumed nikud would score natively, because the mask grades the rendered consonant-plus-point as one image. It does not, and the reason is arithmetic: a vowel point is about 4% of the composed glyph's cells, so writing the qamets where the holem goes moves the combined score by roughly three points out of a hundred. All three metrics above are area measurements, and area is the one thing a diacritic does not have.
+
+What closes it costs one function and no new data. `rasterizeComposite(text, base)` renders both the composed form and its base, takes the pixel difference, and fits *both* to the composed form's bounds — so the mark comes back as a mask in the whole glyph's frame rather than one fitted to itself. `scoreInk` takes it as `part` and reports a fourth number, `placement`, which folds in as a geometric mean alongside the shape term. A qamets in the wrong place now reads as a miss; the same attempt scored against the whole mask alone still reads as a pass, and a test pins exactly that gap.
+
+It applies to more than the vowels: `WritableGlyph.baseForm` marks שׁ and שׂ as ש-plus-a-dot, so the dot's side finally counts. Two traps, both documented in the repo CLAUDE.md: the two rasterizations must be anchored on the leading edge rather than centred (or a composed form wider than its base shifts the base between them), and an empty difference must be read as "not graded" rather than as a failed attempt.
+
+**Known limitation:** this still grades shape *occupancy*, not letter identity or stroke order. A ד drawn as a ר plus a stray tick scores decently. Layer 2 is what closes that.
 
 **Layer 2 — stroke order and direction.** A hand-authored `StrokeTemplate` per glyph: ordered polylines in a normalized 0–1 box, each with a direction. Hebrew needs ~45 entries (22 consonants + 5 finals + shin/sin dots + ~13 nikud); Greek ~60. Bootstrap the data with the app itself — an internal authoring route where each glyph is drawn once with the stylus and saved as JSON.
 
@@ -551,7 +564,7 @@ export interface ScriptPack {
   direction: 'rtl' | 'ltr';
   fontFamily: string;
   fontLoadSpec: string;              // for document.fonts.load()
-  glyphs: WritableGlyph[];           // char, name, phonetic, group, confusableWith
+  glyphs: WritableGlyph[];           // char, name, phonetic, group, confusableWith, baseForm
   strokes?: Record<string, StrokeTemplate>;
   combining?: { hostChar: string; marks: WritableGlyph[] };  // nikud / breathings + accents
   metrics: { emBox: number; baseline: number; ascender: number; descender: number };
@@ -587,9 +600,9 @@ The architecture is shaped so the interesting parts are pure functions over type
 
 | PR | Scope |
 |----|-------|
-| 9a | Ink capture + render in shared; `/write` letters, trace mode, Layer 0 self-grading, SRS wired |
-| 9b | Layer 1 mask scoring + numeric feedback |
-| 9c | Nikud drills and confusable-pair decks |
+| 9a | ✅ Ink capture + render in shared; `/write` letters, trace mode, Layer 0 self-grading, SRS wired |
+| 9b | ✅ Layer 1 mask scoring + numeric feedback |
+| 9c | ✅ Nikud drills and confusable-pair decks (plus Layer 1b placement scoring) |
 | 9d | `WritingGrid` + word mode from `vocabulary.ts` / `textbooks.ts` |
 | 9e | Stroke templates + authoring route + Layer 2 coaching |
 | 9f | Paradigm writing over `TableModel` |
@@ -647,7 +660,12 @@ The following modules from greek.tools can be copied with minimal or zero change
 | 5 | — | OSHB data pipeline | Medium (mechanical) | None | ✅ Done | #75 |
 | 6 | 3 | Daily Verse | Medium | OSHB pipeline | Queued | #76 |
 | 7 | 5 | Transliteration | Medium | None | Queued (independent — can float earlier if a break is wanted) | #78 |
-| 8 | 4 | Hebrew Bible Reader | High — needs its own sub-breakdown at pickup time | OSHB pipeline, gloss dataset decision | Queued | #77 |
+| 8 | 4 | Hebrew Bible Reader | High — broken into 4a–4e | OSHB pipeline, gloss dataset decision | In progress | #77 |
+| 8a | 4a | Reader: OSHB morph-code formatter | Low | OSHB pipeline | In progress | #117 |
+| 8b | 4b | Reader: gloss source (Strong's, from the pinned OSHB lexicon) | Low | OSHB pipeline | Queued | #118 |
+| 8c | 4c | Reader: shell — book/chapter nav, RTL verses | Medium | OSHB pipeline | Queued | #119 |
+| 8d | 4d | Reader: word popup — morphemes, parse, gloss | Medium | 4a, 4b, 4c | Queued | #120 |
+| 8e | 4e | Reader: cantillation toggle + studied-word highlighting | Low | 4c | Queued | #121 |
 | 9 | 6 | Grammar Reference | High (content-heavy) — needs its own sub-breakdown by section | None | Queued (independent — can float earlier) | #79 |
 | 10 | 7 | Paradigm Quiz | Medium | Phase 1, Phase 6 | Queued | #80 |
 | 11 | 8C | Binyan Guide | Low (content) | None | Queued (independent — can float earlier) | #83 |
@@ -661,7 +679,7 @@ The following modules from greek.tools can be copied with minimal or zero change
 | 19 | 9f | Writing: handwritten paradigms | Medium | 9d, Phase 7 | Queued | #104 |
 | 20 | 9g | Writing: port to greek.tools | Low | 9b (9e for coaching) | Queued | #105 |
 
-Every row above is one GitHub issue, and every issue is scoped to land as a single PR except Phase 4 and Phase 6, which are large enough that they'll be decomposed into their own bite-sized sub-issues (same pattern as Phase 2) once they're picked up. Rows marked "independent" have no hard dependency on the row above them — they're placed here for logical flow (data-pipeline-dependent work grouped together) but can be pulled earlier as a change of pace between heavier phases.
+Every row above is one GitHub issue, and every issue is scoped to land as a single PR. Phase 4 and Phase 6 were too large for that and get their own bite-sized sub-issues (same pattern as Phase 2) once picked up — Phase 4 has been, and its five sub-issues are listed as rows 8a–8e. Rows marked "independent" have no hard dependency on the row above them — they're placed here for logical flow (data-pipeline-dependent work grouped together) but can be pulled earlier as a change of pace between heavier phases.
 
 The OSHB data pipeline (needed for Phases 3 and 4, and for accurate Flashcards frequency data) is the most important early infrastructure investment — see the standalone section above.
 

@@ -30,6 +30,21 @@ export interface WritableGlyph {
    * mask rasterization and stroke templates later.
    */
   referenceForm?: string;
+
+  /**
+   * What is already on the page before this glyph's own mark goes down.
+   *
+   * Set it where a glyph is "some other glyph, plus a mark": שׁ is ש plus a
+   * dot. Scoring uses it to isolate the mark and grade *where the student put
+   * it*, which area-based metrics cannot do on their own — the shin dot is
+   * under 1% of the letter's cells, so putting it on the wrong arm is nearly
+   * free otherwise.
+   *
+   * Combining marks do not need this. Their base is the pack's
+   * `combining.hostChar`, and `baseText()` supplies it.
+   */
+  baseForm?: string;
+
   /** Conventional name, as a textbook would say it aloud — 'alef', 'qamets'. */
   name: string;
   /** Transliteration or sound value. Used as the recall-mode prompt. */
@@ -93,6 +108,21 @@ export function allGlyphs(pack: ScriptPack): WritableGlyph[] {
 export function renderableText(pack: ScriptPack, glyph: WritableGlyph): string {
   if (glyph.group === 'vowel' && pack.combining) return pack.combining.hostChar + glyph.char;
   return glyph.referenceForm ?? glyph.char;
+}
+
+/**
+ * The part of a glyph's rendering that is NOT the mark being drilled, or null
+ * when the whole thing is.
+ *
+ * The counterpart to `renderableText`, and the second half of what placement
+ * scoring needs: rasterize both, and the difference is the mark. Combining
+ * marks resolve to the pack's host consonant; anything else has to say so with
+ * `baseForm`.
+ */
+export function baseText(pack: ScriptPack, glyph: WritableGlyph): string | null {
+  if (glyph.baseForm) return glyph.baseForm;
+  if (glyph.group === 'vowel' && pack.combining) return pack.combining.hostChar;
+  return null;
 }
 
 /** Glyphs in a named group, in pack order. */

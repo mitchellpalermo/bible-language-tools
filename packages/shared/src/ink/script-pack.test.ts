@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { allGlyphs, glyphsInGroup, renderableText, type ScriptPack } from './script-pack';
+import { allGlyphs, baseText, glyphsInGroup, renderableText, type ScriptPack } from './script-pack';
 
 const pack: ScriptPack = {
   id: 'test',
@@ -52,6 +52,35 @@ describe('renderableText', () => {
   it('ignores referenceForm on a combining mark, which needs its host', () => {
     const mark = { char: 'ָ', referenceForm: 'ignored', name: 'qamets', group: 'vowel' as const };
     expect(renderableText(pack, mark)).toBe('פָ');
+  });
+});
+
+describe('baseText', () => {
+  it('is the host consonant for a combining mark', () => {
+    // Rasterize פָ and פ, and the difference is the qamets — which is how
+    // placement gets scored without hand-authored outlines.
+    expect(baseText(pack, pack.combining!.marks[0])).toBe('פ');
+  });
+
+  it('is null for a glyph that is written whole', () => {
+    expect(baseText(pack, pack.glyphs[0])).toBeNull();
+  });
+
+  it('is null for a combining mark in a pack with no host', () => {
+    const { combining: _combining, ...bare } = pack;
+    expect(baseText(bare, pack.combining!.marks[0])).toBeNull();
+  });
+
+  it('prefers an explicit baseForm', () => {
+    // שׁ is ש plus a dot, and the dot's side is the whole distinction — but it
+    // is not a combining mark and has no host to fall back on.
+    const shin = { char: 'שׁ', baseForm: 'ש', name: 'shin', group: 'consonant' as const };
+    expect(baseText(pack, shin)).toBe('ש');
+  });
+
+  it('lets baseForm override the host for a combining mark', () => {
+    const mark = { char: 'ָ', baseForm: 'ב', name: 'qamets', group: 'vowel' as const };
+    expect(baseText(pack, mark)).toBe('ב');
   });
 });
 

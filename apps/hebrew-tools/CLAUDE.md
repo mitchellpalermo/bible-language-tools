@@ -8,7 +8,12 @@ The project is currently a styled placeholder page. All real tools are planned �
 
 Planned routes (per roadmap): `/` (home), `/keyboard`, `/flashcards`, `/write`, `/daily`, `/reader`, `/transliteration`, `/grammar`, `/paradigms`, `/parse`, `/roots`.
 
-`/write` is stylus handwriting practice, built on `@tools/shared/ink`. The engine is language-agnostic; everything Hebrew about it lives in `src/data/script-pack.ts`. See the repo CLAUDE.md for the engine's invariants and `ROADMAP.md` Phase 9 for what is still to come (issues #99–#105).
+`/write` is stylus handwriting practice, built on `@tools/shared/ink`. The engine is language-agnostic; everything Hebrew about it lives in `src/data/script-pack.ts`, and deck construction in `src/data/writing.ts`. See the repo CLAUDE.md for the engine's invariants and `ROADMAP.md` Phase 9 for what is still to come (issues #99–#105).
+
+Two things about the decks that are pedagogy rather than plumbing, and will look like arbitrary complexity if changed without reading them:
+
+- **A confusable deck's order IS the deck.** Members are dealt round-robin so ד and ר alternate; `WritingDeck.order: 'as-built'` is what stops `buildQueue` hoisting due cards to the front and reassembling exactly the blocked presentation the deck exists to avoid.
+- **A repeat within one session can demote a card but not promote it** (`shouldUpdateCard`). A pair deck shows ד three times in five minutes, and SM-2 would read three passes as three spaced repetitions. Stats still count every presentation — the student did the review either way.
 
 ## Tech Stack
 
@@ -43,6 +48,7 @@ pnpm dev            # Start dev server at localhost:4321
 pnpm build          # Build (runs the OSHB data script first)
 pnpm build:data     # Fetch/rebuild public/data/morphhb/ only
 pnpm build:vocab    # Regenerate src/data/vocabulary-garrett.ts from the handout + OSHB
+pnpm build:morph-codes  # Regenerate src/lib/morph-codes.json from the corpus
 pnpm test           # Vitest (watch mode)
 pnpm test:run       # Vitest (single run)
 pnpm test:coverage  # Coverage report (must stay ≥ thresholds)
@@ -102,7 +108,9 @@ See `ROADMAP.md` for the full feature plan and build order.
 - **Root system:** Triliteral (3-letter) root system — pedagogy centers on roots, not lemmas.
 - **Morphological data:** Open Scriptures Hebrew Bible (OSHB) — `github.com/openscriptures/morphhb`, CC BY 4.0. Built into `public/data/morphhb/` by `scripts/build-morphhb.mjs`; see "OSHB data pipeline" below.
 - **Lenient comparison:** Strip U+05B0–U+05C7 (nikud) for lenient grading; also strip U+0591–U+05AF (cantillation) when fully stripping diacritics.
-- **SRS key namespace:** the SRS store is shared across features. Vocabulary cards are keyed by `normalizeKey(cardKey(word))` — the bare lemma, plus `#<sense>` for the handful of homographs that would otherwise share a card (see "Textbook chapter decks"). **Every non-vocabulary card must carry a prefix** or the two collide on a single-letter word. Handwriting practice uses `write:letter:<char>` (`src/data/writing.ts`). Add the prefix to that file when a new card type appears; do not invent one at a call site.
+- **SRS key namespace:** the SRS store is shared across features. Vocabulary cards are keyed by `normalizeKey(cardKey(word))` — the bare lemma, plus `#<sense>` for the handful of homographs that would otherwise share a card (see "Textbook chapter decks"). **Every non-vocabulary card must carry a prefix** or the two collide on a single-letter word. Handwriting practice spends two, both in `src/data/writing.ts`: `write:letter:<char>` for consonants and finals, `write:nikud:<char>` for vowel points. They are separate because the skills are separate, and because the namespaces would otherwise collide outright — shureq's card is keyed by וּ, which is also a vav with a dagesh. `writingCardKey` takes the *glyph* and picks the prefix from its group; add new prefixes to `KEY_PREFIX` and `WRITING_KEY_PREFIXES` together, and never build one at a call site.
+
+The confusable decks deliberately get no prefix of their own — they drill the same letters the alphabet deck does, so grading ד in one must move the card the other sees.
 - **Deck selection is persisted separately from the SRS store** (`hebrew-tools-deck-v1`, `src/lib/deck-selection.ts`) and is never synced. It decides which due cards you see, not what is due, so it stays local to the browser.
 - **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`. There is still no auth or sync in this app — **all study progress is per-browser only.** The D1 plumbing exists (see below), but nothing reads or writes it yet.
 
@@ -117,7 +125,7 @@ gitignored — it is 24 MB regenerated from upstream, not source.
 |---|---|
 | `{CODE}.json` | one per book — `{ [chapter]: { [verse]: HebrewWord[] } }` |
 | `books.json` | the 39 books in Tanakh order, with `section`, chapter and word counts |
-| `lemmas.json` | 9,256 lemmas → `{ count, hebrew?, xlit?, pos?, gender?, root?, gloss? }` |
+| `lemmas.json` | 9,256 lemmas → `{ count, hebrew?, xlit?, pos?, gender?, root? }` |
 
 `src/data/morphhb.ts` is the client side: types, cached fetches, and the text
 helpers. **`lemmas.json` is the app's authoritative frequency source** — real
@@ -166,6 +174,43 @@ Things that will bite if changed carelessly:
 - **Chapter divisions are the Tanakh's, not an English Bible's.** Joel has 4
   chapters and Malachi 3. Verse numbering diverges from English Bibles in places
   too; the osisID in the XML is authoritative.
+
+### Morph codes → readable parses (issue #117)
+
+`src/lib/morph-parse.ts` turns an OSHB morph code into something a student can
+read: `HC/Vqw3ms` into "Conjunction + Qal wayyiqtol 3ms". It is pure and has no
+imports beyond `morphhb.ts`'s text helpers. Daily Verse (#76) and the Reader
+(#77) share it; nothing renders it yet.
+
+Two labels per code, and both are load-bearing. `detail` spells the parse out
+("Qal sequential imperfect 3rd masculine singular") for a popup line; `brief`
+compacts it ("Qal wayyiqtol 3ms") for the inline label under a morpheme, where a
+word with three morphemes has no room for the long form. The brief uses the
+Hebrew names for the four indicative conjugations — a sequential imperfect has no
+short English name worth the space — and ordinary English abbreviations
+elsewhere.
+
+Things that will bite if changed carelessly:
+
+- **The stem letters mean different things in Hebrew and Aramaic.** `Vp` is Piel
+  against Pael, `Vh` is Hiphil against Haphel. Every entry point takes a
+  language and none infers one, because Daniel and Ezra are read in the same
+  reader as Genesis. `isAramaic()` reads the marker off `parsing`.
+- **`x` is a value, not a gap.** A demonstrative is `Pdxms` because it inflects
+  for gender and number and has no person; `Nxxxa` leaves the sub-type slot empty
+  too. It is accepted in every slot and contributes nothing to the output.
+- **One unreadable letter fails the whole code.** `analyzeMorph` returns `null`
+  and callers render the raw code. A parse with a hole in it is undetectable
+  downstream — "masculine singular" that should have read "masculine dual" looks
+  exactly like a correct parse.
+- **`src/lib/morph-codes.json` is the corpus standing as a second witness.** The
+  OSHB spec is a table of letters and says nothing about which combinations
+  occur, or about the shapes that only turn up in the text. The inventory is the
+  898 codes the WLC actually uses, and `morph-parse.test.ts` asserts every one of
+  them parses. Regenerate with `pnpm build:morph-codes`; `pnpm
+  build:morph-codes:check` fails if it is stale and names the codes that moved.
+  Counts are deliberately not recorded — `morphhb` tracks `master`, so a single
+  corrected word would churn the file for no reason.
 
 ### Glosses (issue #118)
 
