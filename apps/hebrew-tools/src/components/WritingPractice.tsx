@@ -199,6 +199,11 @@ function WritingPracticeInner() {
       score: result?.score ?? null,
       // Null when the glyph carries no distinguishing mark to place.
       placement: result?.placement ?? null,
+      // How far the registration search had to move the ink to score it (#114).
+      // Consistently large values here mean the surface and the reference
+      // disagree about where a letter sits, which is a data problem rather than
+      // a handwriting one — and invisible in the score alone.
+      registration: result ? Math.round(Math.hypot(result.offset.x, result.offset.y) * 100) : null,
       followed_suggestion: result ? suggestedGrade(result.score) === which : null,
     });
 
