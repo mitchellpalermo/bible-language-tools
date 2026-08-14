@@ -8,12 +8,16 @@ import {
   fetchBook,
   fetchBooks,
   fetchLemmas,
+  DEFAULT_READER_PREFS,
+  type HebrewWord,
   isAramaic,
   loadLastPassage,
+  loadReaderPrefs,
   morphemes,
+  READER_PREFS_KEY,
   readingText,
   saveLastPassage,
-  type HebrewWord,
+  saveReaderPrefs,
 } from './morphhb';
 
 const word = (over: Partial<HebrewWord> = {}): HebrewWord => ({
@@ -176,6 +180,47 @@ describe('reading position', () => {
     });
     expect(() => saveLastPassage('GEN.1')).not.toThrow();
     expect(loadLastPassage()).toBeNull();
+    getItem.mockRestore();
+    setItem.mockRestore();
+  });
+});
+
+describe('reading preferences', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  // The WLC is an accented text, and a student who has never met te'amim is
+  // better served meeting them and turning them off.
+  it('shows the accents and the highlighting until told otherwise', () => {
+    expect(loadReaderPrefs()).toEqual({ cantillation: true, studied: true });
+    expect(loadReaderPrefs()).toEqual(DEFAULT_READER_PREFS);
+  });
+
+  it('round-trips through localStorage', () => {
+    saveReaderPrefs({ cantillation: false, studied: false });
+    expect(loadReaderPrefs()).toEqual({ cantillation: false, studied: false });
+  });
+
+  it('fills in a preference a stored payload does not carry', () => {
+    localStorage.setItem(READER_PREFS_KEY, JSON.stringify({ cantillation: false }));
+    expect(loadReaderPrefs()).toEqual({ cantillation: false, studied: true });
+  });
+
+  it('falls back rather than throwing on a payload that will not parse', () => {
+    localStorage.setItem(READER_PREFS_KEY, 'not json');
+    expect(loadReaderPrefs()).toEqual(DEFAULT_READER_PREFS);
+  });
+
+  it('survives localStorage throwing', () => {
+    const getItem = vi.spyOn(localStorage, 'getItem').mockImplementation(() => {
+      throw new Error('denied');
+    });
+    const setItem = vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
+      throw new Error('denied');
+    });
+    expect(() => saveReaderPrefs(DEFAULT_READER_PREFS)).not.toThrow();
+    expect(loadReaderPrefs()).toEqual(DEFAULT_READER_PREFS);
     getItem.mockRestore();
     setItem.mockRestore();
   });

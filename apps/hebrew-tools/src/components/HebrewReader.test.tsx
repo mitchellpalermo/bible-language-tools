@@ -5,8 +5,12 @@ import {
   clearMorphhbCache,
   type HebrewBook,
   type HebrewBookMeta,
+  type LemmaIndex,
   READER_HISTORY_KEY,
+  READER_PREFS_KEY,
 } from '../data/morphhb';
+import { newCard, saveSRSStore } from '../data/srs';
+import { cardKey, vocabulary } from '../data/vocabulary';
 import HebrewReader from './HebrewReader';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
@@ -42,6 +46,10 @@ const GENESIS: HebrewBook = {
       // 1 Samuel 2:3's ketiv/qere, borrowed: written ולא, read ולו.
       { text: 'ו/לא', lemma: '3808', pos: 'Tn', parsing: 'HC/Tn', ketiv: true, qere: 'וְ/ל֥/וֹ' },
     ],
+    // Genesis 1:29's בּוֹ — a preposition carrying its own suffix, whose lemma
+    // is the prefix letter code `b` rather than a Strong's number. There are 470
+    // such words in Genesis alone and no lexicon entry for any of them.
+    '4': [{ text: 'בּ֥/וֹ', lemma: 'b', pos: 'R', parsing: 'HR/Sp3ms', after: '׃' }],
   },
   '2': { '1': [{ text: 'וַ/יְכֻלּ֛וּ', lemma: '3615', pos: 'Vq', parsing: 'HC/Vqw3mp' }] },
   '3': { '1': [{ text: 'וְ/הַ/נָּחָשׁ֙', lemma: '5175', pos: 'Nc', parsing: 'HC/Td/Ncmsa' }] },
@@ -49,6 +57,35 @@ const GENESIS: HebrewBook = {
 
 const EXODUS: HebrewBook = {
   '1': { '1': [{ text: 'וְ/אֵ֗לֶּה', lemma: '428', pos: 'Pd', parsing: 'HC/Pdxcp' }] },
+};
+
+// Enough of `lemmas.json` for the popup. The real index is ~140 KB and fetched
+// lazily, which is the behaviour the popup tests below pin.
+const LEMMAS: LemmaIndex = {
+  '430': {
+    count: 2598,
+    hebrew: 'אֱלֹהִים',
+    xlit: 'ʾĕlōhîm',
+    pos: 'N',
+    gender: 'm',
+    root: 'אלה',
+    gloss: 'God, gods',
+  },
+  '1961': { count: 3576, hebrew: 'הָיָה', xlit: 'hāyâ', pos: 'V', root: 'היה', gloss: 'to be' },
+  // A lemma the lexicon cannot reach: it keeps its count and gets no fields.
+  '5175': { count: 31 },
+};
+
+/** The SRS key the flashcards would have stored for a lemma of the corpus. */
+const cardKeyFor = (strong: string): string => {
+  const word = vocabulary.find((w) => w.strong === strong);
+  if (!word) throw new Error(`no vocabulary entry for ${strong}`);
+  return cardKey(word);
+};
+
+const studyWord = (strong: string): void => {
+  const key = cardKeyFor(strong);
+  saveSRSStore({ [key]: { ...newCard(key), repetition: 3 } });
 };
 
 let failWith: string | null = null;
@@ -66,11 +103,13 @@ beforeEach(() => {
       if (failWith) return Promise.resolve({ ok: false, status: 404 } as Response);
       const body = url.endsWith('books.json')
         ? BOOKS
-        : url.endsWith('GEN.json')
-          ? GENESIS
-          : url.endsWith('EXO.json')
-            ? EXODUS
-            : null;
+        : url.endsWith('lemmas.json')
+          ? LEMMAS
+          : url.endsWith('GEN.json')
+            ? GENESIS
+            : url.endsWith('EXO.json')
+              ? EXODUS
+              : null;
       if (!body) return Promise.resolve({ ok: false, status: 404 } as Response);
       return Promise.resolve({ ok: true, json: () => Promise.resolve(body) } as Response);
     }),
@@ -310,5 +349,316 @@ describe('HebrewReader', () => {
       await renderReader();
       expect(readerText()).toHaveTextContent('בָּרָ֣א');
     });
+  });
+});
+
+// ─── The word popup (#120) ────────────────────────────────────────────────────
+
+describe('the word popup', () => {
+  // The first match: a word can occur more than once in a chapter, and any of
+  // them opens the same popup.
+  const openWord = async (text: string) => {
+    const user = userEvent.setup();
+    await renderReader();
+    await user.click(within(readerText()).getAllByText(text)[0]);
+    return within(await screen.findByRole('dialog'));
+  };
+
+  it('opens on the word that was tapped', async () => {
+    const popup = await openWord('הַשָּׁמַ֖יִם');
+    expect(popup.getByText('הַשָּׁמַ֖יִם')).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toHaveAttribute('aria-label', 'About הַשָּׁמַ֖יִם');
+  });
+
+  // This is the thing greek.tools has no analog for, and the thing a first-year
+  // student most needs: that וַיְהִי is וַ + יְהִי.
+  it('takes the word apart into morphemes, each with its own parse', async () => {
+    const popup = await openWord('וַֽיְהִי');
+    expect(popup.getByText('וַֽ')).toBeInTheDocument();
+    expect(popup.getByText('יְהִי')).toBeInTheDocument();
+    expect(popup.getByText('Conjunction')).toBeInTheDocument();
+    expect(popup.getByText('Qal wayyiqtol 3ms')).toBeInTheDocument();
+  });
+
+  it('names the article on a prefixed noun', async () => {
+    const popup = await openWord('הַשָּׁמַ֖יִם');
+    expect(popup.getByText('Definite article')).toBeInTheDocument();
+    expect(popup.getByText('Noun mp')).toBeInTheDocument();
+  });
+
+  // The stem is part of every verbal analysis, and it is spelled out rather
+  // than left as the letter the code carries.
+  it('spells out the binyan for a verb', async () => {
+    const popup = await openWord('וַֽיְהִי');
+    expect(popup.getByText('Stem')).toBeInTheDocument();
+    expect(popup.getByText('Qal')).toBeInTheDocument();
+  });
+
+  it('says nothing about a stem on a word that has none', async () => {
+    const popup = await openWord('אֱלֹהִ֑ים');
+    expect(popup.queryByText('Stem')).not.toBeInTheDocument();
+  });
+
+  it('gives the citation form, gloss, transliteration, root and count', async () => {
+    const popup = await openWord('אֱלֹהִ֑ים');
+    await waitFor(() => expect(popup.getByText('God, gods')).toBeInTheDocument());
+    expect(popup.getByText('אֱלֹהִים')).toBeInTheDocument();
+    expect(popup.getByText('ʾĕlōhîm')).toBeInTheDocument();
+    expect(popup.getByText('אלה')).toBeInTheDocument();
+    expect(popup.getByText('2,598× in the Hebrew Bible')).toBeInTheDocument();
+  });
+
+  // The index is ~140 KB. It is fetched when a popup first needs it, not on
+  // page load, and the parse is on screen either way.
+  it('fetches the lemma index on the first popup rather than on page load', async () => {
+    const fetched = () =>
+      (fetch as ReturnType<typeof vi.fn>).mock.calls.filter((call) =>
+        String(call[0]).endsWith('lemmas.json'),
+      );
+
+    const user = userEvent.setup();
+    await renderReader();
+    expect(fetched()).toHaveLength(0);
+
+    await user.click(within(readerText()).getByText('אֱלֹהִ֑ים'));
+    await screen.findByText('God, gods');
+    expect(fetched()).toHaveLength(1);
+  });
+
+  // Seven lemmas have no lexicon entry, and neither does any inseparable
+  // prefix. A missing field renders as nothing at all — never as "unknown",
+  // which reads like a claim about the word.
+  it('leaves an absent field absent rather than calling it unknown', async () => {
+    const user = userEvent.setup();
+    await renderReader();
+    await user.selectOptions(screen.getByLabelText('Chapter'), '3');
+    await user.click(within(readerText()).getByText('וְהַנָּחָשׁ֙'));
+
+    const popup = within(await screen.findByRole('dialog'));
+    await waitFor(() => expect(popup.getByText('31× in the Hebrew Bible')).toBeInTheDocument());
+    expect(popup.queryByText(/unknown/i)).not.toBeInTheDocument();
+    expect(popup.queryByText('Root')).not.toBeInTheDocument();
+  });
+
+  // A prefix has no Strong's entry at all, and it is a third of the tokens on
+  // the page. `gloss.ts` answers for those without the index.
+  it('glosses an inseparable prefix the lexicon has no entry for', async () => {
+    const user = userEvent.setup();
+    await renderReader();
+    await user.selectOptions(screen.getByLabelText('Chapter'), '1');
+    await user.click(within(readerText()).getByText('בּ֥וֹ'));
+
+    const popup = within(await screen.findByRole('dialog'));
+    expect(popup.getByText('in, at, by, with')).toBeInTheDocument();
+    expect(popup.getByText('Preposition')).toBeInTheDocument();
+    expect(popup.getByText('Pronominal suffix 3ms')).toBeInTheDocument();
+  });
+
+  it('shows the ketiv beside the qere where they differ', async () => {
+    const popup = await openWord('וְל֥וֹ');
+    expect(popup.getByText('Ketiv')).toBeInTheDocument();
+    expect(popup.getByText('ולא')).toBeInTheDocument();
+    expect(popup.getByText('Qere')).toBeInTheDocument();
+  });
+
+  it('links to the flashcards', async () => {
+    const popup = await openWord('בָּרָ֣א');
+    expect(popup.getByRole('link', { name: /Study in Flashcards/ })).toHaveAttribute(
+      'href',
+      '/flashcards',
+    );
+  });
+
+  // The popup is English chrome around Hebrew runs. An un-scoped Hebrew word
+  // inside an English sentence takes its direction from its neighbours.
+  it('runs its chrome left to right and each Hebrew run right to left', async () => {
+    const popup = await openWord('הַשָּׁמַ֖יִם');
+    expect(popup.getByText('הַשָּׁמַ֖יִם').closest('[dir]')).toHaveAttribute('dir', 'rtl');
+    expect(screen.getByRole('dialog')).toHaveAttribute('dir', 'ltr');
+  });
+
+  describe('dismissal', () => {
+    it('closes on the close button', async () => {
+      const user = userEvent.setup();
+      const popup = await openWord('בָּרָ֣א');
+      await user.click(popup.getByLabelText('Close'));
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('closes on Escape', async () => {
+      const user = userEvent.setup();
+      await openWord('בָּרָ֣א');
+      await user.keyboard('{Escape}');
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    // A word is its own dismissal — tapping it again puts the popup away.
+    it('closes when the same word is tapped again', async () => {
+      const user = userEvent.setup();
+      await openWord('בָּרָ֣א');
+      await user.click(within(readerText()).getByText('בָּרָ֣א'));
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('moves to another word when that one is tapped', async () => {
+      const user = userEvent.setup();
+      await openWord('בָּרָ֣א');
+      await user.click(within(readerText()).getByText('אֱלֹהִ֑ים'));
+      expect(screen.getByRole('dialog')).toHaveAttribute('aria-label', 'About אֱלֹהִ֑ים');
+    });
+
+    it('stays open when the popup itself is clicked', async () => {
+      const user = userEvent.setup();
+      const popup = await openWord('בָּרָ֣א');
+      await user.click(popup.getAllByText('בָּרָ֣א')[0]);
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    it('closes on a click anywhere else', async () => {
+      const user = userEvent.setup();
+      await openWord('בָּרָ֣א');
+      await user.click(screen.getByRole('heading', { name: 'Genesis 1' }));
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('closes when the passage changes', async () => {
+      const user = userEvent.setup();
+      await openWord('בָּרָ֣א');
+      await user.click(screen.getByLabelText('Next chapter'));
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+  });
+});
+
+// ─── Reading aids (#121) ──────────────────────────────────────────────────────
+
+describe('the cantillation toggle', () => {
+  it('strips the accents and keeps the vowel points', async () => {
+    const user = userEvent.setup();
+    await renderReader();
+    expect(readerText()).toHaveTextContent('בְּרֵאשִׁ֖ית');
+
+    await user.click(screen.getByRole('button', { name: 'Cantillation' }));
+    // Same word, same vowel points, no accent.
+    expect(readerText()).toHaveTextContent('בְּרֵאשִׁית');
+    expect(readerText().textContent).not.toContain('֖');
+    expect(readerText().textContent).toContain('ְ');
+  });
+
+  it('starts on, because the WLC is an accented text', async () => {
+    await renderReader();
+    expect(screen.getByRole('button', { name: 'Cantillation' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+  });
+
+  it('keeps the sof pasuq, which is punctuation rather than an accent', async () => {
+    const user = userEvent.setup();
+    await renderReader();
+    await user.click(screen.getByRole('button', { name: 'Cantillation' }));
+    expect(readerText()).toHaveTextContent('׃');
+  });
+
+  it('remembers the setting for the next visit', async () => {
+    const user = userEvent.setup();
+    await renderReader();
+    await user.click(screen.getByRole('button', { name: 'Cantillation' }));
+    expect(JSON.parse(localStorage.getItem(READER_PREFS_KEY) as string)).toMatchObject({
+      cantillation: false,
+    });
+  });
+
+  it('opens with the setting it was left on', async () => {
+    localStorage.setItem(READER_PREFS_KEY, JSON.stringify({ cantillation: false, studied: true }));
+    await renderReader();
+    await waitFor(() => expect(readerText()).toHaveTextContent('בְּרֵאשִׁית'));
+    expect(readerText().textContent).not.toContain('֖');
+  });
+
+  it('strips the accents in the popup too, so the two agree', async () => {
+    const user = userEvent.setup();
+    await renderReader();
+    await user.click(screen.getByRole('button', { name: 'Cantillation' }));
+    await user.click(within(readerText()).getAllByText('וַיְהִי')[0]);
+
+    const popup = within(await screen.findByRole('dialog'));
+    expect(popup.getByText('יְהִי')).toBeInTheDocument();
+  });
+});
+
+describe('studied-word highlighting', () => {
+  // The join runs lemma → vocabulary entry → cardKey. `normalizeKey(hebrew)` is
+  // the bug that convention replaced.
+  it('underlines a word whose lemma the student has studied', async () => {
+    studyWord('430');
+    await renderReader();
+    expect(within(readerText()).getByText('אֱלֹהִ֑ים').className).toContain('decoration-dotted');
+  });
+
+  it('leaves a word the student has not studied unmarked', async () => {
+    studyWord('430');
+    await renderReader();
+    expect(within(readerText()).getByText('בָּרָ֣א').className).not.toContain('decoration-dotted');
+  });
+
+  it('marks nothing when nothing has been studied', async () => {
+    await renderReader();
+    expect(within(readerText()).getByText('אֱלֹהִ֑ים').className).not.toContain(
+      'decoration-dotted',
+    );
+  });
+
+  it('can be turned off', async () => {
+    studyWord('430');
+    const user = userEvent.setup();
+    await renderReader();
+    await user.click(screen.getByRole('button', { name: 'Studied words' }));
+    expect(within(readerText()).getByText('אֱלֹהִ֑ים').className).not.toContain(
+      'decoration-dotted',
+    );
+  });
+
+  it('remembers being turned off', async () => {
+    const user = userEvent.setup();
+    await renderReader();
+    await user.click(screen.getByRole('button', { name: 'Studied words' }));
+    expect(JSON.parse(localStorage.getItem(READER_PREFS_KEY) as string)).toMatchObject({
+      studied: false,
+    });
+  });
+});
+
+describe('the legend', () => {
+  it('explains the studied mark when the chapter carries one', async () => {
+    studyWord('430');
+    await renderReader();
+    expect(screen.getByText(/studied in Flashcards/)).toBeInTheDocument();
+  });
+
+  it('explains the qere mark when the chapter carries one', async () => {
+    await renderReader();
+    expect(screen.getByText(/what is read, where it differs/)).toBeInTheDocument();
+  });
+
+  // Only when there is something to explain.
+  it('says nothing about a mark the chapter does not carry', async () => {
+    await renderReader();
+    expect(screen.queryByText(/studied in Flashcards/)).not.toBeInTheDocument();
+  });
+
+  it('drops the qere line on a chapter with no qere', async () => {
+    const user = userEvent.setup();
+    await renderReader();
+    await user.selectOptions(screen.getByLabelText('Chapter'), '2');
+    expect(screen.queryByText(/what is read, where it differs/)).not.toBeInTheDocument();
+  });
+
+  it('drops the studied line when highlighting is off', async () => {
+    studyWord('430');
+    const user = userEvent.setup();
+    await renderReader();
+    await user.click(screen.getByRole('button', { name: 'Studied words' }));
+    expect(screen.queryByText(/studied in Flashcards/)).not.toBeInTheDocument();
   });
 });

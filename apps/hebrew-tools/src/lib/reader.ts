@@ -1,6 +1,7 @@
 /**
  * Pure logic behind `/reader`: what passage is being read, how its reference
- * reads in Hebrew, and where a line is allowed to break.
+ * reads in Hebrew, where a line is allowed to break, and where a word's popup
+ * sits.
  *
  * `HebrewReader.tsx` owns fetching, state and DOM; everything here is a
  * function over values, the same split as `nav-menu.ts` and the ink engine.
@@ -123,4 +124,62 @@ export function accentUnits(words: HebrewWord[]): HebrewWord[][] {
   if (current.length > 0) units.push(current);
 
   return units;
+}
+
+// ─── Word popup placement ─────────────────────────────────────────────────────
+
+/** The popup's width wherever the viewport has room for it. */
+export const POPUP_WIDTH = 288;
+/** Clearance between the popup and the edge of the viewport. */
+const POPUP_MARGIN = 8;
+/** The gap between the word and the popup below it. */
+const POPUP_GAP = 6;
+
+/** What the caller measured of the word: `getBoundingClientRect`, viewport-relative. */
+export interface WordRect {
+  right: number;
+  bottom: number;
+}
+
+/** The viewport the popup has to fit inside, and how far the page is scrolled. */
+export interface Viewport {
+  width: number;
+  scrollX: number;
+  scrollY: number;
+}
+
+/** Where to put the popup, in page coordinates — it is positioned absolutely. */
+export interface PopupBox {
+  left: number;
+  top: number;
+  width: number;
+}
+
+/**
+ * Place a word's popup below it, anchored to where the word *starts*.
+ *
+ * **In RTL a word starts at its right edge**, so the popup hangs leftward from
+ * there — the mirror of greek.tools, which left-aligns the popup with the word
+ * and would here drift away from the word it belongs to on every line.
+ *
+ * Two things greek.tools' clamp gets away with and this one does not:
+ *
+ * - **Clamping happens in viewport coordinates, and the scroll offset is added
+ *   afterwards.** greek.tools compares a page x-coordinate against
+ *   `window.innerWidth`, which is a viewport width; the two only agree while the
+ *   page is not scrolled horizontally.
+ * - **The popup narrows rather than overflowing.** A phone in portrait is
+ *   narrower than `POPUP_WIDTH` plus its margins, and a fixed width there pushes
+ *   the popup off the side of a page that must never scroll sideways.
+ */
+export function popupPosition(rect: WordRect, viewport: Viewport): PopupBox {
+  const width = Math.min(POPUP_WIDTH, Math.max(0, viewport.width - 2 * POPUP_MARGIN));
+  const rightmost = Math.max(POPUP_MARGIN, viewport.width - POPUP_MARGIN - width);
+  const left = Math.min(Math.max(rect.right - width, POPUP_MARGIN), rightmost);
+
+  return {
+    left: left + viewport.scrollX,
+    top: rect.bottom + viewport.scrollY + POPUP_GAP,
+    width,
+  };
 }

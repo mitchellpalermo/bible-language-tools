@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import type { HebrewWord } from '../data/morphhb';
-import { accentUnits, DEFAULT_REF, formatRef, hebrewNumeral, MAQQEF, parseRef } from './reader';
+import {
+  accentUnits,
+  DEFAULT_REF,
+  formatRef,
+  hebrewNumeral,
+  MAQQEF,
+  parseRef,
+  POPUP_WIDTH,
+  popupPosition,
+} from './reader';
 
 const word = (text: string, after?: string): HebrewWord => ({
   text,
@@ -157,5 +166,61 @@ describe('accentUnits', () => {
 
   it('has nothing to group in an empty verse', () => {
     expect(accentUnits([])).toEqual([]);
+  });
+});
+
+describe('popupPosition', () => {
+  const desktop = { width: 1280, scrollX: 0, scrollY: 0 };
+
+  // An RTL word begins at its right edge, so the popup hangs leftward from
+  // there. greek.tools left-aligns, which here would walk away from the word.
+  it('anchors the popup where the word begins, which in RTL is its right edge', () => {
+    const box = popupPosition({ right: 800, bottom: 200 }, desktop);
+    expect(box.left + box.width).toBe(800);
+    expect(box.width).toBe(POPUP_WIDTH);
+  });
+
+  it('sits just below the word', () => {
+    expect(popupPosition({ right: 800, bottom: 200 }, desktop).top).toBe(206);
+  });
+
+  it('keeps a word near the left edge on screen', () => {
+    const box = popupPosition({ right: 40, bottom: 100 }, desktop);
+    expect(box.left).toBe(8);
+  });
+
+  it('keeps a word near the right edge on screen', () => {
+    const box = popupPosition({ right: 1279, bottom: 100 }, desktop);
+    expect(box.left + box.width).toBeLessThanOrEqual(1280 - 8);
+  });
+
+  // The page must never scroll sideways, so on a narrow phone the popup gives
+  // up width rather than hanging off the edge.
+  it('narrows to fit a phone rather than overflowing it', () => {
+    const box = popupPosition({ right: 260, bottom: 100 }, { width: 280, scrollX: 0, scrollY: 0 });
+    expect(box.width).toBe(264);
+    expect(box.left).toBe(8);
+    expect(box.left + box.width).toBeLessThanOrEqual(280 - 8);
+  });
+
+  it('keeps its full width where the viewport has room for it', () => {
+    const box = popupPosition({ right: 300, bottom: 100 }, { width: 390, scrollX: 0, scrollY: 0 });
+    expect(box.width).toBe(POPUP_WIDTH);
+  });
+
+  it('survives a viewport narrower than its own margins', () => {
+    const box = popupPosition({ right: 5, bottom: 10 }, { width: 10, scrollX: 0, scrollY: 0 });
+    expect(box.width).toBe(0);
+    expect(box.left).toBe(8);
+  });
+
+  // The rect is viewport-relative and the popup is positioned in page
+  // coordinates, so the scroll offset is added after the clamp — not before,
+  // which is what makes greek.tools' clamp wrong on a scrolled page.
+  it('clamps in the viewport and places the popup on the page', () => {
+    const scrolled = { width: 1280, scrollX: 500, scrollY: 2000 };
+    const box = popupPosition({ right: 40, bottom: 100 }, scrolled);
+    expect(box.left).toBe(508);
+    expect(box.top).toBe(2106);
   });
 });
