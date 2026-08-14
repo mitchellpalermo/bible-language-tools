@@ -112,7 +112,7 @@ See `ROADMAP.md` for the full feature plan and build order.
 
 The confusable decks deliberately get no prefix of their own — they drill the same letters the alphabet deck does, so grading ד in one must move the card the other sees.
 - **Deck selection is persisted separately from the SRS store** (`hebrew-tools-deck-v1`, `src/lib/deck-selection.ts`) and is never synced. It decides which due cards you see, not what is due, so it stays local to the browser.
-- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`. There is still no auth or sync in this app — **all study progress is per-browser only.** The D1 plumbing exists (see below), but nothing reads or writes it yet.
+- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`, `hebrew-tools-reader-prefs`. There is still no auth or sync in this app — **all study progress is per-browser only.** The D1 plumbing exists (see below), but nothing reads or writes it yet.
 
 ### OSHB data pipeline (issue #75)
 
@@ -261,6 +261,59 @@ Things that will bite if changed carelessly:
   `<xref strong>` agrees for 9,240 of the 9,241 lemmas carrying both; the build
   reports the one disagreement (`2007` vs `2004`) rather than resolving it
   silently.
+
+### The reader (issues #119, #120, #121)
+
+`/reader` is four modules, and the split is the point:
+
+| File | Role |
+|---|---|
+| `src/lib/reader.ts` | Pure — passage refs, Hebrew numerals, accent units, popup placement |
+| `src/lib/studied.ts` | Pure — the lemma → vocabulary → `cardKey` join behind highlighting |
+| `src/components/HebrewText.tsx` | The word and its popup. **Daily Verse (#76) shares this** |
+| `src/components/HebrewReader.tsx` | Fetching, passage state, toolbar, legend |
+
+`HebrewText.tsx` exists so Daily Verse does not grow a second word popup, the
+same reason greek.tools has `GreekText.tsx`. Nothing in it knows about books or
+chapters.
+
+Things that will bite if changed carelessly:
+
+- **An RTL word begins at its right edge**, so `popupPosition` hangs the popup
+  leftward from there. greek.tools left-aligns, which mirrored onto Hebrew walks
+  the popup away from the word it belongs to. Two more differences from its
+  clamp, both deliberate: the clamp runs in *viewport* coordinates with the
+  scroll offset added afterwards (greek.tools compares a page x against
+  `window.innerWidth`), and the popup narrows on a phone rather than overflowing
+  a page that must never scroll sideways.
+- **The popup is LTR chrome around RTL runs**, and every Hebrew span carries its
+  own `dir="rtl"`. A bare Hebrew word inside an English sentence takes its
+  direction from its neighbours.
+- **Absent renders as absent.** Seven lemmas have no lexicon entry and neither
+  does any inseparable prefix. A missing root or transliteration renders as
+  nothing — "unknown" reads like a claim about the word.
+- **`fetchLemmas()` is called by the popup, not by the page.** The index is
+  ~140 KB; a reader that never taps a word never pays for it. The parse and the
+  morphemes do not depend on it, so a failed fetch still leaves a usable popup.
+- **A word carries one lemma, and it can be a prefix's letter code.** בּוֹ is
+  `lemma: 'b'` — a preposition with its own suffix, 470 of them in Genesis alone.
+  `glossFor` answers for those without the index.
+- **Highlighting joins on `cardKey`, never the bare lemma** — see `studied.ts`.
+  The reader knows a word by its augmented Strong's number and the SRS store
+  knows it by a pointed headword, so the vocabulary is the bridge.
+  `normalizeKey(word.hebrew)` is the bug that convention replaced. BDB sense
+  splits are one lexeme for this purpose (`5892a` and `5892b` are both עִיר, same
+  rule as `gloss.ts`); homographs are not.
+- **The two underlines mean different things and are drawn differently.** A qere
+  is **dashed**, a studied word is **dotted**. Drawn the same, the legend would
+  be explaining one mark that means two things — and the legend only names a
+  mark the chapter on screen actually carries.
+- **Cantillation is stripped for display only, through `stripCantillation` in
+  `src/lib/hebrew-input.ts`.** Do not write a second set of Unicode ranges;
+  `morphhb.ts` says so in a comment and `morphhb.test.ts` already pins the
+  script-side copy against it. Nikud stays — stripping vowels is a different
+  feature for a much later student — and the strip is never applied to a word's
+  trailing punctuation, so the sof pasuq and the maqqef survive it.
 
 ### Database (accounts groundwork — issue #91)
 

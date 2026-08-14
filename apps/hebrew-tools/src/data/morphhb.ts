@@ -199,3 +199,46 @@ export function loadLastPassage(): string | null {
     return null;
   }
 }
+
+// ─── Reading preferences ──────────────────────────────────────────────────────
+
+export const READER_PREFS_KEY = 'hebrew-tools-reader-prefs';
+
+/** How the reader is set to display the text. Per-browser, like the passage. */
+export interface ReaderPrefs {
+  /** Show the te'amim. Off strips them for display only — the text is untouched. */
+  cantillation: boolean;
+  /** Underline words the student has studied in Flashcards. */
+  studied: boolean;
+}
+
+/**
+ * Accented and underlined.
+ *
+ * The WLC is an accented text and this reader shows what the manuscript says
+ * until asked not to; a student who has never met te'amim is better served
+ * meeting them and turning them off than never learning they were there.
+ */
+export const DEFAULT_READER_PREFS: ReaderPrefs = { cantillation: true, studied: true };
+
+export function loadReaderPrefs(): ReaderPrefs {
+  try {
+    const raw = localStorage.getItem(READER_PREFS_KEY);
+    if (!raw) return DEFAULT_READER_PREFS;
+    const stored = JSON.parse(raw) as Partial<ReaderPrefs>;
+    return {
+      cantillation: stored.cantillation ?? DEFAULT_READER_PREFS.cantillation,
+      studied: stored.studied ?? DEFAULT_READER_PREFS.studied,
+    };
+  } catch {
+    return DEFAULT_READER_PREFS;
+  }
+}
+
+export function saveReaderPrefs(prefs: ReaderPrefs): void {
+  try {
+    localStorage.setItem(READER_PREFS_KEY, JSON.stringify(prefs));
+  } catch {
+    /* ignore */
+  }
+}

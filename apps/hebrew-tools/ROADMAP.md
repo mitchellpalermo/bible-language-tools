@@ -244,6 +244,12 @@ re-sourced from them by `scripts/build-vocabulary.mjs` (issue #109); see
 
 This is the largest single feature and the anchor of the site.
 
+**Built** — all five sub-issues have landed: the morph-code formatter (#117), the
+Strong's gloss source (#118), the reader shell (#119), the word popup (#120) and
+the reading aids (#121). What the code does and what will bite if it is changed
+carelessly is in `CLAUDE.md` under "The reader"; the rest of this section is the
+plan it was built from.
+
 ### Data source: Open Scriptures Hebrew Bible (OSHB)
 
 - GitHub: [openscriptures/morphhb](https://github.com/openscriptures/morphhb)
@@ -662,12 +668,12 @@ The following modules from greek.tools can be copied with minimal or zero change
 | 5 | — | OSHB data pipeline | Medium (mechanical) | None | ✅ Done | #75 |
 | 6 | 3 | Daily Verse | Medium | OSHB pipeline | Queued | #76 |
 | 7 | 5 | Transliteration | Medium | None | Queued (independent — can float earlier if a break is wanted) | #78 |
-| 8 | 4 | Hebrew Bible Reader | High — broken into 4a–4e | OSHB pipeline, gloss dataset decision | In progress | #77 |
-| 8a | 4a | Reader: OSHB morph-code formatter | Low | OSHB pipeline | In progress | #117 |
-| 8b | 4b | Reader: gloss source (Strong's, from the pinned OSHB lexicon) | Low | OSHB pipeline | Queued | #118 |
-| 8c | 4c | Reader: shell — book/chapter nav, RTL verses | Medium | OSHB pipeline | Queued | #119 |
-| 8d | 4d | Reader: word popup — morphemes, parse, gloss | Medium | 4a, 4b, 4c | Queued | #120 |
-| 8e | 4e | Reader: cantillation toggle + studied-word highlighting | Low | 4c | Queued | #121 |
+| 8 | 4 | Hebrew Bible Reader | High — broken into 4a–4e | OSHB pipeline, gloss dataset decision | ✅ Done | #77 |
+| 8a | 4a | Reader: OSHB morph-code formatter | Low | OSHB pipeline | ✅ Done | #117 |
+| 8b | 4b | Reader: gloss source (Strong's, from the pinned OSHB lexicon) | Low | OSHB pipeline | ✅ Done | #118 |
+| 8c | 4c | Reader: shell — book/chapter nav, RTL verses | Medium | OSHB pipeline | ✅ Done | #119 |
+| 8d | 4d | Reader: word popup — morphemes, parse, gloss | Medium | 4a, 4b, 4c | ✅ Done | #120 |
+| 8e | 4e | Reader: cantillation toggle + studied-word highlighting | Low | 4c | ✅ Done | #121 |
 | 9 | 6 | Grammar Reference | High (content-heavy) — needs its own sub-breakdown by section | None | Queued (independent — can float earlier) | #79 |
 | 10 | 7 | Paradigm Quiz | Medium | Phase 1, Phase 6 | Queued | #80 |
 | 11 | 8C | Binyan Guide | Low (content) | None | Queued (independent — can float earlier) | #83 |
