@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import type { Stroke } from '../stroke';
 import { alphaBounds, type GlyphMask, maskFromAlpha } from './mask';
-import { DEFAULT_TOLERANCE, scoreInk, verdictFor, VERDICT_THRESHOLDS } from './geom';
+import {
+  DEFAULT_TOLERANCE,
+  MAX_REGISTRATION_SHIFT,
+  scoreInk,
+  verdictFor,
+  VERDICT_THRESHOLDS,
+} from './geom';
 
 type Poly = [number, number][];
 
@@ -140,9 +146,16 @@ describe('scoreInk', () => {
   });
 
   it('penalises a stray mark through spill', () => {
+    // Clear of the letter by more than a tolerance-width, which is what makes
+    // this a test of spill. A tick drawn just *inside* that distance costs
+    // almost nothing, and that is the honest reading: tolerance is one stem
+    // width, and a mark that close is within the slop the metric grants
+    // everywhere else. It used to score lower, but only as a side effect of the
+    // registration artefact removed with #114 — the stray dragged the ink's
+    // bounding box, and the letter was marked down for the shift.
     const stray: Poly = [
-      [30, 175],
-      [55, 178],
+      [20, 185],
+      [45, 188],
     ];
     const clean = scoreInk(inkFrom(LETTER), maskFrom(LETTER));
     const messy = scoreInk(inkFrom([...LETTER, stray]), maskFrom(LETTER));
@@ -197,11 +210,16 @@ describe('scoreInk', () => {
   });
 
   it('scores an attempt without a per-attempt search over the glyph', () => {
-    // Uninstrumented this runs at about 0.3ms an attempt, comfortably inside
-    // the budget. The assertion is far looser than that because V8 coverage
-    // inflates it roughly fivefold and this suite runs both ways — it is here
-    // to catch a regression to a brute-force nearest-point search, which costs
-    // three orders of magnitude, not to police tenths of a millisecond.
+    // Uninstrumented this runs at about 0.8ms an attempt — up from ~0.3ms before
+    // the registration search (#114), which evaluates ~74 candidate offsets.
+    // That is the deliberate price of the fix, and it is paid once when the
+    // student taps Compare, never inside a render or a pointer handler.
+    //
+    // The assertion is far looser than either figure because V8 coverage inflates
+    // this roughly tenfold — the search is a tight loop of small calls, which is
+    // what that instrumentation costs most — and this suite runs both ways. It is
+    // here to catch a regression to a brute-force nearest-point search, which
+    // costs three orders of magnitude, not to police tenths of a millisecond.
     const mask = maskFrom(LETTER);
     const ink = inkFrom(LETTER);
     for (let i = 0; i < 10; i++) scoreInk(ink, mask);
@@ -211,7 +229,7 @@ describe('scoreInk', () => {
     for (let i = 0; i < runs; i++) scoreInk(ink, mask);
     const per = (performance.now() - started) / runs;
 
-    expect(per).toBeLessThan(5);
+    expect(per).toBeLessThan(25);
   });
 });
 
@@ -272,10 +290,35 @@ describe('scoreInk placement', () => {
     // The acceptance criterion for the vowel deck, and the reason this metric
     // exists at all: everything about this attempt is right except *where* the
     // qamets went, and it has to read as a miss.
+    //
+    // The bar lands about a third of its own length from where it belongs —
+    // deliberately a near miss, so the two are closer than a tolerance-width at
+    // their nearest ends and some overlap is arithmetic rather than credit. The
+    // claim worth pinning is the verdict and the collapse in score, not a
+    // particular fraction; `far misplacement` below pins the clean-zero case.
     const misplaced = [...LETTER, POINT_LEFT];
     const result = scoreInk(inkFrom(misplaced), composite.whole, { part: composite.mark });
 
-    expect(result.placement).toBeLessThan(0.2);
+    expect(result.placement).toBeLessThan(0.35);
+    expect(result.score).toBeLessThan(VERDICT_THRESHOLDS.close);
+    expect(result.verdict).toBe('miss');
+  });
+
+  it('does not let the registration search slide a mark into its slot', () => {
+    // The guard on #114's translation search, and the reason that search is
+    // bounded and driven by shape alone. A mark written where a different vowel
+    // goes is half a box from its slot — far outside the search — and letting
+    // placement vote on the alignment would have the search trade a little
+    // letterform accuracy for exactly the rescue this must never grant.
+    const above: Poly = [
+      [85, 25],
+      [115, 25],
+    ];
+    const result = scoreInk(inkFrom([...LETTER, above]), composite.whole, {
+      part: composite.mark,
+    });
+
+    expect(result.placement).toBe(0);
     expect(result.verdict).toBe('miss');
   });
 
@@ -326,5 +369,74 @@ describe('verdictFor', () => {
     expect(verdictFor(VERDICT_THRESHOLDS.close)).toBe('close');
     expect(verdictFor(VERDICT_THRESHOLDS.close - 1)).toBe('miss');
     expect(verdictFor(0)).toBe('miss');
+  });
+});
+
+// ── Registration (#114) ──────────────────────────────────────────────────────
+// Both the ink and the mask are fitted to their own bounds, which makes absolute
+// position irrelevant — that part always worked. What did not is that the fit is
+// pinned by the *extreme* points, so one stroke overshooting the reference's
+// ceiling shifts the whole letter body and every metric downstream reads the
+// shift as letterform error.
+
+/** The letter, drawn correctly, but with the right leg started `over` px high. */
+function overshootBy(over: number): Poly[] {
+  return [
+    ROOF,
+    [
+      [160, 40 - over],
+      [160, 160],
+    ],
+    LEFT_LEG,
+  ];
+}
+
+describe('scoreInk registration', () => {
+  it('does not mark down a legible letter for where its bounding box landed', () => {
+    // The reported bug, reduced to the fixture. An overshoot of 22 source pixels
+    // — about a tenth of the box, the same order as the offset measured on the
+    // real attempt — used to cost 21 points and drop a correct letter from
+    // "Good match" to "Not there yet". The letterform itself is untouched.
+    const result = scoreInk(inkFrom(overshootBy(22)), maskFrom(LETTER));
+
+    expect(result.verdict).toBe('pass');
+    expect(result.score).toBeGreaterThanOrEqual(95);
+    // Coverage is where the artefact showed up worst: 0.69 unregistered.
+    expect(result.coverage).toBeGreaterThan(0.9);
+  });
+
+  it('reports the offset it scored at, bounded by the search', () => {
+    const result = scoreInk(inkFrom(overshootBy(22)), maskFrom(LETTER));
+
+    // Non-zero, because correcting the overshoot is the whole point here.
+    expect(Math.abs(result.offset.y)).toBeGreaterThan(0);
+    expect(Math.abs(result.offset.x)).toBeLessThanOrEqual(MAX_REGISTRATION_SHIFT);
+    expect(Math.abs(result.offset.y)).toBeLessThanOrEqual(MAX_REGISTRATION_SHIFT);
+  });
+
+  it('leaves well-registered ink where it is', () => {
+    // The search is seeded at the identity offset and only moves on a strict
+    // improvement, so an attempt that needs no correction reports none — and a
+    // score that was already right cannot drift.
+    const result = scoreInk(inkFrom(LETTER), maskFrom(LETTER));
+
+    expect(result.offset).toEqual({ x: 0, y: 0 });
+    expect(result.score).toBe(100);
+  });
+
+  it('still fails ink that is the wrong shape, however it is shifted', () => {
+    // The bound is what keeps "best placement" from becoming "best excuse".
+    const scribble: Poly[] = [
+      [
+        [50, 150],
+        [150, 60],
+        [60, 55],
+        [140, 145],
+        [45, 100],
+      ],
+    ];
+    const result = scoreInk(inkFrom(scribble), maskFrom(LETTER));
+
+    expect(result.verdict).toBe('miss');
   });
 });
