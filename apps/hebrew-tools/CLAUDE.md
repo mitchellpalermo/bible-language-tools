@@ -10,9 +10,13 @@ Planned routes (per roadmap): `/` (home), `/keyboard`, `/flashcards`, `/write`, 
 
 `/write` is stylus handwriting practice, built on `@tools/shared/ink`. The engine is language-agnostic; everything Hebrew about it lives in `src/data/script-pack.ts`, and deck construction in `src/data/writing.ts`. See the repo CLAUDE.md for the engine's invariants and `ROADMAP.md` Phase 9 for what is still to come (issues #99–#105).
 
-Two things about the decks that are pedagogy rather than plumbing, and will look like arbitrary complexity if changed without reading them:
+`/write` has two surfaces behind one tab strip (`Writing.tsx`): the letter decks (`WritingPractice.tsx`) and word mode (`WordWriting.tsx`, #102). Only the selected one mounts — word mode pulls in the whole vocabulary, and a student drilling the alphabet should not pay for it.
+
+Three things about the decks that are pedagogy rather than plumbing, and will look like arbitrary complexity if changed without reading them:
 
 - **A confusable deck's order IS the deck.** Members are dealt round-robin so ד and ר alternate; `WritingDeck.order: 'as-built'` is what stops `buildQueue` hoisting due cards to the front and reassembling exactly the blocked presentation the deck exists to avoid.
+- **A word-mode gloss is not the flashcard's gloss.** Garrett annotates entries inline — חָפֵץ reads "desire, enjoy, want (the qatal 3ms is חָפֵץ …)" — which is free on a flashcard back, where the Hebrew is shown anyway, and fatal as a writing prompt because it prints the answer. `glossPrompt` trims a trailing parenthetical carrying Hebrew and **drops the word outright** if any survives; a prompt with the answer blanked out of the middle of it is worse than one fewer word. A data test asserts no gloss prompt in the whole vocabulary contains Hebrew. The same rule is why word mode has no trace or copy step: both would show the answer.
+- **`transliteration` is a real constraint on the deck, not a missing field.** The 546 generated entries carry none by design (OSHB has no romanization), so "From the sound" narrows the queue to the hand-curated words rather than falling back to the gloss — silently swapping one kind of prompt for another is worse than a smaller deck, and the UI says why it is small.
 - **A repeat within one session can demote a card but not promote it** (`shouldUpdateCard`). A pair deck shows ד three times in five minutes, and SM-2 would read three passes as three spaced repetitions. Stats still count every presentation — the student did the review either way.
 
 ## Tech Stack
@@ -109,6 +113,8 @@ See `ROADMAP.md` for the full feature plan and build order.
 - **Morphological data:** Open Scriptures Hebrew Bible (OSHB) — `github.com/openscriptures/morphhb`, CC BY 4.0. Built into `public/data/morphhb/` by `scripts/build-morphhb.mjs`; see "OSHB data pipeline" below.
 - **Lenient comparison:** Strip U+05B0–U+05C7 (nikud) for lenient grading; also strip U+0591–U+05AF (cantillation) when fully stripping diacritics.
 - **SRS key namespace:** the SRS store is shared across features. Vocabulary cards are keyed by `normalizeKey(cardKey(word))` — the bare lemma, plus `#<sense>` for the handful of homographs that would otherwise share a card (see "Textbook chapter decks"). **Every non-vocabulary card must carry a prefix** or the two collide on a single-letter word. Handwriting practice spends two, both in `src/data/writing.ts`: `write:letter:<char>` for consonants and finals, `write:nikud:<char>` for vowel points. They are separate because the skills are separate, and because the namespaces would otherwise collide outright — shureq's card is keyed by וּ, which is also a vav with a dagesh. `writingCardKey` takes the *glyph* and picks the prefix from its group; add new prefixes to `KEY_PREFIX` and `WRITING_KEY_PREFIXES` together, and never build one at a call site.
+
+Word-mode writing (#102) spends a third, `write:word:<cardKey>` in `src/data/writing-words.ts`. It must stay distinct from `write:letter:` for the same reason the other two are distinct from each other: the conjunction וְ is a one-letter *word*, and writing a word is not the skill that writing its first letter is. The suffix is `cardKey(word)` and never `word.hebrew`, so אַף "also" and אַף "nose" stay on separate cards here as they do everywhere else.
 
 The confusable decks deliberately get no prefix of their own — they drill the same letters the alphabet deck does, so grading ד in one must move the card the other sees.
 - **Deck selection is persisted separately from the SRS store** (`hebrew-tools-deck-v1`, `src/lib/deck-selection.ts`) and is never synced. It decides which due cards you see, not what is due, so it stays local to the browser.

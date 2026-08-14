@@ -505,7 +505,7 @@ The pedagogy is the spine, not the stylus: every drill runs **trace → copy →
 |------|---------------|-------|
 | **Letters** | Script pack | The 22 letters as 23 cards (shin and sin are drilled apart, since the dot's side is the skill), 5 final forms, begadkephat dagesh variants. A separate deck interleaves the confusable pairs — ב/כ, ד/ר, ה/ח/ת, ו/ז/ן, ס/ם, ע/צ — since that is where beginners actually lose marks. **Glyphs are drilled in the form they are actually written**: final kaf carries its silent sheva (ךְ), shin and sin their dots. A chart built from bare codepoints teaches forms that occur nowhere in the text |
 | **Nikud** | Script pack | Vowel points on a host consonant. *Placement* is most of the skill (qamets centered below, holem above-left). Shipped in 9c — and it needed a scoring change, see below |
-| **Words** | `vocabulary.ts`, `textbooks.ts` | RTL grid of guide boxes, one per consonant cluster. Prompted by gloss or transliteration |
+| **Words** | `vocabulary.ts`, `textbooks.ts` | RTL grid of guide boxes, one per consonant cluster. Prompted by gloss or transliteration. Shipped in 9d — and it turned up a data trap, see below |
 | **Paradigms** | `TableModel` (Phase 7) | Handwrite into blanked cells instead of typing. Same density picker, same result colors. This is the exam-prep mode |
 | **Scribal copying** | Daily Verse / reader text | Long-form, lightly graded. Fill a column of a page over successive days |
 
@@ -546,6 +546,12 @@ It applies to more than the vowels: `WritableGlyph.baseForm` marks שׁ and שׂ
 **Layer 2 — stroke order and direction.** A hand-authored `StrokeTemplate` per glyph: ordered polylines in a normalized 0–1 box, each with a direction. Hebrew needs ~45 entries (22 consonants + 5 finals + shin/sin dots + ~13 nikud); Greek ~60. Bootstrap the data with the app itself — an internal authoring route where each glyph is drawn once with the stylus and saved as JSON.
 
 Matching resamples both user and template stroke to 32 points and compares mean distance, with direction from the endpoint vector's sign. The payoff is coaching text rather than a number: *"Stroke 2 went bottom-to-top — ד draws the roof right-to-left first, then the leg down."* It also gives nearest-template classification nearly free, which turns "you scored 61" into "you wrote a ר."
+
+**What 9d settled.** Three things the plan did not anticipate:
+
+- **A cell is a consonant cluster, and the rule is Unicode's.** `splitClusters` groups a base character with the combining marks after it, which makes בְּ one cell (bet, dagesh and sheva are one act of writing) and costs nothing to port — a decomposed Greek alpha with its breathing behaves identically, so 9g inherits the grid outright.
+- **The gloss cannot always be the prompt.** Garrett annotates entries inline, and חָפֵץ's gloss reads "desire, enjoy, want (the qatal 3ms is חָפֵץ …)" — free on a flashcard back where the Hebrew is shown anyway, and fatal here, because it prints the answer. `glossPrompt` trims a trailing Hebrew-bearing aside and drops the word if any Hebrew survives; 25 of 560 words fall out, and a data test pins that none of the rest leak. The same reasoning is why word mode has no trace or copy step.
+- **Placement scoring from 9c carries straight over.** A pointed cluster is rasterized twice and the vowel graded on its own terms per cell, so דָּ against דַּ is a real distinction rather than a few percent of a cell's area.
 
 ### Stylus specifics
 
@@ -612,7 +618,7 @@ The architecture is shaped so the interesting parts are pure functions over type
 | 9a | ✅ Ink capture + render in shared; `/write` letters, trace mode, Layer 0 self-grading, SRS wired |
 | 9b | ✅ Layer 1 mask scoring + numeric feedback |
 | 9c | ✅ Nikud drills and confusable-pair decks (plus Layer 1b placement scoring) |
-| 9d | `WritingGrid` + word mode from `vocabulary.ts` / `textbooks.ts` |
+| 9d | ✅ `WritingGrid` + word mode from `vocabulary.ts` / `textbooks.ts` |
 | 9e | Stroke templates + authoring route + Layer 2 coaching |
 | 9f | Paradigm writing over `TableModel` |
 | 9g | greek.tools `ScriptPack` + `/write` |
@@ -683,7 +689,7 @@ The following modules from greek.tools can be copied with minimal or zero change
 | 14 | 9a | Writing: ink engine + `/write` letters | Medium | None | In progress | #99 |
 | 15 | 9b | Writing: mask scoring | Low–Medium | 9a | Queued | #100 |
 | 16 | 9c | Writing: nikud + confusable decks | Low | 9b | Queued | #101 |
-| 17 | 9d | Writing: word mode + guide grid | Low–Medium | 9b | Queued | #102 |
+| 17 | 9d | Writing: word mode + guide grid | Low–Medium | 9b | ✅ Done | #102 |
 | 18 | 9e | Writing: stroke order + coaching | Medium | 9a | Queued (independent of 9b–9d) | #103 |
 | 19 | 9f | Writing: handwritten paradigms | Medium | 9d, Phase 7 | Queued | #104 |
 | 20 | 9g | Writing: port to greek.tools | Low | 9b (9e for coaching) | Queued | #105 |
