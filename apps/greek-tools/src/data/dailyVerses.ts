@@ -1,3 +1,7 @@
+import { createDailyStreak, dayIndex } from '@tools/shared/daily';
+
+export type { DailyStreakData } from '@tools/shared/daily';
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface DailyVerseRef {
@@ -98,14 +102,9 @@ export const DAILY_VERSES: readonly DailyVerseRef[] = [
 
 // ─── Day selection ────────────────────────────────────────────────────────────
 
-/**
- * Returns the index into DAILY_VERSES for a given date.
- * Uses local midnight so the verse changes at local midnight for every user.
- */
-export function getTodayIndex(now = new Date()): number {
-  const localMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const epochDays = Math.floor(localMidnight.getTime() / (1000 * 60 * 60 * 24));
-  return ((epochDays % DAILY_VERSES.length) + DAILY_VERSES.length) % DAILY_VERSES.length;
+/** Today's index into DAILY_VERSES. Rolls over at the reader's own midnight. */
+export function getTodayIndex(now?: Date): number {
+  return dayIndex(DAILY_VERSES.length, now);
 }
 
 /** Returns today's verse ref. Same result for every call on the same calendar day. */
@@ -115,52 +114,10 @@ export function getTodayVerse(now?: Date): DailyVerseRef {
 
 // ─── Streak persistence ───────────────────────────────────────────────────────
 
-const STREAK_KEY = 'greek-tools-daily-v1';
+// The cycling and the streak are language-agnostic and live in
+// `@tools/shared/daily`; hebrew.tools runs the same daily feature over the
+// Hebrew Bible. The key stays greek.tools' own — a student who reads both has
+// two streaks, not one.
+export const STREAK_KEY = 'greek-tools-daily-v1';
 
-export interface DailyStreakData {
-  streak: number;
-  lastReadDate: string; // YYYY-MM-DD local date
-}
-
-function localDateStr(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
-
-export function loadStreakData(): DailyStreakData {
-  try {
-    const raw = localStorage.getItem(STREAK_KEY);
-    if (!raw) return { streak: 0, lastReadDate: '' };
-    return JSON.parse(raw) as DailyStreakData;
-  } catch {
-    return { streak: 0, lastReadDate: '' };
-  }
-}
-
-/**
- * Mark today as read and return updated streak data.
- * Calling this multiple times on the same calendar day is idempotent.
- */
-export function markReadToday(now = new Date()): DailyStreakData {
-  const today = localDateStr(now);
-
-  const yd = new Date(now);
-  yd.setDate(yd.getDate() - 1);
-  const yesterday = localDateStr(yd);
-
-  const prev = loadStreakData();
-  if (prev.lastReadDate === today) return prev; // already counted today
-
-  const newStreak = prev.lastReadDate === yesterday ? prev.streak + 1 : 1;
-  const updated: DailyStreakData = { streak: newStreak, lastReadDate: today };
-
-  try {
-    localStorage.setItem(STREAK_KEY, JSON.stringify(updated));
-  } catch {
-    /* ignore */
-  }
-
-  return updated;
-}
+export const { loadStreakData, markReadToday } = createDailyStreak(STREAK_KEY);

@@ -118,7 +118,7 @@ Word-mode writing (#102) spends a third, `write:word:<cardKey>` in `src/data/wri
 
 The confusable decks deliberately get no prefix of their own — they drill the same letters the alphabet deck does, so grading ד in one must move the card the other sees.
 - **Deck selection is persisted separately from the SRS store** (`hebrew-tools-deck-v1`, `src/lib/deck-selection.ts`) and is never synced. It decides which due cards you see, not what is due, so it stays local to the browser.
-- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`, `hebrew-tools-reader-prefs`. There is still no auth or sync in this app — **all study progress is per-browser only.** The D1 plumbing exists (see below), but nothing reads or writes it yet.
+- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`, `hebrew-tools-reader-prefs`, `hebrew-tools-daily-v1`. There is still no auth or sync in this app — **all study progress is per-browser only.** The D1 plumbing exists (see below), but nothing reads or writes it yet.
 
 ### OSHB data pipeline (issue #75)
 
@@ -320,6 +320,55 @@ Things that will bite if changed carelessly:
   script-side copy against it. Nikud stays — stripping vowels is a different
   feature for a much later student — and the strip is never applied to a word's
   trailing punctuation, so the sof pasuq and the maqqef survive it.
+
+### Daily Verse (issue #76)
+
+`src/data/dailyVerses.ts` is the curated list behind `/daily` — 85 verses across
+Torah, Nevi'im and Ketuvim, cycled one a day by `dayIndex` from
+`@tools/shared/daily`. The streak is `createDailyStreak('hebrew-tools-daily-v1')`
+from the same module, deliberately separate from the flashcards streak in
+`hebrew-tools-stats-v1`: reading a verse is not reviewing a deck.
+
+**References are Masoretic, and a wrong one fails silently.** This is the whole
+reason the file has a checker. The corpus numbers verses the way a printed BHS
+does, so a reference typed off an English Bible page still *resolves* — and
+shows a different verse, which nothing downstream can detect. Two mechanisms
+produce it, and ten of the 85 entries are affected:
+
+- **A psalm's superscription is sometimes a verse of its own.** Psalms 8, 19, 34
+  and 46 run one ahead of English; Psalm 51 runs two. Psalms 16, 23, 27, 90, 100,
+  121 and 145 print the superscription *inside* verse 1 and do not shift at all,
+  so the offset must be checked per psalm and never inferred from the presence of
+  a heading. Comparing the corpus's verse count for a chapter against the English
+  one is the decisive test.
+- **Chapters divide differently.** Joel has four chapters in Hebrew and three in
+  English; Malachi has three and four. English Jonah 1:17 is Hebrew Jonah 2:1,
+  English Isaiah 9:6 is Hebrew Isaiah 9:5.
+
+`displayRef` is therefore the Hebrew reference, and `english` records the English
+one **only** where the two disagree — present-and-equal claims a divergence that
+is not there, and the checker rejects it. `dailyVerses.test.ts` pins the exact
+set of ten divergences, because dropping one is invisible at runtime: the verse
+still loads and the page merely stops explaining itself.
+
+```bash
+pnpm build:data       # the corpus must exist first (24 MB, gitignored)
+pnpm check:verses     # resolve every ref; non-zero and names each bad entry
+pnpm check:verses --show   # ...and print each verse to read back
+```
+
+`scripts/check-daily-verses.mjs` is not in `pnpm build` and not in the test
+suite, for the same reason `build:vocab:check` is neither — it needs the corpus,
+which CI does not build. The co-located test covers everything checkable without
+it: shape, that each `displayRef` names the chapter and verse it actually
+fetches, no duplicates, and all three divisions represented. **Run
+`pnpm check:verses` after any edit to the list**; it also flags verses over 22
+words, which stop being a daily verse and become a reading session.
+
+The script reads the entries out of the `.ts` with a regex, since Node cannot
+import TypeScript. It cross-checks the number it parsed against the number of
+`{ book:` occurrences and fails if they differ, so a change to the literal's
+formatting cannot leave it quietly validating a subset.
 
 ### Database (accounts groundwork — issue #91)
 
