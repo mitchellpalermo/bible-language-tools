@@ -42,10 +42,12 @@ export {
 export {
   allGlyphs,
   baseText,
+  type GlyphCluster,
   glyphsInGroup,
   renderableText,
   type ScriptMetrics,
   type ScriptPack,
+  splitClusters,
   type WritableGlyph,
 } from './script-pack';
 export { catmullRom, OneEuroFilter, PointSmoother } from './smooth';

@@ -1,11 +1,11 @@
 ---
-import WritingPractice from '../components/WritingPractice';
+import Writing from '../components/Writing';
 import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout
   title="Writing Practice"
-  description="Practice writing the Hebrew alphabet by hand with a stylus — trace, copy, then write from memory."
+  description="Practice writing Hebrew by hand with a stylus — letters and whole words, traced, copied, then written from memory."
 >
   <div class="mb-6">
     <h1
@@ -15,10 +15,11 @@ import Layout from '../layouts/Layout.astro';
       Writing Practice
     </h1>
     <p class="text-text-muted">
-      Write the letters by hand, then compare against the reference. Best with a stylus —
-      an Apple Pencil gives pressure-sensitive ink and lets you rest your palm on the screen.
+      Write by hand, then compare against the reference — letters on their own, or whole
+      words into a grid of guide boxes. Best with a stylus: an Apple Pencil gives
+      pressure-sensitive ink and lets you rest your palm on the screen.
     </p>
   </div>
 
-  <WritingPractice client:load />
+  <Writing client:load />
 </Layout>

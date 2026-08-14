@@ -129,3 +129,57 @@ export function baseText(pack: ScriptPack, glyph: WritableGlyph): string | null 
 export function glyphsInGroup(pack: ScriptPack, group: WritableGlyph['group']): WritableGlyph[] {
   return allGlyphs(pack).filter(g => g.group === group);
 }
+
+/** One cell of a writing grid: a base character and the marks written on it. */
+export interface GlyphCluster {
+  /** What goes in the cell — the base character plus its combining marks. */
+  text: string;
+  /** The base character alone, with every mark stripped. */
+  base: string;
+  /** Whether the cluster carries any combining mark at all. */
+  pointed: boolean;
+}
+
+/**
+ * A combining mark: anything that attaches to the character before it.
+ *
+ * `\p{M}` rather than a Hebrew range, because this is a Unicode rule and not a
+ * Hebrew one — nikud, a dagesh and a shin dot are nonspacing marks in exactly
+ * the same sense as a Greek breathing or a combining acute. A script-specific
+ * range here would be the abstraction leak `ScriptPack` exists to prevent.
+ */
+const COMBINING = /\p{M}/u;
+
+/**
+ * Split a word into the cells of a writing grid — one per consonant cluster.
+ *
+ * Grid cells are what remove ink segmentation from the problem: the student
+ * says where each letter ends, so the engine never has to guess. That only
+ * works if a cell holds a letter *with its points* — writing בְּ means writing
+ * the bet, its dagesh and its sheva as one act, and splitting them into three
+ * cells would ask for something nobody writes.
+ *
+ * Direction is not this function's business. Clusters come back in logical
+ * order — first-written first — and the grid lays them out right-to-left or
+ * left-to-right from `ScriptPack.direction`. Reversing here instead would
+ * double-reverse the moment a caller rendered them into an RTL container.
+ *
+ * A leading combining mark has no base to attach to, which happens only in
+ * malformed input; it becomes its own cluster rather than being dropped,
+ * because silently discarding part of a word is worse than showing an odd cell.
+ */
+export function splitClusters(text: string): GlyphCluster[] {
+  const clusters: GlyphCluster[] = [];
+
+  for (const char of text) {
+    const last = clusters[clusters.length - 1];
+    if (last && COMBINING.test(char)) {
+      last.text += char;
+      last.pointed = true;
+    } else {
+      clusters.push({ text: char, base: char, pointed: false });
+    }
+  }
+
+  return clusters;
+}
