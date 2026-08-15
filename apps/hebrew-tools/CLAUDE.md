@@ -351,24 +351,37 @@ is not there, and the checker rejects it. `dailyVerses.test.ts` pins the exact
 set of ten divergences, because dropping one is invisible at runtime: the verse
 still loads and the page merely stops explaining itself.
 
+**The validation runs in the test suite, and there is nothing to remember to
+run.** The checks live once in `scripts/lib/daily-verses.mjs` — pure functions
+taking the corpus as a `lookup` callback, the same split as `oshb.mjs` against
+`build-morphhb.mjs` — and two callers share them:
+
+| Caller | Covers | Runs |
+|---|---|---|
+| `scripts/lib/daily-verses.test.mjs` | the checker itself, over a synthetic corpus | always, including CI |
+| `src/data/dailyVerses.corpus.test.ts` | the real list against the real corpus | `pnpm test`, **skipped** when the corpus is not built |
+| `src/data/dailyVerses.test.ts` | shape, `displayRef` agreement, duplicates, the ten divergences | always, including CI |
+| `pnpm check:verses` | the same validation, plus `--show` to print the text | by hand |
+
+`describe.skipIf` is what makes the corpus test viable: it needs
+`public/data/morphhb/`, which is 24 MB, gitignored, and deliberately not built
+in CI — the same constraint that keeps `build:vocab:check` out of the build. So
+it runs on every local `pnpm test` and silently skips in CI, which is a tighter
+loop than a pre-commit hook and cannot be bypassed with `--no-verify`. There is
+a companion `describe.skipIf(built)` block whose only job is to make the skip
+visible in the output rather than looking like a missing test.
+
 ```bash
-pnpm build:data       # the corpus must exist first (24 MB, gitignored)
-pnpm check:verses     # resolve every ref; non-zero and names each bad entry
-pnpm check:verses --show   # ...and print each verse to read back
+pnpm build:data            # the corpus (24 MB, gitignored) — enables the corpus test
+pnpm check:verses          # the same checks from the CLI
+pnpm check:verses --show   # ...and print each verse, for proofreading by eye
 ```
 
-`scripts/check-daily-verses.mjs` is not in `pnpm build` and not in the test
-suite, for the same reason `build:vocab:check` is neither — it needs the corpus,
-which CI does not build. The co-located test covers everything checkable without
-it: shape, that each `displayRef` names the chapter and verse it actually
-fetches, no duplicates, and all three divisions represented. **Run
-`pnpm check:verses` after any edit to the list**; it also flags verses over 22
-words, which stop being a daily verse and become a reading session.
-
-The script reads the entries out of the `.ts` with a regex, since Node cannot
-import TypeScript. It cross-checks the number it parsed against the number of
-`{ book:` occurrences and fails if they differ, so a change to the literal's
-formatting cannot leave it quietly validating a subset.
+Two things about the CLI worth knowing: it reads the entries out of the `.ts`
+with a regex, since Node cannot import TypeScript, and it **throws if it parses
+fewer entries than the literal declares** — without that guard a reformatting of
+the array would leave it quietly validating a subset and reporting success. The
+vitest side has no such problem; it imports `DAILY_VERSES` directly.
 
 ### Database (accounts groundwork — issue #91)
 

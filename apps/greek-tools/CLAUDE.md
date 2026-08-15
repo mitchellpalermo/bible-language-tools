@@ -55,7 +55,7 @@ Enforced by Biome (`biome.json`):
 - `noExplicitAny` and `noConsole` are warnings (off in test files)
 - `useExhaustiveDependencies` (React hooks) is a warning
 
-Run `pnpm lint:fix` before committing. The pre-commit hook runs lint-staged automatically.
+Run `pnpm lint:fix` before committing. A pre-commit hook also runs Biome over staged files in this app — it is configured at the **repo root**, not here; see the root CLAUDE.md.
 
 ## Testing
 
