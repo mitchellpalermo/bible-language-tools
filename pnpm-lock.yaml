@@ -6,7 +6,14 @@ settings:
 
 importers:
 
-  .: {}
+  .:
+    devDependencies:
+      lint-staged:
+        specifier: ^16.4.0
+        version: 16.4.0
+      simple-git-hooks:
+        specifier: ^2.13.1
+        version: 2.13.1
 
   apps/greek-tools:
     dependencies:
@@ -92,12 +99,6 @@ importers:
       happy-dom:
         specifier: ^20.7.0
         version: 20.10.2
-      lint-staged:
-        specifier: ^16.4.0
-        version: 16.4.0
-      simple-git-hooks:
-        specifier: ^2.13.1
-        version: 2.13.1
       vitest:
         specifier: ^4.0.18
         version: 4.1.8(@types/node@25.9.2)(@vitest/coverage-v8@4.1.8)(@vitest/ui@4.1.8)(happy-dom@20.10.2)(vite@6.4.3(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))

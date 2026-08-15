@@ -118,7 +118,7 @@ Word-mode writing (#102) spends a third, `write:word:<cardKey>` in `src/data/wri
 
 The confusable decks deliberately get no prefix of their own — they drill the same letters the alphabet deck does, so grading ד in one must move the card the other sees.
 - **Deck selection is persisted separately from the SRS store** (`hebrew-tools-deck-v1`, `src/lib/deck-selection.ts`) and is never synced. It decides which due cards you see, not what is due, so it stays local to the browser.
-- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`, `hebrew-tools-reader-prefs`. There is still no auth or sync in this app — **all study progress is per-browser only.** The D1 plumbing exists (see below), but nothing reads or writes it yet.
+- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`, `hebrew-tools-reader-prefs`, `hebrew-tools-daily-v1`. There is still no auth or sync in this app — **all study progress is per-browser only.** The D1 plumbing exists (see below), but nothing reads or writes it yet.
 
 ### OSHB data pipeline (issue #75)
 
@@ -320,6 +320,68 @@ Things that will bite if changed carelessly:
   script-side copy against it. Nikud stays — stripping vowels is a different
   feature for a much later student — and the strip is never applied to a word's
   trailing punctuation, so the sof pasuq and the maqqef survive it.
+
+### Daily Verse (issue #76)
+
+`src/data/dailyVerses.ts` is the curated list behind `/daily` — 85 verses across
+Torah, Nevi'im and Ketuvim, cycled one a day by `dayIndex` from
+`@tools/shared/daily`. The streak is `createDailyStreak('hebrew-tools-daily-v1')`
+from the same module, deliberately separate from the flashcards streak in
+`hebrew-tools-stats-v1`: reading a verse is not reviewing a deck.
+
+**References are Masoretic, and a wrong one fails silently.** This is the whole
+reason the file has a checker. The corpus numbers verses the way a printed BHS
+does, so a reference typed off an English Bible page still *resolves* — and
+shows a different verse, which nothing downstream can detect. Two mechanisms
+produce it, and ten of the 85 entries are affected:
+
+- **A psalm's superscription is sometimes a verse of its own.** Psalms 8, 19, 34
+  and 46 run one ahead of English; Psalm 51 runs two. Psalms 16, 23, 27, 90, 100,
+  121 and 145 print the superscription *inside* verse 1 and do not shift at all,
+  so the offset must be checked per psalm and never inferred from the presence of
+  a heading. Comparing the corpus's verse count for a chapter against the English
+  one is the decisive test.
+- **Chapters divide differently.** Joel has four chapters in Hebrew and three in
+  English; Malachi has three and four. English Jonah 1:17 is Hebrew Jonah 2:1,
+  English Isaiah 9:6 is Hebrew Isaiah 9:5.
+
+`displayRef` is therefore the Hebrew reference, and `english` records the English
+one **only** where the two disagree — present-and-equal claims a divergence that
+is not there, and the checker rejects it. `dailyVerses.test.ts` pins the exact
+set of ten divergences, because dropping one is invisible at runtime: the verse
+still loads and the page merely stops explaining itself.
+
+**The validation runs in the test suite, and there is nothing to remember to
+run.** The checks live once in `scripts/lib/daily-verses.mjs` — pure functions
+taking the corpus as a `lookup` callback, the same split as `oshb.mjs` against
+`build-morphhb.mjs` — and two callers share them:
+
+| Caller | Covers | Runs |
+|---|---|---|
+| `scripts/lib/daily-verses.test.mjs` | the checker itself, over a synthetic corpus | always, including CI |
+| `src/data/dailyVerses.corpus.test.ts` | the real list against the real corpus | `pnpm test`, **skipped** when the corpus is not built |
+| `src/data/dailyVerses.test.ts` | shape, `displayRef` agreement, duplicates, the ten divergences | always, including CI |
+| `pnpm check:verses` | the same validation, plus `--show` to print the text | by hand |
+
+`describe.skipIf` is what makes the corpus test viable: it needs
+`public/data/morphhb/`, which is 24 MB, gitignored, and deliberately not built
+in CI — the same constraint that keeps `build:vocab:check` out of the build. So
+it runs on every local `pnpm test` and silently skips in CI, which is a tighter
+loop than a pre-commit hook and cannot be bypassed with `--no-verify`. There is
+a companion `describe.skipIf(built)` block whose only job is to make the skip
+visible in the output rather than looking like a missing test.
+
+```bash
+pnpm build:data            # the corpus (24 MB, gitignored) — enables the corpus test
+pnpm check:verses          # the same checks from the CLI
+pnpm check:verses --show   # ...and print each verse, for proofreading by eye
+```
+
+Two things about the CLI worth knowing: it reads the entries out of the `.ts`
+with a regex, since Node cannot import TypeScript, and it **throws if it parses
+fewer entries than the literal declares** — without that guard a reformatting of
+the array would leave it quietly validating a subset and reporting success. The
+vitest side has no such problem; it imports `DAILY_VERSES` directly.
 
 ### Database (accounts groundwork — issue #91)
 

@@ -11,6 +11,7 @@
   },
   "exports": {
     "./srs": "./src/srs.ts",
+    "./daily": "./src/daily.ts",
     "./quiz-settings": "./src/quiz-settings.ts",
     "./nav": "./src/nav.ts",
     "./nav-menu": "./src/nav-menu.ts",

@@ -51,6 +51,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | Export | Description |
 |--------|-------------|
 | `@tools/shared/srs` | SM-2 spaced repetition algorithm, types, and pure stats functions |
+| `@tools/shared/daily` | `dayIndex()` verse-of-the-day cycling and the `createDailyStreak(storageKey)` read-it-daily streak |
 | `@tools/shared/quiz-settings` | `createQuizSettings(storageKey)` factory for persisting quiz difficulty |
 | `@tools/shared/nav` | `NavLink` type and the active-route predicates the nav renders with |
 | `@tools/shared/nav-menu` | `initNavMenu()` — DOM controller for the mobile drawer |
@@ -68,6 +69,8 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 Only add to `packages/shared` if the code is genuinely language-agnostic. Styling via CSS variables (`var(--color-primary)` etc.) is fine — both apps share the same design token names.
 
 Each app's localStorage storage functions stay app-specific (different key namespaces). Only the pure algorithm and UI components belong in shared.
+
+**Where a module does need storage, the shape is a factory over a key**, not a hardcoded one — `createQuizSettings(storageKey)`, `createDailyStreak(storageKey)`. Both apps run the feature; neither may read the other's progress. A student who studies Greek and Hebrew has two streaks, and a shared key would let either one carry the other.
 
 `SiteNav.astro` is the one `.astro` component in the package; the rest are React. Astro components import from a workspace package like any other — the export just has to be listed in `packages/shared/package.json` with its `.astro` extension.
 
@@ -121,6 +124,29 @@ Things to know before changing it:
 - **Ink is stored in CSS pixels, not device pixels.** The canvas scales by `devicePixelRatio` at draw time; baking that in would make saved strokes resolution-dependent.
 - **Smoothing at capture time and interpolation at render time are separate on purpose.** Do not merge them — a render-grade spline applied to incoming samples rounds off real corners, and the square corner of ד is exactly what distinguishes it from ר.
 - **Never assert exact equality on a smoothed coordinate.** `OneEuroFilter` computes `a * value + (1 - a) * prev`, which for a constant input is that constant in real arithmetic but lands a ULP either side of it in floating point, for roughly 8% of the timestamp deltas a DOM happens to produce. `InkCanvas.test.tsx` asserted `p.y === 10` on a horizontal stroke and duly passed locally while failing in CI. Use `toBeCloseTo`. Exact equality is still right for values the engine only *copies* — `stroke.test.ts`'s zero-length resample case is asserting that they are copies.
+
+## Pre-commit hook
+
+`simple-git-hooks` + `lint-staged`, configured in the **root** `package.json`. The root `prepare` script installs the hook, so a plain `pnpm install` is all it takes; `SKIP_SIMPLE_GIT_HOOKS=1 git commit` bypasses it.
+
+It ran nowhere between the monorepo migration and 2026-08-15: the config had been left behind in `apps/greek-tools/package.json`, and nothing installs a hook from a sub-package, so `.git/hooks/` held only samples while greek-tools' CLAUDE.md claimed the hook was running. **Hook config belongs at the root** — that is the only place with the `.git` directory.
+
+What it runs:
+
+```json
+"lint-staged": {
+  "apps/greek-tools/**/*.{ts,tsx,js,mjs}": [
+    "pnpm --filter greek-tools exec biome check --write --no-errors-on-unmatched"
+  ]
+}
+```
+
+Two things this depends on:
+
+- **The glob is scoped to greek-tools because that is the only package with a Biome config** (`apps/greek-tools/biome.json`). Run over `apps/hebrew-tools` or `packages/shared`, Biome would fall back to its own defaults and reformat files nobody has agreed a style for. When hebrew-tools gets a linter, widen the glob — do not widen it first.
+- **Biome is invoked through `pnpm --filter greek-tools exec`**, not directly. It is a devDependency of that app and is not on the root's `PATH`; the filter also sets the cwd so Biome finds its config.
+
+Data checks deliberately do **not** live here. `pnpm check:verses` and `build:vocab:check` need the gitignored corpus and belong in the test suite (`describe.skipIf`) — a hook is bypassable with `--no-verify`, misses edits made through the GitHub web UI or by the `@claude` workflow, and fires less often than tests do.
 
 ## Pull requests
 

@@ -212,29 +212,58 @@ re-sourced from them by `scripts/build-vocabulary.mjs` (issue #109); see
 
 **greek.tools analog:** `/daily` — `DailyVerse.tsx` + `src/data/dailyVerses.ts` + `src/data/dailyDose.ts`
 
+Split into two PRs, the same pattern as Phase 2: the curated verse list is a
+content task with its own failure modes, and the component is UI over it.
+
+| PR | Scope | Issue |
+|----|-------|-------|
+| 3a | Curated verse list, day cycling, streak, and the corpus checker | #128 — ✅ done |
+| 3b | `DailyVerse.tsx`, the `/daily` route and the nav entry | #129 |
+
 ### What ports directly
-- Streak tracking logic (from `srs.ts` — `DailyStreakData`, `loadStreakData`, `markReadToday`)
+- Streak tracking logic — now `@tools/shared/daily`, which greek.tools was
+  migrated onto in the same PR rather than leaving two copies
 - "Show glosses" toggle UX
-- Word-click popup pattern (lemma, gloss, parse, frequency)
+- Word-click popup pattern — `HebrewText.tsx` already exists and is shared with
+  the reader, which is why it was split out in #120
 - sessionStorage caching pattern
 
-### What changes
+### What 3a settled
 
-**Verse source:**
-- No direct equivalent to Daily Dose of Greek exists for Hebrew. Use a curated list as the primary source.
-- Potential secondary source: Bible Gateway or similar APIs (check licensing), or the YouVersion API
+**Verse source:** no equivalent to Daily Dose of Greek exists for Hebrew, so the
+curated list is the only source rather than a fallback. 85 verses — 25 Torah, 27
+Nevi'im, 33 Ketuvim — capped at about twenty words each, because a daily verse
+should be finishable standing up and Joshua 24:15 is thirty-four words.
 
-**Curated verse list:** Aim for ~60–90 verses spread across Torah, Prophets (Nevi'im), and Writings (Ketuvim). Prioritize:
-- Frequent vocabulary
-- Pedagogically useful morphology
-- Well-known passages (Genesis 1:1, Deuteronomy 6:4, Psalm 23:1, etc.)
+**The references are Masoretic, and getting one wrong fails silently.** This is
+the finding that shaped the whole PR. The corpus numbers verses the way a printed
+BHS does, so a reference typed off an English Bible page still *resolves* — and
+shows a different verse. Ten of the 85 diverge, from two causes: a psalm's
+superscription is sometimes a verse of its own (Psalms 8, 19, 34, 46 run one
+ahead; 51 runs two; 16, 23, 27, 90, 100, 121, 145 do not shift at all), and
+chapters divide differently (Hebrew Joel has four chapters, Malachi three;
+English Jonah 1:17 is Hebrew Jonah 2:1). `displayRef` carries the Hebrew
+reference and `english` records the other **only** where they disagree, so the
+page can explain itself rather than look broken.
+
+`scripts/check-daily-verses.mjs` (`pnpm check:verses`) resolves every entry
+against the corpus. It is not in `pnpm build` or the test suite for the same
+reason `build:vocab:check` is neither — it needs the 24 MB of gitignored data.
+The co-located test covers what is checkable without it and pins the exact set of
+ten divergences, since dropping one is invisible at runtime.
+
+### Still to build (3b)
 
 **Display considerations:**
-- Hebrew text must render RTL with `dir="rtl"`
-- Verse reference format: "Genesis 1:1" or "בְּרֵאשִׁית א:א" — show both
-- Cantillation marks (te'amim) in WLC text: consider a toggle to hide them for beginning students
+- Hebrew text renders RTL with `dir="rtl"` — `HebrewText.tsx` already does
+- Show both references: "Genesis 1:1" and "בְּרֵאשִׁית א:א", the latter derived at
+  runtime from `books.json` and `hebrewNumeral()` rather than stored
+- Surface `english` where present, so a student comparing against a study Bible
+  is told why the numbers differ instead of concluding the app is wrong
+- Cantillation toggle — reuse `ReaderPrefs`, which already owns that preference
 
-**Studied-word highlighting:** same pattern as greek.tools — words with `repetition > 0` in the SRS store get highlighted.
+**Studied-word highlighting:** same pattern as the reader — `loadStudiedLemmas()`
+from `src/lib/studied.ts`, joined on `cardKey` and never the bare lemma.
 
 ---
 
@@ -673,7 +702,9 @@ The following modules from greek.tools can be copied with minimal or zero change
 | 3 | 2b | Core flashcards UI | Low | 2a | Queued | #73 |
 | 4 | 2c | Flashcards: typing + directions + filters | Low–Medium | 2b, Phase 1 | Queued | #74 |
 | 5 | — | OSHB data pipeline | Medium (mechanical) | None | ✅ Done | #75 |
-| 6 | 3 | Daily Verse | Medium | OSHB pipeline | Queued | #76 |
+| 6 | 3 | Daily Verse | Medium — broken into 3a–3b | OSHB pipeline | In progress | #76 |
+| 6a | 3a | Daily Verse: curated verse list + day cycling + streak | Low | OSHB pipeline | ✅ Done | #128 |
+| 6b | 3b | Daily Verse: component + `/daily` route | Medium | 3a, #120 | Queued | #129 |
 | 7 | 5 | Transliteration | Medium | None | Queued (independent — can float earlier if a break is wanted) | #78 |
 | 8 | 4 | Hebrew Bible Reader | High — broken into 4a–4e | OSHB pipeline, gloss dataset decision | ✅ Done | #77 |
 | 8a | 4a | Reader: OSHB morph-code formatter | Low | OSHB pipeline | ✅ Done | #117 |
