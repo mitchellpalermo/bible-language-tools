@@ -7,7 +7,9 @@
 // storage keys).
 
 import {
+  applyDailyReset,
   daysFromNow,
+  emptyStats,
   isDue,
   newCard,
   nextSRS,
@@ -50,31 +52,12 @@ export function saveSRSStore(store: Record<string, SRSCard>): void {
   localStorage.setItem(SRS_KEY, JSON.stringify(store));
 }
 
-function emptyStats(): StudyStats {
-  return {
-    streak: 0,
-    lastStreakDate: '',
-    cardsStudiedToday: 0,
-    lastStudyDate: '',
-    totalReviewed: 0,
-    totalCorrect: 0,
-  };
-}
-
 export function loadStats(): StudyStats {
   try {
     const raw = localStorage.getItem(STATS_KEY);
     if (!raw) return emptyStats();
-    const s: StudyStats = { ...emptyStats(), ...(JSON.parse(raw) as Partial<StudyStats>) };
-
-    // Reset daily count when it's a new day; break the streak if a day was missed.
-    if (s.lastStudyDate !== todayStr()) {
-      s.cardsStudiedToday = 0;
-      if (s.lastStreakDate !== yesterdayStr() && s.lastStreakDate !== todayStr()) {
-        s.streak = 0;
-      }
-    }
-    return s;
+    const stored: StudyStats = { ...emptyStats(), ...(JSON.parse(raw) as Partial<StudyStats>) };
+    return applyDailyReset(stored);
   } catch {
     return emptyStats();
   }

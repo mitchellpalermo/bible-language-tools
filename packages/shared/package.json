@@ -11,6 +11,7 @@
   },
   "exports": {
     "./srs": "./src/srs.ts",
+    "./sync-merge": "./src/sync-merge.ts",
     "./quiz-settings": "./src/quiz-settings.ts",
     "./nav": "./src/nav.ts",
     "./nav-menu": "./src/nav-menu.ts",

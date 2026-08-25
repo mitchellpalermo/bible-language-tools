@@ -22,14 +22,28 @@ export interface StudyStats {
 /** Cards per day required to count as a study day for streak purposes */
 export const STREAK_THRESHOLD = 10;
 
+/**
+ * Format a date as YYYY-MM-DD in the *local* calendar, not UTC. Study days have
+ * to roll over at the student's midnight: toISOString() put the boundary at 6pm
+ * for a CST user, so an evening session and the next morning's session landed on
+ * the same "day" and the streak silently stalled. Card due dates run through the
+ * same helpers, so they shifted with it.
+ */
+function localDateStr(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 export function todayStr(): string {
-  return new Date().toISOString().slice(0, 10);
+  return localDateStr(new Date());
 }
 
 export function daysFromNow(n: number): string {
   const d = new Date();
   d.setDate(d.getDate() + n);
-  return d.toISOString().slice(0, 10);
+  return localDateStr(d);
 }
 
 export function yesterdayStr(): string {
@@ -103,10 +117,14 @@ export function recordReview(prev: StudyStats, correct: boolean): StudyStats {
     streak = 0;
   }
 
-  if (cardsToday === STREAK_THRESHOLD) {
+  // Credit the day as soon as the counter crosses the threshold, not only when
+  // it lands exactly on it. A sync merge adopts the other device's daily count
+  // wholesale, which can step over the line in one jump; the old `===` check
+  // then never fired again that day, so no amount of study earned the streak.
+  if (cardsToday >= STREAK_THRESHOLD && lastStreakDate !== today) {
     if (lastStreakDate === yesterday || lastStreakDate === '') {
       streak++;
-    } else if (lastStreakDate !== today) {
+    } else {
       streak = 1;
     }
     lastStreakDate = today;
@@ -119,5 +137,34 @@ export function recordReview(prev: StudyStats, correct: boolean): StudyStats {
     lastStudyDate: today,
     totalReviewed: prev.totalReviewed + 1,
     totalCorrect: prev.totalCorrect + (correct ? 1 : 0),
+  };
+}
+
+export function emptyStats(): StudyStats {
+  return {
+    streak: 0,
+    lastStreakDate: '',
+    cardsStudiedToday: 0,
+    lastStudyDate: '',
+    totalReviewed: 0,
+    totalCorrect: 0,
+  };
+}
+
+/**
+ * Roll a stats record loaded from storage onto the current day: today's card
+ * counter starts over, and a streak whose anchor is older than yesterday is
+ * broken. Pure, so both apps' storage layers share one definition of decay
+ * instead of keeping their own copies in step by hand.
+ */
+export function applyDailyReset(stats: StudyStats): StudyStats {
+  const today = todayStr();
+  if (stats.lastStudyDate === today) return stats;
+
+  const streakBroken = stats.lastStreakDate !== yesterdayStr() && stats.lastStreakDate !== today;
+  return {
+    ...stats,
+    cardsStudiedToday: 0,
+    streak: streakBroken ? 0 : stats.streak,
   };
 }

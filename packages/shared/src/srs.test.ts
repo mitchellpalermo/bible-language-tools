@@ -1,6 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  applyDailyReset,
   daysFromNow,
+  emptyStats,
   isDue,
   newCard,
   nextSRS,
@@ -15,10 +17,15 @@ import {
 
 // ─── helpers ───────────────────────────────────────────────────────────────
 
+// Local calendar formatting, matching src/srs.ts. Built with toISOString() this
+// helper disagreed with the code under test every evening west of UTC.
 function dateStr(offsetDays = 0): string {
   const d = new Date();
   d.setDate(d.getDate() + offsetDays);
-  return d.toISOString().slice(0, 10);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 const TODAY = dateStr(0);
@@ -34,17 +41,6 @@ function makeCard(overrides: Partial<SRSCard> = {}): SRSCard {
     dueDate: TODAY,
     lastReviewed: YESTERDAY,
     ...overrides,
-  };
-}
-
-function emptyStats(): StudyStats {
-  return {
-    streak: 0,
-    lastStreakDate: '',
-    cardsStudiedToday: 0,
-    lastStudyDate: '',
-    totalReviewed: 0,
-    totalCorrect: 0,
   };
 }
 
@@ -336,5 +332,159 @@ describe('recordReview', () => {
 describe('STREAK_THRESHOLD', () => {
   it('is a positive number', () => {
     expect(STREAK_THRESHOLD).toBeGreaterThan(0);
+  });
+});
+
+// ─── regressions: streak credit and the day boundary ────────────────────────
+
+describe('recordReview — crossing the streak threshold (regression)', () => {
+  it('credits the day when the counter jumps past the threshold in one step', () => {
+    // A sync merge adopts the other device's daily count, so cardsStudiedToday
+    // can step over the line rather than landing on it. The old `=== THRESHOLD`
+    // check missed that jump and never credited the day again.
+    const prev: StudyStats = {
+      streak: 3,
+      lastStreakDate: YESTERDAY,
+      cardsStudiedToday: STREAK_THRESHOLD + 4,
+      lastStudyDate: TODAY,
+      totalReviewed: 400,
+      totalCorrect: 350,
+    };
+    const result = recordReview(prev, true);
+    expect(result.lastStreakDate).toBe(TODAY);
+    expect(result.streak).toBe(4);
+  });
+
+  it('still earns the day after a merge left a stale anchor and a count past the line', () => {
+    let stats: StudyStats = {
+      ...emptyStats(),
+      cardsStudiedToday: STREAK_THRESHOLD + 5,
+      lastStudyDate: TODAY,
+      totalReviewed: 400,
+      totalCorrect: 350,
+    };
+    stats = recordReview(stats, true);
+    expect(stats.lastStreakDate).toBe(TODAY);
+    expect(stats.streak).toBe(1);
+  });
+
+  it('credits the day exactly once no matter how many more cards follow', () => {
+    let stats: StudyStats = {
+      ...emptyStats(),
+      streak: 2,
+      lastStreakDate: YESTERDAY,
+      lastStudyDate: TODAY,
+      cardsStudiedToday: STREAK_THRESHOLD - 1,
+    };
+    for (let i = 0; i < 50; i++) stats = recordReview(stats, true);
+    expect(stats.streak).toBe(3);
+    expect(stats.lastStreakDate).toBe(TODAY);
+  });
+});
+
+describe('day boundary is local, not UTC (regression)', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('late evening still reports the current local day', () => {
+    // West of UTC this instant is already tomorrow in UTC — the old
+    // toISOString() helper rolled the study day over at 6pm CST.
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 4, 10, 23, 30, 0));
+    expect(todayStr()).toBe('2026-05-10');
+    expect(yesterdayStr()).toBe('2026-05-09');
+  });
+
+  it('just after midnight still reports the current local day', () => {
+    // East of UTC this instant is still yesterday in UTC.
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 4, 10, 0, 30, 0));
+    expect(todayStr()).toBe('2026-05-10');
+    expect(daysFromNow(1)).toBe('2026-05-11');
+  });
+
+  it('an evening session and the next morning are two different study days', () => {
+    vi.useFakeTimers();
+
+    vi.setSystemTime(new Date(2026, 4, 10, 19, 0, 0));
+    let stats: StudyStats = { ...emptyStats(), lastStudyDate: '2026-05-10', cardsStudiedToday: 9 };
+    stats = recordReview(stats, true);
+    expect(stats.lastStreakDate).toBe('2026-05-10');
+    expect(stats.streak).toBe(1);
+
+    vi.setSystemTime(new Date(2026, 4, 11, 8, 0, 0));
+    stats = { ...stats, cardsStudiedToday: STREAK_THRESHOLD - 1, lastStudyDate: '2026-05-11' };
+    stats = recordReview(stats, true);
+    expect(stats.lastStreakDate).toBe('2026-05-11');
+    expect(stats.streak).toBe(2);
+  });
+});
+
+// ─── applyDailyReset ────────────────────────────────────────────────────────
+
+describe('applyDailyReset', () => {
+  it('leaves a record from today untouched', () => {
+    const stats: StudyStats = {
+      streak: 3,
+      lastStreakDate: TODAY,
+      cardsStudiedToday: 7,
+      lastStudyDate: TODAY,
+      totalReviewed: 30,
+      totalCorrect: 25,
+    };
+    expect(applyDailyReset(stats)).toEqual(stats);
+  });
+
+  it("clears today's counter on a new day but keeps a streak anchored yesterday", () => {
+    const result = applyDailyReset({
+      streak: 3,
+      lastStreakDate: YESTERDAY,
+      cardsStudiedToday: 12,
+      lastStudyDate: YESTERDAY,
+      totalReviewed: 30,
+      totalCorrect: 25,
+    });
+    expect(result.cardsStudiedToday).toBe(0);
+    expect(result.streak).toBe(3);
+  });
+
+  it('breaks a streak whose anchor is older than yesterday', () => {
+    const result = applyDailyReset({
+      streak: 6,
+      lastStreakDate: dateStr(-3),
+      cardsStudiedToday: 12,
+      lastStudyDate: dateStr(-3),
+      totalReviewed: 30,
+      totalCorrect: 25,
+    });
+    expect(result.streak).toBe(0);
+    expect(result.cardsStudiedToday).toBe(0);
+  });
+
+  it('preserves lifetime totals', () => {
+    const result = applyDailyReset({
+      streak: 1,
+      lastStreakDate: dateStr(-5),
+      cardsStudiedToday: 12,
+      lastStudyDate: dateStr(-5),
+      totalReviewed: 300,
+      totalCorrect: 250,
+    });
+    expect(result.totalReviewed).toBe(300);
+    expect(result.totalCorrect).toBe(250);
+  });
+});
+
+describe('emptyStats', () => {
+  it('starts with no progress and no streak anchor', () => {
+    expect(emptyStats()).toEqual({
+      streak: 0,
+      lastStreakDate: '',
+      cardsStudiedToday: 0,
+      lastStudyDate: '',
+      totalReviewed: 0,
+      totalCorrect: 0,
+    });
   });
 });
