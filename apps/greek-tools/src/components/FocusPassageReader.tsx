@@ -53,11 +53,26 @@ export default function FocusPassageReader({ passage }: { passage: FocusPassage 
   });
 
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
+
     fetchBook(passage.book)
-      .then(setBookData)
-      .catch(console.error)
-      .finally(() => setLoading(false));
+      .then((data) => {
+        if (!cancelled) {
+          setBookData(data);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          console.error(err);
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [passage.book]);
 
   const handleActivate = useCallback((word: MorphWord, rect: DOMRect) => {

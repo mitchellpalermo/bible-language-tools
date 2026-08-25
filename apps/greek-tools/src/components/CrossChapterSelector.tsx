@@ -27,18 +27,35 @@ export const DEFAULT_CROSS_CHAPTER_RANGE: CrossChapterRange = {
 
 export default function CrossChapterSelector({ value, onChange }: Props) {
   const [books, setBooks] = useState<BookMeta[]>([]);
-  const [bookData, setBookData] = useState<MorphBook | null>(null);
+  // Kept with the code it was loaded for, so a response that arrives after the
+  // book has moved on can never be mistaken for the current book's data.
+  const [loaded, setLoaded] = useState<{ code: string; data: MorphBook } | null>(null);
 
   useEffect(() => {
     fetchBooks().then(setBooks).catch(console.error);
   }, []);
 
+  // A fetch for the previous book can still be in flight when the book changes
+  // — the export page switches off the default book as soon as it reads `?ref=`.
+  // Without this guard the slower response wins and the verse dropdowns end up
+  // sized from the wrong book.
   useEffect(() => {
-    fetchBook(value.book).then(setBookData).catch(console.error);
+    let cancelled = false;
+
+    fetchBook(value.book)
+      .then((data) => {
+        if (!cancelled) setLoaded({ code: value.book, data });
+      })
+      .catch(console.error);
+
+    return () => {
+      cancelled = true;
+    };
   }, [value.book]);
 
   const currentBook = books.find((b) => b.code === value.book);
   const chapterCount = currentBook?.chapters ?? 1;
+  const bookData = loaded?.code === value.book ? loaded.data : null;
 
   function verseCount(chapter: number): number {
     if (!bookData) return 1;
@@ -94,7 +111,9 @@ export default function CrossChapterSelector({ value, onChange }: Props) {
     <div className="space-y-4">
       {/* Book */}
       <div>
-        <label htmlFor="book" className={labelClass}>Book</label>
+        <label htmlFor="book" className={labelClass}>
+          Book
+        </label>
         <select
           id="book"
           value={value.book}
@@ -120,7 +139,9 @@ export default function CrossChapterSelector({ value, onChange }: Props) {
         <p className={labelClass}>Start</p>
         <div className="flex gap-2">
           <div className="flex-1">
-            <label htmlFor="start-chapter" className="block text-xs text-text-muted mb-1">Chapter</label>
+            <label htmlFor="start-chapter" className="block text-xs text-text-muted mb-1">
+              Chapter
+            </label>
             <select
               id="start-chapter"
               value={value.startChapter}
@@ -135,7 +156,9 @@ export default function CrossChapterSelector({ value, onChange }: Props) {
             </select>
           </div>
           <div className="flex-1">
-            <label htmlFor="start-verse" className="block text-xs text-text-muted mb-1">Verse</label>
+            <label htmlFor="start-verse" className="block text-xs text-text-muted mb-1">
+              Verse
+            </label>
             <select
               id="start-verse"
               value={value.startVerse}
@@ -157,7 +180,9 @@ export default function CrossChapterSelector({ value, onChange }: Props) {
         <p className={labelClass}>End</p>
         <div className="flex gap-2">
           <div className="flex-1">
-            <label htmlFor="end-chapter" className="block text-xs text-text-muted mb-1">Chapter</label>
+            <label htmlFor="end-chapter" className="block text-xs text-text-muted mb-1">
+              Chapter
+            </label>
             <select
               id="end-chapter"
               value={value.endChapter}
@@ -174,7 +199,9 @@ export default function CrossChapterSelector({ value, onChange }: Props) {
             </select>
           </div>
           <div className="flex-1">
-            <label htmlFor="end-verse" className="block text-xs text-text-muted mb-1">Verse</label>
+            <label htmlFor="end-verse" className="block text-xs text-text-muted mb-1">
+              Verse
+            </label>
             <select
               id="end-verse"
               value={value.endVerse}

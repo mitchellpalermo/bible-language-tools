@@ -1,10 +1,11 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useEffect, useState } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { MorphBook } from '../data/morphgnt';
+import type { MorphBook, MorphVerse } from '../data/morphgnt';
 import CrossChapterSelector, {
-  DEFAULT_CROSS_CHAPTER_RANGE,
   type CrossChapterRange,
+  DEFAULT_CROSS_CHAPTER_RANGE,
 } from './CrossChapterSelector';
 
 vi.mock('../data/morphgnt', () => ({
@@ -141,9 +142,109 @@ describe('CrossChapterSelector', () => {
     renderSelector({ book: 'REV', startChapter: 3, startVerse: 1, endChapter: 3, endVerse: 1 });
     await waitFor(() => expect(mockFetchBook).toHaveBeenCalled());
     const chapterSelects = screen.getAllByLabelText('Chapter');
-    const endChapterOptions = Array.from(chapterSelects[1].querySelectorAll('option')).map(
-      (o) => Number((o as HTMLOptionElement).value),
+    const endChapterOptions = Array.from(chapterSelects[1].querySelectorAll('option')).map((o) =>
+      Number((o as HTMLOptionElement).value),
     );
     expect(endChapterOptions.every((n) => n >= 3)).toBe(true);
+  });
+});
+
+// The export page mounts on the default book and switches to the `?ref=` book a
+// tick later, so two fetches are in flight at once. The larger book's response
+// tends to land second — Revelation is roughly fifty times the size of Philemon
+// — which is how Philemon's dropdowns ended up capped at Revelation 1's verse
+// count of 20.
+describe('CrossChapterSelector — overlapping book fetches', () => {
+  function bookOf(verses: number): MorphBook {
+    const chapter: Record<string, MorphVerse> = {};
+    for (let v = 1; v <= verses; v++) chapter[String(v)] = [];
+    return { '1': chapter };
+  }
+
+  const RACE_BOOKS = [
+    { code: 'REV', name: 'Revelation', chapters: 22 },
+    { code: 'PHM', name: 'Philemon', chapters: 1 },
+  ];
+  const REV_VERSES = 20;
+  const PHM_VERSES = 25;
+
+  /** A promise plus the handle to settle it, so tests control resolution order. */
+  function deferred<T>() {
+    let resolve!: (value: T) => void;
+    const promise = new Promise<T>((r) => {
+      resolve = r;
+    });
+    return { promise, resolve };
+  }
+
+  function verseOptions(which: 'start' | 'end'): number[] {
+    const [startVerse, endVerse] = screen.getAllByLabelText('Verse');
+    const select = which === 'start' ? startVerse : endVerse;
+    return Array.from(select.querySelectorAll('option')).map((o) =>
+      Number((o as HTMLOptionElement).value),
+    );
+  }
+
+  /** Mirrors the export page: default book on mount, `?ref=` book a tick later. */
+  function Harness() {
+    const [range, setRange] = useState<CrossChapterRange>(DEFAULT_CROSS_CHAPTER_RANGE);
+    useEffect(() => {
+      setRange((r) => ({ ...r, book: 'PHM', endVerse: 1 }));
+    }, []);
+    return <CrossChapterSelector value={range} onChange={setRange} />;
+  }
+
+  it('ignores the previous book when its response lands last', async () => {
+    const rev = deferred<MorphBook>();
+    const phm = deferred<MorphBook>();
+    mockFetchBooks.mockResolvedValue(RACE_BOOKS);
+    mockFetchBook.mockImplementation((code: string) =>
+      code === 'PHM' ? phm.promise : rev.promise,
+    );
+
+    render(<Harness />);
+    await waitFor(() => expect(mockFetchBook).toHaveBeenCalledWith('PHM'));
+    expect(mockFetchBook).toHaveBeenCalledWith('REV');
+
+    // Philemon first, then the superseded Revelation request — the order that
+    // used to overwrite Philemon's data.
+    await act(async () => {
+      phm.resolve(bookOf(PHM_VERSES));
+      await phm.promise;
+    });
+    await act(async () => {
+      rev.resolve(bookOf(REV_VERSES));
+      await rev.promise;
+    });
+
+    await waitFor(() => expect(verseOptions('start')).toHaveLength(PHM_VERSES));
+    expect(verseOptions('end')).toHaveLength(PHM_VERSES);
+    expect(verseOptions('end').at(-1)).toBe(PHM_VERSES);
+  });
+
+  it('never sizes the dropdowns from a book other than the selected one', async () => {
+    const rev = deferred<MorphBook>();
+    const phm = deferred<MorphBook>();
+    mockFetchBooks.mockResolvedValue(RACE_BOOKS);
+    mockFetchBook.mockImplementation((code: string) =>
+      code === 'PHM' ? phm.promise : rev.promise,
+    );
+
+    render(<Harness />);
+    await waitFor(() => expect(mockFetchBook).toHaveBeenCalledWith('PHM'));
+
+    // Revelation lands while Philemon is still in flight: the dropdowns must
+    // not show Revelation's 20 verses, even briefly.
+    await act(async () => {
+      rev.resolve(bookOf(REV_VERSES));
+      await rev.promise;
+    });
+    expect(verseOptions('end')).not.toHaveLength(REV_VERSES);
+
+    await act(async () => {
+      phm.resolve(bookOf(PHM_VERSES));
+      await phm.promise;
+    });
+    await waitFor(() => expect(verseOptions('end')).toHaveLength(PHM_VERSES));
   });
 });

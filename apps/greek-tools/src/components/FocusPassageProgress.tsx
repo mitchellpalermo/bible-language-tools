@@ -29,9 +29,12 @@ export default function FocusPassageProgress({ passage }: { passage: FocusPassag
   const parseHistory = loadParseHistoryStore()[passage.id];
 
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
+
     fetchBook(passage.book)
       .then((bookData) => {
+        if (cancelled) return;
         const srsStore = loadSRSStore();
         const vocabMap = buildVocabMap(vocabulary);
         const lemmas = extractPassageLemmas(
@@ -44,9 +47,18 @@ export default function FocusPassageProgress({ passage }: { passage: FocusPassag
         );
         setLemmaCount(lemmas.length);
         setBreakdown(getVocabMaturityBreakdown(lemmas, srsStore));
+        setLoading(false);
       })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+      .catch((err) => {
+        if (!cancelled) {
+          console.error(err);
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     passage.book,
     passage.startChapter,
