@@ -112,6 +112,42 @@ Issue template is at `.github/ISSUE_TEMPLATE/feature.md`.
 - Vocabulary data is pre-processed by `scripts/build-vocabulary.mjs`
 - SRS (Spaced Repetition System) state is persisted in `localStorage` via `src/data/srs.ts`
 
+## Loading book data in a component
+
+`fetchBook(code)` is async and the book codes differ wildly in size — `REV.json`
+is roughly fifty times `PHM.json`. Any effect that fetches a book **must** guard
+against a superseded response landing last:
+
+```tsx
+useEffect(() => {
+  let cancelled = false;
+  fetchBook(book)
+    .then((data) => {
+      if (!cancelled) setBookData(data);
+    })
+    .catch(console.error);
+  return () => {
+    cancelled = true;
+  };
+}, [book]);
+```
+
+Two fetches overlap more often than it looks. A page that mounts on a default
+book and then switches — the export page reads `?ref=` in an effect, so its
+first render always fires a fetch for `DEFAULT_BOOK` — has both in flight at
+once, and whichever resolves last wins. That is how the export page capped
+Philemon at 20 verses: Revelation 1's verse count, arriving after Philemon's.
+
+Where the fetched data drives what the user can *choose* (option lists, ranges,
+counts), also pair the data with the code it was loaded for and derive from it
+only when the codes match, as `CrossChapterSelector` does. The cancellation flag
+stops the wrong data from being stored; pairing stops the previous book's data
+from being read during the window before the new fetch resolves.
+
+Mock `fetchBook` per code when testing this — a mock that returns the same stub
+for every book cannot tell a stale response from a fresh one, and the original
+`CrossChapterSelector` tests missed the bug for exactly that reason.
+
 ## Error Reporting
 
 Two mechanisms capture runtime errors and send them to PostHog:

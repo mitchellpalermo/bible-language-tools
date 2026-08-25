@@ -97,9 +97,12 @@ export default function FocusPassageVocab({ passage }: { passage: FocusPassage }
 
   // Load passage vocab
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
+
     fetchBook(passage.book)
       .then((bookData) => {
+        if (cancelled) return;
         const vocabMap = buildVocabMap(vocabulary);
         const lemmaKeys = extractPassageLemmas(
           bookData,
@@ -112,9 +115,18 @@ export default function FocusPassageVocab({ passage }: { passage: FocusPassage }
         const keySet = new Set(lemmaKeys);
         const filtered = vocabulary.filter((w) => keySet.has(normalizeKey(w.greek)));
         setPassageVocab(filtered);
+        setLoading(false);
       })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+      .catch((err) => {
+        if (!cancelled) {
+          console.error(err);
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     passage.book,
     passage.startChapter,
