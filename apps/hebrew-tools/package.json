@@ -50,12 +50,5 @@
     "happy-dom": "^20.7.0",
     "vitest": "^4.0.18",
     "wrangler": "^4.68.1"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "sharp",
-      "workerd"
-    ]
   }
 }

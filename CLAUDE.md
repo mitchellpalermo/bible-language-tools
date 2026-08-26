@@ -200,6 +200,41 @@ Things to know before changing it:
   the a11y set, `useExhaustiveDependencies` — each need a real code change and a
   real review; promoting them is its own PR, not a formatting sweep.
 
+### The pre-commit hook
+
+`simple-git-hooks` installs a `pre-commit` hook that runs `pnpm lint-staged`
+from the **workspace root**, so both the hook config and the `lint-staged`
+config must live in the root `package.json`. They previously sat in
+`apps/greek-tools/package.json`: lint-staged found the config, but ran the task
+with `cwd` at the repo root, where `biome` was not on `PATH`. Every commit
+failed to spawn it with `ENOENT` and rolled itself back, which is why the repo
+accumulated drift that no one saw.
+
+Biome now lives at the root, so the task is a plain `biome check --write` over
+one basename glob and covers every package:
+
+```
+"*.{ts,tsx,js,jsx,mjs,cjs,json,jsonc,css}":
+  "biome check --write --no-errors-on-unmatched"
+```
+
+Two things this depends on:
+
+- **The glob deliberately has no leading path.** A lint-staged pattern without a
+  slash matches on basename, so one entry covers all four packages, and the
+  files Biome should skip are skipped by `files.includes` in the root config
+  rather than by a second list here that could drift out of sync with it.
+- **The extension list tracks CI, not habit.** `pnpm lint` checks JSON and CSS
+  too; a hook that only covered `ts,tsx,js,mjs` would wave through a staged
+  JSON formatting error that then fails the build.
+
+Formatting fixes are applied and re-staged automatically; error-severity lint
+rules block the commit. Biome's *warning* severity does not — `noExplicitAny` is
+a warning here, so it will not stop anything.
+
+`pnpm` settings (`onlyBuiltDependencies`) are also root-only; pnpm warns on
+every command if that field appears in an app's `package.json`.
+
 ## Greek-tools app notes
 
 The production build runs two data scripts before `astro build`:
