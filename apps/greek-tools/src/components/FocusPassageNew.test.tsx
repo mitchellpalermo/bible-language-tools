@@ -110,7 +110,9 @@ describe('FocusPassageNew', () => {
     await waitFor(() => expect(mockFetchBooks).toHaveBeenCalled());
 
     await user.click(screen.getByRole('button', { name: /preview passage/i }));
-    await waitFor(() => expect(screen.getByRole('button', { name: /← back/i })).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /← back/i })).toBeInTheDocument(),
+    );
 
     await user.click(screen.getByRole('button', { name: /← back/i }));
     expect(screen.getByRole('button', { name: /preview passage/i })).toBeInTheDocument();

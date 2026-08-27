@@ -4,7 +4,12 @@ import { authHintClearCookie, authHintSetCookie } from './lib/auth-cookie';
 
 export const onRequest = defineMiddleware(async ({ locals, request }, next) => {
   const env = locals.runtime?.env;
-  if (!env?.DB || !env?.BETTER_AUTH_SECRET || !env?.GOOGLE_CLIENT_ID || !env?.GOOGLE_CLIENT_SECRET) {
+  if (
+    !env?.DB ||
+    !env?.BETTER_AUTH_SECRET ||
+    !env?.GOOGLE_CLIENT_ID ||
+    !env?.GOOGLE_CLIENT_SECRET
+  ) {
     locals.user = null;
     return next();
   }
