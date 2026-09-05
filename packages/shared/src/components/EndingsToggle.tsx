@@ -12,8 +12,16 @@ export default function EndingsToggle({
       className="text-xs px-2.5 py-1 rounded-full border font-medium transition-colors"
       style={
         showEndings
-          ? { background: 'var(--color-primary)', color: '#fff', borderColor: 'var(--color-primary)' }
-          : { background: 'transparent', color: 'var(--color-text-muted)', borderColor: 'var(--color-text-muted)' }
+          ? {
+              background: 'var(--color-primary)',
+              color: '#fff',
+              borderColor: 'var(--color-primary)',
+            }
+          : {
+              background: 'transparent',
+              color: 'var(--color-text-muted)',
+              borderColor: 'var(--color-text-muted)',
+            }
       }
     >
       {showEndings ? 'Endings only' : 'Full forms'}

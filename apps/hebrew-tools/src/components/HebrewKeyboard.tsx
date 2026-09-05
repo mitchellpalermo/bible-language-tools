@@ -2,10 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   applyFinalForms,
   CONSONANT_MAP,
-  COMPOUND_NIKUD_MAP,
-  DAGESH,
   HATEPH_MAP,
-  NIKUD_MAP,
   processHebrewInput,
   processHebrewKey,
   SHEVA,
@@ -185,7 +182,10 @@ function HebrewKeyboardInner() {
         </button>
       </div>
 
-      <details className="bg-bg-card rounded-xl border p-4 shadow-sm" style={{ borderColor: '#D1FAE5' }}>
+      <details
+        className="bg-bg-card rounded-xl border p-4 shadow-sm"
+        style={{ borderColor: '#D1FAE5' }}
+      >
         <summary className="font-semibold cursor-pointer" style={{ color: 'var(--color-primary)' }}>
           Key Mappings Reference
         </summary>
@@ -206,7 +206,10 @@ function HebrewKeyboardInner() {
                 })
                 .map(([ascii, hebrew]) => (
                   <div key={ascii} className="flex gap-2 items-center">
-                    <kbd className="bg-green-50 border border-green-100 px-1.5 py-0.5 rounded text-xs font-mono" style={{ color: 'var(--color-primary)' }}>
+                    <kbd
+                      className="bg-green-50 border border-green-100 px-1.5 py-0.5 rounded text-xs font-mono"
+                      style={{ color: 'var(--color-primary)' }}
+                    >
                       {ascii}
                     </kbd>
                     <span className="text-text-muted">→</span>
@@ -228,19 +231,24 @@ function HebrewKeyboardInner() {
               Nikud (vowel points — type after the consonant)
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-1">
-              {([
-                ['a', 'patah', 'בַ'],
-                ['A', 'qamets', 'בָ'],
-                ['e', 'segol', 'בֶ'],
-                ['E', 'tsere', 'בֵ'],
-                ['i', 'hireq', 'בִ'],
-                ['o', 'holem', 'בֹ'],
-                ['O', 'holem waw', 'וֹ'],
-                ['u', 'qibbuts', 'בֻ'],
-                ['U', 'shureq', 'וּ'],
-              ] as [string, string, string][]).map(([key, name, example]) => (
+              {(
+                [
+                  ['a', 'patah', 'בַ'],
+                  ['A', 'qamets', 'בָ'],
+                  ['e', 'segol', 'בֶ'],
+                  ['E', 'tsere', 'בֵ'],
+                  ['i', 'hireq', 'בִ'],
+                  ['o', 'holem', 'בֹ'],
+                  ['O', 'holem waw', 'וֹ'],
+                  ['u', 'qibbuts', 'בֻ'],
+                  ['U', 'shureq', 'וּ'],
+                ] as [string, string, string][]
+              ).map(([key, name, example]) => (
                 <div key={key} className="flex gap-2 items-center">
-                  <kbd className="bg-green-50 border border-green-100 px-1.5 py-0.5 rounded text-xs font-mono" style={{ color: 'var(--color-primary)' }}>
+                  <kbd
+                    className="bg-green-50 border border-green-100 px-1.5 py-0.5 rounded text-xs font-mono"
+                    style={{ color: 'var(--color-primary)' }}
+                  >
                     {key}
                   </kbd>
                   <span className="text-text-muted text-xs">{name}</span>
@@ -261,14 +269,19 @@ function HebrewKeyboardInner() {
               Sheva &amp; Hateph Vowels
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-1">
-              {([
-                [':', 'sheva', 'בְ'],
-                [':a', 'hateph patah', 'בֲ'],
-                [':e', 'hateph segol', 'בֱ'],
-                [':A', 'hateph qamets', 'בֳ'],
-              ] as [string, string, string][]).map(([key, name, example]) => (
+              {(
+                [
+                  [':', 'sheva', 'בְ'],
+                  [':a', 'hateph patah', 'בֲ'],
+                  [':e', 'hateph segol', 'בֱ'],
+                  [':A', 'hateph qamets', 'בֳ'],
+                ] as [string, string, string][]
+              ).map(([key, name, example]) => (
                 <div key={key} className="flex gap-2 items-center">
-                  <kbd className="bg-green-50 border border-green-100 px-1.5 py-0.5 rounded text-xs font-mono" style={{ color: 'var(--color-primary)' }}>
+                  <kbd
+                    className="bg-green-50 border border-green-100 px-1.5 py-0.5 rounded text-xs font-mono"
+                    style={{ color: 'var(--color-primary)' }}
+                  >
                     {key}
                   </kbd>
                   <span className="text-text-muted text-xs">{name}</span>
@@ -285,16 +298,20 @@ function HebrewKeyboardInner() {
 
           {/* Dagesh */}
           <div>
-            <p className="font-bold mb-2 text-text-muted uppercase tracking-wide text-xs">
-              Other
-            </p>
+            <p className="font-bold mb-2 text-text-muted uppercase tracking-wide text-xs">Other</p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-1">
               <div className="flex gap-2 items-center">
-                <kbd className="bg-green-50 border border-green-100 px-1.5 py-0.5 rounded text-xs font-mono" style={{ color: 'var(--color-primary)' }}>
+                <kbd
+                  className="bg-green-50 border border-green-100 px-1.5 py-0.5 rounded text-xs font-mono"
+                  style={{ color: 'var(--color-primary)' }}
+                >
                   . or *
                 </kbd>
                 <span className="text-text-muted text-xs">dagesh</span>
-                <span dir="rtl" style={{ color: 'var(--color-hebrew)', fontFamily: 'var(--font-hebrew)' }}>
+                <span
+                  dir="rtl"
+                  style={{ color: 'var(--color-hebrew)', fontFamily: 'var(--font-hebrew)' }}
+                >
                   בּ
                 </span>
               </div>

@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import type { Stroke } from '../stroke';
-import { alphaBounds, type GlyphMask, maskFromAlpha } from './mask';
 import {
   DEFAULT_TOLERANCE,
   MAX_REGISTRATION_SHIFT,
   scoreInk,
-  verdictFor,
   VERDICT_THRESHOLDS,
+  verdictFor,
 } from './geom';
+import { alphaBounds, type GlyphMask, maskFromAlpha } from './mask';
 
 type Poly = [number, number][];
 
@@ -49,7 +49,7 @@ function maskFrom(lines: Poly[], stem = STEM): GlyphMask {
 
 /** Ink follows the same centre-lines a student would trace. */
 function inkFrom(lines: Poly[]): Stroke[] {
-  return lines.map(line => ({
+  return lines.map((line) => ({
     points: line.map(([x, y], i) => ({ x, y, pressure: 0.5, t: i * 16 })),
   }));
 }
@@ -85,7 +85,9 @@ describe('scoreInk', () => {
     // Normalization is the whole reason a student can write anywhere on the
     // surface at any size. If this regresses, every score depends on penmanship
     // placement rather than letterform.
-    const shifted = LETTER.map(line => line.map(([x, y]) => [x * 1.4 + 30, y * 1.4 - 10] as [number, number]));
+    const shifted = LETTER.map((line) =>
+      line.map(([x, y]) => [x * 1.4 + 30, y * 1.4 - 10] as [number, number]),
+    );
     const result = scoreInk(inkFrom(shifted), maskFrom(LETTER));
 
     expect(result.score).toBeGreaterThanOrEqual(95);
@@ -192,7 +194,7 @@ describe('scoreInk', () => {
   });
 
   it('honours a tighter tolerance', () => {
-    const drifted = LETTER.map(line => line.map(([x, y]) => [x + 7, y] as [number, number]));
+    const drifted = LETTER.map((line) => line.map(([x, y]) => [x + 7, y] as [number, number]));
     const mask = maskFrom(LETTER);
 
     const lenient = scoreInk(inkFrom(drifted), mask, { tolerance: DEFAULT_TOLERANCE });

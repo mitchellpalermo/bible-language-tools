@@ -99,7 +99,10 @@ describe('WordPopup', () => {
   // The index is ~140 KB and a separate request. The parse does not depend on
   // it, and a reader that lost its lexicon still reads.
   it('still shows the parse when the lemma index will not load', async () => {
-    vi.stubGlobal('fetch', vi.fn(() => Promise.reject(new Error('offline'))));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.reject(new Error('offline'))),
+    );
     showPopup(word());
     await waitFor(() => expect(popup().getByText('Qal wayyiqtol 3ms')).toBeInTheDocument());
     expect(popup().queryByText(/in the Hebrew Bible/)).not.toBeInTheDocument();

@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
-import { srsCards, studyStats, customDecks, users } from './schema';
+import { customDecks, srsCards, studyStats, users } from './schema';
 import { createTestDb } from './test-utils';
 
 const TEST_USER = {
@@ -27,10 +27,7 @@ describe('schema smoke tests', () => {
 
     await db.insert(srsCards).values(card);
 
-    const [result] = await db
-      .select()
-      .from(srsCards)
-      .where(eq(srsCards.wordKey, 'καί'));
+    const [result] = await db.select().from(srsCards).where(eq(srsCards.wordKey, 'καί'));
 
     expect(result).toEqual(card);
   });
@@ -52,10 +49,7 @@ describe('schema smoke tests', () => {
 
     await db.insert(studyStats).values(stats);
 
-    const [result] = await db
-      .select()
-      .from(studyStats)
-      .where(eq(studyStats.userId, TEST_USER.id));
+    const [result] = await db.select().from(studyStats).where(eq(studyStats.userId, TEST_USER.id));
 
     expect(result).toEqual(stats);
   });
@@ -75,10 +69,7 @@ describe('schema smoke tests', () => {
 
     await db.insert(customDecks).values(deck);
 
-    const [result] = await db
-      .select()
-      .from(customDecks)
-      .where(eq(customDecks.id, 'deck-1'));
+    const [result] = await db.select().from(customDecks).where(eq(customDecks.id, 'deck-1'));
 
     expect(result).toEqual(deck);
   });
@@ -99,10 +90,7 @@ describe('schema smoke tests', () => {
 
     await db.delete(users).where(eq(users.id, TEST_USER.id));
 
-    const cards = await db
-      .select()
-      .from(srsCards)
-      .where(eq(srsCards.userId, TEST_USER.id));
+    const cards = await db.select().from(srsCards).where(eq(srsCards.userId, TEST_USER.id));
 
     expect(cards).toHaveLength(0);
   });

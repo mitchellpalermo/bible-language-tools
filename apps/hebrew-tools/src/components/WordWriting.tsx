@@ -5,12 +5,11 @@ import {
   type GlyphMask,
   loadCompositeMask,
   loadGlyphMask,
-  scoreInk,
   type Stroke,
+  scoreInk,
 } from '@tools/shared/ink';
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { type DeckSelection, loadSelection, saveSelection } from '../lib/deck-selection';
 import { hebrewScriptPack } from '../data/script-pack';
 import {
   loadSRSStore,
@@ -35,11 +34,12 @@ import {
   countNewWords,
   countPromptable,
   promptText,
-  type WordPrompt,
   WORD_PROMPTS,
+  type WordPrompt,
   wordScore,
   wordsForSelection,
 } from '../data/writing-words';
+import { type DeckSelection, loadSelection, saveSelection } from '../lib/deck-selection';
 import ErrorBoundary from './ErrorBoundary';
 
 /** Fisher-Yates. The queue shuffles within a band; see `buildWordQueue`. */
@@ -122,14 +122,16 @@ function WordWritingInner() {
     setMasks([]);
 
     Promise.all(
-      cells.map(cell =>
+      cells.map((cell) =>
         cell.pointed
-          ? loadCompositeMask(cell.text, cell.base, MASK_OPTIONS).then(c =>
+          ? loadCompositeMask(cell.text, cell.base, MASK_OPTIONS).then((c) =>
               c ? { whole: c.whole, mark: c.mark } : null,
             )
-          : loadGlyphMask(cell.text, MASK_OPTIONS).then(m => (m ? { whole: m, mark: null } : null)),
+          : loadGlyphMask(cell.text, MASK_OPTIONS).then((m) =>
+              m ? { whole: m, mark: null } : null,
+            ),
       ),
-    ).then(next => {
+    ).then((next) => {
       if (!cancelled) setMasks(next);
     });
     return () => {
@@ -151,13 +153,13 @@ function WordWritingInner() {
 
   const total = wordScore(cellScores);
   const suggested = total === null ? null : suggestedGrade(total);
-  const written = cellStrokes.some(s => s && s.length > 0);
+  const written = cellStrokes.some((s) => s && s.length > 0);
   const newCount = countNewWords(words, srsStore, prompt);
 
   const handleStroke = useCallback(
     (stroke: Stroke) => {
       if (active === null) return;
-      setCellStrokes(prev => {
+      setCellStrokes((prev) => {
         const next = [...prev];
         next[active] = [...(next[active] ?? []), stroke];
         return next;
@@ -176,14 +178,14 @@ function WordWritingInner() {
     if (!current) return;
     const passed = isPassingGrade(which);
 
-    setSrsStore(prev => {
+    setSrsStore((prev) => {
       const updated = nextSRS(prev[current.key] ?? newCard(current.key), qualityFor(which));
       const next = { ...prev, [current.key]: updated };
       saveSRSStore(next);
       return next;
     });
 
-    setStats(prev => {
+    setStats((prev) => {
       const next = recordReview(prev, passed);
       saveStats(next);
       return next;
@@ -202,21 +204,21 @@ function WordWritingInner() {
       followed_suggestion: suggested === null ? null : suggested === which,
     });
 
-    setTally(t => ({ passed: t.passed + (passed ? 1 : 0), missed: t.missed + (passed ? 0 : 1) }));
-    if (index + 1 < queue.length) setIndex(i => i + 1);
+    setTally((t) => ({ passed: t.passed + (passed ? 1 : 0), missed: t.missed + (passed ? 0 : 1) }));
+    if (index + 1 < queue.length) setIndex((i) => i + 1);
     else setDone(true);
   };
 
   const restart = (patch?: Partial<DeckSelection>, nextPrompt?: WordPrompt) => {
     if (patch) {
-      setSelection(prev => {
+      setSelection((prev) => {
         const next = { ...prev, ...patch };
         saveSelection(next);
         return next;
       });
     }
     if (nextPrompt) setPrompt(nextPrompt);
-    setSession(s => s + 1);
+    setSession((s) => s + 1);
     setIndex(0);
     setTally({ passed: 0, missed: 0 });
     setDone(false);
@@ -329,7 +331,7 @@ function WordWritingInner() {
         <button
           type="button"
           onClick={() =>
-            setCellStrokes(prev => {
+            setCellStrokes((prev) => {
               if (active === null) return prev;
               const next = [...prev];
               next[active] = (next[active] ?? []).slice(0, -1);
@@ -344,7 +346,7 @@ function WordWritingInner() {
         <button
           type="button"
           onClick={() =>
-            setCellStrokes(prev => {
+            setCellStrokes((prev) => {
               if (active === null) return prev;
               const next = [...prev];
               next[active] = [];
@@ -397,7 +399,7 @@ function WordWritingInner() {
               : 'The word scores as its weakest letter — one letter wrong is the word wrong.'}
           </p>
           <div className="flex flex-wrap gap-2">
-            {WRITING_GRADES.map(g => (
+            {WRITING_GRADES.map((g) => (
               <button
                 key={g.id}
                 type="button"
@@ -405,9 +407,17 @@ function WordWritingInner() {
                 className="px-4 py-2 rounded-lg font-semibold border transition-colors flex-1 min-w-[5rem]"
                 style={{
                   ...(g.id === 'again'
-                    ? { background: 'var(--color-coral)', color: '#fff', borderColor: 'var(--color-coral)' }
+                    ? {
+                        background: 'var(--color-coral)',
+                        color: '#fff',
+                        borderColor: 'var(--color-coral)',
+                      }
                     : g.id === 'easy'
-                      ? { background: 'var(--color-jade)', color: '#fff', borderColor: 'var(--color-jade)' }
+                      ? {
+                          background: 'var(--color-jade)',
+                          color: '#fff',
+                          borderColor: 'var(--color-jade)',
+                        }
                       : {
                           background: 'var(--color-bg-card)',
                           color: 'var(--color-text)',
@@ -468,7 +478,7 @@ function DeckControls({
 
       {selection.deck === textbook && (
         <div className="flex flex-wrap gap-1.5">
-          {chapters.map(n => {
+          {chapters.map((n) => {
             const on = selection.chapters.includes(n);
             return (
               <button
@@ -478,7 +488,7 @@ function DeckControls({
                 onClick={() =>
                   onChange({
                     chapters: on
-                      ? selection.chapters.filter(c => c !== n)
+                      ? selection.chapters.filter((c) => c !== n)
                       : [...selection.chapters, n].sort((a, b) => a - b),
                   })
                 }
@@ -505,7 +515,7 @@ function DeckControls({
       )}
 
       <div className="flex flex-wrap gap-2 items-center">
-        {WORD_PROMPTS.map(p => (
+        {WORD_PROMPTS.map((p) => (
           <Chip
             key={p.id}
             label={p.label}
@@ -518,8 +528,8 @@ function DeckControls({
 
       {prompt === 'transliteration' && promptable === 0 && (
         <p className="text-sm text-text-muted">
-          None of these words carry a transliteration. The textbook vocabulary is sourced from
-          the Hebrew Bible itself, which has no romanization — try "From the meaning".
+          None of these words carry a transliteration. The textbook vocabulary is sourced from the
+          Hebrew Bible itself, which has no romanization — try "From the meaning".
         </p>
       )}
     </div>
@@ -546,7 +556,11 @@ function Chip({
       className="px-3 py-1.5 rounded-full text-sm font-medium border transition-colors"
       style={
         active
-          ? { background: 'var(--color-primary)', color: '#fff', borderColor: 'var(--color-primary)' }
+          ? {
+              background: 'var(--color-primary)',
+              color: '#fff',
+              borderColor: 'var(--color-primary)',
+            }
           : {
               background: 'var(--color-bg-card)',
               color: 'var(--color-text-muted)',

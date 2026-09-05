@@ -244,7 +244,14 @@ describe('GNTParseQuestion', () => {
           item={FINITE_ITEM}
           index={0}
           total={5}
-          answer={{ ...emptyGNTAnswer(), tense: 'present', voice: 'active', mood: 'indicative', person: '3rd', number: 'singular' }}
+          answer={{
+            ...emptyGNTAnswer(),
+            tense: 'present',
+            voice: 'active',
+            mood: 'indicative',
+            person: '3rd',
+            number: 'singular',
+          }}
           onChange={onChange}
           onSubmit={vi.fn()}
         />,

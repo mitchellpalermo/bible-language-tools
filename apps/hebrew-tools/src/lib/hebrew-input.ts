@@ -35,31 +35,31 @@ export const SHEVA = 'ְ';
  *   - Lowercase s = samek (ס); uppercase S = shin with shin dot (שׁ); $ = shin with sin dot (שׂ)
  */
 export const CONSONANT_MAP: Record<string, string> = {
-  "'": 'א',             // א alef
-  b:   'ב',             // ב bet
-  g:   'ג',             // ג gimel
-  d:   'ד',             // ד dalet
-  h:   'ה',             // ה he
-  w:   'ו',             // ו vav
-  v:   'ו',             // ו vav (alternate)
-  z:   'ז',             // ז zayin
-  c:   'ח',             // ח het
-  t:   'ט',             // ט tet
-  y:   'י',             // י yod
-  k:   'כ',             // כ kaf
-  l:   'ל',             // ל lamed
-  m:   'מ',             // מ mem
-  n:   'נ',             // נ nun
-  s:   'ס',             // ס samek
-  '`': 'ע',             // ע ayin
-  p:   'פ',             // פ pe
-  x:   'צ',             // צ tsade
-  q:   'ק',             // ק qof
-  r:   'ר',             // ר resh
-  S:   'שׁ',       // שׁ shin (shin letter + shin dot U+05C1)
-  '#': 'שׁ',       // שׁ shin (alternate key)
-  '$': 'שׂ',       // שׂ sin  (shin letter + sin dot U+05C2)
-  T:   'ת',             // ת tav
+  "'": 'א', // א alef
+  b: 'ב', // ב bet
+  g: 'ג', // ג gimel
+  d: 'ד', // ד dalet
+  h: 'ה', // ה he
+  w: 'ו', // ו vav
+  v: 'ו', // ו vav (alternate)
+  z: 'ז', // ז zayin
+  c: 'ח', // ח het
+  t: 'ט', // ט tet
+  y: 'י', // י yod
+  k: 'כ', // כ kaf
+  l: 'ל', // ל lamed
+  m: 'מ', // מ mem
+  n: 'נ', // נ nun
+  s: 'ס', // ס samek
+  '`': 'ע', // ע ayin
+  p: 'פ', // פ pe
+  x: 'צ', // צ tsade
+  q: 'ק', // ק qof
+  r: 'ר', // ר resh
+  S: 'שׁ', // שׁ shin (shin letter + shin dot U+05C1)
+  '#': 'שׁ', // שׁ shin (alternate key)
+  $: 'שׂ', // שׂ sin  (shin letter + sin dot U+05C2)
+  T: 'ת', // ת tav
 };
 
 /**
@@ -70,13 +70,13 @@ export const CONSONANT_MAP: Record<string, string> = {
  * level; they are NOT in this map.
  */
 export const NIKUD_MAP: Record<string, string> = {
-  a: 'ַ',  // פַ patah
-  A: 'ָ',  // פָ qamets (gadol)
-  e: 'ֶ',  // פֶ segol
-  E: 'ֵ',  // פֵ tsere
-  i: 'ִ',  // פִ hireq
-  o: 'ֹ',  // פֹ holem (simple dot — does not include waw)
-  u: 'ֻ',  // פֻ qibbuts
+  a: 'ַ', // פַ patah
+  A: 'ָ', // פָ qamets (gadol)
+  e: 'ֶ', // פֶ segol
+  E: 'ֵ', // פֵ tsere
+  i: 'ִ', // פִ hireq
+  o: 'ֹ', // פֹ holem (simple dot — does not include waw)
+  u: 'ֻ', // פֻ qibbuts
 };
 
 /**
@@ -88,8 +88,8 @@ export const NIKUD_MAP: Record<string, string> = {
  * These insert a full vav character so that the waw itself appears in the text.
  */
 export const COMPOUND_NIKUD_MAP: Record<string, string> = {
-  O: 'וֹ',  // וֹ holem waw
-  U: 'וּ',  // וּ shureq
+  O: 'וֹ', // וֹ holem waw
+  U: 'וּ', // וּ shureq
 };
 
 /**
@@ -98,9 +98,9 @@ export const COMPOUND_NIKUD_MAP: Record<string, string> = {
  * one of these keys is pressed immediately after.
  */
 export const HATEPH_MAP: Record<string, string> = {
-  a: 'ֲ',  // פֲ hateph patah
-  e: 'ֱ',  // פֱ hateph segol
-  A: 'ֳ',  // פֳ hateph qamets
+  a: 'ֲ', // פֲ hateph patah
+  e: 'ֱ', // פֱ hateph segol
+  A: 'ֳ', // פֳ hateph qamets
 };
 
 // ---------------------------------------------------------------------------
@@ -112,11 +112,11 @@ export const HATEPH_MAP: Record<string, string> = {
  * a word. Maps the standard (non-final) form to the final form.
  */
 export const FINAL_FORM_MAP: Record<string, string> = {
-  'כ': 'ך',  // כ → ך  kaf → final kaf
-  'מ': 'ם',  // מ → ם  mem → final mem
-  'נ': 'ן',  // נ → ן  nun → final nun
-  'פ': 'ף',  // פ → ף  pe  → final pe
-  'צ': 'ץ',  // צ → ץ  tsade → final tsade
+  כ: 'ך', // כ → ך  kaf → final kaf
+  מ: 'ם', // מ → ם  mem → final mem
+  נ: 'ן', // נ → ן  nun → final nun
+  פ: 'ף', // פ → ף  pe  → final pe
+  צ: 'ץ', // צ → ץ  tsade → final tsade
 };
 
 /**

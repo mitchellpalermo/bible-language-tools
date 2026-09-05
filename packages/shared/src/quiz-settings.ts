@@ -26,9 +26,7 @@ export function createQuizSettings(storageKey: string) {
       const parsed = JSON.parse(raw) as Partial<QuizSettings>;
       return {
         accentStrict:
-          typeof parsed.accentStrict === 'boolean'
-            ? parsed.accentStrict
-            : DEFAULTS.accentStrict,
+          typeof parsed.accentStrict === 'boolean' ? parsed.accentStrict : DEFAULTS.accentStrict,
         density: isValidDensity(parsed.density) ? parsed.density : DEFAULTS.density,
       };
     } catch {

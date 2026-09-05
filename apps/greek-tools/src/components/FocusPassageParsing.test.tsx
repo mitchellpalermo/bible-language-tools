@@ -1,9 +1,8 @@
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FocusPassage } from '../data/focusPassages';
 import type { MorphBook } from '../data/morphgnt';
-import type { GNTParseItem } from '../lib/gnt-parse';
 import FocusPassageParsing from './FocusPassageParsing';
 
 vi.mock('../data/morphgnt', () => ({
@@ -76,7 +75,9 @@ describe('FocusPassageParsing', () => {
   });
 
   it('shows "No verbs found" when passage has no verbs', async () => {
-    mockFetchBook.mockResolvedValue({ '1': { '1': [{ text: 'ἐν', lemma: 'ἐν', pos: 'P-', parsing: '--------' }] } });
+    mockFetchBook.mockResolvedValue({
+      '1': { '1': [{ text: 'ἐν', lemma: 'ἐν', pos: 'P-', parsing: '--------' }] },
+    });
     render(<FocusPassageParsing passage={STUB_PASSAGE} bookName="Revelation" />);
     await waitFor(() => {
       expect(screen.getByText(/no verbs found/i)).toBeInTheDocument();
@@ -86,7 +87,9 @@ describe('FocusPassageParsing', () => {
   it('starts a session and shows parse question', async () => {
     const user = userEvent.setup();
     render(<FocusPassageParsing passage={STUB_PASSAGE} bookName="Revelation" />);
-    await waitFor(() => expect(screen.getByRole('button', { name: /start parsing/i })).not.toBeDisabled());
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /start parsing/i })).not.toBeDisabled(),
+    );
     await user.click(screen.getByRole('button', { name: /start parsing/i }));
     expect(screen.getByText(/parse the highlighted form/i)).toBeInTheDocument();
   });
@@ -133,9 +136,7 @@ describe('FocusPassageParsing', () => {
       await user.selectOptions(screen.getByLabelText('Number'), 'singular');
       await user.click(screen.getByRole('button', { name: /submit/i }));
       await waitFor(() =>
-        expect(
-          screen.getByRole('button', { name: /next form|see results/i }),
-        ).toBeInTheDocument(),
+        expect(screen.getByRole('button', { name: /next form|see results/i })).toBeInTheDocument(),
       );
       await user.click(screen.getByRole('button', { name: /next form|see results/i }));
     }

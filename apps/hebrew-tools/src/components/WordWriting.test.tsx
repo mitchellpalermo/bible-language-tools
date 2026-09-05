@@ -226,9 +226,7 @@ describe('WordWriting grading', () => {
     render(<WordWriting />);
 
     // The counter reads "n / total"; grade every word in the queue.
-    const total = Number(
-      screen.getByText(/^\d+ \/ \d+/).textContent?.match(/\/\s*(\d+)/)?.[1],
-    );
+    const total = Number(screen.getByText(/^\d+ \/ \d+/).textContent?.match(/\/\s*(\d+)/)?.[1]);
     expect(total).toBeGreaterThan(0);
 
     for (let i = 0; i < total; i++) {

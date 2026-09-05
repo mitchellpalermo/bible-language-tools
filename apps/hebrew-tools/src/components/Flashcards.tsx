@@ -1,22 +1,6 @@
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  categoryCounts,
-  categoryLabel,
-  chapterStats,
-  describeChapters,
-  TEXTBOOK_IDS,
-  TEXTBOOKS,
-  type TextbookId,
-  VOCAB_CATEGORIES,
-  type VocabCategory,
-  wordsInChapters,
-} from '../data/textbooks';
-import { hasAuthHint } from '../lib/auth-cookie';
-import { type DeckSelection, loadSelection, saveSelection } from '../lib/deck-selection';
-import { deleteServerProgress } from '../lib/sync-manager';
-import { cardKey, type HebrewGender, type HebrewVocabWord, vocabulary } from '../data/vocabulary';
-import {
   isDue,
   loadSRSStore,
   loadStats,
@@ -25,10 +9,25 @@ import {
   normalizeKey,
   recordReview,
   type SRSCard,
+  STREAK_THRESHOLD,
   saveSRSStore,
   saveStats,
-  STREAK_THRESHOLD,
 } from '../data/srs';
+import {
+  categoryCounts,
+  categoryLabel,
+  chapterStats,
+  describeChapters,
+  TEXTBOOK_IDS,
+  TEXTBOOKS,
+  type TextbookId,
+  VOCAB_CATEGORIES,
+  wordsInChapters,
+} from '../data/textbooks';
+import { cardKey, type HebrewGender, type HebrewVocabWord, vocabulary } from '../data/vocabulary';
+import { hasAuthHint } from '../lib/auth-cookie';
+import { type DeckSelection, loadSelection, saveSelection } from '../lib/deck-selection';
+import { deleteServerProgress } from '../lib/sync-manager';
 import ChapterPicker from './ChapterPicker';
 import ErrorBoundary from './ErrorBoundary';
 
@@ -609,7 +608,11 @@ function FlashcardsInner() {
         }`}
       >
         {/* Front side: Hebrew word */}
-        <p dir="rtl" className="leading-tight text-5xl font-bold" style={{ fontFamily: 'var(--font-hebrew)', color: 'var(--color-hebrew)' }}>
+        <p
+          dir="rtl"
+          className="leading-tight text-5xl font-bold"
+          style={{ fontFamily: 'var(--font-hebrew)', color: 'var(--color-hebrew)' }}
+        >
           {card.hebrew}
         </p>
         <p className="text-text-muted text-xs mt-2 font-medium uppercase tracking-wide">
@@ -640,7 +643,10 @@ function FlashcardsInner() {
             )}
 
             {(card.gender || card.root) && (
-              <p className="text-text-muted text-xs mt-1 uppercase tracking-wide font-medium" dir="ltr">
+              <p
+                className="text-text-muted text-xs mt-1 uppercase tracking-wide font-medium"
+                dir="ltr"
+              >
                 {card.gender && GENDER_LABELS[card.gender]}
                 {card.gender && card.root && ' · '}
                 {card.root && (
@@ -660,18 +666,19 @@ function FlashcardsInner() {
             {/* Forms the textbook prints alongside the headword. These are what
                 the chapter quizzes actually ask for on nouns. */}
             {(card.construct || card.plural) && (
-              <p className="text-text-muted text-xs mt-1.5 uppercase tracking-wide font-medium" dir="ltr">
+              <p
+                className="text-text-muted text-xs mt-1.5 uppercase tracking-wide font-medium"
+                dir="ltr"
+              >
                 {card.construct && (
                   <>
-                    construct{' '}
-                    <HebrewInline>{card.construct}</HebrewInline>
+                    construct <HebrewInline>{card.construct}</HebrewInline>
                   </>
                 )}
                 {card.construct && card.plural && ' · '}
                 {card.plural && (
                   <>
-                    plural{' '}
-                    <HebrewInline>{card.plural}</HebrewInline>
+                    plural <HebrewInline>{card.plural}</HebrewInline>
                   </>
                 )}
               </p>
@@ -682,7 +689,13 @@ function FlashcardsInner() {
                 {card.stems.map((s) => (
                   <li key={s.stem}>
                     <span className="font-semibold text-text">{s.stem}</span>
-                    {s.form && <> <HebrewInline>{s.form}</HebrewInline></>} &mdash; {s.gloss}
+                    {s.form && (
+                      <>
+                        {' '}
+                        <HebrewInline>{s.form}</HebrewInline>
+                      </>
+                    )}{' '}
+                    &mdash; {s.gloss}
                   </li>
                 ))}
               </ul>
@@ -695,7 +708,10 @@ function FlashcardsInner() {
             )}
 
             {card.chapters && card.chapters.length > 0 && (
-              <p className="text-text-muted/70 text-[11px] mt-3 uppercase tracking-wide font-medium" dir="ltr">
+              <p
+                className="text-text-muted/70 text-[11px] mt-3 uppercase tracking-wide font-medium"
+                dir="ltr"
+              >
                 {card.chapters
                   .map(
                     (ref) =>

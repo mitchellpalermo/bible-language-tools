@@ -14,5 +14,5 @@ import { createDb, type Language } from '@tools/db';
 /** The language tag on every row hebrew-tools reads or writes. */
 export const LANGUAGE: Language = 'hebrew';
 
-export { createDb };
 export type { Language };
+export { createDb };

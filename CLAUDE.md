@@ -164,6 +164,42 @@ GitHub Actions workflows in `.github/workflows/`:
 
 Changing `packages/shared` triggers both app workflows.
 
+Both workflows run `pnpm lint` before the tests. It is the same command in both
+because the lint gate is repo-wide, not per app — running it twice is cheap and
+it means the gate fires whichever workflow a change happens to trigger.
+
+## Linting
+
+One Biome config governs the whole monorepo. `biome.json` at the root is the
+`"root": true` config and holds every rule; each workspace package has a
+three-line `biome.json` that is `"root": false` plus `"extends": "//"`, so
+running Biome from inside a package — an editor, a `lint-staged` task with its
+cwd in an app — resolves the same rules the root run uses. `pnpm lint` and
+`pnpm lint:fix` at the root are the entry points.
+
+Things to know before changing it:
+
+- **Path scoping lives in the root config only.** A nested config's
+  `files.includes` is *not* honoured during a root run — Biome discovers files
+  against the root's patterns and uses the nested config for rules. Putting
+  per-app excludes in the nested files silently checks everything.
+- **`includes` patterns need a `**` prefix to match a nested path.**
+  `!apps/*/src/styles` matched nothing; `!**/src/styles` matched. Every negation
+  in the root config is written that way, and adding one without it will look
+  like it worked while the files stay in the sweep.
+- **Generated files that are committed must be excluded, or a `--check` script
+  starts failing.** `apps/hebrew-tools/scripts/build-vocabulary.mjs --check` and
+  `extract-morph-codes.mjs --check` compare their output to the committed file
+  byte for byte, so a formatter pass over `src/data/vocabulary-garrett.ts` or
+  `src/lib/morph-codes.json` makes them stale against a generator that would
+  never produce that text. Same reasoning for `scripts/data/*.json` (scanned
+  handout input), `packages/db/migrations` (drizzle snapshots), and
+  `apps/greek-tools/src/data/vocabulary.ts` (rewritten on every build).
+- **Warnings do not fail the build, by design.** `biome check` exits 0 with
+  warnings and 1 on errors. The ~210 outstanding warnings — `noExplicitAny`,
+  the a11y set, `useExhaustiveDependencies` — each need a real code change and a
+  real review; promoting them is its own PR, not a formatting sweep.
+
 ## Greek-tools app notes
 
 The production build runs two data scripts before `astro build`:

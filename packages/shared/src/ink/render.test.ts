@@ -32,7 +32,7 @@ class RecordingSink implements PathSink {
     this.calls.push({ op: 'closePath', args: [] });
   }
   count(op: Call['op']) {
-    return this.calls.filter(c => c.op === op).length;
+    return this.calls.filter((c) => c.op === op).length;
   }
 }
 
@@ -92,12 +92,18 @@ describe('appendStroke', () => {
 
     expect(sink.count('arc')).toBe(1);
     expect(sink.count('closePath')).toBe(0);
-    expect(sink.calls.find(c => c.op === 'arc')?.args.slice(0, 2)).toEqual([5, 5]);
+    expect(sink.calls.find((c) => c.op === 'arc')?.args.slice(0, 2)).toEqual([5, 5]);
   });
 
   it('emits a closed quad plus a cap at each end for one segment', () => {
     const sink = new RecordingSink();
-    appendStroke(sink, strokeOf([[0, 0], [10, 0]]));
+    appendStroke(
+      sink,
+      strokeOf([
+        [0, 0],
+        [10, 0],
+      ]),
+    );
 
     expect(sink.count('closePath')).toBe(1);
     expect(sink.count('lineTo')).toBe(3);
@@ -106,7 +112,15 @@ describe('appendStroke', () => {
 
   it('adds one quad per segment and one joint circle per point', () => {
     const sink = new RecordingSink();
-    appendStroke(sink, strokeOf([[0, 0], [10, 0], [20, 0], [30, 0]]));
+    appendStroke(
+      sink,
+      strokeOf([
+        [0, 0],
+        [10, 0],
+        [20, 0],
+        [30, 0],
+      ]),
+    );
 
     expect(sink.count('closePath')).toBe(3);
     expect(sink.count('arc')).toBe(4);
@@ -114,7 +128,13 @@ describe('appendStroke', () => {
 
   it('skips the quad for a repeated point but still caps it', () => {
     const sink = new RecordingSink();
-    appendStroke(sink, strokeOf([[0, 0], [0, 0]]));
+    appendStroke(
+      sink,
+      strokeOf([
+        [0, 0],
+        [0, 0],
+      ]),
+    );
 
     expect(sink.count('closePath')).toBe(0);
     expect(sink.count('arc')).toBe(2);
@@ -123,10 +143,28 @@ describe('appendStroke', () => {
   it('varies width with pressure', () => {
     const light = new RecordingSink();
     const heavy = new RecordingSink();
-    appendStroke(light, strokeOf([[0, 0], [10, 0]], 0.1));
-    appendStroke(heavy, strokeOf([[0, 0], [10, 0]], 0.9));
+    appendStroke(
+      light,
+      strokeOf(
+        [
+          [0, 0],
+          [10, 0],
+        ],
+        0.1,
+      ),
+    );
+    appendStroke(
+      heavy,
+      strokeOf(
+        [
+          [0, 0],
+          [10, 0],
+        ],
+        0.9,
+      ),
+    );
 
-    const radius = (s: RecordingSink) => Number(s.calls.find(c => c.op === 'arc')?.args[2] ?? 0);
+    const radius = (s: RecordingSink) => Number(s.calls.find((c) => c.op === 'arc')?.args[2] ?? 0);
     expect(radius(heavy)).toBeGreaterThan(radius(light));
   });
 
@@ -147,16 +185,23 @@ describe('appendStroke', () => {
 
     // ...so every arc must be emitted counterclockwise to match.
     const sink = new RecordingSink();
-    appendStroke(sink, strokeOf([[0, 0], [10, 0], [10, 10]]));
-    const arcs = sink.calls.filter(c => c.op === 'arc');
+    appendStroke(
+      sink,
+      strokeOf([
+        [0, 0],
+        [10, 0],
+        [10, 10],
+      ]),
+    );
+    const arcs = sink.calls.filter((c) => c.op === 'arc');
     expect(arcs).not.toHaveLength(0);
-    expect(arcs.every(a => a.args[5] === true)).toBe(true);
+    expect(arcs.every((a) => a.args[5] === true)).toBe(true);
   });
 
   it('winds a lone dot the same way', () => {
     const sink = new RecordingSink();
     appendStroke(sink, strokeOf([[5, 5]]));
-    expect(sink.calls.find(c => c.op === 'arc')?.args[5]).toBe(true);
+    expect(sink.calls.find((c) => c.op === 'arc')?.args[5]).toBe(true);
   });
 
   it('emits nothing for an empty stroke', () => {
@@ -169,7 +214,16 @@ describe('appendStroke', () => {
 describe('appendStrokes', () => {
   it('accumulates every stroke into one path', () => {
     const sink = new RecordingSink();
-    appendStrokes(sink, [strokeOf([[0, 0], [10, 0]]), strokeOf([[0, 20], [10, 20]])]);
+    appendStrokes(sink, [
+      strokeOf([
+        [0, 0],
+        [10, 0],
+      ]),
+      strokeOf([
+        [0, 20],
+        [10, 20],
+      ]),
+    ]);
     expect(sink.count('closePath')).toBe(2);
   });
 });

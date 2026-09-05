@@ -4,8 +4,8 @@
 // The database is shared with greek-tools, so several of these tests exist
 // specifically to prove hebrew writes never touch greek rows.
 
-import { createTestDb } from '@tools/db/test-utils';
 import { srsCards, studyStats as studyStatsTable, syncState, users } from '@tools/db/schema';
+import { createTestDb } from '@tools/db/test-utils';
 import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { SRSCard, StudyStats } from '../data/srs';
@@ -160,8 +160,14 @@ describe('a stale client cannot regress stored progress', () => {
   });
 
   it('does not roll a card back to fewer repetitions', async () => {
-    await putProgress(db, USER, { srsStore: { מֶלֶךְ: card({ repetition: 8 }) }, studyStats: stats() });
-    await putProgress(db, USER, { srsStore: { מֶלֶךְ: card({ repetition: 1 }) }, studyStats: stats() });
+    await putProgress(db, USER, {
+      srsStore: { מֶלֶךְ: card({ repetition: 8 }) },
+      studyStats: stats(),
+    });
+    await putProgress(db, USER, {
+      srsStore: { מֶלֶךְ: card({ repetition: 1 }) },
+      studyStats: stats(),
+    });
 
     expect((await getProgress(db, USER))?.srsStore.מֶלֶךְ.repetition).toBe(8);
   });
@@ -183,7 +189,10 @@ describe('a stale client cannot regress stored progress', () => {
   });
 
   it('still accepts genuinely new progress from that client', async () => {
-    await putProgress(db, USER, { srsStore: { מֶלֶךְ: card({ repetition: 2 }) }, studyStats: stats() });
+    await putProgress(db, USER, {
+      srsStore: { מֶלֶךְ: card({ repetition: 2 }) },
+      studyStats: stats(),
+    });
     await putProgress(db, USER, {
       srsStore: { מֶלֶךְ: card({ repetition: 6 }), צֹאן: card({ key: 'צֹאן' }) },
       studyStats: stats(),

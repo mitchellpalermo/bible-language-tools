@@ -236,7 +236,10 @@ function GNTSelect<T extends string>({
   const id = label.toLowerCase();
   return (
     <div className={className}>
-      <label htmlFor={id} className="block text-xs font-semibold uppercase tracking-wide text-text-muted mb-1">
+      <label
+        htmlFor={id}
+        className="block text-xs font-semibold uppercase tracking-wide text-text-muted mb-1"
+      >
         {label}
       </label>
       <select

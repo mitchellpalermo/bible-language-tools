@@ -8,10 +8,10 @@ import {
   loadSRSStore,
   loadStats,
   newCard,
-  saveSRSStore,
-  saveStats,
   type SRSCard,
   type StudyStats,
+  saveSRSStore,
+  saveStats,
 } from './srs';
 
 function dateStr(offsetDays = 0): string {

@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CATEGORY_IDS, TEXTBOOK_IDS, wordsInChapter } from './textbooks';
 import { cardKey, type HebrewVocabWord, mergeVocabulary, vocabulary } from './vocabulary';
-import { gd } from './vocabulary-types';
 import {
   CORRECTIONS,
   EDITORIAL_NOTES,
@@ -10,6 +9,7 @@ import {
   OSHB_RESPELLINGS,
   OSHB_UNMATCHED,
 } from './vocabulary-garrett';
+import { gd } from './vocabulary-types';
 
 // Hebrew consonants (U+05D0-05EA) + nikud (U+05B0-U+05BD, U+05C7) + shin/sin
 // dots (U+05C1-U+05C2) + maqqef (U+05BE). Cantillation is intentionally
@@ -119,7 +119,10 @@ describe('vocabulary data', () => {
     for (const [hebrew, words] of byHebrew) {
       if (words.length === 1) continue;
       const senses = words.map((w) => w.sense);
-      expect(senses.every((s) => s !== undefined), `${hebrew} repeats without a sense`).toBe(true);
+      expect(
+        senses.every((s) => s !== undefined),
+        `${hebrew} repeats without a sense`,
+      ).toBe(true);
       expect(new Set(senses).size, `${hebrew} repeats a sense`).toBe(words.length);
     }
   });
@@ -172,9 +175,7 @@ describe('vocabulary data', () => {
 
   it('HebrewVocabWord shape has all required fields', () => {
     const word: HebrewVocabWord = vocabulary[0];
-    expect(Object.keys(word)).toEqual(
-      expect.arrayContaining(['hebrew', 'gloss', 'partOfSpeech']),
-    );
+    expect(Object.keys(word)).toEqual(expect.arrayContaining(['hebrew', 'gloss', 'partOfSpeech']));
   });
 
   it('every construct and plural form is valid pointed Hebrew', () => {
@@ -203,7 +204,9 @@ describe('vocabulary data', () => {
 
 describe('Garrett & DeRouchie import', () => {
   it('brings in the whole handout, chapters 2 through 31', () => {
-    const chapters = new Set(GARRETT_VOCABULARY.flatMap((w) => (w.chapters ?? []).map((c) => c.chapter)));
+    const chapters = new Set(
+      GARRETT_VOCABULARY.flatMap((w) => (w.chapters ?? []).map((c) => c.chapter)),
+    );
     expect(Math.min(...chapters)).toBe(2);
     expect(Math.max(...chapters)).toBe(31);
     expect(chapters.size).toBe(30);
@@ -260,7 +263,7 @@ describe('Garrett & DeRouchie import', () => {
     }
   });
 
-  it('gives every resolved entry a well-formed Strong\'s number', () => {
+  it("gives every resolved entry a well-formed Strong's number", () => {
     GARRETT_VOCABULARY.forEach((word) => {
       if (word.strong === undefined) return;
       expect(VALID_STRONG.test(word.strong), `Bad Strong's on ${word.hebrew}: ${word.strong}`).toBe(
@@ -285,7 +288,10 @@ describe('Garrett & DeRouchie import', () => {
       expect(entry.reason.trim().length, `No reason for ${entry.entry}`).toBeGreaterThan(0);
       const word = GARRETT_VOCABULARY.find((w) => cardKey(w) === entry.entry);
       expect(word, `Exception names an absent entry: ${entry.entry}`).toBeDefined();
-      expect(word?.strong, `${entry.entry} resolves and no longer needs an exception`).toBeUndefined();
+      expect(
+        word?.strong,
+        `${entry.entry} resolves and no longer needs an exception`,
+      ).toBeUndefined();
     }
   });
 
@@ -295,7 +301,9 @@ describe('Garrett & DeRouchie import', () => {
     const withFrequency = GARRETT_VOCABULARY.filter((w) => w.frequency !== undefined);
     expect(withFrequency.length).toBeGreaterThan(350);
     withFrequency.forEach((word) => {
-      expect(Number.isInteger(word.frequency), `Non-integer frequency on ${word.hebrew}`).toBe(true);
+      expect(Number.isInteger(word.frequency), `Non-integer frequency on ${word.hebrew}`).toBe(
+        true,
+      );
       expect(word.frequency).toBeGreaterThan(0);
       expect(word.strong, `Frequency without a lemma on ${word.hebrew}`).toBeDefined();
     });
@@ -312,7 +320,7 @@ describe('Garrett & DeRouchie import', () => {
     });
   });
 
-  it('separates every homograph by Strong\'s number, not only by hand-written sense', () => {
+  it("separates every homograph by Strong's number, not only by hand-written sense", () => {
     const byHebrew = new Map<string, HebrewVocabWord[]>();
     for (const word of GARRETT_VOCABULARY) {
       byHebrew.set(word.hebrew, [...(byHebrew.get(word.hebrew) ?? []), word]);
@@ -358,7 +366,7 @@ describe('Garrett & DeRouchie import', () => {
     }
   });
 
-  it('keeps the textbook\'s gender where the corpus disagrees, and says where', () => {
+  it("keeps the textbook's gender where the corpus disagrees, and says where", () => {
     for (const divergence of GENDER_DIVERGENCES) {
       expect(divergence.textbook).not.toBe(divergence.corpus);
       const word = GARRETT_VOCABULARY.find((w) => w.hebrew === divergence.hebrew);
@@ -369,7 +377,7 @@ describe('Garrett & DeRouchie import', () => {
     }
   });
 
-  it('writes holam male as vav-then-holam, not the handout\'s reverse order', () => {
+  it("writes holam male as vav-then-holam, not the handout's reverse order", () => {
     // The handout mixes the WLC order (holam before the vav) into an otherwise
     // standard text; rendered as-is the vowel lands on the wrong consonant.
     const wlcOrder = /\u05B9\u05BC?\u05D5/;
@@ -428,14 +436,24 @@ describe('Garrett & DeRouchie import', () => {
 
 describe('mergeVocabulary', () => {
   const curated: HebrewVocabWord[] = [
-    { hebrew: 'דָּבָר', transliteration: 'dābār', gloss: 'word', frequency: 1400, partOfSpeech: 'noun' },
+    {
+      hebrew: 'דָּבָר',
+      transliteration: 'dābār',
+      gloss: 'word',
+      frequency: 1400,
+      partOfSpeech: 'noun',
+    },
   ];
 
   it('folds a matching import into the curated entry rather than duplicating it', () => {
     const merged = mergeVocabulary(curated, [
-      { hebrew: 'דָּבָר', gloss: 'word, thing', partOfSpeech: 'noun', gender: 'm', chapters: [
-        { textbook: 'garrett-derouchie', chapter: 5, category: 'core' },
-      ] },
+      {
+        hebrew: 'דָּבָר',
+        gloss: 'word, thing',
+        partOfSpeech: 'noun',
+        gender: 'm',
+        chapters: [{ textbook: 'garrett-derouchie', chapter: 5, category: 'core' }],
+      },
     ]);
     expect(merged).toHaveLength(1);
     // Curated wins where it speaks...
@@ -467,16 +485,21 @@ describe('mergeVocabulary', () => {
     const ref = { textbook: 'garrett-derouchie', chapter: 1, category: 'core' } as const;
     const merged = mergeVocabulary(
       [{ hebrew: 'דָּבָר', gloss: 'word', partOfSpeech: 'noun', chapters: [ref] }],
-      [{ hebrew: 'דָּבָר', gloss: 'word', partOfSpeech: 'noun', chapters: [ref, { ...ref, chapter: 5 }] }],
+      [
+        {
+          hebrew: 'דָּבָר',
+          gloss: 'word',
+          partOfSpeech: 'noun',
+          chapters: [ref, { ...ref, chapter: 5 }],
+        },
+      ],
     );
     expect(merged[0].chapters).toEqual([ref, { ...ref, chapter: 5 }]);
   });
 
   it('does not mutate its inputs', () => {
     const input: HebrewVocabWord[] = [{ hebrew: 'דָּבָר', gloss: 'word', partOfSpeech: 'noun' }];
-    mergeVocabulary(input, [
-      { hebrew: 'דָּבָר', gloss: 'word', partOfSpeech: 'noun', gender: 'm' },
-    ]);
+    mergeVocabulary(input, [{ hebrew: 'דָּבָר', gloss: 'word', partOfSpeech: 'noun', gender: 'm' }]);
     expect(input[0].gender).toBeUndefined();
   });
 

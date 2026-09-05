@@ -19,7 +19,11 @@ describe('normalizeSelection', () => {
   });
 
   it('keeps a valid selection intact', () => {
-    const input = { deck: 'garrett-derouchie', chapters: [1, 2, 3], categories: ['core', 'proper'] };
+    const input = {
+      deck: 'garrett-derouchie',
+      chapters: [1, 2, 3],
+      categories: ['core', 'proper'],
+    };
     expect(normalizeSelection(input)).toEqual(input);
   });
 

@@ -39,7 +39,8 @@ describe('SyncControls', () => {
       () =>
         new Promise<{ hadServerData: boolean; ok: boolean }>((resolve) => {
           resolveSync = (result) => {
-            if (result.ok) localStorage.setItem('greek-tools-last-synced', new Date().toISOString());
+            if (result.ok)
+              localStorage.setItem('greek-tools-last-synced', new Date().toISOString());
             resolve(result);
           };
         }),

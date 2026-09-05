@@ -6,8 +6,8 @@ import {
   loadCompositeMask,
   loadGlyphMask,
   renderableText,
-  scoreInk,
   type Stroke,
+  scoreInk,
   type Verdict,
   type WritableGlyph,
 } from '@tools/shared/ink';
@@ -83,7 +83,7 @@ function WritingPracticeInner() {
   // repetitions when they are minutes apart — see `shouldUpdateCard`.
   const reviewedRef = useRef<Set<string>>(new Set());
 
-  const deck = DECKS.find(d => d.id === deckId) ?? DECKS[0];
+  const deck = DECKS.find((d) => d.id === deckId) ?? DECKS[0];
 
   // Built once per session, not per review. It reads the store directly rather
   // than depending on `srsStore` so that grading a card cannot reorder the
@@ -121,12 +121,12 @@ function WritingPracticeInner() {
       direction: hebrewScriptPack.direction,
     };
     const pending: Promise<ScoringMasks | null> = underlyingText
-      ? loadCompositeMask(referenceText, underlyingText, options).then(c =>
+      ? loadCompositeMask(referenceText, underlyingText, options).then((c) =>
           c ? { whole: c.whole, mark: c.mark } : null,
         )
-      : loadGlyphMask(referenceText, options).then(m => (m ? { whole: m, mark: null } : null));
+      : loadGlyphMask(referenceText, options).then((m) => (m ? { whole: m, mark: null } : null));
 
-    pending.then(next => {
+    pending.then((next) => {
       if (!cancelled) setMasks(next);
     });
     return () => {
@@ -145,14 +145,14 @@ function WritingPracticeInner() {
   );
 
   const handleStrokeComplete = useCallback((stroke: Stroke) => {
-    setStrokes(prev => [...prev, stroke]);
+    setStrokes((prev) => [...prev, stroke]);
   }, []);
 
   const handlePenDetected = useCallback(() => setPenDetected(true), []);
 
   const startDeck = (id: string) => {
     setDeckId(id);
-    setSession(s => s + 1);
+    setSession((s) => s + 1);
     setIndex(0);
     setStrokes([]);
     setRevealed(false);
@@ -171,7 +171,7 @@ function WritingPracticeInner() {
     reviewedRef.current.add(key);
 
     if (shouldUpdateCard(repeat, which)) {
-      setSrsStore(prev => {
+      setSrsStore((prev) => {
         const updated = nextSRS(prev[key] ?? newCard(key), qualityFor(which));
         const next = { ...prev, [key]: updated };
         saveSRSStore(next);
@@ -181,7 +181,7 @@ function WritingPracticeInner() {
 
     // Stats are not conditional: the student did the review either way, and it
     // should count toward the streak whether or not it moved the schedule.
-    setStats(prev => {
+    setStats((prev) => {
       const next = recordReview(prev, passed);
       saveStats(next);
       return next;
@@ -207,14 +207,14 @@ function WritingPracticeInner() {
       followed_suggestion: result ? suggestedGrade(result.score) === which : null,
     });
 
-    setSessionScore(s => ({
+    setSessionScore((s) => ({
       passed: s.passed + (passed ? 1 : 0),
       missed: s.missed + (passed ? 0 : 1),
     }));
 
     setStrokes([]);
     setRevealed(false);
-    if (index + 1 < queue.length) setIndex(i => i + 1);
+    if (index + 1 < queue.length) setIndex((i) => i + 1);
     else setDone(true);
   };
 
@@ -236,14 +236,16 @@ function WritingPracticeInner() {
   const isVowel = glyph?.group === 'vowel';
   // Surfaced before the student writes, not after: a confusable deck's whole
   // job is to make the contrast present at the moment of recall.
-  const partners =
-    deck.category === 'confusables' ? (glyph?.confusableWith ?? []) : [];
+  const partners = deck.category === 'confusables' ? (glyph?.confusableWith ?? []) : [];
 
   if (done || !glyph) {
     return (
       <div className="space-y-4">
         <DeckPicker deckId={deckId} onPick={startDeck} />
-        <div className="bg-bg-card rounded-xl border p-8 text-center shadow-sm" style={{ borderColor: '#D1FAE5' }}>
+        <div
+          className="bg-bg-card rounded-xl border p-8 text-center shadow-sm"
+          style={{ borderColor: '#D1FAE5' }}
+        >
           <p className="text-2xl font-bold mb-2" style={{ color: 'var(--color-primary)' }}>
             {queue.length === 0 ? 'Nothing due in this deck' : 'Session complete'}
           </p>
@@ -270,7 +272,7 @@ function WritingPracticeInner() {
 
       {/* Mode: trace → copy → recall */}
       <div className="flex flex-wrap gap-2 items-center">
-        {WRITING_MODES.map(m => (
+        {WRITING_MODES.map((m) => (
           <button
             key={m.id}
             type="button"
@@ -284,8 +286,16 @@ function WritingPracticeInner() {
             className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
             style={
               mode === m.id
-                ? { background: 'var(--color-primary)', color: '#fff', borderColor: 'var(--color-primary)' }
-                : { background: 'var(--color-bg-card)', color: 'var(--color-text-muted)', borderColor: '#D1FAE5' }
+                ? {
+                    background: 'var(--color-primary)',
+                    color: '#fff',
+                    borderColor: 'var(--color-primary)',
+                  }
+                : {
+                    background: 'var(--color-bg-card)',
+                    color: 'var(--color-text-muted)',
+                    borderColor: '#D1FAE5',
+                  }
             }
           >
             {m.label}
@@ -315,7 +325,9 @@ function WritingPracticeInner() {
         <div className="min-w-0">
           <p className="text-lg font-bold" style={{ color: 'var(--color-primary)' }}>
             {glyph.name}
-            {glyph.phonetic && <span className="text-text-muted font-normal"> · {glyph.phonetic}</span>}
+            {glyph.phonetic && (
+              <span className="text-text-muted font-normal"> · {glyph.phonetic}</span>
+            )}
           </p>
           <p className="text-sm text-text-muted">{promptFor(mode, isVowel)}</p>
           {partners.length > 0 && (
@@ -354,7 +366,7 @@ function WritingPracticeInner() {
       <div className="flex flex-wrap gap-2 items-center">
         <button
           type="button"
-          onClick={() => setStrokes(s => s.slice(0, -1))}
+          onClick={() => setStrokes((s) => s.slice(0, -1))}
           disabled={!hasInk}
           className="px-4 py-2 bg-bg-card text-text-muted border border-gray-200 rounded-lg hover:border-gray-300 hover:text-text transition-colors font-medium disabled:opacity-40"
         >
@@ -378,7 +390,10 @@ function WritingPracticeInner() {
           </button>
         )}
         {penDetected && (
-          <span className="text-xs text-text-muted" title="Touch input is now ignored while writing">
+          <span
+            className="text-xs text-text-muted"
+            title="Touch input is now ignored while writing"
+          >
             Stylus detected · palm rejection on
           </span>
         )}
@@ -386,8 +401,13 @@ function WritingPracticeInner() {
 
       {/* Feedback. The score is a suggestion; the student always has the final say. */}
       {revealed && (
-        <div className="bg-bg-card rounded-xl border p-4 shadow-sm space-y-3" style={{ borderColor: '#D1FAE5' }}>
-          {result ? <ScoreReadout result={result} /> : (
+        <div
+          className="bg-bg-card rounded-xl border p-4 shadow-sm space-y-3"
+          style={{ borderColor: '#D1FAE5' }}
+        >
+          {result ? (
+            <ScoreReadout result={result} />
+          ) : (
             <p className="text-sm text-text-muted">
               The letter is overlaid on your ink. How close was it?
             </p>
@@ -398,7 +418,7 @@ function WritingPracticeInner() {
             </p>
           )}
           <div className="flex flex-wrap gap-2">
-            {WRITING_GRADES.map(g => {
+            {WRITING_GRADES.map((g) => {
               const isSuggested = suggested === g.id;
               return (
                 <button
@@ -408,14 +428,28 @@ function WritingPracticeInner() {
                   className="px-4 py-2 rounded-lg font-semibold border transition-colors flex-1 min-w-[5rem]"
                   style={{
                     ...(g.id === 'again'
-                      ? { background: 'var(--color-coral)', color: '#fff', borderColor: 'var(--color-coral)' }
+                      ? {
+                          background: 'var(--color-coral)',
+                          color: '#fff',
+                          borderColor: 'var(--color-coral)',
+                        }
                       : g.id === 'easy'
-                        ? { background: 'var(--color-jade)', color: '#fff', borderColor: 'var(--color-jade)' }
-                        : { background: 'var(--color-bg-card)', color: 'var(--color-text)', borderColor: '#D1FAE5' }),
+                        ? {
+                            background: 'var(--color-jade)',
+                            color: '#fff',
+                            borderColor: 'var(--color-jade)',
+                          }
+                        : {
+                            background: 'var(--color-bg-card)',
+                            color: 'var(--color-text)',
+                            borderColor: '#D1FAE5',
+                          }),
                     // A ring rather than a different fill: the four buttons keep
                     // their fixed colours, so the suggestion reads as a hint and
                     // not as the only enabled choice.
-                    ...(isSuggested ? { outline: '2px solid var(--color-primary)', outlineOffset: '2px' } : {}),
+                    ...(isSuggested
+                      ? { outline: '2px solid var(--color-primary)', outlineOffset: '2px' }
+                      : {}),
                   }}
                 >
                   {g.label}
@@ -445,9 +479,13 @@ function WritingPracticeInner() {
 function promptFor(mode: WritingMode, isVowel: boolean): string {
   if (mode === 'trace') return 'Draw over the ghosted form.';
   if (mode === 'copy') {
-    return isVowel ? 'Write the form shown — the פ as well as the point.' : 'Write the letter shown.';
+    return isVowel
+      ? 'Write the form shown — the פ as well as the point.'
+      : 'Write the letter shown.';
   }
-  return isVowel ? 'Write פ from memory and place the point on it.' : 'Write this letter from memory.';
+  return isVowel
+    ? 'Write פ from memory and place the point on it.'
+    : 'Write this letter from memory.';
 }
 
 const VERDICT_COPY: Record<Verdict, { label: string; color: string }> = {
@@ -510,8 +548,8 @@ function ScoreReadout({ result }: { result: InkScore }) {
 function DeckPicker({ deckId, onPick }: { deckId: string; onPick: (id: string) => void }) {
   return (
     <div className="space-y-3">
-      {WRITING_DECK_CATEGORIES.map(category => {
-        const decks = DECKS.filter(d => d.category === category.id);
+      {WRITING_DECK_CATEGORIES.map((category) => {
+        const decks = DECKS.filter((d) => d.category === category.id);
         if (decks.length === 0) return null;
         return (
           <div key={category.id}>
@@ -519,7 +557,7 @@ function DeckPicker({ deckId, onPick }: { deckId: string; onPick: (id: string) =
               {category.label}
             </p>
             <div className="flex flex-wrap gap-2">
-              {decks.map(d => (
+              {decks.map((d) => (
                 <DeckChip key={d.id} deck={d} active={deckId === d.id} onPick={onPick} />
               ))}
             </div>
@@ -547,8 +585,16 @@ function DeckChip({
       className="px-3 py-1.5 rounded-full text-sm font-medium border transition-colors"
       style={
         active
-          ? { background: 'var(--color-primary)', color: '#fff', borderColor: 'var(--color-primary)' }
-          : { background: 'var(--color-bg-card)', color: 'var(--color-text-muted)', borderColor: '#D1FAE5' }
+          ? {
+              background: 'var(--color-primary)',
+              color: '#fff',
+              borderColor: 'var(--color-primary)',
+            }
+          : {
+              background: 'var(--color-bg-card)',
+              color: 'var(--color-text-muted)',
+              borderColor: '#D1FAE5',
+            }
       }
     >
       {deck.label}

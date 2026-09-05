@@ -12,9 +12,7 @@ export const users = sqliteTable('users', {
   emailVerified: integer('email_verified', { mode: 'boolean' }).notNull().default(false),
   image: text('image'),
   createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
-  updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
-    .notNull()
-    .default(sql`0`),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull().default(sql`0`),
 });
 
 // Managed by Better Auth — shape defined here so Drizzle owns the migration.

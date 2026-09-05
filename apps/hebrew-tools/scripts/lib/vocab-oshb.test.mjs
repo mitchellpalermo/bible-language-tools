@@ -134,11 +134,12 @@ describe('posLabel', () => {
 describe('buildLexiconIndex', () => {
   it('collects every lemma written the same way under one key', () => {
     const index = buildLexiconIndex(LEMMAS);
-    expect(index.get(normalizeHeadword('עִיר')).map((e) => e.id).sort()).toEqual([
-      '5892a',
-      '5892b',
-      '5894',
-    ]);
+    expect(
+      index
+        .get(normalizeHeadword('עִיר'))
+        .map((e) => e.id)
+        .sort(),
+    ).toEqual(['5892a', '5892b', '5894']);
   });
 
   it('skips lemmas the lexicon gives no headword for', () => {
@@ -256,7 +257,9 @@ describe('resolveHeadword', () => {
   it('honours a pin that names a lemma spelled some other way', () => {
     // תּוֹר "turtle-dove" is a plene spelling of תֹּר, and no lexeme the lexicon
     // writes תּוֹר is the bird. A pin has to be able to say so.
-    const { forms } = buildFormIndex([{ 1: { 1: [{ text: 'תּוֹר', lemma: '8449', pos: 'Nc', parsing: 'HNcfsa' }] } }]);
+    const { forms } = buildFormIndex([
+      { 1: { 1: [{ text: 'תּוֹר', lemma: '8449', pos: 'Nc', parsing: 'HNcfsa' }] } },
+    ]);
     const result = resolveHeadword(handout({ hebrew: 'תּוֹר' }), {
       lexicon: buildLexiconIndex(LEMMAS),
       forms,
@@ -268,9 +271,9 @@ describe('resolveHeadword', () => {
   });
 
   it('throws on a pin that names no lemma at all', () => {
-    expect(() =>
-      resolveHeadword(handout(), { ...indexes(), pins: { אֹהֶל: '99999' } }),
-    ).toThrow(/99999/);
+    expect(() => resolveHeadword(handout(), { ...indexes(), pins: { אֹהֶל: '99999' } })).toThrow(
+      /99999/,
+    );
   });
 });
 

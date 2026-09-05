@@ -157,9 +157,12 @@ describe('hint cookie synchronization', () => {
   });
 
   it('is not fooled by greek-tools’ cookie on a shared browser', async () => {
-    const { locals, request, next } = makeContext({ id: 'user-123', email: 'me@example.com' }, {
-      cookies: 'gt-auth=1',
-    });
+    const { locals, request, next } = makeContext(
+      { id: 'user-123', email: 'me@example.com' },
+      {
+        cookies: 'gt-auth=1',
+      },
+    );
 
     const response = (await onRequest({ locals, request } as never, next)) as Response;
 

@@ -1,6 +1,6 @@
 ---
-import type { NavLink } from '@tools/shared/nav';
 import SiteNav from '@tools/shared/components/SiteNav.astro';
+import type { NavLink } from '@tools/shared/nav';
 import '../styles/global.css';
 
 interface Props {
@@ -8,7 +8,8 @@ interface Props {
   description?: string;
 }
 
-const { title, description = "Free tools for Biblical Hebrew students — coming soon." } = Astro.props;
+const { title, description = 'Free tools for Biblical Hebrew students — coming soon.' } =
+  Astro.props;
 
 // Add roadmap routes here as they ship — the desktop nav and the mobile menu
 // both read this list, so neither needs touching again.

@@ -6,8 +6,8 @@ import {
   formatRef,
   hebrewNumeral,
   MAQQEF,
-  parseRef,
   POPUP_WIDTH,
+  parseRef,
   popupPosition,
 } from './reader';
 
@@ -144,12 +144,7 @@ describe('accentUnits', () => {
 
   // Genesis 1:5 ends `וַיְהִי־עֶרֶב וַיְהִי־בֹקֶר`, two bound pairs in a row.
   it('starts a new unit after each bound pair', () => {
-    const words = [
-      word('וַיְהִי', MAQQEF),
-      word('עֶרֶב'),
-      word('וַיְהִי', MAQQEF),
-      word('בֹקֶר'),
-    ];
+    const words = [word('וַיְהִי', MAQQEF), word('עֶרֶב'), word('וַיְהִי', MAQQEF), word('בֹקֶר')];
     expect(accentUnits(words).map((u) => u.length)).toEqual([2, 2]);
   });
 

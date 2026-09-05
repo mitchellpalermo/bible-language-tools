@@ -3,18 +3,18 @@
 
 export interface SRSCard {
   key: string;
-  interval: number;      // days until next review
-  repetition: number;    // times successfully reviewed in a row
-  easeFactor: number;    // SM-2 ease factor (min 1.3, starts at 2.5)
-  dueDate: string;       // YYYY-MM-DD
-  lastReviewed: string;  // YYYY-MM-DD, empty string if never
+  interval: number; // days until next review
+  repetition: number; // times successfully reviewed in a row
+  easeFactor: number; // SM-2 ease factor (min 1.3, starts at 2.5)
+  dueDate: string; // YYYY-MM-DD
+  lastReviewed: string; // YYYY-MM-DD, empty string if never
 }
 
 export interface StudyStats {
   streak: number;
-  lastStreakDate: string;    // last date the daily threshold was hit
+  lastStreakDate: string; // last date the daily threshold was hit
   cardsStudiedToday: number;
-  lastStudyDate: string;     // YYYY-MM-DD
+  lastStudyDate: string; // YYYY-MM-DD
   totalReviewed: number;
   totalCorrect: number;
 }

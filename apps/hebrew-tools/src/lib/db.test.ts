@@ -12,8 +12,8 @@
 //    single most damaging mistake available in this area, and it is cheap to
 //    guard against here, before any of the sync code exists to make it.
 
-import { createTestDb } from '@tools/db/test-utils';
 import { srsCards, studyStats, syncState, users } from '@tools/db/schema';
+import { createTestDb } from '@tools/db/test-utils';
 import { and, eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { LANGUAGE } from './db';
@@ -23,9 +23,7 @@ type TestDb = ReturnType<typeof createTestDb>;
 const USER_ID = 'user-1';
 
 function seedUser(db: TestDb) {
-  db.insert(users)
-    .values({ id: USER_ID, email: 'mitch@example.com', createdAt: new Date() })
-    .run();
+  db.insert(users).values({ id: USER_ID, email: 'mitch@example.com', createdAt: new Date() }).run();
 }
 
 function card(language: 'greek' | 'hebrew', wordKey: string, repetition = 1) {
@@ -93,8 +91,12 @@ describe('@tools/db resolves from hebrew-tools', () => {
 
 describe('language scoping isolates the two apps', () => {
   beforeEach(() => {
-    db.insert(srsCards).values(card('greek', 'λόγος', 5)).run();
-    db.insert(srsCards).values(card(LANGUAGE, 'דָּבָר', 2)).run();
+    db.insert(srsCards)
+      .values(card('greek', 'λόγος', 5))
+      .run();
+    db.insert(srsCards)
+      .values(card(LANGUAGE, 'דָּבָר', 2))
+      .run();
   });
 
   it('reads only this language for a user who studies both', () => {
@@ -122,7 +124,9 @@ describe('language scoping isolates the two apps', () => {
   it('lets the same word key exist independently in both languages', () => {
     // The primary key is (user_id, language, word_key), so an identical key in
     // the other language must not collide.
-    db.insert(srsCards).values(card('greek', 'דָּבָר', 9)).run();
+    db.insert(srsCards)
+      .values(card('greek', 'דָּבָר', 9))
+      .run();
 
     const rows = db.select().from(srsCards).where(eq(srsCards.wordKey, 'דָּבָר')).all();
     expect(rows).toHaveLength(2);

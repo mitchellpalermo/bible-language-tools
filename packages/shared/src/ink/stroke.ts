@@ -154,8 +154,8 @@ export function normalizeStrokes(strokes: Stroke[], options: NormalizeOptions = 
   const dx = offset + (inner - width * scale) / 2;
   const dy = offset + (inner - height * scale) / 2;
 
-  return strokes.map(stroke => ({
-    points: stroke.points.map(p => ({
+  return strokes.map((stroke) => ({
+    points: stroke.points.map((p) => ({
       x: (p.x - box.minX) * scale + dx,
       y: (p.y - box.minY) * scale + dy,
       pressure: p.pressure,
