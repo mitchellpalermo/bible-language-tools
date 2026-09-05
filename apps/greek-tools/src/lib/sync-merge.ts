@@ -33,14 +33,32 @@ export function mergeSRSStores(
 }
 
 /**
- * Counters take the max of both stores. Daily fields (cardsStudiedToday,
- * lastStudyDate) come from the store with the higher totalReviewed — a proxy
- * for the most recently active device. lastStreakDate follows the higher
- * streak so the streak and its anchor date stay consistent.
+ * Lifetime counters take the max of both stores.
+ *
+ * The date-anchored fields are chosen by RECENCY, not by magnitude. Picking the
+ * larger number looks like "more progress wins" but is wrong for anything a
+ * date has to agree with:
+ *
+ *   - Taking the higher `streak` carried its stale `lastStreakDate` along. A
+ *     device holding streak 12 anchored a month ago beat a live streak of 3,
+ *     and loadStats() then zeroed the result outright, because the anchor was
+ *     neither today nor yesterday. A stale device destroyed a live streak.
+ *   - Taking the higher `totalReviewed` as a proxy for "most recently active"
+ *     fails the same way: the device with the most lifetime reviews is not
+ *     necessarily the one that studied today, and it overwrote a current
+ *     `lastStudyDate` with an old one.
+ *
+ * Both pairs now move together with the later date. Ties break on the larger
+ * counter, which keeps the function symmetric — mergeStudyStats(a, b) and
+ * mergeStudyStats(b, a) still pick the same winner, and both sides of a sync
+ * run this same merge.
+ *
+ * An empty-string date sorts below every real one, so a device that has never
+ * hit the threshold cannot win the streak.
  */
 export function mergeStudyStats(a: StudyStats, b: StudyStats): StudyStats {
-  const recent = b.totalReviewed > a.totalReviewed ? b : a;
-  const streakier = b.streak > a.streak ? b : a;
+  const recent = pickLater(a, b, 'lastStudyDate', 'totalReviewed');
+  const streakier = pickLater(a, b, 'lastStreakDate', 'streak');
   return {
     streak: streakier.streak,
     lastStreakDate: streakier.lastStreakDate,
@@ -49,6 +67,20 @@ export function mergeStudyStats(a: StudyStats, b: StudyStats): StudyStats {
     totalReviewed: Math.max(a.totalReviewed, b.totalReviewed),
     totalCorrect: Math.max(a.totalCorrect, b.totalCorrect),
   };
+}
+
+/**
+ * Whichever store has the later `dateField`; ties break on the larger
+ * `tieField`. Dates are YYYY-MM-DD, so string comparison is date comparison.
+ */
+function pickLater(
+  a: StudyStats,
+  b: StudyStats,
+  dateField: 'lastStudyDate' | 'lastStreakDate',
+  tieField: 'totalReviewed' | 'streak',
+): StudyStats {
+  if (a[dateField] !== b[dateField]) return b[dateField] > a[dateField] ? b : a;
+  return b[tieField] > a[tieField] ? b : a;
 }
 
 /** Union by deck id; duplicate ids resolved by the later createdAt. */

@@ -104,6 +104,51 @@ describe('mergeStudyStats', () => {
     expect(merged.lastStreakDate).toBe('2026-08-07');
   });
 
+  it('a stale high streak does not beat a live lower one', () => {
+    // The regression: picking the larger streak dragged its month-old anchor
+    // along, and loadStats() then zeroed the whole thing because the anchor was
+    // neither today nor yesterday — a stale device silently ate a live streak.
+    const stale = stats({ streak: 12, lastStreakDate: '2026-08-01', totalReviewed: 500 });
+    const live = stats({ streak: 3, lastStreakDate: '2026-09-05', totalReviewed: 40 });
+
+    const merged = mergeStudyStats(live, stale);
+    expect(merged.streak).toBe(3);
+    expect(merged.lastStreakDate).toBe('2026-09-05');
+    expect(mergeStudyStats(stale, live)).toEqual(merged);
+  });
+
+  it('a stale but busier device does not supply the daily fields', () => {
+    // Same failure one field over: most lifetime reviews is not "studied today".
+    const stale = stats({
+      totalReviewed: 500,
+      cardsStudiedToday: 30,
+      lastStudyDate: '2026-08-01',
+    });
+    const live = stats({ totalReviewed: 40, cardsStudiedToday: 6, lastStudyDate: '2026-09-05' });
+
+    const merged = mergeStudyStats(stale, live);
+    expect(merged.cardsStudiedToday).toBe(6);
+    expect(merged.lastStudyDate).toBe('2026-09-05');
+    // The lifetime counter still takes the max — that part was never wrong.
+    expect(merged.totalReviewed).toBe(500);
+  });
+
+  it('breaks a date tie on the larger counter', () => {
+    const a = stats({ streak: 4, lastStreakDate: '2026-09-05' });
+    const b = stats({ streak: 9, lastStreakDate: '2026-09-05' });
+
+    expect(mergeStudyStats(a, b).streak).toBe(9);
+    expect(mergeStudyStats(b, a).streak).toBe(9);
+  });
+
+  it('a device that has never hit the threshold cannot win the streak', () => {
+    const never = stats({ streak: 0, lastStreakDate: '', totalReviewed: 900 });
+    const some = stats({ streak: 2, lastStreakDate: '2026-09-04', totalReviewed: 20 });
+
+    expect(mergeStudyStats(never, some).streak).toBe(2);
+    expect(mergeStudyStats(some, never).streak).toBe(2);
+  });
+
   it('is symmetric', () => {
     const a = stats({
       streak: 4,
@@ -116,6 +161,26 @@ describe('mergeStudyStats', () => {
       lastStreakDate: '2026-08-07',
       totalReviewed: 20,
       totalCorrect: 18,
+    });
+
+    expect(mergeStudyStats(a, b)).toEqual(mergeStudyStats(b, a));
+  });
+
+  it('is symmetric when date and magnitude disagree', () => {
+    // The case the old rule got wrong; symmetry must survive the new tiebreak.
+    const a = stats({
+      streak: 12,
+      lastStreakDate: '2026-08-01',
+      lastStudyDate: '2026-08-01',
+      totalReviewed: 500,
+      totalCorrect: 400,
+    });
+    const b = stats({
+      streak: 3,
+      lastStreakDate: '2026-09-05',
+      lastStudyDate: '2026-09-05',
+      totalReviewed: 40,
+      totalCorrect: 30,
     });
 
     expect(mergeStudyStats(a, b)).toEqual(mergeStudyStats(b, a));

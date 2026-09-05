@@ -94,7 +94,7 @@ describe('mergeSRSStores', () => {
 });
 
 describe('mergeStudyStats', () => {
-  it('takes the max of streak, totalReviewed, and totalCorrect', () => {
+  it('takes the max of the lifetime counters, and the larger streak on a tied anchor', () => {
     const a = makeStats({ streak: 7, totalReviewed: 50, totalCorrect: 90 });
     const b = makeStats({ streak: 2, totalReviewed: 200, totalCorrect: 40 });
     const merged = mergeStudyStats(a, b);
@@ -103,7 +103,7 @@ describe('mergeStudyStats', () => {
     expect(merged.totalCorrect).toBe(90);
   });
 
-  it('takes daily fields from the store with the higher totalReviewed', () => {
+  it('takes daily fields from the store that studied most recently', () => {
     const stale = makeStats({
       totalReviewed: 50,
       cardsStudiedToday: 1,
@@ -119,12 +119,81 @@ describe('mergeStudyStats', () => {
     expect(merged.lastStudyDate).toBe('2026-06-09');
   });
 
-  it('keeps lastStreakDate consistent with the winning streak', () => {
+  it('keeps the streak consistent with its anchor date', () => {
     const a = makeStats({ streak: 7, lastStreakDate: '2026-06-09', totalReviewed: 50 });
     const b = makeStats({ streak: 2, lastStreakDate: '2026-05-01', totalReviewed: 200 });
     const merged = mergeStudyStats(a, b);
     expect(merged.streak).toBe(7);
     expect(merged.lastStreakDate).toBe('2026-06-09');
+  });
+
+  it('a stale high streak does not beat a live lower one', () => {
+    // The regression: picking the larger streak dragged its month-old anchor
+    // along, and loadStats() then zeroed the whole thing because the anchor was
+    // neither today nor yesterday — a stale device silently ate a live streak.
+    const stale = makeStats({ streak: 12, lastStreakDate: '2026-05-01', totalReviewed: 500 });
+    const live = makeStats({ streak: 3, lastStreakDate: '2026-06-09', totalReviewed: 40 });
+
+    const merged = mergeStudyStats(live, stale);
+    expect(merged.streak).toBe(3);
+    expect(merged.lastStreakDate).toBe('2026-06-09');
+    expect(mergeStudyStats(stale, live)).toEqual(merged);
+  });
+
+  it('a stale but busier device does not supply the daily fields', () => {
+    // Same failure one field over: most lifetime reviews is not "studied today".
+    const stale = makeStats({
+      totalReviewed: 500,
+      cardsStudiedToday: 30,
+      lastStudyDate: '2026-05-01',
+    });
+    const live = makeStats({
+      totalReviewed: 40,
+      cardsStudiedToday: 6,
+      lastStudyDate: '2026-06-09',
+    });
+
+    const merged = mergeStudyStats(stale, live);
+    expect(merged.cardsStudiedToday).toBe(6);
+    expect(merged.lastStudyDate).toBe('2026-06-09');
+    // The lifetime counter still takes the max — that part was never wrong.
+    expect(merged.totalReviewed).toBe(500);
+  });
+
+  it('breaks a date tie on the larger counter', () => {
+    const a = makeStats({ streak: 4, lastStreakDate: '2026-06-09' });
+    const b = makeStats({ streak: 9, lastStreakDate: '2026-06-09' });
+
+    expect(mergeStudyStats(a, b).streak).toBe(9);
+    expect(mergeStudyStats(b, a).streak).toBe(9);
+  });
+
+  it('a device that has never hit the threshold cannot win the streak', () => {
+    const never = makeStats({ streak: 0, lastStreakDate: '', totalReviewed: 900 });
+    const some = makeStats({ streak: 2, lastStreakDate: '2026-06-08', totalReviewed: 20 });
+
+    expect(mergeStudyStats(never, some).streak).toBe(2);
+    expect(mergeStudyStats(some, never).streak).toBe(2);
+  });
+
+  it('is symmetric when date and magnitude disagree', () => {
+    // The case the old rule got wrong; symmetry must survive the new tiebreak.
+    const a = makeStats({
+      streak: 12,
+      lastStreakDate: '2026-05-01',
+      lastStudyDate: '2026-05-01',
+      totalReviewed: 500,
+      totalCorrect: 400,
+    });
+    const b = makeStats({
+      streak: 3,
+      lastStreakDate: '2026-06-09',
+      lastStudyDate: '2026-06-09',
+      totalReviewed: 40,
+      totalCorrect: 30,
+    });
+
+    expect(mergeStudyStats(a, b)).toEqual(mergeStudyStats(b, a));
   });
 
   it('is symmetric for the counter fields', () => {
