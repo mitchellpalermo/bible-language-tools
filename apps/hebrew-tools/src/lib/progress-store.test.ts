@@ -159,17 +159,55 @@ describe('a stale client cannot regress stored progress', () => {
     expect(Object.keys(payload?.srsStore ?? {})).toHaveLength(3);
   });
 
-  it('does not roll a card back to fewer repetitions', async () => {
+  it('does not roll a card back when its review is no newer', async () => {
     await putProgress(db, USER, {
       srsStore: { מֶלֶךְ: card({ repetition: 8 }) },
       studyStats: stats(),
     });
+    // Same lastReviewed, so this is a stale copy of the same review rather than
+    // a newer one — the repetition tiebreak holds it off.
     await putProgress(db, USER, {
       srsStore: { מֶלֶךְ: card({ repetition: 1 }) },
       studyStats: stats(),
     });
 
     expect((await getProgress(db, USER))?.srsStore.מֶלֶךְ.repetition).toBe(8);
+  });
+
+  it('accepts a newer failed review, which is not a regression', async () => {
+    // The server half of the lapse bug: putProgress merges with the same rule
+    // the client does, so before the fix there was NO path by which a failed
+    // review could reach the database. A word you kept failing kept coming back
+    // mature. This is the test that says a lapse now actually lands in D1.
+    await putProgress(db, USER, {
+      srsStore: {
+        מֶלֶךְ: card({
+          repetition: 8,
+          interval: 95,
+          dueDate: '2026-11-11',
+          lastReviewed: '2026-08-08',
+        }),
+      },
+      studyStats: stats(),
+    });
+    await putProgress(db, USER, {
+      srsStore: {
+        מֶלֶךְ: card({
+          repetition: 0,
+          interval: 1,
+          easeFactor: 1.96,
+          dueDate: '2026-09-06',
+          lastReviewed: '2026-09-05',
+        }),
+      },
+      studyStats: stats(),
+    });
+
+    const stored = (await getProgress(db, USER))?.srsStore.מֶלֶךְ;
+    expect(stored?.repetition).toBe(0);
+    expect(stored?.interval).toBe(1);
+    expect(stored?.easeFactor).toBeCloseTo(1.96);
+    expect(stored?.dueDate).toBe('2026-09-06');
   });
 
   it('does not roll cumulative stats backwards', async () => {

@@ -68,14 +68,14 @@ describe('mergeSRSStores', () => {
     expect(Object.keys(merged).sort()).toEqual(['a', 'b']);
   });
 
-  it('takes the card with the higher repetition', () => {
+  it('takes the higher repetition when both were reviewed on the same date', () => {
     const low = makeCard('a', { repetition: 1, interval: 1 });
     const high = makeCard('a', { repetition: 5, interval: 30 });
     expect(mergeSRSStores({ a: low }, { a: high }).a).toEqual(high);
     expect(mergeSRSStores({ a: high }, { a: low }).a).toEqual(high);
   });
 
-  it('breaks repetition ties with the later dueDate', () => {
+  it('breaks a same-date repetition tie with the later dueDate', () => {
     const earlier = makeCard('a', { dueDate: '2026-06-10' });
     const later = makeCard('a', { dueDate: '2026-06-20' });
     expect(mergeSRSStores({ a: earlier }, { a: later }).a).toEqual(later);
