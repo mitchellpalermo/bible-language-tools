@@ -26,7 +26,7 @@ describe('mergeSRSStores', () => {
     expect(Object.keys(merged).sort()).toEqual(['a', 'b']);
   });
 
-  it('prefers the card with the higher repetition', () => {
+  it('prefers the higher repetition when both were reviewed on the same date', () => {
     const merged = mergeSRSStores(
       { w: makeCard({ repetition: 2, interval: 6 }) },
       { w: makeCard({ repetition: 5, interval: 30 }) },
@@ -34,7 +34,7 @@ describe('mergeSRSStores', () => {
     expect(merged.w.repetition).toBe(5);
   });
 
-  it('breaks a repetition tie with the later dueDate', () => {
+  it('breaks a same-date repetition tie with the later dueDate', () => {
     const merged = mergeSRSStores(
       { w: makeCard({ repetition: 3, dueDate: '2026-05-10' }) },
       { w: makeCard({ repetition: 3, dueDate: '2026-06-01' }) },
@@ -42,9 +42,58 @@ describe('mergeSRSStores', () => {
     expect(merged.w.dueDate).toBe('2026-06-01');
   });
 
+  it('keeps a failed review — the lapse is what used to be discarded', () => {
+    // The bug: nextSRS resets repetition to 0 on a lapse, so under the old
+    // "higher repetition wins" rule a failed card could never beat an earlier
+    // state of itself. Fail a mature card on one device, sync, and it came back
+    // mature — the reset, the ease penalty and the reschedule all thrown away.
+    const mature = makeCard({
+      repetition: 5,
+      interval: 95,
+      easeFactor: 2.5,
+      dueDate: '2026-08-12',
+      lastReviewed: '2026-05-09',
+    });
+    const lapsed = makeCard({
+      repetition: 0,
+      interval: 1,
+      easeFactor: 1.96,
+      dueDate: '2026-05-21',
+      lastReviewed: '2026-05-20',
+    });
+
+    expect(mergeSRSStores({ w: lapsed }, { w: mature }).w).toEqual(lapsed);
+    expect(mergeSRSStores({ w: mature }, { w: lapsed }).w).toEqual(lapsed);
+  });
+
+  it('a stale device cannot undo a review made later elsewhere', () => {
+    // Same repetition, but the stale card sits further out because its ease had
+    // not yet been knocked down. The old rule tie-broke on the later dueDate and
+    // so preferred the stale card; recency is what makes the newer one win.
+    const stale = makeCard({ repetition: 3, dueDate: '2026-07-01', lastReviewed: '2026-05-01' });
+    const current = makeCard({ repetition: 3, dueDate: '2026-06-15', lastReviewed: '2026-05-20' });
+
+    expect(mergeSRSStores({ w: stale }, { w: current }).w.lastReviewed).toBe('2026-05-20');
+    expect(mergeSRSStores({ w: current }, { w: stale }).w.lastReviewed).toBe('2026-05-20');
+  });
+
+  it('a never-reviewed card cannot displace real progress', () => {
+    const studied = makeCard({ repetition: 4 });
+    const fresh = makeCard({ repetition: 0, dueDate: '2026-12-31', lastReviewed: '' });
+
+    expect(mergeSRSStores({ w: studied }, { w: fresh }).w).toEqual(studied);
+    expect(mergeSRSStores({ w: fresh }, { w: studied }).w).toEqual(studied);
+  });
+
   it('is symmetric', () => {
     const a = { w: makeCard({ repetition: 3, dueDate: '2026-05-10' }) };
     const b = { w: makeCard({ repetition: 7, dueDate: '2026-06-01' }) };
+    expect(mergeSRSStores(a, b)).toEqual(mergeSRSStores(b, a));
+  });
+
+  it('is symmetric when recency and repetition disagree', () => {
+    const a = { w: makeCard({ repetition: 7, dueDate: '2026-08-01', lastReviewed: '2026-05-01' }) };
+    const b = { w: makeCard({ repetition: 0, dueDate: '2026-05-21', lastReviewed: '2026-05-20' }) };
     expect(mergeSRSStores(a, b)).toEqual(mergeSRSStores(b, a));
   });
 });

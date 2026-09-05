@@ -34,7 +34,7 @@ describe('mergeSRSStores', () => {
     expect(Object.keys(mergeSRSStores(a, b)).sort()).toEqual(['דָּבָר', 'מֶלֶךְ'].sort());
   });
 
-  it('prefers the card with more repetitions', () => {
+  it('prefers more repetitions when both were reviewed on the same date', () => {
     const a = { מֶלֶךְ: card({ repetition: 1 }) };
     const b = { מֶלֶךְ: card({ repetition: 5 }) };
 
@@ -42,7 +42,7 @@ describe('mergeSRSStores', () => {
     expect(mergeSRSStores(b, a).מֶלֶךְ.repetition).toBe(5);
   });
 
-  it('breaks repetition ties by the later due date', () => {
+  it('breaks a same-date repetition tie by the later due date', () => {
     const a = { מֶלֶךְ: card({ repetition: 3, dueDate: '2026-08-10' }) };
     const b = { מֶלֶךְ: card({ repetition: 3, dueDate: '2026-09-01' }) };
 
@@ -52,7 +52,11 @@ describe('mergeSRSStores', () => {
 
   it('never drops a review — a studied card beats an untouched one', () => {
     const studied = { מֶלֶךְ: card({ repetition: 4 }) };
-    const fresh = { מֶלֶךְ: card({ repetition: 0, dueDate: '2026-12-31' }) };
+    // A never-reviewed card carries lastReviewed: '', which sorts below every
+    // real date, so a fresh card cannot displace real progress.
+    const fresh = {
+      מֶלֶךְ: card({ repetition: 0, dueDate: '2026-12-31', lastReviewed: '' }),
+    };
 
     expect(mergeSRSStores(studied, fresh).מֶלֶךְ.repetition).toBe(4);
   });
