@@ -111,9 +111,7 @@ describe('ParseSettings', () => {
     const onChange = vi.fn();
     renderSettings(DEFAULT_PARSE_SETTINGS, onChange);
     await user.click(screen.getByRole('button', { name: '30' }));
-    expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ sessionLength: 30 }),
-    );
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ sessionLength: 30 }));
   });
 
   it('"All" and "None" tense shortcuts work', async () => {

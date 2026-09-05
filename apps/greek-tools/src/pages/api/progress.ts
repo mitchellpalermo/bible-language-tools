@@ -32,7 +32,10 @@ const STATS_STRING_FIELDS = ['lastStreakDate', 'lastStudyDate'] as const;
 
 function validatePayload(
   body: unknown,
-): Pick<ProgressPayload, 'srsStore' | 'studyStats' | 'customDecks' | 'focusPassages' | 'parseHistory'> | null {
+): Pick<
+  ProgressPayload,
+  'srsStore' | 'studyStats' | 'customDecks' | 'focusPassages' | 'parseHistory'
+> | null {
   if (!isRecord(body)) return null;
 
   const { srsStore, studyStats, customDecks, focusPassages, parseHistory } = body;
@@ -90,7 +93,10 @@ function validatePayload(
     ...(body as object),
     focusPassages: passages,
     parseHistory: history,
-  } as Pick<ProgressPayload, 'srsStore' | 'studyStats' | 'customDecks' | 'focusPassages' | 'parseHistory'>;
+  } as Pick<
+    ProgressPayload,
+    'srsStore' | 'studyStats' | 'customDecks' | 'focusPassages' | 'parseHistory'
+  >;
 }
 
 export const GET: APIRoute = async ({ locals }) => {

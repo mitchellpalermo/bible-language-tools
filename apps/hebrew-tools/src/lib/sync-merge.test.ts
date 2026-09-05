@@ -105,8 +105,18 @@ describe('mergeStudyStats', () => {
   });
 
   it('is symmetric', () => {
-    const a = stats({ streak: 4, lastStreakDate: '2026-08-01', totalReviewed: 50, totalCorrect: 40 });
-    const b = stats({ streak: 7, lastStreakDate: '2026-08-07', totalReviewed: 20, totalCorrect: 18 });
+    const a = stats({
+      streak: 4,
+      lastStreakDate: '2026-08-01',
+      totalReviewed: 50,
+      totalCorrect: 40,
+    });
+    const b = stats({
+      streak: 7,
+      lastStreakDate: '2026-08-07',
+      totalReviewed: 20,
+      totalCorrect: 18,
+    });
 
     expect(mergeStudyStats(a, b)).toEqual(mergeStudyStats(b, a));
   });

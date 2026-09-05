@@ -69,7 +69,13 @@ const CONSONANTS: WritableGlyph[] = [
     note: 'Closed across the top — no gap. That closure is the whole difference from ה.',
   },
   { char: 'ט', name: 'tet', phonetic: 'ṭ', group: 'consonant' },
-  { char: 'י', name: 'yod', phonetic: 'y', group: 'consonant', note: 'The smallest letter; it hangs from the top line.' },
+  {
+    char: 'י',
+    name: 'yod',
+    phonetic: 'y',
+    group: 'consonant',
+    note: 'The smallest letter; it hangs from the top line.',
+  },
   {
     char: 'כ',
     name: 'kaf',
@@ -78,7 +84,13 @@ const CONSONANTS: WritableGlyph[] = [
     confusableWith: ['ב'],
     note: 'Rounded, with no foot projecting left. ב has one.',
   },
-  { char: 'ל', name: 'lamed', phonetic: 'l', group: 'consonant', note: 'The only letter rising above the top line.' },
+  {
+    char: 'ל',
+    name: 'lamed',
+    phonetic: 'l',
+    group: 'consonant',
+    note: 'The only letter rising above the top line.',
+  },
   { char: 'מ', name: 'mem', phonetic: 'm', group: 'consonant' },
   { char: 'נ', name: 'nun', phonetic: 'n', group: 'consonant' },
   {
@@ -106,7 +118,13 @@ const CONSONANTS: WritableGlyph[] = [
     confusableWith: ['ע'],
     note: 'The arms join higher than in ע, and the left arm rises to the right.',
   },
-  { char: 'ק', name: 'qof', phonetic: 'q', group: 'consonant', note: 'Descends below the baseline.' },
+  {
+    char: 'ק',
+    name: 'qof',
+    phonetic: 'q',
+    group: 'consonant',
+    note: 'Descends below the baseline.',
+  },
   {
     char: 'ר',
     name: 'resh',
@@ -186,8 +204,20 @@ const FINALS: WritableGlyph[] = [
     confusableWith: ['ו'],
     note: 'A vertical that descends below the baseline; ו stops on it.',
   },
-  { char: 'ף', name: 'pe sofit', phonetic: 'p', group: 'final', note: 'Descends below the baseline.' },
-  { char: 'ץ', name: 'tsade sofit', phonetic: 'ṣ', group: 'final', note: 'Descends below the baseline.' },
+  {
+    char: 'ף',
+    name: 'pe sofit',
+    phonetic: 'p',
+    group: 'final',
+    note: 'Descends below the baseline.',
+  },
+  {
+    char: 'ץ',
+    name: 'tsade sofit',
+    phonetic: 'ṣ',
+    group: 'final',
+    note: 'Descends below the baseline.',
+  },
 ];
 
 /**

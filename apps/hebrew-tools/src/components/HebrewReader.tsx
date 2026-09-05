@@ -432,9 +432,7 @@ function HebrewReaderInner() {
       )}
 
       {/* ── Word popup ────────────────────────────────────────────────────── */}
-      {active && (
-        <WordPopup active={active} cantillation={prefs.cantillation} onClose={close} />
-      )}
+      {active && <WordPopup active={active} cantillation={prefs.cantillation} onClose={close} />}
     </div>
   );
 }

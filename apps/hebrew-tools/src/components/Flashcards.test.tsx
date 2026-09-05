@@ -2,10 +2,10 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { loadSRSStore, loadStats, newCard, normalizeKey, saveSRSStore } from '../data/srs';
-import { hasAuthHint } from '../lib/auth-cookie';
-import { deleteServerProgress } from '../lib/sync-manager';
 import { chapterStats, TEXTBOOKS, wordsInChapters } from '../data/textbooks';
 import { cardKey, type HebrewVocabWord, vocabulary } from '../data/vocabulary';
+import { hasAuthHint } from '../lib/auth-cookie';
+import { deleteServerProgress } from '../lib/sync-manager';
 import Flashcards, { FREQ_FILTERS, GENDER_LABELS, matchFreq } from './Flashcards';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
@@ -99,8 +99,8 @@ describe('Flashcards', () => {
   it('renders a Hebrew word on the front of the card', () => {
     renderFlashcards();
     const hebrewTerms = new Set(vocabulary.map((w) => w.hebrew));
-    const shown = screen.getAllByText((_, el) =>
-      el?.tagName === 'P' && hebrewTerms.has(el.textContent ?? ''),
+    const shown = screen.getAllByText(
+      (_, el) => el?.tagName === 'P' && hebrewTerms.has(el.textContent ?? ''),
     );
     expect(shown.length).toBeGreaterThan(0);
   });

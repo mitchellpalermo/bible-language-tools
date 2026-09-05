@@ -12,8 +12,11 @@ export default function NumberToggle({
   onToggle: (num: NumKey) => void;
 }) {
   return (
-    <span className="md:hidden inline-flex rounded-full border overflow-hidden" style={{ borderColor: 'var(--color-text-muted)' }}>
-      {NUMBERS.map(num => (
+    <span
+      className="md:hidden inline-flex rounded-full border overflow-hidden"
+      style={{ borderColor: 'var(--color-text-muted)' }}
+    >
+      {NUMBERS.map((num) => (
         <button
           key={num}
           onClick={() => onToggle(num)}

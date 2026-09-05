@@ -23,7 +23,7 @@ const scoring = vi.hoisted(() => ({
   composite: null as CompositeMask | null,
 }));
 
-vi.mock('@tools/shared/ink', async importOriginal => {
+vi.mock('@tools/shared/ink', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@tools/shared/ink')>();
   return {
     ...actual,
@@ -41,7 +41,8 @@ function barAlpha(orientation: 'horizontal' | 'vertical', from = 8, to = 56): Ui
     for (let x = 0; x < MASK_SOURCE; x++) {
       const along = orientation === 'horizontal' ? x : y;
       const across = orientation === 'horizontal' ? y : x;
-      if (along >= from && along < to && across >= 30 && across < 34) alpha[y * MASK_SOURCE + x] = 255;
+      if (along >= from && along < to && across >= 30 && across < 34)
+        alpha[y * MASK_SOURCE + x] = 255;
     }
   }
   return alpha;
@@ -74,7 +75,7 @@ beforeEach(() => {
 
 const DECKS = buildDecks();
 const [ALPHABET, FINALS] = DECKS;
-const deckById = (id: string) => DECKS.find(d => d.id === id) as (typeof DECKS)[number];
+const deckById = (id: string) => DECKS.find((d) => d.id === id) as (typeof DECKS)[number];
 
 /** Writing cards are keyed by glyph; letters and finals share a prefix. */
 const letterKey = (char: string) =>
@@ -92,7 +93,13 @@ function vowelCanvas() {
 function drawOn(el: Element) {
   const fire = (type: string, x: number) => {
     const event = new Event(type, { bubbles: true, cancelable: true });
-    Object.assign(event, { pointerId: 1, pointerType: 'pen', clientX: x, clientY: 10, pressure: 0.5 });
+    Object.assign(event, {
+      pointerId: 1,
+      pointerType: 'pen',
+      clientX: x,
+      clientY: 10,
+      pressure: 0.5,
+    });
     el.dispatchEvent(event);
   };
   fire('pointerdown', 10);
@@ -110,7 +117,10 @@ describe('deck and mode selection', () => {
   it('starts on the alphabet deck at alef, in trace mode', () => {
     render(<WritingPractice />);
 
-    expect(screen.getByRole('button', { name: /The alphabet/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: /The alphabet/ })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
     expect(screen.getByRole('button', { name: 'Trace' })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByText('alef')).toBeInTheDocument();
     // The counter shares its element with the "new" tally, so match loosely.
@@ -350,7 +360,7 @@ describe('session end', () => {
     const user = userEvent.setup();
     saveSRSStore(
       Object.fromEntries(
-        FINALS.glyphs.map(g => {
+        FINALS.glyphs.map((g) => {
           const key = writingCardKey(g);
           return [key, { ...newCard(key), dueDate: daysFromNow(5) }];
         }),

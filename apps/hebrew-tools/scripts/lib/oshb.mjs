@@ -187,7 +187,8 @@ const TEXT_SEGS = new Set(['x-maqqef', 'x-paseq', 'x-sof-pasuq']);
  * per-element scans because ketiv/qere and trailing punctuation are both
  * questions about what comes *next*.
  */
-const TOKEN_RE = /<w\b[^>]*>[\s\S]*?<\/w>|<note\b[\s\S]*?<\/note>|<seg\b[^>]*\/>|<seg\b[^>]*>[\s\S]*?<\/seg>/g;
+const TOKEN_RE =
+  /<w\b[^>]*>[\s\S]*?<\/w>|<note\b[\s\S]*?<\/note>|<seg\b[^>]*\/>|<seg\b[^>]*>[\s\S]*?<\/seg>/g;
 
 /** Pull the qere reading out of a `<note>`, or undefined if it carries none. */
 function qereOf(note) {
@@ -277,7 +278,8 @@ export function parseVerse(inner, onMorpheme) {
       const type = attr(token, 'type');
       if (type && TEXT_SEGS.has(type) && words.length > 0) {
         const last = words[words.length - 1];
-        last.after = (last.after ?? '') + textOf(token.replace(/<seg\b[^>]*>/, '').replace('</seg>', ''));
+        last.after =
+          (last.after ?? '') + textOf(token.replace(/<seg\b[^>]*>/, '').replace('</seg>', ''));
       }
       continue;
     }
@@ -317,7 +319,8 @@ export function parseBook(xml, onMorpheme) {
     const [, chapter, verse] = parts;
     const words = parseVerse(m[2], onMorpheme);
     if (words.length === 0) continue;
-    (chapters[chapter] ??= {})[verse] = words;
+    chapters[chapter] ??= {};
+    chapters[chapter][verse] = words;
   }
 
   return chapters;

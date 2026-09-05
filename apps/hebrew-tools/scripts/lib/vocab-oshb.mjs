@@ -319,8 +319,7 @@ export function resolveHeadword(entry, { lexicon, forms, pairs, lemmas, pins = {
   const pinned = pins[pinKey] ? pinnedGroup(pins[pinKey], ranked, lemmas, hint) : undefined;
   const chosen = pinned ?? ranked[0];
   const runnerUp = ranked.find((g) => g !== chosen);
-  const ambiguous =
-    !pinned && Boolean(runnerUp) && chosen.count < AMBIGUITY_RATIO * runnerUp.count;
+  const ambiguous = !pinned && Boolean(runnerUp) && chosen.count < AMBIGUITY_RATIO * runnerUp.count;
 
   const head = chosen.head;
   const lemma = lemmas[head.id] ?? {};
@@ -385,8 +384,7 @@ export function mergeEntry(entry, resolution) {
   // The lexicon carries a gender for anything ever coded as a common noun, which
   // includes particles that occasionally are — אֵין is one. A gender on a
   // non-noun card is noise at best and a wrong quiz answer at worst.
-  const corpusGender =
-    resolved && word.partOfSpeech === 'noun' ? resolution.gender : undefined;
+  const corpusGender = resolved && word.partOfSpeech === 'noun' ? resolution.gender : undefined;
   const gender = entry.gender ?? corpusGender;
   if (gender) word.gender = gender;
   if (entry.binyan) word.binyan = entry.binyan;
@@ -454,9 +452,7 @@ function literal(word) {
 }
 
 const record = (entries, fields) =>
-  entries
-    .map((e) => `  { ${fields.map((f) => `${f}: ${quote(e[f])}`).join(', ')} },`)
-    .join('\n');
+  entries.map((e) => `  { ${fields.map((f) => `${f}: ${quote(e[f])}`).join(', ')} },`).join('\n');
 
 /** Render the whole generated module. */
 export function emitModule({

@@ -130,6 +130,10 @@ export function appendStroke(sink: PathSink, stroke: Stroke, options: RibbonOpti
 }
 
 /** Append many strokes to one path. */
-export function appendStrokes(sink: PathSink, strokes: Stroke[], options: RibbonOptions = {}): void {
+export function appendStrokes(
+  sink: PathSink,
+  strokes: Stroke[],
+  options: RibbonOptions = {},
+): void {
   for (const stroke of strokes) appendStroke(sink, stroke, options);
 }

@@ -20,8 +20,18 @@ import {
   yesterdayStr,
 } from '@tools/shared/srs';
 
-export { daysFromNow, isDue, newCard, nextSRS, normalizeKey, recordReview, STREAK_THRESHOLD, todayStr, yesterdayStr };
 export type { SRSCard, StudyStats };
+export {
+  daysFromNow,
+  isDue,
+  newCard,
+  nextSRS,
+  normalizeKey,
+  recordReview,
+  STREAK_THRESHOLD,
+  todayStr,
+  yesterdayStr,
+};
 
 const SRS_KEY = 'hebrew-tools-srs-v1';
 const STATS_KEY = 'hebrew-tools-stats-v1';

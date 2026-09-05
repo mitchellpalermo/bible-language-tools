@@ -49,7 +49,7 @@ export function writingCardKey(glyph: WritableGlyph): string {
 }
 
 export function isWritingKey(key: string): boolean {
-  return WRITING_KEY_PREFIXES.some(prefix => key.startsWith(prefix));
+  return WRITING_KEY_PREFIXES.some((prefix) => key.startsWith(prefix));
 }
 
 /**
@@ -155,7 +155,7 @@ export function confusableGroups(pack: ScriptPack = hebrewScriptPack): WritableG
     }
 
     members.sort((a, b) => (index.get(a) ?? 0) - (index.get(b) ?? 0));
-    groups.push(members.map(char => glyphs[index.get(char) as number]));
+    groups.push(members.map((char) => glyphs[index.get(char) as number]));
   }
 
   return groups;
@@ -195,7 +195,13 @@ export function buildDecks(pack: ScriptPack = hebrewScriptPack): WritingDeck[] {
     // 23 cards, not 22: the alphabet has 22 letters, but shin and sin are
     // drilled separately because writing the dot on the correct side is the
     // whole skill.
-    { id: 'alphabet', label: 'The alphabet', category: 'letters', glyphs: consonants, order: 'due-first' },
+    {
+      id: 'alphabet',
+      label: 'The alphabet',
+      category: 'letters',
+      glyphs: consonants,
+      order: 'due-first',
+    },
     { id: 'finals', label: 'Final forms', category: 'letters', glyphs: finals, order: 'due-first' },
     {
       id: 'all-consonants',
@@ -204,7 +210,13 @@ export function buildDecks(pack: ScriptPack = hebrewScriptPack): WritingDeck[] {
       glyphs: [...consonants, ...finals],
       order: 'due-first',
     },
-    { id: 'nikud', label: 'All vowel points', category: 'vowels', glyphs: vowels, order: 'due-first' },
+    {
+      id: 'nikud',
+      label: 'All vowel points',
+      category: 'vowels',
+      glyphs: vowels,
+      order: 'due-first',
+    },
     // One pass across every group: no pair lands back to back, and the deck
     // stays one review per letter.
     {
@@ -214,11 +226,11 @@ export function buildDecks(pack: ScriptPack = hebrewScriptPack): WritingDeck[] {
       glyphs: interleave(groups),
       order: 'as-built',
     },
-    ...groups.map(group => ({
-      id: `confusable-${group.map(g => g.char).join('')}`,
+    ...groups.map((group) => ({
+      id: `confusable-${group.map((g) => g.char).join('')}`,
       // Named, not shown as glyphs: the point of the deck is that these
       // letters look alike, so a row of them is an unreadable picker label.
-      label: group.map(g => g.name).join(' / '),
+      label: group.map((g) => g.name).join(' / '),
       category: 'confusables' as const,
       glyphs: interleave([group], CONFUSABLE_ROUNDS),
       order: 'as-built' as const,
@@ -272,7 +284,7 @@ export const WRITING_GRADES: { id: WritingGrade; label: string; quality: number 
 ];
 
 export function qualityFor(grade: WritingGrade): number {
-  return WRITING_GRADES.find(g => g.id === grade)?.quality ?? 1;
+  return WRITING_GRADES.find((g) => g.id === grade)?.quality ?? 1;
 }
 
 /**

@@ -27,7 +27,7 @@ const pack: ScriptPack = {
 
 describe('allGlyphs', () => {
   it('includes combining marks alongside the base glyphs', () => {
-    expect(allGlyphs(pack).map(g => g.name)).toEqual(['alef', 'kaf sofit', 'qamets']);
+    expect(allGlyphs(pack).map((g) => g.name)).toEqual(['alef', 'kaf sofit', 'qamets']);
   });
 
   it('works on a pack with no combining marks', () => {
@@ -93,8 +93,8 @@ describe('baseText', () => {
 
 describe('glyphsInGroup', () => {
   it('filters by group across base and combining glyphs', () => {
-    expect(glyphsInGroup(pack, 'consonant').map(g => g.char)).toEqual(['א']);
-    expect(glyphsInGroup(pack, 'vowel').map(g => g.name)).toEqual(['qamets']);
+    expect(glyphsInGroup(pack, 'consonant').map((g) => g.char)).toEqual(['א']);
+    expect(glyphsInGroup(pack, 'vowel').map((g) => g.name)).toEqual(['qamets']);
     expect(glyphsInGroup(pack, 'other')).toEqual([]);
   });
 });
@@ -115,8 +115,8 @@ describe('splitClusters', () => {
     // דָּבָר — three consonants, each carrying a vowel.
     const clusters = splitClusters('דָּבָר');
 
-    expect(clusters.map(c => c.base)).toEqual(['ד', 'ב', 'ר']);
-    expect(clusters.map(c => c.text)).toEqual(['דָּ', 'בָ', 'ר']);
+    expect(clusters.map((c) => c.base)).toEqual(['ד', 'ב', 'ר']);
+    expect(clusters.map((c) => c.text)).toEqual(['דָּ', 'בָ', 'ר']);
   });
 
   it('returns clusters in logical order, not visual order', () => {
@@ -133,7 +133,7 @@ describe('splitClusters', () => {
   });
 
   it('splits an unpointed word into bare consonants', () => {
-    expect(splitClusters('דבר').map(c => c.text)).toEqual(['ד', 'ב', 'ר']);
+    expect(splitClusters('דבר').map((c) => c.text)).toEqual(['ד', 'ב', 'ר']);
   });
 
   it('treats a Greek breathing the same way, without knowing it is Greek', () => {
@@ -155,9 +155,7 @@ describe('splitClusters', () => {
   it('leaves a precomposed character as the one cell it already is', () => {
     // The other half of the same claim: nothing here decomposes anything, so a
     // font-ready composed form passes through untouched.
-    expect(splitClusters('\u1f05')).toEqual([
-      { text: '\u1f05', base: '\u1f05', pointed: false },
-    ]);
+    expect(splitClusters('\u1f05')).toEqual([{ text: '\u1f05', base: '\u1f05', pointed: false }]);
   });
 
   it('is empty for an empty string', () => {

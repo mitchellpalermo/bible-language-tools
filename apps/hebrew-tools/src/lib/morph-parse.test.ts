@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import ATTESTED_CODES from './morph-codes.json';
 import {
   analyzeMorph,
   analyzeWord,
@@ -7,7 +8,6 @@ import {
   formatMorph,
   type MorphLanguage,
 } from './morph-parse';
-import ATTESTED_CODES from './morph-codes.json';
 
 describe('analyzeMorph', () => {
   describe('verbs', () => {
@@ -29,7 +29,9 @@ describe('analyzeMorph', () => {
     });
 
     it('inflects a participle for state, not person', () => {
-      expect(formatMorph('Vqrmsa')).toBe('Verb — Qal active participle masculine singular absolute');
+      expect(formatMorph('Vqrmsa')).toBe(
+        'Verb — Qal active participle masculine singular absolute',
+      );
       expect(briefMorph('Vqrmsa')).toBe('Qal ptc ms');
       expect(briefMorph('Vqrmpc')).toBe('Qal ptc mp constr');
       expect(formatMorph('Vqsmsa')).toBe(

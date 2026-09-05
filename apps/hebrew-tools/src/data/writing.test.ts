@@ -40,7 +40,7 @@ function deck(glyphs: WritableGlyph[], order: WritingQueueOrder = 'due-first'): 
   return { id: 'test', label: 'Test', category: 'letters', glyphs, order };
 }
 
-const deckById = (id: string) => buildDecks().find(d => d.id === id) as WritingDeck;
+const deckById = (id: string) => buildDecks().find((d) => d.id === id) as WritingDeck;
 
 describe('card keys', () => {
   it('prefixes every writing card', () => {
@@ -52,7 +52,7 @@ describe('card keys', () => {
     // Letters and points are separate skills on separate schedules, and the
     // namespaces would otherwise collide: shureq is written וּ, which is also a
     // vav with a dagesh.
-    const qamets = deckById('nikud').glyphs.find(g => g.name === 'qamets') as WritableGlyph;
+    const qamets = deckById('nikud').glyphs.find((g) => g.name === 'qamets') as WritableGlyph;
     expect(writingCardKey(qamets)).toBe('write:nikud:ָ');
     expect(isWritingKey(writingCardKey(qamets))).toBe(true);
   });
@@ -60,7 +60,7 @@ describe('card keys', () => {
   it('gives every deck a key under one of the declared prefixes', () => {
     for (const d of buildDecks()) {
       for (const g of d.glyphs) {
-        expect(WRITING_KEY_PREFIXES.some(p => writingCardKey(g).startsWith(p))).toBe(true);
+        expect(WRITING_KEY_PREFIXES.some((p) => writingCardKey(g).startsWith(p))).toBe(true);
       }
     }
   });
@@ -83,7 +83,7 @@ describe('card keys', () => {
 describe('buildDecks', () => {
   it('offers letters, vowel points, and the confusable pairs', () => {
     const decks = buildDecks();
-    expect(decks.slice(0, 5).map(d => d.id)).toEqual([
+    expect(decks.slice(0, 5).map((d) => d.id)).toEqual([
       'alphabet',
       'finals',
       'all-consonants',
@@ -93,7 +93,7 @@ describe('buildDecks', () => {
   });
 
   it('files every deck under a category the picker renders', () => {
-    const known = new Set(WRITING_DECK_CATEGORIES.map(c => c.id));
+    const known = new Set(WRITING_DECK_CATEGORIES.map((c) => c.id));
     for (const d of buildDecks()) expect(known.has(d.category)).toBe(true);
   });
 
@@ -107,7 +107,7 @@ describe('buildDecks', () => {
   });
 
   it('drills shin and sin as separate, pointed cards', () => {
-    const chars = deckById('alphabet').glyphs.map(g => g.char);
+    const chars = deckById('alphabet').glyphs.map((g) => g.char);
     expect(chars).toContain('שׁ');
     expect(chars).toContain('שׂ');
     // A bare shin is neither letter and appears nowhere in the Hebrew Bible.
@@ -116,7 +116,7 @@ describe('buildDecks', () => {
 
   it('keeps vowel points out of the letter decks', () => {
     for (const id of ['alphabet', 'finals', 'all-consonants']) {
-      expect(deckById(id).glyphs.some(g => g.group === 'vowel')).toBe(false);
+      expect(deckById(id).glyphs.some((g) => g.group === 'vowel')).toBe(false);
     }
   });
 
@@ -132,8 +132,8 @@ describe('the vowel deck', () => {
 
   it('covers the nine full vowels, three hatephs and the sheva', () => {
     expect(nikud.glyphs).toHaveLength(13);
-    expect(nikud.glyphs.filter(g => g.name.startsWith('hateph'))).toHaveLength(3);
-    expect(nikud.glyphs.map(g => g.name)).toContain('sheva');
+    expect(nikud.glyphs.filter((g) => g.name.startsWith('hateph'))).toHaveLength(3);
+    expect(nikud.glyphs.map((g) => g.name)).toContain('sheva');
   });
 
   it('composes every point onto the host consonant', () => {
@@ -146,7 +146,7 @@ describe('the vowel deck', () => {
   it('writes the two vowel letters as vav plus their mark, in that order', () => {
     // Holem male encoded the WLC's way round — point before vav — lands the
     // point on the preceding consonant instead of on the vav.
-    const byName = (n: string) => nikud.glyphs.find(g => g.name === n) as WritableGlyph;
+    const byName = (n: string) => nikud.glyphs.find((g) => g.name === n) as WritableGlyph;
     expect(byName('shureq').char).toBe('וּ');
     expect(byName('holem male').char).toBe('וֹ');
   });
@@ -155,7 +155,7 @@ describe('the vowel deck', () => {
     // U+05C7 exists, but the WLC writes the vowel with an ordinary qamets and
     // the two are drawn the same. A card whose reference is pixel-for-pixel
     // another card's teaches nothing about handwriting.
-    expect(nikud.glyphs.map(g => g.char)).not.toContain('ׇ');
+    expect(nikud.glyphs.map((g) => g.char)).not.toContain('ׇ');
   });
 
   it('tells the student where the point goes, not merely what it looks like', () => {
@@ -169,12 +169,12 @@ describe('confusableGroups', () => {
 
   it('closes over the relation rather than emitting one group per glyph', () => {
     // ה names ח and ת; ח names ה and ת. That is one group of three.
-    const three = groups.find(g => g.some(m => m.char === 'ה')) as WritableGlyph[];
-    expect(three.map(m => m.char)).toEqual(['ה', 'ח', 'ת']);
+    const three = groups.find((g) => g.some((m) => m.char === 'ה')) as WritableGlyph[];
+    expect(three.map((m) => m.char)).toEqual(['ה', 'ח', 'ת']);
   });
 
   it('finds the pairs a first-year student actually loses marks on', () => {
-    expect(groups.map(g => g.map(m => m.char).join(''))).toEqual([
+    expect(groups.map((g) => g.map((m) => m.char).join(''))).toEqual([
       'בכ',
       'דר',
       'החת',
@@ -187,8 +187,8 @@ describe('confusableGroups', () => {
 
   it('groups across the consonant and final decks', () => {
     // ו/ן and ס/ם straddle the two groups, which is exactly why they confuse.
-    const finals = groups.find(g => g.some(m => m.char === 'ן')) as WritableGlyph[];
-    expect(finals.map(m => m.group)).toEqual(['consonant', 'consonant', 'final']);
+    const finals = groups.find((g) => g.some((m) => m.char === 'ן')) as WritableGlyph[];
+    expect(finals.map((m) => m.group)).toEqual(['consonant', 'consonant', 'final']);
   });
 
   it('reads the relation as undirected', () => {
@@ -202,7 +202,7 @@ describe('confusableGroups', () => {
       ],
       combining: undefined,
     };
-    expect(confusableGroups(pack).map(g => g.map(m => m.char))).toEqual([['a', 'b']]);
+    expect(confusableGroups(pack).map((g) => g.map((m) => m.char))).toEqual([['a', 'b']]);
   });
 
   it('ignores partners the pack does not contain', () => {
@@ -220,16 +220,21 @@ describe('interleave', () => {
   const [x, y] = [glyph('x'), glyph('y')];
 
   it('deals one member from each group in turn', () => {
-    expect(interleave([[a, b], [x, y]]).map(g => g.char)).toEqual(['a', 'x', 'b', 'y']);
+    expect(
+      interleave([
+        [a, b],
+        [x, y],
+      ]).map((g) => g.char),
+    ).toEqual(['a', 'x', 'b', 'y']);
   });
 
   it('alternates a single group across its rounds', () => {
     // The contrast the confusable decks are for: ד ר ד ר, never ד ד ד ר ר ר.
-    expect(interleave([[a, b]], 3).map(g => g.char)).toEqual(['a', 'b', 'a', 'b', 'a', 'b']);
+    expect(interleave([[a, b]], 3).map((g) => g.char)).toEqual(['a', 'b', 'a', 'b', 'a', 'b']);
   });
 
   it('handles groups of unequal length without dropping the longer', () => {
-    expect(interleave([[a, b, c], [x]]).map(g => g.char)).toEqual(['a', 'x', 'b', 'c']);
+    expect(interleave([[a, b, c], [x]]).map((g) => g.char)).toEqual(['a', 'x', 'b', 'c']);
   });
 
   it('is empty for no groups', () => {
@@ -247,13 +252,13 @@ describe('the confusable decks', () => {
   });
 
   it('repeats each member so there is something to alternate between', () => {
-    const chars = deckById('confusable-דר').glyphs.map(g => g.char);
+    const chars = deckById('confusable-דר').glyphs.map((g) => g.char);
     expect(chars).toEqual(['ד', 'ר', 'ד', 'ר', 'ד', 'ר']);
     expect(chars).toHaveLength(2 * CONFUSABLE_ROUNDS);
   });
 
   it('never presents the same glyph twice in a row', () => {
-    for (const d of buildDecks().filter(d => d.category === 'confusables')) {
+    for (const d of buildDecks().filter((d) => d.category === 'confusables')) {
       for (let i = 1; i < d.glyphs.length; i++) {
         expect(d.glyphs[i].char).not.toBe(d.glyphs[i - 1].char);
       }
@@ -261,7 +266,7 @@ describe('the confusable decks', () => {
   });
 
   it('spreads the combined deck across the groups, one pass each', () => {
-    const chars = deckById('confusable-all').glyphs.map(g => g.char);
+    const chars = deckById('confusable-all').glyphs.map((g) => g.char);
     expect(chars.slice(0, 7)).toEqual(['ב', 'ד', 'ה', 'ו', 'ס', 'ע', 'שׁ']);
     expect(chars).toHaveLength(16);
     expect(new Set(chars).size).toBe(16);
@@ -283,12 +288,12 @@ describe('buildQueue', () => {
   it('keeps alphabetical order for unseen letters', () => {
     // Deliberately unlike the vocabulary flashcards, which shuffle. Learning
     // the alphabet includes learning its order.
-    expect(buildQueue(deck(glyphs), {}).map(g => g.char)).toEqual(['א', 'ב', 'ג', 'ד']);
+    expect(buildQueue(deck(glyphs), {}).map((g) => g.char)).toEqual(['א', 'ב', 'ג', 'ד']);
   });
 
   it('puts due cards before new ones, each in pack order', () => {
     const store = { [keyOf('ג')]: cardFor('ג'), [keyOf('ד')]: cardFor('ד') };
-    expect(buildQueue(deck(glyphs), store).map(g => g.char)).toEqual(['ג', 'ד', 'א', 'ב']);
+    expect(buildQueue(deck(glyphs), store).map((g) => g.char)).toEqual(['ג', 'ד', 'א', 'ב']);
   });
 
   it('omits cards that are not yet due', () => {
@@ -296,22 +301,17 @@ describe('buildQueue', () => {
       [keyOf('א')]: cardFor('א', { dueDate: '2999-01-01' }),
       [keyOf('ב')]: cardFor('ב'),
     };
-    expect(buildQueue(deck(glyphs), store).map(g => g.char)).toEqual(['ב', 'ג', 'ד']);
+    expect(buildQueue(deck(glyphs), store).map((g) => g.char)).toEqual(['ב', 'ג', 'ד']);
   });
 
   it('returns everything in order in "all" mode, due or not', () => {
     const store = { [keyOf('א')]: cardFor('א', { dueDate: '2999-01-01' }) };
-    expect(buildQueue(deck(glyphs), store, 'all').map(g => g.char)).toEqual([
-      'א',
-      'ב',
-      'ג',
-      'ד',
-    ]);
+    expect(buildQueue(deck(glyphs), store, 'all').map((g) => g.char)).toEqual(['א', 'ב', 'ג', 'ד']);
   });
 
   it('can come back empty when nothing is due', () => {
     const store = Object.fromEntries(
-      glyphs.map(g => [keyOf(g.char), cardFor(g.char, { dueDate: '2999-01-01' })]),
+      glyphs.map((g) => [keyOf(g.char), cardFor(g.char, { dueDate: '2999-01-01' })]),
     );
     expect(buildQueue(deck(glyphs), store)).toEqual([]);
   });
@@ -323,20 +323,20 @@ describe('buildQueue', () => {
     const pair = [glyph('ד'), glyph('ר'), glyph('ד'), glyph('ר')];
     const store = { [keyOf('ד')]: cardFor('ד') };
 
-    expect(buildQueue(deck(pair, 'as-built'), store).map(g => g.char)).toEqual([
+    expect(buildQueue(deck(pair, 'as-built'), store).map((g) => g.char)).toEqual([
       'ד',
       'ר',
       'ד',
       'ר',
     ]);
-    expect(buildQueue(deck(pair), store).map(g => g.char)).toEqual(['ד', 'ד', 'ר', 'ר']);
+    expect(buildQueue(deck(pair), store).map((g) => g.char)).toEqual(['ד', 'ד', 'ר', 'ר']);
   });
 
   it('drops every repeat of a card that is not due', () => {
     const pair = [glyph('ד'), glyph('ר'), glyph('ד'), glyph('ר')];
     const store = { [keyOf('ד')]: cardFor('ד', { dueDate: '2999-01-01' }) };
 
-    expect(buildQueue(deck(pair, 'as-built'), store).map(g => g.char)).toEqual(['ר', 'ר']);
+    expect(buildQueue(deck(pair, 'as-built'), store).map((g) => g.char)).toEqual(['ר', 'ר']);
   });
 });
 
@@ -431,7 +431,7 @@ describe('progress helpers', () => {
 
 describe('pointed reference forms', () => {
   const finals = deckById('finals').glyphs;
-  const byName = (n: string) => finals.find(g => g.name === n) as WritableGlyph;
+  const byName = (n: string) => finals.find((g) => g.name === n) as WritableGlyph;
 
   it('traces final kaf with its silent sheva, keyed by the bare letter', () => {
     // Final kaf closes a syllable, so it carries a sheva essentially wherever
@@ -452,8 +452,8 @@ describe('pointed reference forms', () => {
 
   it('renders shin and sin with their dots already on', () => {
     const alphabet = deckById('alphabet');
-    const shin = alphabet.glyphs.find(g => g.name === 'shin') as WritableGlyph;
-    const sin = alphabet.glyphs.find(g => g.name === 'sin') as WritableGlyph;
+    const shin = alphabet.glyphs.find((g) => g.name === 'shin') as WritableGlyph;
+    const sin = alphabet.glyphs.find((g) => g.name === 'sin') as WritableGlyph;
     expect(renderableText(hebrewScriptPack, shin)).toBe('שׁ');
     expect(renderableText(hebrewScriptPack, sin)).toBe('שׂ');
     expect(shin.confusableWith).toContain(sin.char);
@@ -465,7 +465,7 @@ describe('pointed reference forms', () => {
     // what lets scoring isolate it — see rasterizeComposite.
     const alphabet = deckById('alphabet');
     for (const name of ['shin', 'sin']) {
-      expect(alphabet.glyphs.find(g => g.name === name)?.baseForm).toBe('ש');
+      expect(alphabet.glyphs.find((g) => g.name === name)?.baseForm).toBe('ש');
     }
   });
 
@@ -481,7 +481,7 @@ describe('pointed reference forms', () => {
 
 describe('practiceableGlyphs', () => {
   it('includes the vowel points alongside the letters', () => {
-    const groups = new Set(practiceableGlyphs(hebrewScriptPack).map(g => g.group));
+    const groups = new Set(practiceableGlyphs(hebrewScriptPack).map((g) => g.group));
     expect(groups.has('vowel')).toBe(true);
     expect(groups.has('consonant')).toBe(true);
   });

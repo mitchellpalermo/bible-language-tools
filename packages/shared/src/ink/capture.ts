@@ -120,10 +120,12 @@ export class InkCapture {
     }
 
     this.activeId = sample.pointerId;
-    this.activeKind = sample.pointerType === 'pen' ? 'pen' : sample.pointerType === 'touch' ? 'touch' : 'mouse';
+    this.activeKind =
+      sample.pointerType === 'pen' ? 'pen' : sample.pointerType === 'touch' ? 'touch' : 'mouse';
     this.startTime = sample.timestamp;
     this.points = [];
-    this.smoother = this.options.smoothing === false ? null : new PointSmoother(this.options.smoothingParams);
+    this.smoother =
+      this.options.smoothing === false ? null : new PointSmoother(this.options.smoothingParams);
 
     this.push(sample);
     return outcome;

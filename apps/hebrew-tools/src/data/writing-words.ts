@@ -193,7 +193,7 @@ export function countNewWords(
   store: Record<string, SRSCard>,
   prompt: WordPrompt,
 ): number {
-  return words.filter(w => hasPrompt(w, prompt) && !store[wordCardKey(w)]).length;
+  return words.filter((w) => hasPrompt(w, prompt) && !store[wordCardKey(w)]).length;
 }
 
 /**
@@ -203,7 +203,7 @@ export function countNewWords(
  * chapter reads as a fact about the data rather than as a broken deck.
  */
 export function countPromptable(words: HebrewVocabWord[], prompt: WordPrompt): number {
-  return words.filter(w => hasPrompt(w, prompt)).length;
+  return words.filter((w) => hasPrompt(w, prompt)).length;
 }
 
 /**

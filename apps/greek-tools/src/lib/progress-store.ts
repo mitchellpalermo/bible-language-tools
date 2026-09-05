@@ -137,7 +137,14 @@ export async function getProgress(db: ProgressDb, userId: string): Promise<Progr
     parseHistory[row.passageId] = { correct: row.correct, total: row.total };
   }
 
-  return { srsStore, studyStats, customDecks, focusPassages, parseHistory, syncedAt: state.syncedAt };
+  return {
+    srsStore,
+    studyStats,
+    customDecks,
+    focusPassages,
+    parseHistory,
+    syncedAt: state.syncedAt,
+  };
 }
 
 /**
@@ -147,7 +154,10 @@ export async function getProgress(db: ProgressDb, userId: string): Promise<Progr
 export async function putProgress(
   db: ProgressDb,
   userId: string,
-  payload: Pick<ProgressPayload, 'srsStore' | 'studyStats' | 'customDecks' | 'focusPassages' | 'parseHistory'>,
+  payload: Pick<
+    ProgressPayload,
+    'srsStore' | 'studyStats' | 'customDecks' | 'focusPassages' | 'parseHistory'
+  >,
 ): Promise<string> {
   const syncedAt = new Date().toISOString();
   const userLang = { userId, language: LANGUAGE };

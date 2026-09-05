@@ -26,7 +26,7 @@ export default function Writing() {
   return (
     <div className="space-y-4">
       <div role="tablist" aria-label="Writing practice mode" className="flex flex-wrap gap-2">
-        {SURFACES.map(s => (
+        {SURFACES.map((s) => (
           <button
             key={s.id}
             type="button"
