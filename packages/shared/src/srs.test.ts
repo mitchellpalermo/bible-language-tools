@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   daysFromNow,
   isDue,
@@ -18,7 +18,12 @@ import {
 function dateStr(offsetDays = 0): string {
   const d = new Date();
   d.setDate(d.getDate() + offsetDays);
-  return d.toISOString().slice(0, 10);
+  // Local, not UTC — must match the module's own date rule, or these helpers
+  // reproduce the very bug they are meant to catch.
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 const TODAY = dateStr(0);
@@ -65,6 +70,81 @@ describe('todayStr / daysFromNow / yesterdayStr', () => {
 
   it('yesterdayStr equals daysFromNow(-1)', () => {
     expect(yesterdayStr()).toBe(YESTERDAY);
+  });
+});
+
+// ─── the day boundary is local midnight, not UTC midnight ───────────────────
+//
+// These pin the fix for the study day ending at 19:00 local. They force a
+// timezone west of UTC so that "evening here" is "tomorrow in UTC" — in a UTC
+// runner the two rules are indistinguishable and the bug walks straight through.
+// TZ is set per-test rather than globally so no other suite's dates move.
+//
+// This package is browser code and deliberately carries no @types/node, so the
+// Node-only TZ switch is reached through globalThis with a narrow local type
+// rather than by adding a dependency for one test.
+const nodeEnv = (globalThis as { process?: { env: Record<string, string | undefined> } }).process
+  ?.env;
+
+describe('day boundary in a timezone west of UTC', () => {
+  const ORIGINAL_TZ = nodeEnv?.TZ;
+
+  // 01:30Z on Sep 6 is 20:30 on Sep 5 in Chicago (CDT, UTC-5) — past the old
+  // UTC rollover, comfortably inside the same local evening.
+  const EVENING = new Date('2026-09-06T01:30:00Z');
+
+  beforeEach(() => {
+    if (!nodeEnv) throw new Error('these tests need a runtime whose TZ can be set');
+    nodeEnv.TZ = 'America/Chicago';
+    vi.useFakeTimers();
+    vi.setSystemTime(EVENING);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    if (nodeEnv) nodeEnv.TZ = ORIGINAL_TZ;
+  });
+
+  it('todayStr is the local date, not the UTC date', () => {
+    expect(todayStr()).toBe('2026-09-05');
+  });
+
+  it('daysFromNow counts from the local date', () => {
+    expect(daysFromNow(1)).toBe('2026-09-06');
+    expect(yesterdayStr()).toBe('2026-09-04');
+  });
+
+  it('a card reviewed in the evening is due tomorrow, not the day after', () => {
+    const reviewed = nextSRS({ ...makeCard(), interval: 0, repetition: 0 }, 4);
+    expect(reviewed.lastReviewed).toBe('2026-09-05');
+    expect(reviewed.dueDate).toBe('2026-09-06');
+  });
+
+  it('morning and evening reviews are the same study day', () => {
+    // 15:00Z is 10:00 in Chicago, same calendar day as EVENING.
+    vi.setSystemTime(new Date('2026-09-05T15:00:00Z'));
+    const morning = recordReview(emptyStats(), true);
+    expect(morning.lastStudyDate).toBe('2026-09-05');
+
+    vi.setSystemTime(EVENING);
+    const evening = recordReview(morning, true);
+    expect(evening.lastStudyDate).toBe('2026-09-05');
+    // The counter must carry across the old rollover instead of resetting.
+    expect(evening.cardsStudiedToday).toBe(2);
+  });
+
+  it('one calendar day cannot bank two streak days', () => {
+    let stats = emptyStats();
+    vi.setSystemTime(new Date('2026-09-05T15:00:00Z'));
+    // Hit the threshold in the morning: that is one study day.
+    for (let i = 0; i < STREAK_THRESHOLD; i++) stats = recordReview(stats, true);
+    expect(stats.streak).toBe(1);
+
+    // Keep going after the old rollover; the streak must not advance again.
+    vi.setSystemTime(EVENING);
+    for (let i = 0; i < STREAK_THRESHOLD; i++) stats = recordReview(stats, true);
+    expect(stats.streak).toBe(1);
+    expect(stats.cardsStudiedToday).toBe(STREAK_THRESHOLD * 2);
   });
 });
 

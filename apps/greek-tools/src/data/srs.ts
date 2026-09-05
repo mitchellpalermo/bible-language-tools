@@ -36,14 +36,35 @@ export function normalizeKey(greek: string): string {
 /** Cards per day required to count as a study day for streak purposes */
 export const STREAK_THRESHOLD = 10;
 
+/**
+ * Format a Date as YYYY-MM-DD in the *local* timezone.
+ *
+ * Deliberately not `toISOString().slice(0, 10)`, which formats in UTC and so
+ * ends the study day at 19:00 in America/Chicago (18:00 once DST ends) rather
+ * than at midnight. That made an evening review land on tomorrow's date: the
+ * daily counter reset mid-session, one calendar day could bank two streak days,
+ * and every interval earned after the rollover ran a day long.
+ *
+ * This mirrors packages/shared/src/srs.ts, which hebrew-tools uses. This module
+ * predates that package and still carries its own copy of the algorithm; if the
+ * two ever converge, they must converge on the local-date rule.
+ */
+function localDateStr(d: Date): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 function todayStr(): string {
-  return new Date().toISOString().slice(0, 10);
+  return localDateStr(new Date());
 }
 
 function daysFromNow(n: number): string {
+  // setDate walks the local calendar, so this stays correct across a DST shift.
   const d = new Date();
   d.setDate(d.getDate() + n);
-  return d.toISOString().slice(0, 10);
+  return localDateStr(d);
 }
 
 function yesterdayStr(): string {

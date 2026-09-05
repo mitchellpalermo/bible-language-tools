@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   isDue,
   loadSRSStore,
@@ -18,7 +18,12 @@ import {
 function dateStr(offsetDays = 0): string {
   const d = new Date();
   d.setDate(d.getDate() + offsetDays);
-  return d.toISOString().slice(0, 10);
+  // Local, not UTC — must match the module's own date rule, or these helpers
+  // reproduce the very bug they are meant to catch.
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 const TODAY = dateStr(0);
@@ -399,6 +404,63 @@ describe('recordReview', () => {
 });
 
 // ─── STREAK_THRESHOLD constant ─────────────────────────────────────────────
+
+// ─── the day boundary is local midnight, not UTC midnight ───────────────────
+//
+// greek-tools carries its own copy of the date helpers (they are module-private
+// here, so these go through the public API). Same fix, same reasoning as
+// packages/shared/src/srs.test.ts: force a timezone west of UTC, because in a
+// UTC runner the local and UTC rules are indistinguishable.
+
+describe('day boundary in a timezone west of UTC', () => {
+  const ORIGINAL_TZ = process.env.TZ;
+
+  // 01:30Z on Sep 6 is 20:30 on Sep 5 in Chicago (CDT, UTC-5).
+  const EVENING = new Date('2026-09-06T01:30:00Z');
+
+  beforeEach(() => {
+    process.env.TZ = 'America/Chicago';
+    vi.useFakeTimers();
+    vi.setSystemTime(EVENING);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    process.env.TZ = ORIGINAL_TZ;
+  });
+
+  it('a new card is due on the local date', () => {
+    expect(newCard('λόγος').dueDate).toBe('2026-09-05');
+  });
+
+  it('a card reviewed in the evening is due tomorrow, not the day after', () => {
+    const reviewed = nextSRS(newCard('λόγος'), 4);
+    expect(reviewed.lastReviewed).toBe('2026-09-05');
+    expect(reviewed.dueDate).toBe('2026-09-06');
+  });
+
+  it('morning and evening reviews are the same study day', () => {
+    vi.setSystemTime(new Date('2026-09-05T15:00:00Z')); // 10:00 in Chicago
+    const morning = recordReview(emptyStats(), true);
+    expect(morning.lastStudyDate).toBe('2026-09-05');
+
+    vi.setSystemTime(EVENING);
+    const evening = recordReview(morning, true);
+    expect(evening.lastStudyDate).toBe('2026-09-05');
+    expect(evening.cardsStudiedToday).toBe(2);
+  });
+
+  it('one calendar day cannot bank two streak days', () => {
+    let stats = emptyStats();
+    vi.setSystemTime(new Date('2026-09-05T15:00:00Z'));
+    for (let i = 0; i < STREAK_THRESHOLD; i++) stats = recordReview(stats, true);
+    expect(stats.streak).toBe(1);
+
+    vi.setSystemTime(EVENING);
+    for (let i = 0; i < STREAK_THRESHOLD; i++) stats = recordReview(stats, true);
+    expect(stats.streak).toBe(1);
+  });
+});
 
 describe('STREAK_THRESHOLD', () => {
   it('is a positive number', () => {
