@@ -2,54 +2,18 @@
 //
 // The merge is symmetric: merge(a, b) and merge(b, a) pick the same winners.
 // "More progress wins" is the guiding rule throughout.
+//
+// SRS cards and study stats merge identically in both apps, so those two rules
+// live in @tools/shared/sync-merge and are re-exported here. Everything below
+// is greek-tools-specific: decks, focus passages, and parse history.
+
+import type { SRSCard, StudyStats } from '@tools/shared/srs';
+import { mergeSRSStores, mergeStudyStats } from '@tools/shared/sync-merge';
 
 import type { CustomDeck } from '../data/customDecks';
 import type { FocusPassage, ParseHistory } from '../data/focusPassages';
-import type { SRSCard, StudyStats } from '../data/srs';
 
-/**
- * Per word key: the card with the higher repetition wins.
- * Ties are broken by the later dueDate.
- */
-export function mergeSRSStores(
-  a: Record<string, SRSCard>,
-  b: Record<string, SRSCard>,
-): Record<string, SRSCard> {
-  const merged: Record<string, SRSCard> = { ...a };
-  for (const [key, card] of Object.entries(b)) {
-    const existing = merged[key];
-    if (!existing) {
-      merged[key] = card;
-      continue;
-    }
-    if (
-      card.repetition > existing.repetition ||
-      (card.repetition === existing.repetition && card.dueDate > existing.dueDate)
-    ) {
-      merged[key] = card;
-    }
-  }
-  return merged;
-}
-
-/**
- * Counters take the max of both stores. Daily fields (cardsStudiedToday,
- * lastStudyDate) come from the store with the higher totalReviewed — a proxy
- * for the most recently active device. lastStreakDate follows the higher
- * streak so the streak and its anchor date stay consistent.
- */
-export function mergeStudyStats(a: StudyStats, b: StudyStats): StudyStats {
-  const recent = b.totalReviewed > a.totalReviewed ? b : a;
-  const streakier = b.streak > a.streak ? b : a;
-  return {
-    streak: streakier.streak,
-    lastStreakDate: streakier.lastStreakDate,
-    cardsStudiedToday: recent.cardsStudiedToday,
-    lastStudyDate: recent.lastStudyDate,
-    totalReviewed: Math.max(a.totalReviewed, b.totalReviewed),
-    totalCorrect: Math.max(a.totalCorrect, b.totalCorrect),
-  };
-}
+export { mergeSRSStores, mergeStudyStats };
 
 /** Union by deck id; duplicate ids resolved by the later createdAt. */
 export function mergeCustomDecks(a: CustomDeck[], b: CustomDeck[]): CustomDeck[] {

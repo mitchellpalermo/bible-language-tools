@@ -51,6 +51,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | Export | Description |
 |--------|-------------|
 | `@tools/shared/srs` | SM-2 spaced repetition algorithm, types, and pure stats functions |
+| `@tools/shared/sync-merge` | Merge rules for cross-device sync of SRS cards and study stats |
 | `@tools/shared/quiz-settings` | `createQuizSettings(storageKey)` factory for persisting quiz difficulty |
 | `@tools/shared/nav` | `NavLink` type and the active-route predicates the nav renders with |
 | `@tools/shared/nav-menu` | `initNavMenu()` — DOM controller for the mobile drawer |
@@ -121,6 +122,35 @@ Things to know before changing it:
 - **Ink is stored in CSS pixels, not device pixels.** The canvas scales by `devicePixelRatio` at draw time; baking that in would make saved strokes resolution-dependent.
 - **Smoothing at capture time and interpolation at render time are separate on purpose.** Do not merge them — a render-grade spline applied to incoming samples rounds off real corners, and the square corner of ד is exactly what distinguishes it from ר.
 - **Never assert exact equality on a smoothed coordinate.** `OneEuroFilter` computes `a * value + (1 - a) * prev`, which for a constant input is that constant in real arithmetic but lands a ULP either side of it in floating point, for roughly 8% of the timestamp deltas a DOM happens to produce. `InkCanvas.test.tsx` asserted `p.y === 10` on a horizontal stroke and duly passed locally while failing in CI. Use `toBeCloseTo`. Exact equality is still right for values the engine only *copies* — `stroke.test.ts`'s zero-length resample case is asserting that they are copies.
+
+## Streaks, study days, and sync merges
+
+Three defects lived here at once (fixed Aug 2026). All three are easy to
+reintroduce, so treat these as rules:
+
+**Calendar dates are local, never UTC.** `todayStr` / `daysFromNow` /
+`yesterdayStr` in `@tools/shared/srs` format from `getFullYear/getMonth/getDate`.
+Using `toISOString().slice(0, 10)` moves the day boundary to 6pm for a CST user:
+an evening session and the next morning's collapse into one study day, and card
+`dueDate`s shift with it. Test helpers that build dates must use the same local
+formatting, or the suite starts failing every evening west of UTC.
+
+**Never gate a milestone on a running counter hitting a value exactly.** The
+daily threshold check is `cardsToday >= STREAK_THRESHOLD && lastStreakDate !==
+today`, not `cardsToday === STREAK_THRESHOLD`. A sync merge adopts the other
+device's `cardsStudiedToday` wholesale, so the counter can step over the line
+instead of landing on it — with `===` the day was then never credited, no matter
+how many cards followed.
+
+**Fields that describe each other move together in a merge.** `streak` travels
+with `lastStreakDate`, and `cardsStudiedToday` travels with `lastStudyDate`.
+Pick the winner by the *date*, not the number: two decayed streaks both read 0,
+and a tie-break that falls through to the local side erases the server's anchor
+whenever a user signs in on a fresh browser. `PUT /api/progress` is a full
+replace with no server-side merge, so a bad client merge overwrites good data.
+
+Merge rules must also be symmetric — `merge(a, b)` and `merge(b, a)` pick the
+same winners — because both sides of a sync run the same function.
 
 ## Pull requests
 
