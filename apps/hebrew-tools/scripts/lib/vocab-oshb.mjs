@@ -551,6 +551,14 @@ const HEADER = `// Garrett & DeRouchie chapter vocabulary — GENERATED, do not 
 // form and the count would be about the lexeme. The rest are listed in
 // \`OSHB_UNMATCHED\` with a reason.
 //
+// Chapter 5 lists eight irregular plurals in its section C table, and the handout
+// carries them only as a \`plural\` field on the singular — which renders on the
+// back of the singular's card and is therefore never itself asked. The quiz asks
+// for the plural, so those eight forms are also entered as \`5:inflected\` rows
+// and get cards of their own. נָשִׁים was already such a row under chapter 4 and is
+// simply tagged into 5 as well; the other seven are the one place where an entry
+// comes from the grammar rather than from the handout.
+//
 // \`transliteration\` is still absent: OSHB carries no romanization, and inventing
 // ~500 SBL forms by hand would bake in errors the data tests cannot catch.
 //

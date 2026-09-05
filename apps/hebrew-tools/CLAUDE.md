@@ -16,7 +16,7 @@ Three things about the decks that are pedagogy rather than plumbing, and will lo
 
 - **A confusable deck's order IS the deck.** Members are dealt round-robin so ד and ר alternate; `WritingDeck.order: 'as-built'` is what stops `buildQueue` hoisting due cards to the front and reassembling exactly the blocked presentation the deck exists to avoid.
 - **A word-mode gloss is not the flashcard's gloss.** Garrett annotates entries inline — חָפֵץ reads "desire, enjoy, want (the qatal 3ms is חָפֵץ …)" — which is free on a flashcard back, where the Hebrew is shown anyway, and fatal as a writing prompt because it prints the answer. `glossPrompt` trims a trailing parenthetical carrying Hebrew and **drops the word outright** if any survives; a prompt with the answer blanked out of the middle of it is worse than one fewer word. A data test asserts no gloss prompt in the whole vocabulary contains Hebrew. The same rule is why word mode has no trace or copy step: both would show the answer.
-- **`transliteration` is a real constraint on the deck, not a missing field.** The 546 generated entries carry none by design (OSHB has no romanization), so "From the sound" narrows the queue to the hand-curated words rather than falling back to the gloss — silently swapping one kind of prompt for another is worse than a smaller deck, and the UI says why it is small.
+- **`transliteration` is a real constraint on the deck, not a missing field.** The 553 generated entries carry none by design (OSHB has no romanization), so "From the sound" narrows the queue to the hand-curated words rather than falling back to the gloss — silently swapping one kind of prompt for another is worse than a smaller deck, and the UI says why it is small.
 - **A repeat within one session can demote a card but not promote it** (`shouldUpdateCard`). A pair deck shows ד three times in five minutes, and SM-2 would read three passes as three spaced repetitions. Stats still count every presentation — the student did the review either way.
 
 ## Tech Stack
@@ -392,7 +392,7 @@ The vocabulary is split across four modules, and the split is load-bearing:
 | File | Role |
 |---|---|
 | `src/data/vocabulary-types.ts` | `HebrewVocabWord`, `cardKey`, and `gd()`. Imports **types only** |
-| `src/data/vocabulary-garrett.ts` | Generated — Garrett & DeRouchie chapters 2–31 (546 entries) |
+| `src/data/vocabulary-garrett.ts` | Generated — Garrett & DeRouchie chapters 2–31 (553 entries) |
 | `src/data/vocabulary.ts` | The hand-curated set (incl. chapter 1) + `mergeVocabulary` → `vocabulary` |
 | `src/data/textbooks.ts` | Textbook metadata, categories, and every query over the merged list |
 
@@ -400,9 +400,11 @@ The vocabulary is split across four modules, and the split is load-bearing:
 
 **A chapter tag carries a category**, not just a number — `gd(20, 'core')`. The textbook prints Core, Reading, Inflected, Proper Names, derived-stem and Special sections per chapter, and a word can sit in different sections in different chapters (Core in ch. 9, derived stems in ch. 20). Category belongs on the tag; it is not a property of the word.
 
+**Chapter 5's irregular plurals are cards in their own right, not just a `plural` field.** A `plural` renders on the back of the singular's card — shown every review, never itself asked. Chapter 5 section C tabulates eight of them and the quiz asks for the plural, so each is also a `5:inflected` entry with its own headword and its own SRS card. נָשִׁים was already such a row under chapter 4 and is tagged into 5 as well; the other seven are the one place an entry comes from the grammar rather than from the handout, which is why the generated file's header says so. The singular keeps its `plural` field too — the two directions are different recall tasks, and the pair is what the section teaches.
+
 **To add a chapter's vocabulary:** tag the words with `gd(n, category)`. Nothing else is required — the chapter grid, its counts, the category chips and the summary label all fall out of the tags.
 
-**`transliteration` is absent by design; `frequency` is present wherever a card front is a citation form.** OSHB carries no romanization, and ~546 invented ones would be errors the data tests cannot catch, so the card back omits that line. Frequencies are real occurrence counts over the WLC. The ~125 cards whose front is an inflected or reading-vocabulary *form* carry none, deliberately: the count is a fact about the lexeme behind the form, not about the form. `matchFreq` still returns `false` for `undefined` on every band but "all" — an unmeasured word is not a rare one.
+**`transliteration` is absent by design; `frequency` is present wherever a card front is a citation form.** OSHB carries no romanization, and ~553 invented ones would be errors the data tests cannot catch, so the card back omits that line. Frequencies are real occurrence counts over the WLC. The ~132 cards whose front is an inflected or reading-vocabulary *form* carry none, deliberately: the count is a fact about the lexeme behind the form, not about the form. `matchFreq` still returns `false` for `undefined` on every band but "all" — an unmeasured word is not a rare one.
 
 **Homographs are separated by `sense`, checked by `strong`, and the SRS key is `cardKey(word)`, not `word.hebrew`.** בָּרוּךְ the name and בָּרוּךְ "blessed" are different cards; so are אַף "also" and אַף "nose". Without a sense they would share one SRS card and reviewing one would mark the other. `cardKey` appends `#<sense>` only where a clash exists, so every other word keeps the bare-lemma key its progress is already stored under. **Anything that keys the SRS store off a word must call `cardKey`** — `normalizeKey(word.hebrew)` is the bug this replaced.
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { CATEGORY_IDS, TEXTBOOK_IDS } from './textbooks';
+import { CATEGORY_IDS, TEXTBOOK_IDS, wordsInChapter } from './textbooks';
 import { cardKey, type HebrewVocabWord, mergeVocabulary, vocabulary } from './vocabulary';
+import { gd } from './vocabulary-types';
 import {
   CORRECTIONS,
   EDITORIAL_NOTES,
@@ -382,7 +383,7 @@ describe('Garrett & DeRouchie import', () => {
   // chapters 2-5, because `plural` belongs to the word rather than to the
   // chapter that happens to tabulate it — so nothing else in the suite would
   // notice a regeneration quietly dropping one.
-  it.each([
+  const IRREGULAR_PLURALS = [
     ['אָב', 'אָבוֹת', 'm'],
     ['אִישׁ', 'אֲנָשִׁים', 'm'],
     ['אִשָּׁה', 'נָשִׁים', 'f'],
@@ -391,13 +392,35 @@ describe('Garrett & DeRouchie import', () => {
     ['יוֹם', 'יָמִים', 'm'],
     ['מִזְבֵּחַ', 'מִזְבְּחוֹת', 'm'],
     ['עִיר', 'עָרִים', 'f'],
-  ])('carries the irregular plural of %s', (singular, plural, gender) => {
+  ] as const;
+
+  it.each(IRREGULAR_PLURALS)('carries the irregular plural of %s', (singular, plural, gender) => {
     const word = GARRETT_VOCABULARY.find((w) => w.hebrew === singular);
     expect(word, `No entry for ${singular}`).toBeDefined();
     expect(word?.plural).toBe(plural);
     // The grammar prints the gender wherever the ending contradicts it —
     // אָבוֹת is masculine, עָרִים feminine — so it is part of the entry.
     expect(word?.gender).toBe(gender);
+
+    // ...and the plural is a headword too, not just a field on the singular.
+    // A `plural` renders on the back of the singular's card, which means it is
+    // shown but never asked; the chapter 5 quiz asks for it, so it needs a card
+    // of its own. That is what the `inflected` category is for.
+    const form = GARRETT_VOCABULARY.find((w) => w.hebrew === plural);
+    expect(form, `No card for the plural ${plural}`).toBeDefined();
+    expect(form?.chapters).toContainEqual(gd(5, 'inflected'));
+    // It points back at its singular, the convention the handout's own
+    // inflected rows use — מְלָכִים carries מֶלֶךְ, not a plural of its own.
+    expect(form?.plural).toBe(singular);
+    // Distinct SRS cards: the whole point of the exercise.
+    expect(cardKey(form!)).not.toBe(cardKey(word!));
+  });
+
+  it('puts all eight irregular plurals in the chapter 5 deck', () => {
+    const deck = wordsInChapter('garrett-derouchie', 5).map((w) => w.hebrew);
+    for (const plural of IRREGULAR_PLURALS.map(([, p]) => p)) {
+      expect(deck, `Chapter 5 deck is missing ${plural}`).toContain(plural);
+    }
   });
 });
 

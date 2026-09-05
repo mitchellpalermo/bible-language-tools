@@ -26,6 +26,14 @@
 // form and the count would be about the lexeme. The rest are listed in
 // `OSHB_UNMATCHED` with a reason.
 //
+// Chapter 5 lists eight irregular plurals in its section C table, and the handout
+// carries them only as a `plural` field on the singular — which renders on the
+// back of the singular's card and is therefore never itself asked. The quiz asks
+// for the plural, so those eight forms are also entered as `5:inflected` rows
+// and get cards of their own. נָשִׁים was already such a row under chapter 4 and is
+// simply tagged into 5 as well; the other seven are the one place where an entry
+// comes from the grammar rather than from the handout.
+//
 // `transliteration` is still absent: OSHB carries no romanization, and inventing
 // ~500 SBL forms by hand would bake in errors the data tests cannot catch.
 //
@@ -201,7 +209,7 @@ export const GARRETT_VOCABULARY: HebrewVocabWord[] = [
   { hebrew: 'רֹאשׁ', root: 'ראשׁ', strong: '7218a', gloss: 'head, top, leader', frequency: 599, partOfSpeech: 'noun', gender: 'm', construct: 'רֹאשׁ', chapters: [gd(4, 'core')] },
   { hebrew: 'שְׁנַיִם', root: 'שׁנה', strong: '8147', gloss: 'two', frequency: 768, partOfSpeech: 'noun', note: 'with masculine nouns שְׁנַיִם מְלָכִים, “two kings,” but often with שְׁנֵי as in שְׁנֵי מְלָכִים; with feminine nouns שְׁתַּיִם or שְׁתֵּי as in שְׁתֵּי נָשִׁים, “two women”', chapters: [gd(4, 'core')] },
   { hebrew: 'שָׁמַיִם', root: 'שׁמה', strong: '8064', gloss: 'heaven(s), sky', frequency: 421, partOfSpeech: 'noun', gender: 'm', construct: 'שְׁמֵי', chapters: [gd(4, 'core')] },
-  { hebrew: 'נָשִׁים', root: 'אנשׁ', strong: '802', gloss: 'women', partOfSpeech: 'noun', gender: 'f', plural: 'אִשָּׁה', chapters: [gd(4, 'inflected')] },
+  { hebrew: 'נָשִׁים', root: 'אנשׁ', strong: '802', gloss: 'women', partOfSpeech: 'noun', gender: 'f', plural: 'אִשָּׁה', chapters: [gd(4, 'inflected'), gd(5, 'inflected')] },
   { hebrew: 'יְרוּשָׁלַיִם', gloss: 'Jerusalem (often as יְרוּשָׁלַםִ)', partOfSpeech: 'proper noun', chapters: [gd(4, 'proper')] },
   { hebrew: 'יִשְׂרָאֵל', root: 'שׂרה', strong: '3478', gloss: 'Israel', frequency: 2506, partOfSpeech: 'proper noun', chapters: [gd(4, 'proper')] },
   { hebrew: 'מִצְרִי', strong: '4713', gloss: 'Egyptian(s)', frequency: 76, partOfSpeech: 'adjective', chapters: [gd(4, 'proper')] },
@@ -219,6 +227,13 @@ export const GARRETT_VOCABULARY: HebrewVocabWord[] = [
   { hebrew: 'עוֹלָה', root: 'עלה', strong: '5930a', gloss: 'whole burnt offering (also spelled עֹלָה)', partOfSpeech: 'noun', gender: 'f', construct: 'עֹלַת', chapters: [gd(5, 'core')] },
   { hebrew: 'תּוֹרָה', root: 'ירה', strong: '8451', gloss: 'instruction, teaching, law', frequency: 219, partOfSpeech: 'noun', gender: 'f', construct: 'תּוֹרַת', chapters: [gd(5, 'core')] },
   { hebrew: 'וַיְהִי', strong: '1961', gloss: '“and there was,” “and it happened,” or “and (he) was”', partOfSpeech: 'verb', binyan: 'Qal', chapters: [gd(5, 'inflected')] },
+  { hebrew: 'אָבוֹת', root: 'אבה', strong: '1', gloss: 'fathers', partOfSpeech: 'noun', gender: 'm', plural: 'אָב', chapters: [gd(5, 'inflected')] },
+  { hebrew: 'אֲנָשִׁים', root: 'אישׁ', strong: '376', gloss: 'men', partOfSpeech: 'noun', gender: 'm', plural: 'אִישׁ', chapters: [gd(5, 'inflected')] },
+  { hebrew: 'בָּתִּים', strong: '1004b', gloss: 'houses', partOfSpeech: 'noun', gender: 'm', plural: 'בַּיִת', chapters: [gd(5, 'inflected')] },
+  { hebrew: 'בָּנִים', strong: '1121a', gloss: 'sons', partOfSpeech: 'noun', gender: 'm', plural: 'בֵּן', chapters: [gd(5, 'inflected')] },
+  { hebrew: 'יָמִים', strong: '3117', gloss: 'days', partOfSpeech: 'noun', gender: 'm', plural: 'יוֹם', chapters: [gd(5, 'inflected')] },
+  { hebrew: 'מִזְבְּחוֹת', root: 'זבח', strong: '4196', gloss: 'altars', partOfSpeech: 'noun', gender: 'm', plural: 'מִזְבֵּחַ', chapters: [gd(5, 'inflected')] },
+  { hebrew: 'עָרִים', strong: '5892b', gloss: 'cities', partOfSpeech: 'noun', gender: 'f', plural: 'עִיר', chapters: [gd(5, 'inflected')] },
   { hebrew: 'אִם', strong: '518a', gloss: 'if', frequency: 922, partOfSpeech: 'particle', chapters: [gd(6, 'core')] },
   { hebrew: 'לְ', strong: 'l', gloss: 'to, for', frequency: 20774, partOfSpeech: 'preposition', note: 'directly attached to a noun, as in לְדָוִד, “for David”', chapters: [gd(6, 'core')] },
   { hebrew: 'לְמַעַן', root: 'ענה', strong: '4616', gloss: '“for the sake of” (with a noun, לְמַעַן דָּוִד, “for the sake of David”); “in order that, so that”', partOfSpeech: 'preposition', note: 'with a yiqtol, לְמַעַן יתֵּן, “so that he may give”', chapters: [gd(6, 'core')] },
