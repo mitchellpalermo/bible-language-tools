@@ -376,6 +376,29 @@ describe('Garrett & DeRouchie import', () => {
       expect(wlcOrder.test(word.hebrew), `WLC-order holam in ${word.hebrew}`).toBe(false);
     });
   });
+
+  // Chapter 5, section C of the grammar prints a closed list of irregular
+  // plurals and the chapter quiz marks against it. The forms are spread across
+  // chapters 2-5, because `plural` belongs to the word rather than to the
+  // chapter that happens to tabulate it — so nothing else in the suite would
+  // notice a regeneration quietly dropping one.
+  it.each([
+    ['אָב', 'אָבוֹת', 'm'],
+    ['אִישׁ', 'אֲנָשִׁים', 'm'],
+    ['אִשָּׁה', 'נָשִׁים', 'f'],
+    ['בַּיִת', 'בָּתִּים', 'm'],
+    ['בֵּן', 'בָּנִים', 'm'],
+    ['יוֹם', 'יָמִים', 'm'],
+    ['מִזְבֵּחַ', 'מִזְבְּחוֹת', 'm'],
+    ['עִיר', 'עָרִים', 'f'],
+  ])('carries the irregular plural of %s', (singular, plural, gender) => {
+    const word = GARRETT_VOCABULARY.find((w) => w.hebrew === singular);
+    expect(word, `No entry for ${singular}`).toBeDefined();
+    expect(word?.plural).toBe(plural);
+    // The grammar prints the gender wherever the ending contradicts it —
+    // אָבוֹת is masculine, עָרִים feminine — so it is part of the entry.
+    expect(word?.gender).toBe(gender);
+  });
 });
 
 // ─── mergeVocabulary ──────────────────────────────────────────────────────────
