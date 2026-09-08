@@ -20,7 +20,14 @@ import {
   type WritableGlyph,
 } from '@tools/shared/ink';
 import { hebrewScriptPack } from './script-pack';
-import { isDue, type SRSCard } from './srs';
+import {
+  GRADE_QUALITY,
+  isDue,
+  isPassingGrade,
+  REVIEW_GRADES,
+  type ReviewGrade,
+  type SRSCard,
+} from './srs';
 
 /**
  * Prefix per glyph group. See the note above.
@@ -273,18 +280,30 @@ export function buildQueue(
   return [...due, ...fresh];
 }
 
-/** The four self-assessment buttons, mapped to SM-2 quality scores. */
-export type WritingGrade = 'again' | 'hard' | 'good' | 'easy';
+/**
+ * The four self-assessment buttons.
+ *
+ * `/write` graded on this scale before the vocabulary flashcards did, so it
+ * carried its own copy of the table. The scale now lives in `@tools/shared/srs`
+ * as `ReviewGrade` — both apps' flashcards grade on it too — and this module
+ * only aliases it. Two tables would be two chances for the quality values to
+ * drift apart, and a grade that means one thing on `/write` and another on a
+ * flashcard would move the same SRS card two different ways.
+ */
+export type WritingGrade = ReviewGrade;
 
-export const WRITING_GRADES: { id: WritingGrade; label: string; quality: number }[] = [
-  { id: 'again', label: 'Again', quality: 1 },
-  { id: 'hard', label: 'Hard', quality: 3 },
-  { id: 'good', label: 'Good', quality: 4 },
-  { id: 'easy', label: 'Easy', quality: 5 },
-];
+const GRADE_LABEL: Record<ReviewGrade, string> = {
+  again: 'Again',
+  hard: 'Hard',
+  good: 'Good',
+  easy: 'Easy',
+};
+
+export const WRITING_GRADES: { id: WritingGrade; label: string; quality: number }[] =
+  REVIEW_GRADES.map((id) => ({ id, label: GRADE_LABEL[id], quality: GRADE_QUALITY[id] }));
 
 export function qualityFor(grade: WritingGrade): number {
-  return WRITING_GRADES.find((g) => g.id === grade)?.quality ?? 1;
+  return GRADE_QUALITY[grade];
 }
 
 /**
@@ -315,11 +334,10 @@ export function suggestedGrade(score: number): WritingGrade {
  * Whether a grade counts as correct for streak and accuracy purposes.
  *
  * Mirrors SM-2's own threshold: quality < 3 resets the repetition count, so
- * anything below 3 is a lapse.
+ * anything below 3 is a lapse. Re-exported from shared so `/write` and the
+ * flashcards cannot disagree about what counts as a pass.
  */
-export function isPassingGrade(grade: WritingGrade): boolean {
-  return qualityFor(grade) >= 3;
-}
+export { isPassingGrade };
 
 /**
  * Whether a grade should move the SRS card, given this glyph has already been

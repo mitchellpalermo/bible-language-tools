@@ -9,10 +9,15 @@ import {
   applyDailyReset,
   daysFromNow,
   emptyStats,
+  GRADE_QUALITY,
+  gradeForQuality,
   isDue,
+  isPassingGrade,
   newCard,
   nextSRS,
   normalizeKey,
+  REVIEW_GRADES,
+  type ReviewGrade,
   recordReview,
   type SRSCard,
   STREAK_THRESHOLD,
@@ -21,13 +26,17 @@ import {
   yesterdayStr,
 } from '@tools/shared/srs';
 
-export type { SRSCard, StudyStats };
+export type { ReviewGrade, SRSCard, StudyStats };
 export {
   daysFromNow,
+  GRADE_QUALITY,
+  gradeForQuality,
   isDue,
+  isPassingGrade,
   newCard,
   nextSRS,
   normalizeKey,
+  REVIEW_GRADES,
   recordReview,
   STREAK_THRESHOLD,
   todayStr,

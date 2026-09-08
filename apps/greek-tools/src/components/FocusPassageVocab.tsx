@@ -1,14 +1,19 @@
+import GradeButtons from '@tools/shared/components/GradeButtons';
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FocusPassage } from '../data/focusPassages';
 import { fetchBook } from '../data/morphgnt';
 import {
+  GRADE_QUALITY,
   isDue,
+  isPassingGrade,
   loadSRSStore,
   loadStats,
   newCard,
   nextSRS,
   normalizeKey,
+  REVIEW_GRADES,
+  type ReviewGrade,
   recordReview,
   type SRSCard,
   STREAK_THRESHOLD,
@@ -168,13 +173,14 @@ export default function FocusPassageVocab({ passage }: { passage: FocusPassage }
   const card = queue[index];
 
   const handleReview = useCallback(
-    (correct: boolean) => {
+    (grade: ReviewGrade) => {
       if (!card) return;
+      const correct = isPassingGrade(grade);
       if (studyMode === 'srs') {
         setSrsStore((prev) => {
           const k = normalizeKey(card.greek);
           const existing = prev[k] ?? newCard(k);
-          const updated = nextSRS(existing, correct ? 4 : 1);
+          const updated = nextSRS(existing, GRADE_QUALITY[grade]);
           const next = { ...prev, [k]: updated };
           saveSRSStore(next);
           return next;
@@ -219,8 +225,13 @@ export default function FocusPassageVocab({ passage }: { passage: FocusPassage }
           e.preventDefault();
           handleFlip();
         }
-        if (e.key === 'ArrowRight' && flipped) handleReview(true);
-        if (e.key === 'ArrowLeft' && flipped) handleReview(false);
+        // 1-4 grade the card; the arrows stay as Again/Good aliases.
+        if (flipped) {
+          const byNumber = REVIEW_GRADES[Number(e.key) - 1];
+          if (byNumber) handleReview(byNumber);
+          else if (e.key === 'ArrowRight') handleReview('good');
+          else if (e.key === 'ArrowLeft') handleReview('again');
+        }
       }
     };
     window.addEventListener('keydown', handler);
@@ -484,44 +495,13 @@ export default function FocusPassageVocab({ passage }: { passage: FocusPassage }
       </div>
 
       {/* Action buttons */}
-      {answerMode === 'flip' && flipped && (
-        <div className="flex gap-3 sm:gap-4 sm:justify-center">
-          <button
-            onClick={() => handleReview(false)}
-            className="flex-1 sm:flex-none px-6 py-3 sm:py-2.5 bg-coral/10 border-2 border-coral/30 text-coral rounded-xl hover:bg-coral/20 font-semibold"
-          >
-            ← Still Learning
-          </button>
-          <button
-            onClick={() => handleReview(true)}
-            className="flex-1 sm:flex-none px-6 py-3 sm:py-2.5 bg-jade/10 border-2 border-jade/30 text-jade rounded-xl hover:bg-jade/20 font-semibold"
-          >
-            Got It →
-          </button>
-        </div>
-      )}
-
-      {answerMode === 'type' && answerResult !== null && (
-        <div className="flex gap-3 sm:gap-4 sm:justify-center">
-          {answerResult === 'incorrect' && (
-            <button
-              onClick={() => handleReview(false)}
-              className="flex-1 sm:flex-none px-6 py-3 sm:py-2.5 bg-coral/10 border-2 border-coral/30 text-coral rounded-xl hover:bg-coral/20 font-semibold"
-            >
-              ← Still Learning
-            </button>
-          )}
-          <button
-            onClick={() => handleReview(answerResult === 'correct')}
-            className={`flex-1 sm:flex-none px-6 py-3 sm:py-2.5 rounded-xl border-2 font-semibold ${
-              answerResult === 'correct'
-                ? 'bg-jade/10 border-jade/30 text-jade hover:bg-jade/20'
-                : 'bg-gray-100 border-gray-200 text-text hover:bg-gray-200'
-            }`}
-          >
-            {answerResult === 'correct' ? 'Got It →' : 'Next →'}
-          </button>
-        </div>
+      {/* All four grades in both modes — auto-checking a typed answer says
+          whether the spelling matched, not how hard the recall was. */}
+      {((answerMode === 'flip' && flipped) || (answerMode === 'type' && answerResult !== null)) && (
+        <GradeButtons
+          card={srsStore[normalizeKey(card.greek)] ?? newCard(normalizeKey(card.greek))}
+          onGrade={handleReview}
+        />
       )}
 
       <div className="flex justify-center pt-1">

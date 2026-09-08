@@ -507,18 +507,18 @@ describe('Card study flow', () => {
       await user.click(getCardDiv());
     });
     // After flip, action buttons appear
-    expect(screen.getByRole('button', { name: /got it/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /still learning/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^good/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^again/i })).toBeInTheDocument();
   });
 
-  it('"Got It" advances to the next card', async () => {
+  it('grading Good advances to the next card', async () => {
     const user = userEvent.setup();
     renderFlashcards();
     await act(async () => {
       await user.click(getCardDiv());
     });
     await act(async () => {
-      await user.click(screen.getByRole('button', { name: /got it/i }));
+      await user.click(screen.getByRole('button', { name: /^good/i }));
     });
     // Either shows next card (flip hint) or session complete
     const hasNextCard = screen.queryByText('tap to reveal');
@@ -526,14 +526,14 @@ describe('Card study flow', () => {
     expect(hasNextCard || sessionDone).toBeTruthy();
   });
 
-  it('"Still Learning" advances to the next card', async () => {
+  it('grading Again advances to the next card', async () => {
     const user = userEvent.setup();
     renderFlashcards();
     await act(async () => {
       await user.click(getCardDiv());
     });
     await act(async () => {
-      await user.click(screen.getByRole('button', { name: /still learning/i }));
+      await user.click(screen.getByRole('button', { name: /^again/i }));
     });
     const hasNextCard = screen.queryByText('tap to reveal');
     const sessionDone = screen.queryByText(/session complete/i);
@@ -603,7 +603,7 @@ describe('Card study flow', () => {
       await user.click(getCardDiv());
     });
     await act(async () => {
-      await user.click(screen.getByRole('button', { name: /got it/i }));
+      await user.click(screen.getByRole('button', { name: /^good/i }));
     });
     // After reviewing at least one card, accuracy should appear
     expect(screen.queryByText(/accuracy:/i)).toBeInTheDocument();
@@ -635,7 +635,7 @@ describe('Card study flow', () => {
       await user.click(getCardDiv());
     });
     await act(async () => {
-      await user.click(screen.getByRole('button', { name: /got it/i }));
+      await user.click(screen.getByRole('button', { name: /^good/i }));
     });
     // Session complete screen should now show
     expect(screen.getByText(/session complete/i)).toBeInTheDocument();
@@ -662,7 +662,7 @@ describe('Card study flow', () => {
       await user.click(getCardDiv());
     });
     await act(async () => {
-      await user.click(screen.getByRole('button', { name: /got it/i }));
+      await user.click(screen.getByRole('button', { name: /^good/i }));
     });
     expect(screen.getByText(/session complete/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /study all cards/i })).toBeInTheDocument();
@@ -724,7 +724,7 @@ describe('Card study flow', () => {
     expect(JSON.parse(localStorage.getItem('greek-tools-srs-v2') ?? '{}')).toHaveProperty('καί');
   });
 
-  it('type mode "Still Learning" button calls handleReview(false) after incorrect answer', async () => {
+  it('type mode: grading Again after an incorrect answer advances the card', async () => {
     const user = userEvent.setup();
     renderFlashcards();
     const typeBtn = screen.getByRole('button', { name: /^type$/i });
@@ -738,19 +738,17 @@ describe('Card study flow', () => {
     await act(async () => {
       await user.click(screen.getByRole('button', { name: /^check$/i }));
     });
-    // After incorrect answer, "Still Learning" and "Next →" buttons appear
-    const stillLearningBtn = screen.getByRole('button', { name: /← still learning/i });
-    const nextBtn = screen.getByRole('button', { name: /^next →$/i });
-    expect(stillLearningBtn).toBeInTheDocument();
-    expect(nextBtn).toBeInTheDocument();
+    // A checked answer brings up the grade row rather than a bare Next button.
+    const againBtn = screen.getByRole('button', { name: /^again/i });
+    expect(againBtn).toBeInTheDocument();
     await act(async () => {
-      await user.click(stillLearningBtn);
+      await user.click(againBtn);
     });
     // Card advanced (either new card or still on same card)
-    expect(screen.queryByRole('button', { name: /← still learning/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^again/i })).not.toBeInTheDocument();
   });
 
-  it('type mode "Next →" button advances after incorrect answer', async () => {
+  it('type mode: a wrong typed answer still offers every grade', async () => {
     const user = userEvent.setup();
     renderFlashcards();
     const typeBtn = screen.getByRole('button', { name: /^type$/i });
@@ -764,11 +762,16 @@ describe('Card study flow', () => {
     await act(async () => {
       await user.click(screen.getByRole('button', { name: /^check$/i }));
     });
-    const nextBtn = screen.getByRole('button', { name: /^next →$/i });
+    // Auto-checking says whether the spelling matched, not how hard the recall
+    // was, so every grade stays live even after a wrong answer — a student who
+    // mistyped a word they knew cold can still say so.
+    for (const name of [/^again/i, /^hard/i, /^good/i, /^easy/i]) {
+      expect(screen.getByRole('button', { name })).toBeInTheDocument();
+    }
     await act(async () => {
-      await user.click(nextBtn);
+      await user.click(screen.getByRole('button', { name: /^good/i }));
     });
-    expect(screen.queryByRole('button', { name: /^next →$/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^good/i })).not.toBeInTheDocument();
   });
 
   it('type mode "Got It →" button appears and advances after correct answer', async () => {
@@ -804,12 +807,12 @@ describe('Card study flow', () => {
       await user.click(screen.getByRole('button', { name: /^check$/i }));
     });
     // "Got It →" appears on correct answer
-    const gotItBtn = screen.queryByRole('button', { name: /got it →/i });
+    const gotItBtn = screen.queryByRole('button', { name: /^good/i });
     if (gotItBtn) {
       await act(async () => {
         await user.click(gotItBtn);
       });
-      expect(screen.queryByRole('button', { name: /got it →/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /^good/i })).not.toBeInTheDocument();
     }
   });
 });

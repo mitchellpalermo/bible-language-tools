@@ -1,13 +1,18 @@
+import GradeButtons from '@tools/shared/components/GradeButtons';
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { type CustomDeck, loadCustomDecks } from '../data/customDecks';
 import {
+  GRADE_QUALITY,
   isDue,
+  isPassingGrade,
   loadSRSStore,
   loadStats,
   newCard,
   nextSRS,
   normalizeKey,
+  REVIEW_GRADES,
+  type ReviewGrade,
   recordReview,
   type SRSCard,
   STREAK_THRESHOLD,
@@ -237,16 +242,17 @@ function FlashcardsInner() {
   const card = queue[index];
 
   const handleReview = useCallback(
-    (correct: boolean) => {
+    (grade: ReviewGrade) => {
       if (!card) return;
 
+      const correct = isPassingGrade(grade);
       const intervalDays = srsStore[normalizeKey(card.greek)]?.interval ?? 0;
 
       if (studyMode === 'srs') {
         setSrsStore((prev) => {
           const k = normalizeKey(card.greek);
           const existing = prev[k] ?? newCard(k);
-          const updated = nextSRS(existing, correct ? 4 : 1);
+          const updated = nextSRS(existing, GRADE_QUALITY[grade]);
           const next = { ...prev, [k]: updated };
           saveSRSStore(next);
           return next;
@@ -255,6 +261,7 @@ function FlashcardsInner() {
 
       posthog.capture('flashcard_reviewed', {
         result: correct ? 'correct' : 'incorrect',
+        grade,
         interval_days: intervalDays,
       });
 
@@ -301,8 +308,15 @@ function FlashcardsInner() {
           e.preventDefault();
           handleFlip();
         }
-        if (e.key === 'ArrowRight' && flipped) handleReview(true);
-        if (e.key === 'ArrowLeft' && flipped) handleReview(false);
+        // 1-4 grade the card, in the order the buttons are drawn. The old
+        // Left/Right arrows stay as aliases for Again/Good so the two-button
+        // muscle memory still works.
+        if (flipped) {
+          const byNumber = REVIEW_GRADES[Number(e.key) - 1];
+          if (byNumber) handleReview(byNumber);
+          else if (e.key === 'ArrowRight') handleReview('good');
+          else if (e.key === 'ArrowLeft') handleReview('again');
+        }
       }
     };
     window.addEventListener('keydown', handler);
@@ -817,44 +831,15 @@ function FlashcardsInner() {
       </div>
 
       {/* ── Action buttons ────────────────────────────────────────────────── */}
-      {answerMode === 'flip' && flipped && (
-        <div className="flex gap-3 sm:gap-4 sm:justify-center">
-          <button
-            onClick={() => handleReview(false)}
-            className="flex-1 sm:flex-none px-6 py-3 sm:py-2.5 bg-coral/10 border-2 border-coral/30 text-coral rounded-xl hover:bg-coral/20 active:bg-coral/20 transition-colors font-semibold"
-          >
-            ← Still Learning
-          </button>
-          <button
-            onClick={() => handleReview(true)}
-            className="flex-1 sm:flex-none px-6 py-3 sm:py-2.5 bg-jade/10 border-2 border-jade/30 text-jade rounded-xl hover:bg-jade/20 active:bg-jade/20 transition-colors font-semibold"
-          >
-            Got It →
-          </button>
-        </div>
-      )}
-
-      {answerMode === 'type' && answerResult !== null && (
-        <div className="flex gap-3 sm:gap-4 sm:justify-center">
-          {answerResult === 'incorrect' && (
-            <button
-              onClick={() => handleReview(false)}
-              className="flex-1 sm:flex-none px-6 py-3 sm:py-2.5 bg-coral/10 border-2 border-coral/30 text-coral rounded-xl hover:bg-coral/20 active:bg-coral/20 transition-colors font-semibold"
-            >
-              ← Still Learning
-            </button>
-          )}
-          <button
-            onClick={() => handleReview(answerResult === 'correct')}
-            className={`flex-1 sm:flex-none px-6 py-3 sm:py-2.5 rounded-xl border-2 transition-colors font-semibold ${
-              answerResult === 'correct'
-                ? 'bg-jade/10 border-jade/30 text-jade hover:bg-jade/20 active:bg-jade/20'
-                : 'bg-gray-100 border-gray-200 text-text hover:bg-gray-200 active:bg-gray-200'
-            }`}
-          >
-            {answerResult === 'correct' ? 'Got It →' : 'Next →'}
-          </button>
-        </div>
+      {/* Type mode grades too, and shows all four buttons whether or not the
+          typed answer matched. Auto-checking says whether the spelling was
+          right, not how hard the recall was, and the student is the one who
+          knows — the same reason /write leaves every grade button live. */}
+      {((answerMode === 'flip' && flipped) || (answerMode === 'type' && answerResult !== null)) && (
+        <GradeButtons
+          card={srsStore[normalizeKey(card.greek)] ?? newCard(normalizeKey(card.greek))}
+          onGrade={handleReview}
+        />
       )}
 
       {/* ── Keyboard hints (desktop only) ────────────────────────────────── */}
@@ -866,13 +851,13 @@ function FlashcardsInner() {
           </kbd>{' '}
           flip ·{' '}
           <kbd className="bg-indigo-50 border border-indigo-100 px-1.5 rounded text-primary font-mono">
-            →
-          </kbd>{' '}
-          got it ·{' '}
+            1
+          </kbd>
+          –
           <kbd className="bg-indigo-50 border border-indigo-100 px-1.5 rounded text-primary font-mono">
-            ←
+            4
           </kbd>{' '}
-          still learning
+          grade (Again, Hard, Good, Easy)
         </p>
       )}
       {answerMode === 'type' && (

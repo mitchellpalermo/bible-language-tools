@@ -76,24 +76,114 @@ export function isDue(card: SRSCard): boolean {
 }
 
 /**
- * SM-2 algorithm.
- * quality: 0–5 (4 = correct/easy, 1 = incorrect/hard)
+ * The four answers a review can get, named as Anki names them.
+ *
+ * `/write` has graded on this scale since it shipped; vocabulary flashcards
+ * used to send only "right" and "wrong". The gap mattered: `easy` is the only
+ * grade that raises the ease factor, so without it a card that fell to the 1.30
+ * floor could never climb back, and its intervals grew at 1.3x forever however
+ * well the student came to know the word.
+ */
+export type ReviewGrade = 'again' | 'hard' | 'good' | 'easy';
+
+/** SM-2 quality values for each grade. `< 3` is a lapse, which is SM-2's own rule. */
+export const GRADE_QUALITY: Record<ReviewGrade, number> = {
+  again: 1,
+  hard: 3,
+  good: 4,
+  easy: 5,
+};
+
+export const REVIEW_GRADES = Object.keys(GRADE_QUALITY) as ReviewGrade[];
+
+/** A grade counts as correct — for streaks and accuracy — exactly when SM-2 calls it a pass. */
+export function isPassingGrade(grade: ReviewGrade): boolean {
+  return GRADE_QUALITY[grade] >= 3;
+}
+
+export function gradeForQuality(quality: number): ReviewGrade {
+  if (quality < 3) return 'again';
+  if (quality === 3) return 'hard';
+  if (quality === 4) return 'good';
+  return 'easy';
+}
+
+/**
+ * How each grade moves the ease factor, in Anki's numbers rather than SM-2's.
+ *
+ * Textbook SM-2 derives the adjustment from a quality score, which docks 0.54
+ * for a failure — nearly three times Anki's penalty — and, because this app
+ * only ever sent quality 4 for a pass, never gave any of it back. Ease became a
+ * one-way ratchet: a word missed twice in week one sat at 1.42 for the rest of
+ * the term no matter how well it was later known.
+ *
+ * Anki's table is gentler and, crucially, two-directional. These are its
+ * defaults: Again -0.20, Hard -0.15, Good unchanged, Easy +0.15.
+ */
+export const EASE_DELTA: Record<ReviewGrade, number> = {
+  again: -0.2,
+  hard: -0.15,
+  good: 0,
+  easy: 0.15,
+};
+
+/** Anki's floor. Ease never falls below this however often a card is missed. */
+export const MIN_EASE = 1.3;
+
+/**
+ * Interval multipliers for the two grades that do not simply use the ease
+ * factor. Anki's defaults: Hard advances the card but barely, and Easy takes
+ * the ease factor and stretches it.
+ */
+export const HARD_MULTIPLIER = 1.2;
+export const EASY_BONUS = 1.3;
+
+/**
+ * SM-2 scheduling with Anki's ease and interval rules.
+ *
+ * `quality` stays the parameter because it is SM-2's own interface and every
+ * stored card was written through it; `gradeForQuality` maps it onto the four
+ * buttons. Pass `GRADE_QUALITY[grade]` rather than a bare number at call sites.
+ *
+ * DELIBERATELY NOT IMPLEMENTED: Anki's sub-day learning and relearning steps
+ * (1m, 10m). `SRSCard.dueDate` and `lastReviewed` are calendar dates, not
+ * timestamps — the same limitation the sync merge documents — so a scheduler
+ * here cannot express "again in ten minutes". A lapse therefore resets to one
+ * day, which is where Anki's relearning steps land a card anyway. Adding steps
+ * means changing the card shape and every stored card with it.
  */
 export function nextSRS(card: SRSCard, quality: number): SRSCard {
   let { interval, repetition, easeFactor } = card;
+  const grade = gradeForQuality(quality);
 
-  if (quality < 3) {
+  if (grade === 'again') {
     interval = 1;
     repetition = 0;
   } else {
+    // The first two steps are fixed, so ease cannot stretch a card the student
+    // has seen once into a multi-week gap. From the third pass on, the grade
+    // chooses the multiplier: Hard creeps, Good uses the ease factor, Easy
+    // takes the ease factor and adds Anki's bonus on top.
     if (repetition === 0) interval = 1;
     else if (repetition === 1) interval = 6;
-    else interval = Math.round(interval * easeFactor);
+    else {
+      const multiplier =
+        grade === 'hard'
+          ? HARD_MULTIPLIER
+          : grade === 'easy'
+            ? easeFactor * EASY_BONUS
+            : easeFactor;
+      // The `interval + 1` floor guarantees a pass always advances the card.
+      // It does not fire under today's constants (the smallest case, Hard on a
+      // 6-day card, rounds to 7 either way) but rounding makes a stall
+      // reachable at small intervals if the multipliers are ever tuned, and a
+      // card that answers "correct" without moving looks broken to a student.
+      interval = Math.max(interval + 1, Math.round(interval * multiplier));
+    }
     repetition++;
   }
 
-  const ef = easeFactor + 0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02);
-  easeFactor = Math.max(1.3, ef);
+  easeFactor = Math.max(MIN_EASE, easeFactor + EASE_DELTA[grade]);
 
   return {
     key: card.key,

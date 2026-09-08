@@ -2,11 +2,19 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   applyDailyReset,
   daysFromNow,
+  EASY_BONUS,
   emptyStats,
+  GRADE_QUALITY,
+  gradeForQuality,
+  HARD_MULTIPLIER,
   isDue,
+  isPassingGrade,
+  MIN_EASE,
   newCard,
   nextSRS,
   normalizeKey,
+  REVIEW_GRADES,
+  type ReviewGrade,
   recordReview,
   type SRSCard,
   STREAK_THRESHOLD,
@@ -193,7 +201,7 @@ describe('nextSRS', () => {
     it('preserves ease factor on perfect answer (quality 4)', () => {
       const card = makeCard({ easeFactor: 2.5 });
       const result = nextSRS(card, 4);
-      // EF change for quality=4: +0.1 - 1*0.08 - 1*0.02 = 0
+      // Quality 4 is Anki's "Good", whose ease delta is 0. See EASE_DELTA.
       expect(result.easeFactor).toBeCloseTo(2.5);
     });
 
@@ -486,5 +494,138 @@ describe('emptyStats', () => {
       totalReviewed: 0,
       totalCorrect: 0,
     });
+  });
+});
+
+// ─── Anki parity ─────────────────────────────────────────────────────────────
+//
+// The scheduler follows Anki's SM-2 numbers, not textbook SM-2's. The
+// difference is not cosmetic: textbook SM-2 derives the ease adjustment from
+// the quality score, which docks 0.54 for a failure and — since flashcards only
+// ever sent quality 4 for a pass — gave none of it back. These tests pin the
+// two-directional behaviour, because the one-way ratchet was invisible in the
+// old suite: every assertion about ease was directional (`toBeLessThan`), so
+// the wrong constants passed it.
+
+describe('Anki grade scale', () => {
+  const grade = (g: ReviewGrade, card: Partial<SRSCard> = {}) =>
+    nextSRS(makeCard(card), GRADE_QUALITY[g]);
+
+  it('maps the four grades onto SM-2 quality values', () => {
+    expect(GRADE_QUALITY).toEqual({ again: 1, hard: 3, good: 4, easy: 5 });
+    expect(REVIEW_GRADES).toEqual(['again', 'hard', 'good', 'easy']);
+  });
+
+  it('treats every grade but "again" as a pass', () => {
+    expect(isPassingGrade('again')).toBe(false);
+    expect(isPassingGrade('hard')).toBe(true);
+    expect(isPassingGrade('good')).toBe(true);
+    expect(isPassingGrade('easy')).toBe(true);
+  });
+
+  it('maps arbitrary quality numbers back to a grade', () => {
+    expect(gradeForQuality(0)).toBe('again');
+    expect(gradeForQuality(2)).toBe('again');
+    expect(gradeForQuality(3)).toBe('hard');
+    expect(gradeForQuality(4)).toBe('good');
+    expect(gradeForQuality(5)).toBe('easy');
+  });
+
+  describe('ease adjustments use Anki values, not the SM-2 formula', () => {
+    it("docks 0.20 for Again — not textbook SM-2's 0.54", () => {
+      expect(grade('again', { easeFactor: 2.5 }).easeFactor).toBeCloseTo(2.3);
+    });
+
+    it('docks 0.15 for Hard', () => {
+      expect(grade('hard', { easeFactor: 2.5 }).easeFactor).toBeCloseTo(2.35);
+    });
+
+    it('leaves ease untouched for Good', () => {
+      expect(grade('good', { easeFactor: 2.5 }).easeFactor).toBeCloseTo(2.5);
+    });
+
+    it('adds 0.15 for Easy', () => {
+      expect(grade('easy', { easeFactor: 2.5 }).easeFactor).toBeCloseTo(2.65);
+    });
+
+    it('floors ease at 1.30 however often a card is missed', () => {
+      let card = makeCard({ easeFactor: 2.5 });
+      for (let i = 0; i < 12; i++) card = nextSRS(card, GRADE_QUALITY.again);
+      expect(card.easeFactor).toBe(MIN_EASE);
+    });
+  });
+
+  describe('ease can recover — the regression this change exists for', () => {
+    it('lifts a card off the 1.30 floor when it is finally known', () => {
+      const stuck = makeCard({ easeFactor: MIN_EASE, repetition: 3, interval: 10 });
+      const once = nextSRS(stuck, GRADE_QUALITY.easy);
+      expect(once.easeFactor).toBeCloseTo(1.45);
+
+      // Four more Easy answers and the word is scheduling normally again.
+      let card = once;
+      for (let i = 0; i < 4; i++) card = nextSRS(card, GRADE_QUALITY.easy);
+      expect(card.easeFactor).toBeCloseTo(2.05);
+      expect(card.easeFactor).toBeGreaterThan(MIN_EASE);
+    });
+
+    it('does not let Good alone lift a card off the floor', () => {
+      let card = makeCard({ easeFactor: MIN_EASE });
+      for (let i = 0; i < 5; i++) card = nextSRS(card, GRADE_QUALITY.good);
+      expect(card.easeFactor).toBe(MIN_EASE);
+    });
+  });
+
+  describe('interval multipliers', () => {
+    it('creeps forward on Hard rather than using the ease factor', () => {
+      const result = grade('hard', { repetition: 2, interval: 20, easeFactor: 2.5 });
+      expect(result.interval).toBe(Math.round(20 * HARD_MULTIPLIER));
+    });
+
+    it('uses the ease factor on Good', () => {
+      const result = grade('good', { repetition: 2, interval: 20, easeFactor: 2.5 });
+      expect(result.interval).toBe(Math.round(20 * 2.5));
+    });
+
+    it("stretches by the ease factor and Anki's bonus on Easy", () => {
+      const result = grade('easy', { repetition: 2, interval: 20, easeFactor: 2.5 });
+      expect(result.interval).toBe(Math.round(20 * 2.5 * EASY_BONUS));
+    });
+
+    it('keeps the first two steps fixed regardless of grade', () => {
+      for (const g of ['hard', 'good', 'easy'] as ReviewGrade[]) {
+        expect(grade(g, { repetition: 0, interval: 0 }).interval).toBe(1);
+        expect(grade(g, { repetition: 1, interval: 1 }).interval).toBe(6);
+      }
+    });
+
+    it('always advances a card that passed', () => {
+      for (const g of ['hard', 'good', 'easy'] as ReviewGrade[]) {
+        for (const interval of [6, 7, 10, 45]) {
+          const result = grade(g, { repetition: 2, interval, easeFactor: MIN_EASE });
+          expect(result.interval).toBeGreaterThan(interval);
+        }
+      }
+    });
+
+    it('resets to one day on Again, whatever the card had reached', () => {
+      const result = grade('again', { repetition: 6, interval: 240, easeFactor: 2.5 });
+      expect(result.interval).toBe(1);
+      expect(result.repetition).toBe(0);
+      expect(result.dueDate).toBe(TOMORROW);
+    });
+  });
+
+  it('schedules a hard word more tightly than an easy one over a term', () => {
+    // Same starting card, graded honestly each way. The gap between them is
+    // what the ease factor is for; before this change the "struggled" card
+    // could never close it.
+    let struggled = makeCard({ repetition: 2, interval: 6, easeFactor: 2.5 });
+    let effortless = makeCard({ repetition: 2, interval: 6, easeFactor: 2.5 });
+    for (let i = 0; i < 4; i++) {
+      struggled = nextSRS(struggled, GRADE_QUALITY.hard);
+      effortless = nextSRS(effortless, GRADE_QUALITY.easy);
+    }
+    expect(struggled.interval).toBeLessThan(effortless.interval);
+    expect(struggled.easeFactor).toBeLessThan(effortless.easeFactor);
   });
 });

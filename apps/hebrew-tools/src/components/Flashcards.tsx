@@ -1,12 +1,17 @@
+import GradeButtons from '@tools/shared/components/GradeButtons';
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  GRADE_QUALITY,
   isDue,
+  isPassingGrade,
   loadSRSStore,
   loadStats,
   newCard,
   nextSRS,
   normalizeKey,
+  REVIEW_GRADES,
+  type ReviewGrade,
   recordReview,
   type SRSCard,
   STREAK_THRESHOLD,
@@ -246,16 +251,17 @@ function FlashcardsInner() {
   const card = queue[index];
 
   const handleReview = useCallback(
-    (correct: boolean) => {
+    (grade: ReviewGrade) => {
       if (!card) return;
 
+      const correct = isPassingGrade(grade);
       const intervalDays = srsStore[srsKey(card)]?.interval ?? 0;
 
       if (studyMode === 'srs') {
         setSrsStore((prev) => {
           const k = srsKey(card);
           const existing = prev[k] ?? newCard(k);
-          const updated = nextSRS(existing, correct ? 4 : 1);
+          const updated = nextSRS(existing, GRADE_QUALITY[grade]);
           const next = { ...prev, [k]: updated };
           saveSRSStore(next);
           return next;
@@ -264,6 +270,7 @@ function FlashcardsInner() {
 
       posthog.capture('hebrew_flashcard_reviewed', {
         result: correct ? 'correct' : 'incorrect',
+        grade,
         interval_days: intervalDays,
       });
 
@@ -300,8 +307,15 @@ function FlashcardsInner() {
         e.preventDefault();
         handleFlip();
       }
-      if (e.key === 'ArrowRight' && flipped) handleReview(true);
-      if (e.key === 'ArrowLeft' && flipped) handleReview(false);
+      // 1-4 grade the card, in the order the buttons are drawn. The old
+      // Left/Right arrows are kept as aliases for Again/Good so the two-button
+      // muscle memory still works.
+      if (flipped) {
+        const byNumber = REVIEW_GRADES[Number(e.key) - 1];
+        if (byNumber) handleReview(byNumber);
+        else if (e.key === 'ArrowRight') handleReview('good');
+        else if (e.key === 'ArrowLeft') handleReview('again');
+      }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
@@ -726,22 +740,10 @@ function FlashcardsInner() {
 
       {/* ── Action buttons ────────────────────────────────────────────────── */}
       {flipped && (
-        <div className="flex gap-3 sm:gap-4 sm:justify-center">
-          <button
-            type="button"
-            onClick={() => handleReview(false)}
-            className="flex-1 sm:flex-none px-6 py-3 sm:py-2.5 bg-coral/10 border-2 border-coral/30 text-coral rounded-xl hover:bg-coral/20 active:bg-coral/20 transition-colors font-semibold"
-          >
-            &larr; Still Learning
-          </button>
-          <button
-            type="button"
-            onClick={() => handleReview(true)}
-            className="flex-1 sm:flex-none px-6 py-3 sm:py-2.5 bg-jade/10 border-2 border-jade/30 text-jade rounded-xl hover:bg-jade/20 active:bg-jade/20 transition-colors font-semibold"
-          >
-            Got It &rarr;
-          </button>
-        </div>
+        <GradeButtons
+          card={srsStore[srsKey(card)] ?? newCard(srsKey(card))}
+          onGrade={handleReview}
+        />
       )}
 
       {/* ── Keyboard hints (desktop only) ────────────────────────────────── */}
@@ -752,13 +754,13 @@ function FlashcardsInner() {
         </kbd>{' '}
         flip &middot;{' '}
         <kbd className="bg-primary/5 border border-primary/10 px-1.5 rounded text-primary font-mono">
-          &rarr;
-        </kbd>{' '}
-        got it &middot;{' '}
+          1
+        </kbd>
+        &ndash;
         <kbd className="bg-primary/5 border border-primary/10 px-1.5 rounded text-primary font-mono">
-          &larr;
+          4
         </kbd>{' '}
-        still learning
+        grade (Again, Hard, Good, Easy)
       </p>
 
       {/* ── Footer controls ───────────────────────────────────────────────── */}
