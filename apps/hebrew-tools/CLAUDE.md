@@ -377,6 +377,27 @@ Things that will bite if changed carelessly:
 - **D1 caps bound parameters at 100 per statement.** `srs_cards` has 8 columns, so inserts chunk at 12 rows (`SRS_CHUNK`). Recompute if the table gains a column.
 - **Writes are delete-then-insert of the full per-language set**, not upserts.
 - **Keepalive bodies are capped at 64 KB by browsers.** An oversized store makes the session-end push fail silently; the next sign-in pull or manual "Sync now" covers it.
+- **Scheduling follows Anki's SM-2, not the textbook's.** Ease moves by Anki's
+  table (Again −0.20, Hard −0.15, Good 0, Easy +0.15, floor 1.30) and intervals
+  by its multipliers (Hard 1.2×, Good ×ease, Easy ×ease×1.3). Textbook SM-2
+  derives the adjustment from the quality score, which docks **0.54** for a
+  failure — and since flashcards only ever sent quality 4 for a pass, gave none
+  of it back. Ease was a one-way ratchet: a word missed twice in week one sat at
+  1.42 for the rest of the term however well it was later known, its intervals
+  growing at 1.4× while a never-missed word grew at 2.5×. `easy` is the only
+  grade that raises ease, which is why the two-button flashcards had to become
+  four (`ReviewGrade`, `@tools/shared/components/GradeButtons`). **Stored cards
+  needed no migration** — the field and its range are unchanged, and a card
+  sitting at the floor now simply has a way back up.
+- **`/write` and the flashcards grade on one scale.** `WritingGrade` is an alias
+  of `ReviewGrade` and `WRITING_GRADES` is derived from `GRADE_QUALITY`; both
+  surfaces move the same SRS card, so two tables would be two chances for the
+  quality values to drift.
+- **Anki's sub-day learning steps are deliberately not implemented.** `dueDate`
+  and `lastReviewed` are calendar dates, not timestamps — the same limitation the
+  merge rule documents below — so the scheduler cannot express "again in ten
+  minutes". A lapse resets to one day, where Anki's relearning steps land a card
+  anyway.
 - **Merge rule per card is "most recent review wins":** the card with the later `lastReviewed` beats the other, and only a tie there falls back to higher `repetition`, then later `dueDate`. It used to be `repetition` first, which **silently discarded every failed review** — `nextSRS` resets `repetition` to 0 on a lapse, so a lapsed card could never beat an earlier state of itself, and since `putProgress` runs this same merge server-side there was no path by which a lapse could reach the database at all. A word you kept failing kept coming back mature. A never-reviewed card carries `lastReviewed: ''`, which sorts below every real date, so a fresh card cannot displace real progress. **Known limit:** `lastReviewed` is a calendar date, not a timestamp, so two devices reviewing the same card on the same day are indistinguishable and fall back to the tiebreak; storing a timestamp would change the card shape and every stored card with it. The rule lives in `@tools/shared/sync-merge` and is re-exported by each app. Lifetime stats counters take the max.
 - **`PUT /api/progress` merges server-side; it never replaces.** This is load-bearing. The session-end push is a one-shot keepalive request that cannot pull first, so a device with week-old localStorage will PUT exactly that. Merging on the server means such a push can only add or hold, never regress another device's work — and it holds even for a client that misbehaves, which no client-side fix can. **Do not "optimise" `putProgress` back into a replace.**
 - **Therefore `PUT` can never remove a card.** Deletion goes through `DELETE` only. "Reset SRS" in `Flashcards.tsx` calls `deleteServerProgress()` when signed in for exactly this reason; clearing localStorage alone would be undone by the next sync.

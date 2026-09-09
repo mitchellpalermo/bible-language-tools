@@ -114,9 +114,9 @@ describe('Flashcards', () => {
     const user = userEvent.setup();
     renderFlashcards();
     await user.click(getCard());
-    // "Got It" / "Still Learning" only appear once flipped
-    expect(screen.getByRole('button', { name: /got it/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /still learning/i })).toBeInTheDocument();
+    // The grade buttons only appear once flipped
+    expect(screen.getByRole('button', { name: /^good/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^again/i })).toBeInTheDocument();
   });
 
   it('renders the transliteration without the uppercase transform', async () => {
@@ -147,16 +147,16 @@ describe('Flashcards', () => {
     const user = userEvent.setup();
     renderFlashcards();
     await user.keyboard(' ');
-    expect(screen.getByRole('button', { name: /got it/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^good/i })).toBeInTheDocument();
   });
 
-  it('advances to the next card after marking "Got It"', async () => {
+  it('advances to the next card after grading Good', async () => {
     const user = userEvent.setup();
     renderFlashcards();
     await user.click(getStudyAllButton());
     const cardIndicatorBefore = screen.getByTestId('card-progress').textContent;
     await user.click(getCard());
-    await user.click(screen.getByRole('button', { name: /got it/i }));
+    await user.click(screen.getByRole('button', { name: /^good/i }));
     const cardIndicatorAfter = screen.getByTestId('card-progress').textContent;
     expect(cardIndicatorAfter).not.toBe(cardIndicatorBefore);
   });
@@ -172,11 +172,11 @@ describe('Flashcards', () => {
     expect(after).not.toBe(before);
   });
 
-  it('records a review in the SRS store after "Got It"', async () => {
+  it('records a review in the SRS store after grading Good', async () => {
     const user = userEvent.setup();
     renderFlashcards();
     await user.click(getCard());
-    await user.click(screen.getByRole('button', { name: /got it/i }));
+    await user.click(screen.getByRole('button', { name: /^good/i }));
     const store = loadSRSStore();
     expect(Object.keys(store).length).toBe(1);
   });
@@ -185,7 +185,7 @@ describe('Flashcards', () => {
     const user = userEvent.setup();
     renderFlashcards();
     await user.click(getCard());
-    await user.click(screen.getByRole('button', { name: /still learning/i }));
+    await user.click(screen.getByRole('button', { name: /^again/i }));
     const stats = loadStats();
     expect(stats.totalReviewed).toBe(1);
     expect(stats.totalCorrect).toBe(0);
@@ -201,7 +201,7 @@ describe('Flashcards', () => {
     const deckSize = vocabulary.filter((w) => matchFreq(w.frequency, '2000+')).length;
     for (let i = 0; i < deckSize; i++) {
       await user.click(screen.getByText('tap to reveal'));
-      await user.click(screen.getByRole('button', { name: /got it/i }));
+      await user.click(screen.getByRole('button', { name: /^good/i }));
     }
     expect(screen.getByText('Session Complete')).toBeInTheDocument();
   });
@@ -225,7 +225,7 @@ describe('Flashcards', () => {
     vi.stubGlobal('confirm', vi.fn().mockReturnValue(true));
     renderFlashcards();
     await user.click(getCard());
-    await user.click(screen.getByRole('button', { name: /got it/i }));
+    await user.click(screen.getByRole('button', { name: /^good/i }));
     expect(Object.keys(loadSRSStore()).length).toBe(1);
 
     await user.click(screen.getByRole('button', { name: /reset srs/i }));
@@ -272,7 +272,7 @@ describe('Flashcards', () => {
     vi.stubGlobal('confirm', vi.fn().mockReturnValue(false));
     renderFlashcards();
     await user.click(getCard());
-    await user.click(screen.getByRole('button', { name: /got it/i }));
+    await user.click(screen.getByRole('button', { name: /^good/i }));
 
     await user.click(screen.getByRole('button', { name: /reset srs/i }));
     expect(Object.keys(loadSRSStore()).length).toBe(1);
@@ -325,7 +325,7 @@ describe('Flashcards', () => {
     renderFlashcards();
     expect(screen.queryByText(/Accuracy:/)).not.toBeInTheDocument();
     await user.click(getCard());
-    await user.click(screen.getByRole('button', { name: /got it/i }));
+    await user.click(screen.getByRole('button', { name: /^good/i }));
     expect(screen.getByText(/Accuracy:/)).toBeInTheDocument();
   });
 
@@ -334,7 +334,7 @@ describe('Flashcards', () => {
     renderFlashcards();
     await user.click(getStudyAllButton());
     await user.click(getCard());
-    await user.click(screen.getByRole('button', { name: /got it/i }));
+    await user.click(screen.getByRole('button', { name: /^good/i }));
     await user.click(screen.getByRole('button', { name: /restart session/i }));
     expect(screen.getByTestId('card-progress').textContent).toMatch(/^1\//);
   });
@@ -410,7 +410,7 @@ describe('Flashcards chapter decks', () => {
       const front = screen.getByText((_, el) => el?.getAttribute('dir') === 'rtl');
       expect(inDeck.has(front.textContent ?? '')).toBe(true);
       await user.click(screen.getByText('tap to reveal'));
-      await user.click(screen.getByRole('button', { name: /got it/i }));
+      await user.click(screen.getByRole('button', { name: /^good/i }));
     }
     expect(screen.getByText('Session Complete')).toBeInTheDocument();
   });

@@ -22,7 +22,8 @@
     "./components/EndingsToggle": "./src/components/EndingsToggle.tsx",
     "./components/SectionHeading": "./src/components/SectionHeading.tsx",
     "./components/DescriptionBar": "./src/components/DescriptionBar.tsx",
-    "./components/WritingGrid": "./src/ink/components/WritingGrid.tsx"
+    "./components/WritingGrid": "./src/ink/components/WritingGrid.tsx",
+    "./components/GradeButtons": "./src/components/GradeButtons.tsx"
   },
   "peerDependencies": {
     "react": "^19.0.0"

@@ -59,6 +59,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/components/InkCanvas` | The writing surface (React) |
 | `@tools/shared/components/WritingGrid` | The row of per-letter guide boxes a word is written into (React) |
 | `@tools/shared/components/SiteNav.astro` | The site navigation for both apps (see below) |
+| `@tools/shared/components/GradeButtons` | The Again/Hard/Good/Easy answer row, with per-grade interval previews (React) |
 | `@tools/shared/components/NumberToggle` | Sg/Pl pill toggle (mobile only) |
 | `@tools/shared/components/EndingsToggle` | Full forms / Endings only toggle |
 | `@tools/shared/components/SectionHeading` | Anchor-linked section heading |
@@ -67,6 +68,10 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 ### Adding to shared
 
 Only add to `packages/shared` if the code is genuinely language-agnostic. Styling via CSS variables (`var(--color-primary)` etc.) is fine — both apps share the same design token names.
+
+**Give every token a literal fallback: `var(--color-grape, #7C3AED)`.** Sharing a token *name* is not the same as both apps emitting that token. Tailwind 4 tree-shakes theme variables no utility class references, so hebrew-tools declares `--color-grape` in `global.css`, uses it nowhere, and resolves it to the empty string at runtime — which rendered `GradeButtons`' Easy button with no tint, no border and inherited text, on a page where the other three were fine. The failure is silent and per-app, so it only shows up in a screenshot of the app that happens not to use the token.
+
+Note this compounds with the Tailwind scanning problem below: a shared React component cannot rely on utility classes *or* on bare tokens. `GradeButtons` is therefore styled entirely inline with fallback-bearing tokens, which is the pattern to copy.
 
 Each app's localStorage storage functions stay app-specific (different key namespaces). Only the pure algorithm and UI components belong in shared.
 
