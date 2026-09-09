@@ -139,6 +139,37 @@ export const HARD_MULTIPLIER = 1.2;
 export const EASY_BONUS = 1.3;
 
 /**
+ * Where a card lands when it leaves the learning phase — Anki's "graduating
+ * interval" and "easy interval" defaults.
+ *
+ * The gap between them is the point. Textbook SM-2 sends every first pass to a
+ * single day, so on a brand-new card Again, Hard, Good and Easy all scheduled
+ * it for tomorrow and the four buttons previewed the same "1d". A student's
+ * first impression of the grade scale was that the choice does not matter, and
+ * on a 567-word deck that is most of the deck's first sighting. `easy` skipping
+ * straight to four days is what makes the button mean something immediately.
+ */
+export const GRADUATING_INTERVAL = 1;
+export const EASY_INTERVAL = 4;
+
+/**
+ * The interval a passing grade buys, given where the card already is.
+ *
+ * Strictly ordered by construction: `hard < good < easy`, always. Rounding
+ * alone does not guarantee that — a 1-day card takes 2.5 days on Good and 3.25
+ * on Easy, and both round to 3 — and two grades that schedule a card
+ * identically tell the student, wrongly, that the harder answer costs nothing.
+ * Each grade therefore floors at one day past the grade below it.
+ */
+function passInterval(grade: Exclude<ReviewGrade, 'again'>, interval: number, ease: number) {
+  const hard = Math.max(interval + 1, Math.round(interval * HARD_MULTIPLIER));
+  if (grade === 'hard') return hard;
+  const good = Math.max(hard + 1, Math.round(interval * ease));
+  if (grade === 'good') return good;
+  return Math.max(good + 1, Math.round(interval * ease * EASY_BONUS));
+}
+
+/**
  * SM-2 scheduling with Anki's ease and interval rules.
  *
  * `quality` stays the parameter because it is SM-2's own interface and every
@@ -159,27 +190,23 @@ export function nextSRS(card: SRSCard, quality: number): SRSCard {
   if (grade === 'again') {
     interval = 1;
     repetition = 0;
+  } else if (repetition === 0) {
+    // Leaving the learning phase. Anki graduates to one day, or straight to
+    // four when the answer was Easy.
+    //
+    // Anki's Hard here would repeat the current learning step rather than
+    // graduate. With a single one-day step, repeating it and graduating to it
+    // both mean "tomorrow", so the distinction would show up only in the
+    // repetition counter — not worth a second code path the student cannot see.
+    interval = grade === 'easy' ? EASY_INTERVAL : GRADUATING_INTERVAL;
+    repetition++;
   } else {
-    // The first two steps are fixed, so ease cannot stretch a card the student
-    // has seen once into a multi-week gap. From the third pass on, the grade
-    // chooses the multiplier: Hard creeps, Good uses the ease factor, Easy
-    // takes the ease factor and adds Anki's bonus on top.
-    if (repetition === 0) interval = 1;
-    else if (repetition === 1) interval = 6;
-    else {
-      const multiplier =
-        grade === 'hard'
-          ? HARD_MULTIPLIER
-          : grade === 'easy'
-            ? easeFactor * EASY_BONUS
-            : easeFactor;
-      // The `interval + 1` floor guarantees a pass always advances the card.
-      // It does not fire under today's constants (the smallest case, Hard on a
-      // 6-day card, rounds to 7 either way) but rounding makes a stall
-      // reachable at small intervals if the multipliers are ever tuned, and a
-      // card that answers "correct" without moving looks broken to a student.
-      interval = Math.max(interval + 1, Math.round(interval * multiplier));
-    }
+    // Review phase: the grade picks the multiplier. This used to hardcode a
+    // 6-day second step, which is textbook SM-2 and not what Anki does — Anki
+    // has no fixed second step, it multiplies from the graduating interval. The
+    // hardcoded 6 also meant Hard, Good and Easy were indistinguishable on a
+    // card's second review, on top of being indistinguishable on its first.
+    interval = passInterval(grade, interval, easeFactor);
     repetition++;
   }
 

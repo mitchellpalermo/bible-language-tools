@@ -3,8 +3,10 @@ import {
   applyDailyReset,
   daysFromNow,
   EASY_BONUS,
+  EASY_INTERVAL,
   emptyStats,
   GRADE_QUALITY,
+  GRADUATING_INTERVAL,
   gradeForQuality,
   HARD_MULTIPLIER,
   isDue,
@@ -173,10 +175,13 @@ describe('nextSRS', () => {
       expect(result.repetition).toBe(1);
     });
 
-    it('sets interval to 6 on second successful review (repetition 1)', () => {
+    it('multiplies from the graduating interval on the second review', () => {
+      // Not SM-2's fixed 6-day second step. Anki has no fixed second step: a
+      // 1-day card times an ease of 2.5 is 3 days. The old constant also made
+      // Hard, Good and Easy identical on every card's second review.
       const card = makeCard({ repetition: 1, interval: 1 });
       const result = nextSRS(card, 4);
-      expect(result.interval).toBe(6);
+      expect(result.interval).toBe(3);
       expect(result.repetition).toBe(2);
     });
 
@@ -591,10 +596,29 @@ describe('Anki grade scale', () => {
       expect(result.interval).toBe(Math.round(20 * 2.5 * EASY_BONUS));
     });
 
-    it('keeps the first two steps fixed regardless of grade', () => {
-      for (const g of ['hard', 'good', 'easy'] as ReviewGrade[]) {
-        expect(grade(g, { repetition: 0, interval: 0 }).interval).toBe(1);
-        expect(grade(g, { repetition: 1, interval: 1 }).interval).toBe(6);
+    it('graduates a new card to one day, or four on Easy', () => {
+      // Anki's graduating and easy intervals. Again/Hard/Good all leave a new
+      // card due tomorrow; only Easy skips ahead — which is the whole reason
+      // the four buttons do not preview an identical "1d" on a fresh card.
+      for (const g of ['hard', 'good'] as ReviewGrade[]) {
+        expect(grade(g, { repetition: 0, interval: 0 }).interval).toBe(GRADUATING_INTERVAL);
+      }
+      expect(grade('easy', { repetition: 0, interval: 0 }).interval).toBe(EASY_INTERVAL);
+      expect(grade('again', { repetition: 0, interval: 0 }).interval).toBe(1);
+    });
+
+    it('orders the three passing grades strictly, at every interval', () => {
+      // Rounding alone does not guarantee this: a 1-day card takes 2.5 days on
+      // Good and 3.25 on Easy, both of which round to 3. Two grades that
+      // schedule a card identically say the harder answer was free.
+      for (const interval of [1, 2, 3, 4, 6, 10, 30, 200]) {
+        for (const ease of [MIN_EASE, 2.5, 3.1]) {
+          const at = (g: ReviewGrade) =>
+            grade(g, { repetition: 2, interval, easeFactor: ease }).interval;
+          expect(at('hard')).toBeGreaterThan(interval);
+          expect(at('good')).toBeGreaterThan(at('hard'));
+          expect(at('easy')).toBeGreaterThan(at('good'));
+        }
       }
     });
 
