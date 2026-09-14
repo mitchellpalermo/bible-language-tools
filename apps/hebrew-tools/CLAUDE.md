@@ -118,6 +118,7 @@ Word-mode writing (#102) spends a third, `write:word:<cardKey>` in `src/data/wri
 
 The confusable decks deliberately get no prefix of their own — they drill the same letters the alphabet deck does, so grading ד in one must move the card the other sees.
 - **Deck selection is persisted separately from the SRS store** (`hebrew-tools-deck-v1`, `src/lib/deck-selection.ts`) and is never synced. It decides which due cards you see, not what is due, so it stays local to the browser.
+- **What the card front shows is persisted the same way** (`hebrew-tools-flashcard-display-v1`, `src/lib/flashcard-settings.ts`, over `@tools/shared/flashcard-settings`) and is likewise never synced. Today it holds one boolean: whether the part of speech appears on the front of a flashcard, which defaults to off. See the repo CLAUDE.md under "What the card front gives away".
 - **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`, `hebrew-tools-reader-prefs`. There is still no auth or sync in this app — **all study progress is per-browser only.** The D1 plumbing exists (see below), but nothing reads or writes it yet.
 
 ### OSHB data pipeline (issue #75)

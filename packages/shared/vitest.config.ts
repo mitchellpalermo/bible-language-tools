@@ -5,6 +5,7 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: 'happy-dom',
+    setupFiles: ['./src/test/setup.ts'],
     globals: true,
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     passWithNoTests: true,
@@ -13,6 +14,7 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
       include: ['src/**/*.{ts,tsx}'],
       exclude: [
+        'src/test/**',
         'src/**/*.d.ts',
         // Pre-existing code that predates test infrastructure in this package
         // (added alongside srs.test.ts, the first consumer to actually need

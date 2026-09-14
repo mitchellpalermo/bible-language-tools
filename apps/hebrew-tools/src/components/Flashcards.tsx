@@ -32,6 +32,7 @@ import {
 import { cardKey, type HebrewGender, type HebrewVocabWord, vocabulary } from '../data/vocabulary';
 import { hasAuthHint } from '../lib/auth-cookie';
 import { type DeckSelection, loadSelection, saveSelection } from '../lib/deck-selection';
+import { loadFlashcardSettings, saveFlashcardSettings } from '../lib/flashcard-settings';
 import { deleteServerProgress } from '../lib/sync-manager';
 import ChapterPicker from './ChapterPicker';
 import ErrorBoundary from './ErrorBoundary';
@@ -151,6 +152,19 @@ function FlashcardsInner() {
 
   // Filter (only meaningful for the whole-vocabulary deck)
   const [freqFilter, setFreqFilter] = useState<FreqFilter>('all');
+
+  // Card face — how much of the card is visible before you answer.
+  const [showPartOfSpeech, setShowPartOfSpeech] = useState(
+    () => loadFlashcardSettings().showPartOfSpeech,
+  );
+
+  const togglePartOfSpeech = useCallback(() => {
+    setShowPartOfSpeech((prev) => {
+      const next = !prev;
+      saveFlashcardSettings({ showPartOfSpeech: next });
+      return next;
+    });
+  }, []);
 
   const updateSelection = useCallback((patch: Partial<DeckSelection>) => {
     setSelection((prev) => {
@@ -507,22 +521,40 @@ function FlashcardsInner() {
 
       {/* ── Top controls bar ──────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        {/* Study mode */}
-        <div className="flex gap-1 bg-white border border-primary/10 p-1 rounded-xl shadow-sm">
-          {(['srs', 'all'] as StudyMode[]).map((m) => (
-            <button
-              type="button"
-              key={m}
-              onClick={() => setStudyMode(m)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
-                studyMode === m
-                  ? 'bg-primary text-white shadow-sm'
-                  : 'text-text-muted hover:text-text'
-              }`}
-            >
-              {m === 'srs' ? 'SRS Review' : 'Study All'}
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Study mode */}
+          <div className="flex gap-1 bg-white border border-primary/10 p-1 rounded-xl shadow-sm">
+            {(['srs', 'all'] as StudyMode[]).map((m) => (
+              <button
+                type="button"
+                key={m}
+                onClick={() => setStudyMode(m)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+                  studyMode === m
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'text-text-muted hover:text-text'
+                }`}
+              >
+                {m === 'srs' ? 'SRS Review' : 'Study All'}
+              </button>
+            ))}
+          </div>
+
+          {/* Card face. The part of speech is on the answer side either way —
+              this decides only whether it is also on the front. */}
+          <button
+            type="button"
+            onClick={togglePartOfSpeech}
+            aria-pressed={showPartOfSpeech}
+            title="Show the part of speech on the front of the card. It is always shown with the answer."
+            className={`px-3 py-1 rounded-full text-sm border-2 font-medium transition-colors ${
+              showPartOfSpeech
+                ? 'bg-primary text-white border-primary'
+                : 'border-primary/10 text-text-muted hover:border-primary/40 hover:text-text'
+            }`}
+          >
+            Show part of speech
+          </button>
         </div>
 
         {/* Frequency filter — only applies to the whole-vocabulary deck */}
@@ -629,9 +661,15 @@ function FlashcardsInner() {
         >
           {card.hebrew}
         </p>
-        <p className="text-text-muted text-xs mt-2 font-medium uppercase tracking-wide">
-          {card.partOfSpeech}
-        </p>
+        {/* The part of speech is a hint before the answer and a fact after it.
+            With the toggle off it waits for the flip rather than disappearing:
+            "noun" narrows a word to a fraction of the lexicon, which is help
+            you did not ask for while recalling, and worth having once you have. */}
+        {(showPartOfSpeech || flipped) && (
+          <p className="text-text-muted text-xs mt-2 font-medium uppercase tracking-wide">
+            {card.partOfSpeech}
+          </p>
+        )}
 
         {!flipped && (
           <p className="text-text-muted/60 text-xs mt-6">

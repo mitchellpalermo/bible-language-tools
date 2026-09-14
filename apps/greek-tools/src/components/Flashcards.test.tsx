@@ -889,3 +889,109 @@ describe('DeckBuilder integration', () => {
     expect(screen.queryByText(/no custom decks yet/i)).not.toBeInTheDocument();
   });
 });
+
+// ─── Part of speech on the card front ─────────────────────────────────────────
+
+describe('part of speech', () => {
+  function getCard() {
+    // "tap to reveal" is shown only while unflipped, and only in flip mode.
+    return screen.getByText('tap to reveal').closest('.cursor-pointer') as HTMLElement;
+  }
+
+  function toggle() {
+    return screen.getByRole('button', { name: 'Show part of speech' });
+  }
+
+  /**
+   * The part of speech of whichever card was dealt. The queue is shuffled, so
+   * the expectation is read off the card rather than assumed — the same
+   * approach the preset tests take.
+   */
+  function dealtPartOfSpeech(): string {
+    const front = getCard().querySelector('p')?.textContent;
+    const matches = vocabulary.filter((w) => w.greek === front);
+    // a homograph would make the lookup ambiguous rather than merely wrong
+    expect(matches).toHaveLength(1);
+    return matches[0].partOfSpeech;
+  }
+
+  it('is hidden on the front by default', () => {
+    renderFlashcards();
+    const pos = dealtPartOfSpeech();
+    expect(within(getCard()).queryByText(pos)).not.toBeInTheDocument();
+    expect(toggle()).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('is still revealed with the answer while hidden from the front', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    const pos = dealtPartOfSpeech();
+    const card = getCard();
+    await user.click(card);
+    // Hiding it withholds a hint, not the information.
+    expect(within(card).getByText(pos)).toBeInTheDocument();
+  });
+
+  it('is revealed by checking a typed answer, not only by flipping', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    const pos = dealtPartOfSpeech();
+    const card = getCard();
+
+    await user.click(screen.getByRole('button', { name: 'Type' }));
+    await user.type(screen.getByRole('textbox'), 'definitely not the gloss');
+    await user.click(screen.getByRole('button', { name: 'Check' }));
+
+    expect(within(card).getByText(pos)).toBeInTheDocument();
+  });
+
+  it('appears on the front once the toggle is switched on', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    const pos = dealtPartOfSpeech();
+    await user.click(toggle());
+    expect(within(getCard()).getByText(pos)).toBeInTheDocument();
+    expect(toggle()).toHaveAttribute('aria-pressed', 'true');
+    // Still on the front — the card was never flipped.
+    expect(screen.getByText('tap to reveal')).toBeInTheDocument();
+  });
+
+  it('hides it again on a second press', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    const pos = dealtPartOfSpeech();
+    await user.click(toggle());
+    await user.click(toggle());
+    expect(within(getCard()).queryByText(pos)).not.toBeInTheDocument();
+  });
+
+  it('remembers the choice across a remount', async () => {
+    const user = userEvent.setup();
+    const { unmount } = renderFlashcards();
+    await user.click(toggle());
+    unmount();
+
+    renderFlashcards();
+    expect(within(getCard()).getByText(dealtPartOfSpeech())).toBeInTheDocument();
+  });
+
+  it('leaves the English → Greek front alone, which has no such line to withhold', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(toggle());
+    await user.click(screen.getByRole('button', { name: 'English → Greek' }));
+
+    const card = getCard();
+    const gloss = card.querySelector('p')?.textContent;
+    const matches = vocabulary.filter((w) => w.gloss === gloss);
+    expect(matches.length).toBeGreaterThan(0);
+    const parts = new Set(matches.map((w) => w.partOfSpeech));
+    expect(parts.size).toBe(1);
+
+    // The front is the gloss here, so the part of speech only ever arrives with
+    // the Greek on the back — toggle or no toggle.
+    expect(within(card).queryByText([...parts][0])).not.toBeInTheDocument();
+    await user.click(card);
+    expect(within(card).getByText([...parts][0])).toBeInTheDocument();
+  });
+});

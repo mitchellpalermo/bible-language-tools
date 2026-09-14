@@ -20,6 +20,7 @@ import {
   saveStats,
 } from '../data/srs';
 import { type VocabWord, vocabulary } from '../data/vocabulary';
+import { loadFlashcardSettings, saveFlashcardSettings } from '../lib/flashcard-settings';
 import DeckBuilder from './DeckBuilder';
 import ErrorBoundary from './ErrorBoundary';
 
@@ -134,6 +135,21 @@ function FlashcardsInner() {
   const [freqFilter, setFreqFilter] = useState<FreqFilter>(DEFAULT_FREQ_PRESET.filter);
   const [posFilter, setPosFilter] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+
+  // Card face — how much of the card is visible before you answer. Distinct
+  // from the part-of-speech *filter* above: that decides which words are in the
+  // deck, this decides what a card gives away.
+  const [showPartOfSpeech, setShowPartOfSpeech] = useState(
+    () => loadFlashcardSettings().showPartOfSpeech,
+  );
+
+  const togglePartOfSpeech = useCallback(() => {
+    setShowPartOfSpeech((prev) => {
+      const next = !prev;
+      saveFlashcardSettings({ showPartOfSpeech: next });
+      return next;
+    });
+  }, []);
 
   // Custom decks
   const [customDecks, setCustomDecks] = useState<CustomDeck[]>(() => loadCustomDecks());
@@ -337,6 +353,10 @@ function FlashcardsInner() {
   const front = card ? (direction === 'gr-en' ? card.greek : card.gloss) : '';
   const back = card ? (direction === 'gr-en' ? card.gloss : card.greek) : '';
   const expectedAnswer = card ? (direction === 'gr-en' ? card.gloss : card.greek) : '';
+  // Both answer modes reach the same point — the answer is on screen and the
+  // grade buttons are live — by different routes.
+  const revealed =
+    (answerMode === 'flip' && flipped) || (answerMode === 'type' && answerResult !== null);
   const hasActiveFilters = freqFilter !== 'all' || posFilter.length > 0 || activeDeckId !== null;
   const activePreset = FREQ_PRESETS.find((p) => p.filter === freqFilter) ?? FREQ_PRESETS[0];
 
@@ -470,6 +490,22 @@ function FlashcardsInner() {
               </button>
             ))}
           </div>
+
+          {/* Card face. The part of speech is on the answer side either way —
+              this decides only whether it is also on the front. */}
+          <button
+            type="button"
+            onClick={togglePartOfSpeech}
+            aria-pressed={showPartOfSpeech}
+            title="Show the part of speech on the front of the card. It is always shown with the answer."
+            className={`px-3 py-1.5 rounded-xl text-sm border-2 font-semibold transition-colors ${
+              showPartOfSpeech
+                ? 'bg-grape text-white border-grape'
+                : 'border-gray-200 text-text-muted hover:border-grape/40'
+            }`}
+          >
+            Show part of speech
+          </button>
 
           {/* Filters toggle */}
           <button
@@ -742,7 +778,13 @@ function FlashcardsInner() {
         >
           {front}
         </p>
-        {direction === 'gr-en' && (
+        {/* The part of speech is a hint before the answer and a fact after it.
+            With the toggle off it waits for the reveal rather than
+            disappearing: "verb" narrows a word to a fraction of the lexicon,
+            which is help you did not ask for while recalling, and worth having
+            once you have. (In English → Greek the front is the gloss and there
+            is no such line to withhold; the back carries it as before.) */}
+        {direction === 'gr-en' && (showPartOfSpeech || revealed) && (
           <p className="text-text-muted text-sm mt-2 font-medium uppercase tracking-wide text-xs">
             {card.partOfSpeech}
           </p>
@@ -835,7 +877,7 @@ function FlashcardsInner() {
           typed answer matched. Auto-checking says whether the spelling was
           right, not how hard the recall was, and the student is the one who
           knows — the same reason /write leaves every grade button live. */}
-      {((answerMode === 'flip' && flipped) || (answerMode === 'type' && answerResult !== null)) && (
+      {revealed && (
         <GradeButtons
           card={srsStore[normalizeKey(card.greek)] ?? newCard(normalizeKey(card.greek))}
           onGrade={handleReview}

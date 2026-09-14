@@ -543,3 +543,82 @@ describe('Flashcards chapter decks', () => {
     }
   });
 });
+
+// ─── Part of speech on the card front ─────────────────────────────────────────
+
+describe('part of speech', () => {
+  /**
+   * A card whose part of speech is worth asserting on. `particle` is chosen
+   * because nothing else on the page says it — the deck, category and frequency
+   * chips share no vocabulary with the part-of-speech labels, so a match is the
+   * card and not the chrome.
+   */
+  function seedParticle(): HebrewVocabWord {
+    const word = vocabulary.find((w) => w.partOfSpeech === 'particle');
+    expect(word, 'no vocabulary entry is a particle').toBeDefined();
+    seedDueCard(word as HebrewVocabWord);
+    return word as HebrewVocabWord;
+  }
+
+  function toggle() {
+    return screen.getByRole('button', { name: 'Show part of speech' });
+  }
+
+  it('is hidden on the front by default', () => {
+    const word = seedParticle();
+    renderFlashcards();
+    expect(screen.queryByText(word.partOfSpeech)).not.toBeInTheDocument();
+    expect(toggle()).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('is still revealed with the answer while hidden from the front', async () => {
+    const word = seedParticle();
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(getCard());
+    // Hiding it withholds a hint, not the information.
+    expect(screen.getByText(word.partOfSpeech)).toBeInTheDocument();
+  });
+
+  it('appears on the front once the toggle is switched on', async () => {
+    const word = seedParticle();
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(toggle());
+    expect(screen.getByText(word.partOfSpeech)).toBeInTheDocument();
+    expect(toggle()).toHaveAttribute('aria-pressed', 'true');
+    // Still on the front — the card was never flipped.
+    expect(screen.getByText('tap to reveal')).toBeInTheDocument();
+  });
+
+  it('hides it again on a second press', async () => {
+    const word = seedParticle();
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(toggle());
+    await user.click(toggle());
+    expect(screen.queryByText(word.partOfSpeech)).not.toBeInTheDocument();
+  });
+
+  it('remembers the choice across a remount', async () => {
+    const word = seedParticle();
+    const user = userEvent.setup();
+    const { unmount } = renderFlashcards();
+    await user.click(toggle());
+    unmount();
+
+    renderFlashcards();
+    expect(screen.getByText(word.partOfSpeech)).toBeInTheDocument();
+  });
+
+  it('does not restart the session when toggled', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(getStudyAllButton());
+    const before = getCard().querySelector('p[dir="rtl"]')?.textContent;
+    await user.click(toggle());
+    // A display preference must not reshuffle the queue out from under a card
+    // the student is part-way through recalling.
+    expect(getCard().querySelector('p[dir="rtl"]')?.textContent).toBe(before);
+  });
+});
