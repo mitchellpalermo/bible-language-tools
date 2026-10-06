@@ -34,6 +34,14 @@
 // simply tagged into 5 as well; the other seven are the one place where an entry
 // comes from the grammar rather than from the handout.
 //
+// Chapter 12 does the same for construct forms. Table 12.3 lists six irregular
+// construct nouns, which the handout carries only as a `construct` field on the
+// absolute, so each is also a `12:inflected` row with a card of its own. Its
+// `note` names the absolute it belongs to. אֲבִי and אֲחִי are also how the
+// lexicon spells two personal names, so both are pinned to the noun.
+// Table 12.4 adds the constructs of seven of the chapter 5 plurals — אַנְשֵׁי,
+// בְּנֵי and so on — entered the same way, each naming its absolute plural.
+//
 // `transliteration` is still absent: OSHB carries no romanization, and inventing
 // ~500 SBL forms by hand would bake in errors the data tests cannot catch.
 //
@@ -349,6 +357,19 @@ export const GARRETT_VOCABULARY: HebrewVocabWord[] = [
   { hebrew: 'שָׁנָה', root: 'שׁנה', strong: '8141', gloss: 'year', frequency: 877, partOfSpeech: 'noun', gender: 'f', construct: 'שְׁנַת', plural: 'שָׁנִים', chapters: [gd(12, 'core')] },
   { hebrew: 'תַּחַת', root: 'תחת', strong: '8478', gloss: 'under, instead of', frequency: 505, partOfSpeech: 'noun', gender: 'm', chapters: [gd(12, 'core')] },
   { hebrew: 'יהוה', root: 'הוה', strong: '3068', gloss: 'This is the proper name of Israel’s God', frequency: 6521, partOfSpeech: 'proper noun', note: 'English Bibles routinely translate יהוה as “the Lord,” but it was supposedly pronounced “Yahweh” in biblical times. Out of reverence for the divine name, it is occasionally rendered haššēm (“the name” in Hebrew), but more often, it is pronounced ʾăḏonay (“my / the lord”). The Masoretes signalled this pronunciation by using the vowel pattern of אֲדֹנַי, while retaining the consonants of Yahweh (יְהוָֹה or simply יְהוָה). The pronunciation Jehovah came about because people wrongly pronounced the consonants of יהוה with the vowels of אֲדֹנַי.', chapters: [gd(12, 'special')] },
+  { hebrew: 'אֲבִי', root: 'אבה', strong: '1', gloss: 'father of', partOfSpeech: 'noun', gender: 'm', note: 'construct of אָב', chapters: [gd(12, 'inflected')] },
+  { hebrew: 'אֲחִי', root: 'אחה', strong: '251', gloss: 'brother of', partOfSpeech: 'noun', gender: 'm', note: 'construct of אָח', chapters: [gd(12, 'inflected')] },
+  { hebrew: 'אֵשֶׁת', root: 'אנשׁ', strong: '802', gloss: 'woman of', partOfSpeech: 'noun', gender: 'f', note: 'construct of אִשָּׁה', chapters: [gd(12, 'inflected')] },
+  { hebrew: 'מִלְחֶמֶת', root: 'לחם', strong: '4421', gloss: 'war of', partOfSpeech: 'noun', gender: 'f', note: 'construct of מִלְחָמָה', chapters: [gd(12, 'inflected')] },
+  { hebrew: 'מִשְׁפַּחַת', root: 'שׁפח', strong: '4940', gloss: 'family of', partOfSpeech: 'noun', gender: 'f', note: 'construct of מִשְׁפָּחָה', chapters: [gd(12, 'inflected')] },
+  { hebrew: 'פִּי', strong: '6310', gloss: 'mouth of', partOfSpeech: 'noun', gender: 'm', note: 'construct of פֶּה', chapters: [gd(12, 'inflected')] },
+  { hebrew: 'אַנְשֵׁי', root: 'אישׁ', strong: '376', gloss: 'men of', partOfSpeech: 'noun', gender: 'm', note: 'construct of אֲנָשִׁים', chapters: [gd(12, 'inflected')] },
+  { hebrew: 'נְשֵׁי', root: 'אנשׁ', strong: '802', gloss: 'women of', partOfSpeech: 'noun', gender: 'f', note: 'construct of נָשִׁים', chapters: [gd(12, 'inflected')] },
+  { hebrew: 'בְּנֵי', strong: '1121a', gloss: 'sons of', partOfSpeech: 'noun', gender: 'm', note: 'construct of בָּנִים', chapters: [gd(12, 'inflected')] },
+  { hebrew: 'אֲבוֹת', root: 'אבה', strong: '1', gloss: 'fathers of', partOfSpeech: 'noun', gender: 'm', note: 'construct of אָבוֹת', chapters: [gd(12, 'inflected')] },
+  { hebrew: 'יְמֵי', strong: '3117', gloss: 'days of', partOfSpeech: 'noun', gender: 'm', note: 'construct of יָמִים', chapters: [gd(12, 'inflected')] },
+  { hebrew: 'עָרֵי', strong: '5892b', gloss: 'cities of', partOfSpeech: 'noun', gender: 'f', note: 'construct of עָרִים', chapters: [gd(12, 'inflected')] },
+  { hebrew: 'בָּתֵּי', strong: '1004b', gloss: 'houses of', partOfSpeech: 'noun', gender: 'm', note: 'construct of בָּתִּים', chapters: [gd(12, 'inflected')] },
   { hebrew: 'לֵץ', root: 'ליץ', strong: '3887', gloss: 'mocker, scorner', partOfSpeech: 'noun', chapters: [gd(12, 'reading')] },
   { hebrew: 'חַטָּא', root: 'חטא', strong: '2400', gloss: 'sinful, sinner', partOfSpeech: 'adjective', chapters: [gd(12, 'reading')] },
   { hebrew: 'חֶפְצוֹ', root: 'חפץ', strong: '2656', gloss: '“his delight”', partOfSpeech: 'noun', gender: 'm', chapters: [gd(12, 'reading')] },

@@ -555,6 +555,14 @@ const HEADER = `// Garrett & DeRouchie chapter vocabulary — GENERATED, do not 
 // simply tagged into 5 as well; the other seven are the one place where an entry
 // comes from the grammar rather than from the handout.
 //
+// Chapter 12 does the same for construct forms. Table 12.3 lists six irregular
+// construct nouns, which the handout carries only as a \`construct\` field on the
+// absolute, so each is also a \`12:inflected\` row with a card of its own. Its
+// \`note\` names the absolute it belongs to. אֲבִי and אֲחִי are also how the
+// lexicon spells two personal names, so both are pinned to the noun.
+// Table 12.4 adds the constructs of seven of the chapter 5 plurals — אַנְשֵׁי,
+// בְּנֵי and so on — entered the same way, each naming its absolute plural.
+//
 // \`transliteration\` is still absent: OSHB carries no romanization, and inventing
 // ~500 SBL forms by hand would bake in errors the data tests cannot catch.
 //
