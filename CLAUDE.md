@@ -61,6 +61,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/components/WritingGrid` | The row of per-letter guide boxes a word is written into (React) |
 | `@tools/shared/components/SiteNav.astro` | The site navigation for both apps (see below) |
 | `@tools/shared/components/GradeButtons` | The Again/Hard/Good/Easy answer row, with per-grade interval previews (React) |
+| `@tools/shared/components/ToggleSwitch` | Labelled on/off switch — `role="switch"`, app accent passed in (React) |
 | `@tools/shared/components/NumberToggle` | Sg/Pl pill toggle (mobile only) |
 | `@tools/shared/components/EndingsToggle` | Full forms / Endings only toggle |
 | `@tools/shared/components/SectionHeading` | Anchor-linked section heading |
@@ -152,6 +153,13 @@ Two things about it that are pedagogy rather than plumbing:
   (`revealed` covers both the flip and a checked typed answer), and its English →
   Greek direction is untouched: the front is the gloss there, so there is no
   such line to withhold.
+
+The control is `ToggleSwitch`, not a pill. Every filter on both flashcard pages
+is a chip that fills with the accent when active, and greek-tools draws its Part
+of Speech *filter* out of exactly those chips — a setting that stays put must not
+look like one choice from a row of alternatives. It is a `role="switch"` with
+`aria-checked` rather than a button with `aria-pressed`, because it is a state
+and not a momentary action, and screen readers announce the two differently.
 
 ## Streaks, study days, and sync merges
 
