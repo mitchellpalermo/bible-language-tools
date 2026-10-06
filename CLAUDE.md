@@ -53,6 +53,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/srs` | SM-2 spaced repetition algorithm, types, and pure stats functions |
 | `@tools/shared/sync-merge` | Merge rules for cross-device sync of SRS cards and study stats |
 | `@tools/shared/quiz-settings` | `createQuizSettings(storageKey)` factory for persisting quiz difficulty |
+| `@tools/shared/flashcard-settings` | `createFlashcardSettings(storageKey)` factory for what the flashcard face shows before you answer |
 | `@tools/shared/nav` | `NavLink` type and the active-route predicates the nav renders with |
 | `@tools/shared/nav-menu` | `initNavMenu()` — DOM controller for the mobile drawer |
 | `@tools/shared/ink` | Stylus writing engine — stroke capture, palm rejection, smoothing, variable-width rendering, geometric scoring, and the `ScriptPack` type |
@@ -60,6 +61,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/components/WritingGrid` | The row of per-letter guide boxes a word is written into (React) |
 | `@tools/shared/components/SiteNav.astro` | The site navigation for both apps (see below) |
 | `@tools/shared/components/GradeButtons` | The Again/Hard/Good/Easy answer row, with per-grade interval previews (React) |
+| `@tools/shared/components/ToggleSwitch` | Labelled on/off switch — `role="switch"`, app accent passed in (React) |
 | `@tools/shared/components/NumberToggle` | Sg/Pl pill toggle (mobile only) |
 | `@tools/shared/components/EndingsToggle` | Full forms / Endings only toggle |
 | `@tools/shared/components/SectionHeading` | Anchor-linked section heading |
@@ -127,6 +129,37 @@ Things to know before changing it:
 - **Ink is stored in CSS pixels, not device pixels.** The canvas scales by `devicePixelRatio` at draw time; baking that in would make saved strokes resolution-dependent.
 - **Smoothing at capture time and interpolation at render time are separate on purpose.** Do not merge them — a render-grade spline applied to incoming samples rounds off real corners, and the square corner of ד is exactly what distinguishes it from ר.
 - **Never assert exact equality on a smoothed coordinate.** `OneEuroFilter` computes `a * value + (1 - a) * prev`, which for a constant input is that constant in real arithmetic but lands a ULP either side of it in floating point, for roughly 8% of the timestamp deltas a DOM happens to produce. `InkCanvas.test.tsx` asserted `p.y === 10` on a horizontal stroke and duly passed locally while failing in CI. Use `toBeCloseTo`. Exact equality is still right for values the engine only *copies* — `stroke.test.ts`'s zero-length resample case is asserting that they are copies.
+
+### What the card front gives away
+
+`@tools/shared/flashcard-settings` holds one boolean, `showPartOfSpeech`, and
+each app binds it to its own storage key in `src/lib/flashcard-settings.ts`
+(`hebrew-tools-flashcard-display-v1`, `greek-tools-flashcard-display-v1`). It is
+a display preference, not a filter: it changes nothing about which cards are in
+the deck, what is due, or how anything is scheduled, so it is local to the
+browser and never synced — same reasoning as hebrew-tools' `deck-selection.ts`.
+
+Two things about it that are pedagogy rather than plumbing:
+
+- **The default is hidden, and the default is the point.** "noun" narrows a word
+  to a fraction of the lexicon before the student has recalled anything, and
+  "verb" on a form they were meant to parse hands over the one fact the card was
+  asking for. The toggle exists for people who want the hint, not the other way
+  round.
+- **Hiding it withholds a hint, not the information.** The part of speech still
+  appears with the answer — the same `<p>`, in the same place, rendered on
+  reveal instead of on the front. Deleting it from the card outright would cost
+  a fact worth having once recall is over. greek-tools reveals via either route
+  (`revealed` covers both the flip and a checked typed answer), and its English →
+  Greek direction is untouched: the front is the gloss there, so there is no
+  such line to withhold.
+
+The control is `ToggleSwitch`, not a pill. Every filter on both flashcard pages
+is a chip that fills with the accent when active, and greek-tools draws its Part
+of Speech *filter* out of exactly those chips — a setting that stays put must not
+look like one choice from a row of alternatives. It is a `role="switch"` with
+`aria-checked` rather than a button with `aria-pressed`, because it is a state
+and not a momentary action, and screen readers announce the two differently.
 
 ## Streaks, study days, and sync merges
 

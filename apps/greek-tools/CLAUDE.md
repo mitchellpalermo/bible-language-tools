@@ -111,6 +111,7 @@ Issue template is at `.github/ISSUE_TEMPLATE/feature.md`.
 - Morphological data comes from MorphGNT, pre-processed by `scripts/build-morphgnt.mjs` into `public/data/`
 - Vocabulary data is pre-processed by `scripts/build-vocabulary.mjs`
 - SRS (Spaced Repetition System) state is persisted in `localStorage` via `src/data/srs.ts`
+- Flashcard display preferences are persisted separately (`greek-tools-flashcard-display-v1`, `src/lib/flashcard-settings.ts`, over `@tools/shared/flashcard-settings`). Today that is one boolean: whether the part of speech appears on the front of a flashcard, which defaults to off. See the repo CLAUDE.md under "What the card front gives away".
 
 ## Loading book data in a component
 

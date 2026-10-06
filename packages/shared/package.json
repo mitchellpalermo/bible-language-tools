@@ -13,6 +13,7 @@
     "./srs": "./src/srs.ts",
     "./sync-merge": "./src/sync-merge.ts",
     "./quiz-settings": "./src/quiz-settings.ts",
+    "./flashcard-settings": "./src/flashcard-settings.ts",
     "./nav": "./src/nav.ts",
     "./nav-menu": "./src/nav-menu.ts",
     "./ink": "./src/ink/index.ts",
@@ -23,7 +24,8 @@
     "./components/SectionHeading": "./src/components/SectionHeading.tsx",
     "./components/DescriptionBar": "./src/components/DescriptionBar.tsx",
     "./components/WritingGrid": "./src/ink/components/WritingGrid.tsx",
-    "./components/GradeButtons": "./src/components/GradeButtons.tsx"
+    "./components/GradeButtons": "./src/components/GradeButtons.tsx",
+    "./components/ToggleSwitch": "./src/components/ToggleSwitch.tsx"
   },
   "peerDependencies": {
     "react": "^19.0.0"
