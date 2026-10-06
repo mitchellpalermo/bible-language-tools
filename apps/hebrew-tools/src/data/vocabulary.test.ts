@@ -430,6 +430,60 @@ describe('Garrett & DeRouchie import', () => {
       expect(deck, `Chapter 5 deck is missing ${plural}`).toContain(plural);
     }
   });
+
+  // Table 12.3 of the grammar is the construct-state counterpart of the list
+  // above: six nouns whose construct cannot be derived from the absolute. The
+  // absolutes are spread across chapters 3, 5, 11 and 12, and a `construct`
+  // field is shown on the back of the absolute's card without ever being asked.
+  //
+  // Table 12.4 follows with the constructs of seven of chapter 5's irregular
+  // plurals. Those plurals are form cards themselves and carry no `construct`
+  // field, which is what the fourth column records.
+  const IRREGULAR_CONSTRUCTS = [
+    ['אָב', 'אֲבִי', 'father of', true],
+    ['אָח', 'אֲחִי', 'brother of', true],
+    ['אִשָּׁה', 'אֵשֶׁת', 'woman of', true],
+    ['מִלְחָמָה', 'מִלְחֶמֶת', 'war of', true],
+    ['מִשְׁפָּחָה', 'מִשְׁפַּחַת', 'family of', true],
+    ['פֶּה', 'פִּי', 'mouth of', true],
+    ['אֲנָשִׁים', 'אַנְשֵׁי', 'men of', false],
+    ['נָשִׁים', 'נְשֵׁי', 'women of', false],
+    ['בָּנִים', 'בְּנֵי', 'sons of', false],
+    ['אָבוֹת', 'אֲבוֹת', 'fathers of', false],
+    ['יָמִים', 'יְמֵי', 'days of', false],
+    ['עָרִים', 'עָרֵי', 'cities of', false],
+    ['בָּתִּים', 'בָּתֵּי', 'houses of', false],
+  ] as const;
+
+  it.each(
+    IRREGULAR_CONSTRUCTS,
+  )('gives the irregular construct of %s its own card', (absolute, construct, gloss, onAbsolute) => {
+    const word = GARRETT_VOCABULARY.find((w) => w.hebrew === absolute);
+    expect(word, `No entry for ${absolute}`).toBeDefined();
+    expect(word?.construct).toBe(onAbsolute ? construct : undefined);
+
+    const form = GARRETT_VOCABULARY.find((w) => w.hebrew === construct);
+    expect(form, `No card for the construct ${construct}`).toBeDefined();
+    expect(form?.gloss).toBe(gloss);
+    expect(form?.chapters).toContainEqual(gd(12, 'inflected'));
+    // The back of the card says which noun this is the construct of.
+    expect(form?.note).toBe(`construct of ${absolute}`);
+    // Same lexeme as the absolute. This is the assertion that catches אֲבִי
+    // and אֲחִי resolving to the personal names the lexicon spells that way
+    // (Strong's 21 and 277) if their pins are ever dropped.
+    expect(form?.strong).toBe(word?.strong);
+    expect(form?.gender).toBe(word?.gender);
+    // The count is a fact about the lexeme, not about the form.
+    expect(form?.frequency).toBeUndefined();
+    expect(cardKey(form!)).not.toBe(cardKey(word!));
+  });
+
+  it('puts all thirteen irregular constructs in the chapter 12 deck', () => {
+    const deck = wordsInChapter('garrett-derouchie', 12).map((w) => w.hebrew);
+    for (const construct of IRREGULAR_CONSTRUCTS.map(([, c]) => c)) {
+      expect(deck, `Chapter 12 deck is missing ${construct}`).toContain(construct);
+    }
+  });
 });
 
 // ─── mergeVocabulary ──────────────────────────────────────────────────────────
