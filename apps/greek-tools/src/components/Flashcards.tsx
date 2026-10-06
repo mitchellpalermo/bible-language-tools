@@ -1,4 +1,5 @@
 import GradeButtons from '@tools/shared/components/GradeButtons';
+import ToggleSwitch from '@tools/shared/components/ToggleSwitch';
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { type CustomDeck, loadCustomDecks } from '../data/customDecks';
@@ -492,20 +493,19 @@ function FlashcardsInner() {
           </div>
 
           {/* Card face. The part of speech is on the answer side either way —
-              this decides only whether it is also on the front. */}
-          <button
-            type="button"
-            onClick={togglePartOfSpeech}
-            aria-pressed={showPartOfSpeech}
-            title="Show the part of speech on the front of the card. It is always shown with the answer."
-            className={`px-3 py-1.5 rounded-xl text-sm border-2 font-semibold transition-colors ${
-              showPartOfSpeech
-                ? 'bg-grape text-white border-grape'
-                : 'border-gray-200 text-text-muted hover:border-grape/40'
-            }`}
-          >
-            Show part of speech
-          </button>
+              this decides only whether it is also on the front. A switch rather
+              than a button because it is a setting that stays put — and because
+              the Part of Speech *filter* in the panel below is a row of chips,
+              which this must not be mistaken for. */}
+          <div className="flex items-center bg-white border border-indigo-100 px-3 py-1 rounded-xl shadow-sm">
+            <ToggleSwitch
+              checked={showPartOfSpeech}
+              onChange={togglePartOfSpeech}
+              label="Part of speech"
+              accent="var(--color-grape, #7C3AED)"
+              title="Show the part of speech on the front of the card. It is always shown with the answer."
+            />
+          </div>
 
           {/* Filters toggle */}
           <button

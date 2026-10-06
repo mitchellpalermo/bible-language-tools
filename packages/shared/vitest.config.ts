@@ -22,8 +22,15 @@ export default defineConfig({
         // TODO: add tests and remove from this list as each gets a real consumer:
         // quiz-settings.ts is for the Paradigm Quiz phase, the components for
         // Grammar Reference / Paradigm Quiz.
+        //
+        // Listed one by one rather than as `src/components/**`: GradeButtons and
+        // ToggleSwitch are tested, and a blanket glob would quietly stop
+        // counting the next tested component too.
         'src/quiz-settings.ts',
-        'src/components/**',
+        'src/components/DescriptionBar.tsx',
+        'src/components/EndingsToggle.tsx',
+        'src/components/NumberToggle.tsx',
+        'src/components/SectionHeading.tsx',
       ],
       thresholds: {
         lines: 90,

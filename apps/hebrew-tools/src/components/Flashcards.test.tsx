@@ -561,14 +561,14 @@ describe('part of speech', () => {
   }
 
   function toggle() {
-    return screen.getByRole('button', { name: 'Show part of speech' });
+    return screen.getByRole('switch', { name: 'Part of speech' });
   }
 
   it('is hidden on the front by default', () => {
     const word = seedParticle();
     renderFlashcards();
     expect(screen.queryByText(word.partOfSpeech)).not.toBeInTheDocument();
-    expect(toggle()).toHaveAttribute('aria-pressed', 'false');
+    expect(toggle()).toHaveAttribute('aria-checked', 'false');
   });
 
   it('is still revealed with the answer while hidden from the front', async () => {
@@ -586,7 +586,7 @@ describe('part of speech', () => {
     renderFlashcards();
     await user.click(toggle());
     expect(screen.getByText(word.partOfSpeech)).toBeInTheDocument();
-    expect(toggle()).toHaveAttribute('aria-pressed', 'true');
+    expect(toggle()).toHaveAttribute('aria-checked', 'true');
     // Still on the front — the card was never flipped.
     expect(screen.getByText('tap to reveal')).toBeInTheDocument();
   });

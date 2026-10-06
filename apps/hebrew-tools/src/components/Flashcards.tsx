@@ -1,4 +1,5 @@
 import GradeButtons from '@tools/shared/components/GradeButtons';
+import ToggleSwitch from '@tools/shared/components/ToggleSwitch';
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -541,20 +542,18 @@ function FlashcardsInner() {
           </div>
 
           {/* Card face. The part of speech is on the answer side either way —
-              this decides only whether it is also on the front. */}
-          <button
-            type="button"
-            onClick={togglePartOfSpeech}
-            aria-pressed={showPartOfSpeech}
-            title="Show the part of speech on the front of the card. It is always shown with the answer."
-            className={`px-3 py-1 rounded-full text-sm border-2 font-medium transition-colors ${
-              showPartOfSpeech
-                ? 'bg-primary text-white border-primary'
-                : 'border-primary/10 text-text-muted hover:border-primary/40 hover:text-text'
-            }`}
-          >
-            Show part of speech
-          </button>
+              this decides only whether it is also on the front. A switch rather
+              than a pill because it is a setting that stays put, not a filter
+              chip picked from a row of alternatives. */}
+          <div className="flex items-center bg-white border border-primary/10 px-3 py-1 rounded-xl shadow-sm">
+            <ToggleSwitch
+              checked={showPartOfSpeech}
+              onChange={togglePartOfSpeech}
+              label="Part of speech"
+              accent="var(--color-primary, #15803D)"
+              title="Show the part of speech on the front of the card. It is always shown with the answer."
+            />
+          </div>
         </div>
 
         {/* Frequency filter — only applies to the whole-vocabulary deck */}
