@@ -423,6 +423,30 @@ The weak verb section has no Greek analog. Strong-verb paradigms are 6 conjugati
 
 **greek.tools analog:** `/paradigms` — `ParadigmQuiz.tsx` + `src/lib/paradigm-quiz.ts`
 
+### Status
+
+Being built ahead of Phase 6, not after it. The quiz needs verb forms, not the
+whole Grammar Reference, so the forms live in `src/data/verb-paradigms.ts` and
+Phase 6 will render from the same file when it lands.
+
+| Step | Scope | Status |
+|------|-------|--------|
+| 7a | Verb data: Qal qatal, yiqtol, wayyiqtol for strong, begadkephat, III-ה, היה | ✅ Done |
+| 7b | Shared `TableModel` engine, Hebrew table builders, grading, `useHebrewInput` | ✅ Done |
+| 7c | `/paradigms` page — typed, full table by default, on-screen Hebrew keypad for iPad | Next |
+| 7d | SRS per table + sync; more conjugations and stems as the course reaches them | Queued |
+
+Typed input comes before handwriting (9f). Three things differ from the plan below:
+
+- **The default is the whole table blank**, not a random half. The exercise is
+  reproducing a table from memory, as a Section Exam asks.
+- **Two layouts of the same forms** — one verb as person × number (the blank
+  worksheet), and verb classes side by side (the textbook's summary tables).
+  Cells are keyed by person-gender-number so progress follows the form.
+- **An on-screen Hebrew keypad is part of 7c, not a later nicety.** Pointed
+  Hebrew through the iPad system keyboard means a layer switch for every sheva,
+  dagesh and long vowel. A hardware keyboard keeps the Phase 1 key mapping.
+
 ### What ports directly
 - Three-phase quiz UX (Select → Quiz → Results)
 - `TableModel` / `TableRow` data structure

@@ -13,6 +13,7 @@
     "./srs": "./src/srs.ts",
     "./sync-merge": "./src/sync-merge.ts",
     "./quiz-settings": "./src/quiz-settings.ts",
+    "./paradigm-quiz": "./src/paradigm-quiz.ts",
     "./flashcard-settings": "./src/flashcard-settings.ts",
     "./nav": "./src/nav.ts",
     "./nav-menu": "./src/nav-menu.ts",

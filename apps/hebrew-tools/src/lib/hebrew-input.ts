@@ -197,20 +197,43 @@ export function stripCantillation(s: string): string {
   return s.replace(CANTILLATION, '');
 }
 
-export type AnswerResult = 'correct' | 'nikud-only' | 'wrong';
+export type AnswerResult = 'correct' | 'dagesh-only' | 'nikud-only' | 'wrong';
+
+/**
+ * A dagesh that is not the dot of a shureq.
+ *
+ * Both are U+05BC, and they are not the same mistake: leaving the dot out of
+ * כּ is a missing dagesh, leaving it out of וּ writes a different vowel. In NFC
+ * a vowel sorts ahead of a dagesh on the same letter, so the dot sits directly
+ * against a vav only when that vav carries no vowel of its own — which is
+ * exactly a shureq. A doubled consonantal vav (וַּ) keeps its vowel in between
+ * and is matched like any other dagesh.
+ */
+const NON_SHUREQ_DAGESH = /(?<!\u05D5)\u05BC/g;
+
+function stripDagesh(s: string): string {
+  return s.replace(NON_SHUREQ_DAGESH, '');
+}
 
 /**
  * Grade a user's input against a correct Hebrew paradigm cell answer.
  *
- *   'correct'    — exact Unicode match after NFC normalization
- *   'nikud-only' — consonants match but vowel pointing differs (like 'accent-only' in Greek)
- *   'wrong'      — consonant mismatch
+ *   'correct'     — exact Unicode match after NFC normalization
+ *   'dagesh-only' — everything matches but a dagesh is missing or extra
+ *   'nikud-only'  — consonants match but vowel pointing differs (like 'accent-only' in Greek)
+ *   'wrong'       — consonant mismatch
+ *
+ * Dagesh gets its own tier because it is its own lesson: a begadkephat column
+ * in a paradigm table differs from the strong column in nothing else, and a
+ * result that files a dropped dagesh under "vowels" hides the one thing that
+ * column was there to test.
  */
 export function checkHebrewAnswer(userInput: string, correctAnswer: string): AnswerResult {
   const user = userInput.trim().normalize('NFC');
   const correct = correctAnswer.trim().normalize('NFC');
 
   if (user === correct) return 'correct';
+  if (stripDagesh(user) === stripDagesh(correct)) return 'dagesh-only';
   if (stripNikud(user) === stripNikud(correct)) return 'nikud-only';
   return 'wrong';
 }

@@ -19,14 +19,12 @@ export default defineConfig({
         // Pre-existing code that predates test infrastructure in this package
         // (added alongside srs.test.ts, the first consumer to actually need
         // coverage here — see hebrew-tools' Flashcards feature).
-        // TODO: add tests and remove from this list as each gets a real consumer:
-        // quiz-settings.ts is for the Paradigm Quiz phase, the components for
-        // Grammar Reference / Paradigm Quiz.
+        // TODO: add tests and remove from this list as each gets a real consumer
+        // (Grammar Reference / Paradigm Quiz).
         //
         // Listed one by one rather than as `src/components/**`: GradeButtons and
         // ToggleSwitch are tested, and a blanket glob would quietly stop
         // counting the next tested component too.
-        'src/quiz-settings.ts',
         'src/components/DescriptionBar.tsx',
         'src/components/EndingsToggle.tsx',
         'src/components/NumberToggle.tsx',
