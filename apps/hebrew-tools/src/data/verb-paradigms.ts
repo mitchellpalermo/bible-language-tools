@@ -105,6 +105,16 @@ export const CONJUGATION_PGNS: Record<Conjugation, Pgn[]> = {
   wayyiqtol: PREFIXED_PGNS,
 };
 
+/** A PGN spelled out, for a caption under a table — "3rd masculine singular". */
+const PERSON_NAMES: Record<string, string> = { '1': '1st', '2': '2nd', '3': '3rd' };
+const GENDER_NAMES: Record<string, string> = { m: 'masculine', f: 'feminine', c: 'common' };
+const NUMBER_NAMES: Record<string, string> = { s: 'singular', p: 'plural' };
+
+/** A PGN spelled out, for a caption under a table — "3rd masculine singular". */
+export function pgnLabel(pgn: Pgn): string {
+  return `${PERSON_NAMES[pgn[0]]} ${GENDER_NAMES[pgn[1]]} ${NUMBER_NAMES[pgn[2]]}`;
+}
+
 export const CONJUGATION_LABELS: Record<Conjugation, string> = {
   qatal: 'Qatal (Perfect)',
   yiqtol: 'Yiqtol (Imperfect)',

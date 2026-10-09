@@ -384,6 +384,38 @@ Hebrew → SBL transliteration is more complex than Greek because:
 
 **greek.tools analog:** `/grammar` — `GrammarReference.tsx` + `src/data/grammar.ts`
 
+### Status
+
+Landing a section at a time (issue #79). `/grammar` is live with the first
+six sections; each later step is a data module, a `<section>`, and one entry in
+`NAV_SECTIONS`.
+
+| Step | Scope | Status |
+|------|-------|--------|
+| 6a | `/grammar` shell and section nav; Alphabet (consonants, letter groups, dagesh); Vowels (chart, sheva); Qal Verb rendered from `verb-paradigms.ts` | ✅ Done |
+| 6b | Nouns — endings, absolute and construct, vowel reduction, segolates, the dual; The Article; Prepositions (inseparable, מִן, independent) | ✅ Done |
+| 6c | Pronouns — independent personal, demonstrative, interrogative, relative; Pronominal Suffixes on nouns and prepositions | Next |
+| 6d | Rest of the Qal — imperative, infinitives, participles; Waw Consecutive notes. Data goes in `verb-paradigms.ts` so the quiz gets it too | Queued |
+| 6e | Derived stems — Niphal, Piel, Pual, Hiphil, Hophal, Hithpael | Queued |
+| 6f | Weak verbs as an overlay on the strong paradigm, with diverging cells highlighted; suffixes on verbs | Queued |
+| 6g | Numerals | Queued |
+
+Two things 6a settled that the later steps inherit:
+
+- **The alphabet and vowel names come from the `/write` script pack**, and
+  `src/data/grammar.ts` adds only what a reference needs on top (sounds, letter
+  classes, a vowel's place in the chart). One spelling of every name.
+- **The Qal Verb section opened with what the quiz already had** — qatal,
+  yiqtol and wayyiqtol — rather than waiting for the full conjugation. The verb
+  tables read `verb-paradigms.ts` directly and show the stress mark the quiz
+  strips, so adding a paradigm there adds it to both.
+
+- **Only the verb tables are transcribed from the textbook.** Everything else
+  is general grammar in the app's own words on conventional model words, with
+  every Hebrew form checked against the Westminster Leningrad Codex by the data
+  tests (`src/test/corpus.ts`). 6c onward should follow 6b here: write it, then
+  let the corpus catch the pointing slips, rather than copying tables in.
+
 ### What ports directly
 - Section-nav sidebar pattern
 - Sticky nav / mobile horizontal scroll nav
@@ -705,7 +737,7 @@ The following modules from greek.tools can be copied with minimal or zero change
 | 8c | 4c | Reader: shell — book/chapter nav, RTL verses | Medium | OSHB pipeline | ✅ Done | #119 |
 | 8d | 4d | Reader: word popup — morphemes, parse, gloss | Medium | 4a, 4b, 4c | ✅ Done | #120 |
 | 8e | 4e | Reader: cantillation toggle + studied-word highlighting | Low | 4c | ✅ Done | #121 |
-| 9 | 6 | Grammar Reference | High (content-heavy) — needs its own sub-breakdown by section | None | Queued (independent — can float earlier) | #79 |
+| 9 | 6 | Grammar Reference | High (content-heavy) — broken into 6a–6g by section | None | In progress — 6a, 6b done | #79 |
 | 10 | 7 | Paradigm Quiz | Medium | Phase 1, Phase 6 | Queued | #80 |
 | 11 | 8C | Binyan Guide | Low (content) | None | Queued (independent — can float earlier) | #83 |
 | 12 | 8A | Root Lookup | Medium | Phase 4 data | Queued | #81 |

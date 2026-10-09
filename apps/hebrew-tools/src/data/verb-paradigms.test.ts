@@ -1,8 +1,6 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { DAGESH, stripCantillation } from '../lib/hebrew-input';
-import type { HebrewBook } from './morphhb';
+import { DAGESH } from '../lib/hebrew-input';
+import { hasCorpus, isAttested } from '../test/corpus';
 import {
   answerForm,
   CONJUGATION_LABELS,
@@ -12,6 +10,7 @@ import {
   PREFIXED_PGNS,
   paradigmId,
   paradigmsFor,
+  pgnLabel,
   QATAL_PGNS,
   QATAL_SUFFORMATIVES,
   STEM_LABELS,
@@ -187,14 +186,9 @@ describe('answerForm', () => {
 
 // ─── The corpus as a second witness ──────────────────────────────────────────
 //
-// The textbook is the authority, but a form typed in from a table is exactly
-// the kind of thing that goes wrong by one vowel. Three of the four model verbs
-// are common in the Hebrew Bible, so most of their forms can be looked up there.
-// The corpus is 24 MB and gitignored, so this runs only where `pnpm build:data`
-// has been run — it is a transcription check, not a gate on CI.
-
-const CORPUS_DIR = join(__dirname, '../../public/data/morphhb');
-const hasCorpus = existsSync(join(CORPUS_DIR, 'GEN.json'));
+// The textbook is the authority, but three of the four model verbs are common
+// in the Hebrew Bible, so most of their forms can be looked up there. See
+// `src/test/corpus.ts` for why, and for when this runs.
 
 /**
  * Regular forms the Hebrew Bible happens never to use, or uses only in pause or
@@ -210,48 +204,27 @@ const UNATTESTED: Record<string, Pgn[]> = {
   'qal-wayyiqtol-iii-he': ['3fp', '2mp', '2fp'],
 };
 
-/**
- * The form as it reads after a word ending in a vowel, where a begadkephat
- * first radical loses its dagesh lene: the paradigm's בָּנִיתָ is the text's
- * לֹא־בָנִיתָ. Only the first dagesh can be a dagesh lene at the head of a word.
- */
-function spirantized(form: string): string {
-  return answerForm(form).replace(/^([\u05D0-\u05EA][\u05B0-\u05BB]*)\u05BC/, '$1');
-}
-
-function corpusForms(): Set<string> {
-  const seen = new Set<string>();
-  for (const file of readdirSync(CORPUS_DIR)) {
-    if (file === 'books.json' || file === 'lemmas.json') continue;
-    const book = JSON.parse(readFileSync(join(CORPUS_DIR, file), 'utf8')) as HebrewBook;
-    for (const chapter of Object.values(book)) {
-      for (const verse of Object.values(chapter)) {
-        for (const word of verse) {
-          const text = stripCantillation(word.text).normalize('NFC');
-          seen.add(text.replaceAll('/', ''));
-          for (const morpheme of text.split('/')) seen.add(morpheme);
-        }
-      }
-    }
-  }
-  return seen;
-}
-
 describe.skipIf(!hasCorpus)('against the Westminster Leningrad Codex', () => {
   it('attests every form of the three biblical model verbs, bar the listed gaps', () => {
-    const corpus = corpusForms();
-
     const missing: Record<string, string[]> = {};
 
     for (const p of verbParadigms) {
       // קטל is a grammarian's model verb; Scripture barely uses it.
       if (p.root === 'קטל') continue;
       const gaps = Object.entries(p.forms)
-        .filter(([, form]) => !corpus.has(answerForm(form)) && !corpus.has(spirantized(form)))
+        .filter(([, form]) => !isAttested(form))
         .map(([pgn]) => pgn);
       if (gaps.length > 0) missing[p.id] = gaps;
     }
 
     expect(missing).toEqual(UNATTESTED);
+  });
+});
+
+describe('pgnLabel', () => {
+  it('spells out person, gender and number', () => {
+    expect(pgnLabel('3ms')).toBe('3rd masculine singular');
+    expect(pgnLabel('2fp')).toBe('2nd feminine plural');
+    expect(pgnLabel('1cs')).toBe('1st common singular');
   });
 });

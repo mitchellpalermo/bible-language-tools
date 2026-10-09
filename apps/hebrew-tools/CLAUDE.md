@@ -91,6 +91,32 @@ Branches are at 80% (not 90%) — reserved for defensive null-coalescing paths i
 - Test behavior, not implementation — avoid testing internal state directly
 - Mock `localStorage` is pre-configured in `src/test/setup.ts`
 
+### The corpus gate
+
+Hand-entered Hebrew is checked against the Westminster Leningrad Codex, and in
+CI that check is a gate: `hebrew-tools.yml` runs `build:data` before `test:run`.
+
+| File | Role |
+|---|---|
+| `src/test/corpus.ts` | `hasCorpus`, `corpusForms()`, `isAttested()` — the one implementation |
+| `src/test/corpus.test.ts` | Fails when `CI` is set and the corpus is missing |
+| `src/data/verb-paradigms.test.ts` | Checks כתב, בנה and היה; gaps listed in `UNATTESTED` |
+| `src/data/grammar-nominal.test.ts` | Checks every noun form, example and Hebrew word in a note |
+
+- **Locally it skips until you build the data.** `pnpm build:data` once (24 MB,
+  gitignored), and the checks run from then on. Do this before editing a form.
+- **`isAttested` is deliberately a little forgiving**: it ignores the stress
+  mark, accepts a missing leading dagesh lene (the text's לֹא־בָנִיתָ for the
+  table's בָּנִיתָ), and treats a maqqef phrase as attested when each word is.
+- **`UNATTESTED` is a named list, not an escape hatch.** A regular form Scripture
+  happens not to use belongs there; a new entry is otherwise what a typo looks
+  like. Prefer swapping in an example the text does use.
+- **Upstream drift can fail an unrelated pull request**, because `morphhb`
+  tracks `master`. Fix the form or the list; do not remove the workflow step.
+
+New hand-entered Hebrew — a paradigm, a table, an example — should get the same
+check: collect the forms, call `isAttested`, list the gaps by name.
+
 ### Writing new tests
 
 Target 90% coverage on all new code. For new features, use the Kent Dodds Testing Trophy as a guide: favor integration tests over unit tests where possible.
@@ -510,7 +536,7 @@ Things to know before changing it:
 
 ### Verb paradigms and the paradigm quiz (issue #80)
 
-The model layer is built; the `/paradigms` page is not yet.
+The model layer is built; the `/paradigms` page is not yet. The Grammar Reference already renders the same forms — see below.
 
 | File | Role |
 |---|---|
@@ -525,8 +551,8 @@ Things that will bite if changed carelessly:
   as the vocabulary: a quiz is marked against the page. The forms cannot come
   from OSHB anyway — קטל is barely attested — and a paradigm cell is the regular
   form whether or not Scripture uses it. `verb-paradigms.test.ts` looks each form
-  of כתב, בנה and היה up in the corpus when `public/data/morphhb/` exists (it is
-  skipped in CI, where it does not), and the forms the Bible never uses are
+  of כתב, בנה and היה up in the corpus when `public/data/morphhb/` exists (CI
+  builds it before the tests; a fresh local checkout skips), and the forms the Bible never uses are
   listed by name in `UNATTESTED`. **A new unattested form is what a typo looks
   like** — check the page before adding to that list.
 - **A cell is identified by `<paradigm>:<pgn>`, never by row and column.** The
@@ -553,6 +579,73 @@ Things that will bite if changed carelessly:
   letter is stored as כ and shown as ך so the next letter can still attach.
   Comparing a raw value to an answer fails on every word ending in ך ם ן ף ץ —
   `gradeCell` finalizes first.
+
+### Grammar Reference (issue #79)
+
+`/grammar` is being built a section at a time — see `ROADMAP.md` Phase 6 for the
+6a–6g breakdown. Alphabet, Vowels, Nouns, The Article, Prepositions and Qal Verb
+are live.
+
+| File | Role |
+|---|---|
+| `src/data/grammar.ts` | Alphabet and vowel-chart data: sounds, letter groups, dagesh, vowel classes, sheva rules |
+| `src/data/grammar-nominal.ts` | Nouns (endings, pattern groups, dual), article rules, preposition rules and lists |
+| `src/test/corpus.ts` | Test helper: looks a hand-entered form up in the WLC. Shared with `verb-paradigms.test.ts` |
+| `src/components/GrammarReference.tsx` | The page. `NAV_SECTIONS` drives both the sidebar and the pill row |
+| `src/data/verb-paradigms.ts` | The verb tables' source — shared with the paradigm quiz, not copied |
+
+Things that will bite if changed carelessly:
+
+- **Letter and vowel names are the script pack's, not `grammar.ts`'s.** The
+  reference layers facts onto `hebrewScriptPack` by `char` (letters) and `name`
+  (vowels), and throws at import time if the pack has a glyph with no facts.
+  Add a letter or a point to the pack and `grammar.test.ts` fails by name — that
+  is the intent, not a nuisance. Final forms likewise come from
+  `FINAL_FORM_MAP` in `hebrew-input.ts`.
+- **The table has 23 rows for a 22-letter alphabet.** Shin and sin each get a
+  row because a bare ש is neither. Use `ALPHABET_LETTER_COUNT` for the number a
+  student is taught, never `letters.length`.
+- **Three vowels exist in the chart and not in the pack** — qamets hatuf, tsere
+  yod, hireq yod (`CHART_ONLY_VOWELS`). The pack omits them on purpose: there is
+  nothing distinct to practise writing. Do not "fix" the gap by adding them to
+  the pack, which would add three handwriting cards.
+- **The hatephs are shown on א, everything else on the pack's פ.** A hateph
+  under פ is a syllable Hebrew does not have.
+- **Hebrew inside an English note goes through `<Prose>`.** The notes are plain
+  strings; a raw Hebrew run in an English sentence is ordered by the bidi
+  algorithm against its neighbouring punctuation ("III-ה" rendered as
+  "ה-III") and set in the UI font. `Prose` splits the runs out into `<Hebrew>`
+  spans. Anything that renders a label which *might* contain Hebrew —
+  `VERB_CLASS_LABELS` does — needs it too.
+- **The reference shows a form as stored; the quiz grades `answerForm()`.** Do
+  not route the verb tables through `buildVerbTable` to save code: those
+  answers have the stress mark stripped.
+- **Only the verb forms are transcribed from Garrett & DeRouchie.** They are an
+  answer key, so they match the page. Nothing else on `/grammar` is quizzed and
+  nothing else is copied: the alphabet, vowel, noun, article and preposition
+  content is general first-year grammar in this app's own wording, on the
+  conventional model words (סוּס, דָּבָר, מֶלֶךְ). Do not paste the textbook's
+  tables in to "align" them — Mitch asked for that not to happen. Where the
+  course's wording of a rule differs, adjust the prose.
+- **The corpus is therefore the main guard on the pointing, not a backstop.**
+  `grammar-nominal.test.ts` gathers every Hebrew word in the file — table cells,
+  examples, and words inside the prose notes — and `isAttested` looks each up in
+  the WLC (a maqqef phrase is attested when each word is; a leading dagesh lene
+  may be absent). The forms Scripture never uses are named in `UNATTESTED`.
+  **A new unattested form is what a typo looks like**: the first draft's
+  construct of נָבִיא and plural construct of סֵפֶר both failed, and the fix was
+  to choose model nouns (זָקֵן, שֵׁבֶט) whose every cell occurs, not to grow the
+  list.
+- **Stress is marked on segolates and duals only**, where penultimate stress is
+  what defines the pattern. A noun's `lemma` is always unaccented.
+- **A bare ending is drawn on a dotted circle** (`affixText`, U+25CC) when it
+  begins with a vowel point; a point with nothing under it is a stray tick.
+- **`Hebrew` takes its colour from the `text-hebrew` class, not an inline
+  style**, so a card title can override it. מִן in a green header was invisible
+  — green on green — until it could.
+- **Table headers abbreviate below `sm` through `HeaderWord`**, which hides the
+  abbreviation from assistive tech and keeps the full word for it. Four Hebrew
+  columns do not fit a phone under "SINGULAR / construct".
 
 ### Unicode blocks
 

@@ -33,6 +33,10 @@ jobs:
       - run: pnpm --filter @tools/shared typecheck
       - run: pnpm --filter @tools/db test:run
       - run: pnpm --filter @tools/db typecheck
+      # The corpus is gitignored, and the data tests that check hand-entered
+      # Hebrew against it skip themselves when it is absent. Building it here is
+      # what makes them a gate; src/test/corpus.test.ts fails if it is missing.
+      - run: pnpm --filter hebrew-tools build:data
       - run: pnpm --filter hebrew-tools test:run
       - run: pnpm --filter hebrew-tools typecheck
 

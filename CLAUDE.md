@@ -237,6 +237,36 @@ Both workflows run `pnpm lint` before the tests. It is the same command in both
 because the lint gate is repo-wide, not per app — running it twice is cheap and
 it means the gate fires whichever workflow a change happens to trigger.
 
+### The Hebrew corpus gate
+
+`hebrew-tools.yml` runs `pnpm --filter hebrew-tools build:data` before the
+tests. That step exists for the tests, not for the build: it fetches the
+Westminster Leningrad Codex so the data tests can look every hand-entered Hebrew
+form up in the text — the verb paradigms, and the noun, article and preposition
+forms on `/grammar`. A form that is off by one vowel does not occur, and the
+pull request fails.
+
+Things to know before changing it:
+
+- **Without the step the checks skip; they do not fail.** The corpus is
+  gitignored, and each check is wrapped in `describe.skipIf(!hasCorpus)` so a
+  fresh local checkout can still run the suite. `apps/hebrew-tools/src/test/
+  corpus.test.ts` is the counterweight: it fails whenever `CI` is set and the
+  corpus is absent, so removing the step breaks the build instead of silently
+  switching the gate off.
+- **The corpus tracks `morphhb` master**, so an upstream correction to a word
+  can fail a pull request that touched nothing related. Fix it at the form —
+  list it in that test file's `UNATTESTED`, or choose an example the text does
+  use — rather than dropping the step.
+- **There is no cache, on purpose.** A cold fetch takes a couple of seconds, and
+  a cache would only delay the moment upstream drift shows up.
+- **greek-tools has no equivalent.** Nothing compares `grammar.ts` to MorphGNT,
+  in CI or locally; its workflow builds the corpus only in the deploy job.
+
+To run the gate locally: `pnpm --filter hebrew-tools build:data`, then the tests.
+Details of what is checked and why are in `apps/hebrew-tools/CLAUDE.md` under
+"The corpus gate".
+
 ## Linting
 
 One Biome config governs the whole monorepo. `biome.json` at the root is the
