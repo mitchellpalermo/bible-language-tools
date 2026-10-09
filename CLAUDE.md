@@ -52,7 +52,8 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 |--------|-------------|
 | `@tools/shared/srs` | SM-2 spaced repetition algorithm, types, and pure stats functions |
 | `@tools/shared/sync-merge` | Merge rules for cross-device sync of SRS cards and study stats |
-| `@tools/shared/quiz-settings` | `createQuizSettings(storageKey)` factory for persisting quiz difficulty |
+| `@tools/shared/quiz-settings` | `createQuizSettings(storageKey, overrides?)` factory for persisting quiz difficulty; `overrides` sets one app's defaults |
+| `@tools/shared/paradigm-quiz` | The paradigm quiz engine — `TableModel`, `getQuizCells`, `applyDensity`. Which tables exist and how an answer is graded stay in each app |
 | `@tools/shared/flashcard-settings` | `createFlashcardSettings(storageKey)` factory for what the flashcard face shows before you answer |
 | `@tools/shared/nav` | `NavLink` type and the active-route predicates the nav renders with |
 | `@tools/shared/nav-menu` | `initNavMenu()` — DOM controller for the mobile drawer |

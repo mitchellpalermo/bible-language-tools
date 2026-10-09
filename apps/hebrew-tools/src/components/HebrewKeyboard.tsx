@@ -1,135 +1,15 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  applyFinalForms,
-  CONSONANT_MAP,
-  HATEPH_MAP,
-  processHebrewInput,
-  processHebrewKey,
-  SHEVA,
-  translateHebrewInput,
-} from '../lib/hebrew-input';
+import { useState } from 'react';
+import { CONSONANT_MAP } from '../lib/hebrew-input';
+import { useHebrewInput } from '../lib/use-hebrew-input';
 import ErrorBoundary from './ErrorBoundary';
 
 function HebrewKeyboardInner() {
   const [text, setText] = useState('');
   const [copied, setCopied] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  // Set when keyDown has already handled the key — prevents beforeinput from
-  // double-inserting on iOS Safari, which fires both events after keydown.
-  const keyHandledRef = useRef(false);
-
-  // Tracks the display value we last built via beforeinput/keydown, so the
-  // onChange handler can detect and skip IME echo-backs (Android double-word bug).
-  const lastHandledRef = useRef('');
-
-  // Set after the user types ':' (sheva). The next key a/e/A upgrades the sheva
-  // to a hateph vowel by replacing the last character of raw state.
-  const pendingHatephRef = useRef(false);
-
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    keyHandledRef.current = false;
-
-    if (e.ctrlKey || e.metaKey) return;
-
-    // Hateph sequence continuation: user typed ':' then immediately types a/e/A
-    if (pendingHatephRef.current) {
-      const hateph = HATEPH_MAP[e.key];
-      if (hateph !== undefined) {
-        e.preventDefault();
-        setText((prev) => {
-          // Replace the last code point (which is a SHEVA) with the hateph mark
-          const pts = [...prev];
-          const next = pts.slice(0, -1).join('') + hateph;
-          lastHandledRef.current = applyFinalForms(next);
-          return next;
-        });
-        pendingHatephRef.current = false;
-        keyHandledRef.current = true;
-        return;
-      }
-      // Not a hateph key — let the sheva stand, fall through to normal processing
-      pendingHatephRef.current = false;
-    }
-
-    const { preventDefault, append } = processHebrewKey(e.key, false);
-    if (preventDefault) {
-      e.preventDefault();
-      if (append) {
-        setText((prev) => {
-          const next = prev + append;
-          lastHandledRef.current = applyFinalForms(next);
-          return next;
-        });
-        if (append === SHEVA) pendingHatephRef.current = true;
-      }
-      keyHandledRef.current = true;
-    }
-  }, []);
-
-  // Android soft keyboards fire keydown with key='Unidentified'. The native
-  // beforeinput event carries the actual character in InputEvent.data on all
-  // platforms. We use a native listener (not React's synthetic onBeforeInput)
-  // so it fires correctly on Android.
-  useEffect(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-
-    const handler = (e: Event) => {
-      if (keyHandledRef.current) {
-        keyHandledRef.current = false;
-        return;
-      }
-      const ie = e as unknown as InputEvent;
-      if (ie.inputType !== 'insertText' || !ie.data) return;
-
-      // Multi-char data = Android IME word commit (e.g. "shalom" → "שׁלום")
-      if (ie.data.length > 1) {
-        e.preventDefault();
-        setText((prev) => {
-          const next = prev + translateHebrewInput(ie.data!);
-          lastHandledRef.current = applyFinalForms(next);
-          return next;
-        });
-        return;
-      }
-
-      // Hateph continuation via beforeinput path
-      if (pendingHatephRef.current) {
-        const hateph = HATEPH_MAP[ie.data];
-        if (hateph !== undefined) {
-          e.preventDefault();
-          setText((prev) => {
-            const pts = [...prev];
-            const next = pts.slice(0, -1).join('') + hateph;
-            lastHandledRef.current = applyFinalForms(next);
-            return next;
-          });
-          pendingHatephRef.current = false;
-          return;
-        }
-        pendingHatephRef.current = false;
-      }
-
-      const { preventDefault: pd, append } = processHebrewInput(ie.data);
-      if (pd) {
-        e.preventDefault();
-        if (append) {
-          setText((prev) => {
-            const next = prev + append;
-            lastHandledRef.current = applyFinalForms(next);
-            return next;
-          });
-          if (append === SHEVA) pendingHatephRef.current = true;
-        }
-      }
-    };
-
-    el.addEventListener('beforeinput', handler);
-    return () => el.removeEventListener('beforeinput', handler);
-  }, []);
-
-  const displayText = applyFinalForms(text);
+  // The typing behaviour itself — key mapping, hateph sequences, the Android
+  // and iOS input paths — lives in the hook, which the paradigm quiz shares.
+  const input = useHebrewInput<HTMLTextAreaElement>({ value: text, onChange: setText });
+  const displayText = input.display;
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(displayText);
@@ -138,25 +18,18 @@ function HebrewKeyboardInner() {
   };
 
   const handleClear = () => {
-    setText('');
-    pendingHatephRef.current = false;
-    lastHandledRef.current = '';
-    textareaRef.current?.focus();
+    input.clear();
+    input.ref.current?.focus();
   };
 
   return (
     <div className="space-y-4">
       <textarea
-        ref={textareaRef}
+        ref={input.ref}
         value={displayText}
         dir="rtl"
-        onKeyDown={handleKeyDown}
-        onChange={(e) => {
-          // Skip if this is the browser echoing a value we already built via
-          // beforeinput/keydown — prevents the Android IME double-word bug.
-          if (e.target.value === lastHandledRef.current) return;
-          setText(translateHebrewInput(e.target.value));
-        }}
+        onKeyDown={input.onKeyDown}
+        onChange={input.onChange}
         placeholder="...הקלד עברית"
         className="w-full h-48 p-4 text-2xl rounded-xl border-2 focus:outline-none resize-y bg-bg-card shadow-sm"
         style={{

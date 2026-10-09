@@ -508,6 +508,52 @@ Things to know before changing it:
   `scripts/data/garrett-handout.json` and adding the printed form to its
   `corrections` list, so the divergence from the page stays on the record.
 
+### Verb paradigms and the paradigm quiz (issue #80)
+
+The model layer is built; the `/paradigms` page is not yet.
+
+| File | Role |
+|---|---|
+| `src/data/verb-paradigms.ts` | The answer key — forms transcribed from Garrett & DeRouchie's tables, keyed by person-gender-number (PGN) |
+| `src/lib/paradigm-quiz.ts` | Table builders, cell ids, `gradeCell`. Blanking comes from `@tools/shared/paradigm-quiz` |
+| `src/lib/use-hebrew-input.ts` | The typing behaviour as a hook — shared by `/keyboard` and every quiz cell |
+| `src/lib/quiz-settings.ts` | Binding of the shared settings; default density is `hard` |
+
+Things that will bite if changed carelessly:
+
+- **The textbook is the authority, and the corpus only a witness.** Same split
+  as the vocabulary: a quiz is marked against the page. The forms cannot come
+  from OSHB anyway — קטל is barely attested — and a paradigm cell is the regular
+  form whether or not Scripture uses it. `verb-paradigms.test.ts` looks each form
+  of כתב, בנה and היה up in the corpus when `public/data/morphhb/` exists (it is
+  skipped in CI, where it does not), and the forms the Bible never uses are
+  listed by name in `UNATTESTED`. **A new unattested form is what a typo looks
+  like** — check the page before adding to that list.
+- **A cell is identified by `<paradigm>:<pgn>`, never by row and column.** The
+  textbook prints one paradigm two ways: one verb as person × number, and verb
+  classes side by side as PGN × class. `buildVerbTable` and `buildSummaryTable`
+  produce both from the same forms, and the id is what lets progress on a form
+  follow it between them. SRS keys for paradigm cells must be built from
+  `cellId()`.
+- **Forms are stored with the textbook's stress mark; grade against
+  `answerForm()`.** This is the opposite of the vocabulary, which stores no
+  accents, and deliberately so — the mark is worth showing in a reference table.
+  Nobody types it, so `TableModel` answers are already stripped.
+- **A dropped dagesh is `dagesh-only`, not `nikud-only`.** The begadkephat
+  column of a summary table differs from the strong column in nothing else.
+  **The dot of a shureq is the same codepoint and is not a dagesh**:
+  `checkHebrewAnswer` tells them apart by NFC order — the dot sits directly
+  against a vav only when that vav has no vowel of its own.
+- **`useHebrewInput` takes input by two routes and both are first-class.** A
+  hardware keyboard goes through the phonetic key mapping. `insert()` and
+  `backspace()` are for an on-screen Hebrew keypad, which is how the quiz is
+  typed on an iPad: the system keyboard puts `:` and `.` on a second layer and
+  qamets behind shift, so the mapping costs a dozen layer switches per form.
+- **The hook's value is raw; `display` has the final forms.** A word's last
+  letter is stored as כ and shown as ך so the next letter can still attach.
+  Comparing a raw value to an answer fails on every word ending in ך ם ן ף ץ —
+  `gradeCell` finalizes first.
+
 ### Unicode blocks
 
 | Block | Range | Contents |

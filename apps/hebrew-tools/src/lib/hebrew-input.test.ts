@@ -341,6 +341,39 @@ describe('checkHebrewAnswer', () => {
     expect(checkHebrewAnswer('בית', 'מלך')).toBe('wrong');
   });
 
+  it('returns dagesh-only when a dagesh is the only thing missing', () => {
+    // The begadkephat column of a paradigm table: כָּתַב without its dagesh lene.
+    expect(checkHebrewAnswer('כָתַב', 'כָּתַב')).toBe('dagesh-only');
+  });
+
+  it('returns dagesh-only when a dagesh is the only thing extra', () => {
+    expect(checkHebrewAnswer('קָטַּל', 'קָטַל')).toBe('dagesh-only');
+  });
+
+  it('does not treat the dot of a shureq as a dagesh', () => {
+    // קָטְלו for קָטְלוּ is a missing vowel, not a missing dagesh.
+    expect(checkHebrewAnswer('קָטְלו', 'קָטְלוּ')).toBe('nikud-only');
+  });
+
+  it('still sees a dagesh missing elsewhere in a word that has a shureq', () => {
+    expect(checkHebrewAnswer('כָתְבוּ', 'כָּתְבוּ')).toBe('dagesh-only');
+  });
+
+  it('grades a wrong vowel as nikud-only even when the dagesh is also wrong', () => {
+    expect(checkHebrewAnswer('כַתַב', 'כָּתַב')).toBe('nikud-only');
+  });
+
+  it('compares a dagesh typed before its vowel as equal to one typed after', () => {
+    // Tav, dagesh, hireq — the order a student types it in — against the NFC
+    // order the answer key is stored in. Written as escapes because the two
+    // strings are indistinguishable on screen.
+    const typed = 'תִּ';
+    const stored = 'תִּ';
+
+    expect(typed).not.toBe(stored);
+    expect(checkHebrewAnswer(typed, stored)).toBe('correct');
+  });
+
   it('handles empty inputs', () => {
     expect(checkHebrewAnswer('', '')).toBe('correct');
     expect(checkHebrewAnswer('', 'מלך')).toBe('wrong');

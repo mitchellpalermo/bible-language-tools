@@ -18,19 +18,26 @@ function isValidDensity(d: unknown): d is Density {
   return d === 'easy' || d === 'medium' || d === 'hard';
 }
 
-export function createQuizSettings(storageKey: string) {
+/**
+ * `overrides` replaces the defaults for one app. hebrew-tools starts on `hard`:
+ * its paradigm quiz exists to rehearse writing out a whole table, and a default
+ * that hands back half the answers is a different exercise.
+ */
+export function createQuizSettings(storageKey: string, overrides: Partial<QuizSettings> = {}) {
+  const defaults: QuizSettings = { ...DEFAULTS, ...overrides };
+
   function loadQuizSettings(): QuizSettings {
     try {
       const raw = localStorage.getItem(storageKey);
-      if (!raw) return { ...DEFAULTS };
+      if (!raw) return { ...defaults };
       const parsed = JSON.parse(raw) as Partial<QuizSettings>;
       return {
         accentStrict:
-          typeof parsed.accentStrict === 'boolean' ? parsed.accentStrict : DEFAULTS.accentStrict,
-        density: isValidDensity(parsed.density) ? parsed.density : DEFAULTS.density,
+          typeof parsed.accentStrict === 'boolean' ? parsed.accentStrict : defaults.accentStrict,
+        density: isValidDensity(parsed.density) ? parsed.density : defaults.density,
       };
     } catch {
-      return { ...DEFAULTS };
+      return { ...defaults };
     }
   }
 
