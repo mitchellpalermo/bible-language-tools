@@ -181,6 +181,7 @@ function headSegmentIndex(codes) {
 export function buildFormIndex(books) {
   const forms = new Map();
   const pairs = new Map();
+  const verbs = new Map();
 
   const add = (index, text, lemma) => {
     const key = normalizeHeadword(text);
@@ -210,6 +211,13 @@ export function buildFormIndex(books) {
           if (segments.length > 1 && segments.length === codes.length) {
             add(forms, segments[headSegmentIndex(codes)], word.lemma);
           }
+          // The stem letters mean something else in Aramaic, and no handout
+          // verb is Aramaic, so Daniel and Ezra are not witnesses here.
+          if (word.parsing.startsWith('H') && segments.length === codes.length) {
+            const head = headSegmentIndex(codes);
+            addVerb(verbs, segments.join(''), word.lemma, codes[head], false);
+            if (segments.length > 1) addVerb(verbs, segments[head], word.lemma, codes[head], true);
+          }
 
           const next = verse[i + 1];
           if (word.after?.includes('־') && next && !next.ketiv) {
@@ -220,7 +228,102 @@ export function buildFormIndex(books) {
     }
   }
 
-  return { forms, pairs };
+  return { forms, pairs, verbs };
+}
+
+// ─── The corpus as a witness to a verb's parse ───────────────────────────────
+
+/** OSHB's Hebrew stem letter → the name the handout uses for that binyan. */
+const STEM_NAMES = {
+  q: 'Qal',
+  N: 'Niphal',
+  p: 'Piel',
+  P: 'Pual',
+  h: 'Hiphil',
+  H: 'Hophal',
+  t: 'Hithpael',
+  o: 'Polel',
+};
+
+/**
+ * OSHB's conjugation letter → the app's `VerbConjugation`.
+ *
+ * The jussive and the cohortative are readings of the prefix conjugation, not
+ * forms of their own in most verbs: יִפֹּל is coded `i` twenty-two times and `j`
+ * three, and it is one form. Both therefore witness a yiqtol.
+ */
+const CONJUGATION_NAMES = {
+  p: 'qatal',
+  q: 'weqatal',
+  i: 'yiqtol',
+  j: 'yiqtol',
+  h: 'yiqtol',
+  w: 'wayyiqtol',
+  v: 'imperative',
+  r: 'participle',
+  s: 'passive participle',
+  c: 'infinitive construct',
+  a: 'infinitive absolute',
+};
+
+/** What a sequential form is once its conjunction has been cut off. */
+const WITHOUT_CONJUNCTION = { q: 'p', w: 'i' };
+
+/**
+ * Record one occurrence of a verb form: which stems and conjugations the corpus
+ * parses it as, per lemma.
+ *
+ * `stripped` marks a head morpheme indexed on its own, without the prefixes the
+ * corpus wrote it with. That matters for exactly two codes. וְאָמַר is a weqatal,
+ * but the אָמַר inside it is spelled like — and on a card, simply is — a qatal,
+ * and without the collapse every common citation form would be attested as
+ * both.
+ */
+function addVerb(verbs, text, lemma, code, stripped) {
+  if (!code?.startsWith('V') || !lemma) return;
+  const letter = stripped ? (WITHOUT_CONJUNCTION[code[2]] ?? code[2]) : code[2];
+  const stem = STEM_NAMES[code[1]];
+  const conjugation = CONJUGATION_NAMES[letter];
+  if (!stem || !conjugation) return;
+
+  const key = normalizeHeadword(text);
+  const base = baseStrong(lemma);
+  if (!verbs.has(key)) verbs.set(key, new Map());
+  const byLemma = verbs.get(key);
+  if (!byLemma.has(base)) byLemma.set(base, { stems: new Set(), conjugations: new Set() });
+  byLemma.get(base).stems.add(stem);
+  byLemma.get(base).conjugations.add(conjugation);
+}
+
+/**
+ * Check a handout verb's `binyan` and `conjugation` against the corpus.
+ *
+ * Same division of labour as everywhere else in this file: the handout is the
+ * authority and the corpus is a witness. Both fields are hand-entered, and a
+ * wrong one is undetectable on a card — "Qal yiqtol" under יַצְלִיחַ looks exactly
+ * like a correct parse, and was in the data until this check existed.
+ *
+ * Silence is not disagreement. A form the corpus never uses under this lemma —
+ * קָטַל, or any entry that did not resolve — has no witness and passes. What
+ * fails is a form the corpus *does* attest and never once parses the way the
+ * handout claims. Returns the disagreements as strings; an empty list is a pass.
+ */
+export function witnessVerb(entry, resolution, verbs) {
+  if (!resolution.strong) return [];
+  const witness = verbs.get(resolution.key)?.get(baseStrong(resolution.strong));
+  if (!witness) return [];
+
+  const disagreements = [];
+  const check = (field, attested) => {
+    if (entry[field] && !attested.has(entry[field])) {
+      disagreements.push(
+        `${field} "${entry[field]}", where the corpus only has ${[...attested].sort().join(', ')}`,
+      );
+    }
+  };
+  check('binyan', witness.stems);
+  check('conjugation', witness.conjugations);
+  return disagreements;
 }
 
 // ─── Resolution ──────────────────────────────────────────────────────────────
@@ -358,6 +461,34 @@ function isFormCard(entry) {
 }
 
 /**
+ * A stem's gloss as the card prints it: the literal translation of the form
+ * where the handout carries one, the textbook's wording where it does not.
+ */
+const stemGloss = (stem) => stem.literal ?? stem.gloss;
+
+/**
+ * The gloss a card shows.
+ *
+ * The textbook glosses a verb's citation form with a bare English verb —
+ * כָּתַב "write" — which reads as an infinitive under a form that is a qatal
+ * 3ms. The handout therefore carries a second wording, `literal`, translating
+ * the form actually shown ("he wrote"), and that is what ships. `gloss` stays in
+ * the handout untouched as the record of the printed page.
+ *
+ * An entry listed across several stems has no `literal` of its own: the printed
+ * gloss is its stems joined ("Qal: …; Hiphil: …"), so the literal one is the
+ * same join over the literal stem glosses, and cannot drift from the list the
+ * card prints beneath it.
+ */
+export function cardGloss(entry) {
+  if (entry.literal) return entry.literal;
+  if (entry.stems?.some((stem) => stem.literal)) {
+    return entry.stems.map((stem) => `${stem.stem}: ${stemGloss(stem)}`).join('; ');
+  }
+  return entry.gloss;
+}
+
+/**
  * Fold one resolution into its handout entry, producing a `HebrewVocabWord`.
  *
  * The handout wins on everything English and everything editorial: the gloss, the
@@ -374,7 +505,7 @@ export function mergeEntry(entry, resolution) {
   if (entry.sense) word.sense = entry.sense;
   if (resolved && resolution.root) word.root = resolution.root;
   if (resolved) word.strong = resolution.strong;
-  word.gloss = entry.gloss;
+  word.gloss = cardGloss(entry);
   if (resolved && !isFormCard(entry) && resolution.frequency !== undefined) {
     word.frequency = resolution.frequency;
   }
@@ -388,10 +519,17 @@ export function mergeEntry(entry, resolution) {
   const gender = entry.gender ?? corpusGender;
   if (gender) word.gender = gender;
   if (entry.binyan) word.binyan = entry.binyan;
+  if (entry.conjugation) word.conjugation = entry.conjugation;
   if (entry.construct) word.construct = entry.construct;
   if (entry.plural) word.plural = entry.plural;
   if (entry.alternates) word.alternates = entry.alternates;
-  if (entry.stems) word.stems = entry.stems;
+  if (entry.stems) {
+    // `literal` is folded into `gloss` here; the card has one wording per stem.
+    word.stems = entry.stems.map(({ literal, ...stem }) => ({
+      ...stem,
+      gloss: literal ?? stem.gloss,
+    }));
+  }
   if (entry.note) word.note = entry.note;
   word.chapters = entry.chapters;
 
@@ -433,6 +571,7 @@ function literal(word) {
   push('partOfSpeech', quote(word.partOfSpeech));
   push('gender', word.gender && quote(word.gender));
   push('binyan', word.binyan && quote(word.binyan));
+  push('conjugation', word.conjugation && quote(word.conjugation));
   push('construct', word.construct && quote(word.construct));
   push('plural', word.plural && quote(word.plural));
   push('alternates', word.alternates && `[${word.alternates.map(quote).join(', ')}]`);
@@ -562,6 +701,19 @@ const HEADER = `// Garrett & DeRouchie chapter vocabulary — GENERATED, do not 
 // lexicon spells two personal names, so both are pinned to the noun.
 // Table 12.4 adds the constructs of seven of the chapter 5 plurals — אַנְשֵׁי,
 // בְּנֵי and so on — entered the same way, each naming its absolute plural.
+//
+// Every verb carries a \`conjugation\` naming the form its card shows — qatal for
+// a citation form, which in Hebrew is the Qal qatal 3ms and not an infinitive,
+// and yiqtol, wayyiqtol or a participle where a chapter lists an inflected form.
+// It is entered by hand in the handout, alongside \`binyan\`, and the build
+// checks both against how the corpus parses that spelling. The one verb listed
+// by bare root (ירד) has no form to name and carries none.
+//
+// A citation form's gloss is a literal translation of that form — כָּתַב is "he
+// wrote" — and not the textbook's bare "write", which reads as an infinitive
+// under a qatal 3ms. The printed wording is kept, entry by entry, as \`gloss\` in
+// the handout JSON beside the \`literal\` that ships here. Forms the textbook
+// already translates as conjugated ("(he) will choose") are as printed.
 //
 // \`transliteration\` is still absent: OSHB carries no romanization, and inventing
 // ~500 SBL forms by hand would bake in errors the data tests cannot catch.

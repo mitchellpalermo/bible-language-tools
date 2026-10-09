@@ -30,7 +30,13 @@ import {
   VOCAB_CATEGORIES,
   wordsInChapters,
 } from '../data/textbooks';
-import { cardKey, type HebrewGender, type HebrewVocabWord, vocabulary } from '../data/vocabulary';
+import {
+  cardKey,
+  type HebrewGender,
+  type HebrewVocabWord,
+  verbParse,
+  vocabulary,
+} from '../data/vocabulary';
 import { hasAuthHint } from '../lib/auth-cookie';
 import { type DeckSelection, loadSelection, saveSelection } from '../lib/deck-selection';
 import { loadFlashcardSettings, saveFlashcardSettings } from '../lib/flashcard-settings';
@@ -419,6 +425,8 @@ function FlashcardsInner() {
 
   // ─── Main render ─────────────────────────────────────────────────────────────
 
+  const parse = verbParse(card);
+
   return (
     <div className="space-y-4">
       {/* ── Deck selector ─────────────────────────────────────────────────── */}
@@ -693,13 +701,19 @@ function FlashcardsInner() {
               </p>
             )}
 
-            {(card.gender || card.root) && (
+            {/* A verb's parse belongs with the answer, not on the front: naming
+                the conjugation of the form you are looking at is half of what
+                the card asks. It matters most on a citation form, where the
+                gloss is a bare English verb ("write") under a Hebrew form that
+                is a qatal 3ms ("he wrote"). */}
+            {(card.gender || parse || card.root) && (
               <p
                 className="text-text-muted text-xs mt-1 uppercase tracking-wide font-medium"
                 dir="ltr"
               >
                 {card.gender && GENDER_LABELS[card.gender]}
-                {card.gender && card.root && ' · '}
+                {parse && <span data-testid="verb-parse">{parse}</span>}
+                {(card.gender || parse) && card.root && ' · '}
                 {card.root && (
                   <>
                     root{' '}

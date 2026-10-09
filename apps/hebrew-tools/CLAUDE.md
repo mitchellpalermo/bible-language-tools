@@ -463,7 +463,7 @@ The vocabulary is split across four modules, and the split is load-bearing:
 Rules that the data tests enforce:
 - No cantillation marks (U+0591–U+05AF) in `hebrew`, `construct`, `plural`, `alternates`, or stem forms — including the stress accent Garrett & DeRouchie print over the tonic syllable. Vocabulary entries are pointed but unaccented.
 - Holam male is written `vav + holam`, never the WLC's `holam + vav`. The handout mixes both; rendered as printed, the vowel lands on the wrong consonant.
-- Glosses on tagged words follow the wording of the textbook that assigns them, since that's what the quiz expects.
+- Glosses on tagged words follow the wording of the textbook that assigns them, since that's what the quiz expects. The one exception is a verb's citation form, glossed as the form it is — see "What form a verb card shows" below.
 - Chapter-tagged nouns carry a `gender` (`m` / `f` / `fm`) wherever the textbook prints one; verbs never do.
 - Every divergence from the printed page is listed, with its reason, in `CORRECTIONS` (respellings), `EDITORIAL_NOTES` (a stem printed in the wrong cell, a gloss left blank), `OSHB_RESPELLINGS` (a spelling taken from OSHB where the handout is not wrong, only less precise) or `OSHB_UNMATCHED` (a headword OSHB cannot place, and why). Silent divergence is the thing to avoid — a student comparing the app to the book must be able to find out why they differ.
 
@@ -474,7 +474,7 @@ inputs, and **which one owns which field is the whole design**:
 
 | Source | Owns |
 |---|---|
-| `scripts/data/garrett-handout.json` | chapter and section tags, gloss wording, `construct`, `plural`, `alternates`, `stems`, `note`, `sense`, `binyan` |
+| `scripts/data/garrett-handout.json` | chapter and section tags, gloss wording, `construct`, `plural`, `alternates`, `stems`, `note`, `sense`, `binyan`, `conjugation` |
 | OSHB (`public/data/morphhb/`) | `hebrew`, `root`, `strong`, `partOfSpeech`, `frequency`, and `gender` where the handout prints none |
 
 A retyped Word document is the worst available authority on pointed text and the
@@ -533,6 +533,67 @@ Things to know before changing it:
   the next regeneration; a new correction means editing
   `scripts/data/garrett-handout.json` and adding the printed form to its
   `corrections` list, so the divergence from the page stays on the record.
+
+#### What form a verb card shows, and what its gloss means
+
+Every verb card glosses **the form on its front**, not the lexeme behind it:
+
+| Entry | Front | Gloss | Example |
+|---|---|---|---|
+| Garrett citation form (Core, derived stems) | qatal 3ms | the handout's `literal` | כָּתַב "he wrote" |
+| Garrett inflected or reading form (mostly chs. 6–7) | the form as a passage writes it | as printed | יִבְחַר "(he) will choose" |
+| Hand-curated high-frequency verb (`vocabulary.ts`) | qatal 3ms | hand-written, and it wins the merge | אָמַר "he said" |
+
+**No headword is an infinitive.** A Hebrew verb's dictionary form is its Qal
+qatal 3ms — or the 3ms of the stem it is listed under, הִמְלִיךְ. The textbook
+glosses that form with a bare English verb ("write"), which is the lexeme's
+meaning and reads as an infinitive on a card. So the card says two things the
+page does not: `conjugation` names the form on the back, beside the binyan ("Qal
+qatal", through `verbParse()`), and the gloss translates it.
+
+**This is the one place a tagged word's gloss departs from the textbook's
+wording**, and it is deliberate (Mitch, Oct 2026). The printed wording is not
+lost: each handout entry keeps it as `gloss`, with the wording that ships beside
+it as `literal`, and `cardGloss()` in `scripts/lib/vocab-oshb.mjs` picks. Stems
+carry their own `literal`; an entry listed across stems has none at the top
+level, because its gloss is its stems joined ("Qal: …; Hiphil: …") and is
+composed from them. To add a verb, write both. Conventions the 137 existing ones
+follow:
+
+- "he …" for a qatal 3ms, with "it …" where a person makes no sense (נִבְנָה "it
+  was built"). A stem form that is not a 3ms takes its own person and keeps the
+  textbook's tag: "(qatal 1cs) I fed", "(yiqtol 3ms) he will boast".
+- A stative is "he was …": the textbook prints "be full", "be king". A data
+  test fails on any qatal whose gloss still opens with a bare "be".
+- The textbook's parentheticals and cross-references stay as printed.
+
+Things to know before changing it:
+
+- **The parse is on the back, never the front.** Naming the conjugation of the
+  form in front of you is half of what the card asks; same reasoning as the part
+  of speech, without the opt-in toggle.
+- **`conjugation` and `binyan` are hand-entered in the handout and checked
+  against the corpus** by `witnessVerb` in `scripts/lib/vocab-oshb.mjs`. The
+  build fails when the WLC attests the spelling under that lemma and never once
+  parses it the way the handout claims. Silence is not disagreement: an
+  unattested form (קָטַל) has no witness and passes. The check found יַצְלִיחַ
+  entered as a Qal the day it was written.
+- **A citation form is a qatal by convention, and three of them the corpus
+  spells only as something else** — בּוֹשׁ, הוֹשִׁיב, נֶאֱמַן. They are listed with
+  reasons under `parses` in `scripts/data/garrett-oshb.json`, and a listed parse
+  the corpus stops disputing fails the build as stale, same as `unmatched`.
+- **A sequential form stripped of its conjunction is witnessed as the plain
+  one.** וְאָמַר is a weqatal and the אָמַר inside it is a qatal on a card;
+  without that collapse every common citation form would be attested as both.
+  Jussives and cohortatives witness a yiqtol for the same kind of reason.
+- **No card is a weqatal today.** The type allows it; the handout lists none.
+- **ירד (ch. 27, derived stems) is listed by bare root and carries no
+  conjugation.** Its Hiphil form sits in the gloss text. That is a handout
+  extraction gap, not a design decision — fix it against the page.
+- **The curated verbs' glosses still win the merge**, so nineteen chapter cards
+  carry the hand-written wording ("he reigned, became king") rather than the
+  handout's literal one ("he was king, ruled"). Both are literal; they differ
+  in which senses they list.
 
 ### Verb paradigms and the paradigm quiz (issue #80)
 

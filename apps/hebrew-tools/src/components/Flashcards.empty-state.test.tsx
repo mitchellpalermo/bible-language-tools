@@ -27,6 +27,8 @@ vi.mock('posthog-js', () => ({
 vi.mock('../data/vocabulary', () => ({
   cardKey: (word: { hebrew: string; sense?: string }) =>
     word.sense ? `${word.hebrew}#${word.sense}` : word.hebrew,
+  // Neither mocked word is a verb, so there is never a parse to print.
+  verbParse: () => undefined,
   vocabulary: [
     {
       hebrew: 'דָּבָר',

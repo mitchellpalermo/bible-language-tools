@@ -622,3 +622,48 @@ describe('part of speech', () => {
     expect(getCard().querySelector('p[dir="rtl"]')?.textContent).toBe(before);
   });
 });
+
+// ─── Verb parse on the card back ──────────────────────────────────────────────
+
+describe('verb parse', () => {
+  function seed(hebrew: string) {
+    const word = vocabulary.find((w) => w.hebrew === hebrew) as HebrewVocabWord;
+    seedDueCard(word);
+    return word;
+  }
+
+  it('is withheld from the front — naming the conjugation is part of the answer', () => {
+    seed('כָּתַב');
+    renderFlashcards();
+    expect(screen.queryByTestId('verb-parse')).not.toBeInTheDocument();
+  });
+
+  it('labels a citation form as a qatal once the card is flipped', async () => {
+    seed('כָּתַב');
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(getCard());
+    expect(screen.getByTestId('verb-parse')).toHaveTextContent('Qal qatal');
+  });
+
+  it.each([
+    ['יִבְחַר', 'Qal yiqtol'],
+    ['וַיֹּאמֶר', 'Qal wayyiqtol'],
+    ['הִמְלִיךְ', 'Hiphil qatal'],
+  ])('labels the inflected form %s as %s', async (hebrew, label) => {
+    seed(hebrew);
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(getCard());
+    expect(screen.getByTestId('verb-parse')).toHaveTextContent(label);
+  });
+
+  it('prints nothing on a card that is not a verb', async () => {
+    const word = vocabulary.find((w) => w.partOfSpeech === 'noun') as HebrewVocabWord;
+    seedDueCard(word);
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(getCard());
+    expect(screen.queryByTestId('verb-parse')).not.toBeInTheDocument();
+  });
+});
