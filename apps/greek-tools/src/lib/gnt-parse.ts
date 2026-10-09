@@ -203,6 +203,97 @@ export function gntVoiceLabel(tense: GNTTense, voice: GNTVoice): string {
   return GNT_VOICE_LABELS[voice];
 }
 
+// Participle case/number/gender combinations that share one surface form.
+// A student cannot tell them apart from the spelling, so any of them is a
+// legitimate parse of the form. Each group is a set of (case, number, gender)
+// triples; `endsIn`, when set, limits the group to forms whose accent-free
+// spelling ends that way, for identities that hold in only one declension
+// class (2-1-2 participles, -ος/-η/-ον, have acc. sg. masc. = acc. sg. neut.,
+// but 3-3 -ντ- participles do not).
+type ParticipleParse = [GNTCase, GNTNumber, GNTGender];
+interface ParticipleSyncretism {
+  parses: ParticipleParse[];
+  endsIn?: string;
+}
+
+const PARTICIPLE_SYNCRETISMS: ParticipleSyncretism[] = [
+  // Nom. and acc. sg. neut. are the same in every declension class.
+  {
+    parses: [
+      ['nominative', 'singular', 'neuter'],
+      ['accusative', 'singular', 'neuter'],
+    ],
+  },
+  {
+    parses: [
+      ['nominative', 'plural', 'neuter'],
+      ['accusative', 'plural', 'neuter'],
+    ],
+  },
+  {
+    parses: [
+      ['genitive', 'singular', 'masculine'],
+      ['genitive', 'singular', 'neuter'],
+    ],
+  },
+  {
+    parses: [
+      ['dative', 'singular', 'masculine'],
+      ['dative', 'singular', 'neuter'],
+    ],
+  },
+  {
+    parses: [
+      ['dative', 'plural', 'masculine'],
+      ['dative', 'plural', 'neuter'],
+    ],
+  },
+  // Gen. pl. masc. and neut. match in both classes; fem. differs in -ντ- participles.
+  {
+    parses: [
+      ['genitive', 'plural', 'masculine'],
+      ['genitive', 'plural', 'neuter'],
+    ],
+  },
+  // 2-1-2 only: acc. sg. masc. joins the -ον group. The gate cannot separate
+  // a 3-3 neuter nom./acc. sg. (λῦον) from a 2-1-2 one, so an acc. sg. masc.
+  // answer is also accepted for 3-3 neuter -ον forms.
+  {
+    parses: [
+      ['accusative', 'singular', 'masculine'],
+      ['accusative', 'singular', 'neuter'],
+      ['nominative', 'singular', 'neuter'],
+    ],
+    endsIn: 'ον',
+  },
+];
+
+/** Lowercase and strip accents, breathings and iota subscripts for suffix checks. */
+function stripDiacritics(s: string): string {
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
+
+/**
+ * Returns every (case, number, gender) triple the item's surface form could
+ * legitimately carry, including the item's own tagged parse.
+ */
+export function acceptedParticipleParses(item: GNTParticipleItem): ParticipleParse[] {
+  const self: ParticipleParse = [item.parseCase, item.number, item.gender];
+  const sameAs = (a: ParticipleParse, b: ParticipleParse) =>
+    a[0] === b[0] && a[1] === b[1] && a[2] === b[2];
+  const form = stripDiacritics(item.form);
+  const accepted: ParticipleParse[] = [self];
+
+  for (const group of PARTICIPLE_SYNCRETISMS) {
+    if (group.endsIn && !form.endsWith(group.endsIn)) continue;
+    if (!group.parses.some((p) => sameAs(p, self))) continue;
+    for (const p of group.parses) {
+      if (!accepted.some((a) => sameAs(a, p))) accepted.push(p);
+    }
+  }
+  return accepted;
+}
+
 export function gradeGNTAnswer(item: GNTParseItem, answer: GNTParseAnswer): GNTParseResult {
   const tense = answer.tense === item.tense;
   const voice = gradeGNTVoice(item.tense, item.voice, answer.voice);
@@ -236,10 +327,13 @@ export function gradeGNTAnswer(item: GNTParseItem, answer: GNTParseAnswer): GNTP
     };
   }
 
-  // participle
-  const parseCase = answer.parseCase === item.parseCase;
-  const number = answer.number === item.number;
-  const gender = answer.gender === item.gender;
+  // participle — a syncretic parse is correct on all three facets at once
+  const equivalent = acceptedParticipleParses(item).some(
+    ([c, n, g]) => c === answer.parseCase && n === answer.number && g === answer.gender,
+  );
+  const parseCase = equivalent || answer.parseCase === item.parseCase;
+  const number = equivalent || answer.number === item.number;
+  const gender = equivalent || answer.gender === item.gender;
   return {
     tense,
     voice,

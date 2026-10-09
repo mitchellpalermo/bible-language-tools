@@ -112,6 +112,7 @@ Issue template is at `.github/ISSUE_TEMPLATE/feature.md`.
 - Vocabulary data is pre-processed by `scripts/build-vocabulary.mjs`
 - SRS (Spaced Repetition System) state is persisted in `localStorage` via `src/data/srs.ts`
 - Flashcard display preferences are persisted separately (`greek-tools-flashcard-display-v1`, `src/lib/flashcard-settings.ts`, over `@tools/shared/flashcard-settings`). Today that is one boolean: whether the part of speech appears on the front of a flashcard, which defaults to off. See the repo CLAUDE.md under "What the card front gives away".
+- **Syncretic parses are correct on every facet.** Several case/number/gender combinations share one spelling (participle acc. sg. masc. = acc. sg. neut. in 2-1-2 forms, nom./acc. sg. neut. everywhere, and so on). Grading compares a student's (case, number, gender) against every triple the form could carry, via `PARTICIPLE_SYNCRETISMS` and `acceptedParticipleParses` in `src/lib/gnt-parse.ts`. Never compare a participle facet with strict equality on its own: that marks a legitimate reading wrong (issue #46). Identities that hold in only one declension class take an `endsIn` gate, and an identity the gate cannot separate (fem. gen. pl. in 3-3 participles) is left out.
 
 ## Loading book data in a component
 
