@@ -29,6 +29,15 @@ const liveTools = [
     accentColor: '#0369A1',
     bgColor: '#EFF6FF',
   },
+  {
+    href: '/grammar',
+    icon: '▦',
+    title: 'Grammar',
+    description:
+      'Reference tables for the alphabet, vowels, nouns, the article, prepositions, and Qal verb paradigms — more sections on the way.',
+    accentColor: '#F43F5E',
+    bgColor: '#FFF1F2',
+  },
 ] as const;
 
 const comingTools = [
@@ -37,12 +46,6 @@ const comingTools = [
     description: 'One Hebrew Bible verse per day. Build a reading habit with streak tracking.',
     accentColor: '#D97706',
     bgColor: '#FFFBEB',
-  },
-  {
-    title: 'Grammar Reference',
-    description: 'Paradigm tables for nouns, verbs (all 7 binyanim), pronouns, and prepositions.',
-    accentColor: '#F43F5E',
-    bgColor: '#FFF1F2',
   },
   {
     title: 'Paradigm Quiz',
@@ -87,7 +90,7 @@ const comingTools = [
 
   <!-- ── Live tools ────────────────────────────────────────────────────── -->
   <div class="max-w-4xl mx-auto mb-12">
-    <div class="grid md:grid-cols-3 gap-6">
+    <div class="grid md:grid-cols-2 gap-6">
       {liveTools.map(({ href, icon, title, description, accentColor, bgColor }) => (
         <a
           href={href}
