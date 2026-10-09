@@ -4,6 +4,7 @@ import {
   baseStrong,
   buildFormIndex,
   buildLexiconIndex,
+  cardGloss,
   displayForm,
   emitModule,
   entryKey,
@@ -11,6 +12,7 @@ import {
   normalizeHeadword,
   posLabel,
   resolveHeadword,
+  witnessVerb,
 } from './vocab-oshb.mjs';
 
 // ─── Fixtures ────────────────────────────────────────────────────────────────
@@ -359,6 +361,164 @@ describe('mergeEntry', () => {
 });
 
 // ─── Emitting ────────────────────────────────────────────────────────────────
+
+describe('mergeEntry — verbs', () => {
+  const resolve = (entry) => resolveHeadword(entry, indexes());
+
+  it('carries the handout’s conjugation onto the card beside the binyan', () => {
+    const entry = handout({
+      hebrew: 'וַיֹּאמֶר',
+      gloss: 'and (he) said',
+      posHint: 'verb',
+      binyan: 'Qal',
+      conjugation: 'wayyiqtol',
+      chapters: ['6:inflected'],
+    });
+    const { word } = mergeEntry(entry, resolve(entry));
+    expect(word.binyan).toBe('Qal');
+    expect(word.conjugation).toBe('wayyiqtol');
+  });
+
+  it('leaves it off an entry that has none', () => {
+    const entry = handout();
+    expect(mergeEntry(entry, resolve(entry)).word).not.toHaveProperty('conjugation');
+  });
+});
+
+describe('cardGloss', () => {
+  it('is the textbook’s wording when the handout carries no literal one', () => {
+    expect(cardGloss(handout())).toBe('tent');
+  });
+
+  it('prefers the literal translation of the form on the card', () => {
+    expect(cardGloss(handout({ gloss: 'write', literal: 'he wrote' }))).toBe('he wrote');
+  });
+
+  it('joins the literal stem glosses the way the textbook joins its own', () => {
+    const entry = handout({
+      gloss: 'Qal: return; Pual: (ms participle) returned',
+      stems: [
+        { stem: 'Qal', form: 'שָׁב', gloss: 'return', literal: 'he returned' },
+        // A stem with nothing to reword keeps the printed gloss.
+        { stem: 'Pual', gloss: '(ms participle) returned' },
+      ],
+    });
+    expect(cardGloss(entry)).toBe('Qal: he returned; Pual: (ms participle) returned');
+  });
+
+  it('leaves a multi-stem gloss alone when no stem has been reworded', () => {
+    const entry = handout({
+      gloss: 'Qal: return',
+      stems: [{ stem: 'Qal', gloss: 'return' }],
+    });
+    expect(cardGloss(entry)).toBe('Qal: return');
+  });
+
+  it('ships one wording per stem, with the literal folded into the gloss', () => {
+    const entry = handout({
+      gloss: 'Qal: return',
+      stems: [{ stem: 'Qal', form: 'שָׁב', gloss: 'return', literal: 'he returned' }],
+    });
+    const { word } = mergeEntry(entry, resolveHeadword(entry, indexes()));
+    expect(word.gloss).toBe('Qal: he returned');
+    expect(word.stems).toEqual([{ stem: 'Qal', form: 'שָׁב', gloss: 'he returned' }]);
+  });
+});
+
+// ─── The corpus as a witness to a verb's parse ───────────────────────────────
+
+describe('witnessVerb', () => {
+  /** A corpus of the given words, and a verb entry resolved against it. */
+  const witness = (corpus, over) => {
+    const { forms, pairs, verbs } = buildFormIndex([{ 1: { 1: corpus } }]);
+    const entry = handout({ posHint: 'verb', chapters: ['6:inflected'], ...over });
+    const resolution = resolveHeadword(entry, {
+      lexicon: buildLexiconIndex(LEMMAS),
+      forms,
+      pairs,
+      lemmas: LEMMAS,
+    });
+    return witnessVerb(entry, resolution, verbs);
+  };
+
+  const WAYYOMER = { text: 'וַ/יֹּאמֶר', lemma: '559', parsing: 'HC/Vqw3ms' };
+  const AMAR = { text: 'אָמַר', lemma: '559', parsing: 'HVqp3ms' };
+  const WEAMAR = { text: 'וְ/אָמַר', lemma: '559', parsing: 'HC/Vqq3ms' };
+
+  it('passes a parse the corpus agrees with', () => {
+    expect(
+      witness([WAYYOMER], { hebrew: 'וַיֹּאמֶר', binyan: 'Qal', conjugation: 'wayyiqtol' }),
+    ).toEqual([]);
+  });
+
+  it('names the conjugation the corpus has when the handout has another', () => {
+    const [problem] = witness([WAYYOMER], {
+      hebrew: 'וַיֹּאמֶר',
+      binyan: 'Qal',
+      conjugation: 'yiqtol',
+    });
+    expect(problem).toContain('conjugation "yiqtol"');
+    expect(problem).toContain('wayyiqtol');
+  });
+
+  it('catches a wrong binyan the same way', () => {
+    // The shape of the real catch: יַצְלִיחַ was entered as a Qal.
+    const [problem] = witness([WAYYOMER], {
+      hebrew: 'וַיֹּאמֶר',
+      binyan: 'Hiphil',
+      conjugation: 'wayyiqtol',
+    });
+    expect(problem).toContain('binyan "Hiphil"');
+    expect(problem).toContain('Qal');
+  });
+
+  it('reads a weqatal as a qatal once its conjunction is cut off', () => {
+    // וְאָמַר is a weqatal; the אָמַר inside it is what a citation card shows.
+    // Without the collapse, a corpus holding only the prefixed form would call
+    // every citation form a weqatal.
+    expect(witness([WEAMAR], { hebrew: 'אָמַר', binyan: 'Qal', conjugation: 'qatal' })).toEqual([]);
+    expect(witness([WEAMAR], { hebrew: 'וְאָמַר', binyan: 'Qal', conjugation: 'weqatal' })).toEqual(
+      [],
+    );
+    expect(witness([WEAMAR], { hebrew: 'וְאָמַר', binyan: 'Qal', conjugation: 'qatal' })).toHaveLength(
+      1,
+    );
+  });
+
+  it('counts a jussive as a witness to the yiqtol it is spelled as', () => {
+    const jussive = { text: 'יֹאמַר', lemma: '559', parsing: 'HVqj3ms' };
+    expect(witness([jussive], { hebrew: 'יֹאמַר', binyan: 'Qal', conjugation: 'yiqtol' })).toEqual(
+      [],
+    );
+  });
+
+  it('treats silence as no witness, not as disagreement', () => {
+    // An unattested form and an unresolved entry both have nothing to say.
+    expect(witness([AMAR], { hebrew: 'קָטַל', binyan: 'Qal', conjugation: 'qatal' })).toEqual([]);
+    expect(witnessVerb(handout({ conjugation: 'qatal' }), { status: 'absent' }, new Map())).toEqual(
+      [],
+    );
+  });
+
+  it('does not let another lemma spelled the same way testify', () => {
+    const other = { text: 'אָמַר', lemma: '7451', parsing: 'HVhv2ms' };
+    expect(witness([AMAR, other], { hebrew: 'אָמַר', binyan: 'Qal', conjugation: 'qatal' })).toEqual(
+      [],
+    );
+  });
+
+  it('ignores Aramaic, where the stem letters mean something else', () => {
+    const aramaic = { text: 'אָמַר', lemma: '559', parsing: 'AVhp3ms' };
+    expect(
+      witness([AMAR, aramaic], { hebrew: 'אָמַר', binyan: 'Qal', conjugation: 'qatal' }),
+    ).toEqual([]);
+  });
+
+  it('skips a stem or conjugation letter it has no name for', () => {
+    const odd = { text: 'אָמַר', lemma: '559', parsing: 'HVZp3ms' };
+    expect(witness([odd], { hebrew: 'אָמַר', binyan: 'Qal', conjugation: 'qatal' })).toEqual([]);
+  });
+});
 
 describe('emitModule', () => {
   const emit = (over = {}) =>

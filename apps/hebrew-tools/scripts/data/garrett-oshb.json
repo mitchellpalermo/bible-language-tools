@@ -14,7 +14,12 @@
     "           corpus never uses, a paradigm slot it never fills, a spelling that",
     "           collides with a proper name. A handout typo does not belong here;",
     "           it belongs in the handout's own corrections list, where the printed",
-    "           form stays on record."
+    "           form stays on record.",
+    "parses:    verbs whose binyan or conjugation the corpus appears to contradict.",
+    "           Both are entered by hand in the handout and checked against how",
+    "           the WLC parses that spelling; a citation form is a qatal 3ms by",
+    "           convention, and the corpus sometimes uses the spelling only as",
+    "           something else. Each one is listed here with the reason."
   ],
 
   "pins": {
@@ -38,6 +43,7 @@
     "תַּחַת": "8478",
     "קָרָא#I": "7121",
     "קָרָא#II": "7122",
+    "שָׁבָה": "7725",
     "פֶּלֶג": "6388",
     "רָעָה": "7462",
     "תּוֹר": "8449"
@@ -58,5 +64,11 @@
     { "entry": "ירד", "reason": "listed by bare root, which is unpointed and so cannot be attested as a form" },
     { "entry": "שַׁ", "reason": "the relative prefix; the lexicon cites it as שֶׁ and the corpus only ever writes it attached" },
     { "entry": "נָח", "reason": "the Qal of נוח, which the corpus uses only in the wayyiqtol; the spelling collides with Noah (5146)" }
+  ],
+
+  "parses": [
+    { "entry": "בּוֹשׁ", "reason": "the Qal qatal 3ms of בושׁ is spelled like its infinitives, and the corpus codes every unprefixed occurrence as one of those" },
+    { "entry": "הוֹשִׁיב", "reason": "the Hiphil citation form of ישׁב; the corpus writes this exact spelling once, as the infinitive construct after a preposition" },
+    { "entry": "נֶאֱמַן", "reason": "the Niphal citation form of אמן; the one occurrence spelled this way is the participle in construct" }
   ]
 }

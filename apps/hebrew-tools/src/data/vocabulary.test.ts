@@ -9,7 +9,7 @@ import {
   OSHB_RESPELLINGS,
   OSHB_UNMATCHED,
 } from './vocabulary-garrett';
-import { gd } from './vocabulary-types';
+import { gd, VERB_CONJUGATIONS, verbParse } from './vocabulary-types';
 
 // Hebrew consonants (U+05D0-05EA) + nikud (U+05B0-U+05BD, U+05C7) + shin/sin
 // dots (U+05C1-U+05C2) + maqqef (U+05BE). Cantillation is intentionally
@@ -104,6 +104,68 @@ describe('vocabulary data', () => {
       .forEach((word) => {
         expect(word.binyan, `Verb missing binyan: ${word.hebrew}`).toBeDefined();
       });
+  });
+
+  it('every verb names the conjugation of the form on its card', () => {
+    // The one exception is a verb the handout lists by bare root: unpointed
+    // consonants are not a form of anything, so there is nothing to name.
+    const listedByRoot = (word: HebrewVocabWord) => !/[\u05B0-\u05C7]/.test(word.hebrew);
+    const verbs = vocabulary.filter((word) => word.partOfSpeech === 'verb');
+    for (const word of verbs.filter((w) => !listedByRoot(w))) {
+      expect(VERB_CONJUGATIONS, `Verb missing conjugation: ${word.hebrew}`).toContain(
+        word.conjugation,
+      );
+    }
+    expect(verbs.filter(listedByRoot).map((w) => w.hebrew)).toEqual(['ירד']);
+  });
+
+  it('only verbs carry a conjugation', () => {
+    for (const word of vocabulary.filter((w) => w.partOfSpeech !== 'verb')) {
+      expect(word.conjugation, `Non-verb with a conjugation: ${word.hebrew}`).toBeUndefined();
+    }
+  });
+
+  it.each([
+    ['כָּתַב', 'qatal'],
+    ['בָּא', 'qatal'],
+    ['יָלְדָה', 'qatal'],
+    ['יִבְחַר', 'yiqtol'],
+    ['תִּדְּפֶנּוּ', 'yiqtol'],
+    ['וַיְהִי', 'wayyiqtol'],
+    ['וַתֵּשֶׁב', 'wayyiqtol'],
+    ['שָׁתוּל', 'passive participle'],
+    ['נָכוֹן', 'participle'],
+  ])('tags %s as a %s', (hebrew, conjugation) => {
+    expect(vocabulary.find((w) => w.hebrew === hebrew)?.conjugation).toBe(conjugation);
+  });
+
+  it('reads a wayyiqtol off the form, not off the chapter it is listed under', () => {
+    // Every form that opens with the wayyiqtol's וַ + doubled prefix is tagged
+    // one, and nothing else is. A citation form that happened to be tagged
+    // wayyiqtol would be the handout annotation drifting from the spelling.
+    for (const word of vocabulary.filter((w) => w.partOfSpeech === 'verb')) {
+      expect(word.conjugation === 'wayyiqtol', word.hebrew).toBe(/^וַ[יתנא]/.test(word.hebrew));
+    }
+  });
+
+  it.each([
+    ['כָּתַב', 'he wrote'],
+    ['שָׁפַט', 'he judged, ruled'],
+    ['הִמְלִיךְ', 'he installed someone as king'],
+    ['נִבְנָה', 'it was built'],
+    ['טָמֵא#verb', 'Qal: he was unclean; Piel: he defiled, declared unclean'],
+  ])('glosses the citation form %s literally, as %s', (key, gloss) => {
+    expect(vocabulary.find((w) => cardKey(w) === key)?.gloss).toBe(gloss);
+  });
+
+  it('never glosses a qatal as a bare "be …", which is how an infinitive reads', () => {
+    // The cheapest tell that a citation form slipped through unreworded: every
+    // stative in the textbook is printed "be full", "be heavy", "be king".
+    const bare = vocabulary
+      .filter((w) => w.conjugation === 'qatal')
+      .filter((w) => /^(?:\w+: )?be\b/.test(w.gloss))
+      .map((w) => w.hebrew);
+    expect(bare).toEqual([]);
   });
 
   it('has no duplicate card keys', () => {
@@ -577,5 +639,20 @@ describe('cardKey', () => {
     expect(cardKey({ hebrew: 'אַף', sense: 'noun', gloss: 'nose', partOfSpeech: 'noun' })).toBe(
       'אַף#noun',
     );
+  });
+});
+
+describe('verbParse', () => {
+  it('puts the stem before the conjugation, the order a grammar parses in', () => {
+    expect(verbParse({ binyan: 'Hiphil', conjugation: 'yiqtol' })).toBe('Hiphil yiqtol');
+  });
+
+  it('prints whichever half there is', () => {
+    expect(verbParse({ binyan: 'Qal' })).toBe('Qal');
+    expect(verbParse({ conjugation: 'qatal' })).toBe('qatal');
+  });
+
+  it('is undefined when there is nothing to print', () => {
+    expect(verbParse({})).toBeUndefined();
   });
 });

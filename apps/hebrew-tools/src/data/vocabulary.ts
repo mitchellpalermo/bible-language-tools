@@ -25,10 +25,15 @@
 // so it's left undefined rather than guessed.
 
 import { GARRETT_VOCABULARY } from './vocabulary-garrett';
-import { cardKey, gd, type HebrewVocabWord } from './vocabulary-types';
+import { cardKey, gd, type HebrewVocabWord, verbParse } from './vocabulary-types';
 
-export type { HebrewGender, HebrewVocabWord, VerbStemGloss } from './vocabulary-types';
-export { cardKey, gd };
+export type {
+  HebrewGender,
+  HebrewVocabWord,
+  VerbConjugation,
+  VerbStemGloss,
+} from './vocabulary-types';
+export { cardKey, gd, verbParse };
 
 /** Optional fields an imported entry may contribute to a curated one. */
 const MERGEABLE_FIELDS = [
@@ -36,6 +41,7 @@ const MERGEABLE_FIELDS = [
   'strong',
   'gender',
   'binyan',
+  'conjugation',
   'construct',
   'plural',
   'alternates',
@@ -544,6 +550,7 @@ const CURATED: HebrewVocabWord[] = [
     frequency: 5300,
     partOfSpeech: 'verb',
     binyan: 'Qal',
+    conjugation: 'qatal',
   },
   {
     hebrew: 'הָיָה',
@@ -553,6 +560,7 @@ const CURATED: HebrewVocabWord[] = [
     frequency: 3560,
     partOfSpeech: 'verb',
     binyan: 'Qal',
+    conjugation: 'qatal',
   },
   {
     hebrew: 'עָשָׂה',
@@ -562,6 +570,7 @@ const CURATED: HebrewVocabWord[] = [
     frequency: 2600,
     partOfSpeech: 'verb',
     binyan: 'Qal',
+    conjugation: 'qatal',
   },
   {
     hebrew: 'נָתַן',
@@ -571,6 +580,7 @@ const CURATED: HebrewVocabWord[] = [
     frequency: 2000,
     partOfSpeech: 'verb',
     binyan: 'Qal',
+    conjugation: 'qatal',
   },
   {
     hebrew: 'בָּא',
@@ -580,6 +590,7 @@ const CURATED: HebrewVocabWord[] = [
     frequency: 2570,
     partOfSpeech: 'verb',
     binyan: 'Qal',
+    conjugation: 'qatal',
   },
   {
     hebrew: 'הָלַךְ',
@@ -589,6 +600,7 @@ const CURATED: HebrewVocabWord[] = [
     frequency: 1550,
     partOfSpeech: 'verb',
     binyan: 'Qal',
+    conjugation: 'qatal',
   },
   {
     hebrew: 'רָאָה',
@@ -598,6 +610,7 @@ const CURATED: HebrewVocabWord[] = [
     frequency: 1300,
     partOfSpeech: 'verb',
     binyan: 'Qal',
+    conjugation: 'qatal',
   },
   {
     hebrew: 'שָׁמַע',
@@ -607,6 +620,7 @@ const CURATED: HebrewVocabWord[] = [
     frequency: 1160,
     partOfSpeech: 'verb',
     binyan: 'Qal',
+    conjugation: 'qatal',
   },
   {
     hebrew: 'יָדַע',
@@ -616,6 +630,7 @@ const CURATED: HebrewVocabWord[] = [
     frequency: 950,
     partOfSpeech: 'verb',
     binyan: 'Qal',
+    conjugation: 'qatal',
   },
   {
     hebrew: 'יָצָא',
@@ -625,6 +640,7 @@ const CURATED: HebrewVocabWord[] = [
     frequency: 1070,
     partOfSpeech: 'verb',
     binyan: 'Qal',
+    conjugation: 'qatal',
   },
   {
     hebrew: 'קָרָא',
@@ -635,6 +651,7 @@ const CURATED: HebrewVocabWord[] = [
     frequency: 730,
     partOfSpeech: 'verb',
     binyan: 'Qal',
+    conjugation: 'qatal',
   },
   {
     hebrew: 'עָלָה',
@@ -644,6 +661,7 @@ const CURATED: HebrewVocabWord[] = [
     frequency: 890,
     partOfSpeech: 'verb',
     binyan: 'Qal',
+    conjugation: 'qatal',
   },
   {
     hebrew: 'יָשַׁב',
@@ -653,6 +671,7 @@ const CURATED: HebrewVocabWord[] = [
     frequency: 1080,
     partOfSpeech: 'verb',
     binyan: 'Qal',
+    conjugation: 'qatal',
   },
   {
     hebrew: 'שָׁב',
@@ -662,6 +681,7 @@ const CURATED: HebrewVocabWord[] = [
     frequency: 1075,
     partOfSpeech: 'verb',
     binyan: 'Qal',
+    conjugation: 'qatal',
   },
   {
     hebrew: 'מָצָא',
@@ -671,6 +691,7 @@ const CURATED: HebrewVocabWord[] = [
     frequency: 450,
     partOfSpeech: 'verb',
     binyan: 'Qal',
+    conjugation: 'qatal',
   },
   {
     hebrew: 'שָׁלַח',
@@ -680,6 +701,7 @@ const CURATED: HebrewVocabWord[] = [
     frequency: 840,
     partOfSpeech: 'verb',
     binyan: 'Qal',
+    conjugation: 'qatal',
   },
   {
     hebrew: 'עָבַר',
@@ -689,6 +711,7 @@ const CURATED: HebrewVocabWord[] = [
     frequency: 550,
     partOfSpeech: 'verb',
     binyan: 'Qal',
+    conjugation: 'qatal',
   },
   {
     hebrew: 'שָׁמַר',
@@ -698,6 +721,7 @@ const CURATED: HebrewVocabWord[] = [
     frequency: 470,
     partOfSpeech: 'verb',
     binyan: 'Qal',
+    conjugation: 'qatal',
   },
   {
     hebrew: 'קָם',
@@ -707,6 +731,7 @@ const CURATED: HebrewVocabWord[] = [
     frequency: 630,
     partOfSpeech: 'verb',
     binyan: 'Qal',
+    conjugation: 'qatal',
   },
   {
     hebrew: 'מָלַךְ',
@@ -716,6 +741,7 @@ const CURATED: HebrewVocabWord[] = [
     frequency: 350,
     partOfSpeech: 'verb',
     binyan: 'Qal',
+    conjugation: 'qatal',
   },
 ];
 
