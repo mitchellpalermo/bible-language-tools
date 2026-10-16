@@ -727,7 +727,9 @@ Things that will bite if changed carelessly:
   content is general first-year grammar in this app's own wording, on the
   conventional model words (סוּס, דָּבָר, מֶלֶךְ). Do not paste the textbook's
   tables in to "align" them — Mitch asked for that not to happen. Where the
-  course's wording of a rule differs, adjust the prose.
+  course's wording of a rule differs, adjust the prose. New verb forms (6d–6f)
+  follow the same rule — see `ROADMAP.md` Phase 6 for the two safeguards that
+  replace transcription there.
 - **The corpus is therefore the main guard on the pointing, not a backstop.**
   `grammar-nominal.test.ts` gathers every Hebrew word in the file — table cells,
   examples, and words inside the prose notes — and `isAttested` looks each up in
@@ -737,6 +739,20 @@ Things that will bite if changed carelessly:
   construct of נָבִיא and plural construct of סֵפֶר both failed, and the fix was
   to choose model nouns (זָקֵן, שֵׁבֶט) whose every cell occurs, not to grow the
   list.
+- **Gesenius' Hebrew Grammar is the public-domain cross-check.** The
+  Kautzsch–Cowley Second English Edition (1910) is at
+  <https://archive.org/details/geseniushebrewgr00geseuoft>. Being public domain,
+  it can be quoted and its forms used directly; the concern above is about
+  Garrett & DeRouchie only. It is a reference grammar, not a first-year one, so
+  it lists far more alternate forms than a course does. That makes it the place
+  to look up which cells grammars disagree on, but G&D still decides which
+  variant the quiz expects. The verb paradigms are lettered A–Q (printed pages
+  508–531): B is the strong verb in every stem, C adds suffixes, and D–Q are
+  the weak classes. An asterisk marks a model form, and from Paradigm G onward a
+  bracketed form is one the Old Testament does not use, the same idea as
+  `UNATTESTED`. Two cautions: its terms are older (Perfect and Imperfect, not
+  qatal and yiqtol), and the scan's OCR is unusable for Hebrew, so read forms
+  from the page images, never from extracted text.
 - **Stress is marked on segolates and duals only**, where penultimate stress is
   what defines the pattern. A noun's `lemma` is always unaccented.
 - **A bare ending is drawn on a dotted circle** (`affixText`, U+25CC) when it
