@@ -27,6 +27,7 @@ import {
   REVIEW_GRADES,
   type ReviewGrade,
   type SRSCard,
+  shouldUpdateCard,
 } from './srs';
 
 /**
@@ -337,22 +338,11 @@ export function suggestedGrade(score: number): WritingGrade {
  * anything below 3 is a lapse. Re-exported from shared so `/write` and the
  * flashcards cannot disagree about what counts as a pass.
  */
-export { isPassingGrade };
-
 /**
- * Whether a grade should move the SRS card, given this glyph has already been
- * graded earlier in the same session.
- *
- * A confusable deck presents ד three times in one sitting, and three passing
- * grades in five minutes would stretch the interval as though they were three
- * days apart — SM-2 assumes its reviews are spaced, and here they deliberately
- * are not. So within a session a repeat can demote but never promote: a lapse
- * still pulls the schedule in, because getting it wrong on the second look is
- * real information, while getting it right again immediately is not.
+ * Whether a grade should move the SRS card on a repeat. Lives in `srs.ts`,
+ * because the paradigm quiz applies the same rule; re-exported for the decks.
  */
-export function shouldUpdateCard(alreadyReviewed: boolean, grade: WritingGrade): boolean {
-  return !alreadyReviewed || !isPassingGrade(grade);
-}
+export { isPassingGrade, shouldUpdateCard };
 
 /**
  * How many distinct glyphs in a deck have never been written.

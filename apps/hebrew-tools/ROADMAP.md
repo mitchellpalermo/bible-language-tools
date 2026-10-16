@@ -465,8 +465,9 @@ Phase 6 will render from the same file when it lands.
 |------|-------|--------|
 | 7a | Verb data: Qal qatal, yiqtol, wayyiqtol for strong, begadkephat, III-ה, היה | ✅ Done |
 | 7b | Shared `TableModel` engine, Hebrew table builders, grading, `useHebrewInput` | ✅ Done |
-| 7c | `/paradigms` page — typed, full table by default, on-screen Hebrew keypad for iPad | Next |
-| 7d | SRS per table + sync; more conjugations and stems as the course reaches them | Queued |
+| 7c | `/paradigms` page — typed, full table by default, on-screen Hebrew keypad for iPad | ✅ Done |
+| 7d | SRS per form + sync, due-first blanking and a Due forms mode | ✅ Done |
+| 7e | More conjugations and stems as the course reaches them | Ongoing |
 
 Typed input comes before handwriting (9f). Three things differ from the plan below:
 
@@ -738,7 +739,7 @@ The following modules from greek.tools can be copied with minimal or zero change
 | 8d | 4d | Reader: word popup — morphemes, parse, gloss | Medium | 4a, 4b, 4c | ✅ Done | #120 |
 | 8e | 4e | Reader: cantillation toggle + studied-word highlighting | Low | 4c | ✅ Done | #121 |
 | 9 | 6 | Grammar Reference | High (content-heavy) — broken into 6a–6g by section | None | In progress — 6a, 6b done | #79 |
-| 10 | 7 | Paradigm Quiz | Medium | Phase 1, Phase 6 | Queued | #80 |
+| 10 | 7 | Paradigm Quiz | Medium | Phase 1, Phase 6 | ✅ Done (7a–7d); stems added as the course reaches them | #80 |
 | 11 | 8C | Binyan Guide | Low (content) | None | Queued (independent — can float earlier) | #83 |
 | 12 | 8A | Root Lookup | Medium | Phase 4 data | Queued | #81 |
 | 13 | 8B | Parsing Practice | Medium | Phase 4 data | Queued | #82 |

@@ -453,6 +453,23 @@ this browser's.
 That is correct behaviour for a per-device reset, not a bug — but know that it
 happens, because it surprises people.
 
+### 17. Paradigm forms travel with the vocabulary
+
+**Why:** paradigm cells are ordinary SRS cards under a `paradigm:` key
+(`src/lib/paradigm-srs.ts`), so nothing in the sync layer knows about them. This
+checks that it does not need to.
+
+1. On **A**, open `/paradigms`, check the Qal qatal כתב table with at least one
+   form right, then click **Sync now** on the account page.
+2. On **B**, click **Sync now**, then open `/paradigms`.
+
+**Expect:** B's כתב card reads "9 forms · nothing due" (or the same due count
+A shows), not "not started". `/api/progress` on either device lists keys like
+`paradigm:qal-qatal-begadkephat:3ms`.
+
+**Watch for:** the flashcard counts on B changing. Paradigm keys must not be
+read as vocabulary.
+
 ---
 
 ## Why the fix lives on the server

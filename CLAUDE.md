@@ -88,7 +88,7 @@ Adding a destination means adding one entry to that app's `navLinks` array in `L
 
 Things to know before changing it:
 
-- **A `NavLink` with `children` is still a link.** greek.tools' Study entry points at `/study` *and* lists its five sub-routes, so the hub page stays reachable and the sub-routes are one tap away. The children also serve as the active-path list — that's what lights Study up on `/flashcards`, replacing the old hand-written `STUDY_PATHS` constant.
+- **A `NavLink` with `children` is still a link.** Both apps' Study entry points at `/study` *and* lists its sub-routes (Flashcards and Paradigms on hebrew.tools), so the hub page stays reachable and the sub-routes are one tap away. **The children appear in the mobile drawer only** — the desktop row shows the group — so every study mode needs a card on its app's `/study` page as well as an entry in `children`. The children also serve as the active-path list — that's what lights Study up on `/flashcards`, replacing the old hand-written `STUDY_PATHS` constant.
 - **`isNavLinkActive` is the section, `isNavLinkCurrent` is the page.** The former drives highlighting (a group heading lights on any child route), the latter drives `aria-current="page"` (so a heading and its child don't both claim it).
 - **The account link keeps `data-account-link` / `data-account-label`.** Each app's inline auth-hint script corrects those on prerendered pages, which ship with no session. The hint cookie has no authority — it only swaps the label and href.
 - **The drawer's `visibility` transition is stepped, not eased** (`visibility 0s linear 220ms`, and `0s` on open). `initNavMenu` moves focus into the panel in the same tick it opens it, and a mid-transition `visibility` value would leave that focus call a no-op.
