@@ -410,11 +410,20 @@ Two things 6a settled that the later steps inherit:
   tables read `verb-paradigms.ts` directly and show the stress mark the quiz
   strips, so adding a paradigm there adds it to both.
 
-- **Only the verb tables are transcribed from the textbook.** Everything else
-  is general grammar in the app's own words on conventional model words, with
-  every Hebrew form checked against the Westminster Leningrad Codex by the data
-  tests (`src/test/corpus.ts`). 6c onward should follow 6b here: write it, then
-  let the corpus catch the pointing slips, rather than copying tables in.
+- **Only the Qal qatal, yiqtol and wayyiqtol tables are transcribed from the
+  textbook.** Everything else is general grammar in the app's own words on
+  conventional model words, with every Hebrew form checked against the
+  Westminster Leningrad Codex by the data tests (`src/test/corpus.ts`). 6c
+  onward should follow 6b here: write it, then let the corpus catch the
+  pointing slips, rather than copying tables in.
+- **That includes the new verb forms (6d–6f), with two safeguards** (decided
+  on #79). A verb table is also the quiz's answer key, and a spelling check is
+  weak there: one spelling can fill two cells, and a single model root leaves
+  many cells unattested. So 6d makes the gate check each form against its OSHB
+  parse as well as its spelling. Each verb pull request also lists the cells
+  where grammars commonly disagree (alternate forms, forms some tables omit,
+  how weak classes are grouped), and Mitch checks just those cells against
+  Garrett & DeRouchie so the quiz expects the forms his exams do.
 
 ### What ports directly
 - Section-nav sidebar pattern
