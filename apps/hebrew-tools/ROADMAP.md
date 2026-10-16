@@ -390,15 +390,15 @@ Landing a section at a time (issue #79). `/grammar` is live with the first
 six sections; each later step is a data module, a `<section>`, and one entry in
 `NAV_SECTIONS`.
 
-| Step | Scope | Status |
-|------|-------|--------|
-| 6a | `/grammar` shell and section nav; Alphabet (consonants, letter groups, dagesh); Vowels (chart, sheva); Qal Verb rendered from `verb-paradigms.ts` | ✅ Done |
-| 6b | Nouns — endings, absolute and construct, vowel reduction, segolates, the dual; The Article; Prepositions (inseparable, מִן, independent) | ✅ Done |
-| 6c | Pronouns — independent personal, demonstrative, interrogative, relative; Pronominal Suffixes on nouns and prepositions | Next |
-| 6d | Rest of the Qal — imperative, infinitives, participles; Waw Consecutive notes. Data goes in `verb-paradigms.ts` so the quiz gets it too | Queued |
-| 6e | Derived stems — Niphal, Piel, Pual, Hiphil, Hophal, Hithpael | Queued |
-| 6f | Weak verbs as an overlay on the strong paradigm, with diverging cells highlighted; suffixes on verbs | Queued |
-| 6g | Numerals | Queued |
+| Step | Scope | Status | Issue |
+|------|-------|--------|-------|
+| 6a | `/grammar` shell and section nav; Alphabet (consonants, letter groups, dagesh); Vowels (chart, sheva); Qal Verb rendered from `verb-paradigms.ts` | ✅ Done | #149 (PR) |
+| 6b | Nouns — endings, absolute and construct, vowel reduction, segolates, the dual; The Article; Prepositions (inseparable, מִן, independent) | ✅ Done | #149 (PR) |
+| 6c | Pronouns — independent personal, demonstrative, interrogative, relative; Pronominal Suffixes on nouns and prepositions | Next | #152 |
+| 6d | Rest of the Qal — imperative, infinitives, participles; Waw Consecutive notes. Data goes in `verb-paradigms.ts` so the quiz gets it too | Queued | #153 |
+| 6e | Derived stems — Niphal, Piel, Pual, Hiphil, Hophal, Hithpael | Queued | #154 |
+| 6f | Weak verbs as an overlay on the strong paradigm, with diverging cells highlighted; suffixes on verbs | Queued | #155 |
+| 6g | Numerals | Queued | #156 |
 
 Two things 6a settled that the later steps inherit:
 
@@ -738,6 +738,11 @@ The following modules from greek.tools can be copied with minimal or zero change
 | 8d | 4d | Reader: word popup — morphemes, parse, gloss | Medium | 4a, 4b, 4c | ✅ Done | #120 |
 | 8e | 4e | Reader: cantillation toggle + studied-word highlighting | Low | 4c | ✅ Done | #121 |
 | 9 | 6 | Grammar Reference | High (content-heavy) — broken into 6a–6g by section | None | In progress — 6a, 6b done | #79 |
+| 9c | 6c | Grammar: pronouns + pronominal suffixes | Medium | 6b | Next | #152 |
+| 9d | 6d | Grammar: rest of the Qal + waw consecutive | Medium | 6a | Queued | #153 |
+| 9e | 6e | Grammar: derived stems | High | 6d | Queued | #154 |
+| 9f | 6f | Grammar: weak-verb overlay + suffixes on verbs | High | 6d, 6e | Queued | #155 |
+| 9g | 6g | Grammar: numerals | Low | 6b | Queued | #156 |
 | 10 | 7 | Paradigm Quiz | Medium | Phase 1, Phase 6 | Queued | #80 |
 | 11 | 8C | Binyan Guide | Low (content) | None | Queued (independent — can float earlier) | #83 |
 | 12 | 8A | Root Lookup | Medium | Phase 4 data | Queued | #81 |
@@ -750,7 +755,7 @@ The following modules from greek.tools can be copied with minimal or zero change
 | 19 | 9f | Writing: handwritten paradigms | Medium | 9d, Phase 7 | Queued | #104 |
 | 20 | 9g | Writing: port to greek.tools | Low | 9b (9e for coaching) | Queued | #105 |
 
-Every row above is one GitHub issue, and every issue is scoped to land as a single PR. Phase 4 and Phase 6 were too large for that and get their own bite-sized sub-issues (same pattern as Phase 2) once picked up — Phase 4 has been, and its five sub-issues are listed as rows 8a–8e. Rows marked "independent" have no hard dependency on the row above them — they're placed here for logical flow (data-pipeline-dependent work grouped together) but can be pulled earlier as a change of pace between heavier phases.
+Every row above is one GitHub issue, and every issue is scoped to land as a single PR. Phase 4 and Phase 6 were too large for that and get their own bite-sized sub-issues (same pattern as Phase 2) once picked up — Phase 4 has been, and its five sub-issues are listed as rows 8a–8e; Phase 6's remaining five are rows 9c–9g. Rows marked "independent" have no hard dependency on the row above them — they're placed here for logical flow (data-pipeline-dependent work grouped together) but can be pulled earlier as a change of pace between heavier phases.
 
 The OSHB data pipeline (needed for Phases 3 and 4, and for accurate Flashcards frequency data) is the most important early infrastructure investment — see the standalone section above.
 
