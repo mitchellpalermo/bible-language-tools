@@ -31,7 +31,7 @@ test.describe('Mobile navigation menu', () => {
   test('every destination is reachable at 375px', async ({ page }) => {
     await trigger(page).click();
 
-    for (const name of ['Type', 'Flashcards']) {
+    for (const name of ['Type', 'Study', 'Flashcards', 'Paradigms']) {
       await expect(panel(page).getByRole('link', { name, exact: true })).toBeVisible();
     }
     await expect(panel(page).locator('[data-account-link]')).toBeVisible();
@@ -117,7 +117,8 @@ test.describe('Desktop navigation', () => {
   test('shows the header links and no hamburger', async ({ page }) => {
     await page.goto('/');
 
-    for (const name of ['Type', 'Flashcards']) {
+    // Study's children live in the drawer only; the desktop row shows the group.
+    for (const name of ['Type', 'Study']) {
       await expect(page.getByRole('link', { name, exact: true })).toBeVisible();
     }
     await expect(trigger(page)).toBeHidden();

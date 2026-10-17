@@ -75,3 +75,20 @@ export function loadStats(): StudyStats {
 export function saveStats(stats: StudyStats): void {
   localStorage.setItem(STATS_KEY, JSON.stringify(stats));
 }
+
+/**
+ * Whether a grade should move the SRS card, given the card has already been
+ * reviewed recently enough that this answer is not a spaced recall.
+ *
+ * A confusable deck presents ד three times in one sitting, and three passing
+ * grades in five minutes would stretch the interval as though they were three
+ * days apart — SM-2 assumes its reviews are spaced, and here they deliberately
+ * are not. The paradigm quiz meets the same thing when a table is tried again,
+ * or a verb's forms come round again in the summary table. So a repeat can
+ * demote but never promote: a lapse still pulls the schedule in, because
+ * getting it wrong on the second look is real information, while getting it
+ * right again immediately is not.
+ */
+export function shouldUpdateCard(alreadyReviewed: boolean, grade: ReviewGrade): boolean {
+  return !alreadyReviewed || !isPassingGrade(grade);
+}

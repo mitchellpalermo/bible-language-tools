@@ -142,6 +142,8 @@ See `ROADMAP.md` for the full feature plan and build order.
 
 Word-mode writing (#102) spends a third, `write:word:<cardKey>` in `src/data/writing-words.ts`. It must stay distinct from `write:letter:` for the same reason the other two are distinct from each other: the conjunction וְ is a one-letter *word*, and writing a word is not the skill that writing its first letter is. The suffix is `cardKey(word)` and never `word.hebrew`, so אַף "also" and אַף "nose" stay on separate cards here as they do everywhere else.
 
+The paradigm quiz spends a fourth, `paradigm:<cellId>` in `src/lib/paradigm-srs.ts` — `paradigm:qal-qatal-begadkephat:3ms`. The suffix is `cellId()`, never a row and column, so a form is one card whether it was answered in its own verb's table or in the summary table beside the other classes.
+
 The confusable decks deliberately get no prefix of their own — they drill the same letters the alphabet deck does, so grading ד in one must move the card the other sees.
 - **Deck selection is persisted separately from the SRS store** (`hebrew-tools-deck-v1`, `src/lib/deck-selection.ts`) and is never synced. It decides which due cards you see, not what is due, so it stays local to the browser.
 - **What the card front shows is persisted the same way** (`hebrew-tools-flashcard-display-v1`, `src/lib/flashcard-settings.ts`, over `@tools/shared/flashcard-settings`) and is likewise never synced. Today it holds one boolean: whether the part of speech appears on the front of a flashcard, which defaults to off. See the repo CLAUDE.md under "What the card front gives away".
@@ -597,7 +599,7 @@ Things to know before changing it:
 
 ### Verb paradigms and the paradigm quiz (issue #80)
 
-The model layer is built; the `/paradigms` page is not yet. The Grammar Reference already renders the same forms — see below.
+`/paradigms` is live, and every form is its own SRS card (steps 7c and 7d). More stems and conjugations are added as the course reaches them — see `ROADMAP.md` Phase 7. The Grammar Reference renders the same forms — see below.
 
 | File | Role |
 |---|---|
@@ -605,6 +607,9 @@ The model layer is built; the `/paradigms` page is not yet. The Grammar Referenc
 | `src/lib/paradigm-quiz.ts` | Table builders, cell ids, `gradeCell`. Blanking comes from `@tools/shared/paradigm-quiz` |
 | `src/lib/use-hebrew-input.ts` | The typing behaviour as a hook — shared by `/keyboard` and every quiz cell |
 | `src/lib/quiz-settings.ts` | Binding of the shared settings; default density is `hard` |
+| `src/lib/paradigm-srs.ts` | Paradigm cells as SRS cards: keys, grade mapping, `recordAttempt`, due-first blanking |
+| `src/components/ParadigmQuiz.tsx` | The page: select a table, fill it in, see what was right |
+| `src/components/HebrewKeypad.tsx` | On-screen letters and points, driving a cell through `insert()` / `backspace()` |
 
 Things that will bite if changed carelessly:
 
@@ -636,6 +641,41 @@ Things that will bite if changed carelessly:
   `backspace()` are for an on-screen Hebrew keypad, which is how the quiz is
   typed on an iPad: the system keyboard puts `:` and `.` on a second layer and
   qamets behind shift, so the mapping costs a dozen layer switches per form.
+- **Next and Enter go down a column, not across a row** (`recitationOrder`).
+  Both layouts list PGNs down the side in textbook order, so a column is one
+  verb's paradigm in the order it is recited. Tab still follows the DOM.
+- **With the keypad open, every cell is `inputMode="none"`.** Otherwise each
+  tap on a cell raises the iPad keyboard over the keypad. A hardware keyboard
+  still types through the mapping. The keypad opens by default on a coarse
+  pointer, read after mount because the page is prerendered.
+- **Keypad keys cancel their own `pointerdown` and `mousedown`**, so tapping
+  one leaves the caret in the cell. Typing still routes through the active
+  cell's registered handle, so a blur costs nothing but the caret.
+- **Peek swaps the value, not the element.** Unmounting the inputs while the
+  answers show would drop focus and the caret every time Peek is let go.
+- **A checked form's grade follows its score** (`gradeForResult`). What
+  `countsAsCorrect` passes is a pass: exactly right is `good`, a forgiven
+  pointing slip is `hard` (it advances the card, barely, and costs a little
+  ease). Anything else is `again`. **Nothing infers `easy`** — a typed table
+  cannot tell an effortless answer from a laboured one — so a paradigm card's
+  ease only holds or falls. If that ratchet ever shows, the fix is a way for
+  the student to say "easy", not a guess.
+- **A repeat the same day, or any attempt with a peek, can demote but not
+  promote** — `shouldUpdateCard`, now in `src/data/srs.ts` and shared with the
+  writing decks. "Same day" is the card's `lastReviewed`, not the session, so
+  meeting כתב's forms again in the summary table an hour later counts as a
+  repeat. Peek shows every answer at once, so after it nothing in the table is
+  unaided recall. Stats still count every graded cell.
+- **Density decides how many blanks; the schedule decides which.**
+  `blankForReview` draws due and never-answered cells first. "Due forms" blanks
+  exactly those and is not saved as a setting, because the shared
+  `QuizSettings` shape holds a density and greek.tools has no schedule to read.
+- **Sync needed no code.** Paradigm cards are ordinary entries in the SRS store,
+  which `/api/progress` accepts under any key; `docs/sync-test-plan.md` test 17
+  checks it on two devices.
+- **Lenient marking decides the score, not the colouring.** A dagesh or vowel
+  slip is amber and labelled in both modes, with "not counted" when lenient —
+  a student who got the consonants right still needs to know which mark was off.
 - **The hook's value is raw; `display` has the final forms.** A word's last
   letter is stored as כ and shown as ך so the next letter can still attach.
   Comparing a raw value to an answer fails on every word ending in ך ם ן ף ץ —
@@ -672,7 +712,7 @@ Things that will bite if changed carelessly:
   the pack, which would add three handwriting cards.
 - **The hatephs are shown on א, everything else on the pack's פ.** A hateph
   under פ is a syllable Hebrew does not have.
-- **Hebrew inside an English note goes through `<Prose>`.** The notes are plain
+- **Hebrew inside an English note goes through `<Prose>`** (`src/components/HebrewRuns.tsx`, shared with the paradigm quiz's table headers). The notes are plain
   strings; a raw Hebrew run in an English sentence is ordered by the bidi
   algorithm against its neighbouring punctuation ("III-ה" rendered as
   "ה-III") and set in the UI font. `Prose` splits the runs out into `<Hebrew>`

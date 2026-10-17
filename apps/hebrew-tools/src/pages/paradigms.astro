@@ -1,0 +1,24 @@
+---
+import ParadigmQuiz from '../components/ParadigmQuiz';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Paradigm Quiz"
+  description="Write Biblical Hebrew verb paradigms out from memory — Qal qatal, yiqtol and wayyiqtol, with an on-screen Hebrew keypad for tablets."
+>
+  <div class="mb-6">
+    <h1
+      class="text-3xl font-bold mb-1"
+      style="color: var(--color-primary);"
+    >
+      Paradigm Quiz
+    </h1>
+    <p class="text-text-muted">
+      Fill in a verb table from memory, one verb at a time or the verb classes side by side.
+      On a tablet the Hebrew keypad puts every letter and vowel point one tap away.
+    </p>
+  </div>
+
+  <ParadigmQuiz client:load />
+</Layout>

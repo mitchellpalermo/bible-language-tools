@@ -69,6 +69,7 @@ import {
   type VerbParadigm,
 } from '../data/verb-paradigms';
 import ErrorBoundary from './ErrorBoundary';
+import { Hebrew, Prose } from './HebrewRuns';
 
 // ─── Sections ─────────────────────────────────────────────────────────────────
 
@@ -86,37 +87,6 @@ type SectionId = (typeof NAV_SECTIONS)[number]['id'];
 const CONJUGATIONS = Object.keys(CONJUGATION_LABELS) as Conjugation[];
 
 // ─── Building blocks ──────────────────────────────────────────────────────────
-
-/** A Hebrew run inside the page's English chrome. */
-function Hebrew({ children, className = '' }: { children: string; className?: string }) {
-  return (
-    <span
-      dir="rtl"
-      lang="he"
-      className={`text-hebrew ${className}`}
-      style={{ fontFamily: 'var(--font-hebrew)' }}
-    >
-      {children}
-    </span>
-  );
-}
-
-const HEBREW_RUN = /([\u0590-\u05FF]+(?:\s+[\u0590-\u05FF]+)*)/;
-
-/**
- * English prose that mentions Hebrew.
- *
- * The notes in `grammar.ts` are plain strings — "ר is not a guttural" — and a
- * Hebrew run dropped raw into an English sentence is ordered by the bidi
- * algorithm against whatever punctuation happens to sit beside it, in the UI
- * font. Splitting the runs out gives each its own direction and the Hebrew face.
- */
-function Prose({ children }: { children: string }) {
-  return children.split(HEBREW_RUN).map((part, i) =>
-    // biome-ignore lint/suspicious/noArrayIndexKey: the parts of one string are positional
-    i % 2 === 1 ? <Hebrew key={i}>{part}</Hebrew> : part,
-  );
-}
 
 function SectionHeading({ id, children }: { id: string; children: React.ReactNode }) {
   return (

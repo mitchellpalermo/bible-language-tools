@@ -52,6 +52,10 @@ describe('buildVerbTable', () => {
     expect(buildVerbTable(paradigm('qal-qatal-begadkephat')).label).toBe(
       'Qal Qatal (Perfect) — כתב (begadkephat)',
     );
+    // A numeral keeps its case: not "iii-ה".
+    expect(buildVerbTable(paradigm('qal-yiqtol-iii-he')).label).toBe(
+      'Qal Yiqtol (Imperfect) — בנה (III-ה)',
+    );
     // היה is its own class, so the class adds nothing to the root.
     expect(buildVerbTable(paradigm('qal-yiqtol-hayah')).label).toBe('Qal Yiqtol (Imperfect) — היה');
   });

@@ -91,10 +91,16 @@ function conjugationLabel(p: Pick<VerbParadigm, 'stem' | 'conjugation'>): string
   return `${STEM_LABELS[p.stem]} ${CONJUGATION_LABELS[p.conjugation]}`;
 }
 
-/** "קטל (strong)" — or just the root, for a verb that is its own class. */
+/**
+ * "קטל (strong)" — or just the root, for a verb that is its own class.
+ *
+ * Only a class named by an ordinary word is lowercased. "III-ה" is a numeral,
+ * and lowercased it reads "iii-ה".
+ */
 function verbLabel(p: VerbParadigm): string {
   const className = VERB_CLASS_LABELS[p.verbClass];
-  return className === p.root ? p.root : `${p.root} (${className.toLowerCase()})`;
+  if (className === p.root) return p.root;
+  return `${p.root} (${/^[A-Z][a-z]+$/.test(className) ? className.toLowerCase() : className})`;
 }
 
 /** One verb as person × number: rows 3m–1c, columns Singular and Plural. */

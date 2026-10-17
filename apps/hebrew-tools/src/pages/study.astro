@@ -1,0 +1,72 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// The hub behind the Study nav group — the same page greek.tools has at /study.
+// A group heading is a destination, not just a label (see SiteNav), so this
+// page has to exist; adding a study mode means a card here and a child link in
+// Layout.astro's navLinks.
+const modes = [
+  {
+    href: '/flashcards',
+    title: 'Flashcards',
+    description:
+      'Study Biblical Hebrew vocabulary with spaced repetition, by textbook chapter or by frequency.',
+    accentColor: '#7C3AED',
+    bgColor: '#F5F3FF',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="11" x2="12" y2="16"/><line x1="9.5" y1="13.5" x2="14.5" y2="13.5"/></svg>`,
+    detail: 'Spaced repetition · Course vocabulary',
+  },
+  {
+    href: '/paradigms',
+    title: 'Paradigms',
+    description:
+      'Write Qal verb paradigms out from memory — one verb at a time, or the verb classes side by side.',
+    accentColor: '#0F766E',
+    bgColor: '#F0FDFA',
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="12" y1="3" x2="12" y2="21"/></svg>`,
+    detail: 'Qatal · Yiqtol · Wayyiqtol',
+  },
+] as const;
+---
+
+<Layout title="Study" description="Flashcards and paradigm drills for Biblical Hebrew.">
+
+  <div class="pt-10 pb-4">
+    <h1 class="text-3xl font-extrabold" style="color: var(--color-primary);">Study</h1>
+    <p class="text-text-muted mt-1 text-sm">Pick a mode and get to work.</p>
+  </div>
+
+  <div class="grid sm:grid-cols-2 gap-5 max-w-3xl pb-16">
+    {modes.map(({ href, title, description, accentColor, bgColor, icon, detail }) => (
+      <a
+        href={href}
+        class="group block bg-bg-card rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-white hover:-translate-y-0.5"
+      >
+        <div class="h-1.5 w-full" style={`background: ${accentColor};`} />
+        <div class="p-6">
+          <div
+            class="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+            style={`background: ${bgColor}; color: ${accentColor};`}
+            set:html={icon}
+          />
+          <h2 class="text-lg font-bold mb-1 group-hover:opacity-80 transition-opacity" style={`color: ${accentColor};`}>
+            {title}
+          </h2>
+          <p class="text-xs font-medium mb-3" style={`color: ${accentColor}; opacity: 0.7;`}>
+            {detail}
+          </p>
+          <p class="text-text-muted text-sm leading-relaxed">
+            {description}
+          </p>
+        </div>
+        <div
+          class="px-6 pb-4 text-xs font-semibold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+          style={`color: ${accentColor};`}
+        >
+          Open →
+        </div>
+      </a>
+    ))}
+  </div>
+
+</Layout>
