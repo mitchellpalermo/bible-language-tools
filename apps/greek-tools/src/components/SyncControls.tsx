@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { formatRelativeTime, getLastSyncedAt, pullAndMerge } from '../lib/sync-manager';
 import ErrorBoundary from './ErrorBoundary';
 
@@ -11,7 +11,13 @@ function lastSyncedLabel(): string {
 
 function SyncControlsInner() {
   const [status, setStatus] = useState<SyncStatus>('idle');
-  const [label, setLabel] = useState(lastSyncedLabel);
+  // Defer the localStorage read to post-mount (ADR 006): reading it during
+  // render mismatches the SSR output and throws React hydration error #418.
+  const [label, setLabel] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLabel(lastSyncedLabel());
+  }, []);
 
   async function handleSync() {
     setStatus('syncing');
@@ -35,7 +41,7 @@ function SyncControlsInner() {
           {status === 'syncing' ? 'Syncing…' : 'Sync now'}
         </button>
         <span className="text-sm text-gray-500" aria-live="polite">
-          {status === 'error' ? 'Sync failed — try again' : label}
+          {status === 'error' ? 'Sync failed — try again' : (label ?? 'Never synced')}
         </span>
       </div>
     </div>
