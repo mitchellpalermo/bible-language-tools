@@ -476,6 +476,7 @@ Phase 6 will render from the same file when it lands.
 | 7b | Shared `TableModel` engine, Hebrew table builders, grading, `useHebrewInput` | ✅ Done |
 | 7c | `/paradigms` page — typed, full table by default, on-screen Hebrew keypad for iPad | ✅ Done |
 | 7d | SRS per form + sync, due-first blanking and a Due forms mode | ✅ Done |
+| 7f | Pronominal suffixes on nouns: `pronominal-suffixes.ts`, a Noun suffixes tab beside the conjugations (#159) | ✅ Done |
 | 7e | More conjugations and stems as the course reaches them | Ongoing |
 
 Typed input comes before handwriting (9f). Three things differ from the plan below:

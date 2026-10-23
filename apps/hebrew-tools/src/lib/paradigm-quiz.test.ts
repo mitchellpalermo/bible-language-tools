@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { suffixParadigms } from '../data/pronominal-suffixes';
 import { getParadigm, type VerbParadigm, verbParadigms } from '../data/verb-paradigms';
 import {
   ALL_CATEGORIES,
@@ -6,6 +7,7 @@ import {
   buildTableModels,
   buildVerbTable,
   CATEGORY_LABELS,
+  categoryTabLabel,
   cellId,
   countsAsCorrect,
   getQuizCells,
@@ -123,10 +125,33 @@ describe('buildTableModels', () => {
   const tables = buildTableModels();
 
   it('builds a verb table for every paradigm and a summary per conjugation', () => {
-    expect(tables.filter((t) => t.layout === 'verb')).toHaveLength(verbParadigms.length);
-    expect(tables.filter((t) => t.layout === 'summary').map((t) => t.category)).toEqual(
-      ALL_CATEGORIES,
+    const verbTables = tables.filter((t) => t.category !== 'suffixes');
+    expect(verbTables.filter((t) => t.layout === 'verb')).toHaveLength(verbParadigms.length);
+    expect(verbTables.filter((t) => t.layout === 'summary').map((t) => t.category)).toEqual(
+      ALL_CATEGORIES.filter((c) => c !== 'suffixes'),
     );
+  });
+
+  it('builds a summary and a table per model noun for the suffixes', () => {
+    const suffixTables = tables.filter((t) => t.category === 'suffixes');
+    expect(suffixTables).toHaveLength(suffixParadigms.length + 1);
+    expect(suffixTables.filter((t) => t.layout === 'summary')).toHaveLength(1);
+  });
+
+  it('shares cell ids between a suffix noun table and the suffix summary', () => {
+    const noun = tables.find((t) => t.id === suffixParadigms[0].id) ?? fail();
+    const summary = tables.find((t) => t.id === 'suffix-summary') ?? fail();
+    const ids = new Set(getQuizCells(summary).map((c) => c.id));
+    for (const cell of getQuizCells(noun)) expect(ids.has(cell.id)).toBe(true);
+  });
+
+  it('grades a typed suffixed form against the unstressed answer', () => {
+    expect(gradeCell('דְּבָרוֹ', suffixParadigms[0].forms['3ms'])).toBe('correct');
+  });
+
+  it('labels every tab', () => {
+    expect(categoryTabLabel('suffixes')).toBe('Noun suffixes');
+    expect(categoryTabLabel('qatal')).toBe('Qal Qatal (Perfect)');
   });
 
   it('gives every table a unique id and a labelled category', () => {

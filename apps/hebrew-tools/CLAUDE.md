@@ -604,6 +604,7 @@ Things to know before changing it:
 | File | Role |
 |---|---|
 | `src/data/verb-paradigms.ts` | The answer key — forms transcribed from Garrett & DeRouchie's tables, keyed by person-gender-number (PGN) |
+| `src/data/pronominal-suffixes.ts` | The suffix tables' answer key — Type 1 and Type 2 on model nouns (#159) |
 | `src/lib/paradigm-quiz.ts` | Table builders, cell ids, `gradeCell`. Blanking comes from `@tools/shared/paradigm-quiz` |
 | `src/lib/use-hebrew-input.ts` | The typing behaviour as a hook — shared by `/keyboard` and every quiz cell |
 | `src/lib/quiz-settings.ts` | Binding of the shared settings; default density is `hard` |
@@ -621,6 +622,18 @@ Things that will bite if changed carelessly:
   builds it before the tests; a fresh local checkout skips), and the forms the Bible never uses are
   listed by name in `UNATTESTED`. **A new unattested form is what a typo looks
   like** — check the page before adding to that list.
+- **The suffix tables follow the nominal grammar's authority, not the verbs'.**
+  `pronominal-suffixes.ts` is general grammar on conventional model nouns
+  (דָּבָר, דְּבָרִים, חָכְמָה), not Garrett & DeRouchie's tables, written out in
+  full because a quiz needs an exact key. The corpus is a second witness that
+  cannot be complete: no noun is suffixed in all ten persons, so the 2fs, 2fp
+  and 3fp cells are named in `UNATTESTED` in its test. They live in a
+  `suffixes` category (a tab beside the conjugations), key cells as
+  `suffix-<set>-<noun>:<pgn>` through `cellId()`, and the PGN is the
+  possessor's. **The feminine singular ־ָה becomes ־ָת (חָכְמָתוֹ), shortening to
+  ־ַת only before ־כֶם/־כֶן** — the issue text said ־ַת throughout; the corpus
+  says otherwise. #152 (the reference page) has not landed: when it does, it
+  should import these model nouns rather than declare its own.
 - **A cell is identified by `<paradigm>:<pgn>`, never by row and column.** The
   textbook prints one paradigm two ways: one verb as person × number, and verb
   classes side by side as PGN × class. `buildVerbTable` and `buildSummaryTable`

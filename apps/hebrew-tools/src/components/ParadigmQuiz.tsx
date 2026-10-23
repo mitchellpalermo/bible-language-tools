@@ -29,14 +29,14 @@
 import ToggleSwitch from '@tools/shared/components/ToggleSwitch';
 import posthog from 'posthog-js';
 import { type KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { SUFFIX_RULES } from '../data/pronominal-suffixes';
 import { loadSRSStore, loadStats, type SRSCard, saveSRSStore, saveStats } from '../data/srs';
-import { getParadigm } from '../data/verb-paradigms';
 import {
   ALL_CATEGORIES,
   buildTableModels,
-  CATEGORY_LABELS,
   type Category,
   type CellResult,
+  categoryTabLabel,
   countsAsCorrect,
   type Density,
   getQuizCells,
@@ -233,21 +233,22 @@ function TableCardText({ table }: { table: TableModel }) {
   if (table.layout === 'summary') {
     return (
       <>
-        <span className="block font-semibold text-sm">All classes side by side</span>
+        <span className="block font-semibold text-sm">
+          {table.detail ?? 'All classes side by side'}
+        </span>
         <span className="block text-xs text-text-muted mt-0.5">
           <Prose>{table.cols.join(' · ')}</Prose>
         </span>
       </>
     );
   }
-  const paradigm = getParadigm(table.id);
   const title = table.label.split(' — ')[1] ?? table.label;
   return (
     <>
       <span className="block font-semibold text-sm">
         <Prose>{title}</Prose>
       </span>
-      {paradigm && <span className="block text-xs text-text-muted mt-0.5">“{paradigm.gloss}”</span>}
+      {table.detail && <span className="block text-xs text-text-muted mt-0.5">{table.detail}</span>}
     </>
   );
 }
@@ -277,7 +278,7 @@ function ParadigmSelector({
 
   return (
     <div className="space-y-6">
-      <div role="tablist" aria-label="Conjugation" className="flex flex-wrap gap-2">
+      <div role="tablist" aria-label="Table group" className="flex flex-wrap gap-2">
         {ALL_CATEGORIES.map((id) => (
           <button
             key={id}
@@ -294,7 +295,7 @@ function ParadigmSelector({
                 : 'bg-primary/10 text-text-muted hover:bg-primary/15'
             }`}
           >
-            Qal {CATEGORY_LABELS[id]}
+            {categoryTabLabel(id)}
           </button>
         ))}
       </div>
@@ -845,6 +846,16 @@ function ParadigmQuizInner() {
         <p className="text-xs text-text-muted">
           The qatal has one third-person plural, the 3cp, written on the 3m row.
         </p>
+      )}
+
+      {table.category === 'suffixes' && (
+        <ul className="text-xs text-text-muted space-y-1 list-disc ps-4">
+          {SUFFIX_RULES.map((rule) => (
+            <li key={rule.id}>
+              <Prose>{rule.text}</Prose>
+            </li>
+          ))}
+        </ul>
       )}
 
       {results && <Legend />}
