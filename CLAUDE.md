@@ -234,9 +234,11 @@ Things to know:
 
 - **The build enforces it.** `posthogHostGuard(process.env)` in each app's `astro.config.mjs` (from `@tools/shared/posthog-host-integration`) fails `astro build` when `PUBLIC_POSTHOG_KEY` is set and the host is empty, not `https`, or on `posthog.com`. No key means analytics is off and nothing is checked; `dev` and `preview` are never checked.
 - **`POSTHOG_ALLOW_DIRECT_HOST=1` is the only override**, and is meant to be deliberate. Do not set it to get a red build green.
-- **The guard checks shape, not reachability.** A dead proxy passes. After changing the secret, confirm in PostHog that new events carry `$lib_custom_api_host = https://t.greek.tools`; a return to `none` on `$pageview` is this regression again.
+- **The guard checks the host's shape and the CSP, not reachability.** A dead proxy passes. After changing the secret, confirm in PostHog that new events carry `$lib_custom_api_host = https://t.greek.tools`; a return to `none` on `$pageview` is this regression again.
 - **It reads `process.env`**, which is what CI supplies. A host that exists only in a local `.env` is not seen.
-- **hebrew.tools shares both secrets**, so it sends to `t.greek.tools` today. That proxy has not been verified to accept the hebrew.tools origin; a `t.hebrew.tools` proxy needs per-app secrets.
+- **The CSP must allow the host too, and the build checks it.** Each app's `public/_headers` sets `script-src` and `connect-src`; `posthogHostGuard(process.env, { headers })` fails the build if the host is not allowed there. hebrew.tools' policy allowed only a never-created `t.hebrew.tools`, so **no hebrew.tools study event was ever recorded** until this was fixed. Each app also has `src/test/csp-posthog.test.ts` reading its real `_headers`.
+- **`_headers` covers static pages only.** Server-rendered routes (`/account/*`) never get the CSP, so their analytics can look healthy while every static page is blocked. When verifying analytics, check a static path such as `/flashcards`, not just `/account`.
+- **hebrew.tools shares both secrets**, so it sends to `t.greek.tools` (cross-site for it); that works because its CSP lists the origin. A dedicated `t.hebrew.tools` proxy with per-app secrets is tracked in issue #169, and the CSP already allows that origin.
 - **The root cause pattern:** a config value with many valid-looking representations, where the wrong one degrades silently instead of failing. Validate such values at build time, where the failure is loud, rather than trusting a runtime fallback.
 
 ## CI
