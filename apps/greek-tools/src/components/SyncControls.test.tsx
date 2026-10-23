@@ -23,13 +23,14 @@ describe('SyncControls', () => {
     expect(screen.getByText('Never synced')).toBeInTheDocument();
   });
 
-  it('shows relative last-synced time when a sync is recorded', () => {
+  it('shows relative last-synced time when a sync is recorded', async () => {
     localStorage.setItem(
       'greek-tools-last-synced',
       new Date(Date.now() - 3 * 60_000).toISOString(),
     );
     render(<SyncControls />);
-    expect(screen.getByText('Last synced 3 minutes ago')).toBeInTheDocument();
+    // The label reads localStorage after mount (ADR 006), so await it.
+    expect(await screen.findByText('Last synced 3 minutes ago')).toBeInTheDocument();
   });
 
   it('enters a loading state and resolves to last-synced on success', async () => {
