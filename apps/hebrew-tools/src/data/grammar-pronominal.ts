@@ -126,7 +126,7 @@ export const relativePronouns: Example[] = [
 ];
 
 export const pronounNotes: string[] = [
-  'אָנֹכִי is the longer 1cs form, at home at the head of a sentence; אֲנִי is the everyday one.',
+  'אָנֹכִי is the longer 1cs form, somewhat more emphatic; אֲנִי is the everyday one.',
   'The far demonstratives do double duty as the personal pronouns: הוּא is both “he” and “that”.',
 ];
 
@@ -192,7 +192,7 @@ export const suffixParadigms: SuffixParadigm[] = [
     id: 'type1-shem',
     suffixType: 'type1',
     title: 'Type 1 — on a singular noun',
-    note: 'The suffix joins the singular stem. A 2fs or 1cp suffix brings a helping tsere (שְׁמֵךְ, שְׁמֵנוּ); 2ms, 2mp and 2fp take a sheva (שִׁמְךָ, שִׁמְכֶם).',
+    note: 'The suffix joins the singular stem. The 2fs and 1cp suffixes bring their own full vowel, so the stem keeps its sheva (שְׁמֵךְ, שְׁמֵנוּ). In the 2ms, 2mp and 2fp the suffix opens with a sheva, so the stem takes a hireq instead (שִׁמְךָ, שִׁמְכֶם).',
     modelGloss: 'name',
     forms: {
       '1cs': 'שְׁמִי',
@@ -211,7 +211,7 @@ export const suffixParadigms: SuffixParadigm[] = [
     id: 'type2-banim',
     suffixType: 'type2',
     title: 'Type 2 — on a plural noun',
-    note: 'The plural stem keeps its yod before every suffix but the 1cs: בָּנֶיךָ and בָּנָיו beside בָּנַי, where the 1cs has no yod of its own.',
+    note: 'The plural stem keeps its yod before every suffix, as in בָּנֶיךָ and בָּנָיו. The 1cs is the exception: the final yod of בָּנַי is the suffix itself, with no separate connecting yod before it.',
     modelGloss: 'sons',
     forms: {
       '1cs': 'בָּנַי',
@@ -228,12 +228,12 @@ export const suffixParadigms: SuffixParadigm[] = [
   },
 ];
 
-/** A feminine noun in ־ָה trades it for ־ַת before a suffix. */
+/** A feminine noun in ־ָה takes a tav before a suffix, pointed ־ָת or ־ַת by the usual vowel changes. */
 export const feminineTavRule: FormRule = {
   id: 'feminine-tav',
   when: 'Feminine ־ָה before a suffix',
-  form: '־ַת',
-  note: 'As תּוֹרָה shows, the feminine ending changes before a suffix: תּוֹרָתִי “my law”, תּוֹרָתְךָ “your law”. The suffixes then join as Type 1.',
+  form: '־ָת / ־ַת',
+  note: 'The feminine ending changes before a suffix, and its vowel is qamets or patah as the ordinary vowel changes dictate. In תּוֹרָה the qamets survives: תּוֹרָתִי “my law”, תּוֹרָתְךָ “your law”. The suffixes then join as Type 1.',
   examples: [
     { from: 'תּוֹרָה', hebrew: 'תּוֹרָתִי', gloss: 'my law' },
     { from: 'תּוֹרָה', hebrew: 'תּוֹרָתְךָ', gloss: 'your law' },
@@ -268,7 +268,7 @@ export const prepositionSuffixRules: FormRule[] = [
     id: 'singular-set',
     when: 'בְּ, לְ, עִם, אֵת — the Type 1 set',
     form: 'as on a singular noun',
-    note: 'No connecting yod. אֵת “with” keeps its own spelling apart from the object marker: אִתִּי is “with me”, אֹתִי is “me”.',
+    note: 'No connecting yod. אֵת “with” and the object marker אֵת are different words that share a spelling, and their suffixed forms part ways: אִתִּי is “with me”, אֹתִי is “me”.',
     examples: [
       { hebrew: 'בִּי', gloss: 'in me' },
       { hebrew: 'בְּךָ', gloss: 'in you' },
@@ -313,6 +313,6 @@ export const prepositionSuffixRules: FormRule[] = [
 ];
 
 export const suffixNotes: string[] = [
-  'בְּנִי is “my son” and בָּנַי is “my sons” — the 1cs is the one place the two sets are told apart by a single vowel.',
+  'בְּנִי is “my son” and בָּנַי is “my sons” — the two differ in their vowels alone.',
   'מִמֶּנּוּ does double duty: “from him” and “from us” are the same form.',
 ];

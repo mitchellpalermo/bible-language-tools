@@ -691,7 +691,7 @@ Pronominal Suffixes and Qal Verb are live.
 |---|---|
 | `src/data/grammar.ts` | Alphabet and vowel-chart data: sounds, letter groups, dagesh, vowel classes, sheva rules |
 | `src/data/grammar-nominal.ts` | Nouns (endings, pattern groups, dual), article rules, preposition rules and lists |
-| `src/data/grammar-pronominal.ts` | Pronouns (personal, demonstrative, interrogative, relative) and pronominal suffixes (Type 1/2 paradigms, feminine ־ָה → ־ַת, suffixes on prepositions) |
+| `src/data/grammar-pronominal.ts` | Pronouns (personal, demonstrative, interrogative, relative) and pronominal suffixes (Type 1/2 paradigms, feminine ־ָה → ־ָת / ־ַת, suffixes on prepositions) |
 | `src/test/corpus.ts` | Test helper: looks a hand-entered form up in the WLC. Shared with `verb-paradigms.test.ts` |
 | `src/components/GrammarReference.tsx` | The page. `NAV_SECTIONS` drives both the sidebar and the pill row |
 | `src/data/verb-paradigms.ts` | The verb tables' source — shared with the paradigm quiz, not copied |
