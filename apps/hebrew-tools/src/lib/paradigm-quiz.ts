@@ -13,6 +13,13 @@
 
 import type { TableModel as SharedTableModel, TableRow } from '@tools/shared/paradigm-quiz';
 import {
+  SUFFIX_PGNS,
+  SUFFIX_SET_LABELS,
+  type SuffixParadigm,
+  type SuffixPgn,
+  suffixParadigms,
+} from '../data/pronominal-suffixes';
+import {
   answerForm,
   CONJUGATION_LABELS,
   CONJUGATION_PGNS,
@@ -42,12 +49,23 @@ export {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-/** Tables are grouped by conjugation, which is how the course meets them. */
-export type Category = Conjugation;
+/**
+ * Tables are grouped by conjugation, which is how the course meets them, and
+ * the pronominal suffixes on nouns sit in a group of their own.
+ */
+export type Category = Conjugation | 'suffixes';
 
-export const ALL_CATEGORIES: Category[] = ['qatal', 'yiqtol', 'wayyiqtol'];
+export const ALL_CATEGORIES: Category[] = ['qatal', 'yiqtol', 'wayyiqtol', 'suffixes'];
 
-export const CATEGORY_LABELS: Record<Category, string> = CONJUGATION_LABELS;
+export const CATEGORY_LABELS: Record<Category, string> = {
+  ...CONJUGATION_LABELS,
+  suffixes: 'Noun suffixes',
+};
+
+/** The tab text: a conjugation is a Qal one, the suffix group is not. */
+export function categoryTabLabel(category: Category): string {
+  return category === 'suffixes' ? CATEGORY_LABELS[category] : `Qal ${CATEGORY_LABELS[category]}`;
+}
 
 /**
  * `verb` is one verb as person × number; `summary` is several verb classes side
@@ -57,6 +75,8 @@ export type TableLayout = 'verb' | 'summary';
 
 export interface TableModel extends SharedTableModel<Category> {
   layout: TableLayout;
+  /** A line for the select screen: the verb's gloss, or what a summary compares. */
+  detail?: string;
 }
 
 /** Result of grading a single blank cell. */
@@ -122,6 +142,7 @@ export function buildVerbTable(paradigm: VerbParadigm): TableModel {
     label: `${conjugationLabel(paradigm)} — ${verbLabel(paradigm)}`,
     category: paradigm.conjugation,
     layout: 'verb',
+    detail: `“${paradigm.gloss}”`,
     cols: ['Singular', 'Plural'],
     rows,
   };
@@ -143,6 +164,7 @@ export function buildSummaryTable(conjugation: Conjugation): TableModel | undefi
     label: `${conjugationLabel(paradigms[0])} — summary`,
     category: conjugation,
     layout: 'summary',
+    detail: 'All classes side by side',
     cols: paradigms.map((p) => `${VERB_CLASS_LABELS[p.verbClass]} (${p.root})`),
     rows: CONJUGATION_PGNS[conjugation].map((pgn) => ({
       label: pgn,
@@ -157,13 +179,54 @@ function formAt(paradigm: VerbParadigm, pgn: Pgn | undefined): string | null {
   return form ? answerForm(form) : null;
 }
 
-/** Build all available TableModels: each conjugation's summary, then its verbs. */
-export function buildTableModels(): TableModel[] {
-  return ALL_CATEGORIES.flatMap((conjugation) => {
-    const summary = buildSummaryTable(conjugation);
-    const verbs = verbParadigms.filter((p) => p.conjugation === conjugation).map(buildVerbTable);
-    return summary ? [summary, ...verbs] : verbs;
+/** One model noun with its ten suffixes, as owner person × number. */
+export function buildSuffixTable(paradigm: SuffixParadigm): TableModel {
+  const rows: TableRow[] = PERSON_ROWS.map((row) => {
+    const pgns = [row.singular, row.plural[0]] as SuffixPgn[];
+    return {
+      label: row.label,
+      answers: pgns.map((pgn) => answerForm(paradigm.forms[pgn])),
+      ids: pgns.map((pgn) => cellId(paradigm.id, pgn)),
+    };
   });
+  return {
+    id: paradigm.id,
+    label: `${SUFFIX_SET_LABELS[paradigm.set]} — ${paradigm.lemma}`,
+    category: 'suffixes',
+    layout: 'verb',
+    detail: `“${paradigm.gloss}” · ${paradigm.shape}`,
+    cols: ['Singular', 'Plural'],
+    rows,
+  };
+}
+
+/** The model nouns side by side, one column each, a row per suffix. */
+export function buildSuffixSummaryTable(): TableModel {
+  return {
+    id: 'suffix-summary',
+    label: 'Pronominal suffixes — summary',
+    category: 'suffixes',
+    layout: 'summary',
+    detail: 'Type 1 and Type 2 side by side',
+    cols: suffixParadigms.map((p) => p.lemma),
+    rows: SUFFIX_PGNS.map((pgn) => ({
+      label: pgn,
+      answers: suffixParadigms.map((p) => answerForm(p.forms[pgn])),
+      ids: suffixParadigms.map((p) => cellId(p.id, pgn)),
+    })),
+  };
+}
+
+/** Build all available TableModels: each conjugation's summary, then its verbs; then suffixes. */
+export function buildTableModels(): TableModel[] {
+  const verbTables = ALL_CATEGORIES.filter((c): c is Conjugation => c !== 'suffixes').flatMap(
+    (conjugation) => {
+      const summary = buildSummaryTable(conjugation);
+      const verbs = verbParadigms.filter((p) => p.conjugation === conjugation).map(buildVerbTable);
+      return summary ? [summary, ...verbs] : verbs;
+    },
+  );
+  return [...verbTables, buildSuffixSummaryTable(), ...suffixParadigms.map(buildSuffixTable)];
 }
 
 // ─── Grading ──────────────────────────────────────────────────────────────────

@@ -58,6 +58,16 @@ describe('choosing a table', () => {
     expect(screen.getByRole('button', { name: /III-\s*ה.*“build”/ })).toBeInTheDocument();
   });
 
+  it('offers the pronominal suffix tables, and a full round grades', async () => {
+    const user = userEvent.setup();
+    await startTable(user, 'Noun suffixes', /דָּבָר.*“word”/);
+
+    expect(screen.getByText(/Every Type 2 suffix contains a yod/)).toBeInTheDocument();
+    typeKeys(cell('3m Singular'), ['d', 'A', 'b', 'A', 'r', 'o']);
+    await user.click(screen.getByRole('button', { name: 'Check answers' }));
+    expect(posthog.capture).toHaveBeenCalled();
+  });
+
   it('cannot start until a table is chosen, and choosing again deselects', async () => {
     const user = userEvent.setup();
     render(<ParadigmQuiz />);
