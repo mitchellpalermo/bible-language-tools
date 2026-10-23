@@ -697,13 +697,14 @@ Things that will bite if changed carelessly:
 ### Grammar Reference (issue #79)
 
 `/grammar` is being built a section at a time — see `ROADMAP.md` Phase 6 for the
-6a–6g breakdown. Alphabet, Vowels, Nouns, The Article, Prepositions and Qal Verb
-are live.
+6a–6g breakdown. Alphabet, Vowels, Nouns, The Article, Prepositions, Pronouns,
+Pronominal Suffixes and Qal Verb are live.
 
 | File | Role |
 |---|---|
 | `src/data/grammar.ts` | Alphabet and vowel-chart data: sounds, letter groups, dagesh, vowel classes, sheva rules |
 | `src/data/grammar-nominal.ts` | Nouns (endings, pattern groups, dual), article rules, preposition rules and lists |
+| `src/data/grammar-pronominal.ts` | Pronouns (personal, demonstrative, interrogative, relative) and pronominal suffixes (Type 1/2 paradigms, feminine ־ָה → ־ָת / ־ַת, suffixes on prepositions) |
 | `src/test/corpus.ts` | Test helper: looks a hand-entered form up in the WLC. Shared with `verb-paradigms.test.ts` |
 | `src/components/GrammarReference.tsx` | The page. `NAV_SECTIONS` drives both the sidebar and the pill row |
 | `src/data/verb-paradigms.ts` | The verb tables' source — shared with the paradigm quiz, not copied |
@@ -776,6 +777,17 @@ Things that will bite if changed carelessly:
 - **Table headers abbreviate below `sm` through `HeaderWord`**, which hides the
   abbreviation from assistive tech and keeps the full word for it. Four Hebrew
   columns do not fit a phone under "SINGULAR / construct".
+- **Suffix paradigms sit on the most-attested model nouns, not the prettiest.**
+  שֵׁם carries Type 1 (8 of 10 cells occur) and בָּנִים Type 2 (9 of 10); the
+  three missing cells — the feminine plural addressees — are regular
+  formations in `UNATTESTED`, not typos. A bare suffix never occurs as a
+  corpus morpheme (OSHB segments prefixes, not suffixes), so the tables show
+  full forms and the notes use full words, never bare affixes.
+- **The מָה spellings are corpus findings.** Counting the text: מָה before א,
+  מַה before most other consonants, מֶה before ע and ח. State the distribution
+  as found; do not retrofit a remembered rule.
+- **2fp is אַתֵּנָה.** The short אַתֵּן occurs only as וְאַתֵּן; the textbook
+  אַתֶּן never occurs.
 
 ### Unicode blocks
 

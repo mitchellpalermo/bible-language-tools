@@ -3,7 +3,7 @@
  * issue #79). Modeled on greek-tools' component of the same name.
  *
  * Sections so far: Alphabet · Vowels · Nouns · The Article · Prepositions ·
- * Qal Verb. The rest of Phase 6 lands a
+ * Pronouns · Pronominal Suffixes · Qal Verb. The rest of Phase 6 lands a
  * section at a time; adding one is an entry in `NAV_SECTIONS` and a `<section>`
  * below, and both navs pick it up.
  *
@@ -58,6 +58,22 @@ import {
   prepositionNotes,
 } from '../data/grammar-nominal';
 import {
+  demonstratives,
+  feminineTavRule,
+  interrogativeRules,
+  POSSESSIVE_EN,
+  personalPronouns,
+  prepositionSuffixRules,
+  pronounNotes,
+  pronounPgnLabel,
+  relativePronouns,
+  SUFFIX_PGNS,
+  type SuffixParadigm,
+  type SuffixPgn,
+  suffixNotes,
+  suffixParadigms,
+} from '../data/grammar-pronominal';
+import {
   CONJUGATION_LABELS,
   CONJUGATION_PGNS,
   type Conjugation,
@@ -79,6 +95,8 @@ export const NAV_SECTIONS = [
   { id: 'nouns', label: 'Nouns' },
   { id: 'article', label: 'The Article' },
   { id: 'prepositions', label: 'Prepositions' },
+  { id: 'pronouns', label: 'Pronouns' },
+  { id: 'suffixes', label: 'Pronominal Suffixes' },
   { id: 'qal-verb', label: 'Qal Verb' },
 ] as const;
 
@@ -656,6 +674,200 @@ function PrepositionsSection() {
   );
 }
 
+// ─── Pronouns ─────────────────────────────────────────────────────────────────
+
+function PronounsSection() {
+  return (
+    <section id="pronouns" aria-labelledby="pronouns-heading" className="mb-16 scroll-mt-16">
+      <SectionHeading id="pronouns">Pronouns</SectionHeading>
+      <p className="text-sm mb-6 text-text-muted">
+        <Prose>
+          The independent personal pronouns, the demonstratives, the interrogatives, and the
+          relative. Hover a row label for the full person, gender and number.
+        </Prose>
+      </p>
+      <div className="space-y-6">
+        <Card title="The personal pronouns">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-primary/5">
+                  <th scope="col" className={TH}>
+                    <span className="sr-only">Person, gender, number</span>
+                  </th>
+                  <th scope="col" className={TH}>
+                    Pronoun
+                  </th>
+                  <th scope="col" className={TH}>
+                    Meaning
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {personalPronouns.map((pronoun) => (
+                  <tr
+                    key={`${pronoun.pgn}-${pronoun.hebrew}`}
+                    className="border-t border-primary/5"
+                  >
+                    <th
+                      scope="row"
+                      title={pronounPgnLabel(pronoun.pgn)}
+                      className={`${TD} text-left text-xs font-semibold text-text-muted w-12`}
+                    >
+                      {pronoun.pgn.replace('-alt', '*')}
+                    </th>
+                    <td className={`${TD} whitespace-nowrap`}>
+                      <Hebrew className="text-lg sm:text-xl leading-tight">{pronoun.hebrew}</Hebrew>
+                    </td>
+                    <td className={`${TD} text-text-muted`}>{pronoun.gloss}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="px-4 py-2 text-xs text-text-muted border-t border-primary/5">
+            * The longer alternate form.
+          </p>
+        </Card>
+
+        <Card title="Demonstratives">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-primary/5">
+                  <th scope="col" className={TH}>
+                    Distance
+                  </th>
+                  <th scope="col" className={TH}>
+                    Number
+                  </th>
+                  <th scope="col" className={TH}>
+                    Hebrew
+                  </th>
+                  <th scope="col" className={TH}>
+                    Meaning
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {demonstratives.map((d) => (
+                  <tr
+                    key={`${d.distance}-${d.number}-${d.gender ?? 'x'}-${d.hebrew}`}
+                    className="border-t border-primary/5"
+                  >
+                    <td className={`${TD} text-xs font-semibold text-text-muted capitalize`}>
+                      {d.distance}
+                    </td>
+                    <td className={`${TD} text-xs text-text-muted capitalize`}>
+                      {d.number}
+                      {d.gender ? ` (${d.gender === 'm' ? 'masc.' : 'fem.'})` : ''}
+                    </td>
+                    <td className={`${TD} whitespace-nowrap`}>
+                      <Hebrew className="text-lg sm:text-xl leading-tight">{d.hebrew}</Hebrew>
+                    </td>
+                    <td className={`${TD} text-text-muted`}>{d.gloss}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+
+        <Card title="Interrogatives">
+          <RuleList rules={interrogativeRules} />
+        </Card>
+
+        <Card title="The relative">
+          <GlossList entries={relativePronouns} />
+        </Card>
+
+        <Card title="Worth remembering">
+          <Notes notes={pronounNotes} />
+        </Card>
+      </div>
+    </section>
+  );
+}
+
+// ─── Pronominal suffixes ──────────────────────────────────────────────────────
+
+function SuffixParadigmCard({ paradigm }: { paradigm: SuffixParadigm }) {
+  return (
+    <Card title={paradigm.title}>
+      <p className="px-4 py-2 text-sm text-text-muted border-b border-primary/5">
+        <Prose>{paradigm.note}</Prose>
+      </p>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-primary/5">
+              <th scope="col" className={TH}>
+                <span className="sr-only">Person, gender, number</span>
+              </th>
+              <th scope="col" className={TH}>
+                Form
+              </th>
+              <th scope="col" className={TH}>
+                Meaning
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {SUFFIX_PGNS.map((pgn: SuffixPgn) => (
+              <tr key={pgn} className="border-t border-primary/5">
+                <th
+                  scope="row"
+                  title={pgnLabel(pgn)}
+                  className={`${TD} text-left text-xs font-semibold text-text-muted w-12`}
+                >
+                  {pgn}
+                </th>
+                <td className={`${TD} whitespace-nowrap`}>
+                  <Hebrew className="text-lg sm:text-xl leading-tight">
+                    {paradigm.forms[pgn]}
+                  </Hebrew>
+                </td>
+                <td className={`${TD} text-text-muted`}>
+                  {POSSESSIVE_EN[pgn]} {paradigm.modelGloss}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Card>
+  );
+}
+
+function SuffixesSection() {
+  return (
+    <section id="suffixes" aria-labelledby="suffixes-heading" className="mb-16 scroll-mt-16">
+      <SectionHeading id="suffixes">Pronominal Suffixes</SectionHeading>
+      <p className="text-sm mb-6 text-text-muted">
+        <Prose>
+          A pronominal suffix turns a noun into a possessed noun — שְׁמִי, “my name” — or a preposition
+          into a pronoun — לִי, “to me”. There are two sets: Type 1 on singular nouns, Type 2 on
+          plural nouns, told apart by the connecting yod.
+        </Prose>
+      </p>
+      <div className="space-y-6">
+        {suffixParadigms.map((paradigm) => (
+          <SuffixParadigmCard key={paradigm.id} paradigm={paradigm} />
+        ))}
+        <Card title="Feminine nouns in ־ָה">
+          <RuleList rules={[feminineTavRule]} />
+        </Card>
+        <Card title="On prepositions">
+          <RuleList rules={prepositionSuffixRules} />
+        </Card>
+        <Card title="Worth remembering">
+          <Notes notes={suffixNotes} />
+        </Card>
+      </div>
+    </section>
+  );
+}
+
 // ─── Qal verb ─────────────────────────────────────────────────────────────────
 
 /** "קטל (strong)" over "kill" — or just the root, for a verb that is its own class. */
@@ -853,6 +1065,8 @@ function GrammarReferenceInner() {
         <NounsSection />
         <ArticleSection />
         <PrepositionsSection />
+        <PronounsSection />
+        <SuffixesSection />
         <QalVerbSection />
       </div>
     </div>

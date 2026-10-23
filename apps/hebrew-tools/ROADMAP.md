@@ -394,7 +394,7 @@ six sections; each later step is a data module, a `<section>`, and one entry in
 |------|-------|--------|-------|
 | 6a | `/grammar` shell and section nav; Alphabet (consonants, letter groups, dagesh); Vowels (chart, sheva); Qal Verb rendered from `verb-paradigms.ts` | ✅ Done | #149 (PR) |
 | 6b | Nouns — endings, absolute and construct, vowel reduction, segolates, the dual; The Article; Prepositions (inseparable, מִן, independent) | ✅ Done | #149 (PR) |
-| 6c | Pronouns — independent personal, demonstrative, interrogative, relative; Pronominal Suffixes on nouns and prepositions | Next | #152 |
+| 6c | Pronouns — independent personal, demonstrative, interrogative, relative; Pronominal Suffixes on nouns and prepositions | ✅ Done | #152 |
 | 6d | Rest of the Qal — imperative, infinitives, participles; Waw Consecutive notes. Data goes in `verb-paradigms.ts` so the quiz gets it too | Queued | #153 |
 | 6e | Derived stems — Niphal, Piel, Pual, Hiphil, Hophal, Hithpael | Queued | #154 |
 | 6f | Weak verbs as an overlay on the strong paradigm, with diverging cells highlighted; suffixes on verbs | Queued | #155 |
@@ -748,9 +748,9 @@ The following modules from greek.tools can be copied with minimal or zero change
 | 8c | 4c | Reader: shell — book/chapter nav, RTL verses | Medium | OSHB pipeline | ✅ Done | #119 |
 | 8d | 4d | Reader: word popup — morphemes, parse, gloss | Medium | 4a, 4b, 4c | ✅ Done | #120 |
 | 8e | 4e | Reader: cantillation toggle + studied-word highlighting | Low | 4c | ✅ Done | #121 |
-| 9 | 6 | Grammar Reference | High (content-heavy) — broken into 6a–6g by section | None | In progress — 6a, 6b done | #79 |
-| 9c | 6c | Grammar: pronouns + pronominal suffixes | Medium | 6b | Next | #152 |
-| 9d | 6d | Grammar: rest of the Qal + waw consecutive | Medium | 6a | Queued | #153 |
+| 9 | 6 | Grammar Reference | High (content-heavy) — broken into 6a–6g by section | None | In progress — 6a, 6b, 6c done | #79 |
+| 9c | 6c | Grammar: pronouns + pronominal suffixes | Medium | 6b | ✅ Done | #152 |
+| 9d | 6d | Grammar: rest of the Qal + waw consecutive | Medium | 6a | Next | #153 |
 | 9e | 6e | Grammar: derived stems | High | 6d | Queued | #154 |
 | 9f | 6f | Grammar: weak-verb overlay + suffixes on verbs | High | 6d, 6e | Queued | #155 |
 | 9g | 6g | Grammar: numerals | Low | 6b | Queued | #156 |
