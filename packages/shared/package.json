@@ -17,6 +17,8 @@
     "./flashcard-settings": "./src/flashcard-settings.ts",
     "./nav": "./src/nav.ts",
     "./nav-menu": "./src/nav-menu.ts",
+    "./posthog-host": "./src/posthog-host.ts",
+    "./posthog-host-integration": "./src/posthog-host-integration.ts",
     "./ink": "./src/ink/index.ts",
     "./components/InkCanvas": "./src/ink/components/InkCanvas.tsx",
     "./components/SiteNav.astro": "./src/components/SiteNav.astro",

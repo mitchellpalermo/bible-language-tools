@@ -219,9 +219,25 @@ Secrets required in GitHub repo settings:
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
 - `BETTER_AUTH_SECRET`
+- `PUBLIC_POSTHOG_KEY` and `PUBLIC_POSTHOG_HOST` (see "Analytics ingest host" below — the host is a first-party proxy, not a PostHog domain)
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
 - `CLAUDE_CODE_OAUTH_TOKEN` (for `@claude` automation)
+
+## Analytics ingest host
+
+`PUBLIC_POSTHOG_HOST` must be the first-party reverse proxy, `https://t.greek.tools`, **not** `https://us.posthog.com` or `https://us.i.posthog.com`. PostHog's own domains are on every common blocklist; a first-party subdomain is not. Both values are GitHub secrets read by the build step in each workflow.
+
+This was learned the expensive way. The Jun 10, 2026 monorepo cutover (`251af0c`) set the secret to `https://us.posthog.com`. Events still arrived, so nothing failed, but ad-blocked visitors vanished: daily users fell from ~25 to ~3 within two days and stayed there until October. Data from Jun 11 onward undercounts and cannot be backfilled. Full account: `apps/greek-tools/docs/adr/007-posthog-first-party-ingest-host.md`.
+
+Things to know:
+
+- **The build enforces it.** `posthogHostGuard(process.env)` in each app's `astro.config.mjs` (from `@tools/shared/posthog-host-integration`) fails `astro build` when `PUBLIC_POSTHOG_KEY` is set and the host is empty, not `https`, or on `posthog.com`. No key means analytics is off and nothing is checked; `dev` and `preview` are never checked.
+- **`POSTHOG_ALLOW_DIRECT_HOST=1` is the only override**, and is meant to be deliberate. Do not set it to get a red build green.
+- **The guard checks shape, not reachability.** A dead proxy passes. After changing the secret, confirm in PostHog that new events carry `$lib_custom_api_host = https://t.greek.tools`; a return to `none` on `$pageview` is this regression again.
+- **It reads `process.env`**, which is what CI supplies. A host that exists only in a local `.env` is not seen.
+- **hebrew.tools shares both secrets**, so it sends to `t.greek.tools` today. That proxy has not been verified to accept the hebrew.tools origin; a `t.hebrew.tools` proxy needs per-app secrets.
+- **The root cause pattern:** a config value with many valid-looking representations, where the wrong one degrades silently instead of failing. Validate such values at build time, where the failure is loud, rather than trusting a runtime fallback.
 
 ## CI
 

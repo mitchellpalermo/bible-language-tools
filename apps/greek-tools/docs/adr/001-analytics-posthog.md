@@ -29,7 +29,7 @@ Several options were evaluated.
 
 Use **PostHog** (cloud-hosted, US region) for analytics.
 
-PostHog is initialized via `posthog-js` in the site layout. A `PostHogProvider` wraps React islands to enable `usePostHog()` in components. Custom events follow the taxonomy defined in the Analytics PRD (`docs/prd/analytics.md`). Session replay is enabled at a 20% sample rate.
+PostHog is initialized via `posthog-js` in the site layout. A `PostHogProvider` wraps React islands to enable `usePostHog()` in components. Custom events follow the taxonomy defined in the Analytics PRD (`docs/prd/analytics.md`). Session replay is enabled at a 20% sample rate. Where events are sent matters as much as the vendor: see [ADR 007](007-posthog-first-party-ingest-host.md).
 
 ---
 
