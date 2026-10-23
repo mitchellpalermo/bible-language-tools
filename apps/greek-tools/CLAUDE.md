@@ -102,8 +102,6 @@ Target 90% coverage on all new code. For new features, use the Kent Dodds Testin
 
 Features are tracked as GitHub Issues (see `docs/adr/002-github-issues-for-task-tracking.md`). Use `/fix-issue <N>` to implement an issue. Always use `closes #N` in commit messages to auto-close on merge.
 
-Issue template is at `.github/ISSUE_TEMPLATE/feature.md`.
-
 ## Greek Domain Notes
 
 - Greek input uses a Beta Code–style mapping (`src/lib/greek-input.ts`): ASCII keys produce Greek characters

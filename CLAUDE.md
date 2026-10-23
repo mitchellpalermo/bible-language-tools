@@ -221,7 +221,7 @@ Secrets required in GitHub repo settings:
 - `BETTER_AUTH_SECRET`
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
-- `ANTHROPIC_API_KEY` (for `@claude` automation)
+- `CLAUDE_CODE_OAUTH_TOKEN` (for `@claude` automation)
 
 ## CI
 
