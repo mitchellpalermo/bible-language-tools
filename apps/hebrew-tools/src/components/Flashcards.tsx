@@ -1,25 +1,19 @@
-import DrillButtons, {
-  DRILL_RESULTS,
-  type DrillResult,
-} from '@tools/shared/components/DrillButtons';
+import DrillButtons from '@tools/shared/components/DrillButtons';
 import GradeButtons from '@tools/shared/components/GradeButtons';
 import ToggleSwitch from '@tools/shared/components/ToggleSwitch';
-import { nextRound, requeueMissed, shuffle } from '@tools/shared/flashcard-session';
-import posthog from 'posthog-js';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  GRADE_QUALITY,
-  isDue,
-  isPassingGrade,
+  type FlashcardSessionEvent,
+  type FlashcardStorage,
+  type StudyMode,
+  useFlashcardSession,
+} from '@tools/shared/use-flashcard-session';
+import posthog from 'posthog-js';
+import { useCallback, useMemo, useState } from 'react';
+import {
   loadSRSStore,
   loadStats,
   newCard,
-  nextSRS,
   normalizeKey,
-  REVIEW_GRADES,
-  type ReviewGrade,
-  recordReview,
-  type SRSCard,
   STREAK_THRESHOLD,
   saveSRSStore,
   saveStats,
@@ -53,30 +47,12 @@ import ErrorBoundary from './ErrorBoundary';
 // direction, a frequency-band filter, and textbook chapter decks. Typing mode,
 // the reverse direction, and part-of-speech/root filters are Phase 2c (#74).
 //
-// TODO(#87): the session/queue state machine below (buildQueue, shuffle,
-// startSession, handleReview, handleFlip, the stats bar, the session-complete
-// screen) is structurally near-identical to greek-tools' Flashcards.tsx --
-// only the SM-2 algorithm is shared today (@tools/shared/srs). Once Phase 2c
-// (#74) lands and this component's final shape is known, extract a generic
-// useFlashcardSession<T>() hook (+ maybe StatsBar/SessionCompleteScreen) into
-// packages/shared, with front/back rendering and answer-checking left as
-// per-app callbacks since those are genuinely script-specific. See #87.
+// The session itself — dealing, grading, drills, the keyboard — is
+// `useFlashcardSession` in @tools/shared (#87). This file is the Hebrew card,
+// the deck and filter controls, and the mapping onto this app's storage keys
+// and analytics events.
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-/**
- * - `srs`: due cards, then new ones. Graded Again/Hard/Good/Easy, which writes
- *   the SRS store.
- * - `all`: one shuffled pass through the deck. A drill — no SRS writes. Graded
- *   Missed / Got it, and a missed card comes back a few cards later until it is
- *   got right once (successive relearning), so a pass ends with every card
- *   recalled correctly at least once.
- * - `endless`: `all` that never ends. When the deck runs out it is reshuffled
- *   and dealt again (#164). Also a drill: an endless *due* queue is incoherent,
- *   since grading a card makes it not-due, so the only ways to keep going would
- *   be to re-queue cards just reviewed (corrupting their intervals) or to stop.
- */
-type StudyMode = 'srs' | 'all' | 'endless';
 
 const STUDY_MODES: { mode: StudyMode; label: string }[] = [
   { mode: 'srs', label: 'SRS Review' },
@@ -141,30 +117,16 @@ export function matchFreq(freq: number | undefined, f: FreqFilter): boolean {
   return freq < 100;
 }
 
-function buildQueue(
-  vocab: HebrewVocabWord[],
-  mode: StudyMode,
-  store: Record<string, SRSCard>,
-): HebrewVocabWord[] {
-  if (mode !== 'srs') return shuffle(vocab);
-  const due: HebrewVocabWord[] = [];
-  const fresh: HebrewVocabWord[] = [];
-  for (const w of vocab) {
-    const c = store[srsKey(w)];
-    if (!c) fresh.push(w);
-    else if (isDue(c)) due.push(w);
-  }
-  // Due cards first (shuffled), then new cards (shuffled)
-  return [...shuffle(due), ...shuffle(fresh)];
-}
+const STORAGE: FlashcardStorage = {
+  loadStore: loadSRSStore,
+  saveStore: saveSRSStore,
+  loadStats,
+  saveStats,
+};
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 function FlashcardsInner() {
-  // Persistent state (localStorage)
-  const [srsStore, setSrsStore] = useState<Record<string, SRSCard>>(() => loadSRSStore());
-  const [stats, setStats] = useState(() => loadStats());
-
   // Mode
   const [studyMode, setStudyMode] = useState<StudyMode>('srs');
 
@@ -195,27 +157,6 @@ function FlashcardsInner() {
     });
   }, []);
 
-  // Session state
-  const [queue, setQueue] = useState<HebrewVocabWord[]>([]);
-  const [index, setIndex] = useState(0);
-  const [flipped, setFlipped] = useState(false);
-  const [sessionScore, setSessionScore] = useState({ known: 0, learning: 0 });
-  const [sessionDone, setSessionDone] = useState(false);
-
-  // Drill state (Study All, Endless). `deck` is the session's cards once each,
-  // which an Endless round is reshuffled from — the queue itself holds repeats
-  // of missed cards. `attemptedRef` is the cards already answered this round,
-  // so only a first attempt is scored. `missedKeys` is every card missed this
-  // session, offered for SRS Review when the session ends.
-  const [deck, setDeck] = useState<HebrewVocabWord[]>([]);
-  const attemptedRef = useRef(new Set<string>());
-  const [missedKeys, setMissedKeys] = useState<ReadonlySet<string>>(() => new Set());
-  const [addedToReview, setAddedToReview] = useState<number | null>(null);
-
-  // Keep a ref to srsStore so buildQueue always uses latest without deps
-  const srsStoreRef = useRef(srsStore);
-  srsStoreRef.current = srsStore;
-
   // ─── Filtered vocabulary ────────────────────────────────────────────────────
 
   const textbookId = selection.deck === 'all' ? null : selection.deck;
@@ -237,228 +178,73 @@ function FlashcardsInner() {
     [textbookId, selection.chapters],
   );
 
-  const dueCount = useMemo(
-    () =>
-      filteredVocab.filter((w) => {
-        const c = srsStore[srsKey(w)];
-        return c ? isDue(c) : false;
-      }).length,
-    [filteredVocab, srsStore],
-  );
-  const newCount = useMemo(
-    () => filteredVocab.filter((w) => !srsStore[srsKey(w)]).length,
-    [filteredVocab, srsStore],
-  );
+  // ─── Session ─────────────────────────────────────────────────────────────────
 
-  // ─── Session management ─────────────────────────────────────────────────────
-
-  const startSession = useCallback(() => {
-    const nextQueue = buildQueue(filteredVocab, studyMode, srsStoreRef.current);
-    setQueue(nextQueue);
-    setDeck(nextQueue);
-    setIndex(0);
-    setFlipped(false);
-    setSessionScore({ known: 0, learning: 0 });
-    setSessionDone(false);
-    attemptedRef.current = new Set();
-    setMissedKeys(new Set());
-    setAddedToReview(null);
-    posthog.capture('hebrew_flashcard_session_started', {
-      deck_size: nextQueue.length,
-      deck: selection.deck === 'all' ? 'all-vocabulary' : selection.deck,
-      chapters: selection.chapters.length > 0 ? selection.chapters.length : 'all',
-      categories: selection.categories.join(','),
-      study_mode: studyMode,
-    });
-  }, [filteredVocab, studyMode, selection]);
-
-  // Mount: start initial session
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    startSession();
-  }, [startSession]);
-
-  // Restart when mode, deck, or filter changes (not on srsStore changes)
-  const prevStudyMode = useRef(studyMode);
-  const prevFreqFilter = useRef(freqFilter);
-  const prevSelection = useRef(selection);
-
-  useEffect(() => {
-    if (
-      studyMode !== prevStudyMode.current ||
-      freqFilter !== prevFreqFilter.current ||
-      selection !== prevSelection.current
-    ) {
-      prevStudyMode.current = studyMode;
-      prevFreqFilter.current = freqFilter;
-      prevSelection.current = selection;
-      startSession();
+  const onEvent = (event: FlashcardSessionEvent) => {
+    switch (event.type) {
+      case 'session_started':
+        posthog.capture('hebrew_flashcard_session_started', {
+          deck_size: event.deckSize,
+          deck: selection.deck === 'all' ? 'all-vocabulary' : selection.deck,
+          chapters: selection.chapters.length > 0 ? selection.chapters.length : 'all',
+          categories: selection.categories.join(','),
+          study_mode: event.studyMode,
+        });
+        break;
+      case 'reviewed':
+        posthog.capture('hebrew_flashcard_reviewed', {
+          result: event.result,
+          grade: event.grade,
+          interval_days: event.intervalDays,
+        });
+        break;
+      case 'drilled':
+        posthog.capture('hebrew_flashcard_reviewed', {
+          result: event.result,
+          study_mode: event.studyMode,
+          first_attempt: event.firstAttempt,
+        });
+        break;
+      case 'missed_added_to_review':
+        posthog.capture('hebrew_flashcard_missed_added_to_review', {
+          count: event.count,
+          study_mode: event.studyMode,
+        });
+        break;
     }
+  };
+
+  const {
+    card,
+    index,
+    queue,
+    flipped,
+    flip: handleFlip,
+    review: handleReview,
+    drill: handleDrill,
+    sessionScore,
+    sessionDone,
+    startSession,
+    finish,
+    srsStore,
+    stats,
+    dueCount,
+    newCount,
+    accuracy,
+    resetStore,
+    missedNotInReview,
+    addMissedToReview,
+    addedToReview,
+  } = useFlashcardSession({
+    words: filteredVocab,
+    getKey: srsKey,
+    studyMode,
+    // A new deck or filter deals a new session. Compared by value, so
+    // re-selecting what is already selected does not throw away the session.
+    restartKey: JSON.stringify([selection, freqFilter]),
+    storage: STORAGE,
+    onEvent,
   });
-
-  // ─── Review handler ─────────────────────────────────────────────────────────
-
-  const card = queue[index];
-
-  /** Move past the current card: to the next one, a new round, or the end. */
-  const advance = useCallback(
-    (nextQueue: HebrewVocabWord[]) => {
-      if (index + 1 < nextQueue.length) {
-        setQueue(nextQueue);
-        setIndex((i) => i + 1);
-        setFlipped(false);
-      } else if (studyMode === 'endless' && card) {
-        // Reshuffle this session's own deck. A filter change restarts the
-        // session instead, so the deck never needs re-reading here.
-        setQueue(nextRound(deck, card, srsKey));
-        setIndex(0);
-        setFlipped(false);
-        attemptedRef.current = new Set();
-      } else {
-        setSessionDone(true);
-      }
-    },
-    [index, studyMode, card, deck],
-  );
-
-  const handleReview = useCallback(
-    (grade: ReviewGrade) => {
-      if (!card) return;
-
-      const correct = isPassingGrade(grade);
-      const intervalDays = srsStore[srsKey(card)]?.interval ?? 0;
-
-      if (studyMode === 'srs') {
-        setSrsStore((prev) => {
-          const k = srsKey(card);
-          const existing = prev[k] ?? newCard(k);
-          const updated = nextSRS(existing, GRADE_QUALITY[grade]);
-          const next = { ...prev, [k]: updated };
-          saveSRSStore(next);
-          return next;
-        });
-      }
-
-      posthog.capture('hebrew_flashcard_reviewed', {
-        result: correct ? 'correct' : 'incorrect',
-        grade,
-        interval_days: intervalDays,
-      });
-
-      setStats((prev) => {
-        const next = recordReview(prev, correct);
-        saveStats(next);
-        return next;
-      });
-
-      setSessionScore((s) => ({
-        known: s.known + (correct ? 1 : 0),
-        learning: s.learning + (correct ? 0 : 1),
-      }));
-
-      advance(queue);
-    },
-    [card, studyMode, srsStore, queue, advance],
-  );
-
-  /** A drill answer. Never touches the SRS store. */
-  const handleDrill = useCallback(
-    (result: DrillResult) => {
-      if (!card) return;
-      const k = srsKey(card);
-      const correct = result === 'got-it';
-
-      // Only a card's first attempt in a round is scored. A missed card comes
-      // back until it is got right, and counting those repeats would inflate
-      // accuracy with answers the student had just been shown.
-      const firstAttempt = !attemptedRef.current.has(k);
-      attemptedRef.current.add(k);
-
-      posthog.capture('hebrew_flashcard_reviewed', {
-        result: correct ? 'correct' : 'incorrect',
-        study_mode: studyMode,
-        first_attempt: firstAttempt,
-      });
-
-      if (firstAttempt) {
-        setStats((prev) => {
-          const next = recordReview(prev, correct);
-          saveStats(next);
-          return next;
-        });
-        setSessionScore((s) => ({
-          known: s.known + (correct ? 1 : 0),
-          learning: s.learning + (correct ? 0 : 1),
-        }));
-      }
-
-      if (!correct) setMissedKeys((prev) => (prev.has(k) ? prev : new Set(prev).add(k)));
-      advance(correct ? queue : requeueMissed(queue, index));
-    },
-    [card, studyMode, queue, index, advance],
-  );
-
-  // Missed words not yet in the SRS store. Cards already scheduled are left
-  // alone: a drill must never move an interval, ease or due date.
-  const missedNotInReview = useMemo(
-    () => [...missedKeys].filter((k) => !srsStore[k]),
-    [missedKeys, srsStore],
-  );
-
-  /**
-   * Hand the session's missed words to SRS Review, as new cards due today.
-   * A cram helps tomorrow's quiz and fades by the exam; spaced review is what
-   * keeps a word, so this is the bridge from one to the other.
-   */
-  const addMissedToReview = useCallback(() => {
-    setSrsStore((prev) => {
-      const next = { ...prev };
-      for (const k of missedKeys) if (!next[k]) next[k] = newCard(k);
-      saveSRSStore(next);
-      return next;
-    });
-    setAddedToReview(missedNotInReview.length);
-    posthog.capture('hebrew_flashcard_missed_added_to_review', {
-      count: missedNotInReview.length,
-      study_mode: studyMode,
-    });
-  }, [missedKeys, missedNotInReview, studyMode]);
-
-  const handleFlip = useCallback(() => setFlipped((f) => !f), []);
-
-  // ─── Keyboard shortcuts ──────────────────────────────────────────────────────
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      if (sessionDone) return;
-      if (e.key === ' ' || e.key === 'Enter') {
-        e.preventDefault();
-        handleFlip();
-      }
-      // Numbers answer the card, in the order the buttons are drawn: 1-4 for
-      // the SRS grades, 1-2 for Missed / Got it. Left/Right are aliases for the
-      // fail and pass ends of either row.
-      if (flipped && studyMode === 'srs') {
-        const byNumber = REVIEW_GRADES[Number(e.key) - 1];
-        if (byNumber) handleReview(byNumber);
-        else if (e.key === 'ArrowRight') handleReview('good');
-        else if (e.key === 'ArrowLeft') handleReview('again');
-      } else if (flipped) {
-        const byNumber = DRILL_RESULTS[Number(e.key) - 1];
-        if (byNumber) handleDrill(byNumber);
-        else if (e.key === 'ArrowRight') handleDrill('got-it');
-        else if (e.key === 'ArrowLeft') handleDrill('missed');
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [flipped, sessionDone, studyMode, handleFlip, handleReview, handleDrill]);
-
-  // ─── Derived values ──────────────────────────────────────────────────────────
-
-  const accuracy =
-    stats.totalReviewed > 0 ? Math.round((stats.totalCorrect / stats.totalReviewed) * 100) : null;
 
   // ─── Session complete screen ─────────────────────────────────────────────────
 
@@ -986,7 +772,7 @@ function FlashcardsInner() {
         {studyMode === 'endless' && (
           <button
             type="button"
-            onClick={() => setSessionDone(true)}
+            onClick={finish}
             className="text-sm text-text-muted hover:text-primary transition-colors font-medium"
           >
             Finish session
@@ -997,14 +783,12 @@ function FlashcardsInner() {
             type="button"
             onClick={() => {
               if (confirm('Reset all SRS progress? This cannot be undone.')) {
-                setSrsStore({});
-                saveSRSStore({});
                 // PUT merges server-side, so clearing localStorage alone would
                 // be undone by the next sync. Destruction has to go through
                 // DELETE. Fire-and-forget: a failure here must not block the
                 // reset the user already sees locally.
                 if (hasAuthHint()) void deleteServerProgress();
-                startSession();
+                resetStore();
               }
             }}
             className="text-sm text-text-muted hover:text-coral transition-colors font-medium"

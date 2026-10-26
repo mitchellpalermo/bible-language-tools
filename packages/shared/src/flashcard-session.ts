@@ -1,10 +1,9 @@
 /**
- * Pure pieces of the flashcard session state machine. hebrew-tools'
- * `Flashcards.tsx` uses them today; greek-tools adopts them with #87.
+ * Pure pieces of the flashcard session state machine, used by
+ * `useFlashcardSession` in `./use-flashcard-session` (#87).
  *
  * Endless mode (#164) is "the queue ran out, deal a new round" — a session
- * rule, not a rendering one — so it lives here rather than in either
- * component, and is where #87's `useFlashcardSession` hook should pick it up.
+ * rule, not a rendering one — so it lives here rather than in either app.
  */
 
 /** Fisher–Yates. `random` is injectable so tests can pin an order. */

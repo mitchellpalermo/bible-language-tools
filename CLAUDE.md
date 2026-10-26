@@ -55,7 +55,8 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/quiz-settings` | `createQuizSettings(storageKey, overrides?)` factory for persisting quiz difficulty; `overrides` sets one app's defaults |
 | `@tools/shared/paradigm-quiz` | The paradigm quiz engine — `TableModel`, `getQuizCells`, `applyDensity`. Which tables exist and how an answer is graded stay in each app |
 | `@tools/shared/flashcard-settings` | `createFlashcardSettings(storageKey)` factory for what the flashcard face shows before you answer |
-| `@tools/shared/flashcard-session` | `shuffle`, `nextRound` and `requeueMissed` — pure flashcard queue rules: Endless mode's reshuffle, and the drill modes' re-queue of a missed card. hebrew-tools uses them today; greek-tools picks them up with #87 |
+| `@tools/shared/flashcard-session` | `shuffle`, `nextRound` and `requeueMissed` — pure flashcard queue rules: Endless mode's reshuffle, and the drill modes' re-queue of a missed card. Used through `use-flashcard-session` |
+| `@tools/shared/use-flashcard-session` | `useFlashcardSession<T>()` — the flashcard session engine: dealing, SRS grading, drills, Endless, typed answers, the keyboard. hebrew-tools runs on it; greek-tools moves onto it in #87's second PR. See "The flashcard session engine" below |
 | `@tools/shared/nav` | `NavLink` type and the active-route predicates the nav renders with |
 | `@tools/shared/nav-menu` | `initNavMenu()` — DOM controller for the mobile drawer |
 | `@tools/shared/ink` | Stylus writing engine — stroke capture, palm rejection, smoothing, variable-width rendering, geometric scoring, and the `ScriptPack` type |
@@ -190,6 +191,45 @@ look like one choice from a row of alternatives. It is a `role="switch"` with
 `aria-checked` rather than a button with `aria-pressed`, because it is a state
 and not a momentary action, and screen readers announce the two differently.
 
+### The flashcard session engine
+
+`useFlashcardSession<T>()` (`packages/shared/src/use-flashcard-session.ts`, #87)
+is everything about a flashcard session that is not about a script. Each app
+passes in what differs by language and keeps its own rendering:
+
+| The hook owns | Each app owns |
+|---|---|
+| Dealing (`buildQueue`), the Endless reshuffle, the drill re-queue | How a card is drawn — direction, font, fields |
+| SRS grading, drill answers, first-attempt scoring | Marking a typed answer (`checkAnswer`) |
+| The SRS store and stats in memory, and saving them | Storage keys (`storage`: its own load/save functions) |
+| Adding a drill's missed cards to SRS Review | Analytics event names (`onEvent` → `posthog.capture`) |
+| Typed-answer state, and the keyboard | Decks, filters, and the `restartKey` built from them |
+
+Things to know before changing it:
+
+- **A session restarts on `restartKey` or `studyMode`, nothing else.** Not on
+  a new `words` array, and not on an SRS write — the store is read through a
+  ref. An app builds the key from the state that defines its deck, so it decides
+  what counts as a different deck. hebrew.tools compares by value
+  (`JSON.stringify`), so re-selecting the current chapter keeps the session.
+- **`deck` and `queue` are different things.** `queue` holds a missed card's
+  repeats; `deck` is the session's cards once each. An Endless round is
+  reshuffled from `deck` — from `queue`, the repeats would compound round after
+  round.
+- **Every move to another card clears the per-card state**, round boundaries
+  included: flipped, the typed answer and its mark. A boundary that skipped the
+  reset showed the last card's "Not quite" on the next one.
+- **The hook names no analytics events.** It emits typed `FlashcardSessionEvent`s
+  and each app maps them to its own names, which PostHog dashboards depend on:
+  `hebrew_flashcard_*` on hebrew.tools, `flashcard_*` on greek.tools.
+- **The session rules are tested once, in `use-flashcard-session.test.ts`.** An
+  app's `Flashcards.test.tsx` checks its wiring and what it draws, not the
+  rules again. That includes options only one app uses (typed answers, the
+  keyboard switch), so the hook's tests cover every option.
+- **`resetStore()` is local only.** A server copy is the caller's to clear —
+  `PUT /api/progress` merges, so a reset that skips the server is undone by the
+  next sync.
+
 ## Streaks, study days, and sync merges
 
 Three defects lived here at once (fixed Aug 2026). All three are easy to
@@ -278,6 +318,16 @@ GitHub Actions workflows in `.github/workflows/`:
 - `claude.yml` — triggers Claude Code on issues/PRs that mention `@claude`
 
 Changing `packages/shared` triggers both app workflows.
+
+**`packages/shared` runs with coverage in CI** (`test:coverage`), so its 90%
+threshold is a gate. The same switch makes every test there run instrumented on
+a shared runner, which is the slowest that code ever runs: about 10× a laptop
+for V8 coverage, and about 5× again for the runner. A wall-clock budget in a test
+must hold under both. The one such test (`ink/score/geom.test.ts`, "without a
+per-attempt search") failed its old 25ms budget at 33ms on the first CI run with
+coverage, while the same run on the other app's workflow passed — a timing
+budget sized from a laptop fails intermittently, not every time. Size a budget
+below the regression it exists to catch, not above the figure you measured.
 
 Both workflows run `pnpm lint` before the tests. It is the same command in both
 because the lint gate is repo-wide, not per app — running it twice is cheap and

@@ -217,11 +217,19 @@ describe('scoreInk', () => {
     // That is the deliberate price of the fix, and it is paid once when the
     // student taps Compare, never inside a render or a pointer handler.
     //
-    // The assertion is far looser than either figure because V8 coverage inflates
-    // this roughly tenfold — the search is a tight loop of small calls, which is
-    // what that instrumentation costs most — and this suite runs both ways. It is
-    // here to catch a regression to a brute-force nearest-point search, which
-    // costs three orders of magnitude, not to police tenths of a millisecond.
+    // The assertion is far looser than either figure because it has to hold on
+    // the slowest machine that runs it, under coverage. V8 coverage inflates this
+    // roughly tenfold (0.77ms → 6.6ms on a laptop) — the search is a tight loop
+    // of small calls, which is what that instrumentation costs most — and a
+    // shared CI runner is about five times slower again: 33ms, which failed the
+    // old 25ms budget the day CI started running this package with coverage.
+    //
+    // It is here to catch a regression to a brute-force nearest-point search,
+    // which costs three orders of magnitude (~800ms uninstrumented), not to
+    // police milliseconds. The budget sits between the two: several times the
+    // worst instrumented CI figure, and well under the brute-force cost even
+    // without coverage, so the regression fails it on any machine. Do not
+    // tighten it toward a laptop's figure — that is what made it flaky.
     const mask = maskFrom(LETTER);
     const ink = inkFrom(LETTER);
     for (let i = 0; i < 10; i++) scoreInk(ink, mask);
@@ -231,7 +239,7 @@ describe('scoreInk', () => {
     for (let i = 0; i < runs; i++) scoreInk(ink, mask);
     const per = (performance.now() - started) / runs;
 
-    expect(per).toBeLessThan(25);
+    expect(per).toBeLessThan(150);
   });
 });
 

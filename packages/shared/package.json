@@ -16,6 +16,7 @@
     "./paradigm-quiz": "./src/paradigm-quiz.ts",
     "./flashcard-settings": "./src/flashcard-settings.ts",
     "./flashcard-session": "./src/flashcard-session.ts",
+    "./use-flashcard-session": "./src/use-flashcard-session.ts",
     "./nav": "./src/nav.ts",
     "./nav-menu": "./src/nav-menu.ts",
     "./posthog-host": "./src/posthog-host.ts",
