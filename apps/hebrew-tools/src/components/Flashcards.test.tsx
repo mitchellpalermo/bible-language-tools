@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import posthog from 'posthog-js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { loadSRSStore, loadStats, newCard, normalizeKey, saveSRSStore } from '../data/srs';
 import { chapterStats, TEXTBOOKS, wordsInChapters } from '../data/textbooks';
@@ -665,5 +666,90 @@ describe('verb parse', () => {
     renderFlashcards();
     await user.click(getCard());
     expect(screen.queryByTestId('verb-parse')).not.toBeInTheDocument();
+  });
+});
+
+// ─── Endless mode (#164) ──────────────────────────────────────────────────────
+
+describe('endless mode', () => {
+  /** The Hebrew on the front of the card currently dealt. */
+  function frontWord() {
+    const el = document.querySelector('p[dir="rtl"].text-5xl');
+    return el?.textContent ?? '';
+  }
+
+  /** Narrow to a small band: a whole-vocabulary round is hundreds of clicks. */
+  async function startEndless(user: ReturnType<typeof userEvent.setup>) {
+    renderFlashcards();
+    await user.click(screen.getByRole('button', { name: 'Endless' }));
+    await user.click(screen.getByRole('button', { name: /^2000\+/ }));
+    return vocabulary.filter((w) => matchFreq(w.frequency, '2000+')).length;
+  }
+
+  async function gradeGood(user: ReturnType<typeof userEvent.setup>) {
+    await user.click(screen.getByText('tap to reveal'));
+    await user.click(screen.getByRole('button', { name: /^good/i }));
+  }
+
+  it('deals a reshuffled deck instead of the session-complete screen', async () => {
+    const user = userEvent.setup();
+    const deckSize = await startEndless(user);
+    expect(deckSize).toBeGreaterThan(1);
+
+    const firstRound: string[] = [];
+    for (let i = 0; i < deckSize; i++) {
+      firstRound.push(frontWord());
+      await gradeGood(user);
+    }
+
+    expect(screen.queryByText('Session Complete')).not.toBeInTheDocument();
+    expect(screen.getByText('tap to reveal')).toBeInTheDocument();
+    // The round boundary must not deal the card that closed the last round.
+    expect(frontWord()).not.toBe(firstRound[firstRound.length - 1]);
+
+    const secondRound: string[] = [];
+    for (let i = 0; i < deckSize; i++) {
+      secondRound.push(frontWord());
+      await gradeGood(user);
+    }
+    expect([...secondRound].sort()).toEqual([...firstRound].sort());
+  });
+
+  it('counts reviews across rounds instead of showing "Card x/y"', async () => {
+    const user = userEvent.setup();
+    const deckSize = await startEndless(user);
+    expect(screen.queryByTestId('card-progress')).not.toBeInTheDocument();
+    expect(screen.getByTestId('session-reviewed').textContent).toBe('0');
+
+    for (let i = 0; i < deckSize + 2; i++) await gradeGood(user);
+
+    expect(screen.getByTestId('session-reviewed').textContent).toBe(String(deckSize + 2));
+    expect(loadStats().totalReviewed).toBe(deckSize + 2);
+  });
+
+  it('leaves the SRS store untouched', async () => {
+    const user = userEvent.setup();
+    const deckSize = await startEndless(user);
+    for (let i = 0; i < deckSize + 1; i++) await gradeGood(user);
+    expect(loadSRSStore()).toEqual({});
+  });
+
+  it('starts over from the top on "Restart session"', async () => {
+    const user = userEvent.setup();
+    await startEndless(user);
+    await gradeGood(user);
+    await gradeGood(user);
+    await user.click(screen.getByRole('button', { name: 'Restart session' }));
+    expect(screen.getByTestId('session-reviewed').textContent).toBe('0');
+    expect(screen.getByRole('button', { name: 'Endless' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('records the study mode on the session-started event', async () => {
+    const user = userEvent.setup();
+    await startEndless(user);
+    expect(posthog.capture).toHaveBeenLastCalledWith(
+      'hebrew_flashcard_session_started',
+      expect.objectContaining({ study_mode: 'endless' }),
+    );
   });
 });
