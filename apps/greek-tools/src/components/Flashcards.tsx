@@ -1,5 +1,6 @@
 import GradeButtons from '@tools/shared/components/GradeButtons';
 import ToggleSwitch from '@tools/shared/components/ToggleSwitch';
+import { nextRound, shuffle } from '@tools/shared/flashcard-session';
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { type CustomDeck, loadCustomDecks } from '../data/customDecks';
@@ -27,7 +28,24 @@ import ErrorBoundary from './ErrorBoundary';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type StudyMode = 'srs' | 'all';
+/**
+ * - `srs`: due cards, then new ones. Grades write the SRS store.
+ * - `all`: one shuffled pass through the deck. A drill — no SRS writes.
+ * - `endless`: `all` that never ends. When the deck runs out it is reshuffled
+ *   and dealt again (#164). Also a drill: an endless *due* queue is incoherent,
+ *   since grading a card makes it not-due, so the only ways to keep going would
+ *   be to re-queue cards just reviewed (corrupting their intervals) or to stop.
+ */
+type StudyMode = 'srs' | 'all' | 'endless';
+
+const STUDY_MODES: { mode: StudyMode; label: string }[] = [
+  { mode: 'srs', label: 'SRS Review' },
+  { mode: 'all', label: 'Study All' },
+  { mode: 'endless', label: 'Endless' },
+];
+
+/** The SRS store key for a word. */
+const srsKey = (word: VocabWord) => normalizeKey(word.greek);
 type AnswerMode = 'flip' | 'type';
 type Direction = 'gr-en' | 'en-gr';
 type FreqFilter = 'all' | '500+' | '100-499' | '50-99' | '<50';
@@ -45,15 +63,6 @@ export const FREQ_PRESETS = [
 export const DEFAULT_FREQ_PRESET = FREQ_PRESETS[1]; // Top 100 (500+ occurrences)
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
 
 function levenshtein(a: string, b: string): number {
   const dp: number[] = Array.from({ length: a.length + 1 }, (_, i) => i);
@@ -95,7 +104,7 @@ function buildQueue(
   mode: StudyMode,
   store: Record<string, SRSCard>,
 ): VocabWord[] {
-  if (mode === 'all') return shuffle(vocab);
+  if (mode !== 'srs') return shuffle(vocab);
   const due: VocabWord[] = [];
   const fresh: VocabWord[] = [];
   for (const w of vocab) {
@@ -216,7 +225,10 @@ function FlashcardsInner() {
     setAnswerResult(null);
     setSessionScore({ known: 0, learning: 0 });
     setSessionDone(false);
-    posthog.capture('flashcard_session_started', { deck_size: queue.length });
+    posthog.capture('flashcard_session_started', {
+      deck_size: queue.length,
+      study_mode: studyMode,
+    });
   }, [filteredVocab, studyMode]);
 
   // Mount: start initial session
@@ -298,11 +310,19 @@ function FlashcardsInner() {
         setFlipped(false);
         setTypedAnswer('');
         setAnswerResult(null);
+      } else if (studyMode === 'endless') {
+        // Reshuffle this session's own deck. A filter change restarts the
+        // session instead, so the deck never needs re-reading here.
+        setQueue(nextRound(queue, card, srsKey));
+        setIndex(0);
+        setFlipped(false);
+        setTypedAnswer('');
+        setAnswerResult(null);
       } else {
         setSessionDone(true);
       }
     },
-    [card, studyMode, srsStore, index, queue.length],
+    [card, studyMode, srsStore, index, queue],
   );
 
   const handleFlip = useCallback(() => setFlipped((f) => !f), []);
@@ -418,7 +438,7 @@ function FlashcardsInner() {
             Study ahead anyway
           </button>
         )}
-        {studyMode === 'all' && hasActiveFilters && (
+        {studyMode !== 'srs' && hasActiveFilters && (
           <button
             onClick={() => {
               setFreqFilter('all');
@@ -442,17 +462,18 @@ function FlashcardsInner() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Study mode */}
         <div className="flex gap-1 bg-white border border-indigo-100 p-1 rounded-xl shadow-sm">
-          {(['srs', 'all'] as StudyMode[]).map((m) => (
+          {STUDY_MODES.map(({ mode, label }) => (
             <button
-              key={m}
-              onClick={() => setStudyMode(m)}
+              key={mode}
+              onClick={() => setStudyMode(mode)}
+              aria-pressed={studyMode === mode}
               className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
-                studyMode === m
+                studyMode === mode
                   ? 'bg-grape text-white shadow-sm'
                   : 'text-text-muted hover:text-text'
               }`}
             >
-              {m === 'srs' ? 'SRS Review' : 'Study All'}
+              {label}
             </button>
           ))}
         </div>
@@ -713,6 +734,18 @@ function FlashcardsInner() {
                 <span className="hidden sm:inline text-indigo-200">|</span>
                 <span>
                   New: <strong className="text-primary">{newCount}</strong>
+                </span>
+                <span className="hidden sm:inline text-indigo-200">|</span>
+              </>
+            ) : studyMode === 'endless' ? (
+              <>
+                {/* "Card x/y" means nothing when the deck never ends. */}
+                <span>
+                  Reviewed:{' '}
+                  <strong className="text-grape" data-testid="session-reviewed">
+                    {sessionScore.known + sessionScore.learning}
+                  </strong>{' '}
+                  this session
                 </span>
                 <span className="hidden sm:inline text-indigo-200">|</span>
               </>

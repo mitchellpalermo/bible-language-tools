@@ -11,7 +11,9 @@
 
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import posthog from 'posthog-js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { loadSRSStore, loadStats, normalizeKey } from '../data/srs';
 import { vocabulary } from '../data/vocabulary';
 import Flashcards, { DEFAULT_FREQ_PRESET, FREQ_PRESETS } from './Flashcards';
 
@@ -993,5 +995,127 @@ describe('part of speech', () => {
     expect(within(card).queryByText([...parts][0])).not.toBeInTheDocument();
     await user.click(card);
     expect(within(card).getByText([...parts][0])).toBeInTheDocument();
+  });
+});
+
+// ─── Endless mode (#164) ──────────────────────────────────────────────────────
+
+describe('Endless mode', () => {
+  // A three-word custom deck: small enough to walk several rounds, large
+  // enough that the round boundary has a card to avoid repeating.
+  const DECK = vocabulary.slice(0, 3);
+
+  async function startEndless(user: ReturnType<typeof userEvent.setup>) {
+    localStorage.setItem(
+      'greek-tools-custom-decks-v1',
+      JSON.stringify([
+        {
+          id: 'three',
+          name: 'Three Words',
+          wordKeys: DECK.map((w) => normalizeKey(w.greek)),
+          createdAt: '',
+        },
+      ]),
+    );
+    renderFlashcards();
+    const section = screen.getByText(/^my decks$/i).parentElement!;
+    const deckBtn = within(section)
+      .getAllByRole('button')
+      .find((b) => b.textContent?.includes('Three Words'))!;
+    await act(async () => {
+      await user.click(deckBtn);
+    });
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: 'Endless' }));
+    });
+  }
+
+  /** The Greek on the front of the card currently dealt. */
+  function frontWord() {
+    const words = new Set(DECK.map((w) => w.greek));
+    const el = Array.from(document.querySelectorAll('p')).find((p) =>
+      words.has(p.textContent ?? ''),
+    );
+    return el?.textContent ?? '';
+  }
+
+  async function gradeGood(user: ReturnType<typeof userEvent.setup>) {
+    await act(async () => {
+      await user.click(screen.getByText('tap to reveal'));
+    });
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /^good/i }));
+    });
+  }
+
+  it('deals a reshuffled deck instead of the session-complete screen', async () => {
+    const user = userEvent.setup();
+    await startEndless(user);
+
+    const firstRound: string[] = [];
+    for (let i = 0; i < DECK.length; i++) {
+      firstRound.push(frontWord());
+      await gradeGood(user);
+    }
+
+    expect(screen.queryByText(/session complete/i)).not.toBeInTheDocument();
+    // The round boundary must not deal the card that closed the last round.
+    expect(frontWord()).not.toBe(firstRound[firstRound.length - 1]);
+
+    const secondRound: string[] = [];
+    for (let i = 0; i < DECK.length; i++) {
+      secondRound.push(frontWord());
+      await gradeGood(user);
+    }
+    expect([...secondRound].sort()).toEqual([...firstRound].sort());
+    expect([...firstRound].sort()).toEqual(DECK.map((w) => w.greek).sort());
+  });
+
+  it('counts reviews across rounds instead of showing "Card x/y"', async () => {
+    const user = userEvent.setup();
+    await startEndless(user);
+    expect(screen.queryByText(/^card:/i)).not.toBeInTheDocument();
+    expect(screen.getByTestId('session-reviewed').textContent).toBe('0');
+
+    for (let i = 0; i < DECK.length + 2; i++) await gradeGood(user);
+
+    expect(screen.getByTestId('session-reviewed').textContent).toBe(String(DECK.length + 2));
+    expect(loadStats().totalReviewed).toBe(DECK.length + 2);
+  });
+
+  it('leaves the SRS store untouched', async () => {
+    const user = userEvent.setup();
+    await startEndless(user);
+    for (let i = 0; i < DECK.length + 1; i++) await gradeGood(user);
+    expect(loadSRSStore()).toEqual({});
+  });
+
+  it('clears the typed answer when a new round is dealt', async () => {
+    const user = userEvent.setup();
+    await startEndless(user);
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /^type$/i }));
+    });
+    for (let i = 0; i < DECK.length; i++) {
+      const input = screen.getByPlaceholderText(/type the english gloss/i);
+      await act(async () => {
+        await user.type(input, 'not the answer{Enter}');
+      });
+      await act(async () => {
+        await user.click(screen.getByRole('button', { name: /^again/i }));
+      });
+    }
+    expect(screen.queryByText(/session complete/i)).not.toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/type the english gloss/i)).toHaveValue('');
+    expect(screen.queryByText(/not quite/i)).not.toBeInTheDocument();
+  });
+
+  it('records the study mode on the session-started event', async () => {
+    const user = userEvent.setup();
+    await startEndless(user);
+    expect(posthog.capture).toHaveBeenLastCalledWith(
+      'flashcard_session_started',
+      expect.objectContaining({ study_mode: 'endless' }),
+    );
   });
 });

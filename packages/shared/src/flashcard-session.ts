@@ -1,9 +1,10 @@
 /**
- * Pure pieces of the flashcard session state machine.
+ * Pure pieces of the flashcard session state machine, shared by both apps'
+ * `Flashcards.tsx`.
  *
- * These live outside `Flashcards.tsx` so they move with it when #87 extracts a
- * shared `useFlashcardSession` hook: the endless mode's behaviour is "the queue
- * ran out, deal a new round", which is a session rule, not a rendering one.
+ * Endless mode (#164) is "the queue ran out, deal a new round" — a session
+ * rule, not a rendering one — so it lives here rather than in either
+ * component, and is where #87's `useFlashcardSession` hook should pick it up.
  */
 
 /** Fisher–Yates. `random` is injectable so tests can pin an order. */

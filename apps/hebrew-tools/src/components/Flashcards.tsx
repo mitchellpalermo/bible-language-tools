@@ -1,5 +1,6 @@
 import GradeButtons from '@tools/shared/components/GradeButtons';
 import ToggleSwitch from '@tools/shared/components/ToggleSwitch';
+import { nextRound, shuffle } from '@tools/shared/flashcard-session';
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -39,7 +40,6 @@ import {
 } from '../data/vocabulary';
 import { hasAuthHint } from '../lib/auth-cookie';
 import { type DeckSelection, loadSelection, saveSelection } from '../lib/deck-selection';
-import { nextRound, shuffle } from '../lib/flashcard-session';
 import { loadFlashcardSettings, saveFlashcardSettings } from '../lib/flashcard-settings';
 import { deleteServerProgress } from '../lib/sync-manager';
 import ChapterPicker from './ChapterPicker';
