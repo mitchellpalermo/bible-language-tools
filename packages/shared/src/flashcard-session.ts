@@ -1,6 +1,6 @@
 /**
- * Pure pieces of the flashcard session state machine, shared by both apps'
- * `Flashcards.tsx`.
+ * Pure pieces of the flashcard session state machine. hebrew-tools'
+ * `Flashcards.tsx` uses them today; greek-tools adopts them with #87.
  *
  * Endless mode (#164) is "the queue ran out, deal a new round" — a session
  * rule, not a rendering one — so it lives here rather than in either
