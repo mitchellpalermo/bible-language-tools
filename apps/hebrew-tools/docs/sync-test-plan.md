@@ -28,7 +28,7 @@ replacing it, so a stale push can only ever add or hold — never regress anothe
 device's work. Tests 10 and 11 exist to confirm that in the real world.
 
 **Corollary: `PUT` can never remove a card.** Deletion goes through `DELETE`
-only, which is what "Reset SRS" and the "Start fresh" option call. Test 8 and
+only, which is what the account page's reset and the "Start fresh" option call. Test 8 and
 test 16 cover those paths.
 
 ## Setup
@@ -436,16 +436,20 @@ Re-run this after test 10; that is the point of maximum write pressure.
 
 ---
 
-### 16. Reset SRS reaches the server
+### 16. Reset reaches the server
 
 **Why:** since `PUT` merges, clearing localStorage alone would be undone by the
 next sync. Reset has to call `DELETE`.
 
-1. On **A**, signed in with synced progress, click **Reset SRS** and confirm.
+1. On **A**, signed in with synced progress, open `/account` (or follow
+   **Manage SRS progress** from the Flashcards footer), click **Reset SRS
+   progress…**, type `RESET` and click **Erase SRS progress**. The result
+   should read "erased, in this browser and on your account".
 2. Check `/api/progress`.
 
-**Expect:** `{"data":null}` — the account's Hebrew progress is gone, not just
-this browser's.
+**Expect:** an empty `srsStore` — the account's Hebrew cards are gone, not just
+this browser's — with `studyStats` still holding A's streak and totals. The
+reset deletes, then pushes A's copy straight back, and A's copy has no cards.
 
 3. On **B** (still holding the old cards), click **Sync now**.
 

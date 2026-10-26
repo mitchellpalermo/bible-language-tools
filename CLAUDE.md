@@ -57,6 +57,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/flashcard-settings` | `createFlashcardSettings(storageKey)` factory for what the flashcard face shows before you answer |
 | `@tools/shared/flashcard-session` | `shuffle`, `nextRound` and `requeueMissed` — pure flashcard queue rules: Endless mode's reshuffle, and the drill modes' re-queue of a missed card. Used through `use-flashcard-session` |
 | `@tools/shared/use-flashcard-session` | `useFlashcardSession<T>()` — the flashcard session engine: dealing, SRS grading, drills, Endless, typed answers, the keyboard. hebrew-tools runs on it; greek-tools moves onto it in #87's second PR. See "The flashcard session engine" below |
+| `@tools/shared/reset-progress` | `resetSrsProgress` and `isResetConfirmed` — erase the SRS store, this browser first, then the account copy via `DELETE`; a server failure never undoes the local reset |
 | `@tools/shared/nav` | `NavLink` type and the active-route predicates the nav renders with |
 | `@tools/shared/nav-menu` | `initNavMenu()` — DOM controller for the mobile drawer |
 | `@tools/shared/ink` | Stylus writing engine — stroke capture, palm rejection, smoothing, variable-width rendering, geometric scoring, and the `ScriptPack` type |
@@ -65,6 +66,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/components/SiteNav.astro` | The site navigation for both apps (see below) |
 | `@tools/shared/components/GradeButtons` | The Again/Hard/Good/Easy answer row, with per-grade interval previews (React) |
 | `@tools/shared/components/DrillButtons` | The Missed / Got it answer row for the drill modes, which schedule nothing (React) |
+| `@tools/shared/components/ResetProgress` | The account page's "Danger zone": open, type RESET, erase. Each app wraps it in `src/components/ResetProgress.tsx` with its own list of what is erased and kept (React) |
 | `@tools/shared/components/ToggleSwitch` | Labelled on/off switch — `role="switch"`, app accent passed in (React) |
 | `@tools/shared/components/NumberToggle` | Sg/Pl pill toggle (mobile only) |
 | `@tools/shared/components/EndingsToggle` | Full forms / Endings only toggle |
@@ -226,9 +228,10 @@ Things to know before changing it:
   app's `Flashcards.test.tsx` checks its wiring and what it draws, not the
   rules again. That includes options only one app uses (typed answers, the
   keyboard switch), so the hook's tests cover every option.
-- **`resetStore()` is local only.** A server copy is the caller's to clear —
-  `PUT /api/progress` merges, so a reset that skips the server is undone by the
-  next sync.
+- **The hook has no reset, on purpose.** Erasing the SRS store is the account
+  page's job (`ResetProgress`; see "A merge cannot express a deletion" below),
+  behind a typed confirmation and with the server copy cleared too. A reset on
+  a study screen sits one tap from a session, which is why it moved.
 
 ## Streaks, study days, and sync merges
 
@@ -258,6 +261,26 @@ replace with no server-side merge, so a bad client merge overwrites good data.
 
 Merge rules must also be symmetric — `merge(a, b)` and `merge(b, a)` pick the
 same winners — because both sides of a sync run the same function.
+
+**A merge cannot express a deletion, so erasing goes through `DELETE`.** Every
+merge here is a union: a card or deck missing on one side is read as "not seen
+yet", never "removed". The old Flashcards "Reset SRS" in greek-tools cleared
+localStorage only, and the next pull-and-merge ("Sync now", signing in) put
+every card back. The reset now lives on each app's account page
+(`src/components/ResetProgress.tsx` over `@tools/shared/components/ResetProgress`)
+and calls `DELETE /api/progress` when signed in. Three things to know:
+
+- **greek's `DELETE` is broader than the reset.** It also removes custom decks,
+  focus passages and parse history (it was written for "Start fresh"), so the
+  greek binding pushes this browser's copy straight back afterwards. hebrew's
+  removes only cards, stats and `sync_state`, and its binding pushes back too,
+  so the account keeps its stats. Both wrappers name it `clearServerSrs`.
+- **It is per device.** Another device still holding the cards pushes them on
+  its next session end, and the merge keeps them. The confirmation says so.
+- **The same gap exists for greek's deck deletion.** `deleteCustomDeck` is
+  local-only and `mergeCustomDecks` is a union, so a deleted deck that the
+  account still holds can come back on the next pull. Closing it properly needs
+  tombstones, not another `DELETE`.
 
 ## Pull requests
 

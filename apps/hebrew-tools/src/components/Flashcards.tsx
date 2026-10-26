@@ -36,10 +36,8 @@ import {
   verbParse,
   vocabulary,
 } from '../data/vocabulary';
-import { hasAuthHint } from '../lib/auth-cookie';
 import { type DeckSelection, loadSelection, saveSelection } from '../lib/deck-selection';
 import { loadFlashcardSettings, saveFlashcardSettings } from '../lib/flashcard-settings';
-import { deleteServerProgress } from '../lib/sync-manager';
 import ChapterPicker from './ChapterPicker';
 import ErrorBoundary from './ErrorBoundary';
 
@@ -231,7 +229,6 @@ function FlashcardsInner() {
     dueCount,
     newCount,
     accuracy,
-    resetStore,
     missedNotInReview,
     addMissedToReview,
     addedToReview,
@@ -778,23 +775,14 @@ function FlashcardsInner() {
             Finish session
           </button>
         )}
+        {/* Resetting lives on the account page, behind a typed confirmation. */}
         {studyMode === 'srs' && (
-          <button
-            type="button"
-            onClick={() => {
-              if (confirm('Reset all SRS progress? This cannot be undone.')) {
-                // PUT merges server-side, so clearing localStorage alone would
-                // be undone by the next sync. Destruction has to go through
-                // DELETE. Fire-and-forget: a failure here must not block the
-                // reset the user already sees locally.
-                if (hasAuthHint()) void deleteServerProgress();
-                resetStore();
-              }
-            }}
-            className="text-sm text-text-muted hover:text-coral transition-colors font-medium"
+          <a
+            href="/account#reset-progress"
+            className="text-sm text-text-muted hover:text-primary transition-colors font-medium"
           >
-            Reset SRS
-          </button>
+            Manage SRS progress
+          </a>
         )}
       </div>
     </div>

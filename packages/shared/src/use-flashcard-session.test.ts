@@ -397,22 +397,6 @@ describe('adding missed cards to SRS Review', () => {
   });
 });
 
-// ─── Resetting the schedule ───────────────────────────────────────────────────
-
-describe('resetStore', () => {
-  it('empties the store and deals again from it', () => {
-    const { result, mem } = setup(
-      { words: deckOf(2) },
-      { store: { w0: { ...newCard('w0'), dueDate: daysFromNow(9) } } },
-    );
-    expect(result.current.queue).toHaveLength(1); // w0 is not due
-    act(() => result.current.resetStore());
-    expect(mem.state.store).toEqual({});
-    expect(result.current.srsStore).toEqual({});
-    expect(result.current.queue).toHaveLength(2);
-  });
-});
-
 // ─── Typed answers ────────────────────────────────────────────────────────────
 
 describe('typed answers', () => {

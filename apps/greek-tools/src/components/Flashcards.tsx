@@ -920,19 +920,14 @@ function FlashcardsInner() {
         >
           Restart session
         </button>
+        {/* Resetting lives on the account page, behind a typed confirmation. */}
         {studyMode === 'srs' && (
-          <button
-            onClick={() => {
-              if (confirm('Reset all SRS progress? This cannot be undone.')) {
-                setSrsStore({});
-                saveSRSStore({});
-                startSession();
-              }
-            }}
-            className="text-sm text-text-muted hover:text-coral transition-colors font-medium"
+          <a
+            href="/account#reset-progress"
+            className="text-sm text-text-muted hover:text-grape transition-colors font-medium"
           >
-            Reset SRS
-          </button>
+            Manage SRS progress
+          </a>
         )}
       </div>
     </div>

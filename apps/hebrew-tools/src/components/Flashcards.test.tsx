@@ -5,8 +5,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { loadSRSStore, loadStats, newCard, normalizeKey, saveSRSStore } from '../data/srs';
 import { chapterStats, TEXTBOOKS, wordsInChapters } from '../data/textbooks';
 import { cardKey, type HebrewVocabWord, vocabulary } from '../data/vocabulary';
-import { hasAuthHint } from '../lib/auth-cookie';
-import { deleteServerProgress } from '../lib/sync-manager';
 import Flashcards, { FREQ_FILTERS, GENDER_LABELS, matchFreq } from './Flashcards';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
@@ -14,9 +12,6 @@ import Flashcards, { FREQ_FILTERS, GENDER_LABELS, matchFreq } from './Flashcards
 vi.mock('posthog-js', () => ({
   default: { capture: vi.fn(), init: vi.fn(), identify: vi.fn(), captureException: vi.fn() },
 }));
-
-vi.mock('../lib/sync-manager', () => ({ deleteServerProgress: vi.fn() }));
-vi.mock('../lib/auth-cookie', () => ({ hasAuthHint: vi.fn(() => false) }));
 
 beforeEach(() => {
   localStorage.clear();
@@ -221,62 +216,16 @@ describe('Flashcards', () => {
   // stubs the vocabulary module — asserting it here would mean betting that some
   // frequency band stays permanently empty as words are added.
 
-  it('resets SRS progress when confirmed', async () => {
-    const user = userEvent.setup();
-    vi.stubGlobal('confirm', vi.fn().mockReturnValue(true));
-    renderFlashcards();
-    await user.click(getCard());
-    await user.click(screen.getByRole('button', { name: /^good/i }));
-    expect(Object.keys(loadSRSStore()).length).toBe(1);
-
-    await user.click(screen.getByRole('button', { name: /reset srs/i }));
-    expect(loadSRSStore()).toEqual({});
-  });
-
-  it('clears server progress on reset when signed in', async () => {
-    // PUT merges server-side, so clearing localStorage alone would be undone by
-    // the next sync. DELETE is the only path that actually removes anything.
-    const user = userEvent.setup();
-    vi.mocked(hasAuthHint).mockReturnValue(true);
-    vi.stubGlobal('confirm', vi.fn().mockReturnValue(true));
+  // The reset moved to the account page (ResetProgress.test.tsx covers it).
+  // What is left here is the way to it — and that no one-tap reset remains.
+  it('links to the account page reset instead of offering one here', () => {
     renderFlashcards();
 
-    await user.click(screen.getByRole('button', { name: /reset srs/i }));
-
-    expect(deleteServerProgress).toHaveBeenCalledOnce();
-  });
-
-  it('does not call the server on reset when signed out', async () => {
-    const user = userEvent.setup();
-    vi.mocked(hasAuthHint).mockReturnValue(false);
-    vi.stubGlobal('confirm', vi.fn().mockReturnValue(true));
-    renderFlashcards();
-
-    await user.click(screen.getByRole('button', { name: /reset srs/i }));
-
-    expect(deleteServerProgress).not.toHaveBeenCalled();
-  });
-
-  it('does not clear server progress when the reset is declined', async () => {
-    const user = userEvent.setup();
-    vi.mocked(hasAuthHint).mockReturnValue(true);
-    vi.stubGlobal('confirm', vi.fn().mockReturnValue(false));
-    renderFlashcards();
-
-    await user.click(screen.getByRole('button', { name: /reset srs/i }));
-
-    expect(deleteServerProgress).not.toHaveBeenCalled();
-  });
-
-  it('does not reset SRS progress when the confirm dialog is declined', async () => {
-    const user = userEvent.setup();
-    vi.stubGlobal('confirm', vi.fn().mockReturnValue(false));
-    renderFlashcards();
-    await user.click(getCard());
-    await user.click(screen.getByRole('button', { name: /^good/i }));
-
-    await user.click(screen.getByRole('button', { name: /reset srs/i }));
-    expect(Object.keys(loadSRSStore()).length).toBe(1);
+    expect(screen.getByRole('link', { name: 'Manage SRS progress' })).toHaveAttribute(
+      'href',
+      '/account#reset-progress',
+    );
+    expect(screen.queryByRole('button', { name: /reset/i })).not.toBeInTheDocument();
   });
 
   it('shows "study ahead anyway" when SRS mode has nothing due', () => {
