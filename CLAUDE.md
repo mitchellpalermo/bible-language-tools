@@ -56,7 +56,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/paradigm-quiz` | The paradigm quiz engine — `TableModel`, `getQuizCells`, `applyDensity`. Which tables exist and how an answer is graded stay in each app |
 | `@tools/shared/flashcard-settings` | `createFlashcardSettings(storageKey)` factory for what the flashcard face shows before you answer |
 | `@tools/shared/flashcard-session` | `shuffle`, `nextRound` and `requeueMissed` — pure flashcard queue rules: Endless mode's reshuffle, and the drill modes' re-queue of a missed card. Used through `use-flashcard-session` |
-| `@tools/shared/use-flashcard-session` | `useFlashcardSession<T>()` — the flashcard session engine: dealing, SRS grading, drills, Endless, typed answers, the keyboard. hebrew-tools runs on it; greek-tools moves onto it in #87's second PR. See "The flashcard session engine" below |
+| `@tools/shared/use-flashcard-session` | `useFlashcardSession<T>()` — the flashcard session engine: dealing, SRS grading, drills, Endless, typed answers, the keyboard. Both apps' `Flashcards.tsx` run on it. See "The flashcard session engine" below |
 | `@tools/shared/reset-progress` | `resetSrsProgress` and `isResetConfirmed` — erase the SRS store, this browser first, then the account copy via `DELETE`; a server failure never undoes the local reset |
 | `@tools/shared/nav` | `NavLink` type and the active-route predicates the nav renders with |
 | `@tools/shared/nav-menu` | `initNavMenu()` — DOM controller for the mobile drawer |
@@ -163,8 +163,8 @@ Two things about it that are pedagogy rather than plumbing:
 ### Drill modes answer Missed / Got it
 
 Study All and Endless are drills: they never write the SRS schedule, so the
-four SM-2 grades and their interval previews mean nothing there. hebrew-tools
-shows `DrillButtons` in their place (greek-tools follows with #87). The rules,
+four SM-2 grades and their interval previews mean nothing there. Both apps
+show `DrillButtons` in their place. The rules,
 all from the memory research rather than taste:
 
 - **A miss comes back 4–6 cards later, never next** (`requeueMissed`,
@@ -183,6 +183,10 @@ all from the memory research rather than taste:
   scheduled card's interval, ease or due date. A cram helps tomorrow's quiz and
   fades by the exam (Cepeda et al. 2006); this is the bridge to spacing.
   Endless reaches the summary through its "Finish session" button.
+- **A typed answer never answers the card by itself.** On greek.tools, Check
+  marks the spelling and reveals the card; the student then picks Missed / Got
+  it (or a grade in SRS Review). A mistyped word they knew cold is still Got
+  it, and a lucky match they could not have recalled is still Missed.
 
 ### The part-of-speech control
 
@@ -214,6 +218,10 @@ Things to know before changing it:
   ref. An app builds the key from the state that defines its deck, so it decides
   what counts as a different deck. hebrew.tools compares by value
   (`JSON.stringify`), so re-selecting the current chapter keeps the session.
+  greek.tools keys on the frequency band, the part-of-speech filter and the
+  active custom deck's word list, sorted: renaming a deck, flipping direction
+  or switching between Flip and Type keeps the session; editing a deck's words
+  deals a new one.
 - **`deck` and `queue` are different things.** `queue` holds a missed card's
   repeats; `deck` is the session's cards once each. An Endless round is
   reshuffled from `deck` — from `queue`, the repeats would compound round after
