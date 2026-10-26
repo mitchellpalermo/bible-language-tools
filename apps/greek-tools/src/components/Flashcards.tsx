@@ -926,7 +926,7 @@ function FlashcardsInner() {
             href="/account#reset-progress"
             className="text-sm text-text-muted hover:text-grape transition-colors font-medium"
           >
-            Manage progress
+            Manage SRS progress
           </a>
         )}
       </div>

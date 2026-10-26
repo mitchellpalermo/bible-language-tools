@@ -688,7 +688,7 @@ describe('Card study flow', () => {
   it('links to the account page reset instead of offering one here', () => {
     renderFlashcards();
 
-    expect(screen.getByRole('link', { name: 'Manage progress' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Manage SRS progress' })).toHaveAttribute(
       'href',
       '/account#reset-progress',
     );
