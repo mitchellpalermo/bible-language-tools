@@ -672,11 +672,9 @@ describe('verb parse', () => {
 // ─── Endless mode (#164) ──────────────────────────────────────────────────────
 
 describe('endless mode', () => {
-  /** The Hebrew on the front of the card currently dealt. */
-  function frontWord() {
-    const el = document.querySelector('p[dir="rtl"].text-5xl');
-    return el?.textContent ?? '';
-  }
+  // The session rules themselves — the reshuffle, the round boundary, the store
+  // left untouched — are tested once, in @tools/shared's
+  // use-flashcard-session.test.ts. These check this app's wiring of them.
 
   /** Narrow to a small band: a whole-vocabulary round is hundreds of clicks. */
   async function startEndless(user: ReturnType<typeof userEvent.setup>) {
@@ -691,30 +689,6 @@ describe('endless mode', () => {
     await user.click(screen.getByRole('button', { name: /^got it/i }));
   }
 
-  it('deals a reshuffled deck instead of the session-complete screen', async () => {
-    const user = userEvent.setup();
-    const deckSize = await startEndless(user);
-    expect(deckSize).toBeGreaterThan(1);
-
-    const firstRound: string[] = [];
-    for (let i = 0; i < deckSize; i++) {
-      firstRound.push(frontWord());
-      await gotIt(user);
-    }
-
-    expect(screen.queryByText('Session Complete')).not.toBeInTheDocument();
-    expect(screen.getByText('tap to reveal')).toBeInTheDocument();
-    // The round boundary must not deal the card that closed the last round.
-    expect(frontWord()).not.toBe(firstRound[firstRound.length - 1]);
-
-    const secondRound: string[] = [];
-    for (let i = 0; i < deckSize; i++) {
-      secondRound.push(frontWord());
-      await gotIt(user);
-    }
-    expect([...secondRound].sort()).toEqual([...firstRound].sort());
-  });
-
   it('counts reviews across rounds instead of showing "Card x/y"', async () => {
     const user = userEvent.setup();
     const deckSize = await startEndless(user);
@@ -725,13 +699,6 @@ describe('endless mode', () => {
 
     expect(screen.getByTestId('session-reviewed').textContent).toBe(String(deckSize + 2));
     expect(loadStats().totalReviewed).toBe(deckSize + 2);
-  });
-
-  it('leaves the SRS store untouched', async () => {
-    const user = userEvent.setup();
-    const deckSize = await startEndless(user);
-    for (let i = 0; i < deckSize + 1; i++) await gotIt(user);
-    expect(loadSRSStore()).toEqual({});
   });
 
   it('starts over from the top on "Restart session"', async () => {
@@ -757,6 +724,10 @@ describe('endless mode', () => {
 // ─── Drill answers: Missed / Got it ───────────────────────────────────────────
 
 describe('drill answers', () => {
+  // The re-queue gap, first-attempt scoring and the never-write rule are
+  // tested in @tools/shared's use-flashcard-session.test.ts. These check what
+  // this app draws from them.
+
   const BAND = vocabulary.filter((w) => matchFreq(w.frequency, '2000+'));
 
   function frontWord() {
@@ -794,31 +765,6 @@ describe('drill answers', () => {
     expect(screen.queryByRole('button', { name: /^got it/i })).not.toBeInTheDocument();
   });
 
-  it('brings a missed card back a few cards later, never straight away', async () => {
-    const user = userEvent.setup();
-    await startStudyAll(user);
-    const missed = frontWord();
-    await answer(user, 'missed');
-
-    let between = 0;
-    while (frontWord() !== missed) {
-      between++;
-      await answer(user, 'got it');
-    }
-    expect(between).toBeGreaterThanOrEqual(4);
-    expect(between).toBeLessThanOrEqual(6);
-  });
-
-  it('ends a pass only once every card has been got right', async () => {
-    const user = userEvent.setup();
-    await startStudyAll(user);
-    await answer(user, 'missed');
-    // The miss added one card to the pass.
-    expect(screen.getByTestId('card-progress').textContent).toBe(`2/${BAND.length + 1}`);
-    for (let i = 0; i < BAND.length; i++) await answer(user, 'got it');
-    expect(screen.getByText('Session Complete')).toBeInTheDocument();
-  });
-
   it('scores only the first attempt at each card', async () => {
     const user = userEvent.setup();
     await startStudyAll(user);
@@ -827,14 +773,6 @@ describe('drill answers', () => {
     expect(screen.getByText(`${BAND.length - 1} got it · 1 still learning`)).toBeInTheDocument();
     expect(loadStats().totalReviewed).toBe(BAND.length);
     expect(loadStats().totalCorrect).toBe(BAND.length - 1);
-  });
-
-  it('never writes the SRS store, missed or not', async () => {
-    const user = userEvent.setup();
-    await startStudyAll(user);
-    await answer(user, 'missed');
-    await answer(user, 'got it');
-    expect(loadSRSStore()).toEqual({});
   });
 
   it('answers from the keyboard: 1 is Missed, 2 is Got it', async () => {
@@ -871,31 +809,6 @@ describe('drill answers', () => {
       for (let i = 0; i < BAND.length; i++) await answer(user, 'got it');
       expect(screen.getByText('Session Complete')).toBeInTheDocument();
       expect(screen.queryByRole('button', { name: /to srs review/i })).not.toBeInTheDocument();
-    });
-
-    it('leaves a word already in SRS Review exactly as it was', async () => {
-      // Seed one word with real history, then miss every card once.
-      const seeded = BAND[0];
-      const seededKey = normalizeKey(cardKey(seeded));
-      const history = { ...newCard(seededKey), interval: 12, repetition: 3, dueDate: '2099-01-01' };
-      saveSRSStore({ [seededKey]: history });
-
-      const user = userEvent.setup();
-      await startStudyAll(user);
-      const seen = new Set<string>();
-      while (!screen.queryByText('Session Complete')) {
-        const front = frontWord();
-        await answer(user, seen.has(front) ? 'got it' : 'missed');
-        seen.add(front);
-      }
-
-      const offer = screen.getByRole('button', { name: /^Add \d+ to SRS Review$/ });
-      const offered = Number(offer.textContent?.match(/\d+/)?.[0]);
-      await user.click(offer);
-
-      const store = loadSRSStore();
-      expect(store[seededKey]).toEqual(history);
-      expect(Object.keys(store)).toHaveLength(offered + 1);
     });
 
     it('is reached from Endless through "Finish session"', async () => {
