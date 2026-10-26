@@ -683,45 +683,16 @@ describe('Card study flow', () => {
     expect(screen.getByPlaceholderText(/type the greek word/i)).toBeInTheDocument();
   });
 
-  it('"Reset SRS" button is shown in SRS mode and resets store', async () => {
+  // The reset moved to the account page (ResetProgress.test.tsx covers it).
+  // What is left here is the way to it — and that no one-tap reset remains.
+  it('links to the account page reset instead of offering one here', () => {
     renderFlashcards();
-    expect(screen.getByRole('button', { name: /reset srs/i })).toBeInTheDocument();
-  });
 
-  it('"Reset SRS" resets SRS progress when confirmed', async () => {
-    vi.stubGlobal('confirm', vi.fn().mockReturnValue(true));
-    const user = userEvent.setup();
-    // Seed some SRS data
-    localStorage.setItem(
-      'greek-tools-srs-v2',
-      JSON.stringify({
-        καί: {
-          interval: 4,
-          repetitions: 3,
-          easeFactor: 2.5,
-          nextReview: '2099-01-01',
-          lastReview: '2025-01-01',
-        },
-      }),
+    expect(screen.getByRole('link', { name: 'Manage progress' })).toHaveAttribute(
+      'href',
+      '/account#reset-progress',
     );
-    renderFlashcards();
-    await act(async () => {
-      await user.click(screen.getByRole('button', { name: /reset srs/i }));
-    });
-    // SRS store should be cleared
-    expect(localStorage.getItem('greek-tools-srs-v2')).toBe('{}');
-  });
-
-  it('"Reset SRS" does nothing when cancelled', async () => {
-    vi.stubGlobal('confirm', vi.fn().mockReturnValue(false));
-    const user = userEvent.setup();
-    localStorage.setItem('greek-tools-srs-v2', JSON.stringify({ καί: { interval: 4 } }));
-    renderFlashcards();
-    await act(async () => {
-      await user.click(screen.getByRole('button', { name: /reset srs/i }));
-    });
-    // SRS store should remain unchanged
-    expect(JSON.parse(localStorage.getItem('greek-tools-srs-v2') ?? '{}')).toHaveProperty('καί');
+    expect(screen.queryByRole('button', { name: /reset srs/i })).not.toBeInTheDocument();
   });
 
   it('type mode: grading Again after an incorrect answer advances the card', async () => {

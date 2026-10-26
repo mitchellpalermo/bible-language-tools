@@ -28,11 +28,12 @@ test.describe('Auth flow', () => {
     await expect(page.getByRole('link', { name: /sign in/i })).toBeVisible();
   });
 
-  test('account page redirects unauthenticated users to sign-in', async ({ page }) => {
+  // Signed-out visitors have local progress too, and the reset lives here.
+  test('account page shows signed-out visitors a sign-in link and the reset', async ({ page }) => {
     await page.goto('/account');
-    await expect(page).toHaveURL(/\/account\/signin/);
-    const url = new URL(page.url());
-    expect(url.searchParams.get('from')).toBe('/account');
+    await expect(page).toHaveURL(/\/account$/);
+    await expect(page.getByRole('link', { name: /sign in to sync it/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /reset review progress/i })).toBeVisible();
   });
 
   test('sign-in with invalid credentials shows error message', async ({ page }) => {
