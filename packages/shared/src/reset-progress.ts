@@ -1,4 +1,4 @@
-// Erasing the SRS store — the rules both apps' "Reset review progress" follows.
+// Erasing the SRS store — the rules both apps' "Reset SRS progress" follows.
 //
 // The reset used to be a footer button on the Flashcards page behind a bare
 // `confirm()`, one stray tap from wiping every review schedule on the device.

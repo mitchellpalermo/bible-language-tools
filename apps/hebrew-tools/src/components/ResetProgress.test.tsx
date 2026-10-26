@@ -50,9 +50,9 @@ afterEach(() => {
 
 async function confirmReset() {
   const user = userEvent.setup();
-  await user.click(screen.getByRole('button', { name: 'Reset review progress…' }));
+  await user.click(screen.getByRole('button', { name: 'Reset SRS progress…' }));
   await user.type(screen.getByLabelText('Type RESET to confirm'), 'RESET');
-  await user.click(screen.getByRole('button', { name: 'Erase review progress' }));
+  await user.click(screen.getByRole('button', { name: 'Erase SRS progress' }));
   return user;
 }
 
@@ -60,9 +60,9 @@ describe('hebrew.tools ResetProgress', () => {
   it('names flashcards, handwriting and the paradigm quiz before anything is erased', async () => {
     const user = userEvent.setup();
     render(<ResetProgress signedIn={false} />);
-    await user.click(screen.getByRole('button', { name: 'Reset review progress…' }));
+    await user.click(screen.getByRole('button', { name: 'Reset SRS progress…' }));
 
-    const panel = screen.getByRole('group', { name: 'Erase all review progress?' });
+    const panel = screen.getByRole('group', { name: 'Erase all SRS progress?' });
     expect(panel).toHaveTextContent(/Vocabulary flashcards/);
     expect(panel).toHaveTextContent(/Handwriting practice/);
     expect(panel).toHaveTextContent(/Paradigm quiz/);
@@ -75,7 +75,7 @@ describe('hebrew.tools ResetProgress', () => {
     await confirmReset();
 
     expect(await screen.findByRole('status')).toHaveTextContent(
-      'Review progress erased in this browser.',
+      'SRS progress erased in this browser.',
     );
     expect(loadSRSStore()).toEqual({});
     expect(loadStats()).toMatchObject({ totalReviewed: 120, totalCorrect: 100 });
@@ -136,10 +136,10 @@ describe('hebrew.tools ResetProgress', () => {
   it('erases nothing until the word is typed', async () => {
     const user = userEvent.setup();
     render(<ResetProgress signedIn />);
-    await user.click(screen.getByRole('button', { name: 'Reset review progress…' }));
+    await user.click(screen.getByRole('button', { name: 'Reset SRS progress…' }));
     await user.type(screen.getByLabelText('Type RESET to confirm'), 'yes');
 
-    expect(screen.getByRole('button', { name: 'Erase review progress' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Erase SRS progress' })).toBeDisabled();
     expect(Object.keys(loadSRSStore())).toHaveLength(SEEDED_KEYS.length);
     expect(fetchMock).not.toHaveBeenCalled();
   });

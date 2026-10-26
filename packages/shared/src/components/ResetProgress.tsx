@@ -154,7 +154,7 @@ export default function ResetProgress({
         Danger zone
       </h2>
       <p style={{ ...paragraph, color: MUTED }}>
-        Erase every review schedule{' '}
+        Erase every SRS (spaced repetition) review schedule{' '}
         {signedIn ? 'on this device and your account' : 'in this browser'} and start over. Your{' '}
         {joinPhrases(keeps)} are kept.
       </p>
@@ -173,7 +173,7 @@ export default function ResetProgress({
 
       {phase === 'idle' ? (
         <button type="button" ref={openRef} onClick={open} style={outlineDanger}>
-          Reset review progress…
+          Reset SRS progress…
         </button>
       ) : (
         // A fieldset is a group to assistive tech; the heading names it.
@@ -194,7 +194,7 @@ export default function ResetProgress({
             id={titleId}
             style={{ margin: '0 0 0.5rem', fontSize: '1rem', fontWeight: 700, color: TEXT }}
           >
-            Erase all review progress?
+            Erase all SRS progress?
           </h3>
           <p style={paragraph}>Every card starts over as new. The review schedules erased are:</p>
           <ul
@@ -290,7 +290,7 @@ export default function ResetProgress({
                 cursor: confirmed && phase !== 'working' ? 'pointer' : 'not-allowed',
               }}
             >
-              {phase === 'working' ? 'Erasing…' : 'Erase review progress'}
+              {phase === 'working' ? 'Erasing…' : 'Erase SRS progress'}
             </button>
             <button
               type="button"
@@ -336,8 +336,8 @@ function ResultMessage({
     <div ref={resultRef} tabIndex={-1}>
       <p role="status" style={box(JADE)}>
         {outcome.server === 'cleared'
-          ? 'Review progress erased, in this browser and on your account. Every card is new again.'
-          : 'Review progress erased in this browser. Every card is new again.'}
+          ? 'SRS progress erased, in this browser and on your account. Every card is new again.'
+          : 'SRS progress erased in this browser. Every card is new again.'}
       </p>
       {outcome.server === 'failed' && (
         <p role="alert" style={box(CORAL)}>

@@ -33,7 +33,7 @@ test.describe('Auth flow', () => {
     await page.goto('/account');
     await expect(page).toHaveURL(/\/account$/);
     await expect(page.getByRole('link', { name: /sign in to sync it/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /reset review progress/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /reset SRS progress/i })).toBeVisible();
   });
 
   test('sign-in with invalid credentials shows error message', async ({ page }) => {

@@ -23,9 +23,9 @@ function setup(props: Partial<ResetProgressProps> = {}) {
   return { user, clearLocal, clearServer };
 }
 
-const openButton = () => screen.getByRole('button', { name: 'Reset review progress…' });
+const openButton = () => screen.getByRole('button', { name: 'Reset SRS progress…' });
 const eraseButton = () =>
-  screen.getByRole('button', { name: 'Erase review progress' }) as HTMLButtonElement;
+  screen.getByRole('button', { name: 'Erase SRS progress' }) as HTMLButtonElement;
 const confirmInput = () => screen.getByLabelText('Type RESET to confirm') as HTMLInputElement;
 
 async function openAndType(user: ReturnType<typeof userEvent.setup>, word = 'RESET') {
@@ -48,14 +48,14 @@ describe('ResetProgress', () => {
 
     expect(screen.getByRole('heading', { name: 'Danger zone' })).toBeTruthy();
     expect(openButton()).toBeTruthy();
-    expect(screen.queryByRole('button', { name: 'Erase review progress' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Erase SRS progress' })).toBeNull();
   });
 
   it('opens a confirmation that names everything erased and kept, and focuses the field', async () => {
     const { user } = setup();
     await user.click(openButton());
 
-    const group = screen.getByRole('group', { name: 'Erase all review progress?' });
+    const group = screen.getByRole('group', { name: 'Erase all SRS progress?' });
     for (const item of ERASES) expect(group.textContent).toContain(item);
     expect(group.textContent).toContain('Kept: your streak and accuracy stats.');
     expect(group.textContent).toContain('cannot be undone');
@@ -103,7 +103,7 @@ describe('ResetProgress', () => {
     expect(screen.queryByRole('alert')).toBeNull();
     // The panel closes and focus lands on the result, not the top of the page.
     expect(screen.queryByRole('group')).toBeNull();
-    expect(document.activeElement?.textContent).toMatch(/Review progress erased/);
+    expect(document.activeElement?.textContent).toMatch(/SRS progress erased/);
   });
 
   it('confirms with Enter from the field', async () => {
@@ -121,7 +121,7 @@ describe('ResetProgress', () => {
 
     expect(clearServer).not.toHaveBeenCalled();
     expect((await screen.findByRole('status')).textContent).toBe(
-      'Review progress erased in this browser. Every card is new again.',
+      'SRS progress erased in this browser. Every card is new again.',
     );
   });
 

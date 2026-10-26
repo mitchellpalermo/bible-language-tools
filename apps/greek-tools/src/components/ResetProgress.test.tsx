@@ -79,18 +79,18 @@ afterEach(() => {
 
 async function confirmReset() {
   const user = userEvent.setup();
-  await user.click(screen.getByRole('button', { name: 'Reset review progress…' }));
+  await user.click(screen.getByRole('button', { name: 'Reset SRS progress…' }));
   await user.type(screen.getByLabelText('Type RESET to confirm'), 'RESET');
-  await user.click(screen.getByRole('button', { name: 'Erase review progress' }));
+  await user.click(screen.getByRole('button', { name: 'Erase SRS progress' }));
 }
 
 describe('greek.tools ResetProgress', () => {
   it('names focus passage vocabulary as sharing the flashcard schedules, and lists what is kept', async () => {
     const user = userEvent.setup();
     render(<ResetProgress signedIn={false} />);
-    await user.click(screen.getByRole('button', { name: 'Reset review progress…' }));
+    await user.click(screen.getByRole('button', { name: 'Reset SRS progress…' }));
 
-    const panel = screen.getByRole('group', { name: 'Erase all review progress?' });
+    const panel = screen.getByRole('group', { name: 'Erase all SRS progress?' });
     expect(panel).toHaveTextContent(/Vocabulary flashcards/);
     expect(panel).toHaveTextContent(/Focus passage vocabulary/);
     expect(panel).toHaveTextContent(

@@ -442,8 +442,8 @@ Re-run this after test 10; that is the point of maximum write pressure.
 next sync. Reset has to call `DELETE`.
 
 1. On **A**, signed in with synced progress, open `/account` (or follow
-   **Manage progress** from the Flashcards footer), click **Reset review
-   progress…**, type `RESET` and click **Erase review progress**. The result
+   **Manage progress** from the Flashcards footer), click **Reset SRS
+   progress…**, type `RESET` and click **Erase SRS progress**. The result
    should read "erased, in this browser and on your account".
 2. Check `/api/progress`.
 
