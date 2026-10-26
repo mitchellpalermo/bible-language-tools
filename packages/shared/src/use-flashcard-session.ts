@@ -357,17 +357,6 @@ export function useFlashcardSession<T, R = never>(options: FlashcardSessionOptio
     emit({ type: 'missed_added_to_review', count: missedNotInReview.length, studyMode });
   }, [missedKeys, missedNotInReview, studyMode, emit]);
 
-  /**
-   * Empty the SRS store and deal again. Destructive and local only: anything
-   * server-side is the caller's to clear.
-   */
-  const resetStore = useCallback(() => {
-    srsStoreRef.current = {};
-    setSrsStore({});
-    latest.current.storage.saveStore({});
-    startSession();
-  }, [startSession]);
-
   // ─── Keyboard ───────────────────────────────────────────────────────────────
 
   useEffect(() => {
@@ -442,7 +431,6 @@ export function useFlashcardSession<T, R = never>(options: FlashcardSessionOptio
     dueCount,
     newCount,
     accuracy,
-    resetStore,
     // After a drill
     missedNotInReview,
     addMissedToReview,

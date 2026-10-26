@@ -228,9 +228,10 @@ Things to know before changing it:
   app's `Flashcards.test.tsx` checks its wiring and what it draws, not the
   rules again. That includes options only one app uses (typed answers, the
   keyboard switch), so the hook's tests cover every option.
-- **`resetStore()` is local only.** A server copy is the caller's to clear —
-  `PUT /api/progress` merges, so a reset that skips the server is undone by the
-  next sync.
+- **The hook has no reset, on purpose.** Erasing the SRS store is the account
+  page's job (`ResetProgress`; see "A merge cannot express a deletion" below),
+  behind a typed confirmation and with the server copy cleared too. A reset on
+  a study screen sits one tap from a session, which is why it moved.
 
 ## Streaks, study days, and sync merges
 
