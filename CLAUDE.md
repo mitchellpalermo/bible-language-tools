@@ -319,6 +319,16 @@ GitHub Actions workflows in `.github/workflows/`:
 
 Changing `packages/shared` triggers both app workflows.
 
+**`packages/shared` runs with coverage in CI** (`test:coverage`), so its 90%
+threshold is a gate. The same switch makes every test there run instrumented on
+a shared runner, which is the slowest that code ever runs: about 10× a laptop
+for V8 coverage, and about 5× again for the runner. A wall-clock budget in a test
+must hold under both. The one such test (`ink/score/geom.test.ts`, "without a
+per-attempt search") failed its old 25ms budget at 33ms on the first CI run with
+coverage, while the same run on the other app's workflow passed — a timing
+budget sized from a laptop fails intermittently, not every time. Size a budget
+below the regression it exists to catch, not above the figure you measured.
+
 Both workflows run `pnpm lint` before the tests. It is the same command in both
 because the lint gate is repo-wide, not per app — running it twice is cheap and
 it means the gate fires whichever workflow a change happens to trigger.
