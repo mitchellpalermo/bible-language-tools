@@ -55,7 +55,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/quiz-settings` | `createQuizSettings(storageKey, overrides?)` factory for persisting quiz difficulty; `overrides` sets one app's defaults |
 | `@tools/shared/paradigm-quiz` | The paradigm quiz engine — `TableModel`, `getQuizCells`, `applyDensity`. Which tables exist and how an answer is graded stay in each app |
 | `@tools/shared/flashcard-settings` | `createFlashcardSettings(storageKey)` factory for what the flashcard face shows before you answer |
-| `@tools/shared/flashcard-session` | `shuffle` and `nextRound` — pure flashcard queue rules, including Endless mode's reshuffle. hebrew-tools uses them today; greek-tools picks them up with #87 |
+| `@tools/shared/flashcard-session` | `shuffle`, `nextRound` and `requeueMissed` — pure flashcard queue rules: Endless mode's reshuffle, and the drill modes' re-queue of a missed card. hebrew-tools uses them today; greek-tools picks them up with #87 |
 | `@tools/shared/nav` | `NavLink` type and the active-route predicates the nav renders with |
 | `@tools/shared/nav-menu` | `initNavMenu()` — DOM controller for the mobile drawer |
 | `@tools/shared/ink` | Stylus writing engine — stroke capture, palm rejection, smoothing, variable-width rendering, geometric scoring, and the `ScriptPack` type |
@@ -63,6 +63,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/components/WritingGrid` | The row of per-letter guide boxes a word is written into (React) |
 | `@tools/shared/components/SiteNav.astro` | The site navigation for both apps (see below) |
 | `@tools/shared/components/GradeButtons` | The Again/Hard/Good/Easy answer row, with per-grade interval previews (React) |
+| `@tools/shared/components/DrillButtons` | The Missed / Got it answer row for the drill modes, which schedule nothing (React) |
 | `@tools/shared/components/ToggleSwitch` | Labelled on/off switch — `role="switch"`, app accent passed in (React) |
 | `@tools/shared/components/NumberToggle` | Sg/Pl pill toggle (mobile only) |
 | `@tools/shared/components/EndingsToggle` | Full forms / Endings only toggle |
@@ -155,6 +156,32 @@ Two things about it that are pedagogy rather than plumbing:
   (`revealed` covers both the flip and a checked typed answer), and its English →
   Greek direction is untouched: the front is the gloss there, so there is no
   such line to withhold.
+
+### Drill modes answer Missed / Got it
+
+Study All and Endless are drills: they never write the SRS schedule, so the
+four SM-2 grades and their interval previews mean nothing there. hebrew-tools
+shows `DrillButtons` in their place (greek-tools follows with #87). The rules,
+all from the memory research rather than taste:
+
+- **A miss comes back 4–6 cards later, never next** (`requeueMissed`,
+  `REQUEUE_GAP`). Recall after a gap is harder, and the harder correct recall
+  is what strengthens memory (Pyc & Rawson 2009). The exact range is an
+  engineering choice.
+- **A pass ends only when every card has been got right once.** That is
+  successive relearning to a criterion of one (Rawson & Dunlosky 2011).
+  Dropping a card after one correct recall, or never re-asking a miss, both
+  cost retention (Karpicke & Roediger 2008).
+- **Only a card's first attempt in a round is scored** — session tally,
+  accuracy, streak. The re-asks would otherwise inflate accuracy with answers
+  the student was just shown.
+- **The end of a session offers the missed words to SRS Review**, as new cards
+  due today. It adds only words not already in the store and never touches a
+  scheduled card's interval, ease or due date. A cram helps tomorrow's quiz and
+  fades by the exam (Cepeda et al. 2006); this is the bridge to spacing.
+  Endless reaches the summary through its "Finish session" button.
+
+### The part-of-speech control
 
 The control is `ToggleSwitch`, not a pill. Every filter on both flashcard pages
 is a chip that fills with the accent when active, and greek-tools draws its Part

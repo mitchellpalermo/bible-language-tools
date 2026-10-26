@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { nextRound, shuffle } from './flashcard-session';
+import { nextRound, REQUEUE_GAP, requeueMissed, shuffle } from './flashcard-session';
 
 /** A `random` that replays a fixed sequence, so an order can be pinned. */
 function sequence(...values: number[]) {
@@ -64,5 +64,43 @@ describe('nextRound', () => {
 
   it('is a plain shuffle when there is no previous card', () => {
     expect(nextRound(['a', 'b', 'c'], undefined, id, () => 0.9999)).toEqual(['a', 'b', 'c']);
+  });
+});
+
+describe('requeueMissed', () => {
+  const deck = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+
+  it('brings the card back after REQUEUE_GAP.min cards at the low end', () => {
+    const out = requeueMissed(deck, 0, () => 0);
+    expect(out).toEqual(['a', 'b', 'c', 'd', 'e', 'a', 'f', 'g', 'h', 'i', 'j']);
+    expect(out.indexOf('a', 1) - 1).toBe(REQUEUE_GAP.min);
+  });
+
+  it('brings the card back after REQUEUE_GAP.max cards at the high end', () => {
+    const out = requeueMissed(deck, 0, () => 0.9999);
+    expect(out.indexOf('a', 1) - 1).toBe(REQUEUE_GAP.max);
+  });
+
+  it('never makes the missed card the very next one while others remain', () => {
+    for (let n = 0; n < 100; n++) {
+      const out = requeueMissed(deck, 3);
+      expect(out[4]).not.toBe('d');
+      expect(out).toHaveLength(deck.length + 1);
+    }
+  });
+
+  it('goes to the end when fewer cards than the gap remain', () => {
+    expect(requeueMissed(['a', 'b', 'c'], 1, () => 0)).toEqual(['a', 'b', 'c', 'b']);
+  });
+
+  it('is next when it was the last card, since nothing is left to put between', () => {
+    expect(requeueMissed(['a', 'b'], 1)).toEqual(['a', 'b', 'b']);
+  });
+
+  it('leaves the input alone, and ignores an index past the end', () => {
+    const input = ['a', 'b'];
+    requeueMissed(input, 0);
+    expect(input).toEqual(['a', 'b']);
+    expect(requeueMissed(input, 5)).toEqual(['a', 'b']);
   });
 });

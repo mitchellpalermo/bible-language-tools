@@ -29,6 +29,7 @@
     "./components/DescriptionBar": "./src/components/DescriptionBar.tsx",
     "./components/WritingGrid": "./src/ink/components/WritingGrid.tsx",
     "./components/GradeButtons": "./src/components/GradeButtons.tsx",
+    "./components/DrillButtons": "./src/components/DrillButtons.tsx",
     "./components/ToggleSwitch": "./src/components/ToggleSwitch.tsx"
   },
   "peerDependencies": {

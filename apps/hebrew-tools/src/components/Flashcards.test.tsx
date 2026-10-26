@@ -151,13 +151,13 @@ describe('Flashcards', () => {
     expect(screen.getByRole('button', { name: /^good/i })).toBeInTheDocument();
   });
 
-  it('advances to the next card after grading Good', async () => {
+  it('advances to the next card after answering Got it', async () => {
     const user = userEvent.setup();
     renderFlashcards();
     await user.click(getStudyAllButton());
     const cardIndicatorBefore = screen.getByTestId('card-progress').textContent;
     await user.click(getCard());
-    await user.click(screen.getByRole('button', { name: /^good/i }));
+    await user.click(screen.getByRole('button', { name: /^got it/i }));
     const cardIndicatorAfter = screen.getByTestId('card-progress').textContent;
     expect(cardIndicatorAfter).not.toBe(cardIndicatorBefore);
   });
@@ -202,7 +202,7 @@ describe('Flashcards', () => {
     const deckSize = vocabulary.filter((w) => matchFreq(w.frequency, '2000+')).length;
     for (let i = 0; i < deckSize; i++) {
       await user.click(screen.getByText('tap to reveal'));
-      await user.click(screen.getByRole('button', { name: /^good/i }));
+      await user.click(screen.getByRole('button', { name: /^got it/i }));
     }
     expect(screen.getByText('Session Complete')).toBeInTheDocument();
   });
@@ -335,7 +335,7 @@ describe('Flashcards', () => {
     renderFlashcards();
     await user.click(getStudyAllButton());
     await user.click(getCard());
-    await user.click(screen.getByRole('button', { name: /^good/i }));
+    await user.click(screen.getByRole('button', { name: /^got it/i }));
     await user.click(screen.getByRole('button', { name: /restart session/i }));
     expect(screen.getByTestId('card-progress').textContent).toMatch(/^1\//);
   });
@@ -411,7 +411,7 @@ describe('Flashcards chapter decks', () => {
       const front = screen.getByText((_, el) => el?.getAttribute('dir') === 'rtl');
       expect(inDeck.has(front.textContent ?? '')).toBe(true);
       await user.click(screen.getByText('tap to reveal'));
-      await user.click(screen.getByRole('button', { name: /^good/i }));
+      await user.click(screen.getByRole('button', { name: /^got it/i }));
     }
     expect(screen.getByText('Session Complete')).toBeInTheDocument();
   });
@@ -686,9 +686,9 @@ describe('endless mode', () => {
     return vocabulary.filter((w) => matchFreq(w.frequency, '2000+')).length;
   }
 
-  async function gradeGood(user: ReturnType<typeof userEvent.setup>) {
+  async function gotIt(user: ReturnType<typeof userEvent.setup>) {
     await user.click(screen.getByText('tap to reveal'));
-    await user.click(screen.getByRole('button', { name: /^good/i }));
+    await user.click(screen.getByRole('button', { name: /^got it/i }));
   }
 
   it('deals a reshuffled deck instead of the session-complete screen', async () => {
@@ -699,7 +699,7 @@ describe('endless mode', () => {
     const firstRound: string[] = [];
     for (let i = 0; i < deckSize; i++) {
       firstRound.push(frontWord());
-      await gradeGood(user);
+      await gotIt(user);
     }
 
     expect(screen.queryByText('Session Complete')).not.toBeInTheDocument();
@@ -710,7 +710,7 @@ describe('endless mode', () => {
     const secondRound: string[] = [];
     for (let i = 0; i < deckSize; i++) {
       secondRound.push(frontWord());
-      await gradeGood(user);
+      await gotIt(user);
     }
     expect([...secondRound].sort()).toEqual([...firstRound].sort());
   });
@@ -721,7 +721,7 @@ describe('endless mode', () => {
     expect(screen.queryByTestId('card-progress')).not.toBeInTheDocument();
     expect(screen.getByTestId('session-reviewed').textContent).toBe('0');
 
-    for (let i = 0; i < deckSize + 2; i++) await gradeGood(user);
+    for (let i = 0; i < deckSize + 2; i++) await gotIt(user);
 
     expect(screen.getByTestId('session-reviewed').textContent).toBe(String(deckSize + 2));
     expect(loadStats().totalReviewed).toBe(deckSize + 2);
@@ -730,15 +730,15 @@ describe('endless mode', () => {
   it('leaves the SRS store untouched', async () => {
     const user = userEvent.setup();
     const deckSize = await startEndless(user);
-    for (let i = 0; i < deckSize + 1; i++) await gradeGood(user);
+    for (let i = 0; i < deckSize + 1; i++) await gotIt(user);
     expect(loadSRSStore()).toEqual({});
   });
 
   it('starts over from the top on "Restart session"', async () => {
     const user = userEvent.setup();
     await startEndless(user);
-    await gradeGood(user);
-    await gradeGood(user);
+    await gotIt(user);
+    await gotIt(user);
     await user.click(screen.getByRole('button', { name: 'Restart session' }));
     expect(screen.getByTestId('session-reviewed').textContent).toBe('0');
     expect(screen.getByRole('button', { name: 'Endless' })).toHaveAttribute('aria-pressed', 'true');
@@ -751,5 +751,161 @@ describe('endless mode', () => {
       'hebrew_flashcard_session_started',
       expect.objectContaining({ study_mode: 'endless' }),
     );
+  });
+});
+
+// ─── Drill answers: Missed / Got it ───────────────────────────────────────────
+
+describe('drill answers', () => {
+  const BAND = vocabulary.filter((w) => matchFreq(w.frequency, '2000+'));
+
+  function frontWord() {
+    return document.querySelector('p[dir="rtl"].text-5xl')?.textContent ?? '';
+  }
+
+  async function startStudyAll(user: ReturnType<typeof userEvent.setup>) {
+    renderFlashcards();
+    await user.click(getStudyAllButton());
+    await user.click(screen.getByRole('button', { name: /^2000\+/ }));
+  }
+
+  async function answer(user: ReturnType<typeof userEvent.setup>, which: 'missed' | 'got it') {
+    await user.click(screen.getByText('tap to reveal'));
+    await user.click(screen.getByRole('button', { name: new RegExp(`^${which}`, 'i') }));
+  }
+
+  it('replaces the SRS grades with Missed and Got it, with no interval previews', async () => {
+    const user = userEvent.setup();
+    await startStudyAll(user);
+    await user.click(getCard());
+    expect(screen.getByRole('button', { name: /^missed/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^got it/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^good/i })).not.toBeInTheDocument();
+    for (const name of [/^missed/i, /^got it/i]) {
+      expect(screen.getByRole('button', { name }).textContent).not.toMatch(/\d+(\.\d)?(d|wk|mo|y)/);
+    }
+  });
+
+  it('keeps the four SRS grades in SRS Review', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(getCard());
+    expect(screen.getByRole('button', { name: /^good/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^got it/i })).not.toBeInTheDocument();
+  });
+
+  it('brings a missed card back a few cards later, never straight away', async () => {
+    const user = userEvent.setup();
+    await startStudyAll(user);
+    const missed = frontWord();
+    await answer(user, 'missed');
+
+    let between = 0;
+    while (frontWord() !== missed) {
+      between++;
+      await answer(user, 'got it');
+    }
+    expect(between).toBeGreaterThanOrEqual(4);
+    expect(between).toBeLessThanOrEqual(6);
+  });
+
+  it('ends a pass only once every card has been got right', async () => {
+    const user = userEvent.setup();
+    await startStudyAll(user);
+    await answer(user, 'missed');
+    // The miss added one card to the pass.
+    expect(screen.getByTestId('card-progress').textContent).toBe(`2/${BAND.length + 1}`);
+    for (let i = 0; i < BAND.length; i++) await answer(user, 'got it');
+    expect(screen.getByText('Session Complete')).toBeInTheDocument();
+  });
+
+  it('scores only the first attempt at each card', async () => {
+    const user = userEvent.setup();
+    await startStudyAll(user);
+    await answer(user, 'missed');
+    for (let i = 0; i < BAND.length; i++) await answer(user, 'got it');
+    expect(screen.getByText(`${BAND.length - 1} got it · 1 still learning`)).toBeInTheDocument();
+    expect(loadStats().totalReviewed).toBe(BAND.length);
+    expect(loadStats().totalCorrect).toBe(BAND.length - 1);
+  });
+
+  it('never writes the SRS store, missed or not', async () => {
+    const user = userEvent.setup();
+    await startStudyAll(user);
+    await answer(user, 'missed');
+    await answer(user, 'got it');
+    expect(loadSRSStore()).toEqual({});
+  });
+
+  it('answers from the keyboard: 1 is Missed, 2 is Got it', async () => {
+    const user = userEvent.setup();
+    await startStudyAll(user);
+    await user.keyboard(' ');
+    await user.keyboard('1');
+    expect(screen.getByTestId('card-progress').textContent).toBe(`2/${BAND.length + 1}`);
+    await user.keyboard(' ');
+    await user.keyboard('2');
+    expect(screen.getByTestId('card-progress').textContent).toBe(`3/${BAND.length + 1}`);
+  });
+
+  describe('adding missed words to SRS Review', () => {
+    it('offers the missed words at the end of a pass, and adds them as due today', async () => {
+      const user = userEvent.setup();
+      await startStudyAll(user);
+      const missed = frontWord();
+      await answer(user, 'missed');
+      for (let i = 0; i < BAND.length; i++) await answer(user, 'got it');
+
+      await user.click(screen.getByRole('button', { name: 'Add 1 to SRS Review' }));
+
+      const word = BAND.find((w) => w.hebrew === missed) as HebrewVocabWord;
+      const key = normalizeKey(cardKey(word));
+      expect(loadSRSStore()).toEqual({ [key]: newCard(key) });
+      expect(screen.getByRole('status')).toHaveTextContent('Added 1 word to SRS Review');
+      expect(screen.queryByRole('button', { name: /to srs review/i })).not.toBeInTheDocument();
+    });
+
+    it('offers nothing when no card was missed', async () => {
+      const user = userEvent.setup();
+      await startStudyAll(user);
+      for (let i = 0; i < BAND.length; i++) await answer(user, 'got it');
+      expect(screen.getByText('Session Complete')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /to srs review/i })).not.toBeInTheDocument();
+    });
+
+    it('leaves a word already in SRS Review exactly as it was', async () => {
+      // Seed one word with real history, then miss every card once.
+      const seeded = BAND[0];
+      const seededKey = normalizeKey(cardKey(seeded));
+      const history = { ...newCard(seededKey), interval: 12, repetition: 3, dueDate: '2099-01-01' };
+      saveSRSStore({ [seededKey]: history });
+
+      const user = userEvent.setup();
+      await startStudyAll(user);
+      const seen = new Set<string>();
+      while (!screen.queryByText('Session Complete')) {
+        const front = frontWord();
+        await answer(user, seen.has(front) ? 'got it' : 'missed');
+        seen.add(front);
+      }
+
+      const offer = screen.getByRole('button', { name: /^Add \d+ to SRS Review$/ });
+      const offered = Number(offer.textContent?.match(/\d+/)?.[0]);
+      await user.click(offer);
+
+      const store = loadSRSStore();
+      expect(store[seededKey]).toEqual(history);
+      expect(Object.keys(store)).toHaveLength(offered + 1);
+    });
+
+    it('is reached from Endless through "Finish session"', async () => {
+      const user = userEvent.setup();
+      renderFlashcards();
+      await user.click(screen.getByRole('button', { name: 'Endless' }));
+      await answer(user, 'missed');
+      await user.click(screen.getByRole('button', { name: 'Finish session' }));
+      expect(screen.getByText('Session Complete')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Add 1 to SRS Review' })).toBeInTheDocument();
+    });
   });
 });

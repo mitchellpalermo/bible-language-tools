@@ -1,6 +1,10 @@
+import DrillButtons, {
+  DRILL_RESULTS,
+  type DrillResult,
+} from '@tools/shared/components/DrillButtons';
 import GradeButtons from '@tools/shared/components/GradeButtons';
 import ToggleSwitch from '@tools/shared/components/ToggleSwitch';
-import { nextRound, shuffle } from '@tools/shared/flashcard-session';
+import { nextRound, requeueMissed, shuffle } from '@tools/shared/flashcard-session';
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -61,8 +65,12 @@ import ErrorBoundary from './ErrorBoundary';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 /**
- * - `srs`: due cards, then new ones. Grades write the SRS store.
- * - `all`: one shuffled pass through the deck. A drill — no SRS writes.
+ * - `srs`: due cards, then new ones. Graded Again/Hard/Good/Easy, which writes
+ *   the SRS store.
+ * - `all`: one shuffled pass through the deck. A drill — no SRS writes. Graded
+ *   Missed / Got it, and a missed card comes back a few cards later until it is
+ *   got right once (successive relearning), so a pass ends with every card
+ *   recalled correctly at least once.
  * - `endless`: `all` that never ends. When the deck runs out it is reshuffled
  *   and dealt again (#164). Also a drill: an endless *due* queue is incoherent,
  *   since grading a card makes it not-due, so the only ways to keep going would
@@ -194,6 +202,16 @@ function FlashcardsInner() {
   const [sessionScore, setSessionScore] = useState({ known: 0, learning: 0 });
   const [sessionDone, setSessionDone] = useState(false);
 
+  // Drill state (Study All, Endless). `deck` is the session's cards once each,
+  // which an Endless round is reshuffled from — the queue itself holds repeats
+  // of missed cards. `attemptedRef` is the cards already answered this round,
+  // so only a first attempt is scored. `missedKeys` is every card missed this
+  // session, offered for SRS Review when the session ends.
+  const [deck, setDeck] = useState<HebrewVocabWord[]>([]);
+  const attemptedRef = useRef(new Set<string>());
+  const [missedKeys, setMissedKeys] = useState<ReadonlySet<string>>(() => new Set());
+  const [addedToReview, setAddedToReview] = useState<number | null>(null);
+
   // Keep a ref to srsStore so buildQueue always uses latest without deps
   const srsStoreRef = useRef(srsStore);
   srsStoreRef.current = srsStore;
@@ -237,10 +255,14 @@ function FlashcardsInner() {
   const startSession = useCallback(() => {
     const nextQueue = buildQueue(filteredVocab, studyMode, srsStoreRef.current);
     setQueue(nextQueue);
+    setDeck(nextQueue);
     setIndex(0);
     setFlipped(false);
     setSessionScore({ known: 0, learning: 0 });
     setSessionDone(false);
+    attemptedRef.current = new Set();
+    setMissedKeys(new Set());
+    setAddedToReview(null);
     posthog.capture('hebrew_flashcard_session_started', {
       deck_size: nextQueue.length,
       deck: selection.deck === 'all' ? 'all-vocabulary' : selection.deck,
@@ -278,6 +300,27 @@ function FlashcardsInner() {
 
   const card = queue[index];
 
+  /** Move past the current card: to the next one, a new round, or the end. */
+  const advance = useCallback(
+    (nextQueue: HebrewVocabWord[]) => {
+      if (index + 1 < nextQueue.length) {
+        setQueue(nextQueue);
+        setIndex((i) => i + 1);
+        setFlipped(false);
+      } else if (studyMode === 'endless' && card) {
+        // Reshuffle this session's own deck. A filter change restarts the
+        // session instead, so the deck never needs re-reading here.
+        setQueue(nextRound(deck, card, srsKey));
+        setIndex(0);
+        setFlipped(false);
+        attemptedRef.current = new Set();
+      } else {
+        setSessionDone(true);
+      }
+    },
+    [index, studyMode, card, deck],
+  );
+
   const handleReview = useCallback(
     (grade: ReviewGrade) => {
       if (!card) return;
@@ -313,21 +356,73 @@ function FlashcardsInner() {
         learning: s.learning + (correct ? 0 : 1),
       }));
 
-      if (index + 1 < queue.length) {
-        setIndex((i) => i + 1);
-        setFlipped(false);
-      } else if (studyMode === 'endless') {
-        // Reshuffle this session's own deck. A filter change restarts the
-        // session instead, so the deck never needs re-reading here.
-        setQueue(nextRound(queue, card, srsKey));
-        setIndex(0);
-        setFlipped(false);
-      } else {
-        setSessionDone(true);
-      }
+      advance(queue);
     },
-    [card, studyMode, srsStore, index, queue],
+    [card, studyMode, srsStore, queue, advance],
   );
+
+  /** A drill answer. Never touches the SRS store. */
+  const handleDrill = useCallback(
+    (result: DrillResult) => {
+      if (!card) return;
+      const k = srsKey(card);
+      const correct = result === 'got-it';
+
+      // Only a card's first attempt in a round is scored. A missed card comes
+      // back until it is got right, and counting those repeats would inflate
+      // accuracy with answers the student had just been shown.
+      const firstAttempt = !attemptedRef.current.has(k);
+      attemptedRef.current.add(k);
+
+      posthog.capture('hebrew_flashcard_reviewed', {
+        result: correct ? 'correct' : 'incorrect',
+        study_mode: studyMode,
+        first_attempt: firstAttempt,
+      });
+
+      if (firstAttempt) {
+        setStats((prev) => {
+          const next = recordReview(prev, correct);
+          saveStats(next);
+          return next;
+        });
+        setSessionScore((s) => ({
+          known: s.known + (correct ? 1 : 0),
+          learning: s.learning + (correct ? 0 : 1),
+        }));
+      }
+
+      if (!correct) setMissedKeys((prev) => (prev.has(k) ? prev : new Set(prev).add(k)));
+      advance(correct ? queue : requeueMissed(queue, index));
+    },
+    [card, studyMode, queue, index, advance],
+  );
+
+  // Missed words not yet in the SRS store. Cards already scheduled are left
+  // alone: a drill must never move an interval, ease or due date.
+  const missedNotInReview = useMemo(
+    () => [...missedKeys].filter((k) => !srsStore[k]),
+    [missedKeys, srsStore],
+  );
+
+  /**
+   * Hand the session's missed words to SRS Review, as new cards due today.
+   * A cram helps tomorrow's quiz and fades by the exam; spaced review is what
+   * keeps a word, so this is the bridge from one to the other.
+   */
+  const addMissedToReview = useCallback(() => {
+    setSrsStore((prev) => {
+      const next = { ...prev };
+      for (const k of missedKeys) if (!next[k]) next[k] = newCard(k);
+      saveSRSStore(next);
+      return next;
+    });
+    setAddedToReview(missedNotInReview.length);
+    posthog.capture('hebrew_flashcard_missed_added_to_review', {
+      count: missedNotInReview.length,
+      study_mode: studyMode,
+    });
+  }, [missedKeys, missedNotInReview, studyMode]);
 
   const handleFlip = useCallback(() => setFlipped((f) => !f), []);
 
@@ -341,19 +436,24 @@ function FlashcardsInner() {
         e.preventDefault();
         handleFlip();
       }
-      // 1-4 grade the card, in the order the buttons are drawn. The old
-      // Left/Right arrows are kept as aliases for Again/Good so the two-button
-      // muscle memory still works.
-      if (flipped) {
+      // Numbers answer the card, in the order the buttons are drawn: 1-4 for
+      // the SRS grades, 1-2 for Missed / Got it. Left/Right are aliases for the
+      // fail and pass ends of either row.
+      if (flipped && studyMode === 'srs') {
         const byNumber = REVIEW_GRADES[Number(e.key) - 1];
         if (byNumber) handleReview(byNumber);
         else if (e.key === 'ArrowRight') handleReview('good');
         else if (e.key === 'ArrowLeft') handleReview('again');
+      } else if (flipped) {
+        const byNumber = DRILL_RESULTS[Number(e.key) - 1];
+        if (byNumber) handleDrill(byNumber);
+        else if (e.key === 'ArrowRight') handleDrill('got-it');
+        else if (e.key === 'ArrowLeft') handleDrill('missed');
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [flipped, sessionDone, handleFlip, handleReview]);
+  }, [flipped, sessionDone, studyMode, handleFlip, handleReview, handleDrill]);
 
   // ─── Derived values ──────────────────────────────────────────────────────────
 
@@ -379,6 +479,32 @@ function FlashcardsInner() {
             You're all caught up! Check back tomorrow for more reviews.
           </p>
         )}
+        {studyMode !== 'srs' &&
+          (addedToReview !== null ? (
+            <p role="status" className="text-text-muted text-sm px-4">
+              Added {addedToReview} {addedToReview === 1 ? 'word' : 'words'} to SRS Review.
+              {addedToReview === 1 ? ' It comes' : ' They come'} up first in your next review.
+            </p>
+          ) : (
+            missedNotInReview.length > 0 && (
+              <div className="mx-auto max-w-sm bg-bg-card rounded-2xl border-2 border-primary/10 px-4 py-4 space-y-3 shadow-sm">
+                <p className="text-sm text-text">
+                  You missed {missedNotInReview.length}{' '}
+                  {missedNotInReview.length === 1 ? 'word that isn’t' : 'words that aren’t'} in your
+                  review schedule yet. Add {missedNotInReview.length === 1 ? 'it' : 'them'} so{' '}
+                  {missedNotInReview.length === 1 ? 'it keeps' : 'they keep'} coming back over the
+                  next few weeks, not just today.
+                </p>
+                <button
+                  type="button"
+                  onClick={addMissedToReview}
+                  className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity font-semibold text-sm shadow-sm"
+                >
+                  Add {missedNotInReview.length} to SRS Review
+                </button>
+              </div>
+            )
+          ))}
         <div className="flex flex-col sm:flex-row justify-center gap-3 pt-2 px-4 sm:px-0">
           <button
             type="button"
@@ -816,12 +942,18 @@ function FlashcardsInner() {
       </div>
 
       {/* ── Action buttons ────────────────────────────────────────────────── */}
-      {flipped && (
-        <GradeButtons
-          card={srsStore[srsKey(card)] ?? newCard(srsKey(card))}
-          onGrade={handleReview}
-        />
-      )}
+      {/* The SRS grades schedule the card, so they preview the interval each
+          would buy. A drill schedules nothing, so its row asks only whether
+          the card should come back this round. */}
+      {flipped &&
+        (studyMode === 'srs' ? (
+          <GradeButtons
+            card={srsStore[srsKey(card)] ?? newCard(srsKey(card))}
+            onGrade={handleReview}
+          />
+        ) : (
+          <DrillButtons onAnswer={handleDrill} />
+        ))}
 
       {/* ── Keyboard hints (desktop only) ────────────────────────────────── */}
       <p className="hidden sm:block text-xs text-text-muted text-center">
@@ -835,9 +967,9 @@ function FlashcardsInner() {
         </kbd>
         &ndash;
         <kbd className="bg-primary/5 border border-primary/10 px-1.5 rounded text-primary font-mono">
-          4
+          {studyMode === 'srs' ? 4 : 2}
         </kbd>{' '}
-        grade (Again, Hard, Good, Easy)
+        {studyMode === 'srs' ? 'grade (Again, Hard, Good, Easy)' : 'answer (Missed, Got it)'}
       </p>
 
       {/* ── Footer controls ───────────────────────────────────────────────── */}
@@ -849,6 +981,17 @@ function FlashcardsInner() {
         >
           Restart session
         </button>
+        {/* Endless never ends by itself, so this is its way to the summary —
+            and to the offer of putting missed words into SRS Review. */}
+        {studyMode === 'endless' && (
+          <button
+            type="button"
+            onClick={() => setSessionDone(true)}
+            className="text-sm text-text-muted hover:text-primary transition-colors font-medium"
+          >
+            Finish session
+          </button>
+        )}
         {studyMode === 'srs' && (
           <button
             type="button"
