@@ -447,8 +447,9 @@ next sync. Reset has to call `DELETE`.
    should read "erased, in this browser and on your account".
 2. Check `/api/progress`.
 
-**Expect:** `{"data":null}` — the account's Hebrew progress is gone, not just
-this browser's.
+**Expect:** an empty `srsStore` — the account's Hebrew cards are gone, not just
+this browser's — with `studyStats` still holding A's streak and totals. The
+reset deletes, then pushes A's copy straight back, and A's copy has no cards.
 
 3. On **B** (still holding the old cards), click **Sync now**.
 

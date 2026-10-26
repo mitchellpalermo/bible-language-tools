@@ -96,9 +96,31 @@ describe('hebrew.tools ResetProgress', () => {
     expect(await screen.findByRole('status')).toHaveTextContent(
       'in this browser and on your account',
     );
-    expect(fetchMock).toHaveBeenCalledOnce();
-    expect(fetchMock).toHaveBeenCalledWith('/api/progress', { method: 'DELETE' });
+    expect(fetchMock).toHaveBeenNthCalledWith(1, '/api/progress', { method: 'DELETE' });
     expect(loadSRSStore()).toEqual({});
+  });
+
+  it('pushes this browser back after the delete, so the account keeps its stats', async () => {
+    render(<ResetProgress signedIn />);
+    await confirmReset();
+    await screen.findByRole('status');
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const [url, init] = fetchMock.mock.calls[1];
+    expect(url).toBe('/api/progress');
+    expect(init.method).toBe('PUT');
+    const body = JSON.parse(init.body);
+    expect(body.srsStore).toEqual({});
+    expect(body.studyStats.totalReviewed).toBe(120);
+  });
+
+  it('does not push when the delete fails', async () => {
+    fetchMock.mockResolvedValue(new Response('', { status: 500 }));
+    render(<ResetProgress signedIn />);
+    await confirmReset();
+    await screen.findByRole('alert');
+
+    expect(fetchMock).toHaveBeenCalledOnce();
   });
 
   it('keeps the local reset when the server delete fails, and says so', async () => {

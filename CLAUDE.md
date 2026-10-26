@@ -272,7 +272,8 @@ and calls `DELETE /api/progress` when signed in. Three things to know:
 - **greek's `DELETE` is broader than the reset.** It also removes custom decks,
   focus passages and parse history (it was written for "Start fresh"), so the
   greek binding pushes this browser's copy straight back afterwards. hebrew's
-  removes only cards, stats and `sync_state`.
+  removes only cards, stats and `sync_state`, and its binding pushes back too,
+  so the account keeps its stats. Both wrappers name it `clearServerSrs`.
 - **It is per device.** Another device still holding the cards pushes them on
   its next session end, and the merge keeps them. The confirmation says so.
 - **The same gap exists for greek's deck deletion.** `deleteCustomDeck` is

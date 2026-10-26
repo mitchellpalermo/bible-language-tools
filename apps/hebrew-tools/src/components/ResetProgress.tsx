@@ -1,6 +1,6 @@
 import SharedResetProgress from '@tools/shared/components/ResetProgress';
 import { saveSRSStore } from '../data/srs';
-import { deleteServerProgress } from '../lib/sync-manager';
+import { deleteServerProgress, push } from '../lib/sync-manager';
 import ErrorBoundary from './ErrorBoundary';
 
 // hebrew.tools' binding of the shared Danger zone (see
@@ -22,15 +22,31 @@ export const ERASES = [
 ] as const;
 
 /**
- * Left alone by the reset. Stats stay in this browser; on the server,
- * `DELETE /api/progress` removes them along with the cards, and the next push
- * from this browser puts them back.
+ * Left alone by the reset. On the server `DELETE /api/progress` removes the
+ * stats along with the cards; `clearServerSrs` pushes them straight back.
  */
 export const KEEPS = ['streak', 'accuracy stats', 'deck choices'] as const;
 
 /** Empty this browser's SRS store. Throws if storage cannot be written. */
 export function clearLocalSrs(): void {
   saveSRSStore({});
+}
+
+/**
+ * Delete the account's copy, then push this browser's back.
+ *
+ * `DELETE /api/progress` removes the stats and the sync record along with the
+ * cards, while this browser keeps its stats. Without the push, the account
+ * would sit with no stats — and no record of ever having synced — until the
+ * next session-end push. PUT merges server-side, so pushing an empty store
+ * onto an empty account adds no cards back. The push's result does not decide
+ * the outcome: the cards are gone either way, and the next push covers a
+ * failed one. Same shape as greek.tools' reset.
+ */
+export async function clearServerSrs(): Promise<boolean> {
+  const deleted = await deleteServerProgress();
+  if (deleted) await push();
+  return deleted;
 }
 
 export default function ResetProgress({ signedIn }: { signedIn: boolean }) {
@@ -43,7 +59,7 @@ export default function ResetProgress({ signedIn }: { signedIn: boolean }) {
         clearLocal={clearLocalSrs}
         // PUT merges server-side and can never remove a card, so only DELETE
         // makes the reset stick across a sync.
-        clearServer={deleteServerProgress}
+        clearServer={clearServerSrs}
       />
     </ErrorBoundary>
   );
