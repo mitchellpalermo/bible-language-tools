@@ -1,14 +1,19 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import {
+  bdbStemNames,
+  buildGlossIndex,
   buildLemmaIndex,
   createLemmaStats,
+  GLOSS_LIMITS,
   headLemma,
   headLemmaIndex,
   headMorph,
   normalizeLemmaKey,
   nounGender,
   parseAugIndex,
+  parseBdb,
+  parseBdbEntry,
   parseBook,
   parseLexicalIndex,
   parseStrongGlosses,
@@ -654,5 +659,313 @@ describe('parseStrongGlosses, degrading', () => {
       </lexicon>`,
     );
     expect(glosses.has('11')).toBe(false);
+  });
+});
+
+// ─── BDB ─────────────────────────────────────────────────────────────────────
+
+// Excerpts of the pinned BrownDriverBriggs.xml, cut down but with the markup
+// that matters left exactly as BDB writes it.
+const BDB = {
+  gam: `<w>גַּם</w> 768 <pos>adv</pos>. denoting <em>addition</em>, <def>also</def>, <def>moreover</def>, <def>yea</def>
+    <status p="168">base</status>`,
+  melakha: `<w>מְלָאכָה</w> 167 <pos>n.f</pos>. <def>occupation</def>, <def>work</def>
+    <sense n="1"><def>occupation</def>, <def>business</def></sense>
+    <sense n="3"><def>work</def> as something done or made</sense>`,
+  qanah: `<w>קָנָה</w> 84 <pos>vb</pos>. <def>get</def>, <def>acquire</def>
+    <sense><stem>Qal</stem> 81
+      <sense n="1"><def>get</def>, <def>acquire</def> (all poet.)</sense>
+      <sense n="2">elsewhere <def>buy</def></sense>
+    </sense>
+    <sense><stem>Niph</stem>. <def>be bought</def></sense>
+    <sense><stem>Hiph</stem>. <def>caused</def> (one) <def>to purchase me</def>, i.e. <def>made me a bondman</def></sense>`,
+  et: `<w>אֵת</w> the <def>mark of the accusative</def>, prefixed as a rule only to nouns that are <em>definite</em>`,
+  chazaq: `<w>חָזַק</w> 291 <pos>vb</pos>. <def>be</def> or <def>grow firm</def>, <def>strong</def>, <def>strengthen</def>
+    <sense><stem>Qal</stem>
+      <sense n="I">intrans. <def>be</def> or <def>grow strong</def></sense>
+      <sense n="II">transit. only <def>strengthened him not</def></sense>
+    </sense>
+    <sense><stem>Hiph</stem>.
+      <sense n="1">
+        <sense n="a"><def>make strong</def>, <def>strengthen</def></sense>
+        <sense n="b"><def>make firm</def>, the kingdom</sense>
+      </sense>
+      <sense n="6">esp. <def>take</def> or <def>keep hold</def> of, <def>seize</def>, <def>grasp</def></sense>
+    </sense>`,
+  al: `<w>עַל</w>, <w>עָ֑ל</w>
+    <sense n="I"><pos>subst</pos>. <def>height</def></sense>
+    <sense n="II">As <pos>prep</pos>. <def>upon</def>, and hence <def>on the ground of</def>, <def>over</def>, <def>against</def></sense>`,
+  halakh: `<w>הָלַךְ</w> 1554 <pos>vb</pos>. <def>go</def>, <def>come</def>, <def>walk</def>
+    <sense><stem>Qal</stem>
+      <sense n="I"><sense n="1">of things</sense><sense n="2">of men</sense></sense>
+      <sense n="II"><sense n="1"><def>pass away</def>, <def>die</def></sense></sense>
+    </sense>
+    <sense><stem>Hiph</stem><sense n="1"><def>lead</def>, <def>bring</def></sense></sense>`,
+  tsavah: `[<w>צָוָה</w>] 485 <pos>vb</pos>. <stem>Pi</stem>. <def>lay charge</def> (upon), <def>give charge</def> (to), <def>charge</def>`,
+  nakhah: `<w>נָכָה</w> <pos>vb</pos>. <def>smite</def>
+    <sense><stem>Niph</stem>. <def>and he shall be smitten</def>, <def>and die</def></sense>
+    <sense><stem>Hiph</stem>. <sense n="1"><def>Smite</def>, <def>strike</def></sense><sense n="2"><def>smite</def></sense></sense>`,
+  yisrael: `<w>יִשְׂרָאֵל</w> 2507 <pos>n.pr.m</pos>. et <pos>gent</pos>. <def>Israel</def> (<def>Ēl persisteth</def>, <def>persevereth</def>)
+    <sense n="1"><pos>n.pr.m</pos>. second name of Jacob</sense>`,
+  shaul: `<w>שָׁאוּל</w> <pos>n.pr.m</pos>. (= <def>asked</def>)
+    <sense n="1">397 1st king of Isr.</sense>`,
+  asher: `<w>אֲשֶׁר</w> <pos>part. of relation</pos> A <em>sign of relation</em>, bringing the clause into relation`,
+};
+
+describe('bdbStemNames', () => {
+  it('maps BDB’s abbreviations onto the names the popup renders', () => {
+    expect(bdbStemNames('Hiph')).toEqual(['Hiphil']);
+    expect(bdbStemNames('Hithp')).toEqual(['Hithpael']);
+    expect(bdbStemNames('Pe')).toEqual(['Peal']);
+  });
+
+  it('reads past a trailing period, a sense number and editorial brackets', () => {
+    expect(bdbStemNames('Niph.')).toEqual(['Niphal']);
+    expect(bdbStemNames('Qal 1')).toEqual(['Qal']);
+    expect(bdbStemNames('Pi. 2')).toEqual(['Piel']);
+    expect(bdbStemNames('[Qal]')).toEqual(['Qal']);
+  });
+
+  it('files one label under both stems where OSHB cuts the forms finer', () => {
+    expect(bdbStemNames('Pō‛l')).toEqual(['Polel', 'Poel']);
+    expect(bdbStemNames('Hithpa')).toEqual(['Hithpaal', 'Ithpaal']);
+  });
+
+  it('knows a mis-tagged noun sense is not a stem', () => {
+    expect(bdbStemNames('n.[m.]')).toBeNull();
+  });
+
+  it('fails loudly on a label it does not know, rather than dropping the stem', () => {
+    expect(() => bdbStemNames('Zzz')).toThrow(/not mapped/);
+  });
+});
+
+describe('parseBdbEntry', () => {
+  it('takes the head’s defs as the gloss — BDB’s first sense where Strong’s missed', () => {
+    expect(parseBdbEntry(BDB.gam).gloss).toEqual(['also', 'moreover', 'yea']);
+    expect(parseBdbEntry(BDB.melakha).gloss).toEqual(['occupation', 'work']);
+    expect(parseBdbEntry(BDB.qanah).gloss).toEqual(['get', 'acquire']);
+    expect(parseBdbEntry(BDB.et).gloss).toEqual(['mark of the accusative']);
+  });
+
+  it('joins defs that BDB tagged as pieces of one phrase', () => {
+    // "<def>be</def> or <def>grow firm</def>" — a first-def rule reads "be"
+    expect(parseBdbEntry(BDB.chazaq).gloss).toEqual(['be or grow firm', 'strong', 'strengthen']);
+  });
+
+  it('falls back to the first sense that has a def when the head has none', () => {
+    expect(parseBdbEntry(BDB.al).gloss).toEqual(['height']);
+  });
+
+  it('drops a def inside parentheses, which is etymology rather than a gloss', () => {
+    expect(parseBdbEntry(BDB.yisrael).gloss).toEqual(['Israel']);
+    expect(parseBdbEntry(BDB.shaul).gloss).toEqual([]);
+  });
+
+  it('yields nothing for an entry that describes rather than glosses', () => {
+    expect(parseBdbEntry(BDB.asher).gloss).toEqual([]);
+  });
+
+  it('files each stem’s senses under the popup’s stem names, in BDB’s order', () => {
+    const { stems } = parseBdbEntry(BDB.chazaq);
+    expect(stems.Hiphil).toEqual([
+      ['make strong', 'strengthen'],
+      ['make firm'],
+      ['take or keep hold', 'seize', 'grasp'],
+    ]);
+    expect(stems.Qal).toEqual([['be or grow strong']]);
+  });
+
+  it('drops a stem sense that translates a cited phrase, and the whole of its sense', () => {
+    const qanah = parseBdbEntry(BDB.qanah).stems;
+    // "caused (one) to purchase me" — not "caused" left behind
+    expect(qanah.Hiphil).toBeUndefined();
+    expect(qanah.Niphal).toEqual([['be bought']]);
+    // "and he shall be smitten, and die" — not "and die" left behind
+    expect(parseBdbEntry(BDB.nakhah).stems.Niphal).toBeUndefined();
+  });
+
+  it('lowercases a capitalized sense opener and drops a repeated sense', () => {
+    expect(parseBdbEntry(BDB.nakhah).stems.Hiphil).toEqual([['smite', 'strike']]);
+  });
+
+  it('stands the head in for a Qal whose first sense is bare', () => {
+    // The file is abridged: Qal I carries no defs, and the first def under Qal
+    // is sense II's "pass away, die".
+    const { stems } = parseBdbEntry(BDB.halakh);
+    expect(stems.Qal[0]).toEqual(['go', 'come', 'walk']);
+    expect(stems.Qal[1]).toEqual(['pass away', 'die']);
+    expect(stems.Hiphil).toEqual([['lead', 'bring']]);
+  });
+
+  it('reads a single-stem verb that names its stem in the head', () => {
+    const { gloss, stems } = parseBdbEntry(BDB.tsavah);
+    expect(gloss).toEqual(['lay charge', 'give charge', 'charge']);
+    expect(stems).toEqual({ Piel: [['lay charge', 'give charge', 'charge']] });
+  });
+
+  it('keeps every def it saw, for checking pins against', () => {
+    expect(parseBdbEntry(BDB.al).defs).toEqual(
+      new Set(['height', 'upon', 'on the ground of', 'over', 'against']),
+    );
+  });
+
+  it('decodes entities and skips a noun sense tagged as a stem', () => {
+    const entry = parseBdbEntry(
+      `<w>x</w> <def>sin &amp; guilt</def><sense><stem>n.[m.]</stem> <def>a thing</def></sense>`,
+    );
+    expect(entry.gloss).toEqual(['sin & guilt']);
+    expect(entry.stems).toEqual({});
+  });
+
+  it('ignores defs after the last sense, which comment on the whole entry', () => {
+    const entry = parseBdbEntry(
+      `<w>x</w><sense n="1">a <em>b</em></sense> cf. <def>trailing note</def>`,
+    );
+    expect(entry.gloss).toEqual([]);
+    expect(entry.defs.has('trailing note')).toBe(true);
+  });
+});
+
+describe('parseBdb', () => {
+  it('keys every entry by its id', () => {
+    const bdb = parseBdb(
+      `<lexicon><part id="c" xml:lang="heb"><section id="c.ck">
+        <entry id="c.ck.ab">${BDB.gam}</entry>
+        <entry id="s.cb.aa" type="root" mod="I">${BDB.qanah}</entry>
+      </section></part></lexicon>`,
+    );
+    expect([...bdb.keys()]).toEqual(['c.ck.ab', 's.cb.aa']);
+    expect(bdb.get('s.cb.aa').gloss).toEqual(['get', 'acquire']);
+  });
+});
+
+describe('buildGlossIndex', () => {
+  const aug = parseAugIndex(`<index>
+    <w aug="1571">clf</w>
+    <w aug="5921a">jkq</w>
+    <w aug="5921b">jkr</w>
+    <w aug="2388">dsn</w>
+    <w aug="3478">fmf</w>
+    <w aug="7586">mfm</w>
+    <w aug="834a">bjs</w>
+    <w aug="c">zzz</w>
+  </index>`);
+  const li = parseLexicalIndex(`<index>
+    <entry id="clf"><w>גַּם</w><xref bdb="c.ck.ab" strong="1571"/></entry>
+    <entry id="jkq"><w>עַל</w><xref bdb="p.cs.ar" strong="5921"/></entry>
+    <entry id="jkr"><w>עַל</w><xref bdb="p.cs.zz" strong="5921"/></entry>
+    <entry id="dsn"><w>חָזַק</w><xref bdb="h.bs.aa" strong="2388"/></entry>
+    <entry id="fmf"><w>יִשְׂרָאֵל</w><xref bdb="u.ce.ab" strong="3478"/></entry>
+    <entry id="mfm"><w>שָׁאוּל</w><xref bdb="v.ag.ac" strong="7586"/></entry>
+    <entry id="bjs"><w>אֲשֶׁר</w><xref bdb="a.gk.aa" strong="834"/></entry>
+    <entry id="zzz"><w>וְ</w><xref bdb="w.aa.aa"/></entry>
+  </index>`);
+  const bdb = new Map([
+    ['c.ck.ab', parseBdbEntry(BDB.gam)],
+    ['p.cs.ar', parseBdbEntry(BDB.al)],
+    // The other עַל — what a lookup by bare Strong's number can land on.
+    ['p.cs.zz', parseBdbEntry('<w>עַל</w> <def>forasmuch as</def>')],
+    ['h.bs.aa', parseBdbEntry(BDB.chazaq)],
+    ['u.ce.ab', parseBdbEntry(BDB.yisrael)],
+    ['v.ag.ac', parseBdbEntry(BDB.shaul)],
+    ['a.gk.aa', parseBdbEntry(BDB.asher)],
+    ['w.aa.aa', parseBdbEntry('<w>וְ</w> <def>so</def>, <def>then</def>')],
+  ]);
+  const lemmas = {
+    1571: { count: 769, pos: 'D', gloss: 'assemblage, also' },
+    '5921a': { count: 5764, pos: 'R' },
+    2388: { count: 290, pos: 'V' },
+    3478: { count: 2506, pos: 'Np', xlit: 'yiśrāʾēl' },
+    7586: { count: 406, pos: 'Np', xlit: 'šāʾûl', gloss: 'Shaul' },
+    '834a': { count: 4954, pos: 'T', gloss: 'who, which, what, that, when' },
+    9999: { count: 1, pos: 'N' },
+    c: { count: 50992, pos: 'C' },
+  };
+
+  it('glosses through the exact augmented key, never the bare Strong’s number', () => {
+    const { glosses } = buildGlossIndex(lemmas, aug, li, bdb);
+    expect(glosses['5921a'].g).toEqual(['height']);
+    expect(glosses['1571'].g).toEqual(['also', 'moreover', 'yea']);
+  });
+
+  it('carries a verb’s stem senses, trimmed to the limits', () => {
+    const { glosses } = buildGlossIndex(lemmas, aug, li, bdb);
+    expect(glosses['2388'].s.Hiphil).toHaveLength(3);
+    for (const senses of Object.values(glosses['2388'].s)) {
+      expect(senses.length).toBeLessThanOrEqual(GLOSS_LIMITS.senses);
+      for (const items of senses) expect(items.length).toBeLessThanOrEqual(GLOSS_LIMITS.senseItems);
+    }
+    expect(glosses['2388'].s.Hiphil[2]).toEqual(['take or keep hold', 'seize']);
+    expect(glosses['1571'].s).toBeUndefined();
+  });
+
+  it('gives a name BDB’s English, then the transliteration — never Strong’s', () => {
+    const { glosses } = buildGlossIndex(lemmas, aug, li, bdb);
+    expect(glosses['3478'].g).toEqual(['Israel']);
+    expect(glosses['7586'].g).toEqual(['šāʾûl']);
+  });
+
+  it('falls back to Strong’s, trimmed, where BDB describes rather than glosses', () => {
+    const { glosses, sources } = buildGlossIndex(lemmas, aug, li, bdb);
+    expect(glosses['834a'].g).toEqual(['who', 'which', 'what']);
+    expect(sources.strong.map((s) => s.lemma)).toEqual(['834a']);
+  });
+
+  it('leaves the inseparable prefixes to gloss.ts', () => {
+    const { glosses } = buildGlossIndex(lemmas, aug, li, bdb);
+    expect(glosses.c).toBeUndefined();
+  });
+
+  it('reports a lemma with no BDB entry, and writes nothing for one with no gloss at all', () => {
+    const { glosses, noEntry, sources } = buildGlossIndex(lemmas, aug, li, bdb);
+    expect(noEntry).toEqual([{ lemma: '9999', count: 1 }]);
+    expect(sources.none).toEqual([{ lemma: '9999', count: 1 }]);
+    expect(glosses['9999']).toBeUndefined();
+  });
+
+  it('sorts each report by frequency', () => {
+    const { sources } = buildGlossIndex(lemmas, aug, li, bdb);
+    expect(sources.bdb.map((s) => s.lemma)).toEqual(['5921a', '3478', '1571', '2388']);
+  });
+
+  describe('pins', () => {
+    it('replaces the head with defs the entry carries', () => {
+      const pins = { '5921a': { gloss: ['upon', 'over', 'against'] } };
+      const { glosses, sources } = buildGlossIndex(lemmas, aug, li, bdb, pins);
+      expect(glosses['5921a'].g).toEqual(['upon', 'over', 'against']);
+      expect(sources.pin.map((s) => s.lemma)).toEqual(['5921a']);
+    });
+
+    it('puts a pinned stem sense first and keeps the entry’s others after it', () => {
+      const pins = { 2388: { stems: { Hiphil: ['seize'] } } };
+      const { glosses, sources } = buildGlossIndex(lemmas, aug, li, bdb, pins);
+      expect(glosses['2388'].s.Hiphil[0]).toEqual(['seize']);
+      expect(glosses['2388'].s.Hiphil[1]).toEqual(['make strong', 'strengthen']);
+      // A stem-only pin leaves the head as BDB wrote it.
+      expect(sources.pin).toEqual([]);
+    });
+
+    it('fails the build on a pinned def the entry does not carry', () => {
+      const pins = { '5921a': { gloss: ['upon', 'atop'] } };
+      expect(() => buildGlossIndex(lemmas, aug, li, bdb, pins)).toThrow(/5921a.*atop/);
+      const stems = { 2388: { stems: { Qal: ['be mighty'] } } };
+      expect(() => buildGlossIndex(lemmas, aug, li, bdb, stems)).toThrow(/be mighty/);
+    });
+
+    it('fails on a pin for a lemma that reaches no entry', () => {
+      expect(() => buildGlossIndex(lemmas, aug, li, bdb, { 9999: { gloss: ['x'] } })).toThrow(
+        /9999/,
+      );
+    });
+  });
+});
+
+describe('the parseLexicalIndex BDB link', () => {
+  it('reads the BDB id off the cross-reference', () => {
+    const li = parseLexicalIndex(
+      `<index><entry id="aac"><w>אָב</w><xref bdb="a.ae.ab" strong="1"/></entry></index>`,
+    );
+    expect(li.get('aac').bdb).toBe('a.ae.ab');
   });
 });

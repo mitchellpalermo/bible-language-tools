@@ -8,6 +8,7 @@
     "build": "node scripts/build-morphhb.mjs && astro build",
     "build:data": "node scripts/build-morphhb.mjs",
     "build:data:force": "node scripts/build-morphhb.mjs --force",
+    "check:pins": "node scripts/check-bdb-pins.mjs",
     "build:vocab": "node scripts/build-vocabulary.mjs",
     "build:vocab:check": "node scripts/build-vocabulary.mjs --check",
     "check:verses": "node scripts/check-daily-verses.mjs",

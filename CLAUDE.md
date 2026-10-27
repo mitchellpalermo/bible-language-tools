@@ -535,8 +535,8 @@ See `apps/hebrew-tools/ROADMAP.md` for the full feature roadmap.
 
 The production build runs the OSHB data pipeline before `astro build`:
 - `scripts/build-morphhb.mjs` — fetches the Westminster Leningrad Codex and the
-  OSHB Hebrew Lexicon, outputs per-book JSON, a book index and a lemma index to
-  `public/data/morphhb/`
+  OSHB Hebrew Lexicon (Strong's and BDB), outputs per-book JSON, a book index, a
+  lemma index and BDB's glosses (`glosses.json`) to `public/data/morphhb/`
 
 Skipped in dev if the data is already present. `pnpm build:data` regenerates
 without a full build, `pnpm build:data:force` refetches. The parser's invariants

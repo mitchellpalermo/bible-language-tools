@@ -20,7 +20,7 @@ import {
 import { formatRef, hebrewNumeral } from '../lib/reader';
 import { lemmaBase, loadStudiedLemmas } from '../lib/studied';
 import ErrorBoundary from './ErrorBoundary';
-import { type ActiveWord, MarkLegend, WordPopup, WordRun } from './HebrewText';
+import { type ActiveWord, MarkLegend, useGlossLine, WordPopup, WordRun } from './HebrewText';
 import PrefToggle from './PrefToggle';
 
 /**
@@ -33,12 +33,14 @@ import PrefToggle from './PrefToggle';
  * `loadStudiedLemmas`. What is this page's own is the choice of verse, the
  * streak, and the two references.
  *
- * There is no interlinear gloss line, on purpose. The reader's glosses are
- * Strong's, and Strong's often lists a word's root sense first — its first
- * sense under גַּם is "assemblage", under מְלָאכָה "deputyship". A line of
- * those under a verse teaches the wrong word, and the course vocabulary may not
- * stand in (see "Glosses" in CLAUDE.md). The popup gives the full lexicon
- * entry for any word tapped.
+ * **The gloss line is BDB's, and it is off until asked for.** Strong's often
+ * leads with a word's root sense — "assemblage" for גַּם, "deputyship" for
+ * מְלָאכָה — which is why #179 shipped without a line at all. BDB reads
+ * "also" and "occupation, work", and a verb gets its own stem's sense
+ * (`lineGloss` in `src/lib/gloss.ts`). The course vocabulary may not stand in
+ * for either (see "Glosses" in CLAUDE.md). The preference is the reader's,
+ * `ReaderPrefs.glosses`, and `useGlossLine` fetches `glosses.json` only once
+ * it is on.
  *
  * Why a fallback is reported, not just taken: it looks exactly like a normal
  * page, so a broken feed hides. `hebrew_daily_verse_viewed` carries `source`
@@ -136,13 +138,17 @@ function DailyVerseInner() {
     };
   }, []);
 
-  const toggleCantillation = useCallback(() => {
+  const togglePref = useCallback((key: 'cantillation' | 'glosses') => {
     setPrefs((current) => {
-      const next = { ...current, cantillation: !current.cantillation };
+      const next = { ...current, [key]: !current[key] };
       saveReaderPrefs(next);
       return next;
     });
   }, []);
+  const toggleCantillation = useCallback(() => togglePref('cantillation'), [togglePref]);
+  const toggleGlosses = useCallback(() => togglePref('glosses'), [togglePref]);
+
+  const glossOf = useGlossLine(prefs.glosses);
 
   const activate = useCallback((word: HebrewWord, rect: DOMRect) => {
     setActive((prev) => (prev?.word === word ? null : { word, rect }));
@@ -209,6 +215,7 @@ function DailyVerseInner() {
                 isStudied={isStudied}
                 active={active?.word ?? null}
                 onActivate={activate}
+                glossOf={glossOf}
               />
             </div>
 
@@ -241,6 +248,9 @@ function DailyVerseInner() {
             <div className="flex flex-wrap gap-2 mt-5" onClick={(e) => e.stopPropagation()}>
               <PrefToggle on={prefs.cantillation} onChange={toggleCantillation}>
                 Cantillation
+              </PrefToggle>
+              <PrefToggle on={prefs.glosses} onChange={toggleGlosses}>
+                Glosses
               </PrefToggle>
               <a
                 href={`/reader?ref=${formatRef(today.ref)}`}

@@ -8,6 +8,7 @@
  *   {CODE}.json   per book — { [chapter]: { [verse]: HebrewWord[] } }
  *   books.json    the 39-book index, in Tanakh order
  *   lemmas.json   lemma → { count, hebrew?, xlit?, pos?, gender?, root?, gloss? }
+ *   glosses.json  lemma → { g, s? } — BDB's short gloss and a verb's stem senses
  *
  * `lemmas.json` is the authoritative frequency source for the app. Its counts are
  * real occurrence counts over the Westminster Leningrad Codex, computed per
@@ -26,30 +27,21 @@ import { fileURLToPath } from 'node:url';
 
 import { BOOKS } from './lib/books.mjs';
 import {
+  buildGlossIndex,
   buildLemmaIndex,
   createLemmaStats,
   parseAugIndex,
+  parseBdb,
   parseBook,
   parseLexicalIndex,
   parseStrongGlosses,
 } from './lib/oshb.mjs';
+import { LEXICON_BASE, WLC_BASE } from './lib/sources.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = join(__dirname, '..', 'public', 'data', 'morphhb');
+const PINS = join(__dirname, 'data', 'bdb-pins.json');
 const FORCE = process.argv.includes('--force');
-
-/**
- * The corpus tracks `master`, matching how greek-tools consumes MorphGNT: the
- * WLC is a living critical edition and we want its corrections.
- *
- * The lexicon is pinned to a commit, matching how greek-tools consumes Dodson.
- * It is reference data whose only job is to be stable — an upstream edit that
- * silently changed 9,000 headwords would be invisible in a diff of generated
- * output that is not committed.
- */
-const WLC_BASE = 'https://raw.githubusercontent.com/openscriptures/morphhb/master/wlc';
-const LEXICON_BASE =
-  'https://raw.githubusercontent.com/openscriptures/HebrewLexicon/21c9add13bc727d3a951361778e97e3ff7afd1ce';
 
 const log = (...args) => process.stdout.write(`${args.join(' ')}\n`);
 const warn = (...args) => process.stderr.write(`${args.join(' ')}\n`);
@@ -75,6 +67,7 @@ async function main() {
   const upToDate =
     !FORCE &&
     (await fileExists(join(OUT_DIR, 'lemmas.json'))) &&
+    (await fileExists(join(OUT_DIR, 'glosses.json'))) &&
     (await fileExists(join(OUT_DIR, 'books.json'))) &&
     (await Promise.all(BOOKS.map((b) => fileExists(join(OUT_DIR, `${b.code}.json`))))).every(
       Boolean,
@@ -118,19 +111,28 @@ async function main() {
 
   await writeFile(join(OUT_DIR, 'books.json'), JSON.stringify(bookIndex, null, 2), 'utf-8');
 
-  const [augXml, lexXml, strongXml] = await Promise.all([
+  const [augXml, lexXml, strongXml, bdbXml] = await Promise.all([
     fetchText(`${LEXICON_BASE}/AugIndex.xml`),
     fetchText(`${LEXICON_BASE}/LexicalIndex.xml`),
     fetchText(`${LEXICON_BASE}/HebrewStrong.xml`),
+    fetchText(`${LEXICON_BASE}/BrownDriverBriggs.xml`),
   ]);
+  const augIndex = parseAugIndex(augXml);
+  const lexicalIndex = parseLexicalIndex(lexXml);
   const { lemmas, unresolved, glossless, strongConflicts } = buildLemmaIndex(
     stats,
-    parseAugIndex(augXml),
-    parseLexicalIndex(lexXml),
+    augIndex,
+    lexicalIndex,
     parseStrongGlosses(strongXml),
   );
 
   await writeFile(join(OUT_DIR, 'lemmas.json'), JSON.stringify(lemmas), 'utf-8');
+
+  // A separate file, not more fields on lemmas.json: the popup needs the
+  // lemma index for a count and a root, and the gloss line needs only this.
+  const { pins } = JSON.parse(await readFile(PINS, 'utf-8'));
+  const glossIndex = buildGlossIndex(lemmas, augIndex, lexicalIndex, parseBdb(bdbXml), pins);
+  await writeFile(join(OUT_DIR, 'glosses.json'), JSON.stringify(glossIndex.glosses), 'utf-8');
 
   const lemmaCount = Object.keys(lemmas).length;
   const glossed = lemmaCount - glossless.length;
@@ -158,6 +160,8 @@ async function main() {
     );
   }
 
+  reportGlosses(glossIndex, lemmas);
+
   if (unresolved.length > 0) {
     const tokens = unresolved.reduce((sum, u) => sum + u.count, 0);
     warn(
@@ -168,6 +172,39 @@ async function main() {
           .join(', '),
     );
   }
+}
+
+/**
+ * Where the short glosses came from, by lemma and by occurrence. A drop in the
+ * BDB share is the first sign the parser stopped reading an entry shape.
+ */
+function reportGlosses({ sources, stemmed }, lemmas) {
+  const numbered = Object.entries(lemmas).filter(([key]) => /^\d/.test(key));
+  const totalLemmas = numbered.length;
+  const totalTokens = numbered.reduce((sum, [, l]) => sum + l.count, 0);
+  const tokens = (list) => list.reduce((sum, item) => sum + item.count, 0);
+  const pct = (n, d) => `${((n / d) * 100).toFixed(1)}%`;
+  const line = (label, list) =>
+    `    ${label.padEnd(30)} ${String(list.length).padStart(5)} lemmas (${pct(list.length, totalLemmas)}), ` +
+    `${pct(tokens(list), totalTokens)} of occurrences`;
+
+  log('  short glosses (glosses.json):');
+  log(line('BDB', sources.bdb));
+  log(line('BDB, pinned sense', sources.pin));
+  log(line('proper name, transliteration', sources.xlit));
+  log(line("Strong's (BDB bare)", sources.strong));
+  if (sources.none.length > 0) log(line('none', sources.none));
+
+  const verbs = numbered.filter(([, l]) => l.pos === 'V');
+  const verbKeys = new Set(verbs.map(([key]) => key));
+  const covered = stemmed.filter((s) => verbKeys.has(s.lemma));
+  log(
+    `    verbs with BDB stem senses     ${String(covered.length).padStart(5)} of ${verbs.length} ` +
+      `(${pct(
+        tokens(covered),
+        verbs.reduce((sum, [, l]) => sum + l.count, 0),
+      )} of verb occurrences)`,
+  );
 }
 
 // Sanity check the written output rather than trusting a clean exit: a silent

@@ -10,7 +10,8 @@
  *   - openscriptures/morphhb        `wlc/*.xml`      — WLC text + morphology
  *   - openscriptures/HebrewLexicon  `AugIndex.xml`   — augmented Strong's → lexical index id
  *                                   `LexicalIndex.xml` — pointed lexical form, POS, root
- *                                   `HebrewStrong.xml` — glosses
+ *                                   `HebrewStrong.xml` — Strong's glosses
+ *                                   `BrownDriverBriggs.xml` — BDB glosses and stem senses
  */
 
 // ─── Unicode ─────────────────────────────────────────────────────────────────
@@ -460,6 +461,10 @@ export function parseLexicalIndex(xml) {
       // The lexicon's own link to Strong's. Only used to check the number the
       // lemma key already carries — see `buildLemmaIndex`.
       strong: /<xref[^>]*strong="([^"]*)"/.exec(body)?.[1]?.trim(),
+      // The entry's id in `BrownDriverBriggs.xml`. Reached through the exact
+      // augmented key, so `5921a` lands on עַל "upon" and never on the other
+      // entries that share Strong's 5921 — see `buildGlossIndex`.
+      bdb: /<xref[^>]*bdb="([^"]*)"/.exec(body)?.[1]?.trim(),
       root: etym ? attr(etym[1], 'root') : undefined,
       parents: etym
         ? etym[2]
@@ -570,4 +575,505 @@ export function resolveRoot(entries, id, depth = 0) {
     if (root) return root;
   }
   return undefined;
+}
+
+// ─── BDB glosses (issue #131) ────────────────────────────────────────────────
+
+/**
+ * BDB's stem labels → the names `src/lib/morph-parse.ts` renders.
+ *
+ * Built from every `<stem>` value in the pinned `BrownDriverBriggs.xml`, and
+ * **an unknown label throws** (`bdbStemNames`). A stem that was silently
+ * dropped would look exactly like a verb BDB does not cover, so the build
+ * fails instead and the label gets added here.
+ *
+ * Most labels name one stem. A few name two, because BDB and OSHB cut the same
+ * forms differently: BDB writes one "Pōʿl" family where OSHB separates Polel
+ * (`o`) from Poel (`m`), and its Aramaic "Hithpa" covers both of OSHB's
+ * Hithpaal (`M`) and Ithpaal (`P`). The senses are filed under each.
+ *
+ * Labels are compared after `cleanStemLabel`, which drops a trailing period, a
+ * trailing sense number ("Qal 1", "Pi. 2") and editorial brackets ("[Qal]").
+ */
+const STEM_LABELS = {
+  // Hebrew, the seven
+  Qal: ['Qal'],
+  'Qal pass': ['Qal passive'],
+  Niph: ['Niphal'],
+  Pi: ['Piel'],
+  Piel: ['Piel'],
+  Pu: ['Pual'],
+  Pual: ['Pual'],
+  Hiph: ['Hiphil'],
+  Hoph: ['Hophal'],
+  Hithp: ['Hithpael'],
+  // Hebrew, the hollow and geminate variants
+  Po: ['Polel', 'Poel'],
+  'Pō‛': ['Polel', 'Poel'],
+  'Po‛': ['Polel', 'Poel'],
+  'Pō‛l': ['Polel', 'Poel'],
+  'Po‛l': ['Polel', 'Poel'],
+  Pol: ['Polel', 'Poel'],
+  Polel: ['Polel', 'Poel'],
+  'Po‛lel': ['Polel', 'Poel'],
+  'Po‛lēl': ['Polel', 'Poel'],
+  'Pō‛lēl': ['Polel', 'Poel'],
+  'Pô‛lēl': ['Polel', 'Poel'],
+  'Pōl‛ēl': ['Polel', 'Poel'],
+  'Pôl‛el': ['Polel', 'Poel'],
+  'Po‛ēl': ['Polel', 'Poel'],
+  'Po‛el': ['Polel', 'Poel'],
+  'Pō‛ēl': ['Polel', 'Poel'],
+  'Pō‛êl': ['Polel', 'Poel'],
+  'Pō‛el': ['Polel', 'Poel'],
+  'Pô‛el': ['Polel', 'Poel'],
+  'Po‛al': ['Polal', 'Poal'],
+  'Pō‛al': ['Polal', 'Poal'],
+  'Pō‛lal': ['Polal', 'Poal'],
+  'Po‛lal': ['Polal', 'Poal'],
+  'Pu‛l': ['Pulal'],
+  Hithpo: ['Hithpolel', 'Hithpoel'],
+  Hithpol: ['Hithpolel', 'Hithpoel'],
+  'Hithpō‛': ['Hithpolel', 'Hithpoel'],
+  'Hithpô‛': ['Hithpolel', 'Hithpoel'],
+  'Hithpō‛l': ['Hithpolel', 'Hithpoel'],
+  'Hithpo‛l': ['Hithpolel', 'Hithpoel'],
+  Hithpōl: ['Hithpolel', 'Hithpoel'],
+  'Hithpō‛lēl': ['Hithpolel', 'Hithpoel'],
+  'Hithpo‛lel': ['Hithpolel', 'Hithpoel'],
+  'Hithpo‛el': ['Hithpolel', 'Hithpoel'],
+  'Po‛. Hithpo‛l': ['Polel', 'Poel', 'Hithpolel', 'Hithpoel'],
+  Pilp: ['Pilpel'],
+  Pilpēl: ['Pilpel'],
+  Palp: ['Pilpel', 'Palpel'],
+  Polp: ['Polpal'],
+  Hithpalp: ['Hithpalpel'],
+  Pil: ['Pilel'],
+  'Pi‛lēl': ['Pilel'],
+  'Pi‛lel': ['Pilel'],
+  'Pa‛lel': ['Palel'],
+  'Pa‛l': ['Palel'],
+  'Pe‛al‛al': ['Pealal'],
+  'Hithpa‛lēl': ['Hithpalel', 'Nithpalel'],
+  Hothp: ['Hothpaal'],
+  Nithp: ['Nithpael'],
+  Tiph: ['Tiphil', 'Tiphel'],
+  Shaph: ['Shaphel'],
+  Ishtaph: ['Ishtaphel', 'Hishtaphel'],
+  // Aramaic
+  Pe: ['Peal'],
+  'Pe‛îl': ['Peil'],
+  'Pᵉ‛îl': ['Peil'],
+  Pa: ['Pael'],
+  Haph: ['Haphel'],
+  Hêphal: ['Hephal'],
+  Hithpe: ['Hithpeel', 'Ithpeel'],
+  Ithpe: ['Ithpeel', 'Hithpeel'],
+  Hithpa: ['Hithpaal', 'Ithpaal'],
+  Ithpa: ['Ithpaal', 'Hithpaal'],
+  'Ethpō‛l': ['Ithpolel', 'Ithpoel'],
+};
+
+/**
+ * `<stem>` values that are not stems. BDB's markup tags one noun sense of a
+ * root with `<stem>n.[m.]</stem>`; its senses are a noun's, so they are not
+ * filed under any stem.
+ */
+const NOT_STEMS = new Set(['n.[m.]']);
+
+function cleanStemLabel(raw) {
+  return raw
+    .trim()
+    .replace(/^\[(.*)\]$/, '$1')
+    .replace(/\s+\d+$/, '')
+    .replace(/\.$/, '')
+    .trim();
+}
+
+/**
+ * The `morph-parse.ts` stem names a BDB `<stem>` label covers, or `null` for a
+ * label that is not a stem. Throws on a label it does not know.
+ */
+export function bdbStemNames(raw) {
+  const label = cleanStemLabel(raw);
+  if (NOT_STEMS.has(label)) return null;
+  const names = STEM_LABELS[label];
+  if (!names) throw new Error(`BDB stem label "${raw}" is not mapped — add it to STEM_LABELS`);
+  return names;
+}
+
+const HEBREW_LETTER = /[א-ת]/;
+
+/**
+ * **A `<def>` that translates a cited phrase is not a gloss.** Inside a verb's
+ * stem senses BDB marks the English of a specific quotation with `<def>` too —
+ * חָזַק Qal II "transit. only *strengthened him not*", נָכָה Niphal "*and he
+ * shall be smitten*", שָׁלַח Niphal "*letters were sent*". On their own those
+ * read as nonsense. What gives them away is a personal pronoun, a finite
+ * auxiliary or a leading "and": a stem sense is a dictionary form and has
+ * none of them.
+ *
+ * **One cited item condemns its whole sense.** BDB splits a quotation into
+ * several defs as readily as a phrase, so the pieces around a cited item are
+ * fragments of the same quotation: נָכָה Niphal is "*and he shall be smitten*,
+ * *and die*", שָׁלַח Hiphil "*and I* … *will send*". Keeping the survivors
+ * would leave "and die" as the Niphal of "smite".
+ *
+ * Only stem senses are filtered. In an entry's head a pronoun *is* the gloss —
+ * הוּא is "he, she, it".
+ */
+const CITED_PHRASE =
+  /\b(?:he|she|it|they|we|thou|him|her|me|thee|us|them|ye|thy|thine|my|his|our|their|was|were|shall|will|hath|hast)\b|\bI\b|^and\b/i;
+
+/**
+ * Turn one region's run of text and `<def>`s into gloss items.
+ *
+ * **BDB tags pieces of one phrase as separate `<def>`s.** חָזַק opens with
+ * "`<def>be</def>` or `<def>grow firm</def>`", and a first-def rule reads
+ * "be". Defs separated only by "or", "and" or "/" are one item, joined with
+ * the word between them. So is a pair split by a short parenthetical, so that
+ * קָנָה's Hiphil reads "caused (one) to purchase me" as one phrase — which the
+ * cited-phrase rule then drops whole, rather than leaving "caused" behind.
+ * Anything else between two defs — a comma, a reference, a Hebrew citation, a
+ * word of commentary — starts a new item.
+ *
+ * **A def inside parentheses is etymology, not a gloss.** יִשְׂרָאֵל is
+ * "`<def>Israel</def>` (`<def>Ēl persisteth</def>`)": the name, then what it
+ * means. Parenthesized defs are dropped and break the phrase they interrupt.
+ */
+function glossItems(parts, { stem = false } = {}) {
+  const items = [];
+  let cited = false;
+  let current = null;
+  let gap = '';
+  const flush = () => {
+    if (current === null) return;
+    let item = current.replace(/\s+/g, ' ').trim();
+    if (stem) {
+      if (CITED_PHRASE.test(item)) cited = true;
+      // "to hear", "to be blessed": an infinitive marker is not part of a gloss.
+      item = item.replace(/^to\s+/, '');
+    }
+    if (item && !HEBREW_LETTER.test(item) && !items.includes(item)) items.push(item);
+    current = null;
+  };
+
+  for (const part of parts) {
+    if (part.def === undefined) {
+      gap += part.text;
+      continue;
+    }
+    if (part.paren > 0) {
+      flush();
+      gap = '¶';
+      continue;
+    }
+    const joiner = /^\s*(or|and|\/|\([^()¶]*\))\s*$/.exec(gap);
+    if (current !== null && joiner) current += ` ${joiner[1]} ${part.def}`;
+    else {
+      flush();
+      current = part.def;
+    }
+    gap = '';
+  }
+  flush();
+  return cited ? [] : items;
+}
+
+/**
+ * Parse one BDB `<entry>` body into a tree of senses.
+ *
+ * Each node is `{ stems, parts, children }`: `stems` is set on a sense that
+ * opens with `<stem>`, `parts` is the node's own text and defs in order (a
+ * `<w>` Hebrew citation is a separator), and `children` are its nested
+ * `<sense>`s. The root is the entry's head, before any sense.
+ */
+function senseTree(body) {
+  const root = { stems: null, parts: [], children: [], trailing: [] };
+  const stack = [root];
+  let node = root;
+  let paren = 0;
+  let mode = null; // 'def' | 'stem' | 'w' | 'skip'
+  let buffer = '';
+  let wDepth = 0;
+
+  const clean = body.replace(/<status\b[\s\S]*?<\/status>/g, '');
+  for (const [token] of clean.matchAll(/<[^>]+>|[^<]+/g)) {
+    if (token.startsWith('<')) {
+      if (/^<sense\b/.test(token)) {
+        const child = { stems: null, parts: [], children: [] };
+        node.children.push(child);
+        stack.push(child);
+        node = child;
+        paren = 0;
+      } else if (token === '</sense>') {
+        if (stack.length > 1) stack.pop();
+        node = stack[stack.length - 1];
+      } else if (token === '<def>') {
+        mode = 'def';
+        buffer = '';
+      } else if (token === '</def>') {
+        if (node !== root || root.children.length === 0) {
+          node.parts.push({ def: decodeEntities(buffer), paren });
+        } else {
+          root.trailing.push(decodeEntities(buffer));
+        }
+        mode = null;
+      } else if (token === '<stem>') {
+        mode = 'stem';
+        buffer = '';
+      } else if (token === '</stem>') {
+        // A verb used in one stem only names it in the head, with no <sense>
+        // around it: צָוָה is "<stem>Pi</stem>. lay charge, give charge".
+        node.stems = bdbStemNames(decodeEntities(buffer));
+        mode = null;
+      } else if (/^<w\b/.test(token) && !token.endsWith('/>')) {
+        wDepth++;
+        node.parts.push({ text: ' ¶ ' });
+      } else if (token === '</w>') {
+        wDepth = Math.max(0, wDepth - 1);
+      } else if (/^<ref\b/.test(token)) {
+        // A reference interrupts a phrase the same way a citation does.
+        node.parts.push({ text: ' ¶ ' });
+      }
+      continue;
+    }
+    if (mode === 'def' || mode === 'stem') {
+      buffer += token;
+      continue;
+    }
+    if (wDepth > 0) continue;
+    // The head is what comes before the first sense; text after the last one
+    // is commentary on the whole entry.
+    if (node === root && root.children.length > 0) continue;
+    node.parts.push({ text: token });
+    for (const c of token) {
+      if (c === '(') paren++;
+      else if (c === ')') paren = Math.max(0, paren - 1);
+    }
+  }
+  return root;
+}
+
+function decodeEntities(s) {
+  return s
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'");
+}
+
+/** Depth-first, the first node at or under `node` that yields any items. */
+function firstItems(node) {
+  const own = glossItems(node.parts);
+  if (own.length > 0) return own;
+  for (const child of node.children) {
+    const found = firstItems(child);
+    if (found.length > 0) return found;
+  }
+  return [];
+}
+
+/** Every node's items under a stem, depth-first, one array per sense that has any. */
+function allSenses(node, out = []) {
+  const own = glossItems(node.parts, { stem: true });
+  if (own.length > 0) out.push(own);
+  for (const child of node.children) if (!child.stems) allSenses(child, out);
+  return out;
+}
+
+/**
+ * Whether a stem block says nothing about its primary sense: no defs of its
+ * own, and none anywhere under its first sense. הָלַךְ's Qal is like that —
+ * the file is abridged, sense I (go, come, walk) carries no defs, and the
+ * first def under Qal is sense II's "pass away, die".
+ */
+function primaryIsBare(block) {
+  if (glossItems(block.parts, { stem: true }).length > 0) return false;
+  const first = block.children.find((child) => !child.stems);
+  return !first || allSenses(first).length === 0;
+}
+
+/** Words BDB capitalizes because they are names, not because they open a sense. */
+const PROPER = new Set(['God', 'Yahweh', 'Lord', 'Israel']);
+
+/**
+ * BDB capitalizes the opening def of some numbered senses ("Say", "Fall
+ * out"). Inside a stem's sense list that is typography, not a proper noun.
+ */
+function lowerFirst(item) {
+  const word = item.split(/\s/)[0];
+  return /^[A-Z][a-z]/.test(item) && !PROPER.has(word)
+    ? item[0].toLowerCase() + item.slice(1)
+    : item;
+}
+
+/** Drop a sense that adds nothing to the ones before it ("see", "see", "see"). */
+function distinctSenses(senses) {
+  const seen = new Set();
+  return senses.filter((items) => {
+    const fresh = items.some((item) => !seen.has(item));
+    for (const item of items) seen.add(item);
+    return fresh;
+  });
+}
+
+/**
+ * Every stem block in an entry, wherever BDB nested it — including the head
+ * itself, for a verb that names its one stem there.
+ */
+function stemBlocks(root) {
+  const out = root.stems ? [root] : [];
+  const walk = (node) => {
+    for (const child of node.children) {
+      if (child.stems) out.push(child);
+      else walk(child);
+    }
+  };
+  walk(root);
+  return out;
+}
+
+/** Every def an entry carries, cleaned the same way items are. For pin checks. */
+function allDefs(node, out = new Set()) {
+  for (const def of node.trailing ?? []) out.add(def.replace(/\s+/g, ' ').trim());
+  for (const part of node.parts) {
+    if (part.def !== undefined) out.add(part.def.replace(/\s+/g, ' ').trim());
+  }
+  for (const child of node.children) allDefs(child, out);
+  return out;
+}
+
+/**
+ * Parse one BDB entry body.
+ *
+ * - `gloss` — the entry's own head: the defs before its first `<sense>`, or
+ *   failing that the first sense that has any. גַּם → `['also', 'moreover',
+ *   'yea']`; מְלָאכָה → `['occupation', 'work']`.
+ * - `stems` — for a verb, stem name → its senses in BDB's order, each a list of
+ *   items: חָזַק's Hiphil is `[['make strong', 'strengthen'], ['make firm'], …]`.
+ * - `defs` — every def in the entry, which is what a pin is checked against.
+ */
+export function parseBdbEntry(body) {
+  const tree = senseTree(body);
+  const gloss = firstItems(tree);
+  const stems = {};
+  for (const block of stemBlocks(tree)) {
+    let senses = allSenses(block).map((items) => items.map(lowerFirst));
+    // The head of a verb entry is BDB's Qal meaning, so it stands in for a Qal
+    // whose own first sense is bare. A derived stem gets no such stand-in: the
+    // head would give a Hiphil the Qal's meaning.
+    const basic = block.stems.includes('Qal') || block.stems.includes('Peal');
+    if (basic && block !== tree && gloss.length > 0 && primaryIsBare(block)) {
+      senses = [gloss, ...senses];
+    }
+    if (senses.length === 0) continue;
+    for (const name of block.stems) {
+      // A stem BDB lists twice (a second Hiphil block further down) keeps both.
+      stems[name] = distinctSenses([...(stems[name] ?? []), ...senses]);
+    }
+  }
+  return { gloss, stems, defs: allDefs(tree) };
+}
+
+/** `BrownDriverBriggs.xml`: entry id → `parseBdbEntry` result. */
+export function parseBdb(xml) {
+  const entries = new Map();
+  for (const m of xml.matchAll(/<entry id="([^"]*)"[^>]*>([\s\S]*?)<\/entry>/g)) {
+    entries.set(m[1], parseBdbEntry(m[2]));
+  }
+  return entries;
+}
+
+/**
+ * A pin chooses among the entry's defs and never supplies its own, so the
+ * wording stays BDB's. A pinned def the entry does not carry — a typo, or an
+ * upstream edit to the lexicon — fails the build by name.
+ */
+function checkPin(key, pin, entry) {
+  const named = [...(pin.gloss ?? []), ...Object.values(pin.stems ?? {}).flat()];
+  const missing = named.filter((def) => !entry?.defs.has(def));
+  if (missing.length > 0) {
+    throw new Error(
+      `BDB pin for ${key} names defs the entry does not carry: ${missing.join(', ')}`,
+    );
+  }
+}
+
+/** How much of each list survives into `glosses.json`. */
+export const GLOSS_LIMITS = { items: 3, senses: 4, senseItems: 2 };
+
+/**
+ * Join BDB into the per-lemma gloss file, `glosses.json`.
+ *
+ * `lemmas` is `buildLemmaIndex`'s output (for `pos`, `xlit` and the Strong's
+ * gloss), and `pins` is `scripts/data/bdb-pins.json`'s `pins`.
+ *
+ * Each lemma gets `{ g, s? }`: `g` is the short gloss as a list of items, `s`
+ * the stem senses for a verb. Where `g` comes from, in order:
+ *
+ * 1. **A pin**, for the handful of common words whose first BDB sense
+ *    misleads (אֱלֹהִים "rulers, judges"). A pin names defs *from the entry*,
+ *    so the wording stays BDB's, and a pinned def the entry does not carry
+ *    throws — that is how a pin goes stale.
+ * 2. **BDB**, through the exact augmented key: `lemma → AugIndex →
+ *    LexicalIndex <xref bdb> → entry`. Looking BDB up by bare Strong's number
+ *    instead lands עַל (`5921a`) on the wrong entry.
+ * 3. **For a proper name, the lexicon's transliteration** — BDB gives the
+ *    English name for most (Israel, Moses), and not for שָׁאוּל.
+ * 4. **Strong's**, trimmed to the same length, for what BDB leaves bare —
+ *    אֲשֶׁר among them, which BDB describes rather than glosses.
+ *
+ * The inseparable prefixes are letter codes, not numbers, and are skipped:
+ * `src/lib/gloss.ts` answers for them, as it always has.
+ */
+export function buildGlossIndex(lemmas, augIndex, lexicalIndex, bdb, pins = {}) {
+  /** @type {Record<string, { g: string[], s?: Record<string, string[][]> }>} */
+  const glosses = {};
+  const sources = { pin: [], bdb: [], xlit: [], strong: [], none: [] };
+  const stemmed = [];
+  const noEntry = [];
+
+  for (const [key, lemma] of Object.entries(lemmas)) {
+    if (!/^\d/.test(key)) continue;
+    const id = augIndex.get(key);
+    const bdbId = id ? lexicalIndex.get(id)?.bdb : undefined;
+    const entry = bdbId ? bdb.get(bdbId) : undefined;
+    if (!entry) noEntry.push({ lemma: key, count: lemma.count });
+
+    const pin = pins[key];
+    if (pin) checkPin(key, pin, entry);
+
+    let g;
+    let source;
+    if (pin?.gloss) [g, source] = [pin.gloss, 'pin'];
+    else if (entry?.gloss.length) [g, source] = [entry.gloss, 'bdb'];
+    else if (lemma.pos === 'Np' && lemma.xlit) [g, source] = [[lemma.xlit], 'xlit'];
+    else if (lemma.gloss) [g, source] = [lemma.gloss.split(/,\s*/), 'strong'];
+    else [g, source] = [[], 'none'];
+    sources[source].push({ lemma: key, count: lemma.count });
+
+    const stems = { ...(entry?.stems ?? {}) };
+    for (const [stem, first] of Object.entries(pin?.stems ?? {})) {
+      stems[stem] = distinctSenses([first, ...(stems[stem] ?? [])]);
+    }
+    const s = {};
+    for (const [stem, senses] of Object.entries(stems)) {
+      s[stem] = senses
+        .slice(0, GLOSS_LIMITS.senses)
+        .map((items) => items.slice(0, GLOSS_LIMITS.senseItems));
+    }
+    if (Object.keys(s).length > 0) stemmed.push({ lemma: key, count: lemma.count });
+
+    if (g.length === 0 && Object.keys(s).length === 0) continue;
+    glosses[key] = {
+      g: g.slice(0, GLOSS_LIMITS.items),
+      ...(Object.keys(s).length > 0 ? { s } : {}),
+    };
+  }
+
+  const byCount = (a, b) => b.count - a.count;
+  for (const list of [...Object.values(sources), stemmed, noEntry]) list.sort(byCount);
+  return { glosses, sources, stemmed, noEntry };
 }

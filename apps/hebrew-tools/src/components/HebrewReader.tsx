@@ -16,7 +16,7 @@ import {
 import { DEFAULT_REF, formatRef, hebrewNumeral, parseRef } from '../lib/reader';
 import { lemmaBase, loadStudiedLemmas } from '../lib/studied';
 import ErrorBoundary from './ErrorBoundary';
-import { type ActiveWord, MarkLegend, WordPopup, WordRun } from './HebrewText';
+import { type ActiveWord, MarkLegend, useGlossLine, WordPopup, WordRun } from './HebrewText';
 import PrefToggle from './PrefToggle';
 
 /**
@@ -73,9 +73,11 @@ interface VerseProps {
   studied: Set<string>;
   active: HebrewWord | null;
   onActivate: (word: HebrewWord, rect: DOMRect) => void;
+  /** The gloss line, or `undefined` while it is off. See `useGlossLine`. */
+  glossOf?: (word: HebrewWord) => string | undefined;
 }
 
-function Verse({ number, words, prefs, studied, active, onActivate }: VerseProps) {
+function Verse({ number, words, prefs, studied, active, onActivate, glossOf }: VerseProps) {
   return (
     <span id={`verse-${number}`}>
       <sup
@@ -93,6 +95,7 @@ function Verse({ number, words, prefs, studied, active, onActivate }: VerseProps
         isStudied={(word) => prefs.studied && studied.has(lemmaBase(word.lemma))}
         active={active}
         onActivate={onActivate}
+        glossOf={glossOf}
       />
     </span>
   );
@@ -119,6 +122,9 @@ function HebrewReaderInner() {
     setPrefs(loadReaderPrefs());
     setStudied(loadStudiedLemmas());
   }, []);
+
+  // Off by default, like Daily Verse: a chapter is for reading first.
+  const glossOf = useGlossLine(prefs.glosses);
 
   const setPref = useCallback((key: keyof ReaderPrefs) => {
     setPrefs((current) => {
@@ -280,6 +286,9 @@ function HebrewReaderInner() {
         <PrefToggle on={prefs.studied} onChange={() => setPref('studied')}>
           Studied words
         </PrefToggle>
+        <PrefToggle on={prefs.glosses} onChange={() => setPref('glosses')}>
+          Glosses
+        </PrefToggle>
 
         <div className="flex gap-1 ms-auto">
           <button
@@ -363,6 +372,7 @@ function HebrewReaderInner() {
               studied={studied}
               active={active?.word ?? null}
               onActivate={activate}
+              glossOf={glossOf}
             />
           ))}
         </div>

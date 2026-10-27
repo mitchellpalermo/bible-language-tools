@@ -75,14 +75,39 @@ export interface LemmaEntry {
   /** Triliteral root, where the lexicon's etymology reaches one. */
   root?: string;
   /**
-   * A short gloss, from Strong's. Absent only for the inseparable prefixes,
-   * which have no lexicon entry at all — `src/lib/gloss.ts` supplies those, and
-   * is the call a reader should make rather than reading this field directly.
+   * Strong's gloss. The reader no longer shows it first — BDB's, in
+   * `glosses.json`, comes ahead of it — but it is the fallback when that file
+   * has not loaded. Absent only for the inseparable prefixes. Read a gloss
+   * through `src/lib/gloss.ts`, never off this field.
    */
   gloss?: string;
 }
 
 export type LemmaIndex = Record<string, LemmaEntry>;
+
+/**
+ * One lemma in `glosses.json` — BDB's short gloss and a verb's stem senses,
+ * built by `buildGlossIndex` in `scripts/lib/oshb.mjs`.
+ *
+ * Lists rather than joined strings, because a BDB def can itself contain a
+ * comma ("be firm, strong"), and the gloss line needs to cut at an item.
+ */
+export interface GlossEntry {
+  /**
+   * The short gloss, up to three items. BDB's head where it has one; a pinned
+   * BDB sense for a few common words; a proper name's transliteration where
+   * BDB gives no English; Strong's where BDB describes rather than glosses.
+   */
+  g: string[];
+  /**
+   * A verb's senses by stem — `Hiphil` → `[['make strong', 'strengthen'],
+   * ['make firm'], …]`, named as `morph-parse.ts` names stems. Up to four
+   * senses of up to two items each.
+   */
+  s?: Record<string, string[][]>;
+}
+
+export type GlossIndex = Record<string, GlossEntry>;
 
 // ─── Text helpers ─────────────────────────────────────────────────────────────
 
@@ -142,6 +167,7 @@ export function isAramaic(word: Pick<HebrewWord, 'parsing'>): boolean {
 const bookCache = new Map<string, HebrewBook>();
 let booksCache: HebrewBookMeta[] | null = null;
 let lemmaCache: LemmaIndex | null = null;
+let glossCache: GlossIndex | null = null;
 
 export async function fetchBook(code: string): Promise<HebrewBook> {
   const cached = bookCache.get(code);
@@ -162,8 +188,8 @@ export async function fetchBooks(): Promise<HebrewBookMeta[]> {
 }
 
 /**
- * The lemma index. Around 140 KB over the wire, so fetch it when a feature
- * actually needs a gloss or a frequency, not on page load.
+ * The lemma index. Around 230 KB over the wire, so fetch it when a feature
+ * actually needs a frequency or a root, not on page load.
  */
 export async function fetchLemmas(): Promise<LemmaIndex> {
   if (lemmaCache) return lemmaCache;
@@ -173,11 +199,24 @@ export async function fetchLemmas(): Promise<LemmaIndex> {
   return lemmaCache;
 }
 
+/**
+ * BDB's short glosses and stem senses. About 120 KB over the wire — fetched by
+ * the popup and by a gloss line when it is switched on, never on page load.
+ */
+export async function fetchGlosses(): Promise<GlossIndex> {
+  if (glossCache) return glossCache;
+  const res = await fetch('/data/morphhb/glosses.json');
+  if (!res.ok) throw new Error(`Failed to load glosses: HTTP ${res.status}`);
+  glossCache = (await res.json()) as GlossIndex;
+  return glossCache;
+}
+
 /** Drop every cached fetch. Exists for tests. */
 export function clearMorphhbCache(): void {
   bookCache.clear();
   booksCache = null;
   lemmaCache = null;
+  glossCache = null;
 }
 
 // ─── Reading position ─────────────────────────────────────────────────────────
@@ -210,6 +249,11 @@ export interface ReaderPrefs {
   cantillation: boolean;
   /** Underline words the student has studied in Flashcards. */
   studied: boolean;
+  /**
+   * Show a gloss line under every word. Off by default: a verse is for reading
+   * first, and a line of English under it is an answer key to the whole thing.
+   */
+  glosses: boolean;
 }
 
 /**
@@ -219,7 +263,11 @@ export interface ReaderPrefs {
  * until asked not to; a student who has never met te'amim is better served
  * meeting them and turning them off than never learning they were there.
  */
-export const DEFAULT_READER_PREFS: ReaderPrefs = { cantillation: true, studied: true };
+export const DEFAULT_READER_PREFS: ReaderPrefs = {
+  cantillation: true,
+  studied: true,
+  glosses: false,
+};
 
 export function loadReaderPrefs(): ReaderPrefs {
   try {
@@ -229,6 +277,7 @@ export function loadReaderPrefs(): ReaderPrefs {
     return {
       cantillation: stored.cantillation ?? DEFAULT_READER_PREFS.cantillation,
       studied: stored.studied ?? DEFAULT_READER_PREFS.studied,
+      glosses: stored.glosses ?? DEFAULT_READER_PREFS.glosses,
     };
   } catch {
     return DEFAULT_READER_PREFS;

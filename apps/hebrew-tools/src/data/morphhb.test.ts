@@ -8,6 +8,7 @@ import {
   displayText,
   fetchBook,
   fetchBooks,
+  fetchGlosses,
   fetchLemmas,
   type HebrewWord,
   isAramaic,
@@ -138,13 +139,16 @@ describe('fetching', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it('caches the books index and the lemma index too', async () => {
+  it('caches the books index, the lemma index and the glosses too', async () => {
     const fetchMock = stubFetch([]);
     await fetchBooks();
     await fetchBooks();
     await fetchLemmas();
     await fetchLemmas();
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    await fetchGlosses();
+    await fetchGlosses();
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock).toHaveBeenCalledWith('/data/morphhb/glosses.json');
   });
 
   it('throws with the status when a fetch fails', async () => {
@@ -152,6 +156,7 @@ describe('fetching', () => {
     await expect(fetchBook('XXX')).rejects.toThrow('HTTP 404');
     await expect(fetchBooks()).rejects.toThrow('HTTP 404');
     await expect(fetchLemmas()).rejects.toThrow('HTTP 404');
+    await expect(fetchGlosses()).rejects.toThrow('HTTP 404');
   });
 });
 
@@ -187,19 +192,20 @@ describe('reading preferences', () => {
 
   // The WLC is an accented text, and a student who has never met te'amim is
   // better served meeting them and turning them off.
-  it('shows the accents and the highlighting until told otherwise', () => {
-    expect(loadReaderPrefs()).toEqual({ cantillation: true, studied: true });
+  it('shows the accents and the highlighting until told otherwise, and no glosses', () => {
+    expect(loadReaderPrefs()).toEqual({ cantillation: true, studied: true, glosses: false });
     expect(loadReaderPrefs()).toEqual(DEFAULT_READER_PREFS);
   });
 
   it('round-trips through localStorage', () => {
-    saveReaderPrefs({ cantillation: false, studied: false });
-    expect(loadReaderPrefs()).toEqual({ cantillation: false, studied: false });
+    saveReaderPrefs({ cantillation: false, studied: false, glosses: true });
+    expect(loadReaderPrefs()).toEqual({ cantillation: false, studied: false, glosses: true });
   });
 
   it('fills in a preference a stored payload does not carry', () => {
     localStorage.setItem(READER_PREFS_KEY, JSON.stringify({ cantillation: false }));
-    expect(loadReaderPrefs()).toEqual({ cantillation: false, studied: true });
+    // A payload saved before the gloss line existed has no `glosses`.
+    expect(loadReaderPrefs()).toEqual({ cantillation: false, studied: true, glosses: false });
   });
 
   it('falls back rather than throwing on a payload that will not parse', () => {

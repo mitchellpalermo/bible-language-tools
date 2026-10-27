@@ -1,0 +1,313 @@
+{
+  "_readme": [
+    "Which BDB defs stand as a lemma's short gloss, for the words where the",
+    "entry's first sense misleads a reader. Used by buildGlossIndex in",
+    "scripts/lib/oshb.mjs, which writes public/data/morphhb/glosses.json.",
+    "",
+    "A pin chooses, it never writes. Every string in `gloss` and `stems` must be",
+    "a def the BDB entry itself carries, and the build fails on one that is not,",
+    "so the wording on the page stays the lexicon's (Mitch, Oct 2026).",
+    "",
+    "gloss:  replaces the head gloss, in the order given.",
+    "stems:  stem name (as morph-parse.ts renders it) -> the sense to list first",
+    "        for that stem. The entry's own senses follow it, minus repeats.",
+    "why:    what the unpinned gloss says, and why that misleads.",
+    "",
+    "tbesh:  what STEPBible's TBESH (Translators Brief lexicon of Extended Strongs",
+    "        for Hebrew, CC BY 4.0, Tyndale House / STEPBible.org) gives as this",
+    "        lemma's main gloss, or null if it has none. Required on every pin.",
+    "",
+    "Before adding a pin (Mitch, Oct 2026):",
+    "  1. pnpm check:pins <lemma>   shows BDB's defs (the only words a pin may use)",
+    "     and TBESH's glosses for the word.",
+    "  2. Choose BDB defs; copy TBESH's first gloss into `tbesh`.",
+    "  3. The pin need not match TBESH. Where they differ, tell Mitch (the word,",
+    "     the pin, TBESH's gloss) and say so in `why`.",
+    "  4. pnpm check:pins            must pass. It fails only on a missing or stale",
+    "     `tbesh`, never on a difference; it lists the differences for step 3.",
+    "TBESH is a witness, not a source: its wording never reaches the app.",
+    "",
+    "Only pin a word a reader meets often. The long tail reads BDB as written."
+  ],
+  "pins": {
+    "85": {
+      "gloss": [
+        "Abraham"
+      ],
+      "tbesh": "Abraham",
+      "why": "The entry is Abram's, so the head reads 'Abram, Abraham'."
+    },
+    "341": {
+      "gloss": [
+        "enemy"
+      ],
+      "tbesh": "enemy",
+      "why": "OSHB's lemma is the noun אֹיֵב; BDB files it under the verb, 'be hostile to'."
+    },
+    "413": {
+      "gloss": [
+        "to",
+        "towards",
+        "into"
+      ],
+      "tbesh": "to(wards)",
+      "why": "The head is BDB's description, 'motion to or direction towards'."
+    },
+    "430": {
+      "gloss": [
+        "God",
+        "gods"
+      ],
+      "tbesh": "God",
+      "why": "Sense 1.a is the rare 'rulers, judges'; 2,598 occurrences are almost all God."
+    },
+    "571": {
+      "gloss": [
+        "truth",
+        "faithfulness"
+      ],
+      "tbesh": "truth: faithful",
+      "why": "The head stops at 'firmness, faithfulness'; 'truth' is several senses down. Leads with 'truth', as TBESH does ('truth: faithful')."
+    },
+    "854": {
+      "gloss": [
+        "with"
+      ],
+      "tbesh": "with",
+      "why": "The second item, 'proximity', is the root's sense, not the preposition's."
+    },
+    "977": {
+      "stems": {
+        "Qal": [
+          "choose"
+        ]
+      },
+      "tbesh": "to choose",
+      "why": "BDB's Qal senses are headed by kind — 'divine choice', 'man's choice' — not by meaning."
+    },
+    "996": {
+      "gloss": [
+        "between"
+      ],
+      "tbesh": "between",
+      "why": "The head is the noun sense, 'interval, space between'."
+    },
+    "1288": {
+      "stems": {
+        "Piel": [
+          "bless"
+        ]
+      },
+      "tbesh": "to bless",
+      "why": "BDB's Piel senses describe who blesses whom ('bless God', 'God blesses'), not what the stem means."
+    },
+    "1961": {
+      "gloss": [
+        "be",
+        "become",
+        "come to pass"
+      ],
+      "stems": {
+        "Qal": [
+          "be",
+          "become"
+        ]
+      },
+      "tbesh": "to be",
+      "why": "BDB leads with 'fall out', the archaic English for 'happen'."
+    },
+    "2706": {
+      "gloss": [
+        "a statute",
+        "decree",
+        "ordinance"
+      ],
+      "tbesh": "statute: decree",
+      "why": "The head opens with BDB's description, 'something prescribed'."
+    },
+    "3426": {
+      "gloss": [
+        "is",
+        "are",
+        "existence"
+      ],
+      "tbesh": "there",
+      "why": "The head is the noun sense, 'being, substance'; the word nearly always means 'there is'. TBESH: 'there'. BDB's entry has no 'there'; 'is, are' is the nearest it carries."
+    },
+    "3824": {
+      "gloss": [
+        "heart",
+        "inner man",
+        "mind"
+      ],
+      "tbesh": "heart",
+      "why": "Same entry shape as לֵב."
+    },
+    "3966": {
+      "gloss": [
+        "very",
+        "exceedingly"
+      ],
+      "tbesh": "much",
+      "why": "The head is the noun sense, 'muchness, force'; the word is nearly always the adverb. TBESH: 'much'. BDB has 'muchness', not 'much'; 'very' is the adverb it carries."
+    },
+    "4725": {
+      "gloss": [
+        "place"
+      ],
+      "tbesh": "place",
+      "why": "The head opens with 'standing-place'."
+    },
+    "4994": {
+      "gloss": [
+        "pray",
+        "now"
+      ],
+      "tbesh": "please",
+      "why": "BDB splits 'I pray' into two defs, so the head reads 'I, pray'. TBESH: 'please'. Not in BDB's entry; 'pray' is the same courtesy in BDB's English."
+    },
+    "5030": {
+      "gloss": [
+        "prophet",
+        "spokesman"
+      ],
+      "tbesh": "prophet",
+      "why": "BDB leads with 'spokesman, speaker'."
+    },
+    "5048": {
+      "gloss": [
+        "in front of",
+        "in sight of",
+        "opposite to"
+      ],
+      "tbesh": "before",
+      "why": "The head opens with the noun sense, 'what is conspicuous'. TBESH: 'before'. Not in BDB's entry; 'in front of' is the nearest it carries."
+    },
+    "5750": {
+      "gloss": [
+        "still",
+        "yet",
+        "again"
+      ],
+      "tbesh": "still",
+      "why": "The head opens with the root's sense, 'a going round, continuance'."
+    },
+    "5769": {
+      "gloss": [
+        "long duration",
+        "futurity"
+      ],
+      "tbesh": "forever: enduring",
+      "why": "'Antiquity' second suggests the past; the word mostly looks forward. TBESH: 'forever: enduring'. BDB's entry in this file is three defs and none is 'for ever'; this is the nearest. A known gap of the BDB-only rule."
+    },
+    "6153": {
+      "gloss": [
+        "evening"
+      ],
+      "tbesh": "evening",
+      "why": "The head opens with 'set', from BDB's note on sunset."
+    },
+    "6726": {
+      "gloss": [
+        "Zion"
+      ],
+      "tbesh": "Zion",
+      "why": "The head opens with the transliteration 'Ṣiyyôn'."
+    },
+    "6944": {
+      "gloss": [
+        "sacredness",
+        "apartness"
+      ],
+      "tbesh": "holiness",
+      "why": "'Apartness' alone, first, reads as a spatial word. TBESH: 'holiness'. BDB's entry in this file is only 'apartness, sacredness'. A known gap of the BDB-only rule."
+    },
+    "7650": {
+      "stems": {
+        "Qal": [
+          "swear"
+        ]
+      },
+      "tbesh": "to swear",
+      "why": "The only Qal sense is a cited phrase, 'those sworn with oaths'."
+    },
+    "7965": {
+      "gloss": [
+        "peace",
+        "welfare",
+        "completeness"
+      ],
+      "tbesh": "peace",
+      "why": "BDB lists 'peace' fourth, after 'completeness, soundness, welfare'."
+    },
+    "8199": {
+      "stems": {
+        "Qal": [
+          "judge",
+          "govern"
+        ]
+      },
+      "tbesh": "to judge",
+      "why": "The Qal opens with 'act as law-giver, judge', which is too long for the gloss line and leaves 'act as law-giver' on its own."
+    },
+    "8478": {
+      "gloss": [
+        "underneath",
+        "instead of"
+      ],
+      "tbesh": "underneath: under",
+      "why": "The head opens with the noun sense, 'the under part'."
+    },
+    "5921a": {
+      "gloss": [
+        "upon",
+        "over",
+        "against"
+      ],
+      "tbesh": "upon",
+      "why": "The entry opens on its rare noun sense, 'height'; the preposition is sense II."
+    },
+    "310a": {
+      "gloss": [
+        "after",
+        "behind"
+      ],
+      "tbesh": "after",
+      "why": "The head is the noun sense, 'the hinder or following part'."
+    },
+    "3820a": {
+      "gloss": [
+        "heart",
+        "inner man",
+        "mind"
+      ],
+      "tbesh": "heart",
+      "why": "BDB lists 'heart' fourth, after 'inner man, mind, will'."
+    },
+    "2896a": {
+      "gloss": [
+        "good",
+        "pleasant"
+      ],
+      "tbesh": "pleasant",
+      "why": "BDB leads with 'pleasant, agreeable'. TBESH agrees on the words but leads with 'pleasant', BDB's own order. 'Good' first is a judgement TBESH does not corroborate; kept on review (Mitch, Oct 27, 2026)."
+    },
+    "5387a": {
+      "gloss": [
+        "a chief prince",
+        "one lifted up"
+      ],
+      "tbesh": "leader",
+      "why": "The head opens with the root's sense, 'one lifted up'. TBESH: 'leader'. Not in BDB's entry; 'a chief prince' is the nearest it carries."
+    },
+    "7235a": {
+      "gloss": [
+        "become many",
+        "be great",
+        "increase"
+      ],
+      "tbesh": "to multiply",
+      "why": "The head's defs are a phrase split across a comma, so it reads 'be, become, much'. TBESH: 'to multiply'. Not in BDB's entry; 'become many' is the nearest it carries."
+    }
+  }
+}

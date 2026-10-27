@@ -14,9 +14,9 @@
 // which is what makes this a gate — and `corpus.test.ts` fails there if the
 // corpus is missing, so the gate cannot quietly turn back into a skip.
 
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { HebrewBook } from '../data/morphhb';
+import type { HebrewBook, HebrewBookMeta } from '../data/morphhb';
 import { stripCantillation } from '../lib/hebrew-input';
 
 const CORPUS_DIR = join(__dirname, '../../public/data/morphhb');
@@ -29,9 +29,14 @@ let cache: Set<string> | undefined;
 export function corpusForms(): Set<string> {
   if (cache) return cache;
   const seen = new Set<string>();
-  for (const file of readdirSync(CORPUS_DIR)) {
-    if (file === 'books.json' || file === 'lemmas.json') continue;
-    const book = JSON.parse(readFileSync(join(CORPUS_DIR, file), 'utf8')) as HebrewBook;
+  // The book list, not the directory: the folder also holds the lemma index
+  // and the glosses, and a listing that skipped known non-books by name read
+  // the next one added as a book.
+  const index = JSON.parse(
+    readFileSync(join(CORPUS_DIR, 'books.json'), 'utf8'),
+  ) as HebrewBookMeta[];
+  for (const { code } of index) {
+    const book = JSON.parse(readFileSync(join(CORPUS_DIR, `${code}.json`), 'utf8')) as HebrewBook;
     for (const chapter of Object.values(book)) {
       for (const verse of Object.values(chapter)) {
         for (const word of verse) {
