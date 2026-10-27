@@ -1,4 +1,5 @@
 ---
+import MorphWordmark from '@tools/shared/components/MorphWordmark.astro';
 import SiteNav from '@tools/shared/components/SiteNav.astro';
 import type { NavLink } from '@tools/shared/nav';
 import '../styles/global.css';
@@ -116,18 +117,15 @@ const user = Astro.locals.user;
     <!-- ── Footer ─────────────────────────────────────────────────────── -->
     <footer class="bg-primary text-white/60 text-sm text-center px-4 py-5">
       <p>
-        <!-- "hebrew.tools" morphs into Hebrew on hover -->
-        <span class="group inline-block cursor-default select-none">
-          <span class="relative inline-block overflow-hidden align-bottom" style="height: 1.25em;">
-            <span class="absolute inset-0 flex items-center justify-center transition-all duration-300 group-hover:opacity-0 group-hover:-translate-y-full">hebrew</span>
-            <span class="absolute inset-0 flex items-center justify-center transition-all duration-300 opacity-0 translate-y-full group-hover:opacity-100 group-hover:translate-y-0 text-accent-light" style="font-family: var(--font-hebrew);">עִבְרִית</span>
-            <span class="invisible">עִבְרִית</span>
-          </span><span class="relative inline-block overflow-hidden align-bottom ml-1" style="height: 1.25em;">
-            <span class="absolute inset-0 flex items-center justify-center transition-all duration-300 group-hover:opacity-0 group-hover:-translate-y-full">tools</span>
-            <span class="absolute inset-0 flex items-center justify-center transition-all duration-300 opacity-0 translate-y-full group-hover:opacity-100 group-hover:translate-y-0 text-accent-light" style="font-family: var(--font-hebrew);">כֵּלִים</span>
-            <span class="invisible">כֵּלִים</span>
-          </span>
-        </span>
+        <MorphWordmark
+          label="hebrew.tools"
+          words={[
+            { from: 'hebrew', to: 'עִבְרִית' },
+            { from: 'tools', to: 'כֵּלִים' },
+          ]}
+          toFont="var(--font-hebrew)"
+          toLang="he"
+        />
         <span class="mx-2 opacity-40">—</span>
         free utilities for Biblical Hebrew students
       </p>
