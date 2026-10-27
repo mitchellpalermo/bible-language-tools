@@ -21,8 +21,10 @@
     "  1. pnpm check:pins <lemma>   shows BDB's defs (the only words a pin may use)",
     "     and TBESH's glosses for the word.",
     "  2. Choose BDB defs; copy TBESH's first gloss into `tbesh`.",
-    "  3. Where the pin and TBESH differ, say so in `why`.",
-    "  4. pnpm check:pins            must pass.",
+    "  3. The pin need not match TBESH. Where they differ, tell Mitch (the word,",
+    "     the pin, TBESH's gloss) and say so in `why`.",
+    "  4. pnpm check:pins            must pass. It fails only on a missing or stale",
+    "     `tbesh`, never on a difference; it lists the differences for step 3.",
     "TBESH is a witness, not a source: its wording never reaches the app.",
     "",
     "Only pin a word a reader meets often. The long tail reads BDB as written."

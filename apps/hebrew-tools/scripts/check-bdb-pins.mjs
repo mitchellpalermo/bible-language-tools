@@ -87,7 +87,9 @@ async function main() {
   log(`bdb pins: ${Object.keys(pins).length} checked against TBESH`);
 
   if (differs.length > 0) {
-    log(`\n  ${differs.length} pins TBESH words differently — check each one's "why":`);
+    // Not a failure: a pin need not match TBESH. Each difference is reported
+    // to Mitch and explained in the pin's "why".
+    log(`\n  ${differs.length} pins TBESH words differently — report these, and check each "why":`);
     for (const d of differs) {
       log(
         `    ${d.key.padEnd(6)} ${headword(d.key).padEnd(10)} pin: ${d.chosen.join(', ')}  ·  TBESH: ${d.current}`,

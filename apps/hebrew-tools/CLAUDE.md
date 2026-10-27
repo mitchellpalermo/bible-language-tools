@@ -341,10 +341,14 @@ Things that will bite if changed carelessly — the BDB parser
      TBESH's glosses, side by side.
   2. Choose BDB defs, and copy TBESH's first gloss into the pin's `tbesh`
      (`null` if TBESH has no entry).
-  3. Where the two differ, say so in `why`.
+  3. **A pin does not have to agree with TBESH, but a difference is always
+     reported to Mitch** — name the word, the pin and TBESH's gloss when
+     proposing or adding it — and recorded in `why`.
   4. `pnpm check:pins` must pass: it fails on a pin with no `tbesh`, or one
-     whose `tbesh` is no longer what TBESH says, and lists every pin TBESH words
-     differently. `tbesh.test.mjs` fails offline on a pin with no `tbesh` field.
+     whose `tbesh` is no longer what TBESH says. It never fails on a
+     difference; it lists every pin TBESH words differently, and that list is
+     what step 3 reports. `tbesh.test.mjs` fails offline on a pin with no
+     `tbesh` field.
 
   Three things to know about it:
   - **TBESH is a witness, never a source.** Its wording does not reach the app;
