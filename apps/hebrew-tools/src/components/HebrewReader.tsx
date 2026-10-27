@@ -13,10 +13,11 @@ import {
   saveReaderPrefs,
   type TanakhSection,
 } from '../data/morphhb';
-import { accentUnits, DEFAULT_REF, formatRef, hebrewNumeral, parseRef } from '../lib/reader';
+import { DEFAULT_REF, formatRef, hebrewNumeral, parseRef } from '../lib/reader';
 import { lemmaBase, loadStudiedLemmas } from '../lib/studied';
 import ErrorBoundary from './ErrorBoundary';
-import { type ActiveWord, WordPopup, WordToken } from './HebrewText';
+import { type ActiveWord, MarkLegend, WordPopup, WordRun } from './HebrewText';
+import PrefToggle from './PrefToggle';
 
 /**
  * The Hebrew Bible reader (issues #119, #120, #121).
@@ -75,8 +76,6 @@ interface VerseProps {
 }
 
 function Verse({ number, words, prefs, studied, active, onActivate }: VerseProps) {
-  const units = useMemo(() => accentUnits(words), [words]);
-
   return (
     <span id={`verse-${number}`}>
       <sup
@@ -88,54 +87,14 @@ function Verse({ number, words, prefs, studied, active, onActivate }: VerseProps
       >
         {number}
       </sup>
-      {units.map((unit, i) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: units are positional
-        <span key={i}>
-          {/* The unit is one word to the ear, so it is one word to the line
-              breaker. The space that follows it is where a break may fall. */}
-          <span style={{ whiteSpace: 'nowrap' }}>
-            {unit.map((word, j) => (
-              <WordToken
-                // biome-ignore lint/suspicious/noArrayIndexKey: words are positional
-                key={j}
-                word={word}
-                cantillation={prefs.cantillation}
-                studied={prefs.studied && studied.has(lemmaBase(word.lemma))}
-                active={word === active}
-                onActivate={onActivate}
-              />
-            ))}
-          </span>{' '}
-        </span>
-      ))}
+      <WordRun
+        words={words}
+        cantillation={prefs.cantillation}
+        isStudied={(word) => prefs.studied && studied.has(lemmaBase(word.lemma))}
+        active={active}
+        onActivate={onActivate}
+      />
     </span>
-  );
-}
-
-// ─── Toolbar ──────────────────────────────────────────────────────────────────
-
-function Toggle({
-  on,
-  onChange,
-  children,
-}: {
-  on: boolean;
-  onChange: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onChange}
-      aria-pressed={on}
-      className={`px-3 py-2 rounded-xl text-sm font-semibold border-2 transition-colors ${
-        on
-          ? 'border-primary bg-primary/10 text-primary'
-          : 'border-primary/10 text-text-muted hover:border-primary/40'
-      }`}
-    >
-      {children}
-    </button>
   );
 }
 
@@ -315,12 +274,12 @@ function HebrewReaderInner() {
           )}
         </select>
 
-        <Toggle on={prefs.cantillation} onChange={() => setPref('cantillation')}>
+        <PrefToggle on={prefs.cantillation} onChange={() => setPref('cantillation')}>
           Cantillation
-        </Toggle>
-        <Toggle on={prefs.studied} onChange={() => setPref('studied')}>
+        </PrefToggle>
+        <PrefToggle on={prefs.studied} onChange={() => setPref('studied')}>
           Studied words
-        </Toggle>
+        </PrefToggle>
 
         <div className="flex gap-1 ms-auto">
           <button
@@ -410,26 +369,7 @@ function HebrewReaderInner() {
       )}
 
       {/* ── Legend ────────────────────────────────────────────────────────── */}
-      {(marks.studied || marks.qere) && (
-        <div className="text-text-muted text-xs mt-6 space-y-1 select-none">
-          {marks.studied && (
-            <p>
-              <span className="underline decoration-dotted decoration-primary/70 underline-offset-4">
-                dotted underline
-              </span>{' '}
-              — a word you have studied in Flashcards
-            </p>
-          )}
-          {marks.qere && (
-            <p>
-              <span className="underline decoration-dashed decoration-accent/50 underline-offset-4">
-                dashed underline
-              </span>{' '}
-              — a qere: what is read, where it differs from what is written
-            </p>
-          )}
-        </div>
-      )}
+      <MarkLegend studied={marks.studied} qere={marks.qere} className="mt-6" />
 
       {/* ── Word popup ────────────────────────────────────────────────────── */}
       {active && <WordPopup active={active} cantillation={prefs.cantillation} onClose={close} />}

@@ -21,7 +21,7 @@
  *   all — never as "unknown", which reads like a claim about the word.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   displayText,
@@ -34,7 +34,7 @@ import {
 import { glossFor } from '../lib/gloss';
 import { stripCantillation } from '../lib/hebrew-input';
 import { analyzeWord } from '../lib/morph-parse';
-import { popupPosition } from '../lib/reader';
+import { accentUnits, popupPosition } from '../lib/reader';
 
 // ─── Display text ─────────────────────────────────────────────────────────────
 
@@ -115,6 +115,91 @@ export function WordToken({
       </span>
       {word.after && <span className="text-text-muted">{word.after}</span>}
     </>
+  );
+}
+
+// ─── WordRun ──────────────────────────────────────────────────────────────────
+
+/**
+ * A run of words — a verse — grouped into accent units.
+ *
+ * A maqqef binds words into one accentual unit, so each unit renders in one
+ * non-breaking span and the space after it is where a line may break. Shared by
+ * the reader and Daily Verse, so the two cannot disagree about where a line of
+ * Hebrew is allowed to wrap.
+ */
+export function WordRun({
+  words,
+  cantillation,
+  isStudied,
+  active,
+  onActivate,
+}: {
+  words: HebrewWord[];
+  cantillation: boolean;
+  isStudied: (word: HebrewWord) => boolean;
+  active: HebrewWord | null;
+  onActivate: (word: HebrewWord, rect: DOMRect) => void;
+}) {
+  const units = useMemo(() => accentUnits(words), [words]);
+
+  return units.map((unit, i) => (
+    // biome-ignore lint/suspicious/noArrayIndexKey: units are positional
+    <span key={i}>
+      {/* The unit is one word to the ear, so it is one word to the line
+          breaker. The space that follows it is where a break may fall. */}
+      <span style={{ whiteSpace: 'nowrap' }}>
+        {unit.map((word, j) => (
+          <WordToken
+            // biome-ignore lint/suspicious/noArrayIndexKey: words are positional
+            key={j}
+            word={word}
+            cantillation={cantillation}
+            studied={isStudied(word)}
+            active={word === active}
+            onActivate={onActivate}
+          />
+        ))}
+      </span>{' '}
+    </span>
+  ));
+}
+
+// ─── MarkLegend ───────────────────────────────────────────────────────────────
+
+/**
+ * What the two underlines mean. A caller passes only the marks the text on
+ * screen actually carries, so a passage with neither gets no legend at all.
+ */
+export function MarkLegend({
+  studied,
+  qere,
+  className = '',
+}: {
+  studied: boolean;
+  qere: boolean;
+  className?: string;
+}) {
+  if (!studied && !qere) return null;
+  return (
+    <div className={`text-text-muted text-xs space-y-1 select-none ${className}`}>
+      {studied && (
+        <p>
+          <span className="underline decoration-dotted decoration-primary/70 underline-offset-4">
+            dotted underline
+          </span>{' '}
+          — a word you have studied in Flashcards
+        </p>
+      )}
+      {qere && (
+        <p>
+          <span className="underline decoration-dashed decoration-accent/50 underline-offset-4">
+            dashed underline
+          </span>{' '}
+          — a qere: what is read, where it differs from what is written
+        </p>
+      )}
+    </div>
   );
 }
 

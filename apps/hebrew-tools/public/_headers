@@ -19,5 +19,6 @@
   # style-src includes 'unsafe-inline' because React uses inline style attributes.
   # t.greek.tools is the PostHog reverse proxy both apps send to today (PUBLIC_POSTHOG_HOST).
   # t.hebrew.tools is allowed for the dedicated proxy planned in issue #169, which does not exist yet.
+  # dailydoseofscripture.com is the Daily Dose of Scripture API behind /daily (connect-src only).
   # This file only applies to static pages: server-rendered routes (/account/*) never receive it.
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://t.greek.tools https://t.hebrew.tools https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://t.greek.tools https://t.hebrew.tools https://beacon.cloudflareinsights.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://t.greek.tools https://t.hebrew.tools https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://t.greek.tools https://t.hebrew.tools https://beacon.cloudflareinsights.com https://dailydoseofscripture.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';

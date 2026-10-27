@@ -306,8 +306,9 @@ Things that will bite if changed carelessly:
 |---|---|
 | `src/lib/reader.ts` | Pure — passage refs, Hebrew numerals, accent units, popup placement |
 | `src/lib/studied.ts` | Pure — the lemma → vocabulary → `cardKey` join behind highlighting |
-| `src/components/HebrewText.tsx` | The word and its popup. **Daily Verse (#76) shares this** |
-| `src/components/HebrewReader.tsx` | Fetching, passage state, toolbar, legend |
+| `src/components/HebrewText.tsx` | The word, a verse's run of words (`WordRun`), the underline legend (`MarkLegend`) and the popup. **Daily Verse shares all four** |
+| `src/components/PrefToggle.tsx` | The pressed-pill toggle for a reading preference. Shared with Daily Verse |
+| `src/components/HebrewReader.tsx` | Fetching, passage state, toolbar |
 
 `HebrewText.tsx` exists so Daily Verse does not grow a second word popup, the
 same reason greek.tools has `GreekText.tsx`. Nothing in it knows about books or
@@ -411,6 +412,40 @@ with a regex, since Node cannot import TypeScript, and it **throws if it parses
 fewer entries than the literal declares** — without that guard a reformatting of
 the array would leave it quietly validating a subset and reporting success. The
 vitest side has no such problem; it imports `DAILY_VERSES` directly.
+
+#### The page (`/daily`, #129)
+
+| File | Role |
+|---|---|
+| `src/data/dailyDose.ts` | The Hebrew binding of `@tools/shared/daily-dose`: category 192, book names |
+| `src/components/DailyVerse.tsx` | Picks today's verse, loads it, renders it over the reader's pieces |
+| `src/data/fixtures/daily-dose-hebrew-feed-2026-05-23.json` | The real feed on a Saturday with a Q&A on top |
+
+The verse is today's Daily Dose of Scripture Hebrew lesson, or the curated
+verse when the feed cannot be used. Things to know before changing it:
+
+- **The feed numbers verses the way the Hebrew Bible does**, so a lesson
+  reference goes to the corpus unchanged. All 2,522 verse titles in its history
+  resolve, and it has verses English numbering lacks (Psalm 18:51, Jonah 2:11).
+  A lesson carries no `english`; the feed says nothing about English numbering.
+- **A lesson the corpus cannot resolve falls back as `not_in_text`.** That is
+  how a switch to English numbering on their side would first show up.
+  `hebrew_daily_verse_viewed` carries `source` and, on a fallback,
+  `fallback_reason` — check the ratio in PostHog after any change here, on the
+  static `/daily` page. A broken feed otherwise looks like a normal page; see
+  greek-tools' CLAUDE.md, "The Daily Dose source".
+- **Book names come from `books.json`**, the corpus's own index, which the page
+  fetches anyway for the Hebrew reference. `TITLE_ALIASES` holds only names the
+  feed actually uses that the index does not: "Psalm" and "Gen". A typo the feed
+  made once is not worth an entry.
+- **`dailydoseofscripture.com` must stay in `connect-src`** in
+  `public/_headers`. `dailyDose.test.ts` reads the real file.
+- **There is no interlinear gloss line, on purpose.** Strong's first sense is
+  often a root sense ("assemblage" for גַּם, "deputyship" for מְלָאכָה), and the
+  textbook may not stand in — see "Glosses" above. It comes back with BDB
+  (#131); `ROADMAP.md` Phase 3 has the two traps found in BDB's data.
+- **The streak is marked on mount.** Opening the page is the reading, and
+  `markReadToday` is idempotent within a day.
 
 ### Database (accounts groundwork — issue #91)
 

@@ -1,9 +1,9 @@
 import { readFileSync } from 'node:fs';
+import { cspAllowsDailyDose } from '@tools/shared/daily-dose';
 import { todayStr } from '@tools/shared/srs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   BOOK_NAME_TO_CODE,
-  DAILY_DOSE_API_URL,
   decodeHtmlEntities,
   fetchDailyDoseVerse,
   parseDailyDoseRef,
@@ -216,9 +216,7 @@ describe('pickDailyDoseLesson', () => {
 // the CSP change. Vitest runs from the app directory.
 describe('public/_headers connect-src', () => {
   it('allows the Daily Dose API origin', () => {
-    const headers = readFileSync('public/_headers', 'utf8');
-    const connectSrc = /connect-src([^;]*)/.exec(headers)?.[1].trim().split(/\s+/) ?? [];
-    expect(connectSrc).toContain(new URL(DAILY_DOSE_API_URL).origin);
+    expect(cspAllowsDailyDose(readFileSync('public/_headers', 'utf8'))).toBe(true);
   });
 });
 

@@ -10,6 +10,8 @@
  * and nothing failed. This guard turns that mistake into a failed build.
  */
 
+import { cspBlockingDirective } from './csp';
+
 export interface PosthogHostEnv {
   PUBLIC_POSTHOG_KEY?: string;
   PUBLIC_POSTHOG_HOST?: string;
@@ -75,20 +77,6 @@ export function checkPosthogHost(env: PosthogHostEnv): PosthogHostCheck {
 /** Directives PostHog needs: the SDK script/config load and event uploads. */
 const CSP_DIRECTIVES = ['script-src', 'connect-src'] as const;
 
-function sourcesFor(csp: string, directive: string): string[] | null {
-  const directives = new Map<string, string[]>();
-  for (const part of csp.split(';')) {
-    const [name, ...sources] = part.trim().split(/\s+/);
-    if (name) directives.set(name.toLowerCase(), sources);
-  }
-  return directives.get(directive) ?? directives.get('default-src') ?? null;
-}
-
-function allows(sources: string[] | null, origin: string): boolean {
-  if (!sources) return true; // no policy for this directive: nothing blocks it
-  return sources.some((s) => s === '*' || s === 'https:' || s.replace(/\/$/, '') === origin);
-}
-
 /**
  * Check that every `Content-Security-Policy` rule in a Cloudflare `_headers`
  * file allows `host` for scripts and connections. A file with no CSP passes.
@@ -101,21 +89,12 @@ export function checkCspAllowsHost(headersText: string, host: string): PosthogHo
     return { ok: false, reason: `Cannot check the CSP: "${host}" is not a valid URL.` };
   }
 
-  const policies = headersText
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => /^content-security-policy\s*:/i.test(line))
-    .map((line) => line.replace(/^content-security-policy\s*:/i, '').trim());
-
-  for (const csp of policies) {
-    for (const directive of CSP_DIRECTIVES) {
-      if (!allows(sourcesFor(csp, directive), origin)) {
-        return {
-          ok: false,
-          reason: `The Content Security Policy in public/_headers does not allow ${origin} in ${directive}, so the browser will block PostHog on every static page. Add ${origin} to ${directive} (and connect-src).`,
-        };
-      }
-    }
+  const directive = cspBlockingDirective(headersText, origin, CSP_DIRECTIVES);
+  if (directive) {
+    return {
+      ok: false,
+      reason: `The Content Security Policy in public/_headers does not allow ${origin} in ${directive}, so the browser will block PostHog on every static page. Add ${origin} to ${directive} (and connect-src).`,
+    };
   }
   return { ok: true };
 }

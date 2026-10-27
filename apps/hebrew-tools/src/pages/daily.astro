@@ -1,0 +1,20 @@
+---
+import DailyVerse from '../components/DailyVerse';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Daily Verse"
+  description="Read one verse of the Hebrew Bible a day in the pointed Hebrew text. Build a reading habit with streak tracking and a gloss for every word."
+>
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold mb-1" style="color: var(--color-primary);">
+      Daily Verse
+    </h1>
+    <p class="text-text-muted">
+      Read the verse of today's Hebrew lesson from <a href="https://dailydoseofscripture.com" target="_blank" rel="noopener noreferrer" class="underline hover:text-text transition-colors">Daily Dose of Scripture</a> in the Westminster Leningrad Codex. Tap any word for its lexical form, gloss, and parse.
+    </p>
+  </div>
+
+  <DailyVerse client:load />
+</Layout>
