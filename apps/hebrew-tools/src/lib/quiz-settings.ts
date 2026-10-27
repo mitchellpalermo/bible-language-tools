@@ -16,6 +16,7 @@ import { createQuizSettings } from '@tools/shared/quiz-settings';
 
 export const QUIZ_SETTINGS_KEY = 'hebrew-tools-quiz-settings-v1';
 
-export const { loadQuizSettings, saveQuizSettings } = createQuizSettings(QUIZ_SETTINGS_KEY, {
-  density: 'hard',
-});
+export const { loadQuizSettings, saveQuizSettings, defaultQuizSettings } = createQuizSettings(
+  QUIZ_SETTINGS_KEY,
+  { density: 'hard' },
+);

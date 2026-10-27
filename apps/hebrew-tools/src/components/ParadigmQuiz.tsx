@@ -27,6 +27,7 @@
  */
 
 import ToggleSwitch from '@tools/shared/components/ToggleSwitch';
+import { useStoredState } from '@tools/shared/use-stored-state';
 import posthog from 'posthog-js';
 import { type KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { SUFFIX_RULES } from '../data/pronominal-suffixes';
@@ -51,7 +52,7 @@ import {
   type TableProgress,
   tableProgress,
 } from '../lib/paradigm-srs';
-import { loadQuizSettings, saveQuizSettings } from '../lib/quiz-settings';
+import { defaultQuizSettings, loadQuizSettings, saveQuizSettings } from '../lib/quiz-settings';
 import { useHebrewInput } from '../lib/use-hebrew-input';
 import ErrorBoundary from './ErrorBoundary';
 import HebrewKeypad from './HebrewKeypad';
@@ -652,26 +653,41 @@ function Legend() {
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
+const EMPTY_STORE: Record<string, SRSCard> = {};
+
 function ParadigmQuizInner() {
   const tables = useMemo(() => buildTableModels(), []);
   const [phase, setPhase] = useState<Phase>({ name: 'select' });
   const [inputs, setInputs] = useState<InputMap>({});
   const [peeking, setPeeking] = useState(false);
-  const [strict, setStrict] = useState(() => loadQuizSettings().accentStrict);
-  const [density, setDensity] = useState<Density>(() => loadQuizSettings().density);
+  // Read after hydration, and saved by the setter rather than by an effect:
+  // the page is prerendered, and an effect would write the defaults over the
+  // student's settings on mount (ADR 006).
+  const [settings, setSettings] = useStoredState(
+    loadQuizSettings,
+    defaultQuizSettings,
+    saveQuizSettings,
+  );
+  const { accentStrict: strict, density } = settings;
+  const setStrict = useCallback(
+    (on: boolean) => setSettings((s) => ({ ...s, accentStrict: on })),
+    [setSettings],
+  );
+  const setDensity = useCallback(
+    (d: Density) => setSettings((s) => ({ ...s, density: d })),
+    [setSettings],
+  );
   // "Due forms" is a choice for this visit, not a saved difficulty: the shared
   // settings shape holds a density, and greek.tools has no schedule to read.
   const [dueOnly, setDueOnly] = useState(false);
   const mode: BlankMode = dueOnly ? 'due' : density;
-  const [store, setStore] = useState<Record<string, SRSCard>>(() => loadSRSStore());
+  // What is due drives each table's progress line, so it waits for hydration
+  // too. Saved explicitly on submit, which reads the store fresh.
+  const [store, setStore] = useStoredState<Record<string, SRSCard>>(loadSRSStore, EMPTY_STORE);
   const peekedRef = useRef(false);
   const [keypadOpen, setKeypadOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const handles = useRef(new Map<number, CellHandle>());
-
-  useEffect(() => {
-    saveQuizSettings({ accentStrict: strict, density });
-  }, [strict, density]);
 
   // A touch screen starts with the keypad open. Read after mount: the page is
   // prerendered, and the server has no pointer to ask about.

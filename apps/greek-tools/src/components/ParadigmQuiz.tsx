@@ -11,6 +11,7 @@
  *     when true, accent errors are marked wrong (yellow).
  */
 
+import { useStoredState } from '@tools/shared/use-stored-state';
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { verbParadigms } from '../data/grammar';
@@ -33,7 +34,7 @@ import {
   type QuizCell,
   type TableModel,
 } from '../lib/paradigm-quiz';
-import { loadQuizSettings, saveQuizSettings } from '../lib/quiz-settings';
+import { defaultQuizSettings, loadQuizSettings, saveQuizSettings } from '../lib/quiz-settings';
 import ErrorBoundary from './ErrorBoundary';
 import type { Mood } from './grammar/VerbParadigmGrid';
 import VerbParadigmGrid from './grammar/VerbParadigmGrid';
@@ -880,13 +881,22 @@ function ParadigmQuizInner() {
   const [inputs, setInputs] = useState<InputMap>({});
   const [results, setResults] = useState<Record<number, CellResult>>({});
   const [showHints, setShowHints] = useState(false);
-  // Settings persist to localStorage across sessions
-  const [accentStrict, setAccentStrict] = useState(() => loadQuizSettings().accentStrict);
-  const [density, setDensity] = useState<Density>(() => loadQuizSettings().density);
-
-  useEffect(() => {
-    saveQuizSettings({ accentStrict, density });
-  }, [accentStrict, density]);
+  // Settings persist to localStorage across sessions. Read after hydration,
+  // and saved by the setter rather than by an effect (ADR 006).
+  const [settings, setSettings] = useStoredState(
+    loadQuizSettings,
+    defaultQuizSettings,
+    saveQuizSettings,
+  );
+  const { accentStrict, density } = settings;
+  const setAccentStrict = useCallback(
+    (on: boolean) => setSettings((s) => ({ ...s, accentStrict: on })),
+    [setSettings],
+  );
+  const setDensity = useCallback(
+    (d: Density) => setSettings((s) => ({ ...s, density: d })),
+    [setSettings],
+  );
 
   const submitted = phase.name === 'results';
 

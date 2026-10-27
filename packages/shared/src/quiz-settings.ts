@@ -45,5 +45,12 @@ export function createQuizSettings(storageKey: string, overrides: Partial<QuizSe
     localStorage.setItem(storageKey, JSON.stringify(settings));
   }
 
-  return { loadQuizSettings, saveQuizSettings };
+  /**
+   * What a page renders before it may read storage — on the server, and on
+   * the first client render that hydrates over it (ADR 006). Frozen, because
+   * it is handed to state as-is.
+   */
+  const defaultQuizSettings: Readonly<QuizSettings> = Object.freeze({ ...defaults });
+
+  return { loadQuizSettings, saveQuizSettings, defaultQuizSettings };
 }
