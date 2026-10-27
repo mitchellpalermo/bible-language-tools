@@ -1,0 +1,257 @@
+{
+  "_readme": [
+    "Which BDB defs stand as a lemma's short gloss, for the words where the",
+    "entry's first sense misleads a reader. Used by buildGlossIndex in",
+    "scripts/lib/oshb.mjs, which writes public/data/morphhb/glosses.json.",
+    "",
+    "A pin chooses, it never writes. Every string in `gloss` and `stems` must be",
+    "a def the BDB entry itself carries, and the build fails on one that is not,",
+    "so the wording on the page stays the lexicon's (Mitch, Oct 2026).",
+    "",
+    "gloss:  replaces the head gloss, in the order given.",
+    "stems:  stem name (as morph-parse.ts renders it) -> the sense to list first",
+    "        for that stem. The entry's own senses follow it, minus repeats.",
+    "why:    what the unpinned gloss says, and why that misleads.",
+    "",
+    "Only pin a word a reader meets often. The long tail reads BDB as written."
+  ],
+  "pins": {
+    "5921a": {
+      "gloss": [
+        "upon",
+        "over",
+        "against"
+      ],
+      "why": "The entry opens on its rare noun sense, 'height'; the preposition is sense II."
+    },
+    "413": {
+      "gloss": [
+        "to",
+        "towards",
+        "into"
+      ],
+      "why": "The head is BDB's description, 'motion to or direction towards'."
+    },
+    "430": {
+      "gloss": [
+        "God",
+        "gods"
+      ],
+      "why": "Sense 1.a is the rare 'rulers, judges'; 2,598 occurrences are almost all God."
+    },
+    "1961": {
+      "gloss": [
+        "be",
+        "become",
+        "come to pass"
+      ],
+      "stems": {
+        "Qal": [
+          "be",
+          "become"
+        ]
+      },
+      "why": "BDB leads with 'fall out', the archaic English for 'happen'."
+    },
+    "5750": {
+      "gloss": [
+        "still",
+        "yet",
+        "again"
+      ],
+      "why": "The head opens with the root's sense, 'a going round, continuance'."
+    },
+    "310a": {
+      "gloss": [
+        "after",
+        "behind"
+      ],
+      "why": "The head is the noun sense, 'the hinder or following part'."
+    },
+    "996": {
+      "gloss": [
+        "between"
+      ],
+      "why": "The head is the noun sense, 'interval, space between'."
+    },
+    "8478": {
+      "gloss": [
+        "underneath",
+        "instead of"
+      ],
+      "why": "The head opens with the noun sense, 'the under part'."
+    },
+    "854": {
+      "gloss": [
+        "with"
+      ],
+      "why": "The second item, 'proximity', is the root's sense, not the preposition's."
+    },
+    "3966": {
+      "gloss": [
+        "very",
+        "exceedingly"
+      ],
+      "why": "The head is the noun sense, 'muchness, force'; the word is nearly always the adverb."
+    },
+    "4994": {
+      "gloss": [
+        "pray",
+        "now"
+      ],
+      "why": "BDB splits 'I pray' into two defs, so the head reads 'I, pray'."
+    },
+    "6944": {
+      "gloss": [
+        "sacredness",
+        "apartness"
+      ],
+      "why": "'Apartness' alone, first, reads as a spatial word."
+    },
+    "5769": {
+      "gloss": [
+        "long duration",
+        "futurity"
+      ],
+      "why": "'Antiquity' second suggests the past; the word mostly looks forward."
+    },
+    "3820a": {
+      "gloss": [
+        "heart",
+        "inner man",
+        "mind"
+      ],
+      "why": "BDB lists 'heart' fourth, after 'inner man, mind, will'."
+    },
+    "3824": {
+      "gloss": [
+        "heart",
+        "inner man",
+        "mind"
+      ],
+      "why": "Same entry shape as לֵב."
+    },
+    "2896a": {
+      "gloss": [
+        "good",
+        "pleasant"
+      ],
+      "why": "BDB leads with 'pleasant, agreeable'."
+    },
+    "4725": {
+      "gloss": [
+        "place"
+      ],
+      "why": "The head opens with 'standing-place'."
+    },
+    "341": {
+      "gloss": [
+        "enemy"
+      ],
+      "why": "OSHB's lemma is the noun אֹיֵב; BDB files it under the verb, 'be hostile to'."
+    },
+    "5030": {
+      "gloss": [
+        "prophet",
+        "spokesman"
+      ],
+      "why": "BDB leads with 'spokesman, speaker'."
+    },
+    "85": {
+      "gloss": [
+        "Abraham"
+      ],
+      "why": "The entry is Abram's, so the head reads 'Abram, Abraham'."
+    },
+    "6726": {
+      "gloss": [
+        "Zion"
+      ],
+      "why": "The head opens with the transliteration 'Ṣiyyôn'."
+    },
+    "1288": {
+      "stems": {
+        "Piel": [
+          "bless"
+        ]
+      },
+      "why": "BDB's Piel senses describe who blesses whom ('bless God', 'God blesses'), not what the stem means."
+    },
+    "7965": {
+      "gloss": [
+        "peace",
+        "welfare",
+        "completeness"
+      ],
+      "why": "BDB lists 'peace' fourth, after 'completeness, soundness, welfare'."
+    },
+    "571": {
+      "gloss": [
+        "faithfulness",
+        "truth"
+      ],
+      "why": "The head stops at 'firmness, faithfulness'; 'truth' is several senses down."
+    },
+    "3426": {
+      "gloss": [
+        "is",
+        "are",
+        "existence"
+      ],
+      "why": "The head is the noun sense, 'being, substance'; the word nearly always means 'there is'."
+    },
+    "2706": {
+      "gloss": [
+        "a statute",
+        "decree",
+        "ordinance"
+      ],
+      "why": "The head opens with BDB's description, 'something prescribed'."
+    },
+    "5387a": {
+      "gloss": [
+        "a chief prince",
+        "one lifted up"
+      ],
+      "why": "The head opens with the root's sense, 'one lifted up'."
+    },
+    "7235a": {
+      "gloss": [
+        "become many",
+        "be great",
+        "increase"
+      ],
+      "why": "The head's defs are a phrase split across a comma, so it reads 'be, become, much'."
+    },
+    "6153": {
+      "gloss": [
+        "evening"
+      ],
+      "why": "The head opens with 'set', from BDB's note on sunset."
+    },
+    "5048": {
+      "gloss": [
+        "in front of",
+        "in sight of",
+        "opposite to"
+      ],
+      "why": "The head opens with the noun sense, 'what is conspicuous'."
+    },
+    "977": {
+      "stems": {
+        "Qal": [
+          "choose"
+        ]
+      },
+      "why": "BDB's Qal senses are headed by kind — 'divine choice', 'man's choice' — not by meaning."
+    },
+    "7650": {
+      "stems": {
+        "Qal": [
+          "swear"
+        ]
+      },
+      "why": "The only Qal sense is a cited phrase, 'those sworn with oaths'."
+    }
+  }
+}
