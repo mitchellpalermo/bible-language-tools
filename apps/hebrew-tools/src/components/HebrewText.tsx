@@ -142,12 +142,16 @@ export function WordToken({
         lang="en"
         onClick={handleClick}
         data-testid="word-gloss"
-        className="cursor-pointer text-text-muted text-xs text-center px-0.5"
+        className="cursor-pointer text-text-muted text-xs text-center px-1.5"
         style={{
           fontFamily: 'var(--font-sans)',
           lineHeight: 1.25,
+          // The verse's own word spacing is set for Hebrew at 1.75rem.
+          wordSpacing: 'normal',
           // A single long gloss wraps under its own word rather than shoving
-          // the next one along; the column is as wide as the wider row.
+          // the next one along; the column is as wide as the wider row. The
+          // padding is what keeps two glosses apart inside a maqqef pair,
+          // where there is no space between the words to do it.
           maxWidth: '9rem',
           whiteSpace: 'normal',
         }}
