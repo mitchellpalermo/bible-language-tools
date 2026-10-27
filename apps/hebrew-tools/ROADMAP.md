@@ -297,7 +297,9 @@ lemma, built into `glosses.json`. Decided with Mitch (Oct 27, 2026):
   write a gloss: אֱלֹהִים "rulers, judges" → "God, gods", עוֹד "a going round" →
   "still, yet, again", הָיָה "fall out" → "be, become". About thirty common
   words, each pin a def the entry carries and checked by the build
-  (`scripts/data/bdb-pins.json`).
+  (`scripts/data/bdb-pins.json`). Every pin is also checked against STEPBible's
+  TBESH before it is added (`pnpm check:pins`): about three quarters agree, and
+  the rest differ because TBESH's word is not in BDB's entry.
 - **The popup switches to BDB too**, with Strong's as the fallback, and shows
   the senses of the word's own stem. That closes #131.
 - **A verb on the gloss line reads its stem's sense**, so a Hiphil does not

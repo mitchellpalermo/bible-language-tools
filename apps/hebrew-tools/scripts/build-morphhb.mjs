@@ -36,24 +36,12 @@ import {
   parseLexicalIndex,
   parseStrongGlosses,
 } from './lib/oshb.mjs';
+import { LEXICON_BASE, WLC_BASE } from './lib/sources.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = join(__dirname, '..', 'public', 'data', 'morphhb');
 const PINS = join(__dirname, 'data', 'bdb-pins.json');
 const FORCE = process.argv.includes('--force');
-
-/**
- * The corpus tracks `master`, matching how greek-tools consumes MorphGNT: the
- * WLC is a living critical edition and we want its corrections.
- *
- * The lexicon is pinned to a commit, matching how greek-tools consumes Dodson.
- * It is reference data whose only job is to be stable — an upstream edit that
- * silently changed 9,000 headwords would be invisible in a diff of generated
- * output that is not committed.
- */
-const WLC_BASE = 'https://raw.githubusercontent.com/openscriptures/morphhb/master/wlc';
-const LEXICON_BASE =
-  'https://raw.githubusercontent.com/openscriptures/HebrewLexicon/21c9add13bc727d3a951361778e97e3ff7afd1ce';
 
 const log = (...args) => process.stdout.write(`${args.join(' ')}\n`);
 const warn = (...args) => process.stderr.write(`${args.join(' ')}\n`);

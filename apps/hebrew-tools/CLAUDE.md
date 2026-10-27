@@ -53,6 +53,7 @@ pnpm build          # Build (runs the OSHB data script first)
 pnpm build:data     # Fetch/rebuild public/data/morphhb/ only
 pnpm build:vocab    # Regenerate src/data/vocabulary-garrett.ts from the handout + OSHB
 pnpm build:morph-codes  # Regenerate src/lib/morph-codes.json from the corpus
+pnpm check:pins     # Check the BDB pins against STEPBible's TBESH (see "Glosses")
 pnpm test           # Vitest (watch mode)
 pnpm test:run       # Vitest (single run)
 pnpm test:coverage  # Coverage report (must stay ≥ thresholds)
@@ -332,6 +333,33 @@ Things that will bite if changed carelessly — the BDB parser
   entry already carries, as the head gloss or as a stem's first sense, with a
   `why`. A pinned def the entry does not carry fails the build. Only pin a word a
   reader meets often; the long tail reads BDB as written.
+- **Every pin is checked against STEPBible's TBESH first** (Mitch, Oct 2026).
+  TBESH's `Gloss` column is a short gloss per extended Strong's number, written
+  by Tyndale's translators and keyed the same way as our lemmas — a second
+  opinion that is not BDB. The step, before any new pin:
+  1. `pnpm check:pins <lemma>` — BDB's defs (the only words a pin may use) and
+     TBESH's glosses, side by side.
+  2. Choose BDB defs, and copy TBESH's first gloss into the pin's `tbesh`
+     (`null` if TBESH has no entry).
+  3. Where the two differ, say so in `why`.
+  4. `pnpm check:pins` must pass: it fails on a pin with no `tbesh`, or one
+     whose `tbesh` is no longer what TBESH says, and lists every pin TBESH words
+     differently. `tbesh.test.mjs` fails offline on a pin with no `tbesh` field.
+
+  Three things to know about it:
+  - **TBESH is a witness, never a source.** Its wording does not reach the app;
+    eight pins differ from it because TBESH's word (עוֹלָם "forever", קֹדֶשׁ
+    "holiness") is not in BDB's entry at all. Letting TBESH fill those gaps
+    would be a second gloss authority — a separate decision.
+  - **Match the id exactly, suffix lowercase** (`H2896a`). Under bare `H2896`
+    sit three different words, and a fallback to the bare number mixes them —
+    the same trap as joining BDB by bare Strong's number.
+  - **It is fetched, never committed.** TBESH's licence asks that the file not
+    be redistributed, so `check-bdb-pins.mjs` reads it from STEPBible's
+    repository at the commit pinned in `scripts/lib/sources.mjs`, beside the
+    lexicon's. Only its `Gloss` column is read: `Meaning` is Abridged BDB, and
+    OSHB's own `LexicalIndex.xml` `<def>` is BDB's first def cut short, so
+    neither is a second opinion.
 - **Proper names: BDB's English, else the lexicon's `xlit`, never Strong's.**
   BDB gives "Israel", "Moses", "Jerusalem"; for שָׁאוּל it gives only an
   etymology, so the line reads "šāʾûl". The popup does not repeat a
