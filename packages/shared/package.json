@@ -11,6 +11,7 @@
   },
   "exports": {
     "./srs": "./src/srs.ts",
+    "./daily": "./src/daily.ts",
     "./sync-merge": "./src/sync-merge.ts",
     "./quiz-settings": "./src/quiz-settings.ts",
     "./paradigm-quiz": "./src/paradigm-quiz.ts",

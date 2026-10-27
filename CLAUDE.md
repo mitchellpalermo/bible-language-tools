@@ -51,6 +51,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | Export | Description |
 |--------|-------------|
 | `@tools/shared/srs` | SM-2 spaced repetition algorithm, types, and pure stats functions |
+| `@tools/shared/daily` | `dayIndex()` verse-of-the-day cycling and the `createDailyStreak(storageKey)` read-it-daily streak |
 | `@tools/shared/sync-merge` | Merge rules for cross-device sync of SRS cards and study stats |
 | `@tools/shared/quiz-settings` | `createQuizSettings(storageKey, overrides?)` factory for persisting quiz difficulty; `overrides` sets one app's defaults |
 | `@tools/shared/paradigm-quiz` | The paradigm quiz engine — `TableModel`, `getQuizCells`, `applyDensity`. Which tables exist and how an answer is graded stay in each app |
@@ -82,6 +83,8 @@ Only add to `packages/shared` if the code is genuinely language-agnostic. Stylin
 Note this compounds with the Tailwind scanning problem below: a shared React component cannot rely on utility classes *or* on bare tokens. `GradeButtons` is therefore styled entirely inline with fallback-bearing tokens, which is the pattern to copy.
 
 Each app's localStorage storage functions stay app-specific (different key namespaces). Only the pure algorithm and UI components belong in shared.
+
+**Where a module does need storage, the shape is a factory over a key**, not a hardcoded one — `createQuizSettings(storageKey)`, `createFlashcardSettings(storageKey)`, `createDailyStreak(storageKey)`. Both apps run the feature; neither may read the other's progress. A student who studies Greek and Hebrew has two streaks, and a shared key would let either one carry the other.
 
 `SiteNav.astro` is the one `.astro` component in the package; the rest are React. Astro components import from a workspace package like any other — the export just has to be listed in `packages/shared/package.json` with its `.astro` extension.
 
