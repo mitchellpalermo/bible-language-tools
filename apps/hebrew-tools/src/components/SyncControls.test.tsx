@@ -26,12 +26,13 @@ describe('SyncControls', () => {
     expect(screen.getByText('Never synced')).toBeInTheDocument();
   });
 
-  it('shows how long ago the last sync was', () => {
+  it('shows how long ago the last sync was', async () => {
     setLastSyncedAt(new Date(Date.now() - 5 * 60_000).toISOString());
 
     render(<SyncControls />);
 
-    expect(screen.getByText(/Last synced 5 minutes ago/)).toBeInTheDocument();
+    // The label reads localStorage after mount (ADR 006), so await it.
+    expect(await screen.findByText(/Last synced 5 minutes ago/)).toBeInTheDocument();
   });
 
   it('syncs on click and refreshes the label', async () => {

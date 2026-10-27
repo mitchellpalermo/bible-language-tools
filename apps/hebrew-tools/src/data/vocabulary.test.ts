@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CATEGORY_IDS, TEXTBOOK_IDS } from './textbooks';
+import { CATEGORY_IDS, TEXTBOOK_IDS, wordsInChapter } from './textbooks';
 import { cardKey, type HebrewVocabWord, mergeVocabulary, vocabulary } from './vocabulary';
 import {
   CORRECTIONS,
@@ -9,6 +9,7 @@ import {
   OSHB_RESPELLINGS,
   OSHB_UNMATCHED,
 } from './vocabulary-garrett';
+import { gd, VERB_CONJUGATIONS, verbParse } from './vocabulary-types';
 
 // Hebrew consonants (U+05D0-05EA) + nikud (U+05B0-U+05BD, U+05C7) + shin/sin
 // dots (U+05C1-U+05C2) + maqqef (U+05BE). Cantillation is intentionally
@@ -105,6 +106,68 @@ describe('vocabulary data', () => {
       });
   });
 
+  it('every verb names the conjugation of the form on its card', () => {
+    // The one exception is a verb the handout lists by bare root: unpointed
+    // consonants are not a form of anything, so there is nothing to name.
+    const listedByRoot = (word: HebrewVocabWord) => !/[\u05B0-\u05C7]/.test(word.hebrew);
+    const verbs = vocabulary.filter((word) => word.partOfSpeech === 'verb');
+    for (const word of verbs.filter((w) => !listedByRoot(w))) {
+      expect(VERB_CONJUGATIONS, `Verb missing conjugation: ${word.hebrew}`).toContain(
+        word.conjugation,
+      );
+    }
+    expect(verbs.filter(listedByRoot).map((w) => w.hebrew)).toEqual(['ירד']);
+  });
+
+  it('only verbs carry a conjugation', () => {
+    for (const word of vocabulary.filter((w) => w.partOfSpeech !== 'verb')) {
+      expect(word.conjugation, `Non-verb with a conjugation: ${word.hebrew}`).toBeUndefined();
+    }
+  });
+
+  it.each([
+    ['כָּתַב', 'qatal'],
+    ['בָּא', 'qatal'],
+    ['יָלְדָה', 'qatal'],
+    ['יִבְחַר', 'yiqtol'],
+    ['תִּדְּפֶנּוּ', 'yiqtol'],
+    ['וַיְהִי', 'wayyiqtol'],
+    ['וַתֵּשֶׁב', 'wayyiqtol'],
+    ['שָׁתוּל', 'passive participle'],
+    ['נָכוֹן', 'participle'],
+  ])('tags %s as a %s', (hebrew, conjugation) => {
+    expect(vocabulary.find((w) => w.hebrew === hebrew)?.conjugation).toBe(conjugation);
+  });
+
+  it('reads a wayyiqtol off the form, not off the chapter it is listed under', () => {
+    // Every form that opens with the wayyiqtol's וַ + doubled prefix is tagged
+    // one, and nothing else is. A citation form that happened to be tagged
+    // wayyiqtol would be the handout annotation drifting from the spelling.
+    for (const word of vocabulary.filter((w) => w.partOfSpeech === 'verb')) {
+      expect(word.conjugation === 'wayyiqtol', word.hebrew).toBe(/^וַ[יתנא]/.test(word.hebrew));
+    }
+  });
+
+  it.each([
+    ['כָּתַב', 'he wrote'],
+    ['שָׁפַט', 'he judged, ruled'],
+    ['הִמְלִיךְ', 'he installed someone as king'],
+    ['נִבְנָה', 'it was built'],
+    ['טָמֵא#verb', 'Qal: he was unclean; Piel: he defiled, declared unclean'],
+  ])('glosses the citation form %s literally, as %s', (key, gloss) => {
+    expect(vocabulary.find((w) => cardKey(w) === key)?.gloss).toBe(gloss);
+  });
+
+  it('never glosses a qatal as a bare "be …", which is how an infinitive reads', () => {
+    // The cheapest tell that a citation form slipped through unreworded: every
+    // stative in the textbook is printed "be full", "be heavy", "be king".
+    const bare = vocabulary
+      .filter((w) => w.conjugation === 'qatal')
+      .filter((w) => /^(?:\w+: )?be\b/.test(w.gloss))
+      .map((w) => w.hebrew);
+    expect(bare).toEqual([]);
+  });
+
   it('has no duplicate card keys', () => {
     const keys = vocabulary.map(cardKey);
     expect(new Set(keys).size).toBe(keys.length);
@@ -118,7 +181,10 @@ describe('vocabulary data', () => {
     for (const [hebrew, words] of byHebrew) {
       if (words.length === 1) continue;
       const senses = words.map((w) => w.sense);
-      expect(senses.every((s) => s !== undefined), `${hebrew} repeats without a sense`).toBe(true);
+      expect(
+        senses.every((s) => s !== undefined),
+        `${hebrew} repeats without a sense`,
+      ).toBe(true);
       expect(new Set(senses).size, `${hebrew} repeats a sense`).toBe(words.length);
     }
   });
@@ -171,9 +237,7 @@ describe('vocabulary data', () => {
 
   it('HebrewVocabWord shape has all required fields', () => {
     const word: HebrewVocabWord = vocabulary[0];
-    expect(Object.keys(word)).toEqual(
-      expect.arrayContaining(['hebrew', 'gloss', 'partOfSpeech']),
-    );
+    expect(Object.keys(word)).toEqual(expect.arrayContaining(['hebrew', 'gloss', 'partOfSpeech']));
   });
 
   it('every construct and plural form is valid pointed Hebrew', () => {
@@ -202,7 +266,9 @@ describe('vocabulary data', () => {
 
 describe('Garrett & DeRouchie import', () => {
   it('brings in the whole handout, chapters 2 through 31', () => {
-    const chapters = new Set(GARRETT_VOCABULARY.flatMap((w) => (w.chapters ?? []).map((c) => c.chapter)));
+    const chapters = new Set(
+      GARRETT_VOCABULARY.flatMap((w) => (w.chapters ?? []).map((c) => c.chapter)),
+    );
     expect(Math.min(...chapters)).toBe(2);
     expect(Math.max(...chapters)).toBe(31);
     expect(chapters.size).toBe(30);
@@ -259,7 +325,7 @@ describe('Garrett & DeRouchie import', () => {
     }
   });
 
-  it('gives every resolved entry a well-formed Strong\'s number', () => {
+  it("gives every resolved entry a well-formed Strong's number", () => {
     GARRETT_VOCABULARY.forEach((word) => {
       if (word.strong === undefined) return;
       expect(VALID_STRONG.test(word.strong), `Bad Strong's on ${word.hebrew}: ${word.strong}`).toBe(
@@ -284,7 +350,10 @@ describe('Garrett & DeRouchie import', () => {
       expect(entry.reason.trim().length, `No reason for ${entry.entry}`).toBeGreaterThan(0);
       const word = GARRETT_VOCABULARY.find((w) => cardKey(w) === entry.entry);
       expect(word, `Exception names an absent entry: ${entry.entry}`).toBeDefined();
-      expect(word?.strong, `${entry.entry} resolves and no longer needs an exception`).toBeUndefined();
+      expect(
+        word?.strong,
+        `${entry.entry} resolves and no longer needs an exception`,
+      ).toBeUndefined();
     }
   });
 
@@ -294,7 +363,9 @@ describe('Garrett & DeRouchie import', () => {
     const withFrequency = GARRETT_VOCABULARY.filter((w) => w.frequency !== undefined);
     expect(withFrequency.length).toBeGreaterThan(350);
     withFrequency.forEach((word) => {
-      expect(Number.isInteger(word.frequency), `Non-integer frequency on ${word.hebrew}`).toBe(true);
+      expect(Number.isInteger(word.frequency), `Non-integer frequency on ${word.hebrew}`).toBe(
+        true,
+      );
       expect(word.frequency).toBeGreaterThan(0);
       expect(word.strong, `Frequency without a lemma on ${word.hebrew}`).toBeDefined();
     });
@@ -311,7 +382,7 @@ describe('Garrett & DeRouchie import', () => {
     });
   });
 
-  it('separates every homograph by Strong\'s number, not only by hand-written sense', () => {
+  it("separates every homograph by Strong's number, not only by hand-written sense", () => {
     const byHebrew = new Map<string, HebrewVocabWord[]>();
     for (const word of GARRETT_VOCABULARY) {
       byHebrew.set(word.hebrew, [...(byHebrew.get(word.hebrew) ?? []), word]);
@@ -357,7 +428,7 @@ describe('Garrett & DeRouchie import', () => {
     }
   });
 
-  it('keeps the textbook\'s gender where the corpus disagrees, and says where', () => {
+  it("keeps the textbook's gender where the corpus disagrees, and says where", () => {
     for (const divergence of GENDER_DIVERGENCES) {
       expect(divergence.textbook).not.toBe(divergence.corpus);
       const word = GARRETT_VOCABULARY.find((w) => w.hebrew === divergence.hebrew);
@@ -368,7 +439,7 @@ describe('Garrett & DeRouchie import', () => {
     }
   });
 
-  it('writes holam male as vav-then-holam, not the handout\'s reverse order', () => {
+  it("writes holam male as vav-then-holam, not the handout's reverse order", () => {
     // The handout mixes the WLC order (holam before the vav) into an otherwise
     // standard text; rendered as-is the vowel lands on the wrong consonant.
     const wlcOrder = /\u05B9\u05BC?\u05D5/;
@@ -376,20 +447,129 @@ describe('Garrett & DeRouchie import', () => {
       expect(wlcOrder.test(word.hebrew), `WLC-order holam in ${word.hebrew}`).toBe(false);
     });
   });
+
+  // Chapter 5, section C of the grammar prints a closed list of irregular
+  // plurals and the chapter quiz marks against it. The forms are spread across
+  // chapters 2-5, because `plural` belongs to the word rather than to the
+  // chapter that happens to tabulate it — so nothing else in the suite would
+  // notice a regeneration quietly dropping one.
+  const IRREGULAR_PLURALS = [
+    ['אָב', 'אָבוֹת', 'm'],
+    ['אִישׁ', 'אֲנָשִׁים', 'm'],
+    ['אִשָּׁה', 'נָשִׁים', 'f'],
+    ['בַּיִת', 'בָּתִּים', 'm'],
+    ['בֵּן', 'בָּנִים', 'm'],
+    ['יוֹם', 'יָמִים', 'm'],
+    ['מִזְבֵּחַ', 'מִזְבְּחוֹת', 'm'],
+    ['עִיר', 'עָרִים', 'f'],
+  ] as const;
+
+  it.each(IRREGULAR_PLURALS)('carries the irregular plural of %s', (singular, plural, gender) => {
+    const word = GARRETT_VOCABULARY.find((w) => w.hebrew === singular);
+    expect(word, `No entry for ${singular}`).toBeDefined();
+    expect(word?.plural).toBe(plural);
+    // The grammar prints the gender wherever the ending contradicts it —
+    // אָבוֹת is masculine, עָרִים feminine — so it is part of the entry.
+    expect(word?.gender).toBe(gender);
+
+    // ...and the plural is a headword too, not just a field on the singular.
+    // A `plural` renders on the back of the singular's card, which means it is
+    // shown but never asked; the chapter 5 quiz asks for it, so it needs a card
+    // of its own. That is what the `inflected` category is for.
+    const form = GARRETT_VOCABULARY.find((w) => w.hebrew === plural);
+    expect(form, `No card for the plural ${plural}`).toBeDefined();
+    expect(form?.chapters).toContainEqual(gd(5, 'inflected'));
+    // It points back at its singular, the convention the handout's own
+    // inflected rows use — מְלָכִים carries מֶלֶךְ, not a plural of its own.
+    expect(form?.plural).toBe(singular);
+    // Distinct SRS cards: the whole point of the exercise.
+    expect(cardKey(form!)).not.toBe(cardKey(word!));
+  });
+
+  it('puts all eight irregular plurals in the chapter 5 deck', () => {
+    const deck = wordsInChapter('garrett-derouchie', 5).map((w) => w.hebrew);
+    for (const plural of IRREGULAR_PLURALS.map(([, p]) => p)) {
+      expect(deck, `Chapter 5 deck is missing ${plural}`).toContain(plural);
+    }
+  });
+
+  // Table 12.3 of the grammar is the construct-state counterpart of the list
+  // above: six nouns whose construct cannot be derived from the absolute. The
+  // absolutes are spread across chapters 3, 5, 11 and 12, and a `construct`
+  // field is shown on the back of the absolute's card without ever being asked.
+  //
+  // Table 12.4 follows with the constructs of seven of chapter 5's irregular
+  // plurals. Those plurals are form cards themselves and carry no `construct`
+  // field, which is what the fourth column records.
+  const IRREGULAR_CONSTRUCTS = [
+    ['אָב', 'אֲבִי', 'father of', true],
+    ['אָח', 'אֲחִי', 'brother of', true],
+    ['אִשָּׁה', 'אֵשֶׁת', 'woman of', true],
+    ['מִלְחָמָה', 'מִלְחֶמֶת', 'war of', true],
+    ['מִשְׁפָּחָה', 'מִשְׁפַּחַת', 'family of', true],
+    ['פֶּה', 'פִּי', 'mouth of', true],
+    ['אֲנָשִׁים', 'אַנְשֵׁי', 'men of', false],
+    ['נָשִׁים', 'נְשֵׁי', 'women of', false],
+    ['בָּנִים', 'בְּנֵי', 'sons of', false],
+    ['אָבוֹת', 'אֲבוֹת', 'fathers of', false],
+    ['יָמִים', 'יְמֵי', 'days of', false],
+    ['עָרִים', 'עָרֵי', 'cities of', false],
+    ['בָּתִּים', 'בָּתֵּי', 'houses of', false],
+  ] as const;
+
+  it.each(
+    IRREGULAR_CONSTRUCTS,
+  )('gives the irregular construct of %s its own card', (absolute, construct, gloss, onAbsolute) => {
+    const word = GARRETT_VOCABULARY.find((w) => w.hebrew === absolute);
+    expect(word, `No entry for ${absolute}`).toBeDefined();
+    expect(word?.construct).toBe(onAbsolute ? construct : undefined);
+
+    const form = GARRETT_VOCABULARY.find((w) => w.hebrew === construct);
+    expect(form, `No card for the construct ${construct}`).toBeDefined();
+    expect(form?.gloss).toBe(gloss);
+    expect(form?.chapters).toContainEqual(gd(12, 'inflected'));
+    // The back of the card says which noun this is the construct of.
+    expect(form?.note).toBe(`construct of ${absolute}`);
+    // Same lexeme as the absolute. This is the assertion that catches אֲבִי
+    // and אֲחִי resolving to the personal names the lexicon spells that way
+    // (Strong's 21 and 277) if their pins are ever dropped.
+    expect(form?.strong).toBe(word?.strong);
+    expect(form?.gender).toBe(word?.gender);
+    // The count is a fact about the lexeme, not about the form.
+    expect(form?.frequency).toBeUndefined();
+    expect(cardKey(form!)).not.toBe(cardKey(word!));
+  });
+
+  it('puts all thirteen irregular constructs in the chapter 12 deck', () => {
+    const deck = wordsInChapter('garrett-derouchie', 12).map((w) => w.hebrew);
+    for (const construct of IRREGULAR_CONSTRUCTS.map(([, c]) => c)) {
+      expect(deck, `Chapter 12 deck is missing ${construct}`).toContain(construct);
+    }
+  });
 });
 
 // ─── mergeVocabulary ──────────────────────────────────────────────────────────
 
 describe('mergeVocabulary', () => {
   const curated: HebrewVocabWord[] = [
-    { hebrew: 'דָּבָר', transliteration: 'dābār', gloss: 'word', frequency: 1400, partOfSpeech: 'noun' },
+    {
+      hebrew: 'דָּבָר',
+      transliteration: 'dābār',
+      gloss: 'word',
+      frequency: 1400,
+      partOfSpeech: 'noun',
+    },
   ];
 
   it('folds a matching import into the curated entry rather than duplicating it', () => {
     const merged = mergeVocabulary(curated, [
-      { hebrew: 'דָּבָר', gloss: 'word, thing', partOfSpeech: 'noun', gender: 'm', chapters: [
-        { textbook: 'garrett-derouchie', chapter: 5, category: 'core' },
-      ] },
+      {
+        hebrew: 'דָּבָר',
+        gloss: 'word, thing',
+        partOfSpeech: 'noun',
+        gender: 'm',
+        chapters: [{ textbook: 'garrett-derouchie', chapter: 5, category: 'core' }],
+      },
     ]);
     expect(merged).toHaveLength(1);
     // Curated wins where it speaks...
@@ -421,16 +601,21 @@ describe('mergeVocabulary', () => {
     const ref = { textbook: 'garrett-derouchie', chapter: 1, category: 'core' } as const;
     const merged = mergeVocabulary(
       [{ hebrew: 'דָּבָר', gloss: 'word', partOfSpeech: 'noun', chapters: [ref] }],
-      [{ hebrew: 'דָּבָר', gloss: 'word', partOfSpeech: 'noun', chapters: [ref, { ...ref, chapter: 5 }] }],
+      [
+        {
+          hebrew: 'דָּבָר',
+          gloss: 'word',
+          partOfSpeech: 'noun',
+          chapters: [ref, { ...ref, chapter: 5 }],
+        },
+      ],
     );
     expect(merged[0].chapters).toEqual([ref, { ...ref, chapter: 5 }]);
   });
 
   it('does not mutate its inputs', () => {
     const input: HebrewVocabWord[] = [{ hebrew: 'דָּבָר', gloss: 'word', partOfSpeech: 'noun' }];
-    mergeVocabulary(input, [
-      { hebrew: 'דָּבָר', gloss: 'word', partOfSpeech: 'noun', gender: 'm' },
-    ]);
+    mergeVocabulary(input, [{ hebrew: 'דָּבָר', gloss: 'word', partOfSpeech: 'noun', gender: 'm' }]);
     expect(input[0].gender).toBeUndefined();
   });
 
@@ -454,5 +639,20 @@ describe('cardKey', () => {
     expect(cardKey({ hebrew: 'אַף', sense: 'noun', gloss: 'nose', partOfSpeech: 'noun' })).toBe(
       'אַף#noun',
     );
+  });
+});
+
+describe('verbParse', () => {
+  it('puts the stem before the conjugation, the order a grammar parses in', () => {
+    expect(verbParse({ binyan: 'Hiphil', conjugation: 'yiqtol' })).toBe('Hiphil yiqtol');
+  });
+
+  it('prints whichever half there is', () => {
+    expect(verbParse({ binyan: 'Qal' })).toBe('Qal');
+    expect(verbParse({ conjugation: 'qatal' })).toBe('qatal');
+  });
+
+  it('is undefined when there is nothing to print', () => {
+    expect(verbParse({})).toBeUndefined();
   });
 });

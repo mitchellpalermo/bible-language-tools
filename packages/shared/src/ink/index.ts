@@ -14,30 +14,37 @@ export {
   type PointerKind,
   type PointerSample,
 } from './capture';
-export { appendStroke, appendStrokes, type PathSink, type RibbonOptions, segmentQuad, widthAt } from './render';
+export {
+  appendStroke,
+  appendStrokes,
+  type PathSink,
+  type RibbonOptions,
+  segmentQuad,
+  widthAt,
+} from './render';
 export {
   DEFAULT_TOLERANCE,
   type InkScore,
-  scoreInk,
   type ScoreOptions,
-  type Verdict,
+  scoreInk,
   VERDICT_THRESHOLDS,
+  type Verdict,
   verdictFor,
 } from './score/geom';
 export {
   alphaBounds,
-  clearGlyphMaskCache,
   type CompositeMask,
+  clearGlyphMaskCache,
   distanceTransform,
   type GlyphMask,
+  type LoadMaskOptions,
   loadCompositeMask,
   loadGlyphMask,
-  type LoadMaskOptions,
-  maskFromAlpha,
   type MaskOptions,
+  maskFromAlpha,
+  type RasterizeOptions,
   rasterizeComposite,
   rasterizeGlyph,
-  type RasterizeOptions,
 } from './score/mask';
 export {
   allGlyphs,
@@ -56,8 +63,8 @@ export {
   boundingBox,
   distance,
   type InkPoint,
-  normalizeStrokes,
   type NormalizeOptions,
+  normalizeStrokes,
   resample,
   type Stroke,
   strokeLength,

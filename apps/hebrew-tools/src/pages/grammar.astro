@@ -1,0 +1,21 @@
+---
+import GrammarReference from '../components/GrammarReference';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Grammar Reference"
+  description="Quick-reference tables for Biblical Hebrew — the alphabet, the vowel chart, noun patterns, the article, prepositions, and Qal verb paradigms."
+>
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold mb-1" style="color: var(--color-primary);">
+      Grammar Reference
+    </h1>
+    <p class="text-text-muted">
+      Tables to keep open while reading and translating. The alphabet, the vowels, nouns, the
+      article, prepositions, and the Qal verb so far — more sections are on the way.
+    </p>
+  </div>
+
+  <GrammarReference client:load />
+</Layout>

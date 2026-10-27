@@ -6,7 +6,12 @@ export const onRequest = defineMiddleware(async ({ locals, request }, next) => {
   // No bindings (plain `astro dev` without .dev.vars, or a preview build) —
   // degrade to signed-out rather than throwing on every request.
   const env = locals.runtime?.env;
-  if (!env?.DB || !env?.BETTER_AUTH_SECRET || !env?.GOOGLE_CLIENT_ID || !env?.GOOGLE_CLIENT_SECRET) {
+  if (
+    !env?.DB ||
+    !env?.BETTER_AUTH_SECRET ||
+    !env?.GOOGLE_CLIENT_ID ||
+    !env?.GOOGLE_CLIENT_SECRET
+  ) {
     locals.user = null;
     return next();
   }

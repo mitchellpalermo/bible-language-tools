@@ -77,7 +77,7 @@ describe('distanceTransform', () => {
 
   it('saturates rather than returning Infinity for an empty grid', () => {
     const d = distanceTransform(new Uint8Array(16), 4);
-    expect(d.every(v => Number.isFinite(v) && v > 4)).toBe(true);
+    expect(d.every((v) => Number.isFinite(v) && v > 4)).toBe(true);
   });
 });
 
@@ -142,7 +142,12 @@ describe('maskFromAlpha', () => {
     // Clamping the sample window to the source raster instead of to the glyph
     // lets an out-of-box cell read the nearest edge pixel, which smears a solid
     // glyph across the entire grid.
-    const mask = maskFromAlpha(alphaGrid(32, 32, () => true), 32, 32, { size: 40, padding: 0.25 });
+    const mask = maskFromAlpha(
+      alphaGrid(32, 32, () => true),
+      32,
+      32,
+      { size: 40, padding: 0.25 },
+    );
     const box = bitsBox(mask);
 
     expect(box?.minX).toBeGreaterThanOrEqual(9);
@@ -153,7 +158,7 @@ describe('maskFromAlpha', () => {
     const mask = maskFromAlpha(new Uint8Array(64), 8, 8, { size: 16 });
 
     expect(mask.filled).toBe(0);
-    expect(mask.bits.every(b => b === 0)).toBe(true);
+    expect(mask.bits.every((b) => b === 0)).toBe(true);
     expect(mask.distance).toHaveLength(256);
   });
 
@@ -164,7 +169,11 @@ describe('maskFromAlpha', () => {
   });
 
   it('defaults to the documented geometry', () => {
-    const mask = maskFromAlpha(alphaGrid(8, 8, () => true), 8, 8);
+    const mask = maskFromAlpha(
+      alphaGrid(8, 8, () => true),
+      8,
+      8,
+    );
     expect(mask.size).toBe(DEFAULT_MASK_SIZE);
     expect(mask.padding).toBe(DEFAULT_MASK_PADDING);
   });
@@ -209,7 +218,12 @@ describe('rasterizeGlyph', () => {
       .spyOn(document, 'createElement')
       .mockReturnValue({ getContext: () => ctx } as unknown as HTMLElement);
 
-    const mask = rasterizeGlyph('א', { fontFamily: 'serif', sourceSize: source, size: 10, padding: 0 });
+    const mask = rasterizeGlyph('א', {
+      fontFamily: 'serif',
+      sourceSize: source,
+      size: 10,
+      padding: 0,
+    });
 
     expect(ctx.fillText).toHaveBeenCalledWith('א', 8, 8);
     expect(mask?.filled).toBe(100);
@@ -248,9 +262,15 @@ describe('loadGlyphMask', () => {
 
   it('still produces a mask when the font fails to load', async () => {
     const load = vi.fn(() => Promise.reject(new Error('offline')));
-    vi.stubGlobal('document', { ...document, fonts: { load }, createElement: () => ({ getContext: () => null }) });
+    vi.stubGlobal('document', {
+      ...document,
+      fonts: { load },
+      createElement: () => ({ getContext: () => null }),
+    });
 
-    await expect(loadGlyphMask('א', { fontFamily: 'serif', fontLoadSpec: '16px serif' })).resolves.toBeNull();
+    await expect(
+      loadGlyphMask('א', { fontFamily: 'serif', fontLoadSpec: '16px serif' }),
+    ).resolves.toBeNull();
     vi.unstubAllGlobals();
   });
 
@@ -357,7 +377,7 @@ const COMBINING = new Set(['ָ']); // qamets
 type Rect = [number, number, number, number];
 
 function layout(text: string, x: number, align: string): Rect[] {
-  const advance = [...text].filter(c => !COMBINING.has(c)).length * CHAR_W;
+  const advance = [...text].filter((c) => !COMBINING.has(c)).length * CHAR_W;
   const right = align === 'right' ? x : align === 'left' ? x + advance : x + advance / 2;
   const top = COMPOSITE_SOURCE / 2 - CHAR_H / 2;
 
@@ -425,14 +445,14 @@ describe('rasterizeComposite', () => {
 
     expect(calls).toHaveLength(2);
     expect(calls[0].x).toBe(calls[1].x);
-    expect(calls.every(c => c.align === 'right')).toBe(true);
+    expect(calls.every((c) => c.align === 'right')).toBe(true);
   });
 
   it('anchors on the left edge under ltr', () => {
     const calls = stubRenderer();
     rasterizeComposite('ab', 'a', { ...COMPOSITE_OPTIONS, direction: 'ltr' });
 
-    expect(calls.every(c => c.align === 'left')).toBe(true);
+    expect(calls.every((c) => c.align === 'left')).toBe(true);
     expect(calls[0].x).toBe(calls[1].x);
   });
 
@@ -498,9 +518,7 @@ describe('rasterizeComposite', () => {
       }),
     });
 
-    expect(
-      rasterizeComposite('פָ', 'פ', { fontFamily: 'serif', sourceSize: 16 }),
-    ).toBeNull();
+    expect(rasterizeComposite('פָ', 'פ', { fontFamily: 'serif', sourceSize: 16 })).toBeNull();
   });
 });
 

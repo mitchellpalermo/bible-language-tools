@@ -96,9 +96,7 @@ describe('FocusPassageHub', () => {
     render(<FocusPassageHub passageId="hub-test-1" />);
     await waitFor(() => expect(screen.getByRole('button', { name: 'Vocab' })).toBeInTheDocument());
     await user.click(screen.getByRole('button', { name: 'Vocab' }));
-    await waitFor(() =>
-      expect(screen.getByText(/no vocabulary words found/i)).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByText(/no vocabulary words found/i)).toBeInTheDocument());
   });
 
   it('switches to Parsing tab on click', async () => {

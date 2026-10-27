@@ -3,11 +3,11 @@ import { resolve } from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MorphWord } from '../data/morphgnt';
 import {
+  buildTranslationPDF,
   CONTENT_W,
+  extractVerses,
   LINE_BLOCK_H,
   RULE_COUNT,
-  buildTranslationPDF,
-  extractVerses,
   wrapWords,
 } from './pdf-export';
 
@@ -214,9 +214,7 @@ describe('wrapWords', () => {
 
 describe('buildTranslationPDF', () => {
   beforeEach(() => {
-    const fontBytes = readFileSync(
-      resolve(__dirname, '../../public/fonts/NotoSans-Regular.ttf'),
-    );
+    const fontBytes = readFileSync(resolve(__dirname, '../../public/fonts/NotoSans-Regular.ttf'));
     const arrayBuffer = fontBytes.buffer.slice(
       fontBytes.byteOffset,
       fontBytes.byteOffset + fontBytes.byteLength,

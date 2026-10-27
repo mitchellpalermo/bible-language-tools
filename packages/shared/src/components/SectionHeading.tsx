@@ -1,5 +1,11 @@
 /** Section heading with an anchor ID for sidebar links. */
-export default function SectionHeading({ id, children }: { id: string; children: React.ReactNode }) {
+export default function SectionHeading({
+  id,
+  children,
+}: {
+  id: string;
+  children: React.ReactNode;
+}) {
   return (
     <h2
       id={id}

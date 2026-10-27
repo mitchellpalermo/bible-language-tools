@@ -14,7 +14,13 @@ import InkCanvas from './InkCanvas';
 function firePointer(
   el: Element,
   type: string,
-  init: { x?: number; y?: number; pointerId?: number; pointerType?: string; pressure?: number } = {},
+  init: {
+    x?: number;
+    y?: number;
+    pointerId?: number;
+    pointerType?: string;
+    pressure?: number;
+  } = {},
 ) {
   const event = new Event(type, { bubbles: true, cancelable: true });
   Object.assign(event, {
@@ -69,7 +75,7 @@ describe('InkCanvas', () => {
 
     // Smoothing moves the samples, so assert the shape rather than exact
     // coordinates: the stroke must run left to right at a constant height.
-    const xs = stroke.points.map(p => p.x);
+    const xs = stroke.points.map((p) => p.x);
     expect(xs).toEqual([...xs].sort((a, b) => a - b));
     // `toBeCloseTo`, not `===`: the filter computes `a * value + (1 - a) * prev`,
     // and for a constant y that is 10 in real arithmetic but lands a ULP either

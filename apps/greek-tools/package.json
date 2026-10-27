@@ -51,14 +51,8 @@
     "@vitest/coverage-v8": "^4.0.18",
     "@vitest/ui": "^4.0.18",
     "happy-dom": "^20.7.0",
+    "typescript": "^5.9.3",
     "vitest": "^4.0.18",
     "wrangler": "^4.68.1"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "sharp",
-      "workerd"
-    ]
   }
 }

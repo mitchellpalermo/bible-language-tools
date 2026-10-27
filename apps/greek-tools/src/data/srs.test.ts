@@ -15,10 +15,15 @@ import {
 
 // ─── helpers ───────────────────────────────────────────────────────────────
 
+// Local calendar formatting, matching @tools/shared/srs. Built with toISOString() this
+// helper disagreed with the code under test every evening west of UTC.
 function dateStr(offsetDays = 0): string {
   const d = new Date();
   d.setDate(d.getDate() + offsetDays);
-  return d.toISOString().slice(0, 10);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 const TODAY = dateStr(0);
@@ -137,10 +142,12 @@ describe('nextSRS', () => {
       expect(result.repetition).toBe(1);
     });
 
-    it('sets interval to 6 on second successful review (repetition 1)', () => {
+    it('multiplies from the graduating interval on the second review', () => {
+      // Not SM-2's fixed 6-day second step — Anki multiplies from wherever the
+      // card graduated, so a 1-day card at ease 2.5 goes to 3 days.
       const card = makeCard({ repetition: 1, interval: 1 });
       const result = nextSRS(card, 4);
-      expect(result.interval).toBe(6);
+      expect(result.interval).toBe(3);
       expect(result.repetition).toBe(2);
     });
 

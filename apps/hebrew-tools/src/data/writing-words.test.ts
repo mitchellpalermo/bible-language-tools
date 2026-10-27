@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { newCard, type SRSCard } from './srs';
-import type { HebrewVocabWord } from './vocabulary-types';
 import { vocabulary } from './vocabulary';
+import type { HebrewVocabWord } from './vocabulary-types';
 import {
   buildWordQueue,
   countNewWords,
@@ -45,8 +45,18 @@ describe('wordCardKey', () => {
   it('keeps homographs on separate cards', () => {
     // `cardKey` appends the sense where a clash exists. Keying off the bare
     // lemma would merge אַף "also" with אַף "nose".
-    const also: HebrewVocabWord = { hebrew: 'אַף', sense: 'also', gloss: 'also', partOfSpeech: 'conjunction' };
-    const nose: HebrewVocabWord = { hebrew: 'אַף', sense: 'nose', gloss: 'nose', partOfSpeech: 'noun' };
+    const also: HebrewVocabWord = {
+      hebrew: 'אַף',
+      sense: 'also',
+      gloss: 'also',
+      partOfSpeech: 'conjunction',
+    };
+    const nose: HebrewVocabWord = {
+      hebrew: 'אַף',
+      sense: 'nose',
+      gloss: 'nose',
+      partOfSpeech: 'noun',
+    };
 
     expect(wordCardKey(also)).not.toBe(wordCardKey(nose));
   });
@@ -54,14 +64,14 @@ describe('wordCardKey', () => {
 
 describe('toWritingWord', () => {
   it('gives each consonant cluster its own cell', () => {
-    expect(toWritingWord(DAVAR).cells.map(c => c.text)).toEqual(['דָּ', 'בָ', 'ר']);
+    expect(toWritingWord(DAVAR).cells.map((c) => c.text)).toEqual(['דָּ', 'בָ', 'ר']);
   });
 
   it('keeps a final form with its silent sheva in one cell', () => {
     // מֶלֶךְ ends in ךְ. The sheva belongs to that cell, not to a cell of its own.
     const cells = toWritingWord(MELEKH).cells;
 
-    expect(cells.map(c => c.base)).toEqual(['מ', 'ל', 'ך']);
+    expect(cells.map((c) => c.base)).toEqual(['מ', 'ל', 'ך']);
     expect(cells[2].text).toBe('ךְ');
   });
 
@@ -94,7 +104,7 @@ describe('buildWordQueue', () => {
   it('drops words that cannot carry the chosen prompt', () => {
     const queue = buildWordQueue([DAVAR, MELEKH], {}, 'transliteration');
 
-    expect(queue.map(w => w.word.hebrew)).toEqual(['דָּבָר']);
+    expect(queue.map((w) => w.word.hebrew)).toEqual(['דָּבָר']);
   });
 
   it('puts due cards ahead of unseen ones', () => {
@@ -109,7 +119,7 @@ describe('buildWordQueue', () => {
     const store = { [wordCardKey(DAVAR)]: settled(wordCardKey(DAVAR)) };
     const queue = buildWordQueue([DAVAR, MELEKH], store, 'gloss');
 
-    expect(queue.map(w => w.word.hebrew)).toEqual(['מֶלֶךְ']);
+    expect(queue.map((w) => w.word.hebrew)).toEqual(['מֶלֶךְ']);
   });
 
   it('shuffles within a band but never across one', () => {
@@ -118,7 +128,7 @@ describe('buildWordQueue', () => {
     // fall behind an unseen one.
     const due = { ...DAVAR, hebrew: 'דָּבָר' };
     const store = { [wordCardKey(due)]: newCard(wordCardKey(due)) };
-    const reverse = <T,>(items: T[]): T[] => [...items].reverse();
+    const reverse = <T>(items: T[]): T[] => [...items].reverse();
     const queue = buildWordQueue([due, MELEKH], store, 'gloss', reverse);
 
     expect(queue[0].word.hebrew).toBe('דָּבָר');
@@ -166,8 +176,8 @@ describe('wordsForSelection', () => {
 
     expect(chapter2.length).toBeGreaterThan(0);
     expect(
-      chapter2.every(w =>
-        (w.chapters ?? []).some(c => c.chapter === 2 && c.category === 'core'),
+      chapter2.every((w) =>
+        (w.chapters ?? []).some((c) => c.chapter === 2 && c.category === 'core'),
       ),
     ).toBe(true);
   });
@@ -210,7 +220,7 @@ describe('glossPrompt', () => {
     };
 
     expect(hasPrompt(giveaway, 'gloss')).toBe(false);
-    expect(buildWordQueue([giveaway, DAVAR], {}, 'gloss').map(w => w.word.hebrew)).toEqual([
+    expect(buildWordQueue([giveaway, DAVAR], {}, 'gloss').map((w) => w.word.hebrew)).toEqual([
       'דָּבָר',
     ]);
   });
@@ -220,7 +230,7 @@ describe('glossPrompt', () => {
     // student as a prompt that contains the word they are being asked to write.
     const hebrew = /[֐-׿]/;
     const leaks = vocabulary
-      .map(w => promptText(w, 'gloss'))
+      .map((w) => promptText(w, 'gloss'))
       .filter((p): p is string => p !== null && hebrew.test(p));
 
     expect(leaks).toEqual([]);

@@ -413,6 +413,47 @@ Hebrew → SBL transliteration is more complex than Greek because:
 
 **greek.tools analog:** `/grammar` — `GrammarReference.tsx` + `src/data/grammar.ts`
 
+### Status
+
+Landing a section at a time (issue #79). `/grammar` is live with the first
+six sections; each later step is a data module, a `<section>`, and one entry in
+`NAV_SECTIONS`.
+
+| Step | Scope | Status | Issue |
+|------|-------|--------|-------|
+| 6a | `/grammar` shell and section nav; Alphabet (consonants, letter groups, dagesh); Vowels (chart, sheva); Qal Verb rendered from `verb-paradigms.ts` | ✅ Done | #149 (PR) |
+| 6b | Nouns — endings, absolute and construct, vowel reduction, segolates, the dual; The Article; Prepositions (inseparable, מִן, independent) | ✅ Done | #149 (PR) |
+| 6c | Pronouns — independent personal, demonstrative, interrogative, relative; Pronominal Suffixes on nouns and prepositions | ✅ Done | #152 |
+| 6d | Rest of the Qal — imperative, infinitives, participles; Waw Consecutive notes. Data goes in `verb-paradigms.ts` so the quiz gets it too | Queued | #153 |
+| 6e | Derived stems — Niphal, Piel, Pual, Hiphil, Hophal, Hithpael | Queued | #154 |
+| 6f | Weak verbs as an overlay on the strong paradigm, with diverging cells highlighted; suffixes on verbs | Queued | #155 |
+| 6g | Numerals | Queued | #156 |
+
+Two things 6a settled that the later steps inherit:
+
+- **The alphabet and vowel names come from the `/write` script pack**, and
+  `src/data/grammar.ts` adds only what a reference needs on top (sounds, letter
+  classes, a vowel's place in the chart). One spelling of every name.
+- **The Qal Verb section opened with what the quiz already had** — qatal,
+  yiqtol and wayyiqtol — rather than waiting for the full conjugation. The verb
+  tables read `verb-paradigms.ts` directly and show the stress mark the quiz
+  strips, so adding a paradigm there adds it to both.
+
+- **Only the Qal qatal, yiqtol and wayyiqtol tables are transcribed from the
+  textbook.** Everything else is general grammar in the app's own words on
+  conventional model words, with every Hebrew form checked against the
+  Westminster Leningrad Codex by the data tests (`src/test/corpus.ts`). 6c
+  onward should follow 6b here: write it, then let the corpus catch the
+  pointing slips, rather than copying tables in.
+- **That includes the new verb forms (6d–6f), with two safeguards** (decided
+  on #79). A verb table is also the quiz's answer key, and a spelling check is
+  weak there: one spelling can fill two cells, and a single model root leaves
+  many cells unattested. So 6d makes the gate check each form against its OSHB
+  parse as well as its spelling. Each verb pull request also lists the cells
+  where grammars commonly disagree (alternate forms, forms some tables omit,
+  how weak classes are grouped), and Mitch checks just those cells against
+  Garrett & DeRouchie so the quiz expects the forms his exams do.
+
 ### What ports directly
 - Section-nav sidebar pattern
 - Sticky nav / mobile horizontal scroll nav
@@ -451,6 +492,32 @@ The weak verb section has no Greek analog. Strong-verb paradigms are 6 conjugati
 ## Phase 7 — Paradigm Quiz
 
 **greek.tools analog:** `/paradigms` — `ParadigmQuiz.tsx` + `src/lib/paradigm-quiz.ts`
+
+### Status
+
+Being built ahead of Phase 6, not after it. The quiz needs verb forms, not the
+whole Grammar Reference, so the forms live in `src/data/verb-paradigms.ts` and
+Phase 6 will render from the same file when it lands.
+
+| Step | Scope | Status |
+|------|-------|--------|
+| 7a | Verb data: Qal qatal, yiqtol, wayyiqtol for strong, begadkephat, III-ה, היה | ✅ Done |
+| 7b | Shared `TableModel` engine, Hebrew table builders, grading, `useHebrewInput` | ✅ Done |
+| 7c | `/paradigms` page — typed, full table by default, on-screen Hebrew keypad for iPad | ✅ Done |
+| 7d | SRS per form + sync, due-first blanking and a Due forms mode | ✅ Done |
+| 7f | Pronominal suffixes on nouns: `pronominal-suffixes.ts`, a Noun suffixes tab beside the conjugations (#159) | ✅ Done |
+| 7e | More conjugations and stems as the course reaches them | Ongoing |
+
+Typed input comes before handwriting (9f). Three things differ from the plan below:
+
+- **The default is the whole table blank**, not a random half. The exercise is
+  reproducing a table from memory, as a Section Exam asks.
+- **Two layouts of the same forms** — one verb as person × number (the blank
+  worksheet), and verb classes side by side (the textbook's summary tables).
+  Cells are keyed by person-gender-number so progress follows the form.
+- **An on-screen Hebrew keypad is part of 7c, not a later nicety.** Pointed
+  Hebrew through the iPad system keyboard means a layer switch for every sheva,
+  dagesh and long vowel. A hardware keyboard keeps the Phase 1 key mapping.
 
 ### What ports directly
 - Three-phase quiz UX (Select → Quiz → Results)
@@ -712,8 +779,13 @@ The following modules from greek.tools can be copied with minimal or zero change
 | 8c | 4c | Reader: shell — book/chapter nav, RTL verses | Medium | OSHB pipeline | ✅ Done | #119 |
 | 8d | 4d | Reader: word popup — morphemes, parse, gloss | Medium | 4a, 4b, 4c | ✅ Done | #120 |
 | 8e | 4e | Reader: cantillation toggle + studied-word highlighting | Low | 4c | ✅ Done | #121 |
-| 9 | 6 | Grammar Reference | High (content-heavy) — needs its own sub-breakdown by section | None | Queued (independent — can float earlier) | #79 |
-| 10 | 7 | Paradigm Quiz | Medium | Phase 1, Phase 6 | Queued | #80 |
+| 9 | 6 | Grammar Reference | High (content-heavy) — broken into 6a–6g by section | None | In progress — 6a, 6b, 6c done | #79 |
+| 9c | 6c | Grammar: pronouns + pronominal suffixes | Medium | 6b | ✅ Done | #152 |
+| 9d | 6d | Grammar: rest of the Qal + waw consecutive | Medium | 6a | Next | #153 |
+| 9e | 6e | Grammar: derived stems | High | 6d | Queued | #154 |
+| 9f | 6f | Grammar: weak-verb overlay + suffixes on verbs | High | 6d, 6e | Queued | #155 |
+| 9g | 6g | Grammar: numerals | Low | 6b | Queued | #156 |
+| 10 | 7 | Paradigm Quiz | Medium | Phase 1, Phase 6 | ✅ Done (7a–7d); stems added as the course reaches them | #80 |
 | 11 | 8C | Binyan Guide | Low (content) | None | Queued (independent — can float earlier) | #83 |
 | 12 | 8A | Root Lookup | Medium | Phase 4 data | Queued | #81 |
 | 13 | 8B | Parsing Practice | Medium | Phase 4 data | Queued | #82 |
@@ -725,7 +797,7 @@ The following modules from greek.tools can be copied with minimal or zero change
 | 19 | 9f | Writing: handwritten paradigms | Medium | 9d, Phase 7 | Queued | #104 |
 | 20 | 9g | Writing: port to greek.tools | Low | 9b (9e for coaching) | Queued | #105 |
 
-Every row above is one GitHub issue, and every issue is scoped to land as a single PR. Phase 4 and Phase 6 were too large for that and get their own bite-sized sub-issues (same pattern as Phase 2) once picked up — Phase 4 has been, and its five sub-issues are listed as rows 8a–8e. Rows marked "independent" have no hard dependency on the row above them — they're placed here for logical flow (data-pipeline-dependent work grouped together) but can be pulled earlier as a change of pace between heavier phases.
+Every row above is one GitHub issue, and every issue is scoped to land as a single PR. Phase 4 and Phase 6 were too large for that and get their own bite-sized sub-issues (same pattern as Phase 2) once picked up — Phase 4 has been, and its five sub-issues are listed as rows 8a–8e; Phase 6's remaining five are rows 9c–9g. Rows marked "independent" have no hard dependency on the row above them — they're placed here for logical flow (data-pipeline-dependent work grouped together) but can be pulled earlier as a change of pace between heavier phases.
 
 The OSHB data pipeline (needed for Phases 3 and 4, and for accurate Flashcards frequency data) is the most important early infrastructure investment — see the standalone section above.
 

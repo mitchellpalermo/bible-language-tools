@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { newCard, saveSRSStore, type SRSCard } from '../data/srs';
+import { newCard, type SRSCard, saveSRSStore } from '../data/srs';
 import type { HebrewVocabWord } from '../data/vocabulary';
 import { vocabulary } from '../data/vocabulary';
 import { lemmaBase, lemmaCardKeys, loadStudiedLemmas, studiedLemmas } from './studied';
@@ -106,7 +106,10 @@ describe('studiedLemmas', () => {
   });
 
   it('counts a lexeme studied under any one of its cards', () => {
-    const both = [entry({ hebrew: 'אָמַר', strong: '559' }), entry({ hebrew: 'וַיֹּאמֶר', strong: '559' })];
+    const both = [
+      entry({ hebrew: 'אָמַר', strong: '559' }),
+      entry({ hebrew: 'וַיֹּאמֶר', strong: '559' }),
+    ];
     expect(studiedLemmas(store(studiedCard('וַיֹּאמֶר')), both).has('559')).toBe(true);
   });
 

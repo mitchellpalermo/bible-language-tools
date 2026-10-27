@@ -299,11 +299,7 @@ function combine(
  * Ink with no extent, or a mask with nothing in it, scores zero rather than
  * dividing by it.
  */
-export function scoreInk(
-  strokes: Stroke[],
-  mask: GlyphMask,
-  options: ScoreOptions = {},
-): InkScore {
+export function scoreInk(strokes: Stroke[], mask: GlyphMask, options: ScoreOptions = {}): InkScore {
   if (mask.filled === 0) return EMPTY;
 
   const { size, padding } = mask;

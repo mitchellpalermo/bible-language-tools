@@ -1,27 +1,42 @@
+import DrillButtons from '@tools/shared/components/DrillButtons';
+import GradeButtons from '@tools/shared/components/GradeButtons';
+import ToggleSwitch from '@tools/shared/components/ToggleSwitch';
+import {
+  type AnswerMode,
+  type FlashcardSessionEvent,
+  type FlashcardStorage,
+  type StudyMode,
+  useFlashcardSession,
+} from '@tools/shared/use-flashcard-session';
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { type CustomDeck, loadCustomDecks } from '../data/customDecks';
 import {
-  isDue,
   loadSRSStore,
   loadStats,
   newCard,
-  nextSRS,
   normalizeKey,
-  recordReview,
-  type SRSCard,
   STREAK_THRESHOLD,
   saveSRSStore,
   saveStats,
 } from '../data/srs';
 import { type VocabWord, vocabulary } from '../data/vocabulary';
+import { loadFlashcardSettings, saveFlashcardSettings } from '../lib/flashcard-settings';
 import DeckBuilder from './DeckBuilder';
 import ErrorBoundary from './ErrorBoundary';
 
+// The session itself — dealing, grading, the drill modes, typed-answer state
+// and the keyboard — is `useFlashcardSession` in @tools/shared (#87). This file
+// is the Greek card, the deck and filter controls, the marking of a typed
+// answer, and the mapping onto this app's storage keys and analytics events.
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type StudyMode = 'srs' | 'all';
-type AnswerMode = 'flip' | 'type';
+const STUDY_MODES: { mode: StudyMode; label: string }[] = [
+  { mode: 'srs', label: 'SRS Review' },
+  { mode: 'all', label: 'Study All' },
+  { mode: 'endless', label: 'Endless' },
+];
 type Direction = 'gr-en' | 'en-gr';
 type FreqFilter = 'all' | '500+' | '100-499' | '50-99' | '<50';
 
@@ -39,14 +54,15 @@ export const DEFAULT_FREQ_PRESET = FREQ_PRESETS[1]; // Top 100 (500+ occurrences
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+/** The SRS store key for a word. */
+const srsKey = (word: VocabWord) => normalizeKey(word.greek);
+
+const STORAGE: FlashcardStorage = {
+  loadStore: loadSRSStore,
+  saveStore: saveSRSStore,
+  loadStats,
+  saveStats,
+};
 
 function levenshtein(a: string, b: string): number {
   const dp: number[] = Array.from({ length: a.length + 1 }, (_, i) => i);
@@ -60,6 +76,11 @@ function levenshtein(a: string, b: string): number {
     }
   }
   return dp[a.length];
+}
+
+/** What the student is asked to produce: the back of the card. */
+function expectedAnswer(word: VocabWord, direction: Direction): string {
+  return direction === 'gr-en' ? word.gloss : word.greek;
 }
 
 function checkAnswer(input: string, gloss: string): boolean {
@@ -83,23 +104,6 @@ function matchFreq(freq: number, f: FreqFilter): boolean {
   return freq < 50;
 }
 
-function buildQueue(
-  vocab: VocabWord[],
-  mode: StudyMode,
-  store: Record<string, SRSCard>,
-): VocabWord[] {
-  if (mode === 'all') return shuffle(vocab);
-  const due: VocabWord[] = [];
-  const fresh: VocabWord[] = [];
-  for (const w of vocab) {
-    const c = store[normalizeKey(w.greek)];
-    if (!c) fresh.push(w);
-    else if (isDue(c)) due.push(w);
-  }
-  // Due cards first (shuffled), then new cards (shuffled)
-  return [...shuffle(due), ...shuffle(fresh)];
-}
-
 // ─── Part-of-speech options present in the vocabulary ─────────────────────────
 
 const ALL_POS = [
@@ -116,10 +120,6 @@ const ALL_POS = [
 // ─── Component ────────────────────────────────────────────────────────────────
 
 function FlashcardsInner() {
-  // Persistent state (localStorage)
-  const [srsStore, setSrsStore] = useState<Record<string, SRSCard>>(() => loadSRSStore());
-  const [stats, setStats] = useState(() => loadStats());
-
   // Mode / direction
   const [studyMode, setStudyMode] = useState<StudyMode>('srs');
   const [answerMode, setAnswerMode] = useState<AnswerMode>('flip');
@@ -130,24 +130,27 @@ function FlashcardsInner() {
   const [posFilter, setPosFilter] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
 
+  // Card face — how much of the card is visible before you answer. Distinct
+  // from the part-of-speech *filter* above: that decides which words are in the
+  // deck, this decides what a card gives away.
+  const [showPartOfSpeech, setShowPartOfSpeech] = useState(
+    () => loadFlashcardSettings().showPartOfSpeech,
+  );
+
+  const togglePartOfSpeech = useCallback(() => {
+    setShowPartOfSpeech((prev) => {
+      const next = !prev;
+      saveFlashcardSettings({ showPartOfSpeech: next });
+      return next;
+    });
+  }, []);
+
   // Custom decks
   const [customDecks, setCustomDecks] = useState<CustomDeck[]>(() => loadCustomDecks());
   const [activeDeckId, setActiveDeckId] = useState<string | null>(null);
   const [showDeckBuilder, setShowDeckBuilder] = useState(false);
 
-  // Session state
-  const [queue, setQueue] = useState<VocabWord[]>([]);
-  const [index, setIndex] = useState(0);
-  const [flipped, setFlipped] = useState(false);
-  const [typedAnswer, setTypedAnswer] = useState('');
-  const [answerResult, setAnswerResult] = useState<'correct' | 'incorrect' | null>(null);
-  const [sessionScore, setSessionScore] = useState({ known: 0, learning: 0 });
-  const [sessionDone, setSessionDone] = useState(false);
-
   const inputRef = useRef<HTMLInputElement>(null);
-  // Keep a ref to srsStore so buildQueue always uses latest without deps
-  const srsStoreRef = useRef(srsStore);
-  srsStoreRef.current = srsStore;
 
   // ─── Filtered vocabulary ────────────────────────────────────────────────────
 
@@ -169,160 +172,100 @@ function FlashcardsInner() {
     );
   }, [freqFilter, posFilter, activeDeckId, customDecks]);
 
-  // SRS stats for display
-  const dueCount = useMemo(
-    () =>
-      filteredVocab.filter((w) => {
-        const c = srsStore[normalizeKey(w.greek)];
-        return c ? isDue(c) : false;
-      }).length,
-    [filteredVocab, srsStore],
-  );
-  const newCount = useMemo(
-    () => filteredVocab.filter((w) => !srsStore[normalizeKey(w.greek)]).length,
-    [filteredVocab, srsStore],
-  );
+  // ─── Session ─────────────────────────────────────────────────────────────────
 
-  // ─── Session management ─────────────────────────────────────────────────────
-
-  const startSession = useCallback(() => {
-    const queue = buildQueue(filteredVocab, studyMode, srsStoreRef.current);
-    setQueue(queue);
-    setIndex(0);
-    setFlipped(false);
-    setTypedAnswer('');
-    setAnswerResult(null);
-    setSessionScore({ known: 0, learning: 0 });
-    setSessionDone(false);
-    posthog.capture('flashcard_session_started', { deck_size: queue.length });
-  }, [filteredVocab, studyMode]);
-
-  // Mount: start initial session
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    startSession();
-  }, [startSession]);
-
-  // Restart when mode or filters change (not on srsStore changes)
-  const posFilterKey = posFilter.join(',');
-  const activeDeckWordKeysKey =
+  // The words of the active custom deck, so editing a deck's words deals a new
+  // session and renaming it does not. Sorted: the same words in another order
+  // are the same deck.
+  const activeDeckWordKeys =
     activeDeckId !== null
-      ? (customDecks.find((d) => d.id === activeDeckId)?.wordKeys.join(',') ?? '')
-      : '';
-  const prevStudyMode = useRef(studyMode);
-  const prevFreqFilter = useRef(freqFilter);
-  const prevPosFilterKey = useRef(posFilterKey);
-  const prevActiveDeckId = useRef(activeDeckId);
-  const prevActiveDeckWordKeysKey = useRef(activeDeckWordKeysKey);
+      ? [...(customDecks.find((d) => d.id === activeDeckId)?.wordKeys ?? [])].sort()
+      : [];
 
-  useEffect(() => {
-    if (
-      studyMode !== prevStudyMode.current ||
-      freqFilter !== prevFreqFilter.current ||
-      posFilterKey !== prevPosFilterKey.current ||
-      activeDeckId !== prevActiveDeckId.current ||
-      activeDeckWordKeysKey !== prevActiveDeckWordKeysKey.current
-    ) {
-      prevStudyMode.current = studyMode;
-      prevFreqFilter.current = freqFilter;
-      prevPosFilterKey.current = posFilterKey;
-      prevActiveDeckId.current = activeDeckId;
-      prevActiveDeckWordKeysKey.current = activeDeckWordKeysKey;
-      startSession();
+  const onEvent = (event: FlashcardSessionEvent) => {
+    switch (event.type) {
+      case 'session_started':
+        posthog.capture('flashcard_session_started', {
+          deck_size: event.deckSize,
+          study_mode: event.studyMode,
+        });
+        break;
+      case 'reviewed':
+        posthog.capture('flashcard_reviewed', {
+          result: event.result,
+          grade: event.grade,
+          interval_days: event.intervalDays,
+        });
+        break;
+      case 'drilled':
+        posthog.capture('flashcard_reviewed', {
+          result: event.result,
+          study_mode: event.studyMode,
+          first_attempt: event.firstAttempt,
+        });
+        break;
+      case 'missed_added_to_review':
+        posthog.capture('flashcard_missed_added_to_review', {
+          count: event.count,
+          study_mode: event.studyMode,
+        });
+        break;
     }
+  };
+
+  const {
+    card,
+    index,
+    queue,
+    flipped,
+    flip: handleFlip,
+    revealed,
+    typedAnswer,
+    setTypedAnswer,
+    answerResult,
+    submitTyped: handleTypeSubmit,
+    review: handleReview,
+    drill: handleDrill,
+    sessionScore,
+    sessionDone,
+    startSession,
+    finish,
+    srsStore,
+    stats,
+    dueCount,
+    newCount,
+    accuracy,
+    missedNotInReview,
+    addMissedToReview,
+    addedToReview,
+  } = useFlashcardSession<VocabWord, boolean>({
+    words: filteredVocab,
+    getKey: srsKey,
+    studyMode,
+    // The inputs that define the deck. Direction, answer mode and the card
+    // face are left out: they change how a card is asked, not which cards.
+    restartKey: JSON.stringify([freqFilter, posFilter, activeDeckId, activeDeckWordKeys]),
+    storage: STORAGE,
+    onEvent,
+    answerMode,
+    // Read at Check time, so the direction toggle applies to the card on screen.
+    checkAnswer: (input, word) => checkAnswer(input, expectedAnswer(word, direction)),
   });
 
-  // ─── Review handler ─────────────────────────────────────────────────────────
-
-  const card = queue[index];
-
-  const handleReview = useCallback(
-    (correct: boolean) => {
-      if (!card) return;
-
-      const intervalDays = srsStore[normalizeKey(card.greek)]?.interval ?? 0;
-
-      if (studyMode === 'srs') {
-        setSrsStore((prev) => {
-          const k = normalizeKey(card.greek);
-          const existing = prev[k] ?? newCard(k);
-          const updated = nextSRS(existing, correct ? 4 : 1);
-          const next = { ...prev, [k]: updated };
-          saveSRSStore(next);
-          return next;
-        });
-      }
-
-      posthog.capture('flashcard_reviewed', {
-        result: correct ? 'correct' : 'incorrect',
-        interval_days: intervalDays,
-      });
-
-      setStats((prev) => {
-        const next = recordReview(prev, correct);
-        saveStats(next);
-        return next;
-      });
-
-      setSessionScore((s) => ({
-        known: s.known + (correct ? 1 : 0),
-        learning: s.learning + (correct ? 0 : 1),
-      }));
-
-      if (index + 1 < queue.length) {
-        setIndex((i) => i + 1);
-        setFlipped(false);
-        setTypedAnswer('');
-        setAnswerResult(null);
-      } else {
-        setSessionDone(true);
-      }
-    },
-    [card, studyMode, srsStore, index, queue.length],
-  );
-
-  const handleFlip = useCallback(() => setFlipped((f) => !f), []);
-
-  const handleTypeSubmit = useCallback(() => {
-    if (!card || answerResult !== null) return;
-    const expected = direction === 'gr-en' ? card.gloss : card.greek;
-    const correct = checkAnswer(typedAnswer, expected);
-    setAnswerResult(correct ? 'correct' : 'incorrect');
-  }, [card, direction, typedAnswer, answerResult]);
-
-  // ─── Keyboard shortcuts ──────────────────────────────────────────────────────
-
+  // Keep the type input focused on every new card, so a typed session never
+  // needs a tap between answers. `answerResult` covers a one-card Endless deck,
+  // where the next round deals the same card back.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: a new card is the trigger
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      if (sessionDone) return;
-      if (answerMode === 'flip') {
-        if (e.key === ' ' || e.key === 'Enter') {
-          e.preventDefault();
-          handleFlip();
-        }
-        if (e.key === 'ArrowRight' && flipped) handleReview(true);
-        if (e.key === 'ArrowLeft' && flipped) handleReview(false);
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [answerMode, flipped, sessionDone, handleFlip, handleReview]);
-
-  // Focus type input when card changes
-  useEffect(() => {
-    if (answerMode === 'type' && !sessionDone) {
+    if (answerMode === 'type' && !sessionDone && answerResult === null) {
       inputRef.current?.focus();
     }
-  }, [answerMode, sessionDone]);
+  }, [answerMode, sessionDone, card, answerResult]);
 
   // ─── Derived values ──────────────────────────────────────────────────────────
 
-  const accuracy =
-    stats.totalReviewed > 0 ? Math.round((stats.totalCorrect / stats.totalReviewed) * 100) : null;
   const front = card ? (direction === 'gr-en' ? card.greek : card.gloss) : '';
-  const back = card ? (direction === 'gr-en' ? card.gloss : card.greek) : '';
-  const expectedAnswer = card ? (direction === 'gr-en' ? card.gloss : card.greek) : '';
+  const back = card ? expectedAnswer(card, direction) : '';
   const hasActiveFilters = freqFilter !== 'all' || posFilter.length > 0 || activeDeckId !== null;
   const activePreset = FREQ_PRESETS.find((p) => p.filter === freqFilter) ?? FREQ_PRESETS[0];
 
@@ -345,6 +288,35 @@ function FlashcardsInner() {
             You're all caught up! Check back tomorrow for more reviews.
           </p>
         )}
+        {/* A drill never writes the schedule, so its misses would be gone by
+            tomorrow. This is the bridge to spaced review: missed words not yet
+            scheduled join SRS Review as new cards, due today. */}
+        {studyMode !== 'srs' &&
+          (addedToReview !== null ? (
+            <p role="status" className="text-text-muted text-sm px-4">
+              Added {addedToReview} {addedToReview === 1 ? 'word' : 'words'} to SRS Review.
+              {addedToReview === 1 ? ' It comes' : ' They come'} up first in your next review.
+            </p>
+          ) : (
+            missedNotInReview.length > 0 && (
+              <div className="mx-auto max-w-sm bg-bg-card rounded-2xl border-2 border-indigo-100 px-4 py-4 space-y-3 shadow-sm">
+                <p className="text-sm text-text">
+                  You missed {missedNotInReview.length}{' '}
+                  {missedNotInReview.length === 1 ? 'word that isn’t' : 'words that aren’t'} in your
+                  review schedule yet. Add {missedNotInReview.length === 1 ? 'it' : 'them'} so{' '}
+                  {missedNotInReview.length === 1 ? 'it keeps' : 'they keep'} coming back over the
+                  next few weeks, not just today.
+                </p>
+                <button
+                  type="button"
+                  onClick={addMissedToReview}
+                  className="px-4 py-2 bg-grape text-white rounded-lg hover:opacity-90 transition-opacity font-semibold text-sm shadow-sm"
+                >
+                  Add {missedNotInReview.length} to SRS Review
+                </button>
+              </div>
+            )
+          ))}
         <div className="flex flex-col sm:flex-row justify-center gap-3 pt-2 px-4 sm:px-0">
           <button
             onClick={startSession}
@@ -383,7 +355,7 @@ function FlashcardsInner() {
             Study ahead anyway
           </button>
         )}
-        {studyMode === 'all' && hasActiveFilters && (
+        {studyMode !== 'srs' && hasActiveFilters && (
           <button
             onClick={() => {
               setFreqFilter('all');
@@ -407,17 +379,18 @@ function FlashcardsInner() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Study mode */}
         <div className="flex gap-1 bg-white border border-indigo-100 p-1 rounded-xl shadow-sm">
-          {(['srs', 'all'] as StudyMode[]).map((m) => (
+          {STUDY_MODES.map(({ mode, label }) => (
             <button
-              key={m}
-              onClick={() => setStudyMode(m)}
+              key={mode}
+              onClick={() => setStudyMode(mode)}
+              aria-pressed={studyMode === mode}
               className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
-                studyMode === m
+                studyMode === mode
                   ? 'bg-grape text-white shadow-sm'
                   : 'text-text-muted hover:text-text'
               }`}
             >
-              {m === 'srs' ? 'SRS Review' : 'Study All'}
+              {label}
             </button>
           ))}
         </div>
@@ -455,6 +428,21 @@ function FlashcardsInner() {
                 {m === 'flip' ? 'Flip' : 'Type'}
               </button>
             ))}
+          </div>
+
+          {/* Card face. The part of speech is on the answer side either way —
+              this decides only whether it is also on the front. A switch rather
+              than a button because it is a setting that stays put — and because
+              the Part of Speech *filter* in the panel below is a row of chips,
+              which this must not be mistaken for. */}
+          <div className="flex items-center bg-white border border-indigo-100 px-3 py-1 rounded-xl shadow-sm">
+            <ToggleSwitch
+              checked={showPartOfSpeech}
+              onChange={togglePartOfSpeech}
+              label="Part of speech"
+              accent="var(--color-grape, #7C3AED)"
+              title="Show the part of speech on the front of the card. It is always shown with the answer."
+            />
           </div>
 
           {/* Filters toggle */}
@@ -666,11 +654,23 @@ function FlashcardsInner() {
                 </span>
                 <span className="hidden sm:inline text-indigo-200">|</span>
               </>
+            ) : studyMode === 'endless' ? (
+              <>
+                {/* "Card x/y" means nothing when the deck never ends. */}
+                <span>
+                  Reviewed:{' '}
+                  <strong className="text-grape" data-testid="session-reviewed">
+                    {sessionScore.known + sessionScore.learning}
+                  </strong>{' '}
+                  this session
+                </span>
+                <span className="hidden sm:inline text-indigo-200">|</span>
+              </>
             ) : (
               <>
                 <span>
                   Card:{' '}
-                  <strong className="text-grape">
+                  <strong className="text-grape" data-testid="card-progress">
                     {index + 1}/{queue.length}
                   </strong>
                 </span>
@@ -728,7 +728,13 @@ function FlashcardsInner() {
         >
           {front}
         </p>
-        {direction === 'gr-en' && (
+        {/* The part of speech is a hint before the answer and a fact after it.
+            With the toggle off it waits for the reveal rather than
+            disappearing: "verb" narrows a word to a fraction of the lexicon,
+            which is help you did not ask for while recalling, and worth having
+            once you have. (In English → Greek the front is the gloss and there
+            is no such line to withhold; the back carries it as before.) */}
+        {direction === 'gr-en' && (showPartOfSpeech || revealed) && (
           <p className="text-text-muted text-sm mt-2 font-medium uppercase tracking-wide text-xs">
             {card.partOfSpeech}
           </p>
@@ -795,10 +801,10 @@ function FlashcardsInner() {
         {answerMode === 'type' && answerResult !== null && (
           <div
             className={`mt-4 px-4 py-3 rounded-xl w-full max-w-sm text-center border-2 ${
-              answerResult === 'correct' ? 'bg-jade/5 border-jade/30' : 'bg-coral/5 border-coral/30'
+              answerResult ? 'bg-jade/5 border-jade/30' : 'bg-coral/5 border-coral/30'
             }`}
           >
-            {answerResult === 'correct' ? (
+            {answerResult ? (
               <p className="font-bold" style={{ color: 'var(--color-jade)' }}>
                 Correct!
               </p>
@@ -808,7 +814,7 @@ function FlashcardsInner() {
                   Not quite
                 </p>
                 <p className="text-text-muted text-sm mt-1">
-                  Answer: <span className="font-semibold text-text">{expectedAnswer}</span>
+                  Answer: <span className="font-semibold text-text">{back}</span>
                 </p>
               </>
             )}
@@ -817,73 +823,32 @@ function FlashcardsInner() {
       </div>
 
       {/* ── Action buttons ────────────────────────────────────────────────── */}
-      {answerMode === 'flip' && flipped && (
-        <div className="flex gap-3 sm:gap-4 sm:justify-center">
-          <button
-            onClick={() => handleReview(false)}
-            className="flex-1 sm:flex-none px-6 py-3 sm:py-2.5 bg-coral/10 border-2 border-coral/30 text-coral rounded-xl hover:bg-coral/20 active:bg-coral/20 transition-colors font-semibold"
-          >
-            ← Still Learning
-          </button>
-          <button
-            onClick={() => handleReview(true)}
-            className="flex-1 sm:flex-none px-6 py-3 sm:py-2.5 bg-jade/10 border-2 border-jade/30 text-jade rounded-xl hover:bg-jade/20 active:bg-jade/20 transition-colors font-semibold"
-          >
-            Got It →
-          </button>
-        </div>
-      )}
+      {/* The SRS grades schedule the card, so they preview the interval each
+          would buy. A drill schedules nothing, so its row asks only whether
+          the card should come back this round.
 
-      {answerMode === 'type' && answerResult !== null && (
-        <div className="flex gap-3 sm:gap-4 sm:justify-center">
-          {answerResult === 'incorrect' && (
-            <button
-              onClick={() => handleReview(false)}
-              className="flex-1 sm:flex-none px-6 py-3 sm:py-2.5 bg-coral/10 border-2 border-coral/30 text-coral rounded-xl hover:bg-coral/20 active:bg-coral/20 transition-colors font-semibold"
-            >
-              ← Still Learning
-            </button>
-          )}
-          <button
-            onClick={() => handleReview(answerResult === 'correct')}
-            className={`flex-1 sm:flex-none px-6 py-3 sm:py-2.5 rounded-xl border-2 transition-colors font-semibold ${
-              answerResult === 'correct'
-                ? 'bg-jade/10 border-jade/30 text-jade hover:bg-jade/20 active:bg-jade/20'
-                : 'bg-gray-100 border-gray-200 text-text hover:bg-gray-200 active:bg-gray-200'
-            }`}
-          >
-            {answerResult === 'correct' ? 'Got It →' : 'Next →'}
-          </button>
-        </div>
-      )}
+          Type mode answers through the same row, and never on its own: every
+          button stays live whether or not the typed answer matched. Checking
+          says whether the spelling was right, not how hard the recall was,
+          and the student is the one who knows — the same reason /write leaves
+          every grade button live. */}
+      {revealed &&
+        (studyMode === 'srs' ? (
+          <GradeButtons
+            card={srsStore[srsKey(card)] ?? newCard(srsKey(card))}
+            onGrade={handleReview}
+          />
+        ) : (
+          <DrillButtons onAnswer={handleDrill} />
+        ))}
 
       {/* ── Keyboard hints (desktop only) ────────────────────────────────── */}
-      {answerMode === 'flip' && (
-        <p className="hidden sm:block text-xs text-text-muted text-center">
-          Keyboard:{' '}
-          <kbd className="bg-indigo-50 border border-indigo-100 px-1.5 rounded text-primary font-mono">
-            Space
-          </kbd>{' '}
-          flip ·{' '}
-          <kbd className="bg-indigo-50 border border-indigo-100 px-1.5 rounded text-primary font-mono">
-            →
-          </kbd>{' '}
-          got it ·{' '}
-          <kbd className="bg-indigo-50 border border-indigo-100 px-1.5 rounded text-primary font-mono">
-            ←
-          </kbd>{' '}
-          still learning
-        </p>
-      )}
-      {answerMode === 'type' && (
-        <p className="hidden sm:block text-xs text-text-muted text-center">
-          Keyboard:{' '}
-          <kbd className="bg-indigo-50 border border-indigo-100 px-1.5 rounded text-primary font-mono">
-            Enter
-          </kbd>{' '}
-          check answer
-        </p>
-      )}
+      <p className="hidden sm:block text-xs text-text-muted text-center">
+        Keyboard: <Kbd>{answerMode === 'flip' ? 'Space' : 'Enter'}</Kbd>{' '}
+        {answerMode === 'flip' ? 'flip' : 'check answer'} · <Kbd>1</Kbd>–
+        <Kbd>{studyMode === 'srs' ? '4' : '2'}</Kbd>{' '}
+        {studyMode === 'srs' ? 'grade (Again, Hard, Good, Easy)' : 'answer (Missed, Got it)'}
+      </p>
 
       {/* ── Footer controls ───────────────────────────────────────────────── */}
       <div className="flex justify-center gap-4 pt-1">
@@ -893,22 +858,36 @@ function FlashcardsInner() {
         >
           Restart session
         </button>
-        {studyMode === 'srs' && (
+        {/* Endless never ends by itself, so this is its way to the summary —
+            and to the offer of putting missed words into SRS Review. */}
+        {studyMode === 'endless' && (
           <button
-            onClick={() => {
-              if (confirm('Reset all SRS progress? This cannot be undone.')) {
-                setSrsStore({});
-                saveSRSStore({});
-                startSession();
-              }
-            }}
-            className="text-sm text-text-muted hover:text-coral transition-colors font-medium"
+            type="button"
+            onClick={finish}
+            className="text-sm text-text-muted hover:text-grape transition-colors font-medium"
           >
-            Reset SRS
+            Finish session
           </button>
+        )}
+        {/* Resetting lives on the account page, behind a typed confirmation. */}
+        {studyMode === 'srs' && (
+          <a
+            href="/account#reset-progress"
+            className="text-sm text-text-muted hover:text-grape transition-colors font-medium"
+          >
+            Manage SRS progress
+          </a>
         )}
       </div>
     </div>
+  );
+}
+
+function Kbd({ children }: { children: string }) {
+  return (
+    <kbd className="bg-indigo-50 border border-indigo-100 px-1.5 rounded text-primary font-mono">
+      {children}
+    </kbd>
   );
 }
 

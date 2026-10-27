@@ -85,7 +85,9 @@ describe('PUT validation', () => {
   it('accepts a well-formed payload and returns the server syncedAt', async () => {
     vi.mocked(putProgress).mockResolvedValue('2026-08-08T12:00:00.000Z');
 
-    const response = await PUT(ctx({ srsStore: { מֶלֶךְ: validCard }, studyStats: validStats }) as never);
+    const response = await PUT(
+      ctx({ srsStore: { מֶלֶךְ: validCard }, studyStats: validStats }) as never,
+    );
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ syncedAt: '2026-08-08T12:00:00.000Z' });
@@ -139,10 +141,7 @@ describe('PUT validation', () => {
         studyStats: validStats,
       }),
     ],
-    [
-      'a null card',
-      JSON.stringify({ srsStore: { מֶלֶךְ: null }, studyStats: validStats }),
-    ],
+    ['a null card', JSON.stringify({ srsStore: { מֶלֶךְ: null }, studyStats: validStats })],
   ])('rejects %s with 400', async (_label, body) => {
     const response = await PUT(ctx(body) as never);
 

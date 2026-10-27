@@ -113,9 +113,7 @@ describe('PassageSelector', () => {
     await waitFor(() => expect(mockFetchBooks).toHaveBeenCalled());
     const chapterSelect = screen.getByLabelText('Chapter');
     await user.selectOptions(chapterSelect, '3');
-    expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ chapter: 3, verseStart: 1 }),
-    );
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ chapter: 3, verseStart: 1 }));
   });
 
   it('calls onChange when start verse changes', async () => {
@@ -148,8 +146,6 @@ describe('PassageSelector', () => {
     renderSelector(DEFAULT_GNT_SETTINGS, {}, onChange);
     const checkbox = screen.getByRole('checkbox', { name: /skip repeat verbs/i });
     await user.click(checkbox);
-    expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ skipRepeatedLemmas: true }),
-    );
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ skipRepeatedLemmas: true }));
   });
 });

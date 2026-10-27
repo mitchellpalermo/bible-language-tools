@@ -1,17 +1,21 @@
 /**
  * Tests for src/components/Flashcards.tsx
  *
- * Focuses on the frequency preset selector introduced in issue #48:
- * - Preset buttons are visible in the deck setup area
- * - Each preset correctly scopes the deck to the frequency band
- * - Presets are combinable with the POS filter
- * - Active preset is reflected in the filter badge
- * - Default preset is "Top 100" (500+ occurrences)
+ * Covers the deck and filter controls (the frequency presets from issue #48,
+ * the POS filter, custom decks), the card, and this app's wiring of the shared
+ * session engine.
+ *
+ * The session rules themselves — the drill re-queue, first-attempt scoring,
+ * the Endless reshuffle, the store left untouched by a drill — are tested once,
+ * in @tools/shared's use-flashcard-session.test.ts (#87). The tests here check
+ * what this app draws from them, its analytics names, and its typed answers.
  */
 
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import posthog from 'posthog-js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { loadSRSStore, loadStats, newCard, normalizeKey } from '../data/srs';
 import { vocabulary } from '../data/vocabulary';
 import Flashcards, { DEFAULT_FREQ_PRESET, FREQ_PRESETS } from './Flashcards';
 
@@ -507,18 +511,18 @@ describe('Card study flow', () => {
       await user.click(getCardDiv());
     });
     // After flip, action buttons appear
-    expect(screen.getByRole('button', { name: /got it/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /still learning/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^good/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^again/i })).toBeInTheDocument();
   });
 
-  it('"Got It" advances to the next card', async () => {
+  it('grading Good advances to the next card', async () => {
     const user = userEvent.setup();
     renderFlashcards();
     await act(async () => {
       await user.click(getCardDiv());
     });
     await act(async () => {
-      await user.click(screen.getByRole('button', { name: /got it/i }));
+      await user.click(screen.getByRole('button', { name: /^good/i }));
     });
     // Either shows next card (flip hint) or session complete
     const hasNextCard = screen.queryByText('tap to reveal');
@@ -526,14 +530,14 @@ describe('Card study flow', () => {
     expect(hasNextCard || sessionDone).toBeTruthy();
   });
 
-  it('"Still Learning" advances to the next card', async () => {
+  it('grading Again advances to the next card', async () => {
     const user = userEvent.setup();
     renderFlashcards();
     await act(async () => {
       await user.click(getCardDiv());
     });
     await act(async () => {
-      await user.click(screen.getByRole('button', { name: /still learning/i }));
+      await user.click(screen.getByRole('button', { name: /^again/i }));
     });
     const hasNextCard = screen.queryByText('tap to reveal');
     const sessionDone = screen.queryByText(/session complete/i);
@@ -603,7 +607,7 @@ describe('Card study flow', () => {
       await user.click(getCardDiv());
     });
     await act(async () => {
-      await user.click(screen.getByRole('button', { name: /got it/i }));
+      await user.click(screen.getByRole('button', { name: /^good/i }));
     });
     // After reviewing at least one card, accuracy should appear
     expect(screen.queryByText(/accuracy:/i)).toBeInTheDocument();
@@ -630,12 +634,12 @@ describe('Card study flow', () => {
     await act(async () => {
       await user.click(allBtn);
     });
-    // Flip and mark the single card
+    // Flip and mark the single card. A drill answers Missed / Got it.
     await act(async () => {
       await user.click(getCardDiv());
     });
     await act(async () => {
-      await user.click(screen.getByRole('button', { name: /got it/i }));
+      await user.click(screen.getByRole('button', { name: /^got it/i }));
     });
     // Session complete screen should now show
     expect(screen.getByText(/session complete/i)).toBeInTheDocument();
@@ -662,7 +666,7 @@ describe('Card study flow', () => {
       await user.click(getCardDiv());
     });
     await act(async () => {
-      await user.click(screen.getByRole('button', { name: /got it/i }));
+      await user.click(screen.getByRole('button', { name: /^good/i }));
     });
     expect(screen.getByText(/session complete/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /study all cards/i })).toBeInTheDocument();
@@ -683,48 +687,19 @@ describe('Card study flow', () => {
     expect(screen.getByPlaceholderText(/type the greek word/i)).toBeInTheDocument();
   });
 
-  it('"Reset SRS" button is shown in SRS mode and resets store', async () => {
+  // The reset moved to the account page (ResetProgress.test.tsx covers it).
+  // What is left here is the way to it — and that no one-tap reset remains.
+  it('links to the account page reset instead of offering one here', () => {
     renderFlashcards();
-    expect(screen.getByRole('button', { name: /reset srs/i })).toBeInTheDocument();
-  });
 
-  it('"Reset SRS" resets SRS progress when confirmed', async () => {
-    vi.stubGlobal('confirm', vi.fn().mockReturnValue(true));
-    const user = userEvent.setup();
-    // Seed some SRS data
-    localStorage.setItem(
-      'greek-tools-srs-v2',
-      JSON.stringify({
-        καί: {
-          interval: 4,
-          repetitions: 3,
-          easeFactor: 2.5,
-          nextReview: '2099-01-01',
-          lastReview: '2025-01-01',
-        },
-      }),
+    expect(screen.getByRole('link', { name: 'Manage SRS progress' })).toHaveAttribute(
+      'href',
+      '/account#reset-progress',
     );
-    renderFlashcards();
-    await act(async () => {
-      await user.click(screen.getByRole('button', { name: /reset srs/i }));
-    });
-    // SRS store should be cleared
-    expect(localStorage.getItem('greek-tools-srs-v2')).toBe('{}');
+    expect(screen.queryByRole('button', { name: /reset srs/i })).not.toBeInTheDocument();
   });
 
-  it('"Reset SRS" does nothing when cancelled', async () => {
-    vi.stubGlobal('confirm', vi.fn().mockReturnValue(false));
-    const user = userEvent.setup();
-    localStorage.setItem('greek-tools-srs-v2', JSON.stringify({ καί: { interval: 4 } }));
-    renderFlashcards();
-    await act(async () => {
-      await user.click(screen.getByRole('button', { name: /reset srs/i }));
-    });
-    // SRS store should remain unchanged
-    expect(JSON.parse(localStorage.getItem('greek-tools-srs-v2') ?? '{}')).toHaveProperty('καί');
-  });
-
-  it('type mode "Still Learning" button calls handleReview(false) after incorrect answer', async () => {
+  it('type mode: grading Again after an incorrect answer advances the card', async () => {
     const user = userEvent.setup();
     renderFlashcards();
     const typeBtn = screen.getByRole('button', { name: /^type$/i });
@@ -738,19 +713,17 @@ describe('Card study flow', () => {
     await act(async () => {
       await user.click(screen.getByRole('button', { name: /^check$/i }));
     });
-    // After incorrect answer, "Still Learning" and "Next →" buttons appear
-    const stillLearningBtn = screen.getByRole('button', { name: /← still learning/i });
-    const nextBtn = screen.getByRole('button', { name: /^next →$/i });
-    expect(stillLearningBtn).toBeInTheDocument();
-    expect(nextBtn).toBeInTheDocument();
+    // A checked answer brings up the grade row rather than a bare Next button.
+    const againBtn = screen.getByRole('button', { name: /^again/i });
+    expect(againBtn).toBeInTheDocument();
     await act(async () => {
-      await user.click(stillLearningBtn);
+      await user.click(againBtn);
     });
     // Card advanced (either new card or still on same card)
-    expect(screen.queryByRole('button', { name: /← still learning/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^again/i })).not.toBeInTheDocument();
   });
 
-  it('type mode "Next →" button advances after incorrect answer', async () => {
+  it('type mode: a wrong typed answer still offers every grade', async () => {
     const user = userEvent.setup();
     renderFlashcards();
     const typeBtn = screen.getByRole('button', { name: /^type$/i });
@@ -764,11 +737,16 @@ describe('Card study flow', () => {
     await act(async () => {
       await user.click(screen.getByRole('button', { name: /^check$/i }));
     });
-    const nextBtn = screen.getByRole('button', { name: /^next →$/i });
+    // Auto-checking says whether the spelling matched, not how hard the recall
+    // was, so every grade stays live even after a wrong answer — a student who
+    // mistyped a word they knew cold can still say so.
+    for (const name of [/^again/i, /^hard/i, /^good/i, /^easy/i]) {
+      expect(screen.getByRole('button', { name })).toBeInTheDocument();
+    }
     await act(async () => {
-      await user.click(nextBtn);
+      await user.click(screen.getByRole('button', { name: /^good/i }));
     });
-    expect(screen.queryByRole('button', { name: /^next →$/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^good/i })).not.toBeInTheDocument();
   });
 
   it('type mode "Got It →" button appears and advances after correct answer', async () => {
@@ -804,12 +782,12 @@ describe('Card study flow', () => {
       await user.click(screen.getByRole('button', { name: /^check$/i }));
     });
     // "Got It →" appears on correct answer
-    const gotItBtn = screen.queryByRole('button', { name: /got it →/i });
+    const gotItBtn = screen.queryByRole('button', { name: /^good/i });
     if (gotItBtn) {
       await act(async () => {
         await user.click(gotItBtn);
       });
-      expect(screen.queryByRole('button', { name: /got it →/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /^good/i })).not.toBeInTheDocument();
     }
   });
 });
@@ -884,5 +862,468 @@ describe('DeckBuilder integration', () => {
       await user.click(screen.getByRole('button', { name: /close deck builder/i }));
     });
     expect(screen.queryByText(/no custom decks yet/i)).not.toBeInTheDocument();
+  });
+});
+
+// ─── Part of speech on the card front ─────────────────────────────────────────
+
+describe('part of speech', () => {
+  function getCard() {
+    // "tap to reveal" is shown only while unflipped, and only in flip mode.
+    return screen.getByText('tap to reveal').closest('.cursor-pointer') as HTMLElement;
+  }
+
+  function toggle() {
+    return screen.getByRole('switch', { name: 'Part of speech' });
+  }
+
+  /**
+   * The part of speech of whichever card was dealt. The queue is shuffled, so
+   * the expectation is read off the card rather than assumed — the same
+   * approach the preset tests take.
+   */
+  function dealtPartOfSpeech(): string {
+    const front = getCard().querySelector('p')?.textContent;
+    const matches = vocabulary.filter((w) => w.greek === front);
+    // a homograph would make the lookup ambiguous rather than merely wrong
+    expect(matches).toHaveLength(1);
+    return matches[0].partOfSpeech;
+  }
+
+  it('is hidden on the front by default', () => {
+    renderFlashcards();
+    const pos = dealtPartOfSpeech();
+    expect(within(getCard()).queryByText(pos)).not.toBeInTheDocument();
+    expect(toggle()).toHaveAttribute('aria-checked', 'false');
+  });
+
+  it('is still revealed with the answer while hidden from the front', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    const pos = dealtPartOfSpeech();
+    const card = getCard();
+    await user.click(card);
+    // Hiding it withholds a hint, not the information.
+    expect(within(card).getByText(pos)).toBeInTheDocument();
+  });
+
+  it('is revealed by checking a typed answer, not only by flipping', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    const pos = dealtPartOfSpeech();
+    const card = getCard();
+
+    await user.click(screen.getByRole('button', { name: 'Type' }));
+    await user.type(screen.getByRole('textbox'), 'definitely not the gloss');
+    await user.click(screen.getByRole('button', { name: 'Check' }));
+
+    expect(within(card).getByText(pos)).toBeInTheDocument();
+  });
+
+  it('appears on the front once the toggle is switched on', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    const pos = dealtPartOfSpeech();
+    await user.click(toggle());
+    expect(within(getCard()).getByText(pos)).toBeInTheDocument();
+    expect(toggle()).toHaveAttribute('aria-checked', 'true');
+    // Still on the front — the card was never flipped.
+    expect(screen.getByText('tap to reveal')).toBeInTheDocument();
+  });
+
+  it('hides it again on a second press', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    const pos = dealtPartOfSpeech();
+    await user.click(toggle());
+    await user.click(toggle());
+    expect(within(getCard()).queryByText(pos)).not.toBeInTheDocument();
+  });
+
+  it('remembers the choice across a remount', async () => {
+    const user = userEvent.setup();
+    const { unmount } = renderFlashcards();
+    await user.click(toggle());
+    unmount();
+
+    renderFlashcards();
+    expect(within(getCard()).getByText(dealtPartOfSpeech())).toBeInTheDocument();
+  });
+
+  it('leaves the English → Greek front alone, which has no such line to withhold', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(toggle());
+    await user.click(screen.getByRole('button', { name: 'English → Greek' }));
+
+    const card = getCard();
+    const gloss = card.querySelector('p')?.textContent;
+    const matches = vocabulary.filter((w) => w.gloss === gloss);
+    expect(matches.length).toBeGreaterThan(0);
+    const parts = new Set(matches.map((w) => w.partOfSpeech));
+    expect(parts.size).toBe(1);
+
+    // The front is the gloss here, so the part of speech only ever arrives with
+    // the Greek on the back — toggle or no toggle.
+    expect(within(card).queryByText([...parts][0])).not.toBeInTheDocument();
+    await user.click(card);
+    expect(within(card).getByText([...parts][0])).toBeInTheDocument();
+  });
+});
+
+// ─── The shared session engine, as this app wires it (#87) ────────────────────
+
+/**
+ * A three-word custom deck: small enough to finish a pass or walk an Endless
+ * round in a few answers. Their first glosses ("and", "he", "you (singular)")
+ * are what a typed answer is marked against.
+ */
+const DECK = vocabulary.slice(1, 4);
+const DECK_NAME = 'Three Words';
+
+function seedDeck() {
+  localStorage.setItem(
+    'greek-tools-custom-decks-v1',
+    JSON.stringify([
+      {
+        id: 'three',
+        name: DECK_NAME,
+        wordKeys: DECK.map((w) => normalizeKey(w.greek)),
+        createdAt: '',
+      },
+    ]),
+  );
+}
+
+type User = ReturnType<typeof userEvent.setup>;
+
+/** Render on the three-word deck, in the given study mode. */
+async function startOnDeck(user: User, mode: 'SRS Review' | 'Study All' | 'Endless') {
+  seedDeck();
+  renderFlashcards();
+  await user.click(screen.getByRole('button', { name: new RegExp(DECK_NAME) }));
+  if (mode !== 'SRS Review') await user.click(screen.getByRole('button', { name: mode }));
+}
+
+/** The word dealt, read off the front of the card in either direction. */
+function dealtWord() {
+  const fronts = new Set(Array.from(document.querySelectorAll('p'), (p) => p.textContent));
+  const word = DECK.find((w) => fronts.has(w.greek) || fronts.has(w.gloss));
+  expect(word).toBeDefined();
+  return word!;
+}
+
+async function answer(user: User, which: 'missed' | 'got it') {
+  await user.click(screen.getByText('tap to reveal'));
+  await user.click(screen.getByRole('button', { name: new RegExp(`^${which}`, 'i') }));
+}
+
+async function switchToTyping(user: User) {
+  await user.click(screen.getByRole('button', { name: 'Type' }));
+}
+
+async function typeAndCheck(user: User, text: string) {
+  await user.type(screen.getByRole('textbox'), `${text}{Enter}`);
+}
+
+function sessionStarts() {
+  return vi
+    .mocked(posthog.capture)
+    .mock.calls.filter(([name]) => name === 'flashcard_session_started').length;
+}
+
+describe('drill answers', () => {
+  it('replaces the SRS grades with Missed and Got it, with no interval previews', async () => {
+    const user = userEvent.setup();
+    await startOnDeck(user, 'Study All');
+    await user.click(screen.getByText('tap to reveal'));
+    expect(screen.getByRole('button', { name: /^missed/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^got it/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^good/i })).not.toBeInTheDocument();
+    for (const name of [/^missed/i, /^got it/i]) {
+      expect(screen.getByRole('button', { name }).textContent).not.toMatch(/\d+(\.\d)?(d|wk|mo|y)/);
+    }
+  });
+
+  it('keeps the four SRS grades in SRS Review', async () => {
+    const user = userEvent.setup();
+    await startOnDeck(user, 'SRS Review');
+    await user.click(screen.getByText('tap to reveal'));
+    for (const name of [/^again/i, /^hard/i, /^good/i, /^easy/i]) {
+      expect(screen.getByRole('button', { name })).toBeInTheDocument();
+    }
+    expect(screen.queryByRole('button', { name: /^got it/i })).not.toBeInTheDocument();
+  });
+
+  it('answers from the keyboard: 1 is Missed, 2 is Got it', async () => {
+    const user = userEvent.setup();
+    await startOnDeck(user, 'Study All');
+    await user.keyboard(' ');
+    await user.keyboard('1');
+    // A miss re-queues the card, so the pass grows by one.
+    expect(screen.getByTestId('card-progress').textContent).toBe('2/4');
+    await user.keyboard(' ');
+    await user.keyboard('2');
+    expect(screen.getByTestId('card-progress').textContent).toBe('3/4');
+  });
+
+  it('labels the keyboard hint with the row on screen', async () => {
+    const user = userEvent.setup();
+    await startOnDeck(user, 'Study All');
+    expect(screen.getByText(/answer \(Missed, Got it\)/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'SRS Review' }));
+    expect(screen.getByText(/grade \(Again, Hard, Good, Easy\)/)).toBeInTheDocument();
+  });
+
+  it('reports a drill answer as flashcard_reviewed, with its study mode', async () => {
+    const user = userEvent.setup();
+    await startOnDeck(user, 'Study All');
+    await answer(user, 'missed');
+    expect(posthog.capture).toHaveBeenLastCalledWith('flashcard_reviewed', {
+      result: 'incorrect',
+      study_mode: 'all',
+      first_attempt: true,
+    });
+  });
+
+  it('reports an SRS grade with its grade and interval, and schedules the card', async () => {
+    const user = userEvent.setup();
+    await startOnDeck(user, 'SRS Review');
+    const word = dealtWord();
+    await user.click(screen.getByText('tap to reveal'));
+    await user.click(screen.getByRole('button', { name: /^good/i }));
+    expect(posthog.capture).toHaveBeenLastCalledWith('flashcard_reviewed', {
+      result: 'correct',
+      grade: 'good',
+      interval_days: 0,
+    });
+    expect(loadSRSStore()[normalizeKey(word.greek)]?.repetition).toBe(1);
+  });
+});
+
+describe('Endless mode', () => {
+  it('counts reviews across rounds instead of showing "Card x/y"', async () => {
+    const user = userEvent.setup();
+    await startOnDeck(user, 'Endless');
+    expect(screen.queryByTestId('card-progress')).not.toBeInTheDocument();
+    expect(screen.getByTestId('session-reviewed').textContent).toBe('0');
+
+    for (let i = 0; i < DECK.length + 2; i++) await answer(user, 'got it');
+
+    expect(screen.queryByText(/session complete/i)).not.toBeInTheDocument();
+    expect(screen.getByTestId('session-reviewed').textContent).toBe(String(DECK.length + 2));
+    expect(loadStats().totalReviewed).toBe(DECK.length + 2);
+  });
+
+  it('records the study mode on the session-started event', async () => {
+    const user = userEvent.setup();
+    await startOnDeck(user, 'Endless');
+    expect(posthog.capture).toHaveBeenLastCalledWith('flashcard_session_started', {
+      deck_size: DECK.length,
+      study_mode: 'endless',
+    });
+  });
+
+  it('reaches the summary, and the add-to-review offer, through "Finish session"', async () => {
+    const user = userEvent.setup();
+    await startOnDeck(user, 'Endless');
+    await answer(user, 'missed');
+    await user.click(screen.getByRole('button', { name: 'Finish session' }));
+    expect(screen.getByText('Session Complete')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add 1 to SRS Review' })).toBeInTheDocument();
+  });
+
+  it('offers "Finish session" in Endless only', async () => {
+    const user = userEvent.setup();
+    await startOnDeck(user, 'Study All');
+    expect(screen.queryByRole('button', { name: 'Finish session' })).not.toBeInTheDocument();
+  });
+});
+
+describe('typed answers in a drill', () => {
+  /** The first sense of the gloss: what a student would type. */
+  const firstGloss = (gloss: string) => gloss.split(/[,/]/)[0];
+
+  it('shows Missed and Got it after Check, and a wrong answer can still be Got it', async () => {
+    const user = userEvent.setup();
+    await startOnDeck(user, 'Study All');
+    await switchToTyping(user);
+    await typeAndCheck(user, 'definitely not the gloss');
+
+    expect(screen.getByText('Not quite')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^good/i })).not.toBeInTheDocument();
+    // The check marks the spelling; the student says whether they knew it.
+    await user.click(screen.getByRole('button', { name: /^got it/i }));
+    expect(loadStats().totalCorrect).toBe(1);
+    expect(screen.getByTestId('card-progress').textContent).toBe('2/3');
+  });
+
+  it('lets a matched answer still be marked Missed, which brings the card back', async () => {
+    const user = userEvent.setup();
+    await startOnDeck(user, 'Study All');
+    await switchToTyping(user);
+    await typeAndCheck(user, firstGloss(dealtWord().gloss));
+
+    expect(screen.getByText('Correct!')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /^missed/i }));
+    expect(screen.getByTestId('card-progress').textContent).toBe('2/4');
+  });
+
+  it('marks English → Greek against the Greek word', async () => {
+    const user = userEvent.setup();
+    await startOnDeck(user, 'Study All');
+    await user.click(screen.getByRole('button', { name: 'English → Greek' }));
+    await switchToTyping(user);
+    await typeAndCheck(user, dealtWord().greek);
+    expect(screen.getByText('Correct!')).toBeInTheDocument();
+  });
+
+  it('answers from the keyboard once the answer is checked', async () => {
+    const user = userEvent.setup();
+    await startOnDeck(user, 'Study All');
+    await switchToTyping(user);
+    await typeAndCheck(user, 'not it');
+    await user.keyboard('2');
+    expect(screen.getByTestId('card-progress').textContent).toBe('2/3');
+  });
+
+  it('focuses the input on every new card', async () => {
+    const user = userEvent.setup();
+    await startOnDeck(user, 'Study All');
+    await switchToTyping(user);
+    expect(screen.getByRole('textbox')).toHaveFocus();
+    await typeAndCheck(user, 'not it');
+    await user.click(screen.getByRole('button', { name: /^got it/i }));
+    expect(screen.getByRole('textbox')).toHaveFocus();
+  });
+
+  it('clears the typed answer and its mark when Endless deals a new round', async () => {
+    const user = userEvent.setup();
+    await startOnDeck(user, 'Endless');
+    await switchToTyping(user);
+    for (let i = 0; i < DECK.length; i++) {
+      await typeAndCheck(user, 'not the answer');
+      await user.click(screen.getByRole('button', { name: /^got it/i }));
+    }
+    expect(screen.queryByText(/session complete/i)).not.toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toHaveValue('');
+    expect(screen.queryByText('Not quite')).not.toBeInTheDocument();
+  });
+});
+
+describe('adding missed words to SRS Review', () => {
+  it('offers the missed words at the end of a pass, and adds them as due today', async () => {
+    const user = userEvent.setup();
+    await startOnDeck(user, 'Study All');
+    const missed = dealtWord();
+    await answer(user, 'missed');
+    for (let i = 0; i < DECK.length; i++) await answer(user, 'got it');
+
+    expect(screen.getByText('Session Complete')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Add 1 to SRS Review' }));
+
+    const key = normalizeKey(missed.greek);
+    expect(loadSRSStore()).toEqual({ [key]: newCard(key) });
+    expect(screen.getByRole('status')).toHaveTextContent('Added 1 word to SRS Review');
+    expect(screen.queryByRole('button', { name: /to srs review/i })).not.toBeInTheDocument();
+    expect(posthog.capture).toHaveBeenLastCalledWith('flashcard_missed_added_to_review', {
+      count: 1,
+      study_mode: 'all',
+    });
+  });
+
+  it('offers nothing when no card was missed', async () => {
+    const user = userEvent.setup();
+    await startOnDeck(user, 'Study All');
+    for (let i = 0; i < DECK.length; i++) await answer(user, 'got it');
+    expect(screen.getByText('Session Complete')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /to srs review/i })).not.toBeInTheDocument();
+  });
+
+  it('never offers it after SRS Review, which already schedules every card', async () => {
+    const user = userEvent.setup();
+    await startOnDeck(user, 'SRS Review');
+    for (let i = 0; i < DECK.length; i++) {
+      await user.click(screen.getByText('tap to reveal'));
+      await user.click(screen.getByRole('button', { name: /^again/i }));
+    }
+    expect(screen.getByText('Session Complete')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /to srs review/i })).not.toBeInTheDocument();
+  });
+});
+
+describe('restarting the session', () => {
+  it('deals one session on mount', () => {
+    renderFlashcards();
+    expect(sessionStarts()).toBe(1);
+  });
+
+  it('deals a new session when the part-of-speech filter changes', async () => {
+    const user = userEvent.setup();
+    await startOnDeck(user, 'Study All');
+    await answer(user, 'got it');
+    const before = sessionStarts();
+
+    await user.click(getFiltersToggle());
+    await user.click(screen.getByRole('button', { name: /^conjunction/i }));
+
+    expect(sessionStarts()).toBe(before + 1);
+    expect(screen.getByTestId('card-progress').textContent).toMatch(/^1\//);
+  });
+
+  it('keeps the session when only the direction or answer mode changes', async () => {
+    const user = userEvent.setup();
+    await startOnDeck(user, 'Study All');
+    await answer(user, 'got it');
+    const before = sessionStarts();
+
+    await user.click(screen.getByRole('button', { name: 'English → Greek' }));
+    await switchToTyping(user);
+
+    expect(sessionStarts()).toBe(before);
+    expect(screen.getByTestId('card-progress').textContent).toBe('2/3');
+  });
+
+  it("deals a new session when the active deck's words change, not when it is renamed", async () => {
+    const user = userEvent.setup();
+    await startOnDeck(user, 'Study All');
+    await answer(user, 'got it');
+    const before = sessionStarts();
+
+    const editDeck = async () => {
+      await user.click(screen.getByRole('button', { name: /manage custom decks/i }));
+      await user.click(screen.getByRole('button', { name: `Edit deck ${DECK_NAME}` }));
+    };
+
+    await editDeck();
+    const name = screen.getByDisplayValue(DECK_NAME);
+    await user.clear(name);
+    await user.type(name, DECK_NAME);
+    await user.click(screen.getByRole('button', { name: 'Save Changes' }));
+    await user.click(screen.getByRole('button', { name: /close deck builder/i }));
+    expect(sessionStarts()).toBe(before);
+    expect(screen.getByTestId('card-progress').textContent).toBe('2/3');
+
+    await editDeck();
+    await user.click(screen.getAllByRole('checkbox', { checked: true })[0]);
+    await user.click(screen.getByRole('button', { name: 'Save Changes' }));
+    expect(sessionStarts()).toBe(before + 1);
+    expect(screen.getByTestId('card-progress').textContent).toBe('1/2');
+  });
+});
+
+describe('an empty deck in a drill', () => {
+  it('offers to clear the filters, where SRS Review offers to study ahead', async () => {
+    const user = userEvent.setup();
+    localStorage.setItem(
+      'greek-tools-custom-decks-v1',
+      JSON.stringify([{ id: 'empty', name: 'Empty', wordKeys: [], createdAt: '' }]),
+    );
+    renderFlashcards();
+    await user.click(screen.getByRole('button', { name: /^Empty/ }));
+    await user.click(screen.getByRole('button', { name: 'Study ahead anyway' }));
+    expect(screen.getByText(/no cards match/i)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /clear filters/i }));
+    expect(screen.getByTestId('card-progress')).toBeInTheDocument();
   });
 });

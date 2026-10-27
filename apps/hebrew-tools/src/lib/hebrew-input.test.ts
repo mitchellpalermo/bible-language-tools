@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
   applyFinalForms,
-  checkHebrewAnswer,
+  COMPOUND_NIKUD_MAP,
   CONSONANT_MAP,
+  checkHebrewAnswer,
   DAGESH,
   HATEPH_MAP,
   NIKUD_MAP,
-  COMPOUND_NIKUD_MAP,
   processHebrewInput,
   processHebrewKey,
   SHEVA,
@@ -67,13 +67,13 @@ describe('processHebrewKey', () => {
 
   describe('nikud (vowel point) mappings', () => {
     it.each([
-      ['a', 'ַ'],  // patah
-      ['A', 'ָ'],  // qamets
-      ['e', 'ֶ'],  // segol
-      ['E', 'ֵ'],  // tsere
-      ['i', 'ִ'],  // hireq
-      ['o', 'ֹ'],  // holem
-      ['u', 'ֻ'],  // qibbuts
+      ['a', 'ַ'], // patah
+      ['A', 'ָ'], // qamets
+      ['e', 'ֶ'], // segol
+      ['E', 'ֵ'], // tsere
+      ['i', 'ִ'], // hireq
+      ['o', 'ֹ'], // holem
+      ['u', 'ֻ'], // qibbuts
     ] as [string, string][])('key %s produces %s', (key, expected) => {
       const result = processHebrewKey(key, false);
       expect(result.preventDefault).toBe(true);
@@ -180,7 +180,7 @@ describe('applyFinalForms', () => {
   });
 
   it('converts מ to ם at end of string', () => {
-    expect(applyFinalForms('שׁלום')).toBe('שׁלום');  // mem is already final mem in the source — test plain
+    expect(applyFinalForms('שׁלום')).toBe('שׁלום'); // mem is already final mem in the source — test plain
     expect(applyFinalForms('עמ')).toBe('עם');
   });
 
@@ -197,7 +197,7 @@ describe('applyFinalForms', () => {
   });
 
   it('does NOT convert a final-form candidate in the middle of a word', () => {
-    expect(applyFinalForms('כתב')).toBe('כתב');  // kaf is mid-word
+    expect(applyFinalForms('כתב')).toBe('כתב'); // kaf is mid-word
   });
 
   it('converts at word boundary before a space', () => {
@@ -210,7 +210,7 @@ describe('applyFinalForms', () => {
 
   it('keeps combining marks (nikud) on the converted letter', () => {
     // mem with qamets at word end → final mem with qamets
-    const input = 'עמָ';  // ayin + mem + qamets
+    const input = 'עמָ'; // ayin + mem + qamets
     const result = applyFinalForms(input);
     expect(result).toBe('עםָ');
   });
@@ -269,7 +269,7 @@ describe('stripAllDiacritics', () => {
       const cp = ch.codePointAt(0)!;
       // All remaining code points should be consonants (U+05D0–U+05EA)
       // or regular ASCII (unlikely but safe to allow)
-      expect(cp < 0x0591 || (cp >= 0x05D0 && cp <= 0x05EA)).toBe(true);
+      expect(cp < 0x0591 || (cp >= 0x05d0 && cp <= 0x05ea)).toBe(true);
     }
   });
 
@@ -339,6 +339,39 @@ describe('checkHebrewAnswer', () => {
 
   it('returns wrong when consonants differ', () => {
     expect(checkHebrewAnswer('בית', 'מלך')).toBe('wrong');
+  });
+
+  it('returns dagesh-only when a dagesh is the only thing missing', () => {
+    // The begadkephat column of a paradigm table: כָּתַב without its dagesh lene.
+    expect(checkHebrewAnswer('כָתַב', 'כָּתַב')).toBe('dagesh-only');
+  });
+
+  it('returns dagesh-only when a dagesh is the only thing extra', () => {
+    expect(checkHebrewAnswer('קָטַּל', 'קָטַל')).toBe('dagesh-only');
+  });
+
+  it('does not treat the dot of a shureq as a dagesh', () => {
+    // קָטְלו for קָטְלוּ is a missing vowel, not a missing dagesh.
+    expect(checkHebrewAnswer('קָטְלו', 'קָטְלוּ')).toBe('nikud-only');
+  });
+
+  it('still sees a dagesh missing elsewhere in a word that has a shureq', () => {
+    expect(checkHebrewAnswer('כָתְבוּ', 'כָּתְבוּ')).toBe('dagesh-only');
+  });
+
+  it('grades a wrong vowel as nikud-only even when the dagesh is also wrong', () => {
+    expect(checkHebrewAnswer('כַתַב', 'כָּתַב')).toBe('nikud-only');
+  });
+
+  it('compares a dagesh typed before its vowel as equal to one typed after', () => {
+    // Tav, dagesh, hireq — the order a student types it in — against the NFC
+    // order the answer key is stored in. Written as escapes because the two
+    // strings are indistinguishable on screen.
+    const typed = 'תִּ';
+    const stored = 'תִּ';
+
+    expect(typed).not.toBe(stored);
+    expect(checkHebrewAnswer(typed, stored)).toBe('correct');
   });
 
   it('handles empty inputs', () => {

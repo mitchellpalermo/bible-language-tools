@@ -127,7 +127,7 @@ export function baseText(pack: ScriptPack, glyph: WritableGlyph): string | null 
 
 /** Glyphs in a named group, in pack order. */
 export function glyphsInGroup(pack: ScriptPack, group: WritableGlyph['group']): WritableGlyph[] {
-  return allGlyphs(pack).filter(g => g.group === group);
+  return allGlyphs(pack).filter((g) => g.group === group);
 }
 
 /** One cell of a writing grid: a base character and the marks written on it. */

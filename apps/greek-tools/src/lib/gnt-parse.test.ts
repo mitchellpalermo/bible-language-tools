@@ -291,6 +291,123 @@ describe('gradeGNTAnswer — present middle/passive participle', () => {
 });
 
 // ---------------------------------------------------------------------------
+// gradeGNTAnswer — participles whose forms are syncretic (issue #46)
+// ---------------------------------------------------------------------------
+
+describe('gradeGNTAnswer — syncretic participle forms', () => {
+  // -=no person, X=Perfect, P=Passive, P=Participle
+  const PERF_PASS_ACC_SG_NEUT = {
+    text: 'γεγενημένον',
+    lemma: 'γίνομαι',
+    pos: 'V-',
+    parsing: '-XPPASN-',
+  };
+  const PERF_PASS_NOM_SG_NEUT = {
+    text: 'γεγενημένον',
+    lemma: 'γίνομαι',
+    pos: 'V-',
+    parsing: '-XPPNSN-',
+  };
+  // 2-1-2 dative plural: masculine and neuter share -οις
+  const PERF_PASS_DAT_PL_MASC = {
+    text: 'λελυμένοις',
+    lemma: 'λύω',
+    pos: 'V-',
+    parsing: '-XPPDPM-',
+  };
+  // 3-3 present active (-ντ- stem): acc. sg. masc. -οντα, not -ον
+  const PRES_ACT_ACC_SG_MASC = { text: 'λύοντα', lemma: 'λύω', pos: 'V-', parsing: '-PAPASM-' };
+  // 3-3 present active genitive plural masc. (-όντων)
+  const PRES_ACT_GEN_PL_MASC = { text: 'λυόντων', lemma: 'λύω', pos: 'V-', parsing: '-PAPGPM-' };
+
+  function participleAnswer(
+    parseCase: GNTParseAnswer['parseCase'],
+    number: GNTParseAnswer['number'],
+    gender: GNTParseAnswer['gender'],
+  ): GNTParseAnswer {
+    return {
+      tense: 'perfect',
+      voice: 'passive',
+      mood: 'participle',
+      person: '',
+      number,
+      parseCase,
+      gender,
+    };
+  }
+
+  function gradeAgainst(
+    word: { text: string; lemma: string; pos: string; parsing: string },
+    answer: GNTParseAnswer,
+  ) {
+    const item = extractVerbs(makeBook([word]), '1', 'John')[0];
+    return gradeGNTAnswer(item, answer);
+  }
+
+  it('accepts acc. sg. masc. for a 2-1-2 acc. sg. neut. form (John 2:9)', () => {
+    const result = gradeAgainst(
+      PERF_PASS_ACC_SG_NEUT,
+      participleAnswer('accusative', 'singular', 'masculine'),
+    );
+    expect(result.parseCase).toBe(true);
+    expect(result.number).toBe(true);
+    expect(result.gender).toBe(true);
+    expect(result.allCorrect).toBe(true);
+  });
+
+  it('accepts nom. sg. neut. for an acc. sg. neut. form', () => {
+    const result = gradeAgainst(
+      PERF_PASS_ACC_SG_NEUT,
+      participleAnswer('nominative', 'singular', 'neuter'),
+    );
+    expect(result.allCorrect).toBe(true);
+  });
+
+  it('accepts acc. sg. masc. for a nom. sg. neut. tagged form', () => {
+    const result = gradeAgainst(
+      PERF_PASS_NOM_SG_NEUT,
+      participleAnswer('accusative', 'singular', 'masculine'),
+    );
+    expect(result.allCorrect).toBe(true);
+  });
+
+  it('accepts the neuter for a masculine dative plural form (-οις)', () => {
+    const result = gradeAgainst(
+      PERF_PASS_DAT_PL_MASC,
+      participleAnswer('dative', 'plural', 'neuter'),
+    );
+    expect(result.allCorrect).toBe(true);
+  });
+
+  it('still rejects a wrong number on a syncretic form', () => {
+    const result = gradeAgainst(
+      PERF_PASS_ACC_SG_NEUT,
+      participleAnswer('accusative', 'plural', 'neuter'),
+    );
+    expect(result.number).toBe(false);
+    expect(result.allCorrect).toBe(false);
+  });
+
+  it('does not extend the -ον group to a 3-3 -οντα form', () => {
+    const result = gradeAgainst(
+      PRES_ACT_ACC_SG_MASC,
+      participleAnswer('nominative', 'singular', 'neuter'),
+    );
+    expect(result.gender).toBe(false);
+    expect(result.allCorrect).toBe(false);
+  });
+
+  it('keeps fem. gen. pl. strict for a 3-3 masc. gen. pl. form', () => {
+    const result = gradeAgainst(
+      PRES_ACT_GEN_PL_MASC,
+      participleAnswer('genitive', 'plural', 'feminine'),
+    );
+    expect(result.gender).toBe(false);
+    expect(result.allCorrect).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // gradeGNTAnswer — finite verb
 // ---------------------------------------------------------------------------
 

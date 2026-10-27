@@ -16,7 +16,7 @@ Three things about the decks that are pedagogy rather than plumbing, and will lo
 
 - **A confusable deck's order IS the deck.** Members are dealt round-robin so ד and ר alternate; `WritingDeck.order: 'as-built'` is what stops `buildQueue` hoisting due cards to the front and reassembling exactly the blocked presentation the deck exists to avoid.
 - **A word-mode gloss is not the flashcard's gloss.** Garrett annotates entries inline — חָפֵץ reads "desire, enjoy, want (the qatal 3ms is חָפֵץ …)" — which is free on a flashcard back, where the Hebrew is shown anyway, and fatal as a writing prompt because it prints the answer. `glossPrompt` trims a trailing parenthetical carrying Hebrew and **drops the word outright** if any survives; a prompt with the answer blanked out of the middle of it is worse than one fewer word. A data test asserts no gloss prompt in the whole vocabulary contains Hebrew. The same rule is why word mode has no trace or copy step: both would show the answer.
-- **`transliteration` is a real constraint on the deck, not a missing field.** The 546 generated entries carry none by design (OSHB has no romanization), so "From the sound" narrows the queue to the hand-curated words rather than falling back to the gloss — silently swapping one kind of prompt for another is worse than a smaller deck, and the UI says why it is small.
+- **`transliteration` is a real constraint on the deck, not a missing field.** The 566 generated entries carry none by design (OSHB has no romanization), so "From the sound" narrows the queue to the hand-curated words rather than falling back to the gloss — silently swapping one kind of prompt for another is worse than a smaller deck, and the UI says why it is small.
 - **A repeat within one session can demote a card but not promote it** (`shouldUpdateCard`). A pair deck shows ד three times in five minutes, and SM-2 would read three passes as three spaced repetitions. Stats still count every presentation — the student did the review either way.
 
 ## Tech Stack
@@ -91,6 +91,32 @@ Branches are at 80% (not 90%) — reserved for defensive null-coalescing paths i
 - Test behavior, not implementation — avoid testing internal state directly
 - Mock `localStorage` is pre-configured in `src/test/setup.ts`
 
+### The corpus gate
+
+Hand-entered Hebrew is checked against the Westminster Leningrad Codex, and in
+CI that check is a gate: `hebrew-tools.yml` runs `build:data` before `test:run`.
+
+| File | Role |
+|---|---|
+| `src/test/corpus.ts` | `hasCorpus`, `corpusForms()`, `isAttested()` — the one implementation |
+| `src/test/corpus.test.ts` | Fails when `CI` is set and the corpus is missing |
+| `src/data/verb-paradigms.test.ts` | Checks כתב, בנה and היה; gaps listed in `UNATTESTED` |
+| `src/data/grammar-nominal.test.ts` | Checks every noun form, example and Hebrew word in a note |
+
+- **Locally it skips until you build the data.** `pnpm build:data` once (24 MB,
+  gitignored), and the checks run from then on. Do this before editing a form.
+- **`isAttested` is deliberately a little forgiving**: it ignores the stress
+  mark, accepts a missing leading dagesh lene (the text's לֹא־בָנִיתָ for the
+  table's בָּנִיתָ), and treats a maqqef phrase as attested when each word is.
+- **`UNATTESTED` is a named list, not an escape hatch.** A regular form Scripture
+  happens not to use belongs there; a new entry is otherwise what a typo looks
+  like. Prefer swapping in an example the text does use.
+- **Upstream drift can fail an unrelated pull request**, because `morphhb`
+  tracks `master`. Fix the form or the list; do not remove the workflow step.
+
+New hand-entered Hebrew — a paradigm, a table, an example — should get the same
+check: collect the forms, call `isAttested`, list the gaps by name.
+
 ### Writing new tests
 
 Target 90% coverage on all new code. For new features, use the Kent Dodds Testing Trophy as a guide: favor integration tests over unit tests where possible.
@@ -116,8 +142,11 @@ See `ROADMAP.md` for the full feature plan and build order.
 
 Word-mode writing (#102) spends a third, `write:word:<cardKey>` in `src/data/writing-words.ts`. It must stay distinct from `write:letter:` for the same reason the other two are distinct from each other: the conjunction וְ is a one-letter *word*, and writing a word is not the skill that writing its first letter is. The suffix is `cardKey(word)` and never `word.hebrew`, so אַף "also" and אַף "nose" stay on separate cards here as they do everywhere else.
 
+The paradigm quiz spends a fourth, `paradigm:<cellId>` in `src/lib/paradigm-srs.ts` — `paradigm:qal-qatal-begadkephat:3ms`. The suffix is `cellId()`, never a row and column, so a form is one card whether it was answered in its own verb's table or in the summary table beside the other classes.
+
 The confusable decks deliberately get no prefix of their own — they drill the same letters the alphabet deck does, so grading ד in one must move the card the other sees.
 - **Deck selection is persisted separately from the SRS store** (`hebrew-tools-deck-v1`, `src/lib/deck-selection.ts`) and is never synced. It decides which due cards you see, not what is due, so it stays local to the browser.
+- **What the card front shows is persisted the same way** (`hebrew-tools-flashcard-display-v1`, `src/lib/flashcard-settings.ts`, over `@tools/shared/flashcard-settings`) and is likewise never synced. Today it holds one boolean: whether the part of speech appears on the front of a flashcard, which defaults to off. See the repo CLAUDE.md under "What the card front gives away".
 - **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`, `hebrew-tools-reader-prefs`, `hebrew-tools-daily-v1`. There is still no auth or sync in this app — **all study progress is per-browser only.** The D1 plumbing exists (see below), but nothing reads or writes it yet.
 
 ### OSHB data pipeline (issue #75)
@@ -439,9 +468,34 @@ Things that will bite if changed carelessly:
 - **D1 caps bound parameters at 100 per statement.** `srs_cards` has 8 columns, so inserts chunk at 12 rows (`SRS_CHUNK`). Recompute if the table gains a column.
 - **Writes are delete-then-insert of the full per-language set**, not upserts.
 - **Keepalive bodies are capped at 64 KB by browsers.** An oversized store makes the session-end push fail silently; the next sign-in pull or manual "Sync now" covers it.
-- **Merge rule is "more progress wins":** higher `repetition` wins per card, ties broken by later `dueDate`; stats counters take the max.
+- **Scheduling follows Anki's SM-2, not the textbook's.** Ease moves by Anki's
+  table (Again −0.20, Hard −0.15, Good 0, Easy +0.15, floor 1.30) and intervals
+  by its multipliers (Hard 1.2×, Good ×ease, Easy ×ease×1.3). Textbook SM-2
+  derives the adjustment from the quality score, which docks **0.54** for a
+  failure — and since flashcards only ever sent quality 4 for a pass, gave none
+  of it back. Ease was a one-way ratchet: a word missed twice in week one sat at
+  1.42 for the rest of the term however well it was later known, its intervals
+  growing at 1.4× while a never-missed word grew at 2.5×. `easy` is the only
+  grade that raises ease, which is why the two-button flashcards had to become
+  four (`ReviewGrade`, `@tools/shared/components/GradeButtons`). **Stored cards
+  needed no migration** — the field and its range are unchanged, and a card
+  sitting at the floor now simply has a way back up.
+- **`/write` and the flashcards grade on one scale.** `WritingGrade` is an alias
+  of `ReviewGrade` and `WRITING_GRADES` is derived from `GRADE_QUALITY`; both
+  surfaces move the same SRS card, so two tables would be two chances for the
+  quality values to drift.
+- **Anki's sub-day learning steps are deliberately not implemented.** `dueDate`
+  and `lastReviewed` are calendar dates, not timestamps — the same limitation the
+  merge rule documents below — so the scheduler cannot express "again in ten
+  minutes". A lapse resets to one day, where Anki's relearning steps land a card
+  anyway.
+- **Merge rule per card is "most recent review wins":** the card with the later `lastReviewed` beats the other, and only a tie there falls back to higher `repetition`, then later `dueDate`. It used to be `repetition` first, which **silently discarded every failed review** — `nextSRS` resets `repetition` to 0 on a lapse, so a lapsed card could never beat an earlier state of itself, and since `putProgress` runs this same merge server-side there was no path by which a lapse could reach the database at all. A word you kept failing kept coming back mature. A never-reviewed card carries `lastReviewed: ''`, which sorts below every real date, so a fresh card cannot displace real progress. **Known limit:** `lastReviewed` is a calendar date, not a timestamp, so two devices reviewing the same card on the same day are indistinguishable and fall back to the tiebreak; storing a timestamp would change the card shape and every stored card with it. The rule lives in `@tools/shared/sync-merge` and is re-exported by each app. Lifetime stats counters take the max.
 - **`PUT /api/progress` merges server-side; it never replaces.** This is load-bearing. The session-end push is a one-shot keepalive request that cannot pull first, so a device with week-old localStorage will PUT exactly that. Merging on the server means such a push can only add or hold, never regress another device's work — and it holds even for a client that misbehaves, which no client-side fix can. **Do not "optimise" `putProgress` back into a replace.**
-- **Therefore `PUT` can never remove a card.** Deletion goes through `DELETE` only. "Reset SRS" in `Flashcards.tsx` calls `deleteServerProgress()` when signed in for exactly this reason; clearing localStorage alone would be undone by the next sync.
+- **Therefore `PUT` can never remove a card.** Deletion goes through `DELETE` only. The reset — the account page's Danger zone, `src/components/ResetProgress.tsx` over `@tools/shared/components/ResetProgress` — calls `deleteServerProgress()` when signed in for exactly this reason; clearing localStorage alone would be undone by the next sync. (It used to be a "Reset SRS" button in the Flashcards footer behind a bare `confirm()`; the footer now links to `/account#reset-progress`.) Things to know about it:
+  - **It erases the whole store**, so it takes handwriting (`write:letter:`, `write:nikud:`, `write:word:`) and paradigm-quiz (`paradigm:`) schedules with the flashcards. `ERASES` in `ResetProgress.tsx` is what the confirmation tells the student; a new feature that keys cards into the store must be added to it.
+  - **`/account` renders for signed-out visitors** rather than redirecting to sign-in. Their progress is local and they need the reset too. `signedIn` is passed from `Astro.locals.user`, never the hint cookie.
+  - **Stats survive on both sides because the reset pushes straight after the delete.** `deleteProgress` removes `study_stats` and `sync_state` with the cards, while the client keeps its streak and accuracy; `clearServerSrs` then calls `push()`, which writes them back (with `sync_state` gone it is a plain insert, and an empty store adds no cards). A failed push leaves the gap until the next session-end push, and does not change the reset's outcome.
+  - **Other devices are not reset.** A device still holding the old cards pushes them on its next session end, and the merge keeps them. The confirmation says so; there is no tombstone to stop it.
 
 Cross-device behaviour can't be covered by unit tests. `docs/sync-test-plan.md` is the manual plan; run test 15 (greek.tools isolation) after any change to `progress-store.ts`.
 
@@ -454,7 +508,7 @@ The vocabulary is split across four modules, and the split is load-bearing:
 | File | Role |
 |---|---|
 | `src/data/vocabulary-types.ts` | `HebrewVocabWord`, `cardKey`, and `gd()`. Imports **types only** |
-| `src/data/vocabulary-garrett.ts` | Generated — Garrett & DeRouchie chapters 2–31 (546 entries) |
+| `src/data/vocabulary-garrett.ts` | Generated — Garrett & DeRouchie chapters 2–31 (566 entries) |
 | `src/data/vocabulary.ts` | The hand-curated set (incl. chapter 1) + `mergeVocabulary` → `vocabulary` |
 | `src/data/textbooks.ts` | Textbook metadata, categories, and every query over the merged list |
 
@@ -462,9 +516,13 @@ The vocabulary is split across four modules, and the split is load-bearing:
 
 **A chapter tag carries a category**, not just a number — `gd(20, 'core')`. The textbook prints Core, Reading, Inflected, Proper Names, derived-stem and Special sections per chapter, and a word can sit in different sections in different chapters (Core in ch. 9, derived stems in ch. 20). Category belongs on the tag; it is not a property of the word.
 
+**Chapter 5's irregular plurals are cards in their own right, not just a `plural` field.** A `plural` renders on the back of the singular's card — shown every review, never itself asked. Chapter 5 section C tabulates eight of them and the quiz asks for the plural, so each is also a `5:inflected` entry with its own headword and its own SRS card. נָשִׁים was already such a row under chapter 4 and is tagged into 5 as well; the other seven are the one place an entry comes from the grammar rather than from the handout, which is why the generated file's header says so. The singular keeps its `plural` field too — the two directions are different recall tasks, and the pair is what the section teaches.
+
+**Chapter 12's irregular constructs follow the same rule.** Table 12.3 lists six — אֲבִי, אֲחִי, אֵשֶׁת, מִלְחֶמֶת, מִשְׁפַּחַת, פִּי — and each is a `12:inflected` entry with its own card, glossed "father of" and so on, while the absolute keeps its `construct` field. Two differences from the plurals, both deliberate. The back-pointer is a `note` ("construct of אָב") rather than a `construct` field, because the card back labels that field "construct" and would then claim אָב is the construct of אֲבִי. And אֲבִי and אֲחִי are **pinned** in `scripts/data/garrett-oshb.json`: the lexicon spells two personal names that way (Strong's 21 and 277), a lexicon hit outranks an attested form, and unpinned they resolve to the names and lose their root and gender. Table 12.4's seven constructs of irregular plurals (אַנְשֵׁי, נְשֵׁי, בְּנֵי, אֲבוֹת, יְמֵי, עָרֵי, בָּתֵּי) are entered the same way, each noted as the construct of its chapter 5 plural; none collides with a name. Any construct or suffixed form added as a headword can collide with a name like this — check the `strong` it comes back with.
+
 **To add a chapter's vocabulary:** tag the words with `gd(n, category)`. Nothing else is required — the chapter grid, its counts, the category chips and the summary label all fall out of the tags.
 
-**`transliteration` is absent by design; `frequency` is present wherever a card front is a citation form.** OSHB carries no romanization, and ~546 invented ones would be errors the data tests cannot catch, so the card back omits that line. Frequencies are real occurrence counts over the WLC. The ~125 cards whose front is an inflected or reading-vocabulary *form* carry none, deliberately: the count is a fact about the lexeme behind the form, not about the form. `matchFreq` still returns `false` for `undefined` on every band but "all" — an unmeasured word is not a rare one.
+**`transliteration` is absent by design; `frequency` is present wherever a card front is a citation form.** OSHB carries no romanization, and ~566 invented ones would be errors the data tests cannot catch, so the card back omits that line. Frequencies are real occurrence counts over the WLC. The ~145 cards whose front is an inflected or reading-vocabulary *form* carry none, deliberately: the count is a fact about the lexeme behind the form, not about the form. `matchFreq` still returns `false` for `undefined` on every band but "all" — an unmeasured word is not a rare one.
 
 **Homographs are separated by `sense`, checked by `strong`, and the SRS key is `cardKey(word)`, not `word.hebrew`.** בָּרוּךְ the name and בָּרוּךְ "blessed" are different cards; so are אַף "also" and אַף "nose". Without a sense they would share one SRS card and reviewing one would mark the other. `cardKey` appends `#<sense>` only where a clash exists, so every other word keeps the bare-lemma key its progress is already stored under. **Anything that keys the SRS store off a word must call `cardKey`** — `normalizeKey(word.hebrew)` is the bug this replaced.
 
@@ -473,7 +531,7 @@ The vocabulary is split across four modules, and the split is load-bearing:
 Rules that the data tests enforce:
 - No cantillation marks (U+0591–U+05AF) in `hebrew`, `construct`, `plural`, `alternates`, or stem forms — including the stress accent Garrett & DeRouchie print over the tonic syllable. Vocabulary entries are pointed but unaccented.
 - Holam male is written `vav + holam`, never the WLC's `holam + vav`. The handout mixes both; rendered as printed, the vowel lands on the wrong consonant.
-- Glosses on tagged words follow the wording of the textbook that assigns them, since that's what the quiz expects.
+- Glosses on tagged words follow the wording of the textbook that assigns them, since that's what the quiz expects. The one exception is a verb's citation form, glossed as the form it is — see "What form a verb card shows" below.
 - Chapter-tagged nouns carry a `gender` (`m` / `f` / `fm`) wherever the textbook prints one; verbs never do.
 - Every divergence from the printed page is listed, with its reason, in `CORRECTIONS` (respellings), `EDITORIAL_NOTES` (a stem printed in the wrong cell, a gloss left blank), `OSHB_RESPELLINGS` (a spelling taken from OSHB where the handout is not wrong, only less precise) or `OSHB_UNMATCHED` (a headword OSHB cannot place, and why). Silent divergence is the thing to avoid — a student comparing the app to the book must be able to find out why they differ.
 
@@ -484,7 +542,7 @@ inputs, and **which one owns which field is the whole design**:
 
 | Source | Owns |
 |---|---|
-| `scripts/data/garrett-handout.json` | chapter and section tags, gloss wording, `construct`, `plural`, `alternates`, `stems`, `note`, `sense`, `binyan` |
+| `scripts/data/garrett-handout.json` | chapter and section tags, gloss wording, `construct`, `plural`, `alternates`, `stems`, `note`, `sense`, `binyan`, `conjugation` |
 | OSHB (`public/data/morphhb/`) | `hebrew`, `root`, `strong`, `partOfSpeech`, `frequency`, and `gender` where the handout prints none |
 
 A retyped Word document is the worst available authority on pointed text and the
@@ -543,6 +601,259 @@ Things to know before changing it:
   the next regeneration; a new correction means editing
   `scripts/data/garrett-handout.json` and adding the printed form to its
   `corrections` list, so the divergence from the page stays on the record.
+
+#### What form a verb card shows, and what its gloss means
+
+Every verb card glosses **the form on its front**, not the lexeme behind it:
+
+| Entry | Front | Gloss | Example |
+|---|---|---|---|
+| Garrett citation form (Core, derived stems) | qatal 3ms | the handout's `literal` | כָּתַב "he wrote" |
+| Garrett inflected or reading form (mostly chs. 6–7) | the form as a passage writes it | as printed | יִבְחַר "(he) will choose" |
+| Hand-curated high-frequency verb (`vocabulary.ts`) | qatal 3ms | hand-written, and it wins the merge | אָמַר "he said" |
+
+**No headword is an infinitive.** A Hebrew verb's dictionary form is its Qal
+qatal 3ms — or the 3ms of the stem it is listed under, הִמְלִיךְ. The textbook
+glosses that form with a bare English verb ("write"), which is the lexeme's
+meaning and reads as an infinitive on a card. So the card says two things the
+page does not: `conjugation` names the form on the back, beside the binyan ("Qal
+qatal", through `verbParse()`), and the gloss translates it.
+
+**This is the one place a tagged word's gloss departs from the textbook's
+wording**, and it is deliberate (Mitch, Oct 2026). The printed wording is not
+lost: each handout entry keeps it as `gloss`, with the wording that ships beside
+it as `literal`, and `cardGloss()` in `scripts/lib/vocab-oshb.mjs` picks. Stems
+carry their own `literal`; an entry listed across stems has none at the top
+level, because its gloss is its stems joined ("Qal: …; Hiphil: …") and is
+composed from them. To add a verb, write both. Conventions the 137 existing ones
+follow:
+
+- "he …" for a qatal 3ms, with "it …" where a person makes no sense (נִבְנָה "it
+  was built"). A stem form that is not a 3ms takes its own person and keeps the
+  textbook's tag: "(qatal 1cs) I fed", "(yiqtol 3ms) he will boast".
+- A stative is "he was …": the textbook prints "be full", "be king". A data
+  test fails on any qatal whose gloss still opens with a bare "be".
+- The textbook's parentheticals and cross-references stay as printed.
+
+Things to know before changing it:
+
+- **The parse is on the back, never the front.** Naming the conjugation of the
+  form in front of you is half of what the card asks; same reasoning as the part
+  of speech, without the opt-in toggle.
+- **`conjugation` and `binyan` are hand-entered in the handout and checked
+  against the corpus** by `witnessVerb` in `scripts/lib/vocab-oshb.mjs`. The
+  build fails when the WLC attests the spelling under that lemma and never once
+  parses it the way the handout claims. Silence is not disagreement: an
+  unattested form (קָטַל) has no witness and passes. The check found יַצְלִיחַ
+  entered as a Qal the day it was written.
+- **A citation form is a qatal by convention, and three of them the corpus
+  spells only as something else** — בּוֹשׁ, הוֹשִׁיב, נֶאֱמַן. They are listed with
+  reasons under `parses` in `scripts/data/garrett-oshb.json`, and a listed parse
+  the corpus stops disputing fails the build as stale, same as `unmatched`.
+- **A sequential form stripped of its conjunction is witnessed as the plain
+  one.** וְאָמַר is a weqatal and the אָמַר inside it is a qatal on a card;
+  without that collapse every common citation form would be attested as both.
+  Jussives and cohortatives witness a yiqtol for the same kind of reason.
+- **No card is a weqatal today.** The type allows it; the handout lists none.
+- **ירד (ch. 27, derived stems) is listed by bare root and carries no
+  conjugation.** Its Hiphil form sits in the gloss text. That is a handout
+  extraction gap, not a design decision — fix it against the page.
+- **The curated verbs' glosses still win the merge**, so nineteen chapter cards
+  carry the hand-written wording ("he reigned, became king") rather than the
+  handout's literal one ("he was king, ruled"). Both are literal; they differ
+  in which senses they list.
+
+### Verb paradigms and the paradigm quiz (issue #80)
+
+`/paradigms` is live, and every form is its own SRS card (steps 7c and 7d). More stems and conjugations are added as the course reaches them — see `ROADMAP.md` Phase 7. The Grammar Reference renders the same forms — see below.
+
+| File | Role |
+|---|---|
+| `src/data/verb-paradigms.ts` | The answer key — forms transcribed from Garrett & DeRouchie's tables, keyed by person-gender-number (PGN) |
+| `src/data/pronominal-suffixes.ts` | The suffix tables' answer key — Type 1 and Type 2 on model nouns (#159) |
+| `src/lib/paradigm-quiz.ts` | Table builders, cell ids, `gradeCell`. Blanking comes from `@tools/shared/paradigm-quiz` |
+| `src/lib/use-hebrew-input.ts` | The typing behaviour as a hook — shared by `/keyboard` and every quiz cell |
+| `src/lib/quiz-settings.ts` | Binding of the shared settings; default density is `hard` |
+| `src/lib/paradigm-srs.ts` | Paradigm cells as SRS cards: keys, grade mapping, `recordAttempt`, due-first blanking |
+| `src/components/ParadigmQuiz.tsx` | The page: select a table, fill it in, see what was right |
+| `src/components/HebrewKeypad.tsx` | On-screen letters and points, driving a cell through `insert()` / `backspace()` |
+
+Things that will bite if changed carelessly:
+
+- **The textbook is the authority, and the corpus only a witness.** Same split
+  as the vocabulary: a quiz is marked against the page. The forms cannot come
+  from OSHB anyway — קטל is barely attested — and a paradigm cell is the regular
+  form whether or not Scripture uses it. `verb-paradigms.test.ts` looks each form
+  of כתב, בנה and היה up in the corpus when `public/data/morphhb/` exists (CI
+  builds it before the tests; a fresh local checkout skips), and the forms the Bible never uses are
+  listed by name in `UNATTESTED`. **A new unattested form is what a typo looks
+  like** — check the page before adding to that list.
+- **The suffix tables follow the nominal grammar's authority, not the verbs'.**
+  `pronominal-suffixes.ts` is general grammar on conventional model nouns
+  (דָּבָר, דְּבָרִים, חָכְמָה), not Garrett & DeRouchie's tables, written out in
+  full because a quiz needs an exact key. The corpus is a second witness that
+  cannot be complete: no noun is suffixed in all ten persons, so the 2fs, 2fp
+  and 3fp cells are named in `UNATTESTED` in its test. They live in a
+  `suffixes` category (a tab beside the conjugations), key cells as
+  `suffix-<set>-<noun>:<pgn>` through `cellId()`, and the PGN is the
+  possessor's. **The feminine singular ־ָה becomes ־ָת (חָכְמָתוֹ), shortening to
+  ־ַת only before ־כֶם/־כֶן** — the issue text said ־ַת throughout; the corpus
+  says otherwise. #152 (the reference page) has not landed: when it does, it
+  should import these model nouns rather than declare its own.
+- **A cell is identified by `<paradigm>:<pgn>`, never by row and column.** The
+  textbook prints one paradigm two ways: one verb as person × number, and verb
+  classes side by side as PGN × class. `buildVerbTable` and `buildSummaryTable`
+  produce both from the same forms, and the id is what lets progress on a form
+  follow it between them. SRS keys for paradigm cells must be built from
+  `cellId()`.
+- **Forms are stored with the textbook's stress mark; grade against
+  `answerForm()`.** This is the opposite of the vocabulary, which stores no
+  accents, and deliberately so — the mark is worth showing in a reference table.
+  Nobody types it, so `TableModel` answers are already stripped.
+- **A dropped dagesh is `dagesh-only`, not `nikud-only`.** The begadkephat
+  column of a summary table differs from the strong column in nothing else.
+  **The dot of a shureq is the same codepoint and is not a dagesh**:
+  `checkHebrewAnswer` tells them apart by NFC order — the dot sits directly
+  against a vav only when that vav has no vowel of its own.
+- **`useHebrewInput` takes input by two routes and both are first-class.** A
+  hardware keyboard goes through the phonetic key mapping. `insert()` and
+  `backspace()` are for an on-screen Hebrew keypad, which is how the quiz is
+  typed on an iPad: the system keyboard puts `:` and `.` on a second layer and
+  qamets behind shift, so the mapping costs a dozen layer switches per form.
+- **Next and Enter go down a column, not across a row** (`recitationOrder`).
+  Both layouts list PGNs down the side in textbook order, so a column is one
+  verb's paradigm in the order it is recited. Tab still follows the DOM.
+- **With the keypad open, every cell is `inputMode="none"`.** Otherwise each
+  tap on a cell raises the iPad keyboard over the keypad. A hardware keyboard
+  still types through the mapping. The keypad opens by default on a coarse
+  pointer, read after mount because the page is prerendered.
+- **Keypad keys cancel their own `pointerdown` and `mousedown`**, so tapping
+  one leaves the caret in the cell. Typing still routes through the active
+  cell's registered handle, so a blur costs nothing but the caret.
+- **Peek swaps the value, not the element.** Unmounting the inputs while the
+  answers show would drop focus and the caret every time Peek is let go.
+- **A checked form's grade follows its score** (`gradeForResult`). What
+  `countsAsCorrect` passes is a pass: exactly right is `good`, a forgiven
+  pointing slip is `hard` (it advances the card, barely, and costs a little
+  ease). Anything else is `again`. **Nothing infers `easy`** — a typed table
+  cannot tell an effortless answer from a laboured one — so a paradigm card's
+  ease only holds or falls. If that ratchet ever shows, the fix is a way for
+  the student to say "easy", not a guess.
+- **A repeat the same day, or any attempt with a peek, can demote but not
+  promote** — `shouldUpdateCard`, now in `src/data/srs.ts` and shared with the
+  writing decks. "Same day" is the card's `lastReviewed`, not the session, so
+  meeting כתב's forms again in the summary table an hour later counts as a
+  repeat. Peek shows every answer at once, so after it nothing in the table is
+  unaided recall. Stats still count every graded cell.
+- **Density decides how many blanks; the schedule decides which.**
+  `blankForReview` draws due and never-answered cells first. "Due forms" blanks
+  exactly those and is not saved as a setting, because the shared
+  `QuizSettings` shape holds a density and greek.tools has no schedule to read.
+- **Sync needed no code.** Paradigm cards are ordinary entries in the SRS store,
+  which `/api/progress` accepts under any key; `docs/sync-test-plan.md` test 17
+  checks it on two devices.
+- **Lenient marking decides the score, not the colouring.** A dagesh or vowel
+  slip is amber and labelled in both modes, with "not counted" when lenient —
+  a student who got the consonants right still needs to know which mark was off.
+- **The hook's value is raw; `display` has the final forms.** A word's last
+  letter is stored as כ and shown as ך so the next letter can still attach.
+  Comparing a raw value to an answer fails on every word ending in ך ם ן ף ץ —
+  `gradeCell` finalizes first.
+
+### Grammar Reference (issue #79)
+
+`/grammar` is being built a section at a time — see `ROADMAP.md` Phase 6 for the
+6a–6g breakdown. Alphabet, Vowels, Nouns, The Article, Prepositions, Pronouns,
+Pronominal Suffixes and Qal Verb are live.
+
+| File | Role |
+|---|---|
+| `src/data/grammar.ts` | Alphabet and vowel-chart data: sounds, letter groups, dagesh, vowel classes, sheva rules |
+| `src/data/grammar-nominal.ts` | Nouns (endings, pattern groups, dual), article rules, preposition rules and lists |
+| `src/data/grammar-pronominal.ts` | Pronouns (personal, demonstrative, interrogative, relative) and pronominal suffixes (Type 1/2 paradigms, feminine ־ָה → ־ָת / ־ַת, suffixes on prepositions) |
+| `src/test/corpus.ts` | Test helper: looks a hand-entered form up in the WLC. Shared with `verb-paradigms.test.ts` |
+| `src/components/GrammarReference.tsx` | The page. `NAV_SECTIONS` drives both the sidebar and the pill row |
+| `src/data/verb-paradigms.ts` | The verb tables' source — shared with the paradigm quiz, not copied |
+
+Things that will bite if changed carelessly:
+
+- **Letter and vowel names are the script pack's, not `grammar.ts`'s.** The
+  reference layers facts onto `hebrewScriptPack` by `char` (letters) and `name`
+  (vowels), and throws at import time if the pack has a glyph with no facts.
+  Add a letter or a point to the pack and `grammar.test.ts` fails by name — that
+  is the intent, not a nuisance. Final forms likewise come from
+  `FINAL_FORM_MAP` in `hebrew-input.ts`.
+- **The table has 23 rows for a 22-letter alphabet.** Shin and sin each get a
+  row because a bare ש is neither. Use `ALPHABET_LETTER_COUNT` for the number a
+  student is taught, never `letters.length`.
+- **Three vowels exist in the chart and not in the pack** — qamets hatuf, tsere
+  yod, hireq yod (`CHART_ONLY_VOWELS`). The pack omits them on purpose: there is
+  nothing distinct to practise writing. Do not "fix" the gap by adding them to
+  the pack, which would add three handwriting cards.
+- **The hatephs are shown on א, everything else on the pack's פ.** A hateph
+  under פ is a syllable Hebrew does not have.
+- **Hebrew inside an English note goes through `<Prose>`** (`src/components/HebrewRuns.tsx`, shared with the paradigm quiz's table headers). The notes are plain
+  strings; a raw Hebrew run in an English sentence is ordered by the bidi
+  algorithm against its neighbouring punctuation ("III-ה" rendered as
+  "ה-III") and set in the UI font. `Prose` splits the runs out into `<Hebrew>`
+  spans. Anything that renders a label which *might* contain Hebrew —
+  `VERB_CLASS_LABELS` does — needs it too.
+- **The reference shows a form as stored; the quiz grades `answerForm()`.** Do
+  not route the verb tables through `buildVerbTable` to save code: those
+  answers have the stress mark stripped.
+- **Only the verb forms are transcribed from Garrett & DeRouchie.** They are an
+  answer key, so they match the page. Nothing else on `/grammar` is quizzed and
+  nothing else is copied: the alphabet, vowel, noun, article and preposition
+  content is general first-year grammar in this app's own wording, on the
+  conventional model words (סוּס, דָּבָר, מֶלֶךְ). Do not paste the textbook's
+  tables in to "align" them — Mitch asked for that not to happen. Where the
+  course's wording of a rule differs, adjust the prose. New verb forms (6d–6f)
+  follow the same rule — see `ROADMAP.md` Phase 6 for the two safeguards that
+  replace transcription there.
+- **The corpus is therefore the main guard on the pointing, not a backstop.**
+  `grammar-nominal.test.ts` gathers every Hebrew word in the file — table cells,
+  examples, and words inside the prose notes — and `isAttested` looks each up in
+  the WLC (a maqqef phrase is attested when each word is; a leading dagesh lene
+  may be absent). The forms Scripture never uses are named in `UNATTESTED`.
+  **A new unattested form is what a typo looks like**: the first draft's
+  construct of נָבִיא and plural construct of סֵפֶר both failed, and the fix was
+  to choose model nouns (זָקֵן, שֵׁבֶט) whose every cell occurs, not to grow the
+  list.
+- **Gesenius' Hebrew Grammar is the public-domain cross-check.** The
+  Kautzsch–Cowley Second English Edition (1910) is at
+  <https://archive.org/details/geseniushebrewgr00geseuoft>. Being public domain,
+  it can be quoted and its forms used directly; the concern above is about
+  Garrett & DeRouchie only. It is a reference grammar, not a first-year one, so
+  it lists far more alternate forms than a course does. That makes it the place
+  to look up which cells grammars disagree on, but G&D still decides which
+  variant the quiz expects. The verb paradigms are lettered A–Q (printed pages
+  508–531): B is the strong verb in every stem, C adds suffixes, and D–Q are
+  the weak classes. An asterisk marks a model form, and from Paradigm G onward a
+  bracketed form is one the Old Testament does not use, the same idea as
+  `UNATTESTED`. Two cautions: its terms are older (Perfect and Imperfect, not
+  qatal and yiqtol), and the scan's OCR is unusable for Hebrew, so read forms
+  from the page images, never from extracted text.
+- **Stress is marked on segolates and duals only**, where penultimate stress is
+  what defines the pattern. A noun's `lemma` is always unaccented.
+- **A bare ending is drawn on a dotted circle** (`affixText`, U+25CC) when it
+  begins with a vowel point; a point with nothing under it is a stray tick.
+- **`Hebrew` takes its colour from the `text-hebrew` class, not an inline
+  style**, so a card title can override it. מִן in a green header was invisible
+  — green on green — until it could.
+- **Table headers abbreviate below `sm` through `HeaderWord`**, which hides the
+  abbreviation from assistive tech and keeps the full word for it. Four Hebrew
+  columns do not fit a phone under "SINGULAR / construct".
+- **Suffix paradigms sit on the most-attested model nouns, not the prettiest.**
+  שֵׁם carries Type 1 (8 of 10 cells occur) and בָּנִים Type 2 (9 of 10); the
+  three missing cells — the feminine plural addressees — are regular
+  formations in `UNATTESTED`, not typos. A bare suffix never occurs as a
+  corpus morpheme (OSHB segments prefixes, not suffixes), so the tables show
+  full forms and the notes use full words, never bare affixes.
+- **The מָה spellings are corpus findings.** Counting the text: מָה before א,
+  מַה before most other consonants, מֶה before ע and ח. State the distribution
+  as found; do not retrofit a remembered rule.
+- **2fp is אַתֵּנָה.** The short אַתֵּן occurs only as וְאַתֵּן; the textbook
+  אַתֶּן never occurs.
 
 ### Unicode blocks
 

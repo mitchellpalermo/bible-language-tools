@@ -7,11 +7,18 @@
 // storage keys).
 
 import {
+  applyDailyReset,
   daysFromNow,
+  emptyStats,
+  GRADE_QUALITY,
+  gradeForQuality,
   isDue,
+  isPassingGrade,
   newCard,
   nextSRS,
   normalizeKey,
+  REVIEW_GRADES,
+  type ReviewGrade,
   recordReview,
   type SRSCard,
   STREAK_THRESHOLD,
@@ -20,8 +27,22 @@ import {
   yesterdayStr,
 } from '@tools/shared/srs';
 
-export { daysFromNow, isDue, newCard, nextSRS, normalizeKey, recordReview, STREAK_THRESHOLD, todayStr, yesterdayStr };
-export type { SRSCard, StudyStats };
+export type { ReviewGrade, SRSCard, StudyStats };
+export {
+  daysFromNow,
+  GRADE_QUALITY,
+  gradeForQuality,
+  isDue,
+  isPassingGrade,
+  newCard,
+  nextSRS,
+  normalizeKey,
+  REVIEW_GRADES,
+  recordReview,
+  STREAK_THRESHOLD,
+  todayStr,
+  yesterdayStr,
+};
 
 const SRS_KEY = 'hebrew-tools-srs-v1';
 const STATS_KEY = 'hebrew-tools-stats-v1';
@@ -40,31 +61,12 @@ export function saveSRSStore(store: Record<string, SRSCard>): void {
   localStorage.setItem(SRS_KEY, JSON.stringify(store));
 }
 
-function emptyStats(): StudyStats {
-  return {
-    streak: 0,
-    lastStreakDate: '',
-    cardsStudiedToday: 0,
-    lastStudyDate: '',
-    totalReviewed: 0,
-    totalCorrect: 0,
-  };
-}
-
 export function loadStats(): StudyStats {
   try {
     const raw = localStorage.getItem(STATS_KEY);
     if (!raw) return emptyStats();
-    const s: StudyStats = { ...emptyStats(), ...(JSON.parse(raw) as Partial<StudyStats>) };
-
-    // Reset daily count when it's a new day; break the streak if a day was missed.
-    if (s.lastStudyDate !== todayStr()) {
-      s.cardsStudiedToday = 0;
-      if (s.lastStreakDate !== yesterdayStr() && s.lastStreakDate !== todayStr()) {
-        s.streak = 0;
-      }
-    }
-    return s;
+    const stored: StudyStats = { ...emptyStats(), ...(JSON.parse(raw) as Partial<StudyStats>) };
+    return applyDailyReset(stored);
   } catch {
     return emptyStats();
   }
@@ -72,4 +74,21 @@ export function loadStats(): StudyStats {
 
 export function saveStats(stats: StudyStats): void {
   localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+}
+
+/**
+ * Whether a grade should move the SRS card, given the card has already been
+ * reviewed recently enough that this answer is not a spaced recall.
+ *
+ * A confusable deck presents ד three times in one sitting, and three passing
+ * grades in five minutes would stretch the interval as though they were three
+ * days apart — SM-2 assumes its reviews are spaced, and here they deliberately
+ * are not. The paradigm quiz meets the same thing when a table is tried again,
+ * or a verb's forms come round again in the summary table. So a repeat can
+ * demote but never promote: a lapse still pulls the schedule in, because
+ * getting it wrong on the second look is real information, while getting it
+ * right again immediately is not.
+ */
+export function shouldUpdateCard(alreadyReviewed: boolean, grade: ReviewGrade): boolean {
+  return !alreadyReviewed || !isPassingGrade(grade);
 }

@@ -53,11 +53,14 @@ function GNTParseChallengeInner() {
   // Fetch book data whenever book or chapter changes; recount verbs when range changes
   useEffect(() => {
     if (!settingsLoaded) return;
+    let cancelled = false;
     setVerbCount(null);
     setVerseCount(null);
     setLoading(true);
+
     Promise.all([fetchBook(settings.book), fetchBooks()])
       .then(([data, books]) => {
+        if (cancelled) return;
         setBookData(data);
         const meta = books.find((b) => b.code === settings.book);
         if (meta) setBookName(meta.name);
@@ -73,9 +76,18 @@ function GNTParseChallengeInner() {
         );
         if (settings.skipRepeatedLemmas) verbs = deduplicateByLemma(verbs);
         setVerbCount(verbs.length);
+        setLoading(false);
       })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+      .catch((err) => {
+        if (!cancelled) {
+          console.error(err);
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     settings.book,
     settings.chapter,

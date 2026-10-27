@@ -52,13 +52,23 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 |--------|-------------|
 | `@tools/shared/srs` | SM-2 spaced repetition algorithm, types, and pure stats functions |
 | `@tools/shared/daily` | `dayIndex()` verse-of-the-day cycling and the `createDailyStreak(storageKey)` read-it-daily streak |
-| `@tools/shared/quiz-settings` | `createQuizSettings(storageKey)` factory for persisting quiz difficulty |
+| `@tools/shared/sync-merge` | Merge rules for cross-device sync of SRS cards and study stats |
+| `@tools/shared/quiz-settings` | `createQuizSettings(storageKey, overrides?)` factory for persisting quiz difficulty; `overrides` sets one app's defaults |
+| `@tools/shared/paradigm-quiz` | The paradigm quiz engine — `TableModel`, `getQuizCells`, `applyDensity`. Which tables exist and how an answer is graded stay in each app |
+| `@tools/shared/flashcard-settings` | `createFlashcardSettings(storageKey)` factory for what the flashcard face shows before you answer |
+| `@tools/shared/flashcard-session` | `shuffle`, `nextRound` and `requeueMissed` — pure flashcard queue rules: Endless mode's reshuffle, and the drill modes' re-queue of a missed card. Used through `use-flashcard-session` |
+| `@tools/shared/use-flashcard-session` | `useFlashcardSession<T>()` — the flashcard session engine: dealing, SRS grading, drills, Endless, typed answers, the keyboard. Both apps' `Flashcards.tsx` run on it. See "The flashcard session engine" below |
+| `@tools/shared/reset-progress` | `resetSrsProgress` and `isResetConfirmed` — erase the SRS store, this browser first, then the account copy via `DELETE`; a server failure never undoes the local reset |
 | `@tools/shared/nav` | `NavLink` type and the active-route predicates the nav renders with |
 | `@tools/shared/nav-menu` | `initNavMenu()` — DOM controller for the mobile drawer |
 | `@tools/shared/ink` | Stylus writing engine — stroke capture, palm rejection, smoothing, variable-width rendering, geometric scoring, and the `ScriptPack` type |
 | `@tools/shared/components/InkCanvas` | The writing surface (React) |
 | `@tools/shared/components/WritingGrid` | The row of per-letter guide boxes a word is written into (React) |
 | `@tools/shared/components/SiteNav.astro` | The site navigation for both apps (see below) |
+| `@tools/shared/components/GradeButtons` | The Again/Hard/Good/Easy answer row, with per-grade interval previews (React) |
+| `@tools/shared/components/DrillButtons` | The Missed / Got it answer row for the drill modes, which schedule nothing (React) |
+| `@tools/shared/components/ResetProgress` | The account page's "Danger zone": open, type RESET, erase. Each app wraps it in `src/components/ResetProgress.tsx` with its own list of what is erased and kept (React) |
+| `@tools/shared/components/ToggleSwitch` | Labelled on/off switch — `role="switch"`, app accent passed in (React) |
 | `@tools/shared/components/NumberToggle` | Sg/Pl pill toggle (mobile only) |
 | `@tools/shared/components/EndingsToggle` | Full forms / Endings only toggle |
 | `@tools/shared/components/SectionHeading` | Anchor-linked section heading |
@@ -68,9 +78,13 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 
 Only add to `packages/shared` if the code is genuinely language-agnostic. Styling via CSS variables (`var(--color-primary)` etc.) is fine — both apps share the same design token names.
 
+**Give every token a literal fallback: `var(--color-grape, #7C3AED)`.** Sharing a token *name* is not the same as both apps emitting that token. Tailwind 4 tree-shakes theme variables no utility class references, so hebrew-tools declares `--color-grape` in `global.css`, uses it nowhere, and resolves it to the empty string at runtime — which rendered `GradeButtons`' Easy button with no tint, no border and inherited text, on a page where the other three were fine. The failure is silent and per-app, so it only shows up in a screenshot of the app that happens not to use the token.
+
+Note this compounds with the Tailwind scanning problem below: a shared React component cannot rely on utility classes *or* on bare tokens. `GradeButtons` is therefore styled entirely inline with fallback-bearing tokens, which is the pattern to copy.
+
 Each app's localStorage storage functions stay app-specific (different key namespaces). Only the pure algorithm and UI components belong in shared.
 
-**Where a module does need storage, the shape is a factory over a key**, not a hardcoded one — `createQuizSettings(storageKey)`, `createDailyStreak(storageKey)`. Both apps run the feature; neither may read the other's progress. A student who studies Greek and Hebrew has two streaks, and a shared key would let either one carry the other.
+**Where a module does need storage, the shape is a factory over a key**, not a hardcoded one — `createQuizSettings(storageKey)`, `createFlashcardSettings(storageKey)`, `createDailyStreak(storageKey)`. Both apps run the feature; neither may read the other's progress. A student who studies Greek and Hebrew has two streaks, and a shared key would let either one carry the other.
 
 `SiteNav.astro` is the one `.astro` component in the package; the rest are React. Astro components import from a workspace package like any other — the export just has to be listed in `packages/shared/package.json` with its `.astro` extension.
 
@@ -82,7 +96,7 @@ Adding a destination means adding one entry to that app's `navLinks` array in `L
 
 Things to know before changing it:
 
-- **A `NavLink` with `children` is still a link.** greek.tools' Study entry points at `/study` *and* lists its five sub-routes, so the hub page stays reachable and the sub-routes are one tap away. The children also serve as the active-path list — that's what lights Study up on `/flashcards`, replacing the old hand-written `STUDY_PATHS` constant.
+- **A `NavLink` with `children` is still a link.** Both apps' Study entry points at `/study` *and* lists its sub-routes (Flashcards and Paradigms on hebrew.tools), so the hub page stays reachable and the sub-routes are one tap away. **The children appear in the mobile drawer only** — the desktop row shows the group — so every study mode needs a card on its app's `/study` page as well as an entry in `children`. The children also serve as the active-path list — that's what lights Study up on `/flashcards`, replacing the old hand-written `STUDY_PATHS` constant.
 - **`isNavLinkActive` is the section, `isNavLinkCurrent` is the page.** The former drives highlighting (a group heading lights on any child route), the latter drives `aria-current="page"` (so a heading and its child don't both claim it).
 - **The account link keeps `data-account-link` / `data-account-label`.** Each app's inline auth-hint script corrects those on prerendered pages, which ship with no session. The hint cookie has no authority — it only swaps the label and href.
 - **The drawer's `visibility` transition is stepped, not eased** (`visibility 0s linear 220ms`, and `0s` on open). `initNavMenu` moves focus into the panel in the same tick it opens it, and a mid-transition `visibility` value would leave that focus call a no-op.
@@ -125,28 +139,159 @@ Things to know before changing it:
 - **Smoothing at capture time and interpolation at render time are separate on purpose.** Do not merge them — a render-grade spline applied to incoming samples rounds off real corners, and the square corner of ד is exactly what distinguishes it from ר.
 - **Never assert exact equality on a smoothed coordinate.** `OneEuroFilter` computes `a * value + (1 - a) * prev`, which for a constant input is that constant in real arithmetic but lands a ULP either side of it in floating point, for roughly 8% of the timestamp deltas a DOM happens to produce. `InkCanvas.test.tsx` asserted `p.y === 10` on a horizontal stroke and duly passed locally while failing in CI. Use `toBeCloseTo`. Exact equality is still right for values the engine only *copies* — `stroke.test.ts`'s zero-length resample case is asserting that they are copies.
 
-## Pre-commit hook
+### What the card front gives away
 
-`simple-git-hooks` + `lint-staged`, configured in the **root** `package.json`. The root `prepare` script installs the hook, so a plain `pnpm install` is all it takes; `SKIP_SIMPLE_GIT_HOOKS=1 git commit` bypasses it.
+`@tools/shared/flashcard-settings` holds one boolean, `showPartOfSpeech`, and
+each app binds it to its own storage key in `src/lib/flashcard-settings.ts`
+(`hebrew-tools-flashcard-display-v1`, `greek-tools-flashcard-display-v1`). It is
+a display preference, not a filter: it changes nothing about which cards are in
+the deck, what is due, or how anything is scheduled, so it is local to the
+browser and never synced — same reasoning as hebrew-tools' `deck-selection.ts`.
 
-It ran nowhere between the monorepo migration and 2026-08-15: the config had been left behind in `apps/greek-tools/package.json`, and nothing installs a hook from a sub-package, so `.git/hooks/` held only samples while greek-tools' CLAUDE.md claimed the hook was running. **Hook config belongs at the root** — that is the only place with the `.git` directory.
+Two things about it that are pedagogy rather than plumbing:
 
-What it runs:
+- **The default is hidden, and the default is the point.** "noun" narrows a word
+  to a fraction of the lexicon before the student has recalled anything, and
+  "verb" on a form they were meant to parse hands over the one fact the card was
+  asking for. The toggle exists for people who want the hint, not the other way
+  round.
+- **Hiding it withholds a hint, not the information.** The part of speech still
+  appears with the answer — the same `<p>`, in the same place, rendered on
+  reveal instead of on the front. Deleting it from the card outright would cost
+  a fact worth having once recall is over. greek-tools reveals via either route
+  (`revealed` covers both the flip and a checked typed answer), and its English →
+  Greek direction is untouched: the front is the gloss there, so there is no
+  such line to withhold.
 
-```json
-"lint-staged": {
-  "apps/greek-tools/**/*.{ts,tsx,js,mjs}": [
-    "pnpm --filter greek-tools exec biome check --write --no-errors-on-unmatched"
-  ]
-}
-```
+### Drill modes answer Missed / Got it
 
-Two things this depends on:
+Study All and Endless are drills: they never write the SRS schedule, so the
+four SM-2 grades and their interval previews mean nothing there. Both apps
+show `DrillButtons` in their place. The rules,
+all from the memory research rather than taste:
 
-- **The glob is scoped to greek-tools because that is the only package with a Biome config** (`apps/greek-tools/biome.json`). Run over `apps/hebrew-tools` or `packages/shared`, Biome would fall back to its own defaults and reformat files nobody has agreed a style for. When hebrew-tools gets a linter, widen the glob — do not widen it first.
-- **Biome is invoked through `pnpm --filter greek-tools exec`**, not directly. It is a devDependency of that app and is not on the root's `PATH`; the filter also sets the cwd so Biome finds its config.
+- **A miss comes back 4–6 cards later, never next** (`requeueMissed`,
+  `REQUEUE_GAP`). Recall after a gap is harder, and the harder correct recall
+  is what strengthens memory (Pyc & Rawson 2009). The exact range is an
+  engineering choice.
+- **A pass ends only when every card has been got right once.** That is
+  successive relearning to a criterion of one (Rawson & Dunlosky 2011).
+  Dropping a card after one correct recall, or never re-asking a miss, both
+  cost retention (Karpicke & Roediger 2008).
+- **Only a card's first attempt in a round is scored** — session tally,
+  accuracy, streak. The re-asks would otherwise inflate accuracy with answers
+  the student was just shown.
+- **The end of a session offers the missed words to SRS Review**, as new cards
+  due today. It adds only words not already in the store and never touches a
+  scheduled card's interval, ease or due date. A cram helps tomorrow's quiz and
+  fades by the exam (Cepeda et al. 2006); this is the bridge to spacing.
+  Endless reaches the summary through its "Finish session" button.
+- **A typed answer never answers the card by itself.** On greek.tools, Check
+  marks the spelling and reveals the card; the student then picks Missed / Got
+  it (or a grade in SRS Review). A mistyped word they knew cold is still Got
+  it, and a lucky match they could not have recalled is still Missed.
 
-Data checks deliberately do **not** live here. `pnpm check:verses` and `build:vocab:check` need the gitignored corpus and belong in the test suite (`describe.skipIf`) — a hook is bypassable with `--no-verify`, misses edits made through the GitHub web UI or by the `@claude` workflow, and fires less often than tests do.
+### The part-of-speech control
+
+The control is `ToggleSwitch`, not a pill. Every filter on both flashcard pages
+is a chip that fills with the accent when active, and greek-tools draws its Part
+of Speech *filter* out of exactly those chips — a setting that stays put must not
+look like one choice from a row of alternatives. It is a `role="switch"` with
+`aria-checked` rather than a button with `aria-pressed`, because it is a state
+and not a momentary action, and screen readers announce the two differently.
+
+### The flashcard session engine
+
+`useFlashcardSession<T>()` (`packages/shared/src/use-flashcard-session.ts`, #87)
+is everything about a flashcard session that is not about a script. Each app
+passes in what differs by language and keeps its own rendering:
+
+| The hook owns | Each app owns |
+|---|---|
+| Dealing (`buildQueue`), the Endless reshuffle, the drill re-queue | How a card is drawn — direction, font, fields |
+| SRS grading, drill answers, first-attempt scoring | Marking a typed answer (`checkAnswer`) |
+| The SRS store and stats in memory, and saving them | Storage keys (`storage`: its own load/save functions) |
+| Adding a drill's missed cards to SRS Review | Analytics event names (`onEvent` → `posthog.capture`) |
+| Typed-answer state, and the keyboard | Decks, filters, and the `restartKey` built from them |
+
+Things to know before changing it:
+
+- **A session restarts on `restartKey` or `studyMode`, nothing else.** Not on
+  a new `words` array, and not on an SRS write — the store is read through a
+  ref. An app builds the key from the state that defines its deck, so it decides
+  what counts as a different deck. hebrew.tools compares by value
+  (`JSON.stringify`), so re-selecting the current chapter keeps the session.
+  greek.tools keys on the frequency band, the part-of-speech filter and the
+  active custom deck's word list, sorted: renaming a deck, flipping direction
+  or switching between Flip and Type keeps the session; editing a deck's words
+  deals a new one.
+- **`deck` and `queue` are different things.** `queue` holds a missed card's
+  repeats; `deck` is the session's cards once each. An Endless round is
+  reshuffled from `deck` — from `queue`, the repeats would compound round after
+  round.
+- **Every move to another card clears the per-card state**, round boundaries
+  included: flipped, the typed answer and its mark. A boundary that skipped the
+  reset showed the last card's "Not quite" on the next one.
+- **The hook names no analytics events.** It emits typed `FlashcardSessionEvent`s
+  and each app maps them to its own names, which PostHog dashboards depend on:
+  `hebrew_flashcard_*` on hebrew.tools, `flashcard_*` on greek.tools.
+- **The session rules are tested once, in `use-flashcard-session.test.ts`.** An
+  app's `Flashcards.test.tsx` checks its wiring and what it draws, not the
+  rules again. That includes options only one app uses (typed answers, the
+  keyboard switch), so the hook's tests cover every option.
+- **The hook has no reset, on purpose.** Erasing the SRS store is the account
+  page's job (`ResetProgress`; see "A merge cannot express a deletion" below),
+  behind a typed confirmation and with the server copy cleared too. A reset on
+  a study screen sits one tap from a session, which is why it moved.
+
+## Streaks, study days, and sync merges
+
+Three defects lived here at once (fixed Aug 2026). All three are easy to
+reintroduce, so treat these as rules:
+
+**Calendar dates are local, never UTC.** `todayStr` / `daysFromNow` /
+`yesterdayStr` in `@tools/shared/srs` format from `getFullYear/getMonth/getDate`.
+Using `toISOString().slice(0, 10)` moves the day boundary to 6pm for a CST user:
+an evening session and the next morning's collapse into one study day, and card
+`dueDate`s shift with it. Test helpers that build dates must use the same local
+formatting, or the suite starts failing every evening west of UTC.
+
+**Never gate a milestone on a running counter hitting a value exactly.** The
+daily threshold check is `cardsToday >= STREAK_THRESHOLD && lastStreakDate !==
+today`, not `cardsToday === STREAK_THRESHOLD`. A sync merge adopts the other
+device's `cardsStudiedToday` wholesale, so the counter can step over the line
+instead of landing on it — with `===` the day was then never credited, no matter
+how many cards followed.
+
+**Fields that describe each other move together in a merge.** `streak` travels
+with `lastStreakDate`, and `cardsStudiedToday` travels with `lastStudyDate`.
+Pick the winner by the *date*, not the number: two decayed streaks both read 0,
+and a tie-break that falls through to the local side erases the server's anchor
+whenever a user signs in on a fresh browser. `PUT /api/progress` is a full
+replace with no server-side merge, so a bad client merge overwrites good data.
+
+Merge rules must also be symmetric — `merge(a, b)` and `merge(b, a)` pick the
+same winners — because both sides of a sync run the same function.
+
+**A merge cannot express a deletion, so erasing goes through `DELETE`.** Every
+merge here is a union: a card or deck missing on one side is read as "not seen
+yet", never "removed". The old Flashcards "Reset SRS" in greek-tools cleared
+localStorage only, and the next pull-and-merge ("Sync now", signing in) put
+every card back. The reset now lives on each app's account page
+(`src/components/ResetProgress.tsx` over `@tools/shared/components/ResetProgress`)
+and calls `DELETE /api/progress` when signed in. Three things to know:
+
+- **greek's `DELETE` is broader than the reset.** It also removes custom decks,
+  focus passages and parse history (it was written for "Start fresh"), so the
+  greek binding pushes this browser's copy straight back afterwards. hebrew's
+  removes only cards, stats and `sync_state`, and its binding pushes back too,
+  so the account keeps its stats. Both wrappers name it `clearServerSrs`.
+- **It is per device.** Another device still holding the cards pushes them on
+  its next session end, and the merge keeps them. The confirmation says so.
+- **The same gap exists for greek's deck deletion.** `deleteCustomDeck` is
+  local-only and `mergeCustomDecks` is a union, so a deleted deck that the
+  account still holds can come back on the next pull. Closing it properly needs
+  tombstones, not another `DELETE`.
 
 ## Pull requests
 
@@ -176,9 +321,27 @@ Secrets required in GitHub repo settings:
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
 - `BETTER_AUTH_SECRET`
+- `PUBLIC_POSTHOG_KEY` and `PUBLIC_POSTHOG_HOST` (see "Analytics ingest host" below — the host is a first-party proxy, not a PostHog domain)
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
-- `ANTHROPIC_API_KEY` (for `@claude` automation)
+- `CLAUDE_CODE_OAUTH_TOKEN` (for `@claude` automation)
+
+## Analytics ingest host
+
+`PUBLIC_POSTHOG_HOST` must be the first-party reverse proxy, `https://t.greek.tools`, **not** `https://us.posthog.com` or `https://us.i.posthog.com`. PostHog's own domains are on every common blocklist; a first-party subdomain is not. Both values are GitHub secrets read by the build step in each workflow.
+
+This was learned the expensive way. The Jun 10, 2026 monorepo cutover (`251af0c`) set the secret to `https://us.posthog.com`. Events still arrived, so nothing failed, but ad-blocked visitors vanished: daily users fell from ~25 to ~3 within two days and stayed there until October. Data from Jun 11 onward undercounts and cannot be backfilled. Full account: `apps/greek-tools/docs/adr/007-posthog-first-party-ingest-host.md`.
+
+Things to know:
+
+- **The build enforces it.** `posthogHostGuard(process.env)` in each app's `astro.config.mjs` (from `@tools/shared/posthog-host-integration`) fails `astro build` when `PUBLIC_POSTHOG_KEY` is set and the host is empty, not `https`, or on `posthog.com`. No key means analytics is off and nothing is checked; `dev` and `preview` are never checked.
+- **`POSTHOG_ALLOW_DIRECT_HOST=1` is the only override**, and is meant to be deliberate. Do not set it to get a red build green.
+- **The guard checks the host's shape and the CSP, not reachability.** A dead proxy passes. After changing the secret, confirm in PostHog that new events carry `$lib_custom_api_host = https://t.greek.tools`; a return to `none` on `$pageview` is this regression again.
+- **It reads `process.env`**, which is what CI supplies. A host that exists only in a local `.env` is not seen.
+- **The CSP must allow the host too, and the build checks it.** Each app's `public/_headers` sets `script-src` and `connect-src`; `posthogHostGuard(process.env, { headers })` fails the build if the host is not allowed there. hebrew.tools' policy allowed only a never-created `t.hebrew.tools`, so **no hebrew.tools study event was ever recorded** until this was fixed. Each app also has `src/test/csp-posthog.test.ts` reading its real `_headers`.
+- **`_headers` covers static pages only.** Server-rendered routes (`/account/*`) never get the CSP, so their analytics can look healthy while every static page is blocked. When verifying analytics, check a static path such as `/flashcards`, not just `/account`.
+- **hebrew.tools shares both secrets**, so it sends to `t.greek.tools` (cross-site for it); that works because its CSP lists the origin. A dedicated `t.hebrew.tools` proxy with per-app secrets is tracked in issue #169, and the CSP already allows that origin.
+- **The root cause pattern:** a config value with many valid-looking representations, where the wrong one degrades silently instead of failing. Validate such values at build time, where the failure is loud, rather than trusting a runtime fallback.
 
 ## CI
 
@@ -189,6 +352,117 @@ GitHub Actions workflows in `.github/workflows/`:
 - `claude.yml` — triggers Claude Code on issues/PRs that mention `@claude`
 
 Changing `packages/shared` triggers both app workflows.
+
+**`packages/shared` runs with coverage in CI** (`test:coverage`), so its 90%
+threshold is a gate. The same switch makes every test there run instrumented on
+a shared runner, which is the slowest that code ever runs: about 10× a laptop
+for V8 coverage, and about 5× again for the runner. A wall-clock budget in a test
+must hold under both. The one such test (`ink/score/geom.test.ts`, "without a
+per-attempt search") failed its old 25ms budget at 33ms on the first CI run with
+coverage, while the same run on the other app's workflow passed — a timing
+budget sized from a laptop fails intermittently, not every time. Size a budget
+below the regression it exists to catch, not above the figure you measured.
+
+Both workflows run `pnpm lint` before the tests. It is the same command in both
+because the lint gate is repo-wide, not per app — running it twice is cheap and
+it means the gate fires whichever workflow a change happens to trigger.
+
+### The Hebrew corpus gate
+
+`hebrew-tools.yml` runs `pnpm --filter hebrew-tools build:data` before the
+tests. That step exists for the tests, not for the build: it fetches the
+Westminster Leningrad Codex so the data tests can look every hand-entered Hebrew
+form up in the text — the verb paradigms, and the noun, article and preposition
+forms on `/grammar`. A form that is off by one vowel does not occur, and the
+pull request fails.
+
+Things to know before changing it:
+
+- **Without the step the checks skip; they do not fail.** The corpus is
+  gitignored, and each check is wrapped in `describe.skipIf(!hasCorpus)` so a
+  fresh local checkout can still run the suite. `apps/hebrew-tools/src/test/
+  corpus.test.ts` is the counterweight: it fails whenever `CI` is set and the
+  corpus is absent, so removing the step breaks the build instead of silently
+  switching the gate off.
+- **The corpus tracks `morphhb` master**, so an upstream correction to a word
+  can fail a pull request that touched nothing related. Fix it at the form —
+  list it in that test file's `UNATTESTED`, or choose an example the text does
+  use — rather than dropping the step.
+- **There is no cache, on purpose.** A cold fetch takes a couple of seconds, and
+  a cache would only delay the moment upstream drift shows up.
+- **greek-tools has no equivalent.** Nothing compares `grammar.ts` to MorphGNT,
+  in CI or locally; its workflow builds the corpus only in the deploy job.
+
+To run the gate locally: `pnpm --filter hebrew-tools build:data`, then the tests.
+Details of what is checked and why are in `apps/hebrew-tools/CLAUDE.md` under
+"The corpus gate".
+
+## Linting
+
+One Biome config governs the whole monorepo. `biome.json` at the root is the
+`"root": true` config and holds every rule; each workspace package has a
+three-line `biome.json` that is `"root": false` plus `"extends": "//"`, so
+running Biome from inside a package — an editor, a `lint-staged` task with its
+cwd in an app — resolves the same rules the root run uses. `pnpm lint` and
+`pnpm lint:fix` at the root are the entry points.
+
+Things to know before changing it:
+
+- **Path scoping lives in the root config only.** A nested config's
+  `files.includes` is *not* honoured during a root run — Biome discovers files
+  against the root's patterns and uses the nested config for rules. Putting
+  per-app excludes in the nested files silently checks everything.
+- **`includes` patterns need a `**` prefix to match a nested path.**
+  `!apps/*/src/styles` matched nothing; `!**/src/styles` matched. Every negation
+  in the root config is written that way, and adding one without it will look
+  like it worked while the files stay in the sweep.
+- **Generated files that are committed must be excluded, or a `--check` script
+  starts failing.** `apps/hebrew-tools/scripts/build-vocabulary.mjs --check` and
+  `extract-morph-codes.mjs --check` compare their output to the committed file
+  byte for byte, so a formatter pass over `src/data/vocabulary-garrett.ts` or
+  `src/lib/morph-codes.json` makes them stale against a generator that would
+  never produce that text. Same reasoning for `scripts/data/*.json` (scanned
+  handout input), `packages/db/migrations` (drizzle snapshots), and
+  `apps/greek-tools/src/data/vocabulary.ts` (rewritten on every build).
+- **Warnings do not fail the build, by design.** `biome check` exits 0 with
+  warnings and 1 on errors. The ~210 outstanding warnings — `noExplicitAny`,
+  the a11y set, `useExhaustiveDependencies` — each need a real code change and a
+  real review; promoting them is its own PR, not a formatting sweep.
+
+### The pre-commit hook
+
+`simple-git-hooks` installs a `pre-commit` hook that runs `pnpm lint-staged`
+from the **workspace root**, so both the hook config and the `lint-staged`
+config must live in the root `package.json`. They previously sat in
+`apps/greek-tools/package.json`: lint-staged found the config, but ran the task
+with `cwd` at the repo root, where `biome` was not on `PATH`. Every commit
+failed to spawn it with `ENOENT` and rolled itself back, which is why the repo
+accumulated drift that no one saw.
+
+Biome now lives at the root, so the task is a plain `biome check --write` over
+one basename glob and covers every package:
+
+```
+"*.{ts,tsx,js,jsx,mjs,cjs,json,jsonc,css}":
+  "biome check --write --no-errors-on-unmatched"
+```
+
+Two things this depends on:
+
+- **The glob deliberately has no leading path.** A lint-staged pattern without a
+  slash matches on basename, so one entry covers all four packages, and the
+  files Biome should skip are skipped by `files.includes` in the root config
+  rather than by a second list here that could drift out of sync with it.
+- **The extension list tracks CI, not habit.** `pnpm lint` checks JSON and CSS
+  too; a hook that only covered `ts,tsx,js,mjs` would wave through a staged
+  JSON formatting error that then fails the build.
+
+Formatting fixes are applied and re-staged automatically; error-severity lint
+rules block the commit. Biome's *warning* severity does not — `noExplicitAny` is
+a warning here, so it will not stop anything.
+
+`pnpm` settings (`onlyBuiltDependencies`) are also root-only; pnpm warns on
+every command if that field appears in an app's `package.json`.
 
 ## Greek-tools app notes
 

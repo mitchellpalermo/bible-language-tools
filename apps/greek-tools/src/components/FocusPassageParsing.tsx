@@ -54,9 +54,12 @@ export default function FocusPassageParsing({ passage, bookName }: Props) {
   );
 
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
+
     Promise.all([fetchBook(passage.book), fetchBooks()])
       .then(([bookData, books]) => {
+        if (cancelled) return;
         const name = books.find((b) => b.code === passage.book)?.name ?? bookName;
         let verbs = extractVerbsMultiChapter(
           bookData,
@@ -69,9 +72,18 @@ export default function FocusPassageParsing({ passage, bookName }: Props) {
         if (skipRepeated) verbs = deduplicateByLemma(verbs);
         setAllItems(verbs);
         setVerbCount(verbs.length);
+        setLoading(false);
       })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+      .catch((err) => {
+        if (!cancelled) {
+          console.error(err);
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     passage.book,
     passage.startChapter,

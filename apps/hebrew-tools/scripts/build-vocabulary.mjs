@@ -40,6 +40,7 @@ import {
   entryKey,
   mergeEntry,
   resolveHeadword,
+  witnessVerb,
 } from './lib/vocab-oshb.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -70,10 +71,12 @@ async function main() {
   );
 
   const lexicon = buildLexiconIndex(lemmas);
-  const { forms, pairs } = buildFormIndex(books);
+  const { forms, pairs, verbs } = buildFormIndex(books);
   log(`vocabulary: ${lexicon.size} lexicon forms, ${forms.size} attested forms`);
 
   const accepted = new Map(adjudicated.unmatched.map((u) => [u.entry, u.reason]));
+  const acceptedParses = new Set((adjudicated.parses ?? []).map((p) => p.entry));
+  const disputedParses = new Set();
   const words = [];
   const divergences = [];
   const unmatched = [];
@@ -108,6 +111,19 @@ async function main() {
           `${resolution.ranked.map((g) => `${g.strong}×${g.count}`).join(' ')} — "${entry.gloss}" ` +
           '— add a pin to scripts/data/garrett-oshb.json',
       );
+    }
+
+    // A binyan or conjugation the corpus contradicts is a typo until someone
+    // says otherwise — and the someone has to say why, in the adjudication file.
+    const disagreements = witnessVerb(entry, resolution, verbs);
+    if (disagreements.length > 0) {
+      disputedParses.add(entryKey(entry));
+      if (!acceptedParses.has(entryKey(entry))) {
+        problems.push(
+          `${entryKey(entry)} — the handout says ${disagreements.join('; and ')} ` +
+            '— fix the handout, or record why under "parses" in scripts/data/garrett-oshb.json',
+        );
+      }
     }
 
     const { word, divergence } = mergeEntry(entry, resolution);
@@ -155,6 +171,14 @@ async function main() {
     problems.push(
       `${stale.length} accepted exception(s) now resolve and should be deleted from ` +
         `scripts/data/garrett-oshb.json: ${stale.map((u) => u.entry).join(' ')}`,
+    );
+  }
+
+  const staleParses = [...acceptedParses].filter((entry) => !disputedParses.has(entry));
+  if (staleParses.length > 0) {
+    problems.push(
+      `${staleParses.length} accepted parse(s) the corpus no longer disputes and should be ` +
+        `deleted from scripts/data/garrett-oshb.json: ${staleParses.join(' ')}`,
     );
   }
 

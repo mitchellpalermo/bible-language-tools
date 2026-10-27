@@ -71,7 +71,10 @@ export default function PassageSelector({
         <div className="flex gap-3">
           {/* Book */}
           <div className="flex-1">
-            <label htmlFor="book" className="block text-xs font-semibold uppercase tracking-wide text-text-muted mb-1">
+            <label
+              htmlFor="book"
+              className="block text-xs font-semibold uppercase tracking-wide text-text-muted mb-1"
+            >
               Book
             </label>
             <select
@@ -90,7 +93,10 @@ export default function PassageSelector({
 
           {/* Chapter */}
           <div className="w-28">
-            <label htmlFor="chapter" className="block text-xs font-semibold uppercase tracking-wide text-text-muted mb-1">
+            <label
+              htmlFor="chapter"
+              className="block text-xs font-semibold uppercase tracking-wide text-text-muted mb-1"
+            >
               Chapter
             </label>
             <select
@@ -111,7 +117,10 @@ export default function PassageSelector({
         {/* Verse range */}
         <div className="flex items-end gap-2 mt-3">
           <div className="w-24">
-            <label htmlFor="verse" className="block text-xs font-semibold uppercase tracking-wide text-text-muted mb-1">
+            <label
+              htmlFor="verse"
+              className="block text-xs font-semibold uppercase tracking-wide text-text-muted mb-1"
+            >
               Verse
             </label>
             <select

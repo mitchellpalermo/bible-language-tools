@@ -4,11 +4,11 @@ import { stripCantillation as stripCantillationInBuild } from '../../scripts/lib
 import { stripCantillation } from '../lib/hebrew-input';
 import {
   clearMorphhbCache,
+  DEFAULT_READER_PREFS,
   displayText,
   fetchBook,
   fetchBooks,
   fetchLemmas,
-  DEFAULT_READER_PREFS,
   type HebrewWord,
   isAramaic,
   loadLastPassage,
@@ -63,9 +63,11 @@ describe('morphemes', () => {
   });
 
   it('handles a three-morpheme stack', () => {
-    expect(
-      morphemes({ text: 'וְ/אִשְׁתּ֖/וֹ', parsing: 'HC/Ncfsc/Sp3ms' }).map((m) => m.morph),
-    ).toEqual(['C', 'Ncfsc', 'Sp3ms']);
+    expect(morphemes({ text: 'וְ/אִשְׁתּ֖/וֹ', parsing: 'HC/Ncfsc/Sp3ms' }).map((m) => m.morph)).toEqual([
+      'C',
+      'Ncfsc',
+      'Sp3ms',
+    ]);
   });
 
   it('strips the Aramaic language marker as readily as the Hebrew one', () => {
@@ -93,14 +95,7 @@ describe('stripping cantillation', () => {
   // The build script cannot import the TypeScript, so it carries its own copy of
   // the mark set. These two drifting apart would mean the lexical forms in
   // lemmas.json were normalized differently from the running text on screen.
-  const samples = [
-    'בְּרֵאשִׁ֖ית',
-    'אַבְדָ֑ן',
-    'וְ/אִשְׁתּ֖/וֹ',
-    'שְׁנֵֽי־בָנָ֣יו׃',
-    'שָׁלוֹם',
-    '',
-  ];
+  const samples = ['בְּרֵאשִׁ֖ית', 'אַבְדָ֑ן', 'וְ/אִשְׁתּ֖/וֹ', 'שְׁנֵֽי־בָנָ֣יו׃', 'שָׁלוֹם', ''];
 
   // Behaviour is covered where the function lives, in `hebrew-input.test.ts`.
   it('agrees with the build script’s copy on every sample', () => {

@@ -37,18 +37,25 @@ function DailyVerseInner() {
     async function loadVerse() {
       // Try Daily Dose first, fall back to curated list
       const dailyDose = await fetchDailyDoseVerse();
-      const ref = dailyDose?.verse ?? getTodayVerse();
+      const ref = dailyDose.ok ? dailyDose.verse : getTodayVerse();
 
       if (cancelled) return;
       setVerseRef(ref);
-      setDailyDoseLink(dailyDose?.link ?? null);
+      setDailyDoseLink(dailyDose.ok ? dailyDose.link : null);
 
       try {
         const data = await fetchBook(ref.book);
         if (cancelled) return;
         const words = data[String(ref.chapter)]?.[String(ref.verse)] ?? [];
         setVerse(words);
-        posthog.capture('daily_verse_viewed', { verse_reference: ref.displayRef });
+        // `source` is what makes a broken Daily Dose feed visible: the fallback
+        // looks like a normal page, so without it the regression in #177 hid
+        // for weeks.
+        posthog.capture('daily_verse_viewed', {
+          verse_reference: ref.displayRef,
+          source: dailyDose.ok ? 'daily_dose' : 'curated',
+          ...(dailyDose.ok ? {} : { fallback_reason: dailyDose.reason }),
+        });
       } catch (err) {
         if (!cancelled) setError((err as Error).message);
       } finally {
@@ -168,7 +175,7 @@ function DailyVerseInner() {
                     href={dailyDoseLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label="Watch analysis from Daily Dose of Greek"
+                    aria-label="Watch the lesson on this verse from Daily Dose of Scripture"
                     className="px-3 py-1.5 rounded-lg text-sm border border-accent/30 text-accent hover:border-accent hover:bg-accent/5 transition-colors"
                   >
                     Watch the Daily Dose ↗
@@ -176,6 +183,14 @@ function DailyVerseInner() {
                 )}
               </div>
             </div>
+
+            {/* The page intro credits Daily Dose; say so when this verse is not theirs */}
+            {!dailyDoseLink && (
+              <p className="text-text-muted text-xs mt-4">
+                Today's Daily Dose of Scripture lesson didn't load, so this verse comes from the
+                greek.tools reading list.
+              </p>
+            )}
 
             {/* Known-word legend */}
             {studiedLemmas.size > 0 && (

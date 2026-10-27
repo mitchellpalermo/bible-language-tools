@@ -232,5 +232,8 @@ function CellInk({ strokes, color }: { strokes: Stroke[]; color: string }) {
     ctx.restore();
   }, [strokes, color]);
 
-  return <canvas ref={canvasRef} className="ink-grid__canvas" aria-hidden="true" />;
+  // The canvas is a thumbnail of ink the cell button already announces, so it is
+  // hidden from assistive tech — and `tabIndex={-1}` keeps it out of the tab order,
+  // since a focusable `aria-hidden` element strands a screen reader on nothing.
+  return <canvas ref={canvasRef} className="ink-grid__canvas" aria-hidden="true" tabIndex={-1} />;
 }

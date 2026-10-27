@@ -324,9 +324,7 @@ describe('HebrewReader', () => {
       ),
     );
     render(<HebrewReader />);
-    await waitFor(() =>
-      expect(screen.getByText('Genesis has no chapter 1.')).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByText('Genesis has no chapter 1.')).toBeInTheDocument());
   });
 
   describe('when the text will not load', () => {
@@ -604,9 +602,7 @@ describe('studied-word highlighting', () => {
 
   it('marks nothing when nothing has been studied', async () => {
     await renderReader();
-    expect(within(readerText()).getByText('אֱלֹהִ֑ים').className).not.toContain(
-      'decoration-dotted',
-    );
+    expect(within(readerText()).getByText('אֱלֹהִ֑ים').className).not.toContain('decoration-dotted');
   });
 
   it('can be turned off', async () => {
@@ -614,9 +610,7 @@ describe('studied-word highlighting', () => {
     const user = userEvent.setup();
     await renderReader();
     await user.click(screen.getByRole('button', { name: 'Studied words' }));
-    expect(within(readerText()).getByText('אֱלֹהִ֑ים').className).not.toContain(
-      'decoration-dotted',
-    );
+    expect(within(readerText()).getByText('אֱלֹהִ֑ים').className).not.toContain('decoration-dotted');
   });
 
   it('remembers being turned off', async () => {

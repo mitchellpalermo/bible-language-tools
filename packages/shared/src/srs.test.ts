@@ -1,10 +1,22 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  applyDailyReset,
   daysFromNow,
+  EASY_BONUS,
+  EASY_INTERVAL,
+  emptyStats,
+  GRADE_QUALITY,
+  GRADUATING_INTERVAL,
+  gradeForQuality,
+  HARD_MULTIPLIER,
   isDue,
+  isPassingGrade,
+  MIN_EASE,
   newCard,
   nextSRS,
   normalizeKey,
+  REVIEW_GRADES,
+  type ReviewGrade,
   recordReview,
   type SRSCard,
   STREAK_THRESHOLD,
@@ -15,10 +27,15 @@ import {
 
 // ─── helpers ───────────────────────────────────────────────────────────────
 
+// Local calendar formatting, matching src/srs.ts. Built with toISOString() this
+// helper disagreed with the code under test every evening west of UTC.
 function dateStr(offsetDays = 0): string {
   const d = new Date();
   d.setDate(d.getDate() + offsetDays);
-  return d.toISOString().slice(0, 10);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 const TODAY = dateStr(0);
@@ -34,17 +51,6 @@ function makeCard(overrides: Partial<SRSCard> = {}): SRSCard {
     dueDate: TODAY,
     lastReviewed: YESTERDAY,
     ...overrides,
-  };
-}
-
-function emptyStats(): StudyStats {
-  return {
-    streak: 0,
-    lastStreakDate: '',
-    cardsStudiedToday: 0,
-    lastStudyDate: '',
-    totalReviewed: 0,
-    totalCorrect: 0,
   };
 }
 
@@ -169,10 +175,13 @@ describe('nextSRS', () => {
       expect(result.repetition).toBe(1);
     });
 
-    it('sets interval to 6 on second successful review (repetition 1)', () => {
+    it('multiplies from the graduating interval on the second review', () => {
+      // Not SM-2's fixed 6-day second step. Anki has no fixed second step: a
+      // 1-day card times an ease of 2.5 is 3 days. The old constant also made
+      // Hard, Good and Easy identical on every card's second review.
       const card = makeCard({ repetition: 1, interval: 1 });
       const result = nextSRS(card, 4);
-      expect(result.interval).toBe(6);
+      expect(result.interval).toBe(3);
       expect(result.repetition).toBe(2);
     });
 
@@ -197,7 +206,7 @@ describe('nextSRS', () => {
     it('preserves ease factor on perfect answer (quality 4)', () => {
       const card = makeCard({ easeFactor: 2.5 });
       const result = nextSRS(card, 4);
-      // EF change for quality=4: +0.1 - 1*0.08 - 1*0.02 = 0
+      // Quality 4 is Anki's "Good", whose ease delta is 0. See EASE_DELTA.
       expect(result.easeFactor).toBeCloseTo(2.5);
     });
 
@@ -336,5 +345,311 @@ describe('recordReview', () => {
 describe('STREAK_THRESHOLD', () => {
   it('is a positive number', () => {
     expect(STREAK_THRESHOLD).toBeGreaterThan(0);
+  });
+});
+
+// ─── regressions: streak credit and the day boundary ────────────────────────
+
+describe('recordReview — crossing the streak threshold (regression)', () => {
+  it('credits the day when the counter jumps past the threshold in one step', () => {
+    // A sync merge adopts the other device's daily count, so cardsStudiedToday
+    // can step over the line rather than landing on it. The old `=== THRESHOLD`
+    // check missed that jump and never credited the day again.
+    const prev: StudyStats = {
+      streak: 3,
+      lastStreakDate: YESTERDAY,
+      cardsStudiedToday: STREAK_THRESHOLD + 4,
+      lastStudyDate: TODAY,
+      totalReviewed: 400,
+      totalCorrect: 350,
+    };
+    const result = recordReview(prev, true);
+    expect(result.lastStreakDate).toBe(TODAY);
+    expect(result.streak).toBe(4);
+  });
+
+  it('still earns the day after a merge left a stale anchor and a count past the line', () => {
+    let stats: StudyStats = {
+      ...emptyStats(),
+      cardsStudiedToday: STREAK_THRESHOLD + 5,
+      lastStudyDate: TODAY,
+      totalReviewed: 400,
+      totalCorrect: 350,
+    };
+    stats = recordReview(stats, true);
+    expect(stats.lastStreakDate).toBe(TODAY);
+    expect(stats.streak).toBe(1);
+  });
+
+  it('credits the day exactly once no matter how many more cards follow', () => {
+    let stats: StudyStats = {
+      ...emptyStats(),
+      streak: 2,
+      lastStreakDate: YESTERDAY,
+      lastStudyDate: TODAY,
+      cardsStudiedToday: STREAK_THRESHOLD - 1,
+    };
+    for (let i = 0; i < 50; i++) stats = recordReview(stats, true);
+    expect(stats.streak).toBe(3);
+    expect(stats.lastStreakDate).toBe(TODAY);
+  });
+});
+
+describe('day boundary is local, not UTC (regression)', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('late evening still reports the current local day', () => {
+    // West of UTC this instant is already tomorrow in UTC — the old
+    // toISOString() helper rolled the study day over at 6pm CST.
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 4, 10, 23, 30, 0));
+    expect(todayStr()).toBe('2026-05-10');
+    expect(yesterdayStr()).toBe('2026-05-09');
+  });
+
+  it('just after midnight still reports the current local day', () => {
+    // East of UTC this instant is still yesterday in UTC.
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 4, 10, 0, 30, 0));
+    expect(todayStr()).toBe('2026-05-10');
+    expect(daysFromNow(1)).toBe('2026-05-11');
+  });
+
+  it('an evening session and the next morning are two different study days', () => {
+    vi.useFakeTimers();
+
+    vi.setSystemTime(new Date(2026, 4, 10, 19, 0, 0));
+    let stats: StudyStats = { ...emptyStats(), lastStudyDate: '2026-05-10', cardsStudiedToday: 9 };
+    stats = recordReview(stats, true);
+    expect(stats.lastStreakDate).toBe('2026-05-10');
+    expect(stats.streak).toBe(1);
+
+    vi.setSystemTime(new Date(2026, 4, 11, 8, 0, 0));
+    stats = { ...stats, cardsStudiedToday: STREAK_THRESHOLD - 1, lastStudyDate: '2026-05-11' };
+    stats = recordReview(stats, true);
+    expect(stats.lastStreakDate).toBe('2026-05-11');
+    expect(stats.streak).toBe(2);
+  });
+});
+
+// ─── applyDailyReset ────────────────────────────────────────────────────────
+
+describe('applyDailyReset', () => {
+  it('leaves a record from today untouched', () => {
+    const stats: StudyStats = {
+      streak: 3,
+      lastStreakDate: TODAY,
+      cardsStudiedToday: 7,
+      lastStudyDate: TODAY,
+      totalReviewed: 30,
+      totalCorrect: 25,
+    };
+    expect(applyDailyReset(stats)).toEqual(stats);
+  });
+
+  it("clears today's counter on a new day but keeps a streak anchored yesterday", () => {
+    const result = applyDailyReset({
+      streak: 3,
+      lastStreakDate: YESTERDAY,
+      cardsStudiedToday: 12,
+      lastStudyDate: YESTERDAY,
+      totalReviewed: 30,
+      totalCorrect: 25,
+    });
+    expect(result.cardsStudiedToday).toBe(0);
+    expect(result.streak).toBe(3);
+  });
+
+  it('breaks a streak whose anchor is older than yesterday', () => {
+    const result = applyDailyReset({
+      streak: 6,
+      lastStreakDate: dateStr(-3),
+      cardsStudiedToday: 12,
+      lastStudyDate: dateStr(-3),
+      totalReviewed: 30,
+      totalCorrect: 25,
+    });
+    expect(result.streak).toBe(0);
+    expect(result.cardsStudiedToday).toBe(0);
+  });
+
+  it('preserves lifetime totals', () => {
+    const result = applyDailyReset({
+      streak: 1,
+      lastStreakDate: dateStr(-5),
+      cardsStudiedToday: 12,
+      lastStudyDate: dateStr(-5),
+      totalReviewed: 300,
+      totalCorrect: 250,
+    });
+    expect(result.totalReviewed).toBe(300);
+    expect(result.totalCorrect).toBe(250);
+  });
+});
+
+describe('emptyStats', () => {
+  it('starts with no progress and no streak anchor', () => {
+    expect(emptyStats()).toEqual({
+      streak: 0,
+      lastStreakDate: '',
+      cardsStudiedToday: 0,
+      lastStudyDate: '',
+      totalReviewed: 0,
+      totalCorrect: 0,
+    });
+  });
+});
+
+// ─── Anki parity ─────────────────────────────────────────────────────────────
+//
+// The scheduler follows Anki's SM-2 numbers, not textbook SM-2's. The
+// difference is not cosmetic: textbook SM-2 derives the ease adjustment from
+// the quality score, which docks 0.54 for a failure and — since flashcards only
+// ever sent quality 4 for a pass — gave none of it back. These tests pin the
+// two-directional behaviour, because the one-way ratchet was invisible in the
+// old suite: every assertion about ease was directional (`toBeLessThan`), so
+// the wrong constants passed it.
+
+describe('Anki grade scale', () => {
+  const grade = (g: ReviewGrade, card: Partial<SRSCard> = {}) =>
+    nextSRS(makeCard(card), GRADE_QUALITY[g]);
+
+  it('maps the four grades onto SM-2 quality values', () => {
+    expect(GRADE_QUALITY).toEqual({ again: 1, hard: 3, good: 4, easy: 5 });
+    expect(REVIEW_GRADES).toEqual(['again', 'hard', 'good', 'easy']);
+  });
+
+  it('treats every grade but "again" as a pass', () => {
+    expect(isPassingGrade('again')).toBe(false);
+    expect(isPassingGrade('hard')).toBe(true);
+    expect(isPassingGrade('good')).toBe(true);
+    expect(isPassingGrade('easy')).toBe(true);
+  });
+
+  it('maps arbitrary quality numbers back to a grade', () => {
+    expect(gradeForQuality(0)).toBe('again');
+    expect(gradeForQuality(2)).toBe('again');
+    expect(gradeForQuality(3)).toBe('hard');
+    expect(gradeForQuality(4)).toBe('good');
+    expect(gradeForQuality(5)).toBe('easy');
+  });
+
+  describe('ease adjustments use Anki values, not the SM-2 formula', () => {
+    it("docks 0.20 for Again — not textbook SM-2's 0.54", () => {
+      expect(grade('again', { easeFactor: 2.5 }).easeFactor).toBeCloseTo(2.3);
+    });
+
+    it('docks 0.15 for Hard', () => {
+      expect(grade('hard', { easeFactor: 2.5 }).easeFactor).toBeCloseTo(2.35);
+    });
+
+    it('leaves ease untouched for Good', () => {
+      expect(grade('good', { easeFactor: 2.5 }).easeFactor).toBeCloseTo(2.5);
+    });
+
+    it('adds 0.15 for Easy', () => {
+      expect(grade('easy', { easeFactor: 2.5 }).easeFactor).toBeCloseTo(2.65);
+    });
+
+    it('floors ease at 1.30 however often a card is missed', () => {
+      let card = makeCard({ easeFactor: 2.5 });
+      for (let i = 0; i < 12; i++) card = nextSRS(card, GRADE_QUALITY.again);
+      expect(card.easeFactor).toBe(MIN_EASE);
+    });
+  });
+
+  describe('ease can recover — the regression this change exists for', () => {
+    it('lifts a card off the 1.30 floor when it is finally known', () => {
+      const stuck = makeCard({ easeFactor: MIN_EASE, repetition: 3, interval: 10 });
+      const once = nextSRS(stuck, GRADE_QUALITY.easy);
+      expect(once.easeFactor).toBeCloseTo(1.45);
+
+      // Four more Easy answers and the word is scheduling normally again.
+      let card = once;
+      for (let i = 0; i < 4; i++) card = nextSRS(card, GRADE_QUALITY.easy);
+      expect(card.easeFactor).toBeCloseTo(2.05);
+      expect(card.easeFactor).toBeGreaterThan(MIN_EASE);
+    });
+
+    it('does not let Good alone lift a card off the floor', () => {
+      let card = makeCard({ easeFactor: MIN_EASE });
+      for (let i = 0; i < 5; i++) card = nextSRS(card, GRADE_QUALITY.good);
+      expect(card.easeFactor).toBe(MIN_EASE);
+    });
+  });
+
+  describe('interval multipliers', () => {
+    it('creeps forward on Hard rather than using the ease factor', () => {
+      const result = grade('hard', { repetition: 2, interval: 20, easeFactor: 2.5 });
+      expect(result.interval).toBe(Math.round(20 * HARD_MULTIPLIER));
+    });
+
+    it('uses the ease factor on Good', () => {
+      const result = grade('good', { repetition: 2, interval: 20, easeFactor: 2.5 });
+      expect(result.interval).toBe(Math.round(20 * 2.5));
+    });
+
+    it("stretches by the ease factor and Anki's bonus on Easy", () => {
+      const result = grade('easy', { repetition: 2, interval: 20, easeFactor: 2.5 });
+      expect(result.interval).toBe(Math.round(20 * 2.5 * EASY_BONUS));
+    });
+
+    it('graduates a new card to one day, or four on Easy', () => {
+      // Anki's graduating and easy intervals. Again/Hard/Good all leave a new
+      // card due tomorrow; only Easy skips ahead — which is the whole reason
+      // the four buttons do not preview an identical "1d" on a fresh card.
+      for (const g of ['hard', 'good'] as ReviewGrade[]) {
+        expect(grade(g, { repetition: 0, interval: 0 }).interval).toBe(GRADUATING_INTERVAL);
+      }
+      expect(grade('easy', { repetition: 0, interval: 0 }).interval).toBe(EASY_INTERVAL);
+      expect(grade('again', { repetition: 0, interval: 0 }).interval).toBe(1);
+    });
+
+    it('orders the three passing grades strictly, at every interval', () => {
+      // Rounding alone does not guarantee this: a 1-day card takes 2.5 days on
+      // Good and 3.25 on Easy, both of which round to 3. Two grades that
+      // schedule a card identically say the harder answer was free.
+      for (const interval of [1, 2, 3, 4, 6, 10, 30, 200]) {
+        for (const ease of [MIN_EASE, 2.5, 3.1]) {
+          const at = (g: ReviewGrade) =>
+            grade(g, { repetition: 2, interval, easeFactor: ease }).interval;
+          expect(at('hard')).toBeGreaterThan(interval);
+          expect(at('good')).toBeGreaterThan(at('hard'));
+          expect(at('easy')).toBeGreaterThan(at('good'));
+        }
+      }
+    });
+
+    it('always advances a card that passed', () => {
+      for (const g of ['hard', 'good', 'easy'] as ReviewGrade[]) {
+        for (const interval of [6, 7, 10, 45]) {
+          const result = grade(g, { repetition: 2, interval, easeFactor: MIN_EASE });
+          expect(result.interval).toBeGreaterThan(interval);
+        }
+      }
+    });
+
+    it('resets to one day on Again, whatever the card had reached', () => {
+      const result = grade('again', { repetition: 6, interval: 240, easeFactor: 2.5 });
+      expect(result.interval).toBe(1);
+      expect(result.repetition).toBe(0);
+      expect(result.dueDate).toBe(TOMORROW);
+    });
+  });
+
+  it('schedules a hard word more tightly than an easy one over a term', () => {
+    // Same starting card, graded honestly each way. The gap between them is
+    // what the ease factor is for; before this change the "struggled" card
+    // could never close it.
+    let struggled = makeCard({ repetition: 2, interval: 6, easeFactor: 2.5 });
+    let effortless = makeCard({ repetition: 2, interval: 6, easeFactor: 2.5 });
+    for (let i = 0; i < 4; i++) {
+      struggled = nextSRS(struggled, GRADE_QUALITY.hard);
+      effortless = nextSRS(effortless, GRADE_QUALITY.easy);
+    }
+    expect(struggled.interval).toBeLessThan(effortless.interval);
+    expect(struggled.easeFactor).toBeLessThan(effortless.easeFactor);
   });
 });

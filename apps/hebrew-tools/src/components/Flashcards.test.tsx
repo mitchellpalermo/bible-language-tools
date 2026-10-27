@@ -1,9 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import posthog from 'posthog-js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { loadSRSStore, loadStats, newCard, normalizeKey, saveSRSStore } from '../data/srs';
-import { hasAuthHint } from '../lib/auth-cookie';
-import { deleteServerProgress } from '../lib/sync-manager';
 import { chapterStats, TEXTBOOKS, wordsInChapters } from '../data/textbooks';
 import { cardKey, type HebrewVocabWord, vocabulary } from '../data/vocabulary';
 import Flashcards, { FREQ_FILTERS, GENDER_LABELS, matchFreq } from './Flashcards';
@@ -13,9 +12,6 @@ import Flashcards, { FREQ_FILTERS, GENDER_LABELS, matchFreq } from './Flashcards
 vi.mock('posthog-js', () => ({
   default: { capture: vi.fn(), init: vi.fn(), identify: vi.fn(), captureException: vi.fn() },
 }));
-
-vi.mock('../lib/sync-manager', () => ({ deleteServerProgress: vi.fn() }));
-vi.mock('../lib/auth-cookie', () => ({ hasAuthHint: vi.fn(() => false) }));
 
 beforeEach(() => {
   localStorage.clear();
@@ -99,8 +95,8 @@ describe('Flashcards', () => {
   it('renders a Hebrew word on the front of the card', () => {
     renderFlashcards();
     const hebrewTerms = new Set(vocabulary.map((w) => w.hebrew));
-    const shown = screen.getAllByText((_, el) =>
-      el?.tagName === 'P' && hebrewTerms.has(el.textContent ?? ''),
+    const shown = screen.getAllByText(
+      (_, el) => el?.tagName === 'P' && hebrewTerms.has(el.textContent ?? ''),
     );
     expect(shown.length).toBeGreaterThan(0);
   });
@@ -114,9 +110,9 @@ describe('Flashcards', () => {
     const user = userEvent.setup();
     renderFlashcards();
     await user.click(getCard());
-    // "Got It" / "Still Learning" only appear once flipped
-    expect(screen.getByRole('button', { name: /got it/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /still learning/i })).toBeInTheDocument();
+    // The grade buttons only appear once flipped
+    expect(screen.getByRole('button', { name: /^good/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^again/i })).toBeInTheDocument();
   });
 
   it('renders the transliteration without the uppercase transform', async () => {
@@ -147,16 +143,16 @@ describe('Flashcards', () => {
     const user = userEvent.setup();
     renderFlashcards();
     await user.keyboard(' ');
-    expect(screen.getByRole('button', { name: /got it/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^good/i })).toBeInTheDocument();
   });
 
-  it('advances to the next card after marking "Got It"', async () => {
+  it('advances to the next card after answering Got it', async () => {
     const user = userEvent.setup();
     renderFlashcards();
     await user.click(getStudyAllButton());
     const cardIndicatorBefore = screen.getByTestId('card-progress').textContent;
     await user.click(getCard());
-    await user.click(screen.getByRole('button', { name: /got it/i }));
+    await user.click(screen.getByRole('button', { name: /^got it/i }));
     const cardIndicatorAfter = screen.getByTestId('card-progress').textContent;
     expect(cardIndicatorAfter).not.toBe(cardIndicatorBefore);
   });
@@ -172,11 +168,11 @@ describe('Flashcards', () => {
     expect(after).not.toBe(before);
   });
 
-  it('records a review in the SRS store after "Got It"', async () => {
+  it('records a review in the SRS store after grading Good', async () => {
     const user = userEvent.setup();
     renderFlashcards();
     await user.click(getCard());
-    await user.click(screen.getByRole('button', { name: /got it/i }));
+    await user.click(screen.getByRole('button', { name: /^good/i }));
     const store = loadSRSStore();
     expect(Object.keys(store).length).toBe(1);
   });
@@ -185,7 +181,7 @@ describe('Flashcards', () => {
     const user = userEvent.setup();
     renderFlashcards();
     await user.click(getCard());
-    await user.click(screen.getByRole('button', { name: /still learning/i }));
+    await user.click(screen.getByRole('button', { name: /^again/i }));
     const stats = loadStats();
     expect(stats.totalReviewed).toBe(1);
     expect(stats.totalCorrect).toBe(0);
@@ -201,7 +197,7 @@ describe('Flashcards', () => {
     const deckSize = vocabulary.filter((w) => matchFreq(w.frequency, '2000+')).length;
     for (let i = 0; i < deckSize; i++) {
       await user.click(screen.getByText('tap to reveal'));
-      await user.click(screen.getByRole('button', { name: /got it/i }));
+      await user.click(screen.getByRole('button', { name: /^got it/i }));
     }
     expect(screen.getByText('Session Complete')).toBeInTheDocument();
   });
@@ -220,62 +216,16 @@ describe('Flashcards', () => {
   // stubs the vocabulary module — asserting it here would mean betting that some
   // frequency band stays permanently empty as words are added.
 
-  it('resets SRS progress when confirmed', async () => {
-    const user = userEvent.setup();
-    vi.stubGlobal('confirm', vi.fn().mockReturnValue(true));
-    renderFlashcards();
-    await user.click(getCard());
-    await user.click(screen.getByRole('button', { name: /got it/i }));
-    expect(Object.keys(loadSRSStore()).length).toBe(1);
-
-    await user.click(screen.getByRole('button', { name: /reset srs/i }));
-    expect(loadSRSStore()).toEqual({});
-  });
-
-  it('clears server progress on reset when signed in', async () => {
-    // PUT merges server-side, so clearing localStorage alone would be undone by
-    // the next sync. DELETE is the only path that actually removes anything.
-    const user = userEvent.setup();
-    vi.mocked(hasAuthHint).mockReturnValue(true);
-    vi.stubGlobal('confirm', vi.fn().mockReturnValue(true));
+  // The reset moved to the account page (ResetProgress.test.tsx covers it).
+  // What is left here is the way to it — and that no one-tap reset remains.
+  it('links to the account page reset instead of offering one here', () => {
     renderFlashcards();
 
-    await user.click(screen.getByRole('button', { name: /reset srs/i }));
-
-    expect(deleteServerProgress).toHaveBeenCalledOnce();
-  });
-
-  it('does not call the server on reset when signed out', async () => {
-    const user = userEvent.setup();
-    vi.mocked(hasAuthHint).mockReturnValue(false);
-    vi.stubGlobal('confirm', vi.fn().mockReturnValue(true));
-    renderFlashcards();
-
-    await user.click(screen.getByRole('button', { name: /reset srs/i }));
-
-    expect(deleteServerProgress).not.toHaveBeenCalled();
-  });
-
-  it('does not clear server progress when the reset is declined', async () => {
-    const user = userEvent.setup();
-    vi.mocked(hasAuthHint).mockReturnValue(true);
-    vi.stubGlobal('confirm', vi.fn().mockReturnValue(false));
-    renderFlashcards();
-
-    await user.click(screen.getByRole('button', { name: /reset srs/i }));
-
-    expect(deleteServerProgress).not.toHaveBeenCalled();
-  });
-
-  it('does not reset SRS progress when the confirm dialog is declined', async () => {
-    const user = userEvent.setup();
-    vi.stubGlobal('confirm', vi.fn().mockReturnValue(false));
-    renderFlashcards();
-    await user.click(getCard());
-    await user.click(screen.getByRole('button', { name: /got it/i }));
-
-    await user.click(screen.getByRole('button', { name: /reset srs/i }));
-    expect(Object.keys(loadSRSStore()).length).toBe(1);
+    expect(screen.getByRole('link', { name: 'Manage SRS progress' })).toHaveAttribute(
+      'href',
+      '/account#reset-progress',
+    );
+    expect(screen.queryByRole('button', { name: /reset/i })).not.toBeInTheDocument();
   });
 
   it('shows "study ahead anyway" when SRS mode has nothing due', () => {
@@ -325,7 +275,7 @@ describe('Flashcards', () => {
     renderFlashcards();
     expect(screen.queryByText(/Accuracy:/)).not.toBeInTheDocument();
     await user.click(getCard());
-    await user.click(screen.getByRole('button', { name: /got it/i }));
+    await user.click(screen.getByRole('button', { name: /^good/i }));
     expect(screen.getByText(/Accuracy:/)).toBeInTheDocument();
   });
 
@@ -334,7 +284,7 @@ describe('Flashcards', () => {
     renderFlashcards();
     await user.click(getStudyAllButton());
     await user.click(getCard());
-    await user.click(screen.getByRole('button', { name: /got it/i }));
+    await user.click(screen.getByRole('button', { name: /^got it/i }));
     await user.click(screen.getByRole('button', { name: /restart session/i }));
     expect(screen.getByTestId('card-progress').textContent).toMatch(/^1\//);
   });
@@ -410,7 +360,7 @@ describe('Flashcards chapter decks', () => {
       const front = screen.getByText((_, el) => el?.getAttribute('dir') === 'rtl');
       expect(inDeck.has(front.textContent ?? '')).toBe(true);
       await user.click(screen.getByText('tap to reveal'));
-      await user.click(screen.getByRole('button', { name: /got it/i }));
+      await user.click(screen.getByRole('button', { name: /^got it/i }));
     }
     expect(screen.getByText('Session Complete')).toBeInTheDocument();
   });
@@ -541,5 +491,283 @@ describe('Flashcards chapter decks', () => {
     } else {
       expect(screen.queryByText(/masculine|feminine/)).not.toBeInTheDocument();
     }
+  });
+});
+
+// ─── Part of speech on the card front ─────────────────────────────────────────
+
+describe('part of speech', () => {
+  /**
+   * A card whose part of speech is worth asserting on. `particle` is chosen
+   * because nothing else on the page says it — the deck, category and frequency
+   * chips share no vocabulary with the part-of-speech labels, so a match is the
+   * card and not the chrome.
+   */
+  function seedParticle(): HebrewVocabWord {
+    const word = vocabulary.find((w) => w.partOfSpeech === 'particle');
+    expect(word, 'no vocabulary entry is a particle').toBeDefined();
+    seedDueCard(word as HebrewVocabWord);
+    return word as HebrewVocabWord;
+  }
+
+  function toggle() {
+    return screen.getByRole('switch', { name: 'Part of speech' });
+  }
+
+  it('is hidden on the front by default', () => {
+    const word = seedParticle();
+    renderFlashcards();
+    expect(screen.queryByText(word.partOfSpeech)).not.toBeInTheDocument();
+    expect(toggle()).toHaveAttribute('aria-checked', 'false');
+  });
+
+  it('is still revealed with the answer while hidden from the front', async () => {
+    const word = seedParticle();
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(getCard());
+    // Hiding it withholds a hint, not the information.
+    expect(screen.getByText(word.partOfSpeech)).toBeInTheDocument();
+  });
+
+  it('appears on the front once the toggle is switched on', async () => {
+    const word = seedParticle();
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(toggle());
+    expect(screen.getByText(word.partOfSpeech)).toBeInTheDocument();
+    expect(toggle()).toHaveAttribute('aria-checked', 'true');
+    // Still on the front — the card was never flipped.
+    expect(screen.getByText('tap to reveal')).toBeInTheDocument();
+  });
+
+  it('hides it again on a second press', async () => {
+    const word = seedParticle();
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(toggle());
+    await user.click(toggle());
+    expect(screen.queryByText(word.partOfSpeech)).not.toBeInTheDocument();
+  });
+
+  it('remembers the choice across a remount', async () => {
+    const word = seedParticle();
+    const user = userEvent.setup();
+    const { unmount } = renderFlashcards();
+    await user.click(toggle());
+    unmount();
+
+    renderFlashcards();
+    expect(screen.getByText(word.partOfSpeech)).toBeInTheDocument();
+  });
+
+  it('does not restart the session when toggled', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(getStudyAllButton());
+    const before = getCard().querySelector('p[dir="rtl"]')?.textContent;
+    await user.click(toggle());
+    // A display preference must not reshuffle the queue out from under a card
+    // the student is part-way through recalling.
+    expect(getCard().querySelector('p[dir="rtl"]')?.textContent).toBe(before);
+  });
+});
+
+// ─── Verb parse on the card back ──────────────────────────────────────────────
+
+describe('verb parse', () => {
+  function seed(hebrew: string) {
+    const word = vocabulary.find((w) => w.hebrew === hebrew) as HebrewVocabWord;
+    seedDueCard(word);
+    return word;
+  }
+
+  it('is withheld from the front — naming the conjugation is part of the answer', () => {
+    seed('כָּתַב');
+    renderFlashcards();
+    expect(screen.queryByTestId('verb-parse')).not.toBeInTheDocument();
+  });
+
+  it('labels a citation form as a qatal once the card is flipped', async () => {
+    seed('כָּתַב');
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(getCard());
+    expect(screen.getByTestId('verb-parse')).toHaveTextContent('Qal qatal');
+  });
+
+  it.each([
+    ['יִבְחַר', 'Qal yiqtol'],
+    ['וַיֹּאמֶר', 'Qal wayyiqtol'],
+    ['הִמְלִיךְ', 'Hiphil qatal'],
+  ])('labels the inflected form %s as %s', async (hebrew, label) => {
+    seed(hebrew);
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(getCard());
+    expect(screen.getByTestId('verb-parse')).toHaveTextContent(label);
+  });
+
+  it('prints nothing on a card that is not a verb', async () => {
+    const word = vocabulary.find((w) => w.partOfSpeech === 'noun') as HebrewVocabWord;
+    seedDueCard(word);
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(getCard());
+    expect(screen.queryByTestId('verb-parse')).not.toBeInTheDocument();
+  });
+});
+
+// ─── Endless mode (#164) ──────────────────────────────────────────────────────
+
+describe('endless mode', () => {
+  // The session rules themselves — the reshuffle, the round boundary, the store
+  // left untouched — are tested once, in @tools/shared's
+  // use-flashcard-session.test.ts. These check this app's wiring of them.
+
+  /** Narrow to a small band: a whole-vocabulary round is hundreds of clicks. */
+  async function startEndless(user: ReturnType<typeof userEvent.setup>) {
+    renderFlashcards();
+    await user.click(screen.getByRole('button', { name: 'Endless' }));
+    await user.click(screen.getByRole('button', { name: /^2000\+/ }));
+    return vocabulary.filter((w) => matchFreq(w.frequency, '2000+')).length;
+  }
+
+  async function gotIt(user: ReturnType<typeof userEvent.setup>) {
+    await user.click(screen.getByText('tap to reveal'));
+    await user.click(screen.getByRole('button', { name: /^got it/i }));
+  }
+
+  it('counts reviews across rounds instead of showing "Card x/y"', async () => {
+    const user = userEvent.setup();
+    const deckSize = await startEndless(user);
+    expect(screen.queryByTestId('card-progress')).not.toBeInTheDocument();
+    expect(screen.getByTestId('session-reviewed').textContent).toBe('0');
+
+    for (let i = 0; i < deckSize + 2; i++) await gotIt(user);
+
+    expect(screen.getByTestId('session-reviewed').textContent).toBe(String(deckSize + 2));
+    expect(loadStats().totalReviewed).toBe(deckSize + 2);
+  });
+
+  it('starts over from the top on "Restart session"', async () => {
+    const user = userEvent.setup();
+    await startEndless(user);
+    await gotIt(user);
+    await gotIt(user);
+    await user.click(screen.getByRole('button', { name: 'Restart session' }));
+    expect(screen.getByTestId('session-reviewed').textContent).toBe('0');
+    expect(screen.getByRole('button', { name: 'Endless' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('records the study mode on the session-started event', async () => {
+    const user = userEvent.setup();
+    await startEndless(user);
+    expect(posthog.capture).toHaveBeenLastCalledWith(
+      'hebrew_flashcard_session_started',
+      expect.objectContaining({ study_mode: 'endless' }),
+    );
+  });
+});
+
+// ─── Drill answers: Missed / Got it ───────────────────────────────────────────
+
+describe('drill answers', () => {
+  // The re-queue gap, first-attempt scoring and the never-write rule are
+  // tested in @tools/shared's use-flashcard-session.test.ts. These check what
+  // this app draws from them.
+
+  const BAND = vocabulary.filter((w) => matchFreq(w.frequency, '2000+'));
+
+  function frontWord() {
+    return document.querySelector('p[dir="rtl"].text-5xl')?.textContent ?? '';
+  }
+
+  async function startStudyAll(user: ReturnType<typeof userEvent.setup>) {
+    renderFlashcards();
+    await user.click(getStudyAllButton());
+    await user.click(screen.getByRole('button', { name: /^2000\+/ }));
+  }
+
+  async function answer(user: ReturnType<typeof userEvent.setup>, which: 'missed' | 'got it') {
+    await user.click(screen.getByText('tap to reveal'));
+    await user.click(screen.getByRole('button', { name: new RegExp(`^${which}`, 'i') }));
+  }
+
+  it('replaces the SRS grades with Missed and Got it, with no interval previews', async () => {
+    const user = userEvent.setup();
+    await startStudyAll(user);
+    await user.click(getCard());
+    expect(screen.getByRole('button', { name: /^missed/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^got it/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^good/i })).not.toBeInTheDocument();
+    for (const name of [/^missed/i, /^got it/i]) {
+      expect(screen.getByRole('button', { name }).textContent).not.toMatch(/\d+(\.\d)?(d|wk|mo|y)/);
+    }
+  });
+
+  it('keeps the four SRS grades in SRS Review', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(getCard());
+    expect(screen.getByRole('button', { name: /^good/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^got it/i })).not.toBeInTheDocument();
+  });
+
+  it('scores only the first attempt at each card', async () => {
+    const user = userEvent.setup();
+    await startStudyAll(user);
+    await answer(user, 'missed');
+    for (let i = 0; i < BAND.length; i++) await answer(user, 'got it');
+    expect(screen.getByText(`${BAND.length - 1} got it · 1 still learning`)).toBeInTheDocument();
+    expect(loadStats().totalReviewed).toBe(BAND.length);
+    expect(loadStats().totalCorrect).toBe(BAND.length - 1);
+  });
+
+  it('answers from the keyboard: 1 is Missed, 2 is Got it', async () => {
+    const user = userEvent.setup();
+    await startStudyAll(user);
+    await user.keyboard(' ');
+    await user.keyboard('1');
+    expect(screen.getByTestId('card-progress').textContent).toBe(`2/${BAND.length + 1}`);
+    await user.keyboard(' ');
+    await user.keyboard('2');
+    expect(screen.getByTestId('card-progress').textContent).toBe(`3/${BAND.length + 1}`);
+  });
+
+  describe('adding missed words to SRS Review', () => {
+    it('offers the missed words at the end of a pass, and adds them as due today', async () => {
+      const user = userEvent.setup();
+      await startStudyAll(user);
+      const missed = frontWord();
+      await answer(user, 'missed');
+      for (let i = 0; i < BAND.length; i++) await answer(user, 'got it');
+
+      await user.click(screen.getByRole('button', { name: 'Add 1 to SRS Review' }));
+
+      const word = BAND.find((w) => w.hebrew === missed) as HebrewVocabWord;
+      const key = normalizeKey(cardKey(word));
+      expect(loadSRSStore()).toEqual({ [key]: newCard(key) });
+      expect(screen.getByRole('status')).toHaveTextContent('Added 1 word to SRS Review');
+      expect(screen.queryByRole('button', { name: /to srs review/i })).not.toBeInTheDocument();
+    });
+
+    it('offers nothing when no card was missed', async () => {
+      const user = userEvent.setup();
+      await startStudyAll(user);
+      for (let i = 0; i < BAND.length; i++) await answer(user, 'got it');
+      expect(screen.getByText('Session Complete')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /to srs review/i })).not.toBeInTheDocument();
+    });
+
+    it('is reached from Endless through "Finish session"', async () => {
+      const user = userEvent.setup();
+      renderFlashcards();
+      await user.click(screen.getByRole('button', { name: 'Endless' }));
+      await answer(user, 'missed');
+      await user.click(screen.getByRole('button', { name: 'Finish session' }));
+      expect(screen.getByText('Session Complete')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Add 1 to SRS Review' })).toBeInTheDocument();
+    });
   });
 });

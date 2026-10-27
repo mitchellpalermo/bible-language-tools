@@ -1,17 +1,14 @@
 {
-	"main": "dist/_worker.js/index.js",
-	"name": "greek-tools",
+  "main": "dist/_worker.js/index.js",
+  "name": "greek-tools",
   "compatibility_date": "2026-06-10",
-  "compatibility_flags": [
-    "nodejs_compat",
-    "global_fetch_strictly_public"
-  ],
-	"assets": {
-		"binding": "ASSETS",
-		"directory": "./dist"
-	},
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./dist"
+  },
   "workers_dev": false,
-	"observability": {
+  "observability": {
     "enabled": true,
     "head_sampling_rate": 1
   },
@@ -22,5 +19,5 @@
       "database_id": "ab76178b-b59c-4290-b24d-43e1cb09e317",
       "migrations_dir": "../../packages/db/migrations"
     }
-  ],
+  ]
 }

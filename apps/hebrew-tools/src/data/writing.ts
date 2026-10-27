@@ -20,7 +20,15 @@ import {
   type WritableGlyph,
 } from '@tools/shared/ink';
 import { hebrewScriptPack } from './script-pack';
-import { isDue, type SRSCard } from './srs';
+import {
+  GRADE_QUALITY,
+  isDue,
+  isPassingGrade,
+  REVIEW_GRADES,
+  type ReviewGrade,
+  type SRSCard,
+  shouldUpdateCard,
+} from './srs';
 
 /**
  * Prefix per glyph group. See the note above.
@@ -49,7 +57,7 @@ export function writingCardKey(glyph: WritableGlyph): string {
 }
 
 export function isWritingKey(key: string): boolean {
-  return WRITING_KEY_PREFIXES.some(prefix => key.startsWith(prefix));
+  return WRITING_KEY_PREFIXES.some((prefix) => key.startsWith(prefix));
 }
 
 /**
@@ -155,7 +163,7 @@ export function confusableGroups(pack: ScriptPack = hebrewScriptPack): WritableG
     }
 
     members.sort((a, b) => (index.get(a) ?? 0) - (index.get(b) ?? 0));
-    groups.push(members.map(char => glyphs[index.get(char) as number]));
+    groups.push(members.map((char) => glyphs[index.get(char) as number]));
   }
 
   return groups;
@@ -195,7 +203,13 @@ export function buildDecks(pack: ScriptPack = hebrewScriptPack): WritingDeck[] {
     // 23 cards, not 22: the alphabet has 22 letters, but shin and sin are
     // drilled separately because writing the dot on the correct side is the
     // whole skill.
-    { id: 'alphabet', label: 'The alphabet', category: 'letters', glyphs: consonants, order: 'due-first' },
+    {
+      id: 'alphabet',
+      label: 'The alphabet',
+      category: 'letters',
+      glyphs: consonants,
+      order: 'due-first',
+    },
     { id: 'finals', label: 'Final forms', category: 'letters', glyphs: finals, order: 'due-first' },
     {
       id: 'all-consonants',
@@ -204,7 +218,13 @@ export function buildDecks(pack: ScriptPack = hebrewScriptPack): WritingDeck[] {
       glyphs: [...consonants, ...finals],
       order: 'due-first',
     },
-    { id: 'nikud', label: 'All vowel points', category: 'vowels', glyphs: vowels, order: 'due-first' },
+    {
+      id: 'nikud',
+      label: 'All vowel points',
+      category: 'vowels',
+      glyphs: vowels,
+      order: 'due-first',
+    },
     // One pass across every group: no pair lands back to back, and the deck
     // stays one review per letter.
     {
@@ -214,11 +234,11 @@ export function buildDecks(pack: ScriptPack = hebrewScriptPack): WritingDeck[] {
       glyphs: interleave(groups),
       order: 'as-built',
     },
-    ...groups.map(group => ({
-      id: `confusable-${group.map(g => g.char).join('')}`,
+    ...groups.map((group) => ({
+      id: `confusable-${group.map((g) => g.char).join('')}`,
       // Named, not shown as glyphs: the point of the deck is that these
       // letters look alike, so a row of them is an unreadable picker label.
-      label: group.map(g => g.name).join(' / '),
+      label: group.map((g) => g.name).join(' / '),
       category: 'confusables' as const,
       glyphs: interleave([group], CONFUSABLE_ROUNDS),
       order: 'as-built' as const,
@@ -261,18 +281,30 @@ export function buildQueue(
   return [...due, ...fresh];
 }
 
-/** The four self-assessment buttons, mapped to SM-2 quality scores. */
-export type WritingGrade = 'again' | 'hard' | 'good' | 'easy';
+/**
+ * The four self-assessment buttons.
+ *
+ * `/write` graded on this scale before the vocabulary flashcards did, so it
+ * carried its own copy of the table. The scale now lives in `@tools/shared/srs`
+ * as `ReviewGrade` — both apps' flashcards grade on it too — and this module
+ * only aliases it. Two tables would be two chances for the quality values to
+ * drift apart, and a grade that means one thing on `/write` and another on a
+ * flashcard would move the same SRS card two different ways.
+ */
+export type WritingGrade = ReviewGrade;
 
-export const WRITING_GRADES: { id: WritingGrade; label: string; quality: number }[] = [
-  { id: 'again', label: 'Again', quality: 1 },
-  { id: 'hard', label: 'Hard', quality: 3 },
-  { id: 'good', label: 'Good', quality: 4 },
-  { id: 'easy', label: 'Easy', quality: 5 },
-];
+const GRADE_LABEL: Record<ReviewGrade, string> = {
+  again: 'Again',
+  hard: 'Hard',
+  good: 'Good',
+  easy: 'Easy',
+};
+
+export const WRITING_GRADES: { id: WritingGrade; label: string; quality: number }[] =
+  REVIEW_GRADES.map((id) => ({ id, label: GRADE_LABEL[id], quality: GRADE_QUALITY[id] }));
 
 export function qualityFor(grade: WritingGrade): number {
-  return WRITING_GRADES.find(g => g.id === grade)?.quality ?? 1;
+  return GRADE_QUALITY[grade];
 }
 
 /**
@@ -303,26 +335,14 @@ export function suggestedGrade(score: number): WritingGrade {
  * Whether a grade counts as correct for streak and accuracy purposes.
  *
  * Mirrors SM-2's own threshold: quality < 3 resets the repetition count, so
- * anything below 3 is a lapse.
+ * anything below 3 is a lapse. Re-exported from shared so `/write` and the
+ * flashcards cannot disagree about what counts as a pass.
  */
-export function isPassingGrade(grade: WritingGrade): boolean {
-  return qualityFor(grade) >= 3;
-}
-
 /**
- * Whether a grade should move the SRS card, given this glyph has already been
- * graded earlier in the same session.
- *
- * A confusable deck presents ד three times in one sitting, and three passing
- * grades in five minutes would stretch the interval as though they were three
- * days apart — SM-2 assumes its reviews are spaced, and here they deliberately
- * are not. So within a session a repeat can demote but never promote: a lapse
- * still pulls the schedule in, because getting it wrong on the second look is
- * real information, while getting it right again immediately is not.
+ * Whether a grade should move the SRS card on a repeat. Lives in `srs.ts`,
+ * because the paradigm quiz applies the same rule; re-exported for the decks.
  */
-export function shouldUpdateCard(alreadyReviewed: boolean, grade: WritingGrade): boolean {
-  return !alreadyReviewed || !isPassingGrade(grade);
-}
+export { isPassingGrade, shouldUpdateCard };
 
 /**
  * How many distinct glyphs in a deck have never been written.

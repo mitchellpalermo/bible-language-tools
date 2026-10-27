@@ -105,7 +105,7 @@ describe('stroke assembly', () => {
     expect(c.isDrawing).toBe(true);
     const stroke = c.end(sample({ x: 40, y: 0 }));
 
-    expect(stroke?.points.map(p => p.x)).toEqual([0, 10, 20, 30, 40]);
+    expect(stroke?.points.map((p) => p.x)).toEqual([0, 10, 20, 30, 40]);
     expect(c.isDrawing).toBe(false);
     expect(c.liveStroke).toBeNull();
   });
@@ -118,7 +118,7 @@ describe('stroke assembly', () => {
     c.extend(sample({ pointerId: 2, x: 500, y: 500 }));
     c.extend(sample({ pointerId: 1, x: 10, y: 0 }));
 
-    expect(c.end()?.points.map(p => p.x)).toEqual([0, 10]);
+    expect(c.end()?.points.map((p) => p.x)).toEqual([0, 10]);
   });
 
   it('drops samples too close to the previous one', () => {
@@ -207,7 +207,7 @@ describe('normalizePressure', () => {
     const c = capture();
     c.begin(sample({ pointerType: 'mouse', pressure: 0, x: 0 }));
     c.extend(sample({ pointerType: 'mouse', pressure: 0, x: 10 }));
-    expect(c.end()?.points.every(p => p.pressure === CONSTANT_PRESSURE)).toBe(true);
+    expect(c.end()?.points.every((p) => p.pressure === CONSTANT_PRESSURE)).toBe(true);
   });
 });
 

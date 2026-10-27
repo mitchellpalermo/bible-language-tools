@@ -16,7 +16,11 @@ const STUB_ITEM: ParseItem = {
   lemma: 'λύω',
 };
 
-function renderQuestion(answer: ParseAnswer = emptyAnswer(), onChange = vi.fn(), onSubmit = vi.fn()) {
+function renderQuestion(
+  answer: ParseAnswer = emptyAnswer(),
+  onChange = vi.fn(),
+  onSubmit = vi.fn(),
+) {
   return render(
     <ParseQuestion
       item={STUB_ITEM}
@@ -94,12 +98,13 @@ describe('ParseQuestion', () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
     // 'middle' is valid for present but not for perfect (perfect only has active/mid-pass)
-    renderQuestion({ tense: 'present', voice: 'middle', mood: '', person: '', number: '' }, onChange);
+    renderQuestion(
+      { tense: 'present', voice: 'middle', mood: '', person: '', number: '' },
+      onChange,
+    );
     const tenseSelect = screen.getByLabelText('Tense');
     await user.selectOptions(tenseSelect, 'perfect');
-    expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ tense: 'perfect', voice: '' }),
-    );
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ tense: 'perfect', voice: '' }));
   });
 
   it('calls onChange when voice changes', async () => {

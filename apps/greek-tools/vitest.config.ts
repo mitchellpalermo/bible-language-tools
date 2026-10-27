@@ -1,6 +1,6 @@
-import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'node:url';
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   plugins: [react()],
@@ -28,7 +28,6 @@ export default defineConfig({
         'src/env.d.ts',
         // TODO: add tests for these components and remove from exclude
         'src/components/GrammarReference.tsx',
-        'src/components/DailyVerse.tsx',
         'src/components/GNTReader.tsx',
         'src/components/GreekText.tsx',
         'src/components/Transliteration.tsx',

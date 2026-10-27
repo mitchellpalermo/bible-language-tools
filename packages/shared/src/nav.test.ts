@@ -70,12 +70,15 @@ describe('isNavLinkActive', () => {
     expect(isNavLinkActive(STUDY, '/study')).toBe(true);
   });
 
-  it.each(['/flashcards', '/quiz', '/paradigms', '/parse', '/focus'])(
-    'lights the Study group on %s',
-    (path) => {
-      expect(isNavLinkActive(STUDY, path)).toBe(true);
-    },
-  );
+  it.each([
+    '/flashcards',
+    '/quiz',
+    '/paradigms',
+    '/parse',
+    '/focus',
+  ])('lights the Study group on %s', (path) => {
+    expect(isNavLinkActive(STUDY, path)).toBe(true);
+  });
 
   it('lights the Study group on a nested sub-route', () => {
     expect(isNavLinkActive(STUDY, '/parse/gnt')).toBe(true);

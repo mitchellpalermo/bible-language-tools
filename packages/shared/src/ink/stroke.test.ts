@@ -18,7 +18,15 @@ function strokeOf(coords: [number, number][], pressure = 0.5): Stroke {
 
 describe('strokeLength', () => {
   it('sums the distance between consecutive samples', () => {
-    expect(strokeLength(strokeOf([[0, 0], [3, 4], [3, 14]]))).toBe(15);
+    expect(
+      strokeLength(
+        strokeOf([
+          [0, 0],
+          [3, 4],
+          [3, 14],
+        ]),
+      ),
+    ).toBe(15);
   });
 
   it('is zero for a dot and for an empty stroke', () => {
@@ -29,7 +37,16 @@ describe('strokeLength', () => {
 
 describe('boundingBox', () => {
   it('spans every point across every stroke', () => {
-    const box = boundingBox([strokeOf([[0, 10], [5, 2]]), strokeOf([[-3, 4], [8, 20]])]);
+    const box = boundingBox([
+      strokeOf([
+        [0, 10],
+        [5, 2],
+      ]),
+      strokeOf([
+        [-3, 4],
+        [8, 20],
+      ]),
+    ]);
     expect(box).toEqual({ minX: -3, minY: 2, maxX: 8, maxY: 20 });
   });
 
@@ -41,7 +58,13 @@ describe('boundingBox', () => {
 
 describe('resample', () => {
   it('spaces points evenly by arc length', () => {
-    const points = resample(strokeOf([[0, 0], [10, 0]]), 11);
+    const points = resample(
+      strokeOf([
+        [0, 0],
+        [10, 0],
+      ]),
+      11,
+    );
     expect(points).toHaveLength(11);
     points.forEach((p, i) => {
       expect(p.x).toBeCloseTo(i, 6);
@@ -53,8 +76,13 @@ describe('resample', () => {
     // The same shape drawn slowly (many samples) and quickly (few) must
     // resample to the same points — that equivalence is the entire reason
     // this function exists.
-    const slow = strokeOf(Array.from({ length: 50 }, (_, i): [number, number] => [i / 49 * 10, 0]));
-    const fast = strokeOf([[0, 0], [10, 0]]);
+    const slow = strokeOf(
+      Array.from({ length: 50 }, (_, i): [number, number] => [(i / 49) * 10, 0]),
+    );
+    const fast = strokeOf([
+      [0, 0],
+      [10, 0],
+    ]);
 
     const a = resample(slow, 8);
     const b = resample(fast, 8);
@@ -74,20 +102,39 @@ describe('resample', () => {
   });
 
   it('returns n copies of the point for a zero-length stroke', () => {
-    const points = resample(strokeOf([[4, 7], [4, 7]]), 5);
+    const points = resample(
+      strokeOf([
+        [4, 7],
+        [4, 7],
+      ]),
+      5,
+    );
     expect(points).toHaveLength(5);
-    expect(points.every(p => p.x === 4 && p.y === 7)).toBe(true);
+    expect(points.every((p) => p.x === 4 && p.y === 7)).toBe(true);
   });
 
   it('returns nothing for an empty stroke and rejects n < 2', () => {
     expect(resample({ points: [] }, 4)).toEqual([]);
-    expect(() => resample(strokeOf([[0, 0], [1, 1]]), 1)).toThrow(RangeError);
+    expect(() =>
+      resample(
+        strokeOf([
+          [0, 0],
+          [1, 1],
+        ]),
+        1,
+      ),
+    ).toThrow(RangeError);
   });
 });
 
 describe('normalizeStrokes', () => {
   it('maps ink into the unit box', () => {
-    const [s] = normalizeStrokes([strokeOf([[10, 10], [20, 20]])]);
+    const [s] = normalizeStrokes([
+      strokeOf([
+        [10, 10],
+        [20, 20],
+      ]),
+    ]);
     expect(s.points[0]).toMatchObject({ x: 0, y: 0 });
     expect(s.points[1]).toMatchObject({ x: 1, y: 1 });
   });
@@ -95,7 +142,12 @@ describe('normalizeStrokes', () => {
   it('preserves aspect ratio and centers the shorter axis', () => {
     // A horizontal line must not be stretched to fill the box vertically —
     // if it were, a ו and a ד would normalize to the same thing.
-    const [s] = normalizeStrokes([strokeOf([[0, 0], [10, 0]])]);
+    const [s] = normalizeStrokes([
+      strokeOf([
+        [0, 0],
+        [10, 0],
+      ]),
+    ]);
     expect(s.points[0].x).toBeCloseTo(0, 6);
     expect(s.points[1].x).toBeCloseTo(1, 6);
     expect(s.points[0].y).toBeCloseTo(0.5, 6);
@@ -103,7 +155,15 @@ describe('normalizeStrokes', () => {
   });
 
   it('honours size and padding', () => {
-    const [s] = normalizeStrokes([strokeOf([[0, 0], [10, 10]])], { size: 100, padding: 0.1 });
+    const [s] = normalizeStrokes(
+      [
+        strokeOf([
+          [0, 0],
+          [10, 10],
+        ]),
+      ],
+      { size: 100, padding: 0.1 },
+    );
     expect(s.points[0].x).toBeCloseTo(10, 6);
     expect(s.points[1].x).toBeCloseTo(90, 6);
   });
@@ -115,7 +175,15 @@ describe('normalizeStrokes', () => {
   });
 
   it('carries pressure and time through untouched', () => {
-    const [s] = normalizeStrokes([strokeOf([[0, 0], [10, 10]], 0.8)]);
+    const [s] = normalizeStrokes([
+      strokeOf(
+        [
+          [0, 0],
+          [10, 10],
+        ],
+        0.8,
+      ),
+    ]);
     expect(s.points[1].pressure).toBe(0.8);
     expect(s.points[1].t).toBe(10);
   });
@@ -127,6 +195,17 @@ describe('normalizeStrokes', () => {
 
 describe('totalLength', () => {
   it('sums across strokes', () => {
-    expect(totalLength([strokeOf([[0, 0], [3, 4]]), strokeOf([[0, 0], [0, 10]])])).toBe(15);
+    expect(
+      totalLength([
+        strokeOf([
+          [0, 0],
+          [3, 4],
+        ]),
+        strokeOf([
+          [0, 0],
+          [0, 10],
+        ]),
+      ]),
+    ).toBe(15);
   });
 });

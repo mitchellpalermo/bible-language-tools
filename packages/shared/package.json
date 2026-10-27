@@ -12,9 +12,17 @@
   "exports": {
     "./srs": "./src/srs.ts",
     "./daily": "./src/daily.ts",
+    "./sync-merge": "./src/sync-merge.ts",
     "./quiz-settings": "./src/quiz-settings.ts",
+    "./paradigm-quiz": "./src/paradigm-quiz.ts",
+    "./flashcard-settings": "./src/flashcard-settings.ts",
+    "./flashcard-session": "./src/flashcard-session.ts",
+    "./use-flashcard-session": "./src/use-flashcard-session.ts",
+    "./reset-progress": "./src/reset-progress.ts",
     "./nav": "./src/nav.ts",
     "./nav-menu": "./src/nav-menu.ts",
+    "./posthog-host": "./src/posthog-host.ts",
+    "./posthog-host-integration": "./src/posthog-host-integration.ts",
     "./ink": "./src/ink/index.ts",
     "./components/InkCanvas": "./src/ink/components/InkCanvas.tsx",
     "./components/SiteNav.astro": "./src/components/SiteNav.astro",
@@ -22,7 +30,11 @@
     "./components/EndingsToggle": "./src/components/EndingsToggle.tsx",
     "./components/SectionHeading": "./src/components/SectionHeading.tsx",
     "./components/DescriptionBar": "./src/components/DescriptionBar.tsx",
-    "./components/WritingGrid": "./src/ink/components/WritingGrid.tsx"
+    "./components/WritingGrid": "./src/ink/components/WritingGrid.tsx",
+    "./components/GradeButtons": "./src/components/GradeButtons.tsx",
+    "./components/DrillButtons": "./src/components/DrillButtons.tsx",
+    "./components/ToggleSwitch": "./src/components/ToggleSwitch.tsx",
+    "./components/ResetProgress": "./src/components/ResetProgress.tsx"
   },
   "peerDependencies": {
     "react": "^19.0.0"

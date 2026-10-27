@@ -120,9 +120,7 @@ export default function ChapterPicker({
               <>
                 <button
                   type="button"
-                  onClick={() =>
-                    onChange(chapters.map((c) => c.chapter).filter((c) => c <= pivot))
-                  }
+                  onClick={() => onChange(chapters.map((c) => c.chapter).filter((c) => c <= pivot))}
                   className="px-3 py-1.5 rounded-full text-sm border-2 border-primary/10 text-text-muted hover:border-primary/40 hover:text-text transition-colors font-medium"
                 >
                   Through {textbook.unitLabel} {pivot}

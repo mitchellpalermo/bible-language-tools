@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import type { Stroke } from '../stroke';
-import { alphaBounds, type GlyphMask, maskFromAlpha } from './mask';
 import {
   DEFAULT_TOLERANCE,
   MAX_REGISTRATION_SHIFT,
   scoreInk,
-  verdictFor,
   VERDICT_THRESHOLDS,
+  verdictFor,
 } from './geom';
+import { alphaBounds, type GlyphMask, maskFromAlpha } from './mask';
 
 type Poly = [number, number][];
 
@@ -49,7 +49,7 @@ function maskFrom(lines: Poly[], stem = STEM): GlyphMask {
 
 /** Ink follows the same centre-lines a student would trace. */
 function inkFrom(lines: Poly[]): Stroke[] {
-  return lines.map(line => ({
+  return lines.map((line) => ({
     points: line.map(([x, y], i) => ({ x, y, pressure: 0.5, t: i * 16 })),
   }));
 }
@@ -85,7 +85,9 @@ describe('scoreInk', () => {
     // Normalization is the whole reason a student can write anywhere on the
     // surface at any size. If this regresses, every score depends on penmanship
     // placement rather than letterform.
-    const shifted = LETTER.map(line => line.map(([x, y]) => [x * 1.4 + 30, y * 1.4 - 10] as [number, number]));
+    const shifted = LETTER.map((line) =>
+      line.map(([x, y]) => [x * 1.4 + 30, y * 1.4 - 10] as [number, number]),
+    );
     const result = scoreInk(inkFrom(shifted), maskFrom(LETTER));
 
     expect(result.score).toBeGreaterThanOrEqual(95);
@@ -192,7 +194,7 @@ describe('scoreInk', () => {
   });
 
   it('honours a tighter tolerance', () => {
-    const drifted = LETTER.map(line => line.map(([x, y]) => [x + 7, y] as [number, number]));
+    const drifted = LETTER.map((line) => line.map(([x, y]) => [x + 7, y] as [number, number]));
     const mask = maskFrom(LETTER);
 
     const lenient = scoreInk(inkFrom(drifted), mask, { tolerance: DEFAULT_TOLERANCE });
@@ -215,11 +217,19 @@ describe('scoreInk', () => {
     // That is the deliberate price of the fix, and it is paid once when the
     // student taps Compare, never inside a render or a pointer handler.
     //
-    // The assertion is far looser than either figure because V8 coverage inflates
-    // this roughly tenfold — the search is a tight loop of small calls, which is
-    // what that instrumentation costs most — and this suite runs both ways. It is
-    // here to catch a regression to a brute-force nearest-point search, which
-    // costs three orders of magnitude, not to police tenths of a millisecond.
+    // The assertion is far looser than either figure because it has to hold on
+    // the slowest machine that runs it, under coverage. V8 coverage inflates this
+    // roughly tenfold (0.77ms → 6.6ms on a laptop) — the search is a tight loop
+    // of small calls, which is what that instrumentation costs most — and a
+    // shared CI runner is about five times slower again: 33ms, which failed the
+    // old 25ms budget the day CI started running this package with coverage.
+    //
+    // It is here to catch a regression to a brute-force nearest-point search,
+    // which costs three orders of magnitude (~800ms uninstrumented), not to
+    // police milliseconds. The budget sits between the two: several times the
+    // worst instrumented CI figure, and well under the brute-force cost even
+    // without coverage, so the regression fails it on any machine. Do not
+    // tighten it toward a laptop's figure — that is what made it flaky.
     const mask = maskFrom(LETTER);
     const ink = inkFrom(LETTER);
     for (let i = 0; i < 10; i++) scoreInk(ink, mask);
@@ -229,7 +239,7 @@ describe('scoreInk', () => {
     for (let i = 0; i < runs; i++) scoreInk(ink, mask);
     const per = (performance.now() - started) / runs;
 
-    expect(per).toBeLessThan(25);
+    expect(per).toBeLessThan(150);
   });
 });
 

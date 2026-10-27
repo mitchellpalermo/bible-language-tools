@@ -6,6 +6,7 @@ import {
   headLemma,
   headLemmaIndex,
   headMorph,
+  normalizeLemmaKey,
   nounGender,
   parseAugIndex,
   parseBook,
@@ -13,7 +14,6 @@ import {
   parseStrongGlosses,
   parseVerse,
   posOf,
-  normalizeLemmaKey,
   resolveGender,
   resolveRoot,
   splitMorph,
@@ -183,12 +183,8 @@ describe('resolveGender', () => {
 
 describe('parseVerse', () => {
   it('reads text, head lemma, pos and the full morph string', () => {
-    const words = parseVerse(
-      '<w lemma="c/1961" n="1.1.1" morph="HC/Vqw3ms" id="08xeN">וַ/יְהִ֗י</w>',
-    );
-    expect(words).toEqual([
-      { text: 'וַ/יְהִ֗י', lemma: '1961', pos: 'Vq', parsing: 'HC/Vqw3ms' },
-    ]);
+    const words = parseVerse('<w lemma="c/1961" n="1.1.1" morph="HC/Vqw3ms" id="08xeN">וַ/יְהִ֗י</w>');
+    expect(words).toEqual([{ text: 'וַ/יְהִ֗י', lemma: '1961', pos: 'Vq', parsing: 'HC/Vqw3ms' }]);
   });
 
   it('keeps the morpheme boundaries in the text', () => {
@@ -198,9 +194,7 @@ describe('parseVerse', () => {
 
   it('unwraps markup nested inside a word', () => {
     // Deuteronomy 6:4 writes the ayin of שְׁמַע oversized
-    const [word] = parseVerse(
-      '<w lemma="8085" morph="HVqv2ms">שְׁמַ֖<seg type="x-large">ע</seg></w>',
-    );
+    const [word] = parseVerse('<w lemma="8085" morph="HVqv2ms">שְׁמַ֖<seg type="x-large">ע</seg></w>');
     expect(word.text).toBe('שְׁמַ֖ע');
   });
 
@@ -213,9 +207,7 @@ describe('parseVerse', () => {
   });
 
   it('ignores scribal section markers', () => {
-    const words = parseVerse(
-      '<w lemma="430" morph="HNcmpa">אֱלֹהִים</w><seg type="x-samekh">ס</seg>',
-    );
+    const words = parseVerse('<w lemma="430" morph="HNcmpa">אֱלֹהִים</w><seg type="x-samekh">ס</seg>');
     expect(words).toHaveLength(1);
     expect(words[0].after).toBeUndefined();
   });

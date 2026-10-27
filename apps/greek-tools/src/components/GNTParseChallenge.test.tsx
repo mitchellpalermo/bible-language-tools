@@ -27,9 +27,7 @@ const STUB_BOOK: MorphBook = {
       { text: 'λύεις', lemma: 'λύω', pos: 'V-', parsing: '2PAI-S--' },
       { text: 'λύω', lemma: 'λύω', pos: 'V-', parsing: '1PAI-S--' },
     ],
-    '2': [
-      { text: 'λύομεν', lemma: 'λύω', pos: 'V-', parsing: '1PAI-P--' },
-    ],
+    '2': [{ text: 'λύομεν', lemma: 'λύω', pos: 'V-', parsing: '1PAI-P--' }],
   },
 };
 
@@ -131,9 +129,7 @@ describe('GNTParseChallenge', () => {
       await user.selectOptions(screen.getByLabelText('Number'), 'singular');
       await user.click(screen.getByRole('button', { name: /submit/i }));
       await waitFor(() =>
-        expect(
-          screen.getByRole('button', { name: /next form|see results/i }),
-        ).toBeInTheDocument(),
+        expect(screen.getByRole('button', { name: /next form|see results/i })).toBeInTheDocument(),
       );
       await user.click(screen.getByRole('button', { name: /next form|see results/i }));
     }
@@ -164,9 +160,7 @@ describe('GNTParseChallenge', () => {
       await user.selectOptions(screen.getByLabelText('Number'), 'singular');
       await user.click(screen.getByRole('button', { name: /submit/i }));
       await waitFor(() =>
-        expect(
-          screen.getByRole('button', { name: /next form|see results/i }),
-        ).toBeInTheDocument(),
+        expect(screen.getByRole('button', { name: /next form|see results/i })).toBeInTheDocument(),
       );
       await user.click(screen.getByRole('button', { name: /next form|see results/i }));
     }

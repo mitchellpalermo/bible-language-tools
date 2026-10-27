@@ -1,17 +1,14 @@
 {
-	"main": "dist/_worker.js/index.js",
-	"name": "hebrew-tools",
+  "main": "dist/_worker.js/index.js",
+  "name": "hebrew-tools",
   "compatibility_date": "2026-02-12",
-  "compatibility_flags": [
-    "nodejs_compat",
-    "global_fetch_strictly_public"
-  ],
-	"assets": {
-		"binding": "ASSETS",
-		"directory": "./dist"
-	},
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./dist"
+  },
   "workers_dev": false,
-	"observability": {
+  "observability": {
     "enabled": true
   },
   // Shared with greek-tools — one database, one identity per user, rows scoped

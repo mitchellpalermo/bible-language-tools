@@ -14,10 +14,7 @@ vi.mock('astro:middleware', () => ({
 import { createAuth } from './lib/auth';
 import { onRequest } from './middleware';
 
-function makeContext(
-  sessionUser?: { id: string; email: string } | null,
-  { cookies = '' } = {},
-) {
+function makeContext(sessionUser?: { id: string; email: string } | null, { cookies = '' } = {}) {
   const mockAuth = {
     api: {
       getSession: vi.fn().mockResolvedValue(sessionUser ? { user: sessionUser } : null),

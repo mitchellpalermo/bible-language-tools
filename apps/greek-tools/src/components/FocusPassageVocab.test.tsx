@@ -73,9 +73,7 @@ describe('FocusPassageVocab', () => {
 describe('FocusPassageVocab loading lifecycle', () => {
   it('transitions out of loading state after fetch resolves', async () => {
     render(<FocusPassageVocab passage={STUB_PASSAGE} />);
-    await waitFor(() =>
-      expect(screen.queryByText(/loading vocabulary/i)).not.toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.queryByText(/loading vocabulary/i)).not.toBeInTheDocument());
   });
 });
 
@@ -118,42 +116,36 @@ describe('FocusPassageVocab with vocab data', () => {
     expect(screen.getByText('and')).toBeInTheDocument();
   });
 
-  it('shows Got It and Still Learning buttons after flip', async () => {
+  it('shows the four grade buttons after flip', async () => {
     const user = userEvent.setup();
     render(<FocusPassageVocab passage={STUB_PASSAGE} />);
     await waitFor(() => expect(screen.getByText('καί')).toBeInTheDocument());
     await user.click(screen.getByText('καί'));
-    expect(screen.getByRole('button', { name: /got it/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /still learning/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^good/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^again/i })).toBeInTheDocument();
   });
 
-  it('shows Session Complete after clicking Got It on the last card', async () => {
+  it('shows Session Complete after grading Good on the last card', async () => {
     const user = userEvent.setup();
     render(<FocusPassageVocab passage={STUB_PASSAGE} />);
     await waitFor(() => expect(screen.getByText('καί')).toBeInTheDocument());
     await user.click(screen.getByText('καί'));
-    await waitFor(() =>
-      expect(screen.getByRole('button', { name: /got it/i })).toBeInTheDocument(),
-    );
-    await user.click(screen.getByRole('button', { name: /got it/i }));
-    await waitFor(() =>
-      expect(screen.getByText(/session complete/i)).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByRole('button', { name: /^good/i })).toBeInTheDocument());
+    await user.click(screen.getByRole('button', { name: /^good/i }));
+    await waitFor(() => expect(screen.getByText(/session complete/i)).toBeInTheDocument());
     expect(screen.getByRole('button', { name: /study again/i })).toBeInTheDocument();
   });
 
-  it('shows Session Complete after clicking Still Learning on the last card', async () => {
+  it('shows Session Complete after grading Again on the last card', async () => {
     const user = userEvent.setup();
     render(<FocusPassageVocab passage={STUB_PASSAGE} />);
     await waitFor(() => expect(screen.getByText('καί')).toBeInTheDocument());
     await user.click(screen.getByText('καί'));
     await waitFor(() =>
-      expect(screen.getByRole('button', { name: /still learning/i })).toBeInTheDocument(),
+      expect(screen.getByRole('button', { name: /^again/i })).toBeInTheDocument(),
     );
-    await user.click(screen.getByRole('button', { name: /still learning/i }));
-    await waitFor(() =>
-      expect(screen.getByText(/session complete/i)).toBeInTheDocument(),
-    );
+    await user.click(screen.getByRole('button', { name: /^again/i }));
+    await waitFor(() => expect(screen.getByText(/session complete/i)).toBeInTheDocument());
   });
 
   it('restarts session when Study Again is clicked', async () => {
@@ -164,8 +156,10 @@ describe('FocusPassageVocab with vocab data', () => {
     await user.click(screen.getByRole('button', { name: 'Study All' }));
     await waitFor(() => expect(screen.getByText('καί')).toBeInTheDocument());
     await user.click(screen.getByText('καί'));
-    await user.click(screen.getByRole('button', { name: /got it/i }));
-    await waitFor(() => expect(screen.getByRole('button', { name: /study again/i })).toBeInTheDocument());
+    await user.click(screen.getByRole('button', { name: /^good/i }));
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /study again/i })).toBeInTheDocument(),
+    );
     await user.click(screen.getByRole('button', { name: /study again/i }));
     await waitFor(() => expect(screen.getByText('καί')).toBeInTheDocument());
   });
@@ -217,7 +211,7 @@ describe('FocusPassageVocab with vocab data', () => {
     await waitFor(() => expect(screen.getByText(/not quite/i)).toBeInTheDocument());
   });
 
-  it('type mode: after submitting shows Next button to advance', async () => {
+  it('type mode: after submitting shows the grade buttons', async () => {
     const user = userEvent.setup();
     render(<FocusPassageVocab passage={STUB_PASSAGE} />);
     await waitFor(() => expect(screen.getByText('καί')).toBeInTheDocument());
@@ -226,14 +220,15 @@ describe('FocusPassageVocab with vocab data', () => {
     await user.type(input, 'and');
     await user.click(screen.getByRole('button', { name: /check/i }));
     await waitFor(() => expect(screen.getByText(/correct/i)).toBeInTheDocument());
-    // After correct answer in type mode, Got It button appears
-    expect(screen.getByRole('button', { name: /got it/i })).toBeInTheDocument();
+    // After a checked answer the full grade row appears — auto-checking says
+    // whether the spelling matched, not how hard the recall was.
+    expect(screen.getByRole('button', { name: /^good/i })).toBeInTheDocument();
   });
 
   it('shows "No cards due" in SRS mode when all cards are reviewed', async () => {
     // Pre-populate SRS store with a future due date so the word is not due
     const futureStore = {
-      'καί': {
+      καί: {
         key: 'καί',
         interval: 7,
         repetition: 3,
@@ -244,16 +239,14 @@ describe('FocusPassageVocab with vocab data', () => {
     };
     localStorage.setItem('greek-tools-srs-v2', JSON.stringify(futureStore));
     render(<FocusPassageVocab passage={STUB_PASSAGE} />);
-    await waitFor(() =>
-      expect(screen.getByText(/no cards due/i)).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByText(/no cards due/i)).toBeInTheDocument());
     expect(screen.getByRole('button', { name: /study all anyway/i })).toBeInTheDocument();
   });
 
   it('"Study all anyway" switches to all mode from the no-cards-due state', async () => {
     const user = userEvent.setup();
     const futureStore = {
-      'καί': {
+      καί: {
         key: 'καί',
         interval: 7,
         repetition: 3,

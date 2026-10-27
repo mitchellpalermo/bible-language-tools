@@ -83,12 +83,16 @@ describe('HebrewKeyboard', () => {
 
     // Letters with final forms: type two consonants so the first is mid-word
     it.each([
-      ['k', 'l', 'כ'],   // kaf + lamed: kaf is mid-word, stays כ
-      ['m', 'l', 'מ'],   // mem + lamed: mem is mid-word, stays מ
-      ['n', 'l', 'נ'],   // nun + lamed: nun is mid-word, stays נ
-      ['p', 'l', 'פ'],   // pe  + lamed: pe  is mid-word, stays פ
-      ['x', 'l', 'צ'],   // tsade + lamed: tsade is mid-word, stays צ
-    ] as [string, string, string][])('key %s mid-word produces %s (not final form)', (key, follow, expected) => {
+      ['k', 'l', 'כ'], // kaf + lamed: kaf is mid-word, stays כ
+      ['m', 'l', 'מ'], // mem + lamed: mem is mid-word, stays מ
+      ['n', 'l', 'נ'], // nun + lamed: nun is mid-word, stays נ
+      ['p', 'l', 'פ'], // pe  + lamed: pe  is mid-word, stays פ
+      ['x', 'l', 'צ'], // tsade + lamed: tsade is mid-word, stays צ
+    ] as [
+      string,
+      string,
+      string,
+    ][])('key %s mid-word produces %s (not final form)', (key, follow, expected) => {
       render(<HebrewKeyboard />);
       const ta = getTextarea();
       typeKey(ta, key);
@@ -121,13 +125,13 @@ describe('HebrewKeyboard', () => {
 
   describe('nikud key mappings', () => {
     it.each([
-      ['a', 'ַ'],  // patah
-      ['A', 'ָ'],  // qamets
-      ['e', 'ֶ'],  // segol
-      ['E', 'ֵ'],  // tsere
-      ['i', 'ִ'],  // hireq
-      ['o', 'ֹ'],  // holem
-      ['u', 'ֻ'],  // qibbuts
+      ['a', 'ַ'], // patah
+      ['A', 'ָ'], // qamets
+      ['e', 'ֶ'], // segol
+      ['E', 'ֵ'], // tsere
+      ['i', 'ִ'], // hireq
+      ['o', 'ֹ'], // holem
+      ['u', 'ֻ'], // qibbuts
     ] as [string, string][])('key %s produces %s', (key, expected) => {
       render(<HebrewKeyboard />);
       typeKey(getTextarea(), key);
@@ -164,8 +168,8 @@ describe('HebrewKeyboard', () => {
       typeKey(ta, ':');
       typeKey(ta, 'a');
       // Should contain hateph patah, not sheva
-      expect(ta.value).toContain('ֲ');  // hateph patah
-      expect(ta.value).not.toContain('ְ');  // no sheva
+      expect(ta.value).toContain('ֲ'); // hateph patah
+      expect(ta.value).not.toContain('ְ'); // no sheva
     });
 
     it(':e sequence produces hateph segol (replaces sheva)', () => {
@@ -173,7 +177,7 @@ describe('HebrewKeyboard', () => {
       const ta = getTextarea();
       typeKey(ta, ':');
       typeKey(ta, 'e');
-      expect(ta.value).toContain('ֱ');  // hateph segol
+      expect(ta.value).toContain('ֱ'); // hateph segol
       expect(ta.value).not.toContain('ְ');
     });
 
@@ -182,7 +186,7 @@ describe('HebrewKeyboard', () => {
       const ta = getTextarea();
       typeKey(ta, ':');
       typeKey(ta, 'A');
-      expect(ta.value).toContain('ֳ');  // hateph qamets
+      expect(ta.value).toContain('ֳ'); // hateph qamets
       expect(ta.value).not.toContain('ְ');
     });
 
@@ -192,7 +196,7 @@ describe('HebrewKeyboard', () => {
       typeKey(ta, ':');
       typeKey(ta, 'b');
       // Sheva should still be present, and bet should be appended
-      expect(ta.value).toContain('ְ');  // sheva
+      expect(ta.value).toContain('ְ'); // sheva
       expect(ta.value).toContain('ב');
     });
   });
@@ -320,7 +324,9 @@ describe('HebrewKeyboard', () => {
       const event = new Event('beforeinput', { bubbles: true, cancelable: true });
       Object.defineProperty(event, 'inputType', { value: 'deleteContentBackward' });
       Object.defineProperty(event, 'data', { value: null });
-      await act(async () => { fireEvent(getTextarea(), event); });
+      await act(async () => {
+        fireEvent(getTextarea(), event);
+      });
       expect(getTextarea().value).toBe('');
     });
 
@@ -329,7 +335,9 @@ describe('HebrewKeyboard', () => {
       const event = new Event('beforeinput', { bubbles: true, cancelable: true });
       Object.defineProperty(event, 'inputType', { value: 'insertText' });
       Object.defineProperty(event, 'data', { value: null });
-      await act(async () => { fireEvent(getTextarea(), event); });
+      await act(async () => {
+        fireEvent(getTextarea(), event);
+      });
       expect(getTextarea().value).toBe('');
     });
 
@@ -387,12 +395,12 @@ describe('HebrewKeyboard', () => {
     it('resets pending hateph state on clear', () => {
       render(<HebrewKeyboard />);
       const ta = getTextarea();
-      typeKey(ta, ':');  // pending hateph
+      typeKey(ta, ':'); // pending hateph
       fireEvent.click(screen.getByRole('button', { name: /clear/i }));
       // Typing 'a' after clear should produce patah, not hateph patah
       typeKey(ta, 'a');
-      expect(ta.value).toContain('ַ');  // patah
-      expect(ta.value).not.toContain('ֲ');  // not hateph patah
+      expect(ta.value).toContain('ַ'); // patah
+      expect(ta.value).not.toContain('ֲ'); // not hateph patah
     });
   });
 

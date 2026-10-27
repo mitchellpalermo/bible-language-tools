@@ -20,9 +20,7 @@ const line: Stroke = {
 
 function setup(props: Partial<React.ComponentProps<typeof WritingGrid>> = {}) {
   const onSelect = vi.fn<(i: number) => void>();
-  const view = render(
-    <WritingGrid cells={DAVAR} active={null} onSelect={onSelect} {...props} />,
-  );
+  const view = render(<WritingGrid cells={DAVAR} active={null} onSelect={onSelect} {...props} />);
   return { onSelect, view };
 }
 
@@ -93,7 +91,7 @@ describe('WritingGrid', () => {
     const { view } = setup({
       cells: [cell('דָּ', { score: 91 }), cell('בָ', { score: 70 }), cell('ר', { score: 30 })],
     });
-    const verdicts = [...view.container.querySelectorAll('.ink-grid__score')].map(s =>
+    const verdicts = [...view.container.querySelectorAll('.ink-grid__score')].map((s) =>
       s.getAttribute('data-verdict'),
     );
 
@@ -105,9 +103,9 @@ describe('WritingGrid', () => {
 
     expect(view.container.querySelectorAll('.ink-grid__ghost')).toHaveLength(3);
     expect(
-      render(<WritingGrid cells={DAVAR} active={null} onSelect={() => {}} />).container.querySelectorAll(
-        '.ink-grid__ghost',
-      ),
+      render(
+        <WritingGrid cells={DAVAR} active={null} onSelect={() => {}} />,
+      ).container.querySelectorAll('.ink-grid__ghost'),
     ).toHaveLength(0);
   });
 

@@ -81,7 +81,11 @@ describe('TranslationPDFExport — export flow', () => {
 
   it('shows "Generating PDF…" while the export is in progress', async () => {
     let resolve!: (v: Uint8Array) => void;
-    mockBuildPDF.mockReturnValue(new Promise((res) => { resolve = res; }));
+    mockBuildPDF.mockReturnValue(
+      new Promise((res) => {
+        resolve = res;
+      }),
+    );
 
     const user = userEvent.setup();
     render(<TranslationPDFExport />);
