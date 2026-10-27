@@ -85,7 +85,6 @@ Branches are at 80% (not 90%) due to defensive null-coalescing paths in grammar 
 These components are excluded from coverage thresholds but should be tested:
 
 - `src/components/GrammarReference.tsx`
-- `src/components/DailyVerse.tsx`
 - `src/components/GNTReader.tsx`
 - `src/components/GreekText.tsx`
 - `src/components/Transliteration.tsx`
@@ -148,6 +147,37 @@ from being read during the window before the new fetch resolves.
 Mock `fetchBook` per code when testing this — a mock that returns the same stub
 for every book cannot tell a stale response from a fresh one, and the original
 `CrossChapterSelector` tests missed the bug for exactly that reason.
+
+## The Daily Dose source (`/daily`)
+
+`/daily` shows the newest Greek verse lesson from Daily Dose of Scripture
+(formerly Daily Dose of Greek) and falls back to the curated list in
+`src/data/dailyVerses.ts` when it cannot. `src/data/dailyDose.ts` is the whole
+integration. Things to know before changing it (#177):
+
+- **The fallback is designed to look normal, so it hides a broken source.** The
+  rebrand left the old feed answering with stale posts, and the page showed the
+  wrong verse for weeks without an error. `daily_verse_viewed` now carries
+  `source` (`daily_dose` or `curated`) and, on a fallback, `fallback_reason`.
+  Check that ratio in PostHog after any change here, on the static `/daily`
+  page. Same failure pattern as the PostHog host incident in the repo CLAUDE.md.
+- **Look the category ID up; never guess it.** Greek is category 43 on
+  dailydoseofscripture.com (`/wp-json/wp/v2/categories?slug=greek`). The old
+  Greek ID, 5, is Aramaic on the new host, so a host swap alone would serve
+  Aramaic lessons that fail to parse.
+- **The newest Greek post is often not a verse.** Special editions, interviews
+  and event notices share the category, most Saturdays among them. The fetch
+  takes 10 posts and uses the first title that parses as one Greek NT
+  reference. On a Saturday or Sunday that is Friday's lesson, which is
+  intended. Hebrew, Aramaic, Latin and Septuagint lessons live in other
+  categories, and an OT book name never parses anyway.
+- **`title.rendered` is HTML.** WordPress writes `&#8211;` for a dash and
+  `&amp;` for `&`, so titles are entity-decoded before matching.
+- **The API origin must be in `connect-src` in `public/_headers`.** A missing
+  host fails as a bare network error, which is just another quiet fallback.
+  `dailyDose.test.ts` reads the real `_headers` and fails if it is missing.
+- `src/data/fixtures/daily-dose-greek-feed-2026-10-24.json` is a saved copy of
+  the real response, taken on a Saturday when a special edition was on top.
 
 ## Error Reporting
 
