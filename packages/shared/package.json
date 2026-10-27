@@ -19,6 +19,8 @@
     "./flashcard-settings": "./src/flashcard-settings.ts",
     "./flashcard-session": "./src/flashcard-session.ts",
     "./use-flashcard-session": "./src/use-flashcard-session.ts",
+    "./use-stored-state": "./src/use-stored-state.ts",
+    "./test/hydration": "./src/test/hydration.ts",
     "./reset-progress": "./src/reset-progress.ts",
     "./nav": "./src/nav.ts",
     "./nav-menu": "./src/nav-menu.ts",

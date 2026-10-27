@@ -59,6 +59,8 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/flashcard-settings` | `createFlashcardSettings(storageKey)` factory for what the flashcard face shows before you answer |
 | `@tools/shared/flashcard-session` | `shuffle`, `nextRound` and `requeueMissed` — pure flashcard queue rules: Endless mode's reshuffle, and the drill modes' re-queue of a missed card. Used through `use-flashcard-session` |
 | `@tools/shared/use-flashcard-session` | `useFlashcardSession<T>()` — the flashcard session engine: dealing, SRS grading, drills, Endless, typed answers, the keyboard. Both apps' `Flashcards.tsx` run on it. See "The flashcard session engine" below |
+| `@tools/shared/use-stored-state` | `useStoredState(load, fallback, save?)` and `useHydrated()` — state seeded from storage without breaking hydration. See "Hydration" below |
+| `@tools/shared/test/hydration` | `hydrationErrors(ui, { seed })` — test helper: server-render with storage hidden, seed, hydrate, return every mismatch React reports |
 | `@tools/shared/reset-progress` | `resetSrsProgress` and `isResetConfirmed` — erase the SRS store, this browser first, then the account copy via `DELETE`; a server failure never undoes the local reset |
 | `@tools/shared/nav` | `NavLink` type and the active-route predicates the nav renders with |
 | `@tools/shared/nav-menu` | `initNavMenu()` — DOM controller for the mobile drawer |
@@ -293,6 +295,34 @@ and calls `DELETE /api/progress` when signed in. Three things to know:
   local-only and `mergeCustomDecks` is a union, so a deleted deck that the
   account still holds can come back on the next pull. Closing it properly needs
   tombstones, not another `DELETE`.
+
+## Hydration: the first render matches the server's
+
+Both apps prerender every page, and the server has no `localStorage`. An island
+whose first render shows anything read from storage draws the defaults on the
+server and the student's data in the browser. React then throws #418 on a text
+difference, or, for an attribute-only difference (`className`, `aria-checked`),
+keeps the server's attribute with no error at all. The full account, and the
+four components it caught after `/account`, is ADR 006
+(`apps/greek-tools/docs/adr/006-hydration-client-only-state.md`), which governs
+both apps.
+
+- **State seeded from storage goes through `useStoredState`** from
+  `@tools/shared/use-stored-state`. It hands back the fallback during
+  hydration and the stored value before first paint.
+- **Pass it `save`; do not save in an effect.** An effect that saves on change
+  runs on mount with the fallback and overwrites what the student stored.
+- **Hold back an empty state until `loaded`.** "No focus passages yet" is wrong
+  for a student who has some.
+- **A read during render is fine when the first render does not show it.**
+  Both Flashcards pages read the SRS store in an initializer and deal in an
+  effect, so their first render is the empty state on both sides. Do not move
+  those reads into an effect: the deal would run against an empty store.
+- **The test decides, not a grep.** Each app's `src/test/hydration.test.tsx`
+  hydrates every `client:load` island over its server HTML with a returning
+  student's data, and fails when a page gains an island it does not list. A new
+  island needs a case there. A new stored value needs seeding there, or the
+  test cannot see it differ.
 
 ## Pull requests
 

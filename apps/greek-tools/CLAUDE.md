@@ -217,4 +217,5 @@ The `component` prop is tagged on every captured exception so errors can be filt
 See `docs/adr/` for recorded decisions:
 - `001-analytics-posthog.md` — why PostHog over alternatives
 - `002-github-issues-for-task-tracking.md` — why GitHub Issues replaced PRDs
+- `006-hydration-client-only-state.md` — why an island's first render must not depend on storage, and the test that enforces it (governs both apps)
 - `007-posthog-first-party-ingest-host.md` — why events go through `t.greek.tools`, and the build guard that enforces it

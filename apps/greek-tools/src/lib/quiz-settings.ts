@@ -1,41 +1,17 @@
 /**
- * Quiz settings persistence — saves accent strictness and difficulty
- * preferences to localStorage so they survive page reloads.
+ * greek.tools' binding of the shared quiz settings — accent strictness and
+ * difficulty, kept in localStorage so they survive page reloads.
+ *
+ * This was a hand-written copy of the shared module, identical in behaviour.
+ * It became a binding when the page needed the defaults too (ADR 006): two
+ * copies would have needed the same change made twice.
  */
 
-import type { Density } from './paradigm-quiz';
+export type { Density, QuizSettings } from '@tools/shared/quiz-settings';
 
-const QUIZ_SETTINGS_KEY = 'greek-tools-quiz-settings-v1';
+import { createQuizSettings } from '@tools/shared/quiz-settings';
 
-export interface QuizSettings {
-  accentStrict: boolean;
-  density: Density;
-}
+export const QUIZ_SETTINGS_KEY = 'greek-tools-quiz-settings-v1';
 
-const DEFAULTS: QuizSettings = {
-  accentStrict: false,
-  density: 'medium',
-};
-
-function isValidDensity(d: unknown): d is Density {
-  return d === 'easy' || d === 'medium' || d === 'hard';
-}
-
-export function loadQuizSettings(): QuizSettings {
-  try {
-    const raw = localStorage.getItem(QUIZ_SETTINGS_KEY);
-    if (!raw) return { ...DEFAULTS };
-    const parsed = JSON.parse(raw) as Partial<QuizSettings>;
-    return {
-      accentStrict:
-        typeof parsed.accentStrict === 'boolean' ? parsed.accentStrict : DEFAULTS.accentStrict,
-      density: isValidDensity(parsed.density) ? parsed.density : DEFAULTS.density,
-    };
-  } catch {
-    return { ...DEFAULTS };
-  }
-}
-
-export function saveQuizSettings(settings: QuizSettings): void {
-  localStorage.setItem(QUIZ_SETTINGS_KEY, JSON.stringify(settings));
-}
+export const { loadQuizSettings, saveQuizSettings, defaultQuizSettings } =
+  createQuizSettings(QUIZ_SETTINGS_KEY);

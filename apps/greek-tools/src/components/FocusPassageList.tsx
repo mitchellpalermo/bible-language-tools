@@ -1,3 +1,4 @@
+import { useStoredState } from '@tools/shared/use-stored-state';
 import { Pencil, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -147,8 +148,31 @@ function PassageCard({
   );
 }
 
+const NEW_PASSAGE_CLASS =
+  'px-4 py-2 bg-[var(--color-accent)] text-white rounded-xl text-sm font-bold hover:opacity-90 transition-opacity';
+
+function ListHeader({ subtitle }: { subtitle: string }) {
+  return (
+    <div className="flex items-center justify-between mb-8">
+      <div>
+        <h1 className="text-2xl font-bold text-text">Focus Passages</h1>
+        <p className="text-text-muted text-sm mt-1">{subtitle}</p>
+      </div>
+      <a href="/focus/new" className={NEW_PASSAGE_CLASS}>
+        New Passage
+      </a>
+    </div>
+  );
+}
+
+const EMPTY_SUBTITLE = 'Pin a verse range and master it through vocab, parsing, and reading.';
+const NO_PASSAGES: FocusPassage[] = [];
+
 function FocusPassageListInner() {
-  const [passages, setPassages] = useState<FocusPassage[]>(() => loadFocusPassages());
+  // Passages live in this browser only, and the page is prerendered. Until
+  // they are read, say nothing about them: "No focus passages yet" is the
+  // wrong thing to show a student who has some (ADR 006).
+  const [passages, setPassages, loaded] = useStoredState(loadFocusPassages, NO_PASSAGES);
   const [books, setBooks] = useState<BookMeta[]>([]);
 
   useEffect(() => {
@@ -170,23 +194,19 @@ function FocusPassageListInner() {
     setPassages(updated);
   }
 
+  if (!loaded) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <ListHeader subtitle={EMPTY_SUBTITLE} />
+        <p className="text-center py-24 text-text-muted">Loading…</p>
+      </div>
+    );
+  }
+
   if (passages.length === 0) {
     return (
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-text">Focus Passages</h1>
-            <p className="text-text-muted text-sm mt-1">
-              Pin a verse range and master it through vocab, parsing, and reading.
-            </p>
-          </div>
-          <a
-            href="/focus/new"
-            className="px-4 py-2 bg-[var(--color-accent)] text-white rounded-xl text-sm font-bold hover:opacity-90 transition-opacity"
-          >
-            New Passage
-          </a>
-        </div>
+        <ListHeader subtitle={EMPTY_SUBTITLE} />
 
         <div className="text-center py-24 space-y-4">
           <p
@@ -210,20 +230,9 @@ function FocusPassageListInner() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-text">Focus Passages</h1>
-          <p className="text-text-muted text-sm mt-1">
-            {passages.length} passage{passages.length !== 1 ? 's' : ''} saved
-          </p>
-        </div>
-        <a
-          href="/focus/new"
-          className="px-4 py-2 bg-[var(--color-accent)] text-white rounded-xl text-sm font-bold hover:opacity-90 transition-opacity"
-        >
-          New Passage
-        </a>
-      </div>
+      <ListHeader
+        subtitle={`${passages.length} passage${passages.length !== 1 ? 's' : ''} saved`}
+      />
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {passages.map((p) => (

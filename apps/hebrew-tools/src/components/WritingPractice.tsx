@@ -11,6 +11,7 @@ import {
   type Verdict,
   type WritableGlyph,
 } from '@tools/shared/ink';
+import { useHydrated, useStoredState } from '@tools/shared/use-stored-state';
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { hebrewScriptPack } from '../data/script-pack';
@@ -43,6 +44,7 @@ import {
 import ErrorBoundary from './ErrorBoundary';
 
 const DECKS = buildDecks();
+const EMPTY_STORE: Record<string, SRSCard> = {};
 
 /** The reference masks an attempt is scored against. */
 interface ScoringMasks {
@@ -56,7 +58,14 @@ interface ScoringMasks {
 }
 
 function WritingPracticeInner() {
-  const [srsStore, setSrsStore] = useState<Record<string, SRSCard>>(() => loadSRSStore());
+  // The page is prerendered with no storage, so the schedule is read after
+  // hydration. Until then the server's markup and the browser's must agree on
+  // which letter comes first, and only an empty queue does (ADR 006).
+  const hydrated = useHydrated();
+  const [srsStore, setSrsStore] = useStoredState<Record<string, SRSCard>>(
+    loadSRSStore,
+    EMPTY_STORE,
+  );
   const [, setStats] = useState(() => loadStats());
 
   const [deckId, setDeckId] = useState(DECKS[0].id);
@@ -88,7 +97,11 @@ function WritingPracticeInner() {
   // Built once per session, not per review. It reads the store directly rather
   // than depending on `srsStore` so that grading a card cannot reorder the
   // letters still ahead of the student.
-  const queue = useMemo(() => buildQueue(deck, loadSRSStore()), [deck, session]);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `session` is the restart trigger
+  const queue = useMemo(
+    () => (hydrated ? buildQueue(deck, loadSRSStore()) : []),
+    [deck, session, hydrated],
+  );
 
   const glyph: WritableGlyph | undefined = queue[index];
 
@@ -237,6 +250,20 @@ function WritingPracticeInner() {
   // Surfaced before the student writes, not after: a confusable deck's whole
   // job is to make the contrast present at the moment of recall.
   const partners = deck.category === 'confusables' ? (glyph?.confusableWith ?? []) : [];
+
+  if (!hydrated) {
+    return (
+      <div className="space-y-4">
+        <DeckPicker deckId={deckId} onPick={startDeck} />
+        <p
+          className="bg-bg-card rounded-xl border p-8 text-center text-text-muted shadow-sm"
+          style={{ borderColor: '#D1FAE5' }}
+        >
+          Loading…
+        </p>
+      </div>
+    );
+  }
 
   if (done || !glyph) {
     return (

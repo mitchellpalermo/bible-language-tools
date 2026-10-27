@@ -14,6 +14,13 @@ describe('createQuizSettings', () => {
     expect(loadQuizSettings()).toEqual({ accentStrict: false, density: 'medium' });
   });
 
+  it('exposes the defaults it falls back to, overrides applied', () => {
+    const { defaultQuizSettings } = createQuizSettings(KEY, { density: 'hard' });
+
+    expect(defaultQuizSettings).toEqual({ accentStrict: false, density: 'hard' });
+    expect(Object.isFrozen(defaultQuizSettings)).toBe(true);
+  });
+
   it('lets an app override a default without touching the others', () => {
     const { loadQuizSettings } = createQuizSettings(KEY, { density: 'hard' });
 
