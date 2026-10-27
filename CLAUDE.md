@@ -344,6 +344,18 @@ How to capture: drive a Playwright script against `pnpm dev` rather than taking 
 
 How to attach: GitHub's image upload is web-UI only — there is no API for it, so `gh` cannot upload to it. Commit the images to an orphan branch (`assets/pr-<N>`) and reference them from the PR body by their `raw.githubusercontent.com` URL. That keeps binaries out of `main`'s history, and the branch can be deleted after the merge. The repo is public, so raw URLs render for everyone.
 
+**Build that orphan branch in a throwaway directory, never in the working tree.** `git init` a temp dir, add the remote, commit the PNGs, push the branch, delete the dir:
+
+```bash
+WT=$(mktemp -d) && cd "$WT" && git init -q .
+git remote add origin https://github.com/mitchellpalermo/bible-language-tools.git
+cp /path/to/shots/*.png . && git add *.png
+git commit -q -m "assets: screenshots for PR #<N>"
+git branch -M assets/pr-<N> && git push -q origin assets/pr-<N>
+```
+
+Never `git checkout --orphan` + `git clean -fdx` in the repo: it deletes ignored files (`.dev.vars`, `.wrangler/`, `public/data/`) and untracked directories like `.claude/`, unrecoverably — and `-e` exclusions do not reliably stop it.
+
 ## Cloudflare Workers deployment
 
 Each app deploys to its own Worker. CI runs `wrangler deploy` from each app's directory after a successful build — no dashboard configuration needed.
