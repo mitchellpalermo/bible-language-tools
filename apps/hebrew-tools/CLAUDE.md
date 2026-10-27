@@ -102,6 +102,7 @@ CI that check is a gate: `hebrew-tools.yml` runs `build:data` before `test:run`.
 | `src/test/corpus.test.ts` | Fails when `CI` is set and the corpus is missing |
 | `src/data/verb-paradigms.test.ts` | Checks כתב, בנה and היה; gaps listed in `UNATTESTED` |
 | `src/data/grammar-nominal.test.ts` | Checks every noun form, example and Hebrew word in a note |
+| `src/data/dailyVerses.corpus.test.ts` | Resolves every Daily Verse reference; see "Daily Verse" |
 
 - **Locally it skips until you build the data.** `pnpm build:data` once (24 MB,
   gitignored), and the checks run from then on. Do this before editing a form.
@@ -353,7 +354,10 @@ Things that will bite if changed carelessly:
 ### Daily Verse (issue #76)
 
 `src/data/dailyVerses.ts` is the curated list behind `/daily` — 85 verses across
-Torah, Nevi'im and Ketuvim, cycled one a day by `dayIndex` from
+Torah, Nevi'im and Ketuvim. It is the **fallback** for when the Daily Dose of
+Scripture Hebrew feed cannot be used, the same arrangement as greek.tools (see
+`ROADMAP.md` Phase 3b and greek-tools' CLAUDE.md, "The Daily Dose source"). It is
+cycled one a day by `dayIndex` from
 `@tools/shared/daily`. The streak is `createDailyStreak('hebrew-tools-daily-v1')`
 from the same module, deliberately separate from the flashcards streak in
 `hebrew-tools-stats-v1`: reading a verse is not reviewing a deck.
@@ -388,17 +392,13 @@ taking the corpus as a `lookup` callback, the same split as `oshb.mjs` against
 | Caller | Covers | Runs |
 |---|---|---|
 | `scripts/lib/daily-verses.test.mjs` | the checker itself, over a synthetic corpus | always, including CI |
-| `src/data/dailyVerses.corpus.test.ts` | the real list against the real corpus | `pnpm test`, **skipped** when the corpus is not built |
+| `src/data/dailyVerses.corpus.test.ts` | the real list against the real corpus | `pnpm test` once the corpus is built, and in CI as part of the corpus gate |
 | `src/data/dailyVerses.test.ts` | shape, `displayRef` agreement, duplicates, the ten divergences | always, including CI |
 | `pnpm check:verses` | the same validation, plus `--show` to print the text | by hand |
 
-`describe.skipIf` is what makes the corpus test viable: it needs
-`public/data/morphhb/`, which is 24 MB, gitignored, and deliberately not built
-in CI — the same constraint that keeps `build:vocab:check` out of the build. So
-it runs on every local `pnpm test` and silently skips in CI, which is a tighter
-loop than a pre-commit hook and cannot be bypassed with `--no-verify`. There is
-a companion `describe.skipIf(built)` block whose only job is to make the skip
-visible in the output rather than looking like a missing test.
+The corpus test is guarded by `hasCorpus` from `src/test/corpus.ts`, like the
+other corpus checks (see "The corpus gate"), so a fresh checkout still runs the
+suite and CI cannot quietly skip it.
 
 ```bash
 pnpm build:data            # the corpus (24 MB, gitignored) — enables the corpus test

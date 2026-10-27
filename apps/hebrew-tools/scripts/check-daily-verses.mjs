@@ -5,7 +5,8 @@
  *
  * The checks live in `lib/daily-verses.mjs` and are shared with
  * `src/data/dailyVerses.corpus.test.ts`, which runs the same validation inside
- * `pnpm test` whenever the corpus happens to be built. This file is I/O and
+ * `pnpm test` whenever the corpus is built — locally after `pnpm build:data`,
+ * and always in CI, where it is part of the corpus gate. This file is I/O and
  * output: read the source, read the books, print. Same split as `oshb.mjs`
  * against `build-morphhb.mjs`.
  *

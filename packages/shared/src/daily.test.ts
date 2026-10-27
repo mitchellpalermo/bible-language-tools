@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { createDailyStreak, dayIndex, epochDay, localDateStr } from './daily';
+import { createDailyStreak, dayIndex, epochDay } from './daily';
+import { localDateStr } from './srs';
 
 // ─── localStorage mock ────────────────────────────────────────────────────────
 
@@ -96,22 +97,6 @@ describe('dayIndex', () => {
 
   it('returns 0 for an empty list rather than NaN', () => {
     expect(dayIndex(0)).toBe(0);
-  });
-});
-
-// ─── localDateStr ─────────────────────────────────────────────────────────────
-
-describe('localDateStr', () => {
-  it('zero-pads month and day', () => {
-    expect(localDateStr(new Date(2026, 0, 5))).toBe('2026-01-05');
-  });
-
-  it('reads the local date, not the UTC one', () => {
-    // Late evening local time is already tomorrow in UTC for anyone east of
-    // Greenwich and still yesterday for anyone west — `toISOString().slice(0,10)`
-    // is what this guards against.
-    const late = new Date(2026, 2, 15, 23, 30);
-    expect(localDateStr(late)).toBe('2026-03-15');
   });
 });
 

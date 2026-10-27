@@ -11,6 +11,7 @@ import {
   HARD_MULTIPLIER,
   isDue,
   isPassingGrade,
+  localDateStr,
   MIN_EASE,
   newCard,
   nextSRS,
@@ -55,6 +56,20 @@ function makeCard(overrides: Partial<SRSCard> = {}): SRSCard {
 }
 
 // ─── date helpers ────────────────────────────────────────────────────────────
+
+describe('localDateStr', () => {
+  it('zero-pads month and day', () => {
+    expect(localDateStr(new Date(2026, 0, 5))).toBe('2026-01-05');
+  });
+
+  it('reads the local date, not the UTC one', () => {
+    // Late evening local time is already tomorrow in UTC for anyone east of
+    // Greenwich and still yesterday for anyone west — `toISOString().slice(0,10)`
+    // is what this guards against.
+    const late = new Date(2026, 2, 15, 23, 30);
+    expect(localDateStr(late)).toBe('2026-03-15');
+  });
+});
 
 describe('todayStr / daysFromNow / yesterdayStr', () => {
   it('todayStr matches an ISO date (YYYY-MM-DD)', () => {

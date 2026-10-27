@@ -10,8 +10,12 @@
  *
  * Everything here is deliberately **local-time**, not UTC. A daily feature that
  * rolls over at UTC midnight changes the verse in the middle of the evening for
- * most of the Americas and mid-morning for east Asia.
+ * most of the Americas and mid-morning for east Asia. The day boundary is
+ * `localDateStr` from `./srs`, the same one the flashcard streak uses, so the
+ * two features can never disagree about what "today" is.
  */
+
+import { localDateStr } from './srs';
 
 // ─── Day selection ────────────────────────────────────────────────────────────
 
@@ -50,20 +54,6 @@ export interface DailyStreakData {
 }
 
 const EMPTY: DailyStreakData = { streak: 0, lastReadDate: '' };
-
-/**
- * A local calendar date as `YYYY-MM-DD`.
- *
- * Built from the local getters rather than `toISOString()`, which converts to
- * UTC first and so names yesterday for anyone west of Greenwich after their
- * evening — the exact hours a daily reading habit actually happens in.
- */
-export function localDateStr(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
 
 /** The stored shape, or `null` for anything that is not it. */
 function parse(raw: string | null): DailyStreakData | null {

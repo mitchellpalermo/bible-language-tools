@@ -1,5 +1,6 @@
 /**
- * The curated verse list behind `/daily` (issue #76).
+ * The curated verse list behind `/daily` (issue #76) — the fallback for days
+ * the Daily Dose of Scripture Hebrew feed cannot be used, as on greek.tools.
  *
  * One verse a day, cycling deterministically through the list below. Chosen for
  * three things at once, in roughly this priority: high-frequency vocabulary a

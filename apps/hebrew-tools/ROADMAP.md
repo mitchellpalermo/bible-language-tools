@@ -230,10 +230,11 @@ content task with its own failure modes, and the component is UI over it.
 
 ### What 3a settled
 
-**Verse source:** no equivalent to Daily Dose of Greek exists for Hebrew, so the
-curated list is the only source rather than a fallback. 85 verses — 25 Torah, 27
-Nevi'im, 33 Ketuvim — capped at about twenty words each, because a daily verse
-should be finishable standing up and Joshua 24:15 is thirty-four words.
+**Verse source:** 85 curated verses — 25 Torah, 27 Nevi'im, 33 Ketuvim — capped
+at about twenty words each, because a daily verse should be finishable standing
+up and Joshua 24:15 is thirty-four words. 3a was written as if this list were the
+only source. It is now the **fallback**, as on greek.tools: see "Primary source"
+under 3b.
 
 **The references are Masoretic, and getting one wrong fails silently.** This is
 the finding that shaped the whole PR. The corpus numbers verses the way a printed
@@ -246,13 +247,38 @@ English Jonah 1:17 is Hebrew Jonah 2:1). `displayRef` carries the Hebrew
 reference and `english` records the other **only** where they disagree, so the
 page can explain itself rather than look broken.
 
-`scripts/check-daily-verses.mjs` (`pnpm check:verses`) resolves every entry
-against the corpus. It is not in `pnpm build` or the test suite for the same
-reason `build:vocab:check` is neither — it needs the 24 MB of gitignored data.
-The co-located test covers what is checkable without it and pins the exact set of
-ten divergences, since dropping one is invisible at runtime.
+`dailyVerses.corpus.test.ts` resolves every entry against the corpus, and since
+the corpus gate landed it runs in CI too (`hebrew-tools.yml` builds the corpus
+before the tests). `pnpm check:verses --show` is the same check from the CLI,
+with each verse printed for proofreading. `dailyVerses.test.ts` covers what is
+checkable without the corpus and pins the exact set of ten divergences, since
+dropping one is invisible at runtime.
 
 ### Still to build (3b)
+
+**Primary source — Daily Dose of Scripture, Hebrew.** Daily Dose of Greek became
+Daily Dose of Scripture (#177, #178), and the new site publishes a Hebrew lesson
+most weekdays. Checked Oct 27, 2026:
+
+- Hebrew is **category 192** on `dailydoseofscripture.com`
+  (`/wp-json/wp/v2/categories?slug=hebrew`). Look it up again rather than trusting
+  this number — Greek's old ID turned out to be Aramaic on the new host.
+- The API already sends `access-control-allow-origin: https://hebrew.tools`, so no
+  server route is needed. `public/_headers` must add the origin to `connect-src`.
+- Titles are plain `Book C:V`, sometimes with `a`/`b` (`Nehemiah 5:13b`). Q&A
+  posts (`Q&A – Psalm 23:1`) and course notices share the category and must be
+  skipped, the way greek's `pickDailyDoseLesson` skips specials.
+- **Titles use Masoretic numbering**, which is what the corpus uses: the feed has
+  `Psalm 18:51` and `Jonah 2:11`, and neither verse exists in English numbering.
+  A Daily Dose reference can go to the corpus unchanged. It has no `english`
+  field, though, so the "numbered differently" note can only appear for curated
+  verses.
+- Greek's `src/data/dailyDose.ts` is mostly language-free (WordPress fetch,
+  timeout, entity decoding, title scanning). Before copying it, move that part
+  into `@tools/shared` and keep only the book-name map and category ID per app.
+- Send `daily_verse_viewed` with `source` and `fallback_reason`, as greek.tools
+  now does, so a broken feed shows up in PostHog instead of looking like a normal
+  page.
 
 **Display considerations:**
 - Hebrew text renders RTL with `dir="rtl"` — `HebrewText.tsx` already does

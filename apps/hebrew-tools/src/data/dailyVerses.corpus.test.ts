@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
@@ -8,6 +8,7 @@ import {
   LONG_VERSE_WORDS,
   longVerses,
 } from '../../scripts/lib/daily-verses.mjs';
+import { hasCorpus } from '../test/corpus';
 import { DAILY_VERSES } from './dailyVerses';
 
 /**
@@ -20,19 +21,17 @@ import { DAILY_VERSES } from './dailyVerses';
  * answer.
  *
  * It needs `public/data/morphhb/` — 24 MB, gitignored, regenerated from
- * upstream — so it **skips when the corpus is not built**. That means it runs
- * on a developer machine on every `pnpm test`, and does not run in CI, which
- * deliberately never fetches the corpus (see the repo CLAUDE.md on why
- * `build:vocab:check` is out of the build for the same reason). Running on
- * every local test run is a far tighter loop than a pre-commit hook, which is
- * why this rather than a hook.
+ * upstream — so it is guarded by `hasCorpus` like every other corpus check.
+ * Locally it skips until `pnpm build:data` has been run. In CI it is part of
+ * the corpus gate: `hebrew-tools.yml` builds the corpus before the tests, and
+ * `src/test/corpus.test.ts` fails the run if it is missing, so this cannot
+ * quietly turn into a skip there.
  *
  * `pnpm check:verses --show` is the same validation with the text printed, for
  * proofreading the list by eye.
  */
 
 const DATA_DIR = join(import.meta.dirname, '..', '..', 'public', 'data', 'morphhb');
-const built = existsSync(join(DATA_DIR, 'GEN.json'));
 
 const books = new Map<string, unknown>();
 function lookup(code: string) {
@@ -58,7 +57,7 @@ interface CheckResult {
   words?: unknown[];
 }
 
-describe.skipIf(!built)('DAILY_VERSES against the corpus', () => {
+describe.skipIf(!hasCorpus)('DAILY_VERSES against the corpus', () => {
   const results = (): CheckResult[] =>
     checkEntries(DAILY_VERSES, { lookup, displayNames: DISPLAY_NAMES });
 
@@ -77,11 +76,5 @@ describe.skipIf(!built)('DAILY_VERSES against the corpus', () => {
     // vacuous; this pins that the corpus was actually read.
     const resolved = results().filter((r) => r.words !== undefined);
     expect(resolved).toHaveLength(DAILY_VERSES.length);
-  });
-});
-
-describe.skipIf(built)('corpus not built', () => {
-  it('skips the resolution checks — run `pnpm build:data` to enable them', () => {
-    expect(built).toBe(false);
   });
 });

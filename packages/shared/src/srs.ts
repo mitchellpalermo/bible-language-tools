@@ -28,8 +28,11 @@ export const STREAK_THRESHOLD = 10;
  * for a CST user, so an evening session and the next morning's session landed on
  * the same "day" and the streak silently stalled. Card due dates run through the
  * same helpers, so they shifted with it.
+ *
+ * Exported because every per-day feature needs the same boundary — the daily
+ * verse streak in `./daily` counts days with this, not a copy of it.
  */
-function localDateStr(date: Date): string {
+export function localDateStr(date: Date): string {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
   const d = String(date.getDate()).padStart(2, '0');
