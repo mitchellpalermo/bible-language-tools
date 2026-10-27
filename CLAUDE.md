@@ -66,6 +66,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/components/InkCanvas` | The writing surface (React) |
 | `@tools/shared/components/WritingGrid` | The row of per-letter guide boxes a word is written into (React) |
 | `@tools/shared/components/SiteNav.astro` | The site navigation for both apps (see below) |
+| `@tools/shared/components/MorphWordmark.astro` | The footer's "hebrew tools" / "greek tools" that slides into the original language on hover (see "Clipping boxes size from their content" below) |
 | `@tools/shared/components/GradeButtons` | The Again/Hard/Good/Easy answer row, with per-grade interval previews (React) |
 | `@tools/shared/components/DrillButtons` | The Missed / Got it answer row for the drill modes, which schedule nothing (React) |
 | `@tools/shared/components/ResetProgress` | The account page's "Danger zone": open, type RESET, erase. Each app wraps it in `src/components/ResetProgress.tsx` with its own list of what is erased and kept (React) |
@@ -87,7 +88,20 @@ Each app's localStorage storage functions stay app-specific (different key names
 
 **Where a module does need storage, the shape is a factory over a key**, not a hardcoded one — `createQuizSettings(storageKey)`, `createFlashcardSettings(storageKey)`, `createDailyStreak(storageKey)`. Both apps run the feature; neither may read the other's progress. A student who studies Greek and Hebrew has two streaks, and a shared key would let either one carry the other.
 
-`SiteNav.astro` is the one `.astro` component in the package; the rest are React. Astro components import from a workspace package like any other — the export just has to be listed in `packages/shared/package.json` with its `.astro` extension.
+`SiteNav.astro` and `MorphWordmark.astro` are the `.astro` components in the package; the rest are React.
+
+### Clipping boxes size from their content
+
+An `overflow: hidden` box that animates text in and out must take its size from
+the text it clips, in the font that text renders in — never from a hidden
+"sizer" copy of one hand-picked word. The footer wordmark used to do that: each
+word's box was sized by an `invisible` copy of the Hebrew word in the inherited
+Latin font, which came out narrower than both "hebrew" and "עִבְרִית", so
+hebrew.tools' footer showed sliced-off letters (Oct 2026). greek.tools had the
+same markup and fit with 0.3px to spare. `MorphWordmark` now stacks both faces
+in one grid cell (`grid-area: 1 / 1`), so the box is always the wider of the two.
+Each app's `e2e/footer.spec.ts` measures every face against its box at both
+viewports, at rest and on hover. Astro components import from a workspace package like any other — the export just has to be listed in `packages/shared/package.json` with its `.astro` extension.
 
 ### Site navigation
 

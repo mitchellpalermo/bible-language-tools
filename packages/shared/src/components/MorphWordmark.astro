@@ -1,0 +1,104 @@
+---
+// The footer wordmark for greek.tools and hebrew.tools: each English word
+// slides up and out on hover while its translation slides in beneath it.
+//
+// Each word is a one-cell grid holding both faces, stacked in the same cell.
+// The cell is therefore as wide as the wider face, measured in the font each
+// face actually renders in. The previous version sized the clipping box from a
+// hidden copy of one hand-picked word, in the inherited Latin font: on
+// hebrew.tools that came out narrower than both "hebrew" and "עִבְרִית", and the
+// footer's words were sliced off at both edges. Never size a clipping box from anything but the
+// content it clips.
+//
+// Self-styled with plain CSS for the same reason as SiteNav: Tailwind does not
+// scan packages/shared, so utility classes here would emit nothing.
+
+interface Word {
+  /** Shown at rest — the English word. */
+  from: string;
+  /** Shown on hover — the translation. */
+  to: string;
+}
+
+interface Props {
+  words: Word[];
+  /** The full name, read by screen readers instead of both faces. */
+  label: string;
+  /** Font stack for the translations, e.g. "var(--font-hebrew)". */
+  toFont: string;
+  /** BCP 47 tag for the translations, e.g. "he" or "grc". */
+  toLang: string;
+}
+
+const { words, label, toFont, toLang } = Astro.props;
+---
+
+<span class="morph-wordmark" style={`--morph-to-font: ${toFont};`}>
+  <span class="morph-sr">{label}</span>
+  {words.map((word) => (
+    <span class="morph-word" aria-hidden="true">
+      <span class="morph-face morph-from">{word.from}</span>
+      <span class="morph-face morph-to" lang={toLang}>{word.to}</span>
+    </span>
+  ))}
+</span>
+
+<style>
+  .morph-wordmark {
+    display: inline-flex;
+    gap: 0.25rem;
+    vertical-align: bottom;
+    cursor: default;
+    user-select: none;
+  }
+
+  .morph-word {
+    display: inline-grid;
+    overflow: hidden;
+  }
+
+  .morph-face {
+    grid-area: 1 / 1;
+    justify-self: center;
+    white-space: nowrap;
+    transition:
+      transform 300ms ease,
+      opacity 300ms ease;
+  }
+
+  .morph-to {
+    font-family: var(--morph-to-font);
+    color: var(--color-accent-light, #fcd34d);
+    opacity: 0;
+    transform: translateY(100%);
+  }
+
+  .morph-wordmark:hover .morph-from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+
+  .morph-wordmark:hover .morph-to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .morph-face {
+      transition: opacity 300ms ease;
+      transform: none !important;
+    }
+  }
+
+  .morph-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>
