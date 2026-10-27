@@ -35,7 +35,7 @@ import {
   type LemmaIndex,
   readingText,
 } from '../data/morphhb';
-import { glossFor, stemOf, stemSenses } from '../lib/gloss';
+import { glossFor, lineGloss, stemOf, stemSenses } from '../lib/gloss';
 import { stripCantillation } from '../lib/hebrew-input';
 import { analyzeWord } from '../lib/morph-parse';
 import { accentUnits, popupPosition } from '../lib/reader';
@@ -213,6 +213,40 @@ export function WordRun({
       </span>{' '}
     </span>
   ));
+}
+
+// ─── useGlossLine ─────────────────────────────────────────────────────────────
+
+/**
+ * The gloss line's `glossOf` for `WordRun`, or `undefined` while the line is
+ * off. Shared by the reader and Daily Verse, which both read the line's on/off
+ * state from `ReaderPrefs.glosses`.
+ *
+ * `glosses.json` is ~120 KB, so it is fetched the first time the line is
+ * turned on and not before. It is cached, so turning the line off and on
+ * again asks for nothing new. A failed fetch leaves the line on and empty
+ * rather than taking the text with it.
+ */
+export function useGlossLine(enabled: boolean) {
+  const [glosses, setGlosses] = useState<GlossIndex | null>(null);
+
+  useEffect(() => {
+    if (!enabled || glosses) return;
+    let cancelled = false;
+    fetchGlosses()
+      .then((index) => {
+        if (!cancelled) setGlosses(index);
+      })
+      .catch(() => {
+        /* the text still reads without them */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [enabled, glosses]);
+
+  const glossOf = useCallback((word: HebrewWord) => lineGloss(word, glosses), [glosses]);
+  return enabled ? glossOf : undefined;
 }
 
 // ─── MarkLegend ───────────────────────────────────────────────────────────────

@@ -11,19 +11,16 @@ import {
   DEFAULT_READER_PREFS,
   fetchBook,
   fetchBooks,
-  fetchGlosses,
-  type GlossIndex,
   type HebrewBookMeta,
   type HebrewWord,
   loadReaderPrefs,
   type ReaderPrefs,
   saveReaderPrefs,
 } from '../data/morphhb';
-import { lineGloss } from '../lib/gloss';
 import { formatRef, hebrewNumeral } from '../lib/reader';
 import { lemmaBase, loadStudiedLemmas } from '../lib/studied';
 import ErrorBoundary from './ErrorBoundary';
-import { type ActiveWord, MarkLegend, WordPopup, WordRun } from './HebrewText';
+import { type ActiveWord, MarkLegend, useGlossLine, WordPopup, WordRun } from './HebrewText';
 import PrefToggle from './PrefToggle';
 
 /**
@@ -42,7 +39,8 @@ import PrefToggle from './PrefToggle';
  * "also" and "occupation, work", and a verb gets its own stem's sense
  * (`lineGloss` in `src/lib/gloss.ts`). The course vocabulary may not stand in
  * for either (see "Glosses" in CLAUDE.md). The preference is the reader's,
- * `ReaderPrefs.glosses`, and `glosses.json` is fetched only once it is on.
+ * `ReaderPrefs.glosses`, and `useGlossLine` fetches `glosses.json` only once
+ * it is on.
  *
  * Why a fallback is reported, not just taken: it looks exactly like a normal
  * page, so a broken feed hides. `hebrew_daily_verse_viewed` carries `source`
@@ -105,7 +103,6 @@ function DailyVerseInner() {
   // localStorage is not there when the markup is built.
   const [prefs, setPrefs] = useState<ReaderPrefs>(DEFAULT_READER_PREFS);
   const [studied, setStudied] = useState<Set<string>>(() => new Set());
-  const [glosses, setGlosses] = useState<GlossIndex | null>(null);
 
   useEffect(() => {
     setPrefs(loadReaderPrefs());
@@ -141,23 +138,6 @@ function DailyVerseInner() {
     };
   }, []);
 
-  // The glosses file is ~120 KB, so it waits until the line is wanted. A
-  // failed fetch leaves the line on and empty rather than breaking the verse.
-  useEffect(() => {
-    if (!prefs.glosses || glosses) return;
-    let cancelled = false;
-    fetchGlosses()
-      .then((index) => {
-        if (!cancelled) setGlosses(index);
-      })
-      .catch(() => {
-        /* the verse still reads without them */
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [prefs.glosses, glosses]);
-
   const togglePref = useCallback((key: 'cantillation' | 'glosses') => {
     setPrefs((current) => {
       const next = { ...current, [key]: !current[key] };
@@ -168,7 +148,7 @@ function DailyVerseInner() {
   const toggleCantillation = useCallback(() => togglePref('cantillation'), [togglePref]);
   const toggleGlosses = useCallback(() => togglePref('glosses'), [togglePref]);
 
-  const glossOf = useCallback((word: HebrewWord) => lineGloss(word, glosses), [glosses]);
+  const glossOf = useGlossLine(prefs.glosses);
 
   const activate = useCallback((word: HebrewWord, rect: DOMRect) => {
     setActive((prev) => (prev?.word === word ? null : { word, rect }));
@@ -235,7 +215,7 @@ function DailyVerseInner() {
                 isStudied={isStudied}
                 active={active?.word ?? null}
                 onActivate={activate}
-                glossOf={prefs.glosses ? glossOf : undefined}
+                glossOf={glossOf}
               />
             </div>
 

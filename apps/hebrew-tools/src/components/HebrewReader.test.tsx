@@ -1,8 +1,10 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import posthog from 'posthog-js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   clearMorphhbCache,
+  type GlossIndex,
   type HebrewBook,
   type HebrewBookMeta,
   type LemmaIndex,
@@ -76,6 +78,17 @@ const LEMMAS: LemmaIndex = {
   '5175': { count: 31 },
 };
 
+// Enough of `glosses.json` for the gloss line. אֱלֹהִים is pinned, as the
+// build pins it, so the popup reads "God, gods" with or without this file.
+const GLOSSES: GlossIndex = {
+  '7225': { g: ['beginning', 'chief'] },
+  '1254a': { g: ['shape', 'create'], s: { Qal: [['shape', 'create']] } },
+  '430': { g: ['God', 'gods'] },
+  '8064': { g: ['heavens', 'sky'] },
+  '1961': { g: ['be', 'become', 'come to pass'], s: { Qal: [['be', 'become']] } },
+  '3615': { g: ['be complete', 'at an end'], s: { Qal: [['be complete', 'at an end']] } },
+};
+
 /** The SRS key the flashcards would have stored for a lemma of the corpus. */
 const cardKeyFor = (strong: string): string => {
   const word = vocabulary.find((w) => w.strong === strong);
@@ -105,11 +118,13 @@ beforeEach(() => {
         ? BOOKS
         : url.endsWith('lemmas.json')
           ? LEMMAS
-          : url.endsWith('GEN.json')
-            ? GENESIS
-            : url.endsWith('EXO.json')
-              ? EXODUS
-              : null;
+          : url.endsWith('glosses.json')
+            ? GLOSSES
+            : url.endsWith('GEN.json')
+              ? GENESIS
+              : url.endsWith('EXO.json')
+                ? EXODUS
+                : null;
       if (!body) return Promise.resolve({ ok: false, status: 404 } as Response);
       return Promise.resolve({ ok: true, json: () => Promise.resolve(body) } as Response);
     }),
@@ -388,8 +403,11 @@ describe('the word popup', () => {
   // than left as the letter the code carries.
   it('spells out the binyan for a verb', async () => {
     const popup = await openWord('וַֽיְהִי');
-    expect(popup.getByText('Stem')).toBeInTheDocument();
-    expect(popup.getByText('Qal')).toBeInTheDocument();
+    expect(popup.getByText('Stem').parentElement).toHaveTextContent('Stem Qal');
+    // ...and says what the stem means, from BDB (#131)
+    const senses = await screen.findByTestId('stem-senses');
+    expect(senses).toHaveTextContent(/^Qal/);
+    expect(senses).toHaveTextContent('be, become');
   });
 
   it('says nothing about a stem on a word that has none', async () => {
@@ -620,6 +638,83 @@ describe('studied-word highlighting', () => {
     expect(JSON.parse(localStorage.getItem(READER_PREFS_KEY) as string)).toMatchObject({
       studied: false,
     });
+  });
+});
+
+describe('the gloss line', () => {
+  const fetchedGlosses = () =>
+    (fetch as ReturnType<typeof vi.fn>).mock.calls.filter((call) =>
+      String(call[0]).endsWith('glosses.json'),
+    );
+  const lines = () => screen.getAllByTestId('word-gloss').map((line) => line.textContent);
+
+  it('is off until asked for, and costs nothing until then', async () => {
+    await renderReader();
+    expect(screen.getByRole('button', { name: 'Glosses' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    );
+    expect(screen.queryByTestId('word-gloss')).not.toBeInTheDocument();
+    expect(fetchedGlosses()).toHaveLength(0);
+  });
+
+  it('puts a gloss under every word of the chapter, and saves the choice', async () => {
+    const user = userEvent.setup();
+    await renderReader();
+    await user.click(screen.getByRole('button', { name: 'Glosses' }));
+
+    await waitFor(() => expect(lines()).toContain('God, gods'));
+    expect(lines()).toEqual([
+      'beginning, chief',
+      'shape, create',
+      'God, gods',
+      'heavens, sky',
+      // וַיְהִי is a Qal wayyiqtol of הָיָה, so it reads the Qal's sense
+      'be, become',
+      // עֶרֶב and בֹּקֶר are not in the fixture: their lines stay, empty
+      '\u00a0',
+      'be, become',
+      '\u00a0',
+      // the qere ולו, whose head lemma is not in the fixture
+      '\u00a0',
+      // בּוֹ is the prefix ב with a suffix
+      'in, at',
+    ]);
+    expect(JSON.parse(localStorage.getItem(READER_PREFS_KEY) as string)).toMatchObject({
+      glosses: true,
+    });
+    expect(posthog.capture).toHaveBeenCalledWith('hebrew_reader_pref_toggled', {
+      pref: 'glosses',
+      on: true,
+    });
+  });
+
+  it('keeps the verse numbers beside the glossed words', async () => {
+    localStorage.setItem(READER_PREFS_KEY, JSON.stringify({ glosses: true }));
+    await renderReader();
+    await waitFor(() => expect(lines()).toContain('God, gods'));
+    expect(within(readerText()).getByText('1')).toBeInTheDocument();
+  });
+
+  it('stays on from chapter to chapter without fetching again', async () => {
+    localStorage.setItem(READER_PREFS_KEY, JSON.stringify({ glosses: true }));
+    const user = userEvent.setup();
+    await renderReader();
+    await waitFor(() => expect(lines()).toContain('God, gods'));
+
+    await user.click(screen.getByRole('button', { name: 'Next chapter' }));
+    // Two items would run past LINE_MAX, so it drops to one.
+    await waitFor(() => expect(lines()).toEqual(['be complete']));
+    expect(fetchedGlosses()).toHaveLength(1);
+  });
+
+  it('turns off again', async () => {
+    localStorage.setItem(READER_PREFS_KEY, JSON.stringify({ glosses: true }));
+    const user = userEvent.setup();
+    await renderReader();
+    await waitFor(() => expect(lines()).toContain('God, gods'));
+    await user.click(screen.getByRole('button', { name: 'Glosses' }));
+    expect(screen.queryByTestId('word-gloss')).not.toBeInTheDocument();
   });
 });
 
