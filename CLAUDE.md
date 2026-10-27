@@ -182,13 +182,7 @@ git commit -q -m "assets: screenshots for PR #<N>"
 git branch -M assets/pr-<N> && git push -q origin assets/pr-<N>
 ```
 
-The tempting shortcut is `git checkout --orphan` in the repo itself followed by `git rm -rf --cached . && git clean -fdx` to strip it down to the images. **Do not.** It has already destroyed a working tree once:
-
-- **`git clean -x` deletes ignored files**, which is where everything valuable and unrecoverable lives — `.dev.vars` (local OAuth secrets), `.wrangler/` (the local D1 database), `apps/*/public/data/` (the 24 MB corpus).
-- **`git clean -d` deletes untracked directories**, and `.claude/` is untracked but not ignored. `settings.local.json`, and any local commands or agents, go with it. Nothing in git history can bring them back.
-- **`-e` exclusions do not save you.** `-e node_modules -e .wrangler -e 'public/data'` was the actual attempt; `.wrangler/` and every `apps/*/public/data/` were deleted anyway. `git clean`'s exclude patterns are not the intuitive path prefixes they look like.
-
-A temp directory has none of these failure modes and is no more work.
+Never `git checkout --orphan` + `git clean -fdx` in the repo: it deletes ignored files (`.dev.vars`, `.wrangler/`, `public/data/`) and untracked directories like `.claude/`, unrecoverably — and `-e` exclusions do not reliably stop it.
 
 ## Cloudflare Workers deployment
 
