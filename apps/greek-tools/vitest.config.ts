@@ -28,7 +28,6 @@ export default defineConfig({
         'src/env.d.ts',
         // TODO: add tests for these components and remove from exclude
         'src/components/GrammarReference.tsx',
-        'src/components/DailyVerse.tsx',
         'src/components/GNTReader.tsx',
         'src/components/GreekText.tsx',
         'src/components/Transliteration.tsx',
