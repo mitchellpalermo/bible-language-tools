@@ -152,8 +152,11 @@ for every book cannot tell a stale response from a fresh one, and the original
 
 `/daily` shows the newest Greek verse lesson from Daily Dose of Scripture
 (formerly Daily Dose of Greek) and falls back to the curated list in
-`src/data/dailyVerses.ts` when it cannot. `src/data/dailyDose.ts` is the whole
-integration. Things to know before changing it (#177):
+`src/data/dailyVerses.ts` when it cannot. The fetch, timeout, cache, entity
+decoding and title scanning are `@tools/shared/daily-dose`, shared with
+hebrew.tools' `/daily`; `src/data/dailyDose.ts` binds it to the Greek category
+and the 27 NT book names. A change to how the feed is read belongs in the shared
+module and reaches both apps. Things to know before changing it (#177):
 
 - **The fallback is designed to look normal, so it hides a broken source.** The
   rebrand left the old feed answering with stale posts, and the page showed the
@@ -175,7 +178,9 @@ integration. Things to know before changing it (#177):
   `&amp;` for `&`, so titles are entity-decoded before matching.
 - **The API origin must be in `connect-src` in `public/_headers`.** A missing
   host fails as a bare network error, which is just another quiet fallback.
-  `dailyDose.test.ts` reads the real `_headers` and fails if it is missing.
+  `dailyDose.test.ts` reads the real `_headers` through `cspAllowsDailyDose`,
+  which reads only `Content-Security-Policy:` lines. Its first version searched
+  the whole file for `connect-src` and would have matched a comment.
 - `src/data/fixtures/daily-dose-greek-feed-2026-10-24.json` is a saved copy of
   the real response, taken on a Saturday when a special edition was on top.
 

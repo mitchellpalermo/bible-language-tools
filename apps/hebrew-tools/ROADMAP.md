@@ -218,7 +218,7 @@ content task with its own failure modes, and the component is UI over it.
 | PR | Scope | Issue |
 |----|-------|-------|
 | 3a | Curated verse list, day cycling, streak, and the corpus checker | #128 — ✅ done |
-| 3b | `DailyVerse.tsx`, the `/daily` route and the nav entry | #129 |
+| 3b | `DailyVerse.tsx`, the `/daily` route and the nav entry | #129 — ✅ done |
 
 ### What ports directly
 - Streak tracking logic — now `@tools/shared/daily`, which greek.tools was
@@ -254,42 +254,47 @@ with each verse printed for proofreading. `dailyVerses.test.ts` covers what is
 checkable without the corpus and pins the exact set of ten divergences, since
 dropping one is invisible at runtime.
 
-### Still to build (3b)
+### What 3b settled
+
+**Built** (#129). What the code does and what will bite if it is changed
+carelessly is in `CLAUDE.md` under "Daily Verse"; this is the record of the
+decisions.
 
 **Primary source — Daily Dose of Scripture, Hebrew.** Daily Dose of Greek became
 Daily Dose of Scripture (#177, #178), and the new site publishes a Hebrew lesson
-most weekdays. Checked Oct 27, 2026:
+most weekdays. The curated list is the fallback. Found while building it:
 
-- Hebrew is **category 192** on `dailydoseofscripture.com`
-  (`/wp-json/wp/v2/categories?slug=hebrew`). Look it up again rather than trusting
-  this number — Greek's old ID turned out to be Aramaic on the new host.
-- The API already sends `access-control-allow-origin: https://hebrew.tools`, so no
-  server route is needed. `public/_headers` must add the origin to `connect-src`.
-- Titles are plain `Book C:V`, sometimes with `a`/`b` (`Nehemiah 5:13b`). Q&A
-  posts (`Q&A – Psalm 23:1`) and course notices share the category and must be
-  skipped, the way greek's `pickDailyDoseLesson` skips specials.
-- **Titles use Masoretic numbering**, which is what the corpus uses: the feed has
-  `Psalm 18:51` and `Jonah 2:11`, and neither verse exists in English numbering.
-  A Daily Dose reference can go to the corpus unchanged. It has no `english`
-  field, though, so the "numbered differently" note can only appear for curated
-  verses.
-- Greek's `src/data/dailyDose.ts` is mostly language-free (WordPress fetch,
-  timeout, entity decoding, title scanning). Before copying it, move that part
-  into `@tools/shared` and keep only the book-name map and category ID per app.
-- Send `daily_verse_viewed` with `source` and `fallback_reason`, as greek.tools
-  now does, so a broken feed shows up in PostHog instead of looking like a normal
-  page.
+- Hebrew is **category 192**. The API already allows `https://hebrew.tools` (and
+  `localhost`), so no server route was needed; `public/_headers` allows the
+  origin in `connect-src`.
+- **Titles use Masoretic numbering.** The feed runs Psalm 18 to 18:51 and has
+  Psalm 9:21 and Jonah 2:11, none of which exist in English numbering, and all
+  2,522 verse titles in its history resolve in the corpus. A lesson reference
+  goes to the corpus unchanged. It carries no `english`, so the "numbered
+  differently" note appears only for curated verses.
+- **About a thousand of the category's 3,526 posts are not verse lessons** —
+  grammar lessons, Q&A, corrections, notices. The feed names books as the
+  corpus does, plus "Psalm" (every psalm lesson) and "Gen" (twelve early ones).
+- The feed logic moved to `@tools/shared/daily-dose` rather than being copied;
+  greek.tools runs on it too.
 
-**Display considerations:**
-- Hebrew text renders RTL with `dir="rtl"` — `HebrewText.tsx` already does
-- Show both references: "Genesis 1:1" and "בְּרֵאשִׁית א:א", the latter derived at
-  runtime from `books.json` and `hebrewNumeral()` rather than stored
-- Surface `english` where present, so a student comparing against a study Bible
-  is told why the numbers differ instead of concluding the app is wrong
-- Cantillation toggle — reuse `ReaderPrefs`, which already owns that preference
+**Display:** both references ("Nehemiah 5:16" and נְחֶמְיָה ה:טז, the latter from
+`books.json` and `hebrewNumeral()`), the `english` note, the reader's
+cantillation preference, studied-word highlighting, and the reader's own word
+popup and legend.
 
-**Studied-word highlighting:** same pattern as the reader — `loadStudiedLemmas()`
-from `src/lib/studied.ts`, joined on `cardKey` and never the bare lemma.
+**No interlinear gloss line, deliberately.** The issue asked for a "show
+glosses" toggle. It was built and taken out: the reader's glosses are Strong's,
+and Strong's often lists a root sense first — its first sense for גַּם is
+"assemblage", for מְלָאכָה "deputyship", for קָנָה "erect". Five of the fourteen
+words in the first verse tested read wrong. The course vocabulary cannot stand in
+(see "Gloss dataset" under Phase 4). BDB's first sense is right for those words
+("also", "occupation, work", "get, acquire"), so the line comes back when BDB
+lands — #131, widened from verb stems to a short gloss for every lemma. Two
+traps for whoever does it: BDB tags pieces of a phrase separately (חָזַק's first
+two `<def>`s are "be" and "grow firm"), and the join must go through the exact
+lemma key — a lookup by bare Strong's number gave עַל "forasmuch as" from the
+wrong entry.
 
 ---
 
@@ -795,9 +800,9 @@ The following modules from greek.tools can be copied with minimal or zero change
 | 3 | 2b | Core flashcards UI | Low | 2a | Queued | #73 |
 | 4 | 2c | Flashcards: typing + directions + filters | Low–Medium | 2b, Phase 1 | Queued | #74 |
 | 5 | — | OSHB data pipeline | Medium (mechanical) | None | ✅ Done | #75 |
-| 6 | 3 | Daily Verse | Medium — broken into 3a–3b | OSHB pipeline | In progress | #76 |
+| 6 | 3 | Daily Verse | Medium — broken into 3a–3b | OSHB pipeline | ✅ Done | #76 |
 | 6a | 3a | Daily Verse: curated verse list + day cycling + streak | Low | OSHB pipeline | ✅ Done | #128 |
-| 6b | 3b | Daily Verse: component + `/daily` route | Medium | 3a, #120 | Queued | #129 |
+| 6b | 3b | Daily Verse: component + `/daily` route | Medium | 3a, #120 | ✅ Done | #129 |
 | 7 | 5 | Transliteration | Medium | None | Queued (independent — can float earlier if a break is wanted) | #78 |
 | 8 | 4 | Hebrew Bible Reader | High — broken into 4a–4e | OSHB pipeline, gloss dataset decision | ✅ Done | #77 |
 | 8a | 4a | Reader: OSHB morph-code formatter | Low | OSHB pipeline | ✅ Done | #117 |
