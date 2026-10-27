@@ -1,7 +1,13 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { clearMorphhbCache, type HebrewWord, type LemmaIndex } from '../data/morphhb';
-import { WordPopup, wordText } from './HebrewText';
+import {
+  clearMorphhbCache,
+  type GlossIndex,
+  type HebrewWord,
+  type LemmaIndex,
+} from '../data/morphhb';
+import { WordPopup, WordRun, wordText } from './HebrewText';
 
 // The cases the reader's own fixture cannot reach without misplacing them: an
 // Aramaic verse, a qere with no ketiv, and a lexicon that will not load.
@@ -16,7 +22,19 @@ const word = (over: Partial<HebrewWord> = {}): HebrewWord => ({
 
 const LEMMAS: LemmaIndex = {
   '4430': { count: 180, hebrew: 'מֶלֶךְ', xlit: 'melek', pos: 'N', gloss: 'a king' },
+  '2388': { count: 290, hebrew: 'חָזַק', pos: 'V', gloss: 'fasten, seize, be strong' },
+  '7586': { count: 406, hebrew: 'שָׁאוּל', xlit: 'šāʾûl', pos: 'Np', gloss: 'Shaul' },
 };
+
+const GLOSSES: GlossIndex = {
+  '2388': {
+    g: ['be or grow firm', 'strong', 'strengthen'],
+    s: { Hiphil: [['make strong', 'strengthen'], ['make firm']] },
+  },
+  '7586': { g: ['šāʾûl'] },
+};
+
+let glossesDown = false;
 
 const rect = { right: 400, bottom: 100 } as DOMRect;
 
@@ -27,9 +45,16 @@ const popup = () => within(screen.getByRole('dialog'));
 
 beforeEach(() => {
   clearMorphhbCache();
+  glossesDown = false;
   vi.stubGlobal(
     'fetch',
-    vi.fn(() => Promise.resolve({ ok: true, json: () => Promise.resolve(LEMMAS) } as Response)),
+    vi.fn((url: string) => {
+      if (url.endsWith('glosses.json')) {
+        if (glossesDown) return Promise.resolve({ ok: false, status: 404 } as Response);
+        return Promise.resolve({ ok: true, json: () => Promise.resolve(GLOSSES) } as Response);
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve(LEMMAS) } as Response);
+    }),
   );
 });
 
@@ -112,5 +137,102 @@ describe('WordPopup', () => {
     showPopup(word({ lemma: '4430', parsing: 'ANcmsd/Td', text: 'מַלְכָּ/א֙' }));
     await waitFor(() => expect(popup().getByText('a king')).toBeInTheDocument());
     expect(popup().getByText('180× in the Hebrew Bible')).toBeInTheDocument();
+  });
+});
+
+describe('WordPopup, from BDB', () => {
+  const hiphil = word({ text: 'הֶחֱזַ֔קְתִּי', lemma: '2388', pos: 'Vh', parsing: 'HVhp1cs' });
+
+  it('glosses from BDB rather than Strong’s', async () => {
+    showPopup(hiphil);
+    await waitFor(() =>
+      expect(popup().getByText('be or grow firm, strong, strengthen')).toBeInTheDocument(),
+    );
+    expect(popup().queryByText(/fasten/)).not.toBeInTheDocument();
+  });
+
+  // Issue #131: the popup prints the stem, and now says what the stem does.
+  it('lists what the word’s own stem means', async () => {
+    showPopup(hiphil);
+    const senses = await screen.findByTestId('stem-senses');
+    expect(senses).toHaveTextContent('Hiphil');
+    expect(senses).toHaveTextContent('make strong, strengthen; make firm');
+  });
+
+  it('lists no senses for a stem BDB says nothing about', async () => {
+    showPopup(word({ ...hiphil, parsing: 'HVNp3ms' }));
+    await waitFor(() => expect(popup().getByText(/be or grow firm/)).toBeInTheDocument());
+    expect(screen.queryByTestId('stem-senses')).not.toBeInTheDocument();
+  });
+
+  it('does not repeat a name’s transliteration as its gloss', async () => {
+    showPopup(word({ text: 'שָׁא֔וּל', lemma: '7586', pos: 'Np', parsing: 'HNp' }));
+    await waitFor(() => expect(popup().getByText('šāʾûl')).toBeInTheDocument());
+    expect(popup().getAllByText('šāʾûl')).toHaveLength(1);
+  });
+
+  it('falls back to Strong’s when the BDB glosses will not load', async () => {
+    glossesDown = true;
+    showPopup(hiphil);
+    await waitFor(() => expect(popup().getByText('fasten, seize, be strong')).toBeInTheDocument());
+    expect(screen.queryByTestId('stem-senses')).not.toBeInTheDocument();
+  });
+});
+
+describe('WordRun, with the gloss line', () => {
+  const words: HebrewWord[] = [
+    word({ text: 'עַל', lemma: '5921a', pos: 'R', parsing: 'HR', after: '־' }),
+    word({ text: 'הַ/מְּלָאכָֽה', lemma: '4399', pos: 'Nc', parsing: 'HTd/Ncfsa', after: '׃' }),
+  ];
+  const gloss: Record<string, string> = { '4399': 'occupation, work' };
+
+  const renderRun = (glossOf?: (w: HebrewWord) => string | undefined, onActivate = vi.fn()) =>
+    render(
+      <div dir="rtl">
+        <WordRun
+          words={words}
+          cantillation={false}
+          isStudied={() => false}
+          active={null}
+          onActivate={onActivate}
+          glossOf={glossOf}
+        />
+      </div>,
+    );
+
+  it('draws no line when it is off', () => {
+    renderRun();
+    expect(screen.queryByTestId('word-gloss')).not.toBeInTheDocument();
+  });
+
+  it('puts a gloss under each word, left to right', () => {
+    renderRun((w) => gloss[w.lemma]);
+    const lines = screen.getAllByTestId('word-gloss');
+    expect(lines).toHaveLength(2);
+    expect(lines[1]).toHaveTextContent('occupation, work');
+    expect(lines[1]).toHaveAttribute('dir', 'ltr');
+  });
+
+  it('keeps an empty line under a word with nothing, so the row stays level', () => {
+    renderRun((w) => gloss[w.lemma]);
+    const [empty] = screen.getAllByTestId('word-gloss');
+    expect(empty.textContent).toBe('\u00a0');
+  });
+
+  it('keeps the maqqef and the sof pasuq on the Hebrew row', () => {
+    renderRun((w) => gloss[w.lemma]);
+    const [first, second] = screen.getAllByTestId('glossed-word');
+    const [firstGloss, secondGloss] = screen.getAllByTestId('word-gloss');
+    expect(first.firstElementChild).toHaveTextContent('עַל־');
+    expect(firstGloss).not.toHaveTextContent('־');
+    expect(second.firstElementChild).toHaveTextContent('׃');
+    expect(secondGloss).not.toHaveTextContent('׃');
+  });
+
+  it('opens the word when its gloss is tapped', async () => {
+    const onActivate = vi.fn();
+    renderRun((w) => gloss[w.lemma], onActivate);
+    await userEvent.click(screen.getByText('occupation, work'));
+    expect(onActivate).toHaveBeenCalledWith(words[1], expect.anything());
   });
 });

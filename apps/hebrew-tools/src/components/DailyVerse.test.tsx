@@ -1,10 +1,11 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import posthog from 'posthog-js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { DailyVerseRef } from '../data/dailyVerses';
 import {
   clearMorphhbCache,
+  type GlossIndex,
   type HebrewBook,
   type HebrewBookMeta,
   type LemmaIndex,
@@ -60,6 +61,13 @@ const LEMMAS: LemmaIndex = {
   '3478': { count: 2514, pos: 'Np', xlit: 'yiśrāʾēl', gloss: 'he will rule as God, Jisraël' },
 };
 
+// Genesis 1:1 as glosses.json has it. אֱלֹהִים is pinned; בָּרָא has a Qal sense.
+const GLOSSES: GlossIndex = {
+  '7225': { g: ['beginning', 'chief'] },
+  '1254a': { g: ['shape', 'create'], s: { Qal: [['shape', 'create']], Niphal: [['be created']] } },
+  '430': { g: ['God', 'gods'] },
+};
+
 const lessonPost = (title: string) => ({
   title: { rendered: title },
   link: 'https://dailydoseofscripture.com/hebrew-lesson/',
@@ -69,6 +77,7 @@ const lessonPost = (title: string) => ({
 let feed: unknown[] | 'offline';
 let corpusDown: boolean;
 let booksDown: boolean;
+let glossesDown: boolean;
 
 beforeEach(() => {
   localStorage.clear();
@@ -79,6 +88,7 @@ beforeEach(() => {
   feed = [lessonPost('Q&amp;A &#8211; Psalm 23:1'), lessonPost('Genesis 1:1')];
   corpusDown = false;
   booksDown = false;
+  glossesDown = false;
 
   vi.stubGlobal(
     'fetch',
@@ -86,6 +96,10 @@ beforeEach(() => {
       if (url.startsWith('https://dailydoseofscripture.com')) {
         if (feed === 'offline') return Promise.reject(new TypeError('Failed to fetch'));
         return Promise.resolve({ ok: true, json: async () => feed } as Response);
+      }
+      if (url.endsWith('glosses.json')) {
+        if (glossesDown) return Promise.resolve({ ok: false, status: 404 } as Response);
+        return Promise.resolve({ ok: true, json: async () => GLOSSES } as Response);
       }
       if (url.endsWith('books.json') && booksDown) {
         return Promise.resolve({ ok: false, status: 404 } as Response);
@@ -230,6 +244,72 @@ describe('cantillation', () => {
     expect(JSON.parse(localStorage.getItem(READER_PREFS_KEY) ?? '{}')).toMatchObject({
       cantillation: false,
     });
+  });
+});
+
+describe('the gloss line', () => {
+  const fetchedGlosses = () =>
+    (fetch as ReturnType<typeof vi.fn>).mock.calls.filter((call) =>
+      String(call[0]).endsWith('glosses.json'),
+    );
+
+  it('is off until asked for, and costs nothing until then', async () => {
+    render(<DailyVerse />);
+    await verseText();
+    expect(screen.getByRole('button', { name: 'Glosses' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    );
+    expect(screen.queryByTestId('word-gloss')).not.toBeInTheDocument();
+    expect(fetchedGlosses()).toHaveLength(0);
+  });
+
+  it('puts BDB’s gloss under every word, and saves the choice', async () => {
+    const user = userEvent.setup();
+    render(<DailyVerse />);
+    await verseText();
+
+    await user.click(screen.getByRole('button', { name: 'Glosses' }));
+    expect(await screen.findByText('God, gods')).toBeInTheDocument();
+    const lines = screen.getAllByTestId('word-gloss').map((line) => line.textContent);
+    // בָּרָא is a Qal, so it reads its Qal sense.
+    expect(lines).toEqual(['beginning, chief', 'shape, create', 'God, gods']);
+    expect(JSON.parse(localStorage.getItem(READER_PREFS_KEY) ?? '{}')).toMatchObject({
+      glosses: true,
+    });
+  });
+
+  it('starts on when the reader preference is on, and turns off again', async () => {
+    localStorage.setItem(READER_PREFS_KEY, JSON.stringify({ glosses: true }));
+    const user = userEvent.setup();
+    render(<DailyVerse />);
+    expect(await screen.findByText('beginning, chief')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Glosses' }));
+    expect(screen.queryByTestId('word-gloss')).not.toBeInTheDocument();
+    // The index is kept, so turning it back on asks for nothing new.
+    await user.click(screen.getByRole('button', { name: 'Glosses' }));
+    expect(await screen.findByText('beginning, chief')).toBeInTheDocument();
+    expect(fetchedGlosses()).toHaveLength(1);
+  });
+
+  it('keeps an empty line under a word it has nothing for', async () => {
+    localStorage.setItem(READER_PREFS_KEY, JSON.stringify({ glosses: true }));
+    feed = [lessonPost('Genesis 32:29')];
+    render(<DailyVerse />);
+    await verseText();
+    // Neither word is in the fixture's glosses; לֹא is a qere, read as לוֹ.
+    await waitFor(() => expect(screen.getAllByTestId('word-gloss')).toHaveLength(2));
+    expect(screen.getAllByTestId('word-gloss')[0].textContent).toBe('\u00a0');
+  });
+
+  it('still shows the verse when the glosses will not load', async () => {
+    localStorage.setItem(READER_PREFS_KEY, JSON.stringify({ glosses: true }));
+    glossesDown = true;
+    render(<DailyVerse />);
+    expect(await verseText()).toHaveTextContent('בָּרָ֣א');
+    await waitFor(() => expect(fetchedGlosses()).toHaveLength(1));
+    expect(screen.queryByText('God, gods')).not.toBeInTheDocument();
   });
 });
 

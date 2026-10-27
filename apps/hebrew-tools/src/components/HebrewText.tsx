@@ -18,20 +18,24 @@
  *   begins. `popupPosition` owns that; see `src/lib/reader.ts`.
  * - **Absent is absent.** Seven lemmas have no lexicon entry and neither does
  *   any inseparable prefix, so a missing gloss or root renders as nothing at
- *   all — never as "unknown", which reads like a claim about the word.
+ *   all — never as "unknown", which reads like a claim about the word. The
+ *   gloss line is the one exception in form, not in substance: an empty line
+ *   still takes its height, so the words either side of it stay level.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   displayText,
+  fetchGlosses,
   fetchLemmas,
+  type GlossIndex,
   type HebrewWord,
   isAramaic,
   type LemmaIndex,
   readingText,
 } from '../data/morphhb';
-import { glossFor } from '../lib/gloss';
+import { glossFor, stemOf, stemSenses } from '../lib/gloss';
 import { stripCantillation } from '../lib/hebrew-input';
 import { analyzeWord } from '../lib/morph-parse';
 import { accentUnits, popupPosition } from '../lib/reader';
@@ -69,6 +73,13 @@ export interface ActiveWord {
  * Two marks can land on the same word and they are drawn differently on
  * purpose. A qere is **dashed** and a studied word is **dotted**; drawn the same
  * way, the legend would be explaining one mark that means two things.
+ *
+ * **`gloss` turns the word into a two-row column**, an interlinear: the Hebrew
+ * on top and its gloss beneath, LTR in the UI font. `undefined` means the line
+ * is off; an empty string means it is on and this word has nothing, and the
+ * row is still drawn so the words either side stay on one baseline. The word's
+ * trailing punctuation stays on the Hebrew row — a maqqef belongs between two
+ * Hebrew words, not under one of them.
  */
 export function WordToken({
   word,
@@ -76,12 +87,14 @@ export function WordToken({
   studied,
   active,
   onActivate,
+  gloss,
 }: {
   word: HebrewWord;
   cantillation: boolean;
   studied: boolean;
   active: boolean;
   onActivate: (word: HebrewWord, rect: DOMRect) => void;
+  gloss?: string;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   const qere = word.qere !== undefined || word.qereOnly === true;
@@ -102,7 +115,7 @@ export function WordToken({
     .filter(Boolean)
     .join(' ');
 
-  return (
+  const hebrew = (
     <>
       <span
         ref={ref}
@@ -116,6 +129,33 @@ export function WordToken({
       {word.after && <span className="text-text-muted">{word.after}</span>}
     </>
   );
+
+  if (gloss === undefined) return hebrew;
+
+  return (
+    <span className="inline-flex flex-col items-center align-top" data-testid="glossed-word">
+      <span>{hebrew}</span>
+      {/* biome-ignore lint/a11y/useKeyWithClickEvents: the word above is the same target */}
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: a tap on the gloss opens the word */}
+      <span
+        dir="ltr"
+        lang="en"
+        onClick={handleClick}
+        data-testid="word-gloss"
+        className="cursor-pointer text-text-muted text-xs text-center px-0.5"
+        style={{
+          fontFamily: 'var(--font-sans)',
+          lineHeight: 1.25,
+          // A single long gloss wraps under its own word rather than shoving
+          // the next one along; the column is as wide as the wider row.
+          maxWidth: '9rem',
+          whiteSpace: 'normal',
+        }}
+      >
+        {gloss || '\u00a0'}
+      </span>
+    </span>
+  );
 }
 
 // ─── WordRun ──────────────────────────────────────────────────────────────────
@@ -127,6 +167,9 @@ export function WordToken({
  * non-breaking span and the space after it is where a line may break. Shared by
  * the reader and Daily Verse, so the two cannot disagree about where a line of
  * Hebrew is allowed to wrap.
+ *
+ * `glossOf`, when given, switches on the gloss line under every word; see
+ * `WordToken`. A word it has nothing for still gets an empty line.
  */
 export function WordRun({
   words,
@@ -134,12 +177,14 @@ export function WordRun({
   isStudied,
   active,
   onActivate,
+  glossOf,
 }: {
   words: HebrewWord[];
   cantillation: boolean;
   isStudied: (word: HebrewWord) => boolean;
   active: HebrewWord | null;
   onActivate: (word: HebrewWord, rect: DOMRect) => void;
+  glossOf?: (word: HebrewWord) => string | undefined;
 }) {
   const units = useMemo(() => accentUnits(words), [words]);
 
@@ -158,6 +203,7 @@ export function WordRun({
             studied={isStudied(word)}
             active={word === active}
             onActivate={onActivate}
+            gloss={glossOf ? (glossOf(word) ?? '') : undefined}
           />
         ))}
       </span>{' '}
@@ -266,11 +312,13 @@ export function WordPopup({
 }) {
   const { word, rect } = active;
 
-  // The lemma index is ~140 KB and `fetchLemmas` is deliberately lazy, so it is
-  // fetched on the first popup rather than on page load. It caches, so every
-  // popup after the first fills in without a request; the parse and the
-  // morphemes are on screen either way.
+  // The lemma index and the glosses are fetched on the first popup rather
+  // than on page load, and each is cached, so every popup after the first fills
+  // in without a request. They load independently: the parse and the
+  // morphemes are on screen either way, and without the BDB glosses the popup
+  // still has Strong's.
   const [lemmas, setLemmas] = useState<LemmaIndex | null>(null);
+  const [glosses, setGlosses] = useState<GlossIndex | null>(null);
   useEffect(() => {
     let cancelled = false;
     fetchLemmas()
@@ -279,6 +327,13 @@ export function WordPopup({
       })
       .catch(() => {
         /* the parse still reads without the lexicon */
+      });
+    fetchGlosses()
+      .then((index) => {
+        if (!cancelled) setGlosses(index);
+      })
+      .catch(() => {
+        /* Strong's stands in */
       });
     return () => {
       cancelled = true;
@@ -301,9 +356,9 @@ export function WordPopup({
   }, [onClose]);
 
   const entry = lemmas?.[word.lemma];
-  const gloss = glossFor(word.lemma, lemmas);
-  // Only verbs carry a stem, so the first morpheme that has one is the verb's.
-  const stem = analyzeWord(word).find((part) => part.analysis?.stem)?.analysis?.stem;
+  const gloss = glossFor(word.lemma, { glosses, lemmas });
+  const stem = stemOf(word);
+  const senses = stemSenses(word.lemma, stem, glosses);
   const box = popupPosition(rect, {
     width: window.innerWidth,
     scrollX: window.scrollX,
@@ -340,7 +395,18 @@ export function WordPopup({
         </p>
       )}
 
-      {gloss && <p className="text-sm text-text mt-2">{gloss}</p>}
+      {/* A name with no English gloss has its transliteration as one, and
+          that is already on the line above. */}
+      {gloss && gloss !== entry?.xlit && <p className="text-sm text-text mt-2">{gloss}</p>}
+
+      {/* What this stem means, which is what a verb's gloss alone cannot say:
+          חָזַק is "be or grow firm", and its Hiphil "make strong". */}
+      {stem && senses && (
+        <p className="text-sm text-text mt-1" data-testid="stem-senses">
+          <span className="text-xs font-semibold text-text-muted me-1.5">{stem}</span>
+          {senses.map((items) => items.join(', ')).join('; ')}
+        </p>
+      )}
 
       <Morphemes word={word} cantillation={cantillation} />
 
