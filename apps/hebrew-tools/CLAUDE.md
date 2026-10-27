@@ -508,16 +508,19 @@ verse when the feed cannot be used. Things to know before changing it:
 
 #### The gloss line
 
-`/daily` has an interlinear gloss line behind a "Glosses" toggle, off by
-default. #179 built it on Strong's and took it out — five of the fourteen words
-of Nehemiah 5:16 read wrong — and it came back once BDB was in (see "Glosses").
-`WordRun` takes an optional `glossOf`; with it, each `WordToken` becomes a
-two-row column, Hebrew over English.
+`/daily` and `/reader` both have an interlinear gloss line behind a "Glosses"
+toggle, off by default. #179 built it on Strong's and took it out — five of the
+fourteen words of Nehemiah 5:16 read wrong — and it came back once BDB was in
+(see "Glosses"). `WordRun` takes an optional `glossOf`; with it, each
+`WordToken` becomes a two-row column, Hebrew over English.
 
-- **Off by default, and the preference is the reader's** — `ReaderPrefs.glosses`
-  in `hebrew-tools-reader-prefs`. A line of English under a verse is an answer
-  key to the whole thing; the verse is for reading first. `glosses.json` is not
-  fetched until the line is on.
+- **One preference for both pages** — `ReaderPrefs.glosses` in
+  `hebrew-tools-reader-prefs` — so turning it on in one turns it on in the
+  other. Off by default: a line of English under a verse is an answer key to
+  the whole thing, and the text is for reading first.
+- **`useGlossLine(enabled)` in `HebrewText.tsx` is the one way to get
+  `glossOf`.** It fetches `glosses.json` the first time the line is turned on
+  and not before, and both pages call it rather than each keeping a copy.
 - **A verb shows its stem's sense, not the lemma's.** הֶחֱזַקְתִּי is a Hiphil and
   reads "make strong", where חָזַק's own gloss is "be or grow firm".
 - **Only the head lemma is glossed.** וְגַם reads "also", not "and also"; the

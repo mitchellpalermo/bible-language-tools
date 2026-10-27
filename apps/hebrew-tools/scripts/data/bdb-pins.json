@@ -252,6 +252,15 @@
         ]
       },
       "why": "The only Qal sense is a cited phrase, 'those sworn with oaths'."
+    },
+    "8199": {
+      "stems": {
+        "Qal": [
+          "judge",
+          "govern"
+        ]
+      },
+      "why": "The Qal opens with 'act as law-giver, judge', which is too long for the gloss line and leaves 'act as law-giver' on its own."
     }
   }
 }

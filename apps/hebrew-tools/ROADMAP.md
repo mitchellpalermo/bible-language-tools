@@ -305,7 +305,8 @@ lemma, built into `glosses.json`. Decided with Mitch (Oct 27, 2026):
 - **A proper name reads BDB's English** (Israel, Moses), **else the lexicon's
   transliteration** (šāʾûl), never Strong's older spelling.
 
-The line is off by default and saved with the reader's preferences. Nehemiah
+The line is off by default and saved with the reader's preferences, and
+`/reader` has the same toggle. Nehemiah
 5:16 now reads: also, moreover · occupation, work · wall · this, here · make
 strong · field · not · get, acquire · the whole, all · boy, lad · gather,
 collect · there, thither · upon, over · occupation, work. The traps found in BDB's data — phrases split
