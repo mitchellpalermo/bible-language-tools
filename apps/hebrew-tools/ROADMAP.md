@@ -283,18 +283,39 @@ most weekdays. The curated list is the fallback. Found while building it:
 cantillation preference, studied-word highlighting, and the reader's own word
 popup and legend.
 
-**No interlinear gloss line, deliberately.** The issue asked for a "show
-glosses" toggle. It was built and taken out: the reader's glosses are Strong's,
-and Strong's often lists a root sense first — its first sense for גַּם is
-"assemblage", for מְלָאכָה "deputyship", for קָנָה "erect". Five of the fourteen
-words in the first verse tested read wrong. The course vocabulary cannot stand in
-(see "Gloss dataset" under Phase 4). BDB's first sense is right for those words
-("also", "occupation, work", "get, acquire"), so the line comes back when BDB
-lands — #131, widened from verb stems to a short gloss for every lemma. Two
-traps for whoever does it: BDB tags pieces of a phrase separately (חָזַק's first
-two `<def>`s are "be" and "grow firm"), and the join must go through the exact
-lemma key — a lookup by bare Strong's number gave עַל "forasmuch as" from the
-wrong entry.
+**The interlinear gloss line came in a second pass.** The issue asked for a
+"show glosses" toggle. It was built and taken out of #179: the reader's glosses
+were Strong's, and Strong's often lists a root sense first — its first sense for
+גַּם is "assemblage", for מְלָאכָה "deputyship", for קָנָה "erect". Five of the
+fourteen words in the first verse tested read wrong. The course vocabulary
+cannot stand in (see "Gloss dataset" under Phase 4).
+
+It came back with BDB — #131, widened from verb stems to a short gloss for every
+lemma, built into `glosses.json`. Decided with Mitch (Oct 27, 2026):
+
+- **Where BDB's first sense misleads, pin another of its senses** rather than
+  write a gloss: אֱלֹהִים "rulers, judges" → "God, gods", עוֹד "a going round" →
+  "still, yet, again", הָיָה "fall out" → "be, become". About thirty common
+  words, each pin a def the entry carries and checked by the build
+  (`scripts/data/bdb-pins.json`).
+- **The popup switches to BDB too**, with Strong's as the fallback, and shows
+  the senses of the word's own stem. That closes #131.
+- **A verb on the gloss line reads its stem's sense**, so a Hiphil does not
+  carry the Qal's meaning.
+- **A proper name reads BDB's English** (Israel, Moses), **else the lexicon's
+  transliteration** (šāʾûl), never Strong's older spelling.
+
+The line is off by default and saved with the reader's preferences. Nehemiah
+5:16 now reads: also, moreover · occupation, work · wall · this, here · make
+strong · field · not · get, acquire · the whole, all · boy, lad · gather,
+collect · there, thither · upon, over · occupation, work. The traps found in BDB's data — phrases split
+across `<def>`s, the bare-Strong's-number join, cited phrases, abridged senses —
+are written up in `CLAUDE.md` under "Glosses".
+
+STEPBible's TAHOT (#132), a contextual gloss per occurrence, stays a separate
+question. It is what could gloss a word by its sense in this verse — Neh 5:16's
+Hiphil of חָזַק is about holding to the work, which a stem's first sense, "make
+strong", does not say.
 
 ---
 
@@ -391,6 +412,8 @@ Unlike greek.tools (which uses a hand-curated 50-word vocabulary as the gloss so
 4. **Hand-curated for top-frequency words:** Same approach as greek.tools — start with the top 500 words and expand
 
 **Decided: 3** (issue #118). Strong's is the only option that adds no upstream, no licence question and no pinning decision — the pipeline already fetches that repository at a fixed commit.
+
+**Then 1, on top of 3** (issue #131). Option 1's premise was wrong: the OSHB lexicon repository already ships `BrownDriverBriggs.xml`, machine-readable, at the same pinned commit, with verb senses grouped under `<stem>`. BDB now supplies the short gloss and the stem senses (`glosses.json`); Strong's stays as the fallback. See `CLAUDE.md` under "Glosses".
 
 **The textbook is deliberately not layered over it.** Garrett & DeRouchie's wording is the answer key for the deck built from that textbook, where a quiz is marked against the page. It is not a general-purpose lexicon, and letting it win across the whole Hebrew Bible would make a word's meaning depend on whether a course happened to teach it — the reader would say one thing about חֶסֶד in Genesis and the lexicon another in Isaiah. The split is by use: Flashcards reads the vocabulary, the reader reads the lexicon.
 

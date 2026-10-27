@@ -577,7 +577,7 @@ export function resolveRoot(entries, id, depth = 0) {
   return undefined;
 }
 
-// ─── BDB glosses (issues #131, #180) ─────────────────────────────────────────
+// ─── BDB glosses (issue #131) ────────────────────────────────────────────────
 
 /**
  * BDB's stem labels → the names `src/lib/morph-parse.ts` renders.

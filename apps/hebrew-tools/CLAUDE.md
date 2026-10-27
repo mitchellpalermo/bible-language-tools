@@ -161,7 +161,8 @@ gitignored — it is 24 MB regenerated from upstream, not source.
 |---|---|
 | `{CODE}.json` | one per book — `{ [chapter]: { [verse]: HebrewWord[] } }` |
 | `books.json` | the 39 books in Tanakh order, with `section`, chapter and word counts |
-| `lemmas.json` | 9,256 lemmas → `{ count, hebrew?, xlit?, pos?, gender?, root? }` |
+| `lemmas.json` | 9,256 lemmas → `{ count, hebrew?, xlit?, pos?, gender?, root?, gloss? }` (Strong's gloss) |
+| `glosses.json` | 9,248 lemmas → `{ g, s? }` — BDB's short gloss and a verb's stem senses; see "Glosses" |
 
 `src/data/morphhb.ts` is the client side: types, cached fetches, and the text
 helpers. **`lemmas.json` is the app's authoritative frequency source** — real
@@ -248,55 +249,110 @@ Things that will bite if changed carelessly:
   Counts are deliberately not recorded — `morphhb` tracks `master`, so a single
   corrected word would churn the file for no reason.
 
-### Glosses (issue #118)
+### Glosses (issues #118, #131)
 
-**Read a gloss through `src/lib/gloss.ts`.** It is Strong's, from
-`HebrewStrong.xml` in the pinned OSHB lexicon, joined into `lemmas.json` at
-build time — 9,248 of the corpus's 9,256 lemmas — plus an eight-entry table in
-`gloss.ts` for the inseparable prefixes, which are letter codes with no Strong's
-entry at all.
+**Read a gloss through `src/lib/gloss.ts`.** Three sources sit behind it, in
+this order:
 
-**The textbook is deliberately not a source there.** Garrett & DeRouchie's
-wording is authoritative for the thing it is: the answer key for the deck built
-from that textbook, where a quiz is marked against the printed page. It is not a
+| Source | Built into | Covers |
+|---|---|---|
+| BDB, `BrownDriverBriggs.xml` in the pinned OSHB lexicon | `glosses.json` | every numbered lemma, with build-time fallbacks below |
+| Strong's, `HebrewStrong.xml` | `lemmas.json` | the fallback when `glosses.json` has not loaded |
+| `PREFIX_GLOSSES` in `gloss.ts` | — | the eight inseparable prefixes, which are letter codes |
+
+`glosses.json` already falls back where BDB is bare, so the file alone answers
+for every lemma: **BDB** (84.9% of occurrences), a **pinned BDB sense** (8.7%),
+a **proper name's transliteration** (4.2%), then **Strong's** trimmed to three
+items (2.3%). The build prints that table; a drop in the BDB row is the first
+sign the parser stopped reading an entry shape.
+
+| Call | Used by | Returns |
+|---|---|---|
+| `glossFor(lemma, { glosses, lemmas })` | the popup's gloss | BDB's short gloss, else Strong's, else the prefix table |
+| `stemSenses(lemma, stem, glosses)` | the popup's stem line | BDB's senses for that stem, or nothing |
+| `lineGloss(word, glosses)` | the gloss line on `/daily` | the head lemma's gloss, a verb's stem sense, at most two items |
+
+**Why BDB over Strong's.** Strong's lists every sense undifferentiated and
+often leads with the root's: "assemblage" for גַּם, "deputyship" for
+מְלָאכָה, "erect" for קָנָה, "self, even, namely" for אֵת. BDB reads "also",
+"occupation, work", "get, acquire", "mark of the accusative". And Strong's
+cannot say what a stem does — חָזַק got the same thirteen glosses as a Qal, a
+Piel and a Hithpael (#131).
+
+**The textbook is deliberately not a source.** Garrett & DeRouchie's wording is
+authoritative for the thing it is: the answer key for the deck built from that
+textbook, where a quiz is marked against the printed page. It is not a
 general-purpose lexicon, and letting it win across the whole Hebrew Bible would
 make a word's meaning depend on whether a course happened to teach it — the
 reader would say one thing about חֶסֶד in Genesis and the lexicon another in
-Isaiah.
-
-So the split is by **use**, not by source quality:
+Isaiah. BDB is a lexicon, so it lands on the lexicon side of that split:
 
 | Feature | Gloss source | Answerable to |
 |---|---|---|
 | Flashcards | `word.gloss` off the vocabulary | the textbook |
-| Reader, Daily Verse | `glossFor()` | the lexicon |
+| Reader, Daily Verse | `gloss.ts` | the lexicon (BDB, then Strong's) |
 
 `gloss.ts` imports nothing from `vocabulary.ts`, and that is what keeps the two
 from drifting into each other. Do not add a fallback between them in either
 direction.
 
-Things that will bite if changed carelessly:
+Things that will bite if changed carelessly — the BDB parser
+(`parseBdbEntry` in `scripts/lib/oshb.mjs`):
 
-- **`<def>` inside `<meaning>` is the gloss; `<usage>` is not.** `<usage>` is
-  the KJV's translation words with all the apparatus — H1 reads `chief, (fore-)
-  father(-less), × patrimony, principal.` where the `<def>` reads `father`.
-  Usage is the fallback for the 245 entries carrying no `<meaning>`, trimmed to
-  four alternatives.
-- **BDB sense splits share a gloss.** `5892a` and `5892b` both resolve to H5892
-  because Strong's draws no distinction. Frequency deliberately behaves the
-  other way — counts sum across sense splits and never across homographs.
-- **Proper names keep Strong's romanizations**, so H3478 reads "he will rule as
-  God, Jisraël". A normalization rule for archaic spellings would break more
-  than it fixed; the popup shows the pointed lemma beside the gloss.
-- **The eight inseparable prefixes have no Strong's entry** — they are letter
-  codes, not numbers — and they are 121,669 of the corpus's 305,516 tokens, so a
-  blank popup on a ל is not an option. `PREFIX_GLOSSES` covers all eight. Do not
+- **Join through the exact augmented key.** `lemma → AugIndex → LexicalIndex
+  <xref bdb> → BDB entry`. A lookup by bare Strong's number lands עַל (`5921a`)
+  on another entry under 5921, "forasmuch as".
+- **BDB tags pieces of one phrase as separate `<def>`s.** חָזַק opens
+  "`<def>be</def>` or `<def>grow firm</def>`". Defs separated only by "or",
+  "and", "/" or a short parenthetical are one item; a comma, a reference, a
+  Hebrew citation or any other word starts a new one.
+- **A parenthesized def is etymology.** יִשְׂרָאֵל is "Israel (Ēl persisteth)",
+  and only "Israel" is the gloss.
+- **A def in a stem sense can translate a cited phrase**, and then it is not a
+  gloss: "strengthened him not", "and he shall be smitten, and die", "letters
+  were sent". A pronoun, a finite auxiliary or a leading "and" marks one, and it
+  takes **its whole sense** with it, because the other defs there are fragments
+  of the same quotation. The filter applies to stem senses only — in an entry's
+  head a pronoun is the gloss (הוּא "he, she, it").
+- **The file is abridged.** Some senses carry no defs at all. הָלַךְ's Qal I
+  (go, come, walk) is bare, so a "first def under Qal" rule read "pass away,
+  die". A verb's head is BDB's Qal meaning, so it stands in for a Qal whose
+  first sense is bare. A derived stem gets no such stand-in — the head would
+  give a Hiphil the Qal's meaning — and with no senses of its own it falls back
+  to the lemma's gloss.
+- **A verb used in one stem names it in the head**, with no `<sense>` around
+  it: צָוָה is "`<stem>Pi</stem>`. lay charge, give charge".
+- **Stem labels map through `STEM_LABELS`, and an unknown one fails the
+  build.** A silently dropped stem looks exactly like a verb BDB does not cover.
+  BDB's "Pōʿl" family covers both of OSHB's Polel and Poel, and its Aramaic
+  "Hithpa" both Hithpaal and Ithpaal, so those senses are filed under each.
+- **Pins choose; they never write** (`scripts/data/bdb-pins.json`, Mitch, Oct
+  2026). For about thirty common words BDB's first sense misleads — אֱלֹהִים
+  "rulers, judges", עוֹד "a going round", הָיָה "fall out". A pin names defs the
+  entry already carries, as the head gloss or as a stem's first sense, with a
+  `why`. A pinned def the entry does not carry fails the build. Only pin a word a
+  reader meets often; the long tail reads BDB as written.
+- **Proper names: BDB's English, else the lexicon's `xlit`, never Strong's.**
+  BDB gives "Israel", "Moses", "Jerusalem"; for שָׁאוּל it gives only an
+  etymology, so the line reads "šāʾûl". The popup does not repeat a
+  transliteration it already shows beside the headword.
+- **The inseparable prefixes are skipped by the BDB build** and stay on
+  `PREFIX_GLOSSES`. BDB's own entry for ו opens "so, then". They are 121,669 of
+  the corpus's 305,516 tokens, so a blank popup on a ל is not an option. Do not
   "fix" one by reaching into the vocabulary for it.
+- **Strong's: `<def>` inside `<meaning>` is the gloss; `<usage>` is not.**
+  `<usage>` is the KJV's translation words with all the apparatus — H1 reads
+  `chief, (fore-) father(-less), × patrimony, principal.` where the `<def>`
+  reads `father`.
 - **A lemma key's digits are its Strong's number**, since OSHB's `lemma`
   attribute is an augmented Strong's number by construction. The lexicon's own
   `<xref strong>` agrees for 9,240 of the 9,241 lemmas carrying both; the build
   reports the one disagreement (`2007` vs `2004`) rather than resolving it
   silently.
+- **`glosses.json` is a separate file from `lemmas.json` on purpose.** The gloss
+  line needs only glosses, and the popup needs the lemma index for a count and a
+  root. Both are fetched lazily and cached; the popup loads them independently,
+  so a failed glosses fetch still leaves Strong's.
 
 ### The reader (issues #119, #120, #121)
 
@@ -329,12 +385,17 @@ Things that will bite if changed carelessly:
 - **Absent renders as absent.** Seven lemmas have no lexicon entry and neither
   does any inseparable prefix. A missing root or transliteration renders as
   nothing — "unknown" reads like a claim about the word.
-- **`fetchLemmas()` is called by the popup, not by the page.** The index is
-  ~140 KB; a reader that never taps a word never pays for it. The parse and the
-  morphemes do not depend on it, so a failed fetch still leaves a usable popup.
+- **`fetchLemmas()` and `fetchGlosses()` are called by the popup, not by the
+  page.** The two are ~230 KB and ~120 KB gzipped; a reader that never taps a
+  word never pays for either. The parse and the morphemes depend on neither, so
+  a failed fetch still leaves a usable popup.
+- **The popup names what the word's own stem means.** Below the gloss, a verb
+  gets BDB's senses for its stem — הֶחֱזַקְתִּי reads "Hiphil make strong,
+  strengthen; make firm; …" — through `stemSenses`. A stem BDB lists nothing
+  for gets no line, and nothing announces the absence.
 - **A word carries one lemma, and it can be a prefix's letter code.** בּוֹ is
   `lemma: 'b'` — a preposition with its own suffix, 470 of them in Genesis alone.
-  `glossFor` answers for those without the index.
+  `glossFor` answers for those without either index.
 - **Highlighting joins on `cardKey`, never the bare lemma** — see `studied.ts`.
   The reader knows a word by its augmented Strong's number and the SRS store
   knows it by a pointed headword, so the vocabulary is the bridge.
@@ -440,12 +501,38 @@ verse when the feed cannot be used. Things to know before changing it:
   made once is not worth an entry.
 - **`dailydoseofscripture.com` must stay in `connect-src`** in
   `public/_headers`. `dailyDose.test.ts` reads the real file.
-- **There is no interlinear gloss line, on purpose.** Strong's first sense is
-  often a root sense ("assemblage" for גַּם, "deputyship" for מְלָאכָה), and the
-  textbook may not stand in — see "Glosses" above. It comes back with BDB
-  (#131); `ROADMAP.md` Phase 3 has the two traps found in BDB's data.
+- **The gloss line is BDB's, behind a toggle that starts off** — see "The
+  gloss line" below.
 - **The streak is marked on mount.** Opening the page is the reading, and
   `markReadToday` is idempotent within a day.
+
+#### The gloss line
+
+`/daily` has an interlinear gloss line behind a "Glosses" toggle, off by
+default. #179 built it on Strong's and took it out — five of the fourteen words
+of Nehemiah 5:16 read wrong — and it came back once BDB was in (see "Glosses").
+`WordRun` takes an optional `glossOf`; with it, each `WordToken` becomes a
+two-row column, Hebrew over English.
+
+- **Off by default, and the preference is the reader's** — `ReaderPrefs.glosses`
+  in `hebrew-tools-reader-prefs`. A line of English under a verse is an answer
+  key to the whole thing; the verse is for reading first. `glosses.json` is not
+  fetched until the line is on.
+- **A verb shows its stem's sense, not the lemma's.** הֶחֱזַקְתִּי is a Hiphil and
+  reads "make strong", where חָזַק's own gloss is "be or grow firm".
+- **Only the head lemma is glossed.** וְגַם reads "also", not "and also"; the
+  prefixes are in the popup's morpheme table. A word that *is* a prefix with a
+  suffix (לוֹ) gets the prefix's gloss.
+- **Two items if they fit `LINE_MAX` (18 characters), else one.** A gloss wider
+  than its word pushes the next word along; a single long item wraps under its
+  own word rather than being cut.
+- **An empty line is still drawn** (a non-breaking space), so the words either
+  side stay on one baseline.
+- **The maqqef and the sof pasuq stay on the Hebrew row.** They belong between
+  Hebrew words. Inside a maqqef pair there is no space between the words, so
+  the gloss's own padding keeps the two glosses apart, and the verse's
+  `wordSpacing` is reset on the gloss — it is sized for Hebrew at 1.75rem.
+- **Tapping a gloss opens its word**, the same target as the Hebrew above it.
 
 ### Database (accounts groundwork — issue #91)
 

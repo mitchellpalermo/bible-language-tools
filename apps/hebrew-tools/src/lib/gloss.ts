@@ -3,8 +3,8 @@
  *
  * **BDB first, then Strong's.** `glosses.json` carries a short gloss for every
  * numbered lemma, built from `BrownDriverBriggs.xml` in the pinned OSHB
- * lexicon (issue #180), and BDB's senses for each stem a verb is used in
- * (issue #131). Strong's, in `lemmas.json`, is the fallback when that file has
+ * lexicon, and BDB's senses for each stem a verb is used in (issue #131,
+ * widened from verbs to every lemma). Strong's, in `lemmas.json`, is the fallback when that file has
  * not loaded. The build already falls back where BDB is bare — a pinned BDB
  * sense for a few common words, a proper name's transliteration, then Strong's
  * — so nothing here has to choose between them word by word.
