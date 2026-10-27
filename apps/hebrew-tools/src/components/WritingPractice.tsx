@@ -255,7 +255,10 @@ function WritingPracticeInner() {
     return (
       <div className="space-y-4">
         <DeckPicker deckId={deckId} onPick={startDeck} />
-        <p className="bg-bg-card rounded-xl border p-8 text-center text-text-muted shadow-sm">
+        <p
+          className="bg-bg-card rounded-xl border p-8 text-center text-text-muted shadow-sm"
+          style={{ borderColor: '#D1FAE5' }}
+        >
           Loading…
         </p>
       </div>
