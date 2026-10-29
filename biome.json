@@ -99,7 +99,12 @@
       }
     },
     {
-      "includes": ["**/scripts/**", "**/*.config.{ts,mjs,js}", "**/*.config.*.{ts,mjs,js}"],
+      "includes": [
+        "**/scripts/**",
+        "**/*.config.{ts,mjs,js}",
+        "**/*.config.*.{ts,mjs,js}",
+        "**/*-cli.ts"
+      ],
       "linter": {
         "rules": {
           "suspicious": {

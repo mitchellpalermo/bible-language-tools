@@ -8,6 +8,8 @@
     "build:hebrew": "pnpm --filter hebrew-tools build",
     "test": "pnpm -r test:run",
     "typecheck": "pnpm -r typecheck",
+    "checks": "node packages/dev-tasks/src/checks-cli.ts",
+    "shots": "node packages/dev-tasks/src/shots-cli.ts",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",

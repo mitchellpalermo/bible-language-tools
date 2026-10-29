@@ -10,6 +10,7 @@ apps/
   hebrew-tools/  — hebrew.tools (in development, see ROADMAP.md)
 packages/
   shared/        — language-agnostic utilities shared by both apps
+  dev-tasks/     — `pnpm shots` and `pnpm checks`: PR screenshots and the repo's checks, as scripts
 ```
 
 ## Running the apps
@@ -25,6 +26,10 @@ pnpm build:hebrew       # build hebrew-tools for production
 
 pnpm test               # run all tests across all packages
 pnpm typecheck          # typecheck all packages
+
+pnpm checks             # the data checks: corpus gate, --check scripts, verses, pins
+pnpm checks ci          # everything both CI workflows run, in one report
+pnpm shots capture <list.json> --before main   # PR screenshots from a shot list
 ```
 
 To work on a single app directly:
@@ -338,6 +343,35 @@ both apps.
   island needs a case there. A new stored value needs seeding there, or the
   test cannot see it differ.
 
+## Delegating chores to Haiku
+
+Two chores are mechanical enough to hand to a smaller model, and each has a
+Haiku agent in `.claude/agents/` and a script in `packages/dev-tasks` (see its
+README). **Use the agent for these; do not do them in the main session:**
+
+| Chore | Agent | Script |
+|---|---|---|
+| PR screenshots | `screenshotter` | `pnpm shots` |
+| The corpus gate, the `--check` scripts, `check:verses`, `check:pins`, or a full CI-equivalent run | `checker` | `pnpm checks` |
+
+The main session still owns the judgement either side of the agent:
+
+- **For screenshots, it writes the shot list.** It picks the routes and the
+  state, and for each shot an `expect` text that only appears in that state —
+  "Again" proves a flashcard is revealed, "Flashcards" does not. The script
+  refuses to capture without it, so a missing or vague brief fails loudly
+  rather than producing a shot of the home page. Afterwards **it looks at the
+  PNGs itself** before they go on a PR; the agent does not judge images.
+- **For checks, it reads the report and decides what to do.** The agent
+  returns the report verbatim and fixes nothing. A failure in a `--check`
+  script usually means regenerating a committed file, which is a change to
+  review, not one for a small model to make.
+
+The scripts are what make this safe to delegate: every step that is easy to
+forget — the dev toolbar, the webfont check, `CI=1` on the corpus gate,
+building the corpus first — is in code, not in the agent's instructions. When
+one of these chores gains a step, add it to the script.
+
 ## Pull requests
 
 ### Screenshots are required for any UI-affecting change
@@ -350,13 +384,13 @@ What to capture:
 - **Before and after**, when changing something that already existed. The "before" is the point — a lone "after" shot doesn't show what moved.
 - **Both apps**, when the change touches `packages/shared`. It ships to greek.tools and hebrew.tools at once.
 
-How to capture: drive a Playwright script against `pnpm dev` rather than taking manual screenshots — it is repeatable, and it gets exact viewport sizes. Two things to remember:
+How to capture: write a shot list and send it to the `screenshotter` agent, which runs `pnpm shots capture` (see "Delegating chores to Haiku" above, and `packages/dev-tasks/README.md` for the format). The script handles the points below; they are here so the reasons stay written down.
 
 - **Hide the Astro dev toolbar**, or it floats over the bottom of every shot: `page.addStyleTag({ content: 'astro-dev-toolbar { display: none !important; }' })`.
-- **Only one dev server can hold port 4321.** Both apps use it, and Playwright's `reuseExistingServer` means a stale server from the other app will silently serve the wrong site. Kill it between runs: `lsof -ti:4321 | xargs -r kill -9`.
-- **Check that the webfont actually loaded before trusting a shot of Hebrew or Greek.** Both apps load their script face from Google Fonts, and if the browser cannot reach that host the page renders in a system fallback — which looks plausible in a thumbnail and is not what the app ships. Nikud land wrong and the letterforms differ. Where the browser has no route to the CDN, fetch the CSS and its `woff2` files once with `curl` and serve them to the page with `context.route('https://fonts.googleapis.com/**', ...)` and the same for `fonts.gstatic.com`.
+- **Never reuse, or kill, the dev server on port 4321.** Both apps default to it, so a stale server from the other app will silently serve the wrong site — and the server on it is often one you are using from another worktree. `pnpm shots` starts its own server on a spare port and checks every page title names the right app.
+- **Check that the webfont actually loaded before trusting a shot of Hebrew or Greek.** Both apps load their script face from Google Fonts, and if the browser cannot reach that host the page renders in a system fallback — which looks plausible in a thumbnail and is not what the app ships. Nikud land wrong and the letterforms differ. `pnpm shots` refuses to capture when the page shows the script and its face never loaded. Where the browser has no route to the CDN, fetch the CSS and its `woff2` files once with `curl` and serve them to the page with `context.route('https://fonts.googleapis.com/**', ...)` and the same for `fonts.gstatic.com`.
 
-How to attach: GitHub's image upload is web-UI only — there is no API for it, so `gh` cannot upload to it. Commit the images to an orphan branch (`assets/pr-<N>`) and reference them from the PR body by their `raw.githubusercontent.com` URL. That keeps binaries out of `main`'s history, and the branch can be deleted after the merge. The repo is public, so raw URLs render for everyone.
+How to attach: `pnpm shots publish <dir> --pr <N>` does all of the following and prints the PR-body table. GitHub's image upload is web-UI only — there is no API for it, so `gh` cannot upload to it. Commit the images to an orphan branch (`assets/pr-<N>`) and reference them from the PR body by their `raw.githubusercontent.com` URL. That keeps binaries out of `main`'s history, and the branch can be deleted after the merge. The repo is public, so raw URLs render for everyone.
 
 **Build that orphan branch in a throwaway directory, never in the working tree.** `git init` a temp dir, add the remote, commit the PNGs, push the branch, delete the dir:
 
@@ -450,7 +484,10 @@ Things to know before changing it:
 - **greek-tools has no equivalent.** Nothing compares `grammar.ts` to MorphGNT,
   in CI or locally; its workflow builds the corpus only in the deploy job.
 
-To run the gate locally: `pnpm --filter hebrew-tools build:data`, then the tests.
+To run the gate locally: `pnpm checks data` (or the `checker` agent). It builds
+the corpus, then runs the tests with `CI=1` so a missing corpus fails rather
+than skips, plus the `--check` scripts. By hand it is
+`pnpm --filter hebrew-tools build:data`, then the tests.
 Details of what is checked and why are in `apps/hebrew-tools/CLAUDE.md` under
 "The corpus gate".
 
