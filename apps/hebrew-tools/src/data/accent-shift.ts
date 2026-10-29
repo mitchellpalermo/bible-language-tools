@@ -39,7 +39,13 @@ export type ShiftRuleId =
 
 export interface ShiftRule {
   name: string;
-  /** Plain text; Hebrew runs in it are rendered through `<Prose>`. */
+  /**
+   * Plain text; Hebrew runs in it are rendered through `<Prose>`. Divide an
+   * example's syllables with a paseq (׀), never a slash: `Prose` splits runs at
+   * anything outside the Hebrew block, and a slash would lay the syllables out
+   * left to right. Join it with no-break spaces (\u00A0) so it never wraps
+   * mid-word on a phone.
+   */
   text: string;
   /** Where on `/grammar` the background is taught. */
   href: string;
@@ -51,12 +57,12 @@ const VOWELS = '/grammar#vowels';
 export const SHIFT_RULES: Record<ShiftRuleId, ShiftRule> = {
   'syllable-per-consonant': {
     name: 'One consonant starts each syllable',
-    text: 'Every syllable begins with a single consonant. A vowel letter belongs to the syllable of the consonant before it, so סוּסִים divides סוּ / סִים.',
+    text: 'Every syllable begins with a single consonant. A vowel letter belongs to the syllable of the consonant before it, so סוּסִים divides סוּ\u00A0׀\u00A0סִים.',
     href: VOWELS,
   },
   'vocal-sheva-syllable': {
     name: 'A vocal sheva is its own syllable',
-    text: 'In this course a consonant carrying a vocal sheva, or a hateph under a guttural, makes a syllable on its own: דְּ / בָ / רִים.',
+    text: 'In this course a consonant carrying a vocal sheva, or a hateph under a guttural, makes a syllable on its own: דְּ\u00A0׀\u00A0בָ\u00A0׀\u00A0רִים.',
     href: VOWELS,
   },
   'ending-takes-accent': {

@@ -32,7 +32,7 @@ import {
 } from '@tools/shared/step-drill';
 import { useStoredState } from '@tools/shared/use-stored-state';
 import posthog from 'posthog-js';
-import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 import {
   ENDING_KIND_LABELS,
   POSITION_LABELS,
@@ -239,18 +239,39 @@ function PositionStep({
   );
 }
 
+interface KeypadTarget {
+  insert: (text: string) => void;
+  backspace: () => void;
+}
+
+/**
+ * The typing hook lives here, not in the page: it attaches its Android
+ * `beforeinput` listener when it mounts, so it must mount with the field.
+ * The keypad sits outside, and reaches the field through `register`.
+ */
 function FormStep({
   value,
   onChange,
   onSubmit,
   keypadOpen,
+  register,
 }: {
   value: string;
   onChange: (raw: string) => void;
   onSubmit: () => void;
   keypadOpen: boolean;
+  register: (target: KeypadTarget | null) => void;
 }) {
   const input = useHebrewInput({ value, onChange });
+  const { ref, insert, backspace } = input;
+  useEffect(() => {
+    register({ insert, backspace });
+    return () => register(null);
+  }, [register, insert, backspace]);
+  // Focus on arrival, so typing can start at once.
+  useEffect(() => {
+    ref.current?.focus();
+  }, [ref]);
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -263,7 +284,7 @@ function FormStep({
     <div className="space-y-3">
       <p className="text-sm text-text-muted">Type the new form with full pointing.</p>
       <input
-        ref={input.ref}
+        ref={ref}
         type="text"
         dir="rtl"
         lang="he"
@@ -280,11 +301,6 @@ function FormStep({
         className="w-full text-center text-3xl py-3 px-4 rounded-xl border-2 border-accent/60 bg-bg focus:outline-none focus:border-primary"
         style={{ color: 'var(--color-hebrew)', ...HEBREW_STYLE }}
       />
-      {keypadOpen && (
-        <div className="sticky bottom-0 -mx-4 sm:mx-0 px-2 sm:px-3 py-2 bg-bg/95 backdrop-blur border-t sm:border sm:rounded-xl border-primary/10 shadow-lg">
-          <HebrewKeypad onInsert={input.insert} onBackspace={input.backspace} />
-        </div>
-      )}
     </div>
   );
 }
@@ -344,6 +360,11 @@ function AccentTrainerInner() {
   const [tally, setTally] = useState({ done: 0, clean: 0 });
   const [keypadOpen, setKeypadOpen] = useState(false);
   const stepOpenedAt = useRef(Date.now());
+  // The form field's insert/backspace, for the keypad rendered outside it.
+  const keypadTarget = useRef<KeypadTarget | null>(null);
+  const registerKeypad = useCallback((target: KeypadTarget | null) => {
+    keypadTarget.current = target;
+  }, []);
 
   // Dealt after mount: the server has no store, and the first render must match.
   useEffect(() => {
@@ -574,6 +595,7 @@ function AccentTrainerInner() {
               onChange={(typed) => setAnswers((a) => ({ ...a, typed }))}
               onSubmit={check}
               keypadOpen={keypadOpen}
+              register={registerKeypad}
             />
           )}
 
@@ -605,6 +627,14 @@ function AccentTrainerInner() {
               />
             )}
           </div>
+          {/* Inline, not pinned: the field is the only thing on this step, and
+              a pinned keypad covers it on a phone. */}
+          {drill.step === FORM_STEP && keypadOpen && (
+            <HebrewKeypad
+              onInsert={(text) => keypadTarget.current?.insert(text)}
+              onBackspace={() => keypadTarget.current?.backspace()}
+            />
+          )}
         </section>
       )}
 

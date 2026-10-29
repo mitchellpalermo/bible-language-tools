@@ -200,6 +200,14 @@ describe('AccentTrainer', () => {
     });
   });
 
+  it('focuses the field when the form step opens', async () => {
+    const user = await renderTrainer();
+    await divideSyllables(user, first);
+    await markAccent(user, first);
+    await labelPositions(user, first);
+    expect(screen.getByRole('textbox', { name: 'The new form, pointed' })).toHaveFocus();
+  });
+
   it('opens a keypad on the form step', async () => {
     const user = await renderTrainer();
     await divideSyllables(user, first);
