@@ -146,10 +146,12 @@ Word-mode writing (#102) spends a third, `write:word:<cardKey>` in `src/data/wri
 
 The paradigm quiz spends a fourth, `paradigm:<cellId>` in `src/lib/paradigm-srs.ts` — `paradigm:qal-qatal-begadkephat:3ms`. The suffix is `cellId()`, never a row and column, so a form is one card whether it was answered in its own verb's table or in the summary table beside the other classes.
 
+The Accent-Shift Trainer spends a fifth, `accent:<item id>` in `src/lib/accent-shift.ts` — `accent:davar-pl`. One card per item (a noun and an ending), not per step: a clean pass is `good`, any miss or "Show me" is `again`. Item ids are card keys, so never rename one.
+
 The confusable decks deliberately get no prefix of their own — they drill the same letters the alphabet deck does, so grading ד in one must move the card the other sees.
 - **Deck selection is persisted separately from the SRS store** (`hebrew-tools-deck-v1`, `src/lib/deck-selection.ts`) and is never synced. It decides which due cards you see, not what is due, so it stays local to the browser.
 - **What the card front shows is persisted the same way** (`hebrew-tools-flashcard-display-v1`, `src/lib/flashcard-settings.ts`, over `@tools/shared/flashcard-settings`) and is likewise never synced. Today it holds one boolean: whether the part of speech appears on the front of a flashcard, which defaults to off. See the repo CLAUDE.md under "What the card front gives away".
-- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`, `hebrew-tools-reader-prefs`, `hebrew-tools-daily-v1`. There is still no auth or sync in this app — **all study progress is per-browser only.** The D1 plumbing exists (see below), but nothing reads or writes it yet.
+- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`, `hebrew-tools-reader-prefs`, `hebrew-tools-daily-v1`, `hebrew-tools-accent-scaffold-v1` (speed mode), `hebrew-tools-attempts-v1` (attempt log, not synced). There is still no auth or sync in this app — **all study progress is per-browser only.** The D1 plumbing exists (see below), but nothing reads or writes it yet.
 
 ### OSHB data pipeline (issue #75)
 
@@ -916,6 +918,44 @@ Things that will bite if changed carelessly:
   letter is stored as כ and shown as ך so the next letter can still attach.
   Comparing a raw value to an answer fails on every word ending in ך ם ן ף ץ —
   `gradeCell` finalizes first.
+
+### Accent-Shift Trainer (issue #185)
+
+`/accent` drills what an ending does to a noun: divide the new form into
+syllables, mark the accent, label the pretonic and distant syllables, then type
+the form with full pointing. The engine is `@tools/shared/step-drill` (see the
+repo CLAUDE.md, "The step-gated drill").
+
+| File | Role |
+|---|---|
+| `src/data/accent-shift.ts` | Items (noun, ending, form, syllables, a rule per syllable) and the rule text |
+| `src/lib/accent-shift.ts` | The four checks, `accent:` scheduling, the queue, speed-mode storage |
+| `src/lib/attempt-log.ts` | This app's attempt log (`hebrew-tools-attempts-v1`) |
+| `src/components/AccentTrainer.tsx` | The page |
+
+Things that will bite if changed carelessly:
+
+- **The answer key follows the course, not Gesenius.** Garrett & DeRouchie
+  count a vocal sheva as its own syllable (דְּ / בָ / רִים) and call every
+  syllable before the pretonic "distant". GKC § 26 m says a vocal sheva is
+  never a syllable of its own. Step 3 only has an answer under the course's
+  view, and the course is marked against it. The rule text is this app's own
+  wording, as on `/grammar`.
+- **Steps 1–3 show bare letters.** The pointed form is step 4's answer, so the
+  chips come from `letters()`, never from the item's pointed syllables.
+- **Step 4 is checked syllable by syllable.** When only the pointing is wrong,
+  the typed form is split by the item's letter counts, and each wrong syllable
+  names its own rule. A wrong letter cannot be placed, so every unaccented
+  syllable's rule is offered. A missing dagesh is accepted and pointed out —
+  the drill is about vowels.
+- **Every form and base is corpus-checked** in `accent-shift.test.ts`.
+  דְּבַרְכֶם, the textbook-tidy heavy suffix on דָּבָר, never occurs, so
+  לְבַבְכֶם carries that rule. In לְבַבְכֶם and אַדְמָתוֹ the letter after the
+  silent sheva has no dagesh lene in the text; both are flagged for review.
+- **An ending is drawn on a dotted circle only when it begins with a point**
+  (◌ִים, but וֹת). A test enforces it.
+- **The trainer's cards are in the reset.** `ERASES` in `ResetProgress.tsx`
+  lists it; a new drill that keys cards into the store must be added there too.
 
 ### Grammar Reference (issue #79)
 

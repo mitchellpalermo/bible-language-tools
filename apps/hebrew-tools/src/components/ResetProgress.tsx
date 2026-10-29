@@ -18,6 +18,7 @@ export const ERASES = [
   'Vocabulary flashcards — every word you have reviewed',
   'Handwriting practice — letters, vowel points and whole words',
   'Paradigm quiz — every form you have been quizzed on',
+  'Accent-shift trainer — every word you have worked through',
   'The reader’s marks on words you have studied',
 ] as const;
 

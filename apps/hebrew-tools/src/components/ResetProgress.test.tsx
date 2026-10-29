@@ -57,7 +57,7 @@ async function confirmReset() {
 }
 
 describe('hebrew.tools ResetProgress', () => {
-  it('names flashcards, handwriting and the paradigm quiz before anything is erased', async () => {
+  it('names flashcards, handwriting, the paradigm quiz and the accent trainer before anything is erased', async () => {
     const user = userEvent.setup();
     render(<ResetProgress signedIn={false} />);
     await user.click(screen.getByRole('button', { name: 'Reset SRS progress…' }));
@@ -66,8 +66,9 @@ describe('hebrew.tools ResetProgress', () => {
     expect(panel).toHaveTextContent(/Vocabulary flashcards/);
     expect(panel).toHaveTextContent(/Handwriting practice/);
     expect(panel).toHaveTextContent(/Paradigm quiz/);
+    expect(panel).toHaveTextContent(/Accent-shift trainer/);
     expect(panel).toHaveTextContent('Kept: your streak, accuracy stats and deck choices.');
-    expect(ERASES).toHaveLength(4);
+    expect(ERASES).toHaveLength(5);
   });
 
   it('erases every card in this browser — all features — and keeps the stats', async () => {
