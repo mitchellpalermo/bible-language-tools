@@ -418,12 +418,15 @@ How to attach: `pnpm shots publish <dir> --pr <N>` does all of the following and
 **Build that orphan branch in a throwaway directory, never in the working tree.** `git init` a temp dir, add the remote, commit the PNGs, push the branch, delete the dir:
 
 ```bash
+NAME=$(git config user.name) EMAIL=$(git config user.email)   # run in the repo first
 WT=$(mktemp -d) && cd "$WT" && git init -q .
 git remote add origin https://github.com/mitchellpalermo/bible-language-tools.git
 cp /path/to/shots/*.png . && git add *.png
-git commit -q -m "assets: screenshots for PR #<N>"
+git -c user.name="$NAME" -c user.email="$EMAIL" commit -q -m "assets: screenshots for PR #<N>"
 git branch -M assets/pr-<N> && git push -q origin assets/pr-<N>
 ```
+
+**A fresh `git init` has no identity of its own.** It reads only global config, and on a machine where the name and email are set per repository its commit fails with "Author identity unknown". Read them in the repo and pass them with `-c`, as above; `pnpm shots publish` does the same (`identityArgs` in `packages/dev-tasks/src/git.ts`). The same applies to any script that commits outside the working tree.
 
 Never `git checkout --orphan` + `git clean -fdx` in the repo: it deletes ignored files (`.dev.vars`, `.wrangler/`, `public/data/`) and untracked directories like `.claude/`, unrecoverably — and `-e` exclusions do not reliably stop it.
 
