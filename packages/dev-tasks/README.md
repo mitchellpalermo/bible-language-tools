@@ -122,5 +122,7 @@ a `--check` script, add it there.
 `pnpm --filter @tools/dev-tasks test:run`. `capture.test.ts` drives a real
 Chromium against a small local HTTP server, so every refusal above is tested in
 a browser without starting Astro. The process and git glue (`dev-server.ts`,
-`git.ts`, the two CLIs) is not unit-tested; every decision it acts on lives in
-a tested module.
+`git.ts`, the two CLIs) is mostly not unit-tested; every decision it acts on
+lives in a tested module. The exception is `identityArgs` in `git.ts`:
+`publish` commits in a fresh `git init`, which sees no per-repository
+identity, and `git.test.ts` reproduces that failure with real git.

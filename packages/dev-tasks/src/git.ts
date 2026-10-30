@@ -54,9 +54,29 @@ export function githubRepo(remoteUrl: string): string {
 }
 
 /**
+ * `-c` flags that make a commit in another directory author as `root` does.
+ *
+ * A fresh `git init` reads only global and system config, so where the name
+ * and email are set per repository — as on Mitch's machine — its first commit
+ * fails with "Author identity unknown". `git config` in `root` resolves the
+ * same layers a commit there would (local, then global). An unset value is
+ * left out, so git still reports a missing identity in its own words.
+ */
+export function identityArgs(root: string): string[] {
+  return (['user.name', 'user.email'] as const).flatMap((key) => {
+    try {
+      return ['-c', `${key}=${git(root, 'config', '--get', key)}`];
+    } catch {
+      return [];
+    }
+  });
+}
+
+/**
  * Push `files` (in `dir`) to a fresh orphan branch `assets/pr-<pr>`, built in a
  * throwaway directory — never in the working tree, where the orphan dance
- * would delete ignored files. Returns `owner/name`.
+ * would delete ignored files. The commit borrows `root`'s identity
+ * (`identityArgs`). Returns `owner/name`.
  */
 export function pushAssets(root: string, dir: string, files: string[], pr: number): string {
   const remote = git(root, 'remote', 'get-url', 'origin');
@@ -66,7 +86,7 @@ export function pushAssets(root: string, dir: string, files: string[], pr: numbe
     git(tmp, 'remote', 'add', 'origin', remote);
     for (const f of files) cpSync(join(dir, f), join(tmp, f));
     git(tmp, 'add', ...files);
-    git(tmp, 'commit', '-q', '-m', `assets: screenshots for PR #${pr}`);
+    git(tmp, ...identityArgs(root), 'commit', '-q', '-m', `assets: screenshots for PR #${pr}`);
     git(tmp, 'branch', '-M', `assets/pr-${pr}`);
     git(tmp, 'push', '-q', '--force', 'origin', `assets/pr-${pr}`);
   } finally {
