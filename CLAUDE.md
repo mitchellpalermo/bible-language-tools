@@ -65,6 +65,8 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/flashcard-session` | `shuffle`, `nextRound` and `requeueMissed` — pure flashcard queue rules: Endless mode's reshuffle, and the drill modes' re-queue of a missed card. Used through `use-flashcard-session` |
 | `@tools/shared/use-flashcard-session` | `useFlashcardSession<T>()` — the flashcard session engine: dealing, SRS grading, drills, Endless, typed answers, the keyboard. Both apps' `Flashcards.tsx` run on it. See "The flashcard session engine" below |
 | `@tools/shared/use-stored-state` | `useStoredState(load, fallback, save?)` and `useHydrated()` — state seeded from storage without breaking hydration. See "Hydration" below |
+| `@tools/shared/step-drill` | The step-gated drill engine: `stepDrillReducer`, `isCleanPass`, and `canSkipScaffold` / `createStepDrillHistory(storageKey)` for speed mode. See "The step-gated drill" below |
+| `@tools/shared/attempt-log` | `createAttemptLog(storageKey)` — every checked answer, by concept, for the mastery levels (#187). Local only for now |
 | `@tools/shared/test/hydration` | `hydrationErrors(ui, { seed })` — test helper: server-render with storage hidden, seed, hydrate, return every mismatch React reports |
 | `@tools/shared/reset-progress` | `resetSrsProgress` and `isResetConfirmed` — erase the SRS store, this browser first, then the account copy via `DELETE`; a server failure never undoes the local reset |
 | `@tools/shared/nav` | `NavLink` type and the active-route predicates the nav renders with |
@@ -77,6 +79,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/components/GradeButtons` | The Again/Hard/Good/Easy answer row, with per-grade interval previews (React) |
 | `@tools/shared/components/DrillButtons` | The Missed / Got it answer row for the drill modes, which schedule nothing (React) |
 | `@tools/shared/components/ResetProgress` | The account page's "Danger zone": open, type RESET, erase. Each app wraps it in `src/components/ResetProgress.tsx` with its own list of what is erased and kept (React) |
+| `@tools/shared/components/StepDrill` | `StepList` (the step row; locked steps stay visible) and `RuleFeedback` (a miss names the rule and links to it) (React) |
 | `@tools/shared/components/ToggleSwitch` | Labelled on/off switch — `role="switch"`, app accent passed in (React) |
 | `@tools/shared/components/NumberToggle` | Sg/Pl pill toggle (mobile only) |
 | `@tools/shared/components/EndingsToggle` | Full forms / Endings only toggle |
@@ -118,7 +121,7 @@ Adding a destination means adding one entry to that app's `navLinks` array in `L
 
 Things to know before changing it:
 
-- **A `NavLink` with `children` is still a link.** Both apps' Study entry points at `/study` *and* lists its sub-routes (Flashcards and Paradigms on hebrew.tools), so the hub page stays reachable and the sub-routes are one tap away. **The children appear in the mobile drawer only** — the desktop row shows the group — so every study mode needs a card on its app's `/study` page as well as an entry in `children`. The children also serve as the active-path list — that's what lights Study up on `/flashcards`, replacing the old hand-written `STUDY_PATHS` constant.
+- **A `NavLink` with `children` is still a link.** Both apps' Study entry points at `/study` *and* lists its sub-routes (Flashcards, Paradigms and Accent Shift on hebrew.tools), so the hub page stays reachable and the sub-routes are one tap away. **The children appear in the mobile drawer only** — the desktop row shows the group — so every study mode needs a card on its app's `/study` page as well as an entry in `children`. The children also serve as the active-path list — that's what lights Study up on `/flashcards`, replacing the old hand-written `STUDY_PATHS` constant.
 - **`isNavLinkActive` is the section, `isNavLinkCurrent` is the page.** The former drives highlighting (a group heading lights on any child route), the latter drives `aria-current="page"` (so a heading and its child don't both claim it).
 - **The account link keeps `data-account-link` / `data-account-label`.** Each app's inline auth-hint script corrects those on prerendered pages, which ship with no session. The hint cookie has no authority — it only swaps the label and href.
 - **The drawer's `visibility` transition is stepped, not eased** (`visibility 0s linear 220ms`, and `0s` on open). `initNavMenu` moves focus into the panel in the same tick it opens it, and a mid-transition `visibility` value would leave that focus call a no-op.
@@ -184,6 +187,26 @@ Two things about it that are pedagogy rather than plumbing:
   (`revealed` covers both the flip and a checked typed answer), and its English →
   Greek direction is untouched: the front is the gloss there, so there is no
   such line to withhold.
+
+### The step-gated drill
+
+`@tools/shared/step-drill` runs one item through a fixed sequence of steps,
+each checked before the next unlocks (#185 on hebrew.tools, #198 to come on
+greek.tools). An app supplies the steps, the checks and the rule text; the
+module and `components/StepDrill` own the gate. Nothing in either names a
+language. Rules that are pedagogy rather than plumbing:
+
+- **A step is scored on its first try.** A miss leaves it open with the
+  feedback in view, so the second try is not unaided recall. Only the first
+  try is logged and counted.
+- **"Show me" fills in the answer and counts as a miss**, so a student stuck
+  on step 1 can still reach what the item is about.
+- **Speed mode is earned on evidence** — `canSkipScaffold` wants a full window
+  of scaffold steps (20) at 90%. Speed mode answers no scaffold steps, so it
+  stays earned until the student goes back and misses enough to lose it.
+- **Every checked answer goes to the attempt log** (`@tools/shared/attempt-log`)
+  from the day a drill ships, so the mastery map in #187 starts with history.
+  Concept ids are stable strings; renaming one splits its history.
 
 ### Drill modes answer Missed / Got it
 

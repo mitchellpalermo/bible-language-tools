@@ -20,6 +20,8 @@
     "./flashcard-session": "./src/flashcard-session.ts",
     "./use-flashcard-session": "./src/use-flashcard-session.ts",
     "./use-stored-state": "./src/use-stored-state.ts",
+    "./step-drill": "./src/step-drill.ts",
+    "./attempt-log": "./src/attempt-log.ts",
     "./test/hydration": "./src/test/hydration.ts",
     "./reset-progress": "./src/reset-progress.ts",
     "./nav": "./src/nav.ts",
@@ -38,7 +40,8 @@
     "./components/GradeButtons": "./src/components/GradeButtons.tsx",
     "./components/DrillButtons": "./src/components/DrillButtons.tsx",
     "./components/ToggleSwitch": "./src/components/ToggleSwitch.tsx",
-    "./components/ResetProgress": "./src/components/ResetProgress.tsx"
+    "./components/ResetProgress": "./src/components/ResetProgress.tsx",
+    "./components/StepDrill": "./src/components/StepDrill.tsx"
   },
   "peerDependencies": {
     "react": "^19.0.0"
