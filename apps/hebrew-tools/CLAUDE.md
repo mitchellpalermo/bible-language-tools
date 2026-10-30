@@ -151,7 +151,7 @@ The Accent-Shift Trainer spends a fifth, `accent:<item id>` in `src/lib/accent-s
 The confusable decks deliberately get no prefix of their own — they drill the same letters the alphabet deck does, so grading ד in one must move the card the other sees.
 - **Deck selection is persisted separately from the SRS store** (`hebrew-tools-deck-v1`, `src/lib/deck-selection.ts`) and is never synced. It decides which due cards you see, not what is due, so it stays local to the browser.
 - **What the card front shows is persisted the same way** (`hebrew-tools-flashcard-display-v1`, `src/lib/flashcard-settings.ts`, over `@tools/shared/flashcard-settings`) and is likewise never synced. Today it holds one boolean: whether the part of speech appears on the front of a flashcard, which defaults to off. See the repo CLAUDE.md under "What the card front gives away".
-- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`, `hebrew-tools-reader-prefs`, `hebrew-tools-daily-v1`, `hebrew-tools-accent-scaffold-v1` (speed mode), `hebrew-tools-attempts-v1` (attempt log, not synced). There is still no auth or sync in this app — **all study progress is per-browser only.** The D1 plumbing exists (see below), but nothing reads or writes it yet.
+- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`, `hebrew-tools-reader-prefs`, `hebrew-tools-daily-v1`, `hebrew-tools-accent-scaffold-v1` (speed mode), `hebrew-tools-attempts-v1` (attempt log, not synced), `hebrew-tools-suffix-ladder-v1` (suffix ladder progress, not synced, kept by the account reset). There is still no auth or sync in this app — **all study progress is per-browser only.** The D1 plumbing exists (see below), but nothing reads or writes it yet.
 
 ### OSHB data pipeline (issue #75)
 
@@ -918,6 +918,41 @@ Things that will bite if changed carelessly:
   letter is stored as כ and shown as ך so the next letter can still attach.
   Comparing a raw value to an answer fails on every word ending in ך ם ן ף ץ —
   `gradeCell` finalizes first.
+
+### Suffix ladder (issue #186)
+
+The "Suffix ladder" tab on `/paradigms` is eight suffix tables in order of
+difficulty: the bare suffixes, סוּס, דָּבָר, חָכְמָה, מֶלֶךְ, עַם, the
+prepositions לְ and אֶל, then the pronouns beside their suffixes. It is the
+ordinary paradigm quiz on ordered tables; the unlock rule is
+`@tools/shared/ladder` (see the repo CLAUDE.md, "The paradigm ladder").
+
+| File | Role |
+|---|---|
+| `src/data/suffix-ladder.ts` | The rungs: columns, notes, `LADDER_RUNG_IDS` (stored, never rename) |
+| `src/data/pronominal-suffixes.ts` | `BARE_SUFFIXES`, `HEAVY_SUFFIXES`, and the ladder's nouns (`ladderNounParadigms`) |
+| `src/lib/suffix-ladder.ts` | Storage binding, `ladderOutcome` and the results sentence |
+
+Things that will bite if changed carelessly:
+
+- **Every rung is one table, PGN down the side**, so "two clean writes of the
+  rung" has one meaning. A singular and its plural sit side by side.
+- **A column's id is its paradigm's**, so a form is one SRS card in every tab:
+  rung 3's דָּבָר is the Noun suffixes tab's, and rung 8's suffix columns are
+  rung 1's.
+- **Every noun form is stem + bare suffix, and the test checks it cell by
+  cell** (`STEMS` in `pronominal-suffixes.test.ts`). The corpus cannot witness
+  most of סוּס or עַמִּים, so this is the guard there. The ladder's nouns are
+  kept out of `suffixParadigms` so the Noun suffixes summary stays three
+  columns wide; read through `allSuffixParadigms` or `getSuffixParadigm`.
+- **A bare suffix is typed with no consonant under it and graded as typed**;
+  only the display puts it on a dotted circle (`affixText`, now in
+  `HebrewRuns.tsx`).
+- **Rung 8 asks for each pronoun's everyday form** from `personalPronouns`.
+  הֵמָּה is the 3mp alternate (OSHB parses all 218 that way); it was filed
+  under 3fp until #186.
+- **Every unaided paradigm answer is logged** to the attempt log as
+  `paradigm/<cellId>`, ladder or not. A peeked attempt logs nothing.
 
 ### Accent-Shift Trainer (issue #185)
 

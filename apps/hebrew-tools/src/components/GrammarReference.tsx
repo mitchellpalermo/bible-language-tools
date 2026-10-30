@@ -85,7 +85,7 @@ import {
   type VerbParadigm,
 } from '../data/verb-paradigms';
 import ErrorBoundary from './ErrorBoundary';
-import { Hebrew, Prose } from './HebrewRuns';
+import { affixText, Hebrew, Prose } from './HebrewRuns';
 
 // ─── Sections ─────────────────────────────────────────────────────────────────
 
@@ -158,17 +158,6 @@ function HeaderWord({ children }: { children: string }) {
       <span className="sr-only sm:not-sr-only">{children}</span>
     </>
   );
-}
-
-/** Dotted circle — the conventional stand-in for "any consonant" under a bare point. */
-const PLACEHOLDER = '\u25CC';
-
-/**
- * A bare ending or prefix. One that starts with a vowel point is shown on a
- * dotted circle, since a point with nothing under it renders as a stray tick.
- */
-function affixText(affix: string): string {
-  return /^[\u05B0-\u05BC]/.test(affix) ? PLACEHOLDER + affix : affix;
 }
 
 function Notes({ notes }: { notes: string[] }) {

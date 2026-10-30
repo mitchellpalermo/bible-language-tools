@@ -26,7 +26,7 @@ export const ERASES = [
  * Left alone by the reset. On the server `DELETE /api/progress` removes the
  * stats along with the cards; `clearServerSrs` pushes them straight back.
  */
-export const KEEPS = ['streak', 'accuracy stats', 'deck choices'] as const;
+export const KEEPS = ['streak', 'accuracy stats', 'deck choices', 'suffix ladder rungs'] as const;
 
 /** Empty this browser's SRS store. Throws if storage cannot be written. */
 export function clearLocalSrs(): void {

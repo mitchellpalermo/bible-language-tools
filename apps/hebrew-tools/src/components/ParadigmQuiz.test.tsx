@@ -2,10 +2,13 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import posthog from 'posthog-js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { BARE_SUFFIXES, SUFFIX_PGNS } from '../data/pronominal-suffixes';
 import { daysFromNow, loadSRSStore, loadStats, newCard, type SRSCard } from '../data/srs';
+import { ATTEMPT_LOG_KEY } from '../lib/attempt-log';
 import type { QuizCell } from '../lib/paradigm-quiz';
 import { paradigmCardKey } from '../lib/paradigm-srs';
 import { QUIZ_SETTINGS_KEY } from '../lib/quiz-settings';
+import { LADDER_PROGRESS_KEY } from '../lib/suffix-ladder';
 import ParadigmQuiz, { progressText, recitationOrder, scheduleNote } from './ParadigmQuiz';
 
 vi.mock('posthog-js', () => ({
@@ -517,5 +520,103 @@ describe('scheduleNote', () => {
 
   it('explains an attempt that moved nothing', () => {
     expect(scheduleNote([], false)).toMatch(/already reviewed these forms today/);
+  });
+});
+
+// ─── The suffix ladder (#186) ─────────────────────────────────────────────────
+
+describe('the suffix ladder', () => {
+  /** Rung 1's answers in DOM order: a row per PGN, Type 1 then Type 2. */
+  const rungOneAnswers = SUFFIX_PGNS.flatMap((pgn) => [
+    BARE_SUFFIXES.type1[pgn],
+    BARE_SUFFIXES.type2[pgn],
+  ]);
+
+  async function openLadder(user: ReturnType<typeof userEvent.setup>) {
+    render(<ParadigmQuiz />);
+    await user.click(screen.getByRole('tab', { name: 'Suffix ladder' }));
+  }
+
+  it('shows every rung, with only the first open and the rest saying what opens them', async () => {
+    const user = userEvent.setup();
+    await openLadder(user);
+
+    const rungs = within(screen.getByRole('list', { name: 'Ladder rungs' })).getAllByRole(
+      'listitem',
+    );
+    expect(rungs).toHaveLength(8);
+    expect(rungs.filter((r) => r.dataset.locked)).toHaveLength(7);
+    expect(within(rungs[1]).getByText(/2 clean writes of rung 1 \(0 of 2/)).toBeInTheDocument();
+    expect(within(rungs[0]).getByText('20 forms · not started')).toBeInTheDocument();
+  });
+
+  it('opens a locked rung anyway, in any mode', async () => {
+    const user = userEvent.setup();
+    await openLadder(user);
+
+    const segholate = screen.getByRole('listitem', { name: 'Rung 5, locked' });
+    await user.click(within(segholate).getByRole('button', { name: 'Open anyway' }));
+    await user.click(screen.getByRole('button', { name: /Easy/ }));
+    await user.click(screen.getByRole('button', { name: 'Start' }));
+
+    expect(screen.getByRole('heading', { name: /Rung 5 — מֶלֶךְ and מְלָכִים/ })).toBeInTheDocument();
+    expect(screen.getByText(/older one-syllable stem/)).toBeInTheDocument();
+    // A quarter of twenty forms.
+    expect(screen.getAllByRole('textbox')).toHaveLength(5);
+  });
+
+  it('opens rung 2 after a second clean write of rung 1, and logs every answer', async () => {
+    localStorage.setItem(LADDER_PROGRESS_KEY, JSON.stringify({ suffixes: 1 }));
+    const user = userEvent.setup();
+    await openLadder(user);
+    await user.click(screen.getByRole('button', { name: /The suffixes alone/ }));
+    await user.click(screen.getByRole('button', { name: 'Start' }));
+
+    screen.getAllByRole('textbox').forEach((field, i) => {
+      fireEvent.change(field, { target: { value: rungOneAnswers[i] } });
+    });
+    await user.click(screen.getByRole('button', { name: 'Check answers' }));
+
+    expect(screen.getByText('20/20')).toBeInTheDocument();
+    expect(screen.getByText('Clean write. Rung 2 is open.')).toBeInTheDocument();
+    expect(JSON.parse(localStorage.getItem(LADDER_PROGRESS_KEY) ?? '')).toEqual({ suffixes: 2 });
+    // A bare suffix is shown on a dotted circle.
+    expect(screen.getAllByText('◌ִי').length).toBeGreaterThan(0);
+
+    const log = JSON.parse(localStorage.getItem(ATTEMPT_LOG_KEY) ?? '[]');
+    expect(log).toHaveLength(20);
+    expect(log[0]).toMatchObject({ concept: 'paradigm/suffix-bare-type1:1cs', correct: true });
+
+    await user.click(screen.getByRole('button', { name: 'Another table' }));
+    await user.click(screen.getByRole('tab', { name: 'Suffix ladder' }));
+    expect(screen.getByRole('button', { name: /סוּס and סוּסִים/ })).toBeInTheDocument();
+  });
+
+  it('says a partial table does not count, and leaves the ladder alone', async () => {
+    const user = userEvent.setup();
+    await openLadder(user);
+    await user.click(screen.getByRole('button', { name: /The suffixes alone/ }));
+    await user.click(screen.getByRole('button', { name: /Medium/ }));
+    await user.click(screen.getByRole('button', { name: 'Start' }));
+    await user.click(screen.getByRole('button', { name: 'Check answers' }));
+
+    expect(
+      screen.getByText('Only a Full table write counts toward the next rung.'),
+    ).toBeInTheDocument();
+    expect(localStorage.getItem(LADDER_PROGRESS_KEY)).toBeNull();
+  });
+
+  it('logs nothing from an attempt with a peek', async () => {
+    const user = userEvent.setup();
+    await openLadder(user);
+    await user.click(screen.getByRole('button', { name: /The suffixes alone/ }));
+    await user.click(screen.getByRole('button', { name: 'Start' }));
+    const peek = screen.getByRole('button', { name: 'Hold to peek' });
+    fireEvent.pointerDown(peek);
+    fireEvent.pointerUp(peek);
+    await user.click(screen.getByRole('button', { name: 'Check answers' }));
+
+    expect(screen.getByText(/You peeked, so this write does not count/)).toBeInTheDocument();
+    expect(localStorage.getItem(ATTEMPT_LOG_KEY)).toBeNull();
   });
 });
