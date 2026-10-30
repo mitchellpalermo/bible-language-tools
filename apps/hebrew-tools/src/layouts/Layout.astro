@@ -2,6 +2,7 @@
 import MorphWordmark from '@tools/shared/components/MorphWordmark.astro';
 import SiteNav from '@tools/shared/components/SiteNav.astro';
 import type { NavLink } from '@tools/shared/nav';
+import { creditsCopy } from '../data/credits';
 import '../styles/global.css';
 
 interface Props {
@@ -139,6 +140,9 @@ const user = Astro.locals.user;
       </p>
       <p class="mt-2 text-white/40">
         <a href="/privacy" class="text-white/40 hover:text-white/60 transition-colors underline underline-offset-2">Privacy Policy</a>
+      </p>
+      <p class="mt-2 text-white/40">
+        <a href="/credits" class="text-white/40 hover:text-white/60 transition-colors underline underline-offset-2">{creditsCopy.footerLabel}</a>
       </p>
     </footer>
 

@@ -93,6 +93,8 @@ test.describe('Mobile navigation menu', () => {
 
   test('the footer is reachable on mobile', async ({ page }) => {
     await expect(page.getByRole('link', { name: /privacy policy/i })).toBeVisible();
+    // The label is owner-written, so find the credits link by where it goes.
+    await expect(page.locator('footer a[href="/credits"]')).toBeVisible();
     await expect(page.getByRole('link', { name: 'hello@hebrew.tools' })).toBeVisible();
   });
 
