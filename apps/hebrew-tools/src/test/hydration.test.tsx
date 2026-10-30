@@ -35,6 +35,7 @@ import { saveFlashcardSettings } from '../lib/flashcard-settings';
 import { buildTableModels, getQuizCells } from '../lib/paradigm-quiz';
 import { paradigmCardKey } from '../lib/paradigm-srs';
 import { saveQuizSettings } from '../lib/quiz-settings';
+import { saveLadderProgress } from '../lib/suffix-ladder';
 import { setLastSyncedAt } from '../lib/sync-manager';
 
 vi.mock('posthog-js', () => ({
@@ -69,6 +70,8 @@ function seedReturningStudent() {
   saveStats(stats);
 
   saveQuizSettings({ accentStrict: true, density: 'easy' });
+  // Two suffix-ladder rungs climbed, so the ladder tab has open rungs past the first.
+  saveLadderProgress({ suffixes: 2, sus: 2 });
   saveFlashcardSettings({ showPartOfSpeech: true });
   saveSelection({ deck: 'garrett-derouchie', chapters: [2, 3], categories: ['core'] });
   setLastSyncedAt(new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString());

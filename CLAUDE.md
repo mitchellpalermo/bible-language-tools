@@ -66,6 +66,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/use-flashcard-session` | `useFlashcardSession<T>()` — the flashcard session engine: dealing, SRS grading, drills, Endless, typed answers, the keyboard. Both apps' `Flashcards.tsx` run on it. See "The flashcard session engine" below |
 | `@tools/shared/use-stored-state` | `useStoredState(load, fallback, save?)` and `useHydrated()` — state seeded from storage without breaking hydration. See "Hydration" below |
 | `@tools/shared/step-drill` | The step-gated drill engine: `stepDrillReducer`, `isCleanPass`, and `canSkipScaffold` / `createStepDrillHistory(storageKey)` for speed mode. See "The step-gated drill" below |
+| `@tools/shared/ladder` | The paradigm ladder (#186): `rungStates`, `isCleanWrite`, `recordWrite`, `newlyUnlocked`, and `createLadderProgress(storageKey)`. See "The paradigm ladder" below |
 | `@tools/shared/attempt-log` | `createAttemptLog(storageKey)` — every checked answer, by concept, for the mastery levels (#187). Local only for now |
 | `@tools/shared/test/hydration` | `hydrationErrors(ui, { seed })` — test helper: server-render with storage hidden, seed, hydrate, return every mismatch React reports |
 | `@tools/shared/reset-progress` | `resetSrsProgress` and `isResetConfirmed` — erase the SRS store, this browser first, then the account copy via `DELETE`; a server failure never undoes the local reset |
@@ -80,6 +81,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/components/DrillButtons` | The Missed / Got it answer row for the drill modes, which schedule nothing (React) |
 | `@tools/shared/components/ResetProgress` | The account page's "Danger zone": open, type RESET, erase. Each app wraps it in `src/components/ResetProgress.tsx` with its own list of what is erased and kept (React) |
 | `@tools/shared/components/StepDrill` | `StepList` (the step row; locked steps stay visible) and `RuleFeedback` (a miss names the rule and links to it) (React) |
+| `@tools/shared/components/Ladder` | `LadderRungList` — the rungs in order, locked ones visible with what opens them and an "Open anyway" button (React) |
 | `@tools/shared/components/ToggleSwitch` | Labelled on/off switch — `role="switch"`, app accent passed in (React) |
 | `@tools/shared/components/NumberToggle` | Sg/Pl pill toggle (mobile only) |
 | `@tools/shared/components/EndingsToggle` | Full forms / Endings only toggle |
@@ -207,6 +209,25 @@ language. Rules that are pedagogy rather than plumbing:
 - **Every checked answer goes to the attempt log** (`@tools/shared/attempt-log`)
   from the day a drill ships, so the mastery map in #187 starts with history.
   Concept ids are stable strings; renaming one splits its history.
+
+### The paradigm ladder
+
+`@tools/shared/ladder` orders paradigm tables by difficulty and opens each
+once the one below has been written cleanly (#186 on hebrew.tools, #199 to
+come on greek.tools). An app supplies the rungs (one table each) and its own
+grading; the module owns the unlock rule and `components/Ladder` draws it.
+
+- **A clean write is a Full table, every form exactly right, no peek.** A
+  pointing slip that lenient marking forgives is not clean: the rung asks for
+  the table reproduced. Easy, Medium and Due still work on every rung and
+  still schedule SRS cards; they just do not count toward the next rung.
+- **Two clean writes of the rung directly below open a rung**, and a rung
+  never closes again. Only the rung below counts, so a rung opened anyway and
+  written cleanly opens the next one in the usual way.
+- **A locked rung is visible and can be opened anyway**, through its own
+  button rather than a tap on the card, so the override is deliberate.
+- **Progress is local**, stored per app by `createLadderProgress(key)`, like
+  the attempt log. Syncing waits on #196's sign-in decision.
 
 ### Drill modes answer Missed / Got it
 

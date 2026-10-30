@@ -67,7 +67,9 @@ describe('hebrew.tools ResetProgress', () => {
     expect(panel).toHaveTextContent(/Handwriting practice/);
     expect(panel).toHaveTextContent(/Paradigm quiz/);
     expect(panel).toHaveTextContent(/Accent-shift trainer/);
-    expect(panel).toHaveTextContent('Kept: your streak, accuracy stats and deck choices.');
+    expect(panel).toHaveTextContent(
+      'Kept: your streak, accuracy stats, deck choices and suffix ladder rungs.',
+    );
     expect(ERASES).toHaveLength(5);
   });
 
