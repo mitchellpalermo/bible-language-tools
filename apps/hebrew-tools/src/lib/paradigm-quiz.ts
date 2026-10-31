@@ -19,6 +19,7 @@ import {
   type SuffixPgn,
   suffixParadigms,
 } from '../data/pronominal-suffixes';
+import { type LadderRung, ladderRungs } from '../data/suffix-ladder';
 import {
   answerForm,
   CONJUGATION_LABELS,
@@ -50,21 +51,25 @@ export {
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 /**
- * Tables are grouped by conjugation, which is how the course meets them, and
- * the pronominal suffixes on nouns sit in a group of their own.
+ * Tables are grouped by conjugation, which is how the course meets them. The
+ * pronominal suffixes on nouns sit in a group of their own, and the suffix
+ * ladder (#186) in another.
  */
-export type Category = Conjugation | 'suffixes';
+export type Category = Conjugation | 'suffixes' | 'ladder';
 
-export const ALL_CATEGORIES: Category[] = ['qatal', 'yiqtol', 'wayyiqtol', 'suffixes'];
+export const ALL_CATEGORIES: Category[] = ['qatal', 'yiqtol', 'wayyiqtol', 'suffixes', 'ladder'];
 
 export const CATEGORY_LABELS: Record<Category, string> = {
   ...CONJUGATION_LABELS,
   suffixes: 'Noun suffixes',
+  ladder: 'Suffix ladder',
 };
 
-/** The tab text: a conjugation is a Qal one, the suffix group is not. */
+/** The tab text: a conjugation is a Qal one, the suffix groups are not. */
 export function categoryTabLabel(category: Category): string {
-  return category === 'suffixes' ? CATEGORY_LABELS[category] : `Qal ${CATEGORY_LABELS[category]}`;
+  return category === 'suffixes' || category === 'ladder'
+    ? CATEGORY_LABELS[category]
+    : `Qal ${CATEGORY_LABELS[category]}`;
 }
 
 /**
@@ -77,6 +82,8 @@ export interface TableModel extends SharedTableModel<Category> {
   layout: TableLayout;
   /** A line for the select screen: the verb's gloss, or what a summary compares. */
   detail?: string;
+  /** The ladder rung this table is (`LadderRung.id`); absent off the ladder. */
+  rung?: string;
 }
 
 /** Result of grading a single blank cell. */
@@ -217,16 +224,46 @@ export function buildSuffixSummaryTable(): TableModel {
   };
 }
 
-/** Build all available TableModels: each conjugation's summary, then its verbs; then suffixes. */
+/**
+ * One ladder rung as a table: a row per suffix PGN, a column per paradigm on
+ * the rung. Cell ids come from each column's paradigm, so a form keeps one SRS
+ * card wherever it is answered.
+ */
+export function buildLadderTable(rung: LadderRung, index: number): TableModel {
+  return {
+    id: `ladder-${rung.id}`,
+    label: `Rung ${index + 1} — ${rung.title}`,
+    category: 'ladder',
+    layout: 'summary',
+    detail: rung.detail,
+    rung: rung.id,
+    cols: rung.columns.map((c) => c.label),
+    rows: SUFFIX_PGNS.map((pgn) => ({
+      label: pgn,
+      answers: rung.columns.map((c) => answerForm(c.forms[pgn])),
+      ids: rung.columns.map((c) => cellId(c.id, pgn)),
+    })),
+  };
+}
+
+/**
+ * Build all available TableModels: each conjugation's summary, then its verbs;
+ * then suffixes; then the ladder, in rung order.
+ */
 export function buildTableModels(): TableModel[] {
-  const verbTables = ALL_CATEGORIES.filter((c): c is Conjugation => c !== 'suffixes').flatMap(
-    (conjugation) => {
-      const summary = buildSummaryTable(conjugation);
-      const verbs = verbParadigms.filter((p) => p.conjugation === conjugation).map(buildVerbTable);
-      return summary ? [summary, ...verbs] : verbs;
-    },
-  );
-  return [...verbTables, buildSuffixSummaryTable(), ...suffixParadigms.map(buildSuffixTable)];
+  const verbTables = ALL_CATEGORIES.filter(
+    (c): c is Conjugation => c !== 'suffixes' && c !== 'ladder',
+  ).flatMap((conjugation) => {
+    const summary = buildSummaryTable(conjugation);
+    const verbs = verbParadigms.filter((p) => p.conjugation === conjugation).map(buildVerbTable);
+    return summary ? [summary, ...verbs] : verbs;
+  });
+  return [
+    ...verbTables,
+    buildSuffixSummaryTable(),
+    ...suffixParadigms.map(buildSuffixTable),
+    ...ladderRungs.map(buildLadderTable),
+  ];
 }
 
 // ─── Grading ──────────────────────────────────────────────────────────────────

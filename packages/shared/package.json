@@ -22,6 +22,7 @@
     "./use-stored-state": "./src/use-stored-state.ts",
     "./step-drill": "./src/step-drill.ts",
     "./attempt-log": "./src/attempt-log.ts",
+    "./ladder": "./src/ladder.ts",
     "./test/hydration": "./src/test/hydration.ts",
     "./reset-progress": "./src/reset-progress.ts",
     "./nav": "./src/nav.ts",
@@ -41,7 +42,8 @@
     "./components/DrillButtons": "./src/components/DrillButtons.tsx",
     "./components/ToggleSwitch": "./src/components/ToggleSwitch.tsx",
     "./components/ResetProgress": "./src/components/ResetProgress.tsx",
-    "./components/StepDrill": "./src/components/StepDrill.tsx"
+    "./components/StepDrill": "./src/components/StepDrill.tsx",
+    "./components/Ladder": "./src/components/Ladder.tsx"
   },
   "peerDependencies": {
     "react": "^19.0.0"
