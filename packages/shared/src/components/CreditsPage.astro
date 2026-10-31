@@ -1,0 +1,82 @@
+---
+import type { CreditSource, CreditsCopy } from '../credits';
+
+interface Props {
+  copy: CreditsCopy;
+  sources: CreditSource[];
+  /** CSS colour for the heading and links, e.g. 'var(--color-primary)'. */
+  accent: string;
+}
+
+const { copy, sources, accent } = Astro.props;
+---
+
+<div class="credits" style={`--credits-accent: ${accent};`}>
+  <h1>{copy.title}</h1>
+  <p class="intro">{copy.intro}</p>
+  <ul>
+    {
+      sources.map((s) => (
+        <li id={s.id}>
+          <h2>
+            <a href={s.url} rel="noopener">
+              {s.name}
+            </a>
+          </h2>
+          <p>{s.copy}</p>
+          {s.license && s.licenseUrl && (
+            <p class="license">
+              <a href={s.licenseUrl} rel="noopener">
+                {s.license}
+              </a>
+            </p>
+          )}
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .credits {
+    max-width: 42rem;
+    padding-bottom: 3rem;
+    line-height: 1.75;
+    color: var(--color-text, #1f2937);
+  }
+  h1 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--credits-accent, #1f2937);
+  }
+  .intro {
+    margin-bottom: 1.5rem;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+  li {
+    padding: 1rem 0;
+    border-top: 1px solid var(--color-border, #e5e7eb);
+  }
+  h2 {
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+  p {
+    margin-bottom: 0.25rem;
+  }
+  .license {
+    font-size: 0.875rem;
+  }
+  a {
+    color: var(--credits-accent, #1f2937);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  a:hover {
+    opacity: 0.75;
+  }
+</style>
