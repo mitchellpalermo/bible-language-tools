@@ -264,6 +264,15 @@ with `lastSessionDate`, the later date wins, and the merge is symmetric. On the
 server it is two columns on `study_stats` (`study_streak`,
 `last_session_date`); greek.tools' rows take the defaults until #197.
 
+**Every migration is tested against data written before it.** The database is
+live and shared by both apps, so `packages/db/src/migrations.test.ts` builds it
+at the previous schema with `createTestDbAt('<previous>')` from
+`@tools/db/test-utils`, fills every table for both languages, runs
+`migrateRest()`, and checks that no existing row changed. A new migration adds
+its own `describe` there. Both deploy workflows apply migrations *before* the
+new code ships, so a migration must also leave the previous code working: add
+columns with a constant default, never rename or drop in the same release.
+
 ### Drill modes answer Missed / Got it
 
 Study All and Endless are drills: they never write the SRS schedule, so the
