@@ -66,6 +66,29 @@ describe('gradeForResult', () => {
 describe('recordAttempt', () => {
   const opts = { strict: false, peeked: false };
 
+  it('as practice, can demote a card ahead of schedule but never promote it', () => {
+    const ahead: SRSCard = {
+      key: key('3ms'),
+      interval: 6,
+      repetition: 3,
+      easeFactor: 2.2,
+      dueDate: daysFromNow(4),
+      lastReviewed: daysFromNow(-2),
+    };
+    const store = { [key('3ms')]: ahead, [key('3fs')]: { ...ahead, key: key('3fs') } };
+    const { store: next } = recordAttempt(
+      store,
+      emptyStats(),
+      [
+        { id: cellId(STRONG, '3ms'), result: 'correct' },
+        { id: cellId(STRONG, '3fs'), result: 'wrong' },
+      ],
+      { ...opts, practice: true },
+    );
+    expect(next[key('3ms')]).toEqual(ahead);
+    expect(next[key('3fs')]).toMatchObject({ repetition: 0, interval: 1 });
+  });
+
   it('creates and schedules a card per graded cell', () => {
     const { store, scheduled } = recordAttempt(
       {},

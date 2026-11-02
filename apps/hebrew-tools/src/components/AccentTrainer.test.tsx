@@ -219,3 +219,44 @@ describe('AccentTrainer', () => {
     expect(screen.getByRole('textbox', { name: 'The new form, pointed' })).toHaveValue('א');
   });
 });
+
+describe('a session list', () => {
+  async function showEveryStep(user: ReturnType<typeof userEvent.setup>) {
+    for (let i = 0; i < 4; i++) {
+      await user.click(check());
+      await user.click(screen.getByRole('button', { name: 'Show me' }));
+    }
+  }
+
+  function renderSession(items: ShiftItem[], canContinue = () => true) {
+    const session = { items, onItemDone: vi.fn(), onFinished: vi.fn(), canContinue };
+    render(<AccentTrainer session={session} />);
+    return session;
+  }
+
+  it('works through the given items and hands back after the last', async () => {
+    const [a, b] = buildQueue({}, () => 0);
+    const session = renderSession([a, b]);
+    const user = userEvent.setup();
+    await screen.findByRole('region', { name: 'The noun and its ending' });
+
+    await showEveryStep(user);
+    expect(session.onItemDone).toHaveBeenCalledWith(a.id, false);
+    await user.click(screen.getByRole('button', { name: 'Next word' }));
+
+    await showEveryStep(user);
+    expect(session.onItemDone).toHaveBeenLastCalledWith(b.id, false);
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    expect(session.onFinished).toHaveBeenCalledOnce();
+  });
+
+  it('hands back early when there is no time for another', async () => {
+    const [a, b] = buildQueue({}, () => 0);
+    const session = renderSession([a, b], () => false);
+    const user = userEvent.setup();
+    await screen.findByRole('region', { name: 'The noun and its ending' });
+    await showEveryStep(user);
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    expect(session.onFinished).toHaveBeenCalledOnce();
+  });
+});

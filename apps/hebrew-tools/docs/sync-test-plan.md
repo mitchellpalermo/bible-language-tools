@@ -476,6 +476,28 @@ read as vocabulary.
 
 ---
 
+### 18. The Today study streak travels, and the later day wins
+
+**Why:** the study streak (#184) is the first synced value outside the SRS
+store and the stats. It rides on `study_stats` as `study_streak` and
+`last_session_date`, and its merge picks by date, never by the bigger number.
+
+1. On **A**, open `/today`, start a 20-minute session, answer one card and end
+   the session. The summary reads "Study streak: 1 day". Click **Sync now**.
+2. On **B**, click **Sync now**, then open `/today`.
+3. On **B**, in the console, set an old, long streak:
+   `localStorage.setItem('hebrew-tools-study-streak-v1', JSON.stringify({ streak: 40, lastSessionDate: '2026-01-01' }))`,
+   then click **Sync now**.
+
+**Expect:** after step 2, B's `/today` reads "Study streak: 1 day · today is
+done." After step 3, both devices still read 1 day, and `/api/progress` has
+`studyStreak: { streak: 1, lastSessionDate: <today> }`.
+
+**Watch for:** 40 winning in step 3 — that is the merge picking by number.
+Also run test 15: the new columns must stay at their defaults on greek rows.
+
+---
+
 ## Why the fix lives on the server
 
 The session-end push is a one-shot keepalive request. It cannot pull, merge, and

@@ -4,8 +4,10 @@ import posthog from 'posthog-js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { BARE_SUFFIXES, SUFFIX_PGNS } from '../data/pronominal-suffixes';
 import { daysFromNow, loadSRSStore, loadStats, newCard, type SRSCard } from '../data/srs';
+import { getParadigm } from '../data/verb-paradigms';
 import { ATTEMPT_LOG_KEY } from '../lib/attempt-log';
 import type { QuizCell } from '../lib/paradigm-quiz';
+import { buildVerbTable, cellId } from '../lib/paradigm-quiz';
 import { paradigmCardKey } from '../lib/paradigm-srs';
 import { QUIZ_SETTINGS_KEY } from '../lib/quiz-settings';
 import { LADDER_PROGRESS_KEY } from '../lib/suffix-ladder';
@@ -618,5 +620,65 @@ describe('the suffix ladder', () => {
 
     expect(screen.getByText(/You peeked, so this write does not count/)).toBeInTheDocument();
     expect(localStorage.getItem(ATTEMPT_LOG_KEY)).toBeNull();
+  });
+});
+
+// ─── Today's Session ──────────────────────────────────────────────────────────
+
+describe('a session table', () => {
+  const STRONG = 'qal-qatal-strong';
+  const table = buildVerbTable(getParadigm(STRONG) as NonNullable<ReturnType<typeof getParadigm>>);
+  const ids = [cellId(STRONG, '3ms'), cellId(STRONG, '3fs')];
+
+  function renderSession(practice = false) {
+    const onChecked = vi.fn();
+    const onContinue = vi.fn();
+    render(<ParadigmQuiz session={{ table, blankIds: ids, practice, onChecked, onContinue }} />);
+    return { onChecked, onContinue };
+  }
+
+  async function answerFromPeek(user: ReturnType<typeof userEvent.setup>) {
+    const peek = screen.getByRole('button', { name: 'Hold to peek' });
+    fireEvent.pointerDown(peek);
+    const answers = screen.getAllByRole('textbox').map((f) => (f as HTMLInputElement).value);
+    fireEvent.pointerUp(peek);
+    screen.getAllByRole('textbox').forEach((field, i) => {
+      fireEvent.change(field, { target: { value: answers[i] } });
+    });
+    await user.click(screen.getByRole('button', { name: 'Check answers' }));
+  }
+
+  it('opens on the given blanks, with no table picker, and hands back on Continue', async () => {
+    const user = userEvent.setup();
+    const { onChecked, onContinue } = renderSession();
+    expect(screen.getAllByRole('textbox')).toHaveLength(2);
+    expect(screen.queryByRole('button', { name: /Choose another table/ })).toBeNull();
+    expect(screen.getByText('Today — 2 blanks')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Check answers' }));
+    expect(onChecked).toHaveBeenCalledWith(ids.map((id) => ({ id, correct: false })));
+    expect(screen.queryByRole('button', { name: 'Try again' })).toBeNull();
+
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    expect(onContinue).toHaveBeenCalledOnce();
+  });
+
+  it('never promotes a form answered as practice', async () => {
+    const user = userEvent.setup();
+    const ahead: SRSCard = {
+      key: paradigmCardKey(ids[0]),
+      interval: 6,
+      repetition: 3,
+      easeFactor: 1.8,
+      dueDate: daysFromNow(4),
+      lastReviewed: daysFromNow(-2),
+    };
+    localStorage.setItem(
+      'hebrew-tools-srs-v1',
+      JSON.stringify({ [paradigmCardKey(ids[0])]: ahead }),
+    );
+    renderSession(true);
+    await answerFromPeek(user);
+    expect(loadSRSStore()[paradigmCardKey(ids[0])]).toEqual(ahead);
   });
 });

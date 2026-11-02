@@ -23,6 +23,8 @@
     "./step-drill": "./src/step-drill.ts",
     "./attempt-log": "./src/attempt-log.ts",
     "./ladder": "./src/ladder.ts",
+    "./today": "./src/today.ts",
+    "./study-streak": "./src/study-streak.ts",
     "./test/hydration": "./src/test/hydration.ts",
     "./reset-progress": "./src/reset-progress.ts",
     "./nav": "./src/nav.ts",
@@ -43,7 +45,8 @@
     "./components/ToggleSwitch": "./src/components/ToggleSwitch.tsx",
     "./components/ResetProgress": "./src/components/ResetProgress.tsx",
     "./components/StepDrill": "./src/components/StepDrill.tsx",
-    "./components/Ladder": "./src/components/Ladder.tsx"
+    "./components/Ladder": "./src/components/Ladder.tsx",
+    "./components/TodaySession": "./src/components/TodaySession.tsx"
   },
   "peerDependencies": {
     "react": "^19.0.0"

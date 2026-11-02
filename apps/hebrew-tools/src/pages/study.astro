@@ -5,6 +5,11 @@ import Layout from '../layouts/Layout.astro';
 // A group heading is a destination, not just a label (see SiteNav), so this
 // page has to exist; adding a study mode means a card here and a child link in
 // Layout.astro's navLinks.
+//
+// Today's Session (#184) sits above the modes: it is the routine, and the
+// modes are what it is made of. Each budget is a link that starts a session
+// straight away (`/today?start=20`), so a session is one tap from here.
+const budgets = [20, 45, 90] as const;
 const modes = [
   {
     href: '/flashcards',
@@ -43,8 +48,42 @@ const modes = [
 
   <div class="pt-10 pb-4">
     <h1 class="text-3xl font-extrabold" style="color: var(--color-primary);">Study</h1>
-    <p class="text-text-muted mt-1 text-sm">Pick a mode and get to work.</p>
+    <p class="text-text-muted mt-1 text-sm">Start today’s session, or pick a mode and get to work.</p>
   </div>
+
+  <section
+    aria-labelledby="today-heading"
+    class="max-w-3xl mb-8 bg-bg-card rounded-2xl shadow-sm border border-white overflow-hidden"
+  >
+    <div class="h-1.5 w-full" style="background: var(--color-primary);"></div>
+    <div class="p-6 space-y-4">
+      <div>
+        <h2 id="today-heading" class="text-lg font-bold" style="color: var(--color-primary);">
+          Today’s Session
+        </h2>
+        <p class="text-text-muted text-sm leading-relaxed mt-1">
+          Due vocabulary, then due paradigm forms, then one short drill — filled to the time you
+          have. Pick a length to start.
+        </p>
+      </div>
+      <div class="grid grid-cols-3 gap-3">
+        {budgets.map((minutes) => (
+          <a
+            href={`/today?start=${minutes}`}
+            class="text-center px-3 py-3 rounded-xl font-bold text-white hover:opacity-90 transition-opacity"
+            style="background: var(--color-primary);"
+          >
+            {minutes} <span class="text-xs font-semibold opacity-80">min</span>
+          </a>
+        ))}
+      </div>
+      <a href="/today" class="inline-block text-sm text-text-muted underline">
+        See today’s plan first
+      </a>
+    </div>
+  </section>
+
+  <h2 class="text-sm font-bold text-text-muted uppercase tracking-wider mb-3">Study modes</h2>
 
   <div class="grid sm:grid-cols-2 gap-5 max-w-3xl pb-16">
     {modes.map(({ href, title, description, accentColor, bgColor, icon, detail }) => (

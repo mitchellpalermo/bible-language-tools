@@ -329,3 +329,29 @@ describe('deleteProgress', () => {
     expect(await getProgress(db, OTHER_USER)).not.toBeNull();
   });
 });
+
+describe('the Today study streak', () => {
+  it('reads back empty when it was never sent', async () => {
+    await putProgress(db, USER, { srsStore: {}, studyStats: stats() });
+    expect((await getProgress(db, USER))?.studyStreak).toEqual({ streak: 0, lastSessionDate: '' });
+  });
+
+  it('round-trips through the stats row', async () => {
+    const studyStreak = { streak: 5, lastSessionDate: '2026-11-02' };
+    await putProgress(db, USER, { srsStore: {}, studyStats: stats(), studyStreak });
+    expect((await getProgress(db, USER))?.studyStreak).toEqual(studyStreak);
+  });
+
+  it('is not rolled back by a stale client', async () => {
+    const recent = { streak: 5, lastSessionDate: '2026-11-02' };
+    await putProgress(db, USER, { srsStore: {}, studyStats: stats(), studyStreak: recent });
+    // A device that last studied in September, and one from before the streak existed.
+    await putProgress(db, USER, {
+      srsStore: {},
+      studyStats: stats(),
+      studyStreak: { streak: 40, lastSessionDate: '2026-09-01' },
+    });
+    await putProgress(db, USER, { srsStore: {}, studyStats: stats() });
+    expect((await getProgress(db, USER))?.studyStreak).toEqual(recent);
+  });
+});

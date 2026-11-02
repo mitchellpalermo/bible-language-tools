@@ -17,6 +17,10 @@
  *   Flashcards pages deal in an effect (see "Hydration" in the repo CLAUDE.md).
  * - **Only a step's first try is logged and scored.** The second try comes
  *   with the feedback in view.
+ * - **Today's Session hands it a short list through `session`** (#184) in
+ *   place of the whole queue. After each item the session decides whether
+ *   there is time for another; when there is not, or the list is done, the
+ *   button reads Continue and hands control back.
  */
 
 import { RuleFeedback, StepList } from '@tools/shared/components/StepDrill';
@@ -348,7 +352,16 @@ interface Answers {
 
 const EMPTY_ANSWERS: Answers = { gaps: new Set(), accent: null, positions: [], typed: '' };
 
-function AccentTrainerInner() {
+/** A few items for Today's Session (`TodaySession.tsx`). */
+export interface AccentSession {
+  items: readonly ShiftItem[];
+  onItemDone: (itemId: string, clean: boolean) => void;
+  /** Whether there is time for another item. */
+  canContinue: () => boolean;
+  onFinished: () => void;
+}
+
+function AccentTrainerInner({ session }: { session?: AccentSession }) {
   const [queue, setQueue] = useState<ShiftItem[] | null>(null);
   const [index, setIndex] = useState(0);
   const [speedMode, setSpeedMode] = useState(false);
@@ -368,11 +381,14 @@ function AccentTrainerInner() {
 
   // Dealt after mount: the server has no store, and the first render must match.
   useEffect(() => {
-    setQueue(buildQueue(loadSRSStore()));
+    setQueue(session ? [...session.items] : buildQueue(loadSRSStore()));
     setKeypadOpen(window.matchMedia?.('(pointer: coarse)').matches ?? false);
   }, []);
 
   const item = queue?.[index % (queue?.length || 1)];
+  // In a session, the last item of the list, or the last there is time for.
+  const sessionEnds = (): boolean =>
+    !!session && (index + 1 >= (queue?.length ?? 0) || !session.canContinue());
   const canSkip = canSkipScaffold(history);
   const done = drill.step >= STEP_COUNT;
 
@@ -425,6 +441,7 @@ function AccentTrainerInner() {
       clean,
       speed_mode: speedMode,
     });
+    session?.onItemDone(item.id, clean);
   }
 
   function check() {
@@ -658,10 +675,10 @@ function AccentTrainerInner() {
           <Breakdown item={item} />
           <button
             type="button"
-            onClick={() => nextItem()}
+            onClick={() => (sessionEnds() ? session?.onFinished() : nextItem())}
             className="w-full px-6 py-2.5 rounded-xl font-bold text-sm bg-primary text-white"
           >
-            Next word
+            {sessionEnds() ? 'Continue' : 'Next word'}
           </button>
         </section>
       )}
@@ -673,10 +690,10 @@ function AccentTrainerInner() {
   );
 }
 
-export default function AccentTrainer() {
+export default function AccentTrainer({ session }: { session?: AccentSession } = {}) {
   return (
     <ErrorBoundary component="AccentTrainer">
-      <AccentTrainerInner />
+      <AccentTrainerInner session={session} />
     </ErrorBoundary>
   );
 }

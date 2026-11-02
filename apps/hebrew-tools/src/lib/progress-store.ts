@@ -16,6 +16,7 @@ import {
   studyStats as studyStatsTable,
   syncState as syncStateTable,
 } from '@tools/db/schema';
+import { emptyStudyStreak, type StudyStreakData } from '@tools/shared/study-streak';
 import { and, eq } from 'drizzle-orm';
 import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
 import type { SRSCard, StudyStats } from '../data/srs';
@@ -98,7 +99,12 @@ export async function getProgress(db: ProgressDb, userId: string): Promise<Progr
       }
     : emptyStats();
 
-  return { srsStore, studyStats, syncedAt: state.syncedAt };
+  // The Today streak shares the stats row; see the columns in packages/db.
+  const studyStreak: StudyStreakData = statsRow
+    ? { streak: statsRow.studyStreak, lastSessionDate: statsRow.lastSessionDate }
+    : emptyStudyStreak();
+
+  return { srsStore, studyStats, studyStreak, syncedAt: state.syncedAt };
 }
 
 /**
@@ -124,16 +130,15 @@ export async function getProgress(db: ProgressDb, userId: string): Promise<Progr
 export async function putProgress(
   db: ProgressDb,
   userId: string,
-  payload: Pick<ProgressPayload, 'srsStore' | 'studyStats'>,
+  payload: Pick<ProgressPayload, 'srsStore' | 'studyStats' | 'studyStreak'>,
 ): Promise<string> {
   const syncedAt = new Date().toISOString();
   const userLang = { userId, language: LANGUAGE };
 
   const existing = await getProgress(db, userId);
   // mergeProgress is symmetric, so argument order carries no meaning here.
-  const merged = existing
-    ? mergeProgress({ srsStore: existing.srsStore, studyStats: existing.studyStats }, payload)
-    : payload;
+  const merged = existing ? mergeProgress(existing, payload) : payload;
+  const studyStreak = merged.studyStreak ?? emptyStudyStreak();
 
   const cardRows = Object.entries(merged.srsStore).map(([wordKey, card]) => ({
     ...userLang,
@@ -153,7 +158,12 @@ export async function putProgress(
     db
       .delete(studyStatsTable)
       .where(and(eq(studyStatsTable.userId, userId), eq(studyStatsTable.language, LANGUAGE))),
-    db.insert(studyStatsTable).values({ ...userLang, ...merged.studyStats }),
+    db.insert(studyStatsTable).values({
+      ...userLang,
+      ...merged.studyStats,
+      studyStreak: studyStreak.streak,
+      lastSessionDate: studyStreak.lastSessionDate,
+    }),
     db
       .delete(syncStateTable)
       .where(and(eq(syncStateTable.userId, userId), eq(syncStateTable.language, LANGUAGE))),

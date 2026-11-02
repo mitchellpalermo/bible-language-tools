@@ -88,6 +88,11 @@ export const studyStats = sqliteTable('study_stats', {
   lastStudyDate: text('last_study_date').notNull().default(''),
   totalReviewed: integer('total_reviewed').notNull().default(0),
   totalCorrect: integer('total_correct').notNull().default(0),
+  // The Today session streak (@tools/shared/study-streak), a different streak
+  // from `streak` above. Only hebrew.tools writes it so far; greek.tools' rows
+  // take the defaults until #197.
+  studyStreak: integer('study_streak').notNull().default(0),
+  lastSessionDate: text('last_session_date').notNull().default(''),
 });
 
 // One row per user+language, written on every successful progress PUT.

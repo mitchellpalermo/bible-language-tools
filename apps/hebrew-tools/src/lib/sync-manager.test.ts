@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SRSCard } from '../data/srs';
 import { loadSRSStore, loadStats } from '../data/srs';
+import { loadStudyStreak } from './study-streak';
 import {
   deleteServerProgress,
   formatRelativeTime,
@@ -75,6 +76,14 @@ describe('local snapshot helpers', () => {
 
     expect(loadSRSStore().אֵשׁ).toBeDefined();
     expect(loadStats().totalReviewed).toBe(0);
+  });
+
+  it('carries the Today study streak both ways', () => {
+    const studyStreak = { streak: 3, lastSessionDate: '2026-11-02' };
+    writeLocalProgress({ srsStore: {}, studyStats: emptyStats, studyStreak });
+
+    expect(loadStudyStreak()).toEqual(studyStreak);
+    expect(readLocalProgress().studyStreak).toEqual(studyStreak);
   });
 });
 
