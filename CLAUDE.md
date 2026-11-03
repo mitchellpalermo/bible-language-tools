@@ -67,6 +67,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/use-stored-state` | `useStoredState(load, fallback, save?)` and `useHydrated()` — state seeded from storage without breaking hydration. See "Hydration" below |
 | `@tools/shared/step-drill` | The step-gated drill engine: `stepDrillReducer`, `isCleanPass`, and `canSkipScaffold` / `createStepDrillHistory(storageKey)` for speed mode. See "The step-gated drill" below |
 | `@tools/shared/ladder` | The paradigm ladder (#186): `rungStates`, `isCleanWrite`, `recordWrite`, `newlyUnlocked`, and `createLadderProgress(storageKey)`. See "The paradigm ladder" below |
+| `@tools/shared/today-session` | Today's Session (#184): `fillBudget` (due, then weak, then new, never over the budget), `drillForToday`, `dueTomorrow`, `isWeak`, and the `createStudyStreak(storageKey)` streak. See "Today's Session" below |
 | `@tools/shared/attempt-log` | `createAttemptLog(storageKey)` — every checked answer, by concept, for the mastery levels (#187). Local only for now |
 | `@tools/shared/test/hydration` | `hydrationErrors(ui, { seed })` — test helper: server-render with storage hidden, seed, hydrate, return every mismatch React reports |
 | `@tools/shared/reset-progress` | `resetSrsProgress` and `isResetConfirmed` — erase the SRS store, this browser first, then the account copy via `DELETE`; a server failure never undoes the local reset |
@@ -305,10 +306,35 @@ Things to know before changing it:
   app's `Flashcards.test.tsx` checks its wiring and what it draws, not the
   rules again. That includes options only one app uses (typed answers, the
   keyboard switch), so the hook's tests cover every option.
+- **`dealAsGiven` skips `buildQueue`** and deals `words` in the order passed.
+  Today's Session uses it: it has already put due before weak before new, and
+  includes weak cards that are not due yet, which `buildQueue` would drop.
 - **The hook has no reset, on purpose.** Erasing the SRS store is the account
   page's job (`ResetProgress`; see "A merge cannot express a deletion" below),
   behind a typed confirmation and with the server copy cleared too. A reset on
   a study screen sits one tap from a session, which is why it moved.
+
+### Today's Session
+
+`@tools/shared/today-session` decides what fits a daily session; each app says
+where its items come from, what each costs in seconds, and how they are
+studied (hebrew.tools: `apps/hebrew-tools/CLAUDE.md`, "Today's Session").
+Rules that are pedagogy rather than plumbing:
+
+- **Due before weak before new.** `fillBudget` skips an item that does not fit
+  and keeps going, so a short item can use time a long one could not. But once
+  anything in a tier is skipped, no lower tier gets in: new material never takes
+  time that due work was refused.
+- **The budget is a ceiling.** The fill never adds up to more than the budget,
+  so #184's 10% allowance (`BUDGET_TOLERANCE`) is spent only by estimates
+  running long.
+- **A group's cost is paid once.** Cells of one table share a `group`, and its
+  `groupSeconds` (reading the table, checking it) is charged to the first one
+  admitted.
+- **The study streak is its own streak**, separate from the daily verse's
+  (decided on #196). `createStudyStreak` is `createDailyStreak` under its own
+  key, so the two count days by the same rules. `currentStreak` reads a stored
+  streak whose last day is older than yesterday as 0.
 
 ## Streaks, study days, and sync merges
 

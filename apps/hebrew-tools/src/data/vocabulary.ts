@@ -24,6 +24,7 @@
 // šēm, ʿayin, rōʾš...) have no verbal root that's pedagogically useful to cite,
 // so it's left undefined rather than guessed.
 
+import { normalizeKey } from '@tools/shared/srs';
 import { GARRETT_VOCABULARY } from './vocabulary-garrett';
 import { cardKey, gd, type HebrewVocabWord, verbParse } from './vocabulary-types';
 
@@ -34,6 +35,15 @@ export type {
   VerbStemGloss,
 } from './vocabulary-types';
 export { cardKey, gd, verbParse };
+
+/**
+ * The SRS store key for a word: `cardKey`, which keeps homographs apart,
+ * normalized. Flashcards, the reader's studied marks and Today's Session all
+ * read the store through this, so they agree on which card is which word.
+ */
+export function vocabSrsKey(word: HebrewVocabWord): string {
+  return normalizeKey(cardKey(word));
+}
 
 /** Optional fields an imported entry may contribute to a curated one. */
 const MERGEABLE_FIELDS = [

@@ -1,4 +1,5 @@
 ---
+import TodaySession from '../components/TodaySession';
 import Layout from '../layouts/Layout.astro';
 
 // The hub behind the Study nav group — the same page greek.tools has at /study.
@@ -39,12 +40,20 @@ const modes = [
 ] as const;
 ---
 
-<Layout title="Study" description="Flashcards and paradigm drills for Biblical Hebrew.">
+<Layout title="Study" description="A daily study session, flashcards and paradigm drills for Biblical Hebrew.">
 
   <div class="pt-10 pb-4">
     <h1 class="text-3xl font-extrabold" style="color: var(--color-primary);">Study</h1>
-    <p class="text-text-muted mt-1 text-sm">Pick a mode and get to work.</p>
+    <p class="text-text-muted mt-1 text-sm">Start today’s session, or pick a mode and get to work.</p>
   </div>
+
+  <!-- Today's Session (#184) comes first: one tap studies what is due. The
+       modes below stay for studying one thing on purpose. -->
+  <div class="max-w-3xl pb-8">
+    <TodaySession client:load />
+  </div>
+
+  <h2 class="text-sm font-bold text-text-muted uppercase tracking-wider pb-3">Or pick a mode</h2>
 
   <div class="grid sm:grid-cols-2 gap-5 max-w-3xl pb-16">
     {modes.map(({ href, title, description, accentColor, bgColor, icon, detail }) => (

@@ -228,6 +228,17 @@ describe('SRS Review', () => {
     expect(result.current.sessionScore).toEqual({ known: 2, learning: 0 });
   });
 
+  it('deals a planned order as given, not-yet-due cards included', () => {
+    const later = { ...newCard('w1'), dueDate: daysFromNow(3), interval: 3, repetition: 1 };
+    const words = [word('w2'), word('w1'), word('w0')];
+    const { result, mem } = setup({ words, dealAsGiven: true }, { store: { w1: later } });
+    expect(result.current.queue.map((w) => w.id)).toEqual(['w2', 'w1', 'w0']);
+
+    act(() => result.current.review('good'));
+    act(() => result.current.review('good'));
+    expect(mem.state.store.w1.interval).toBeGreaterThan(3);
+  });
+
   it('counts due and new cards in the current deck', () => {
     const { result } = setup(
       {},

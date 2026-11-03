@@ -23,6 +23,7 @@
     "./step-drill": "./src/step-drill.ts",
     "./attempt-log": "./src/attempt-log.ts",
     "./ladder": "./src/ladder.ts",
+    "./today-session": "./src/today-session.ts",
     "./test/hydration": "./src/test/hydration.ts",
     "./reset-progress": "./src/reset-progress.ts",
     "./nav": "./src/nav.ts",

@@ -68,7 +68,7 @@ describe('hebrew.tools ResetProgress', () => {
     expect(panel).toHaveTextContent(/Paradigm quiz/);
     expect(panel).toHaveTextContent(/Accent-shift trainer/);
     expect(panel).toHaveTextContent(
-      'Kept: your streak, accuracy stats, deck choices and suffix ladder rungs.',
+      'Kept: your streaks, accuracy stats, deck choices, suffix ladder rungs and session length.',
     );
     expect(ERASES).toHaveLength(5);
   });

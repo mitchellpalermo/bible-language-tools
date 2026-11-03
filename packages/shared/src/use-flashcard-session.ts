@@ -116,6 +116,13 @@ export interface FlashcardSessionOptions<T, R> {
   checkAnswer?: (input: string, card: T) => R;
   /** Defaults to true. Off, the app wires its own keys. */
   keyboard?: boolean;
+  /**
+   * Deal `words` exactly as given instead of building the queue (`buildQueue`).
+   * For a caller that has already decided what is studied and in what order —
+   * Today's Session plans due, then weak, then new, and includes weak cards
+   * that are not due yet, which `buildQueue` would leave out. Defaults to false.
+   */
+  dealAsGiven?: boolean;
   /** Injectable for tests; defaults to `Math.random`. */
   random?: () => number;
 }
@@ -202,8 +209,10 @@ export function useFlashcardSession<T, R = never>(options: FlashcardSessionOptio
   // ─── Session lifecycle ──────────────────────────────────────────────────────
 
   const startSession = useCallback(() => {
-    const { words, studyMode: mode, getKey: keyOf } = latest.current;
-    const next = buildQueue(words, mode, srsStoreRef.current, keyOf, random);
+    const { words, studyMode: mode, getKey: keyOf, dealAsGiven } = latest.current;
+    const next = dealAsGiven
+      ? [...words]
+      : buildQueue(words, mode, srsStoreRef.current, keyOf, random);
     setQueue(next);
     setDeck(next);
     setIndex(0);

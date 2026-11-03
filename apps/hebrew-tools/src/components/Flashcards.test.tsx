@@ -5,7 +5,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { loadSRSStore, loadStats, newCard, normalizeKey, saveSRSStore } from '../data/srs';
 import { chapterStats, TEXTBOOKS, wordsInChapters } from '../data/textbooks';
 import { cardKey, type HebrewVocabWord, vocabulary } from '../data/vocabulary';
-import Flashcards, { FREQ_FILTERS, GENDER_LABELS, matchFreq } from './Flashcards';
+import Flashcards, { FREQ_FILTERS, matchFreq } from './Flashcards';
+import { GENDER_LABELS } from './VocabCard';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 

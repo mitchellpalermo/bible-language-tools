@@ -28,8 +28,8 @@
  *   either one is studying the word, so any card counts.
  */
 
-import { loadSRSStore, normalizeKey, type SRSCard } from '../data/srs';
-import { cardKey, type HebrewVocabWord, vocabulary } from '../data/vocabulary';
+import { loadSRSStore, type SRSCard } from '../data/srs';
+import { type HebrewVocabWord, vocabSrsKey, vocabulary } from '../data/vocabulary';
 
 /**
  * The lexeme a lemma key names, with any BDB sense-split letter dropped.
@@ -55,7 +55,7 @@ export function lemmaCardKeys(words: HebrewVocabWord[] = vocabulary): Map<string
     if (!word.strong) continue;
     const base = lemmaBase(word.strong);
     const keys = index.get(base);
-    const key = normalizeKey(cardKey(word));
+    const key = vocabSrsKey(word);
     if (keys) keys.push(key);
     else index.set(base, [key]);
   }

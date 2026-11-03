@@ -163,6 +163,21 @@ describe('AccentTrainer', () => {
     expect(screen.getByText(/1 done, 0 right first time/)).toBeInTheDocument();
   });
 
+  it('stops at its item limit and hands back the tally', async () => {
+    const onComplete = vi.fn();
+    render(<AccentTrainer itemLimit={1} onComplete={onComplete} />);
+    await screen.findByRole('region', { name: 'The noun and its ending' });
+    const user = userEvent.setup();
+    expect(screen.getByText('0 of 1 done, 0 right first time.')).toBeInTheDocument();
+    for (let i = 0; i < 4; i++) {
+      await user.click(check());
+      await user.click(screen.getByRole('button', { name: 'Show me' }));
+    }
+    expect(screen.queryByRole('button', { name: 'Next word' })).toBeNull();
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    expect(onComplete).toHaveBeenCalledWith({ done: 1, clean: 0 });
+  });
+
   describe('speed mode', () => {
     it('is hidden until the scaffold has been earned', async () => {
       await renderTrainer();

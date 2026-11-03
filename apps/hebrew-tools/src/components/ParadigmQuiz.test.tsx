@@ -9,7 +9,8 @@ import type { QuizCell } from '../lib/paradigm-quiz';
 import { paradigmCardKey } from '../lib/paradigm-srs';
 import { QUIZ_SETTINGS_KEY } from '../lib/quiz-settings';
 import { LADDER_PROGRESS_KEY } from '../lib/suffix-ladder';
-import ParadigmQuiz, { progressText, recitationOrder, scheduleNote } from './ParadigmQuiz';
+import { recitationOrder, scheduleNote } from './ParadigmAttempt';
+import ParadigmQuiz, { progressText } from './ParadigmQuiz';
 
 vi.mock('posthog-js', () => ({
   default: { capture: vi.fn(), init: vi.fn(), identify: vi.fn(), captureException: vi.fn() },
@@ -308,6 +309,7 @@ describe('checking answers', () => {
       total: 9,
       strict: false,
       peeked: false,
+      source: 'paradigms',
     });
   });
 

@@ -13,14 +13,12 @@ import {
   loadSRSStore,
   loadStats,
   newCard,
-  normalizeKey,
   STREAK_THRESHOLD,
   saveSRSStore,
   saveStats,
 } from '../data/srs';
 import {
   categoryCounts,
-  categoryLabel,
   chapterStats,
   describeChapters,
   TEXTBOOK_IDS,
@@ -29,17 +27,12 @@ import {
   VOCAB_CATEGORIES,
   wordsInChapters,
 } from '../data/textbooks';
-import {
-  cardKey,
-  type HebrewGender,
-  type HebrewVocabWord,
-  verbParse,
-  vocabulary,
-} from '../data/vocabulary';
+import { vocabSrsKey, vocabulary } from '../data/vocabulary';
 import { type DeckSelection, loadSelection, saveSelection } from '../lib/deck-selection';
 import { loadFlashcardSettings, saveFlashcardSettings } from '../lib/flashcard-settings';
 import ChapterPicker from './ChapterPicker';
 import ErrorBoundary from './ErrorBoundary';
+import VocabCard from './VocabCard';
 
 // Phase 2b scope: SRS, "all" and "endless" study modes, flip answer mode, Hebrew -> English
 // direction, a frequency-band filter, and textbook chapter decks. Typing mode,
@@ -59,21 +52,6 @@ const STUDY_MODES: { mode: StudyMode; label: string }[] = [
 ];
 type FreqFilter = 'all' | '2000+' | '500-1999' | '100-499' | '<100';
 
-/** The SRS store key for a word. Homographs are separated by `cardKey`. */
-const srsKey = (word: HebrewVocabWord) => normalizeKey(cardKey(word));
-
-/**
- * Hebrew quoted inside an English line. `unicode-bidi: isolate` is what keeps a
- * right-to-left run from dragging the surrounding label's punctuation with it.
- */
-function HebrewInline({ children }: { children: string }) {
-  return (
-    <span dir="rtl" style={{ fontFamily: 'var(--font-hebrew)', unicodeBidi: 'isolate' }}>
-      {children}
-    </span>
-  );
-}
-
 export const FREQ_FILTERS: { filter: FreqFilter; label: string }[] = [
   { filter: 'all', label: 'All' },
   { filter: '2000+', label: '2000+' },
@@ -81,13 +59,6 @@ export const FREQ_FILTERS: { filter: FreqFilter; label: string }[] = [
   { filter: '100-499', label: '100–499' },
   { filter: '<100', label: '<100' },
 ];
-
-/** Gender is quizzed alongside the gloss, so it's spelled out rather than abbreviated. */
-export const GENDER_LABELS: Record<HebrewGender, string> = {
-  m: 'masculine',
-  f: 'feminine',
-  fm: 'masculine or feminine',
-};
 
 // Chapter statistics are derived from static vocabulary data, so they're
 // computed once at module scope rather than on every render.
@@ -234,7 +205,7 @@ function FlashcardsInner() {
     addedToReview,
   } = useFlashcardSession({
     words: filteredVocab,
-    getKey: srsKey,
+    getKey: vocabSrsKey,
     studyMode,
     // A new deck or filter deals a new session. Compared by value, so
     // re-selecting what is already selected does not throw away the session.
@@ -346,8 +317,6 @@ function FlashcardsInner() {
   }
 
   // ─── Main render ─────────────────────────────────────────────────────────────
-
-  const parse = verbParse(card);
 
   return (
     <div className="space-y-4">
@@ -589,140 +558,12 @@ function FlashcardsInner() {
       </div>
 
       {/* ── Card ──────────────────────────────────────────────────────────── */}
-      <div
-        onClick={!flipped ? handleFlip : undefined}
-        className={`bg-bg-card rounded-2xl shadow-md border-2 border-primary/10 px-4 py-6 sm:px-10 sm:py-8 text-center select-none min-h-[200px] sm:min-h-[220px] flex flex-col items-center justify-center transition-all ${
-          !flipped ? 'cursor-pointer active:shadow-lg hover:shadow-lg hover:border-primary/30' : ''
-        }`}
-      >
-        {/* Front side: Hebrew word */}
-        <p
-          dir="rtl"
-          className="leading-tight text-5xl font-bold"
-          style={{ fontFamily: 'var(--font-hebrew)', color: 'var(--color-hebrew)' }}
-        >
-          {card.hebrew}
-        </p>
-        {/* The part of speech is a hint before the answer and a fact after it.
-            With the toggle off it waits for the flip rather than disappearing:
-            "noun" narrows a word to a fraction of the lexicon, which is help
-            you did not ask for while recalling, and worth having once you have. */}
-        {(showPartOfSpeech || flipped) && (
-          <p className="text-text-muted text-xs mt-2 font-medium uppercase tracking-wide">
-            {card.partOfSpeech}
-          </p>
-        )}
-
-        {!flipped && (
-          <p className="text-text-muted/60 text-xs mt-6">
-            <span className="sm:hidden">tap to reveal</span>
-            <span className="hidden sm:inline">click or press space to reveal</span>
-          </p>
-        )}
-
-        {/* Back side: gloss */}
-        {flipped && (
-          <div className="mt-4 pt-4 border-t-2 border-primary/5 w-full text-center">
-            <p className="leading-tight text-2xl font-semibold text-text">{card.gloss}</p>
-
-            {/* Transliteration is content, not a label: SBL romanization is
-                case-bearing (ʾādām, not ʾĀDĀM), so it must never pick up the
-                `uppercase` transform the surrounding micro-labels use.
-                Italic is the standard convention for transliterated text.
-                Absent on textbook-imported words — see `vocabulary-garrett.ts`. */}
-            {card.transliteration && (
-              <p className="text-text-muted text-sm mt-2 italic" dir="ltr">
-                {card.transliteration}
-              </p>
-            )}
-
-            {/* A verb's parse belongs with the answer, not on the front: naming
-                the conjugation of the form you are looking at is half of what
-                the card asks. It matters most on a citation form, where the
-                gloss is a bare English verb ("write") under a Hebrew form that
-                is a qatal 3ms ("he wrote"). */}
-            {(card.gender || parse || card.root) && (
-              <p
-                className="text-text-muted text-xs mt-1 uppercase tracking-wide font-medium"
-                dir="ltr"
-              >
-                {card.gender && GENDER_LABELS[card.gender]}
-                {parse && <span data-testid="verb-parse">{parse}</span>}
-                {(card.gender || parse) && card.root && ' · '}
-                {card.root && (
-                  <>
-                    root{' '}
-                    <span
-                      dir="rtl"
-                      style={{ fontFamily: 'var(--font-hebrew)', unicodeBidi: 'isolate' }}
-                    >
-                      {card.root}
-                    </span>
-                  </>
-                )}
-              </p>
-            )}
-
-            {/* Forms the textbook prints alongside the headword. These are what
-                the chapter quizzes actually ask for on nouns. */}
-            {(card.construct || card.plural) && (
-              <p
-                className="text-text-muted text-xs mt-1.5 uppercase tracking-wide font-medium"
-                dir="ltr"
-              >
-                {card.construct && (
-                  <>
-                    construct <HebrewInline>{card.construct}</HebrewInline>
-                  </>
-                )}
-                {card.construct && card.plural && ' · '}
-                {card.plural && (
-                  <>
-                    plural <HebrewInline>{card.plural}</HebrewInline>
-                  </>
-                )}
-              </p>
-            )}
-
-            {card.stems && card.stems.length > 0 && (
-              <ul className="mt-3 space-y-0.5 text-sm text-text-muted" dir="ltr">
-                {card.stems.map((s) => (
-                  <li key={s.stem}>
-                    <span className="font-semibold text-text">{s.stem}</span>
-                    {s.form && (
-                      <>
-                        {' '}
-                        <HebrewInline>{s.form}</HebrewInline>
-                      </>
-                    )}{' '}
-                    &mdash; {s.gloss}
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            {card.note && (
-              <p className="text-text-muted text-xs mt-3 leading-snug" dir="ltr">
-                {card.note}
-              </p>
-            )}
-
-            {card.chapters && card.chapters.length > 0 && (
-              <p
-                className="text-text-muted/70 text-[11px] mt-3 uppercase tracking-wide font-medium"
-                dir="ltr"
-              >
-                {card.chapters
-                  .map(
-                    (ref) =>
-                      `${TEXTBOOKS[ref.textbook].unitLabel} ${ref.chapter} ${categoryLabel(ref.category)}`,
-                  )
-                  .join(' · ')}
-              </p>
-            )}
-          </div>
-        )}
-      </div>
+      <VocabCard
+        card={card}
+        flipped={flipped}
+        onFlip={handleFlip}
+        showPartOfSpeech={showPartOfSpeech}
+      />
 
       {/* ── Action buttons ────────────────────────────────────────────────── */}
       {/* The SRS grades schedule the card, so they preview the interval each
@@ -731,7 +572,7 @@ function FlashcardsInner() {
       {flipped &&
         (studyMode === 'srs' ? (
           <GradeButtons
-            card={srsStore[srsKey(card)] ?? newCard(srsKey(card))}
+            card={srsStore[vocabSrsKey(card)] ?? newCard(vocabSrsKey(card))}
             onGrade={handleReview}
           />
         ) : (

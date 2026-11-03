@@ -151,7 +151,7 @@ The Accent-Shift Trainer spends a fifth, `accent:<item id>` in `src/lib/accent-s
 The confusable decks deliberately get no prefix of their own — they drill the same letters the alphabet deck does, so grading ד in one must move the card the other sees.
 - **Deck selection is persisted separately from the SRS store** (`hebrew-tools-deck-v1`, `src/lib/deck-selection.ts`) and is never synced. It decides which due cards you see, not what is due, so it stays local to the browser.
 - **What the card front shows is persisted the same way** (`hebrew-tools-flashcard-display-v1`, `src/lib/flashcard-settings.ts`, over `@tools/shared/flashcard-settings`) and is likewise never synced. Today it holds one boolean: whether the part of speech appears on the front of a flashcard, which defaults to off. See the repo CLAUDE.md under "What the card front gives away".
-- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`, `hebrew-tools-reader-prefs`, `hebrew-tools-daily-v1`, `hebrew-tools-accent-scaffold-v1` (speed mode), `hebrew-tools-attempts-v1` (attempt log, not synced), `hebrew-tools-suffix-ladder-v1` (suffix ladder progress, not synced, kept by the account reset). There is still no auth or sync in this app — **all study progress is per-browser only.** The D1 plumbing exists (see below), but nothing reads or writes it yet.
+- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`, `hebrew-tools-reader-prefs`, `hebrew-tools-daily-v1`, `hebrew-tools-accent-scaffold-v1` (speed mode), `hebrew-tools-attempts-v1` (attempt log, not synced), `hebrew-tools-suffix-ladder-v1` (suffix ladder progress, not synced, kept by the account reset), `hebrew-tools-study-streak-v1` and `hebrew-tools-session-budget-v1` (Today's Session, not synced, kept by the reset). There is still no auth or sync in this app — **all study progress is per-browser only.** The D1 plumbing exists (see below), but nothing reads or writes it yet.
 
 ### OSHB data pipeline (issue #75)
 
@@ -834,7 +834,8 @@ Things to know before changing it:
 | `src/lib/use-hebrew-input.ts` | The typing behaviour as a hook — shared by `/keyboard` and every quiz cell |
 | `src/lib/quiz-settings.ts` | Binding of the shared settings; default density is `hard` |
 | `src/lib/paradigm-srs.ts` | Paradigm cells as SRS cards: keys, grade mapping, `recordAttempt`, due-first blanking |
-| `src/components/ParadigmQuiz.tsx` | The page: select a table, fill it in, see what was right |
+| `src/components/ParadigmQuiz.tsx` | The page: the table picker, the settings, and what to do after an attempt |
+| `src/components/ParadigmAttempt.tsx` | One table filled in and checked: blanks, keypad, Peek, marking, and every write an attempt makes (SRS, attempt log, ladder). Today's Session hosts it too |
 | `src/components/HebrewKeypad.tsx` | On-screen letters and points, driving a cell through `insert()` / `backspace()` |
 
 Things that will bite if changed carelessly:
@@ -953,6 +954,60 @@ Things that will bite if changed carelessly:
   under 3fp until #186.
 - **Every unaided paradigm answer is logged** to the attempt log as
   `paradigm/<cellId>`, ladder or not. A peeked attempt logs nothing.
+
+### Today's Session (issue #184)
+
+The top of `/study` is one daily session sized to a time budget. The student
+picks 20, 45 or 90 minutes and taps Start. The session runs review words,
+review forms, new words, then one drill, and ends with a summary: reviewed,
+missed, and due tomorrow. The language-agnostic parts (the budget fill, the
+drill rotation, the study streak) are `@tools/shared/today-session`; see the
+repo CLAUDE.md.
+
+| File | Role |
+|---|---|
+| `src/lib/today-session.ts` | What goes in today's session: the plan, the parts in order, the timings, the drill pick, the budget and streak storage |
+| `src/components/TodaySession.tsx` | The island: start screen, the parts, the summary |
+| `src/components/VocabCard.tsx` | The vocabulary card face, shared with Flashcards |
+| `src/components/ParadigmAttempt.tsx` | A table attempt, shared with `/paradigms` |
+
+Things that will bite if changed carelessly:
+
+- **Every part studies through its page's own code.** Words go through
+  `useFlashcardSession` (with `dealAsGiven`) and `VocabCard`, forms through
+  `ParadigmAttempt`, the accent drill through `AccentTrainer` with an
+  `itemLimit`. The session writes nothing itself, so a form written there is
+  scheduled, logged and counted toward the ladder exactly as on `/paradigms`.
+  Do not give the session its own grading.
+- **"Due" means scheduled and due.** `isCellDue` counts a never-answered cell as
+  due, which suits the table picker and would make every unstarted table a
+  review here. A form never written is new material, and the session's new
+  material is vocabulary only.
+- **Weak cards ride with their kind's review**, after the due ones (ease below
+  `WEAK_EASE`, 2.2). Grading one early is an early review: SM-2 schedules it
+  from today. New words come after every review part, so nothing new is studied
+  before due or weak work.
+- **New words are capped** at `NEW_WORDS_PER_SESSION` (15), whatever the
+  budget. They come from the student's deck selection in textbook order, or by
+  frequency from the whole vocabulary.
+- **The drill's time is set aside before the fill.** The rotation is accent
+  shift, suffix ladder, mixed review, one step a day (`drillForToday`). The
+  ladder writes a whole rung, the lowest open one not yet climbed, so a clean
+  write counts. Mixed review asks for up to 8 learned, not-due forms over at
+  most 3 tables. It passes its day on until the student has 4 learned forms.
+- **The timings are estimates and live in one place** (`WORD_SECONDS`,
+  `FORM_SECONDS`, `TABLE_SECONDS`, `ACCENT_ITEM_SECONDS`). The plan never adds
+  up to more than the budget, so #184's 10% allowance is spent only by the
+  estimates being wrong. If sessions run long, change the numbers there.
+- **Only a finished session counts the day.** "End session" keeps every graded
+  review and reports the tally, but leaves the study streak alone. The study
+  streak is separate from the Daily verse streak (decided on #196).
+- **The tally is a ref, not state, when the session ends.** A part reports its
+  last answer and finishes in the same tick, so `end` reads `tallyRef`. Reading
+  state there dropped the drill from the analytics event.
+- **The start screen plans after hydration**, from the SRS store. Its first
+  render says "Planning…" on server and client alike. The plan is not saved, so
+  a reload mid-session starts over (the reviews already graded are kept).
 
 ### Accent-Shift Trainer (issue #185)
 

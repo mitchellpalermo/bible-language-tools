@@ -348,7 +348,22 @@ interface Answers {
 
 const EMPTY_ANSWERS: Answers = { gaps: new Set(), accent: null, positions: [], typed: '' };
 
-function AccentTrainerInner() {
+/** Words worked and words right at every step first time. */
+export interface AccentTally {
+  done: number;
+  clean: number;
+}
+
+export interface AccentTrainerProps {
+  /**
+   * Stop after this many words: the last one offers Continue instead of Next
+   * word. Today's Session sets it; /accent runs open-ended.
+   */
+  itemLimit?: number;
+  onComplete?: (tally: AccentTally) => void;
+}
+
+function AccentTrainerInner({ itemLimit, onComplete }: AccentTrainerProps) {
   const [queue, setQueue] = useState<ShiftItem[] | null>(null);
   const [index, setIndex] = useState(0);
   const [speedMode, setSpeedMode] = useState(false);
@@ -357,7 +372,7 @@ function AccentTrainerInner() {
   const [answers, setAnswers] = useState<Answers>(EMPTY_ANSWERS);
   const [formCheck, setFormCheck] = useState<FormCheck | null>(null);
   const [history, setHistory] = useStoredState(loadScaffoldHistory, [], saveScaffoldHistory);
-  const [tally, setTally] = useState({ done: 0, clean: 0 });
+  const [tally, setTally] = useState<AccentTally>({ done: 0, clean: 0 });
   const [keypadOpen, setKeypadOpen] = useState(false);
   const stepOpenedAt = useRef(Date.now());
   // The form field's insert/backspace, for the keypad rendered outside it.
@@ -656,27 +671,39 @@ function AccentTrainerInner() {
             )}
           </div>
           <Breakdown item={item} />
-          <button
-            type="button"
-            onClick={() => nextItem()}
-            className="w-full px-6 py-2.5 rounded-xl font-bold text-sm bg-primary text-white"
-          >
-            Next word
-          </button>
+          {itemLimit !== undefined && tally.done >= itemLimit ? (
+            <button
+              type="button"
+              onClick={() => onComplete?.(tally)}
+              className="w-full px-6 py-2.5 rounded-xl font-bold text-sm bg-primary text-white"
+            >
+              Continue
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => nextItem()}
+              className="w-full px-6 py-2.5 rounded-xl font-bold text-sm bg-primary text-white"
+            >
+              Next word
+            </button>
+          )}
         </section>
       )}
 
       <p className="text-xs text-text-muted" aria-live="polite">
-        This session: {tally.done} done, {tally.clean} right first time.
+        {itemLimit !== undefined
+          ? `${tally.done} of ${itemLimit} done, ${tally.clean} right first time.`
+          : `This session: ${tally.done} done, ${tally.clean} right first time.`}
       </p>
     </div>
   );
 }
 
-export default function AccentTrainer() {
+export default function AccentTrainer(props: AccentTrainerProps) {
   return (
     <ErrorBoundary component="AccentTrainer">
-      <AccentTrainerInner />
+      <AccentTrainerInner {...props} />
     </ErrorBoundary>
   );
 }
