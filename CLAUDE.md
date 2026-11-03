@@ -354,6 +354,15 @@ Things to know before changing it:
   behind a typed confirmation and with the server copy cleared too. A reset on
   a study screen sits one tap from a session, which is why it moved.
 
+## Favicons
+
+Each app ships `public/favicon.svg`, `favicon.ico` (16/32/48) and `apple-touch-icon.png` (180), all drawn from the same glyph (α, א) as a filled gradient tile with the glyph converted to a path. Two things went wrong before (Nov 2026):
+
+- **A browser that skips the SVG `<link>` asks for `/favicon.ico` itself** (Safari, a cached tab, error pages). greek.tools still had Astro's starter `favicon.ico`, so its tab flipped to the Astro logo on some pages; hebrew.tools had none. Both layouts now declare all three icons, and `@tools/shared/test/favicons` (run by each app's `src/test/favicons.test.ts`) fails if a declared icon has no file or one of the three is not declared.
+- **The old SVG was unfilled `<text>` in `font-family="serif"`**: black on transparent, so invisible in a dark tab, and drawn in whatever serif the machine had. Keep the glyph as a path and give it a background.
+
+To regenerate the rasters from the SVG: `rsvg-convert -w 180 -h 180 favicon.svg -o apple-touch-icon.png`, and `magick` over 16/32/48 renders for the `.ico`.
+
 ## Streaks, study days, and sync merges
 
 Three defects lived here at once (fixed Aug 2026). All three are easy to

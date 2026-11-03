@@ -26,6 +26,7 @@
     "./today": "./src/today.ts",
     "./study-streak": "./src/study-streak.ts",
     "./test/hydration": "./src/test/hydration.ts",
+    "./test/favicons": "./src/test/favicons.ts",
     "./reset-progress": "./src/reset-progress.ts",
     "./nav": "./src/nav.ts",
     "./nav-menu": "./src/nav-menu.ts",
