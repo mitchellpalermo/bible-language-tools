@@ -4,8 +4,10 @@
 // winners. Both sides of a sync run the same merge, so an asymmetric rule would
 // let two devices ping-pong different answers. Cards resolve on "most recent
 // review wins"; the lifetime stats counters take the max. Never lose a review —
-// including a failed one.
+// including a failed one. The attempt log is a union; ladder rungs take the max.
 
+import { type Attempt, compareAttempts, MAX_ATTEMPTS } from './attempt-log';
+import type { LadderProgress } from './ladder';
 import type { SRSCard, StudyStats } from './srs';
 
 /**
@@ -100,4 +102,43 @@ export function mergeStudyStats(a: StudyStats, b: StudyStats): StudyStats {
     totalReviewed: Math.max(a.totalReviewed, b.totalReviewed),
     totalCorrect: Math.max(a.totalCorrect, b.totalCorrect),
   };
+}
+
+/**
+ * The attempt log is append-only, so the merge is a union keyed by id, oldest
+ * first, keeping the newest `MAX_ATTEMPTS`. Ordered by time then id — a total
+ * order — so both sides keep the same window.
+ *
+ * An id is random, so the same id on both sides is the same answer, copied by
+ * an earlier sync. Should two ever differ, the one that sorts first by its
+ * serialized form wins, which keeps the merge symmetric even then.
+ */
+export function mergeAttempts(a: readonly Attempt[], b: readonly Attempt[]): Attempt[] {
+  const byId = new Map<string, Attempt>();
+  for (const attempt of [...a, ...b]) {
+    const existing = byId.get(attempt.id);
+    if (!existing || JSON.stringify(attempt) < JSON.stringify(existing)) {
+      byId.set(attempt.id, attempt);
+    }
+  }
+  return [...byId.values()].sort(compareAttempts).slice(-MAX_ATTEMPTS);
+}
+
+/**
+ * Per rung, the larger clean-write count. A count only ever goes up and a rung
+ * never closes again, so the larger count is the later state of the same
+ * ladder, and an open rung stays open on every device.
+ *
+ * KNOWN LIMIT: clean writes made on two devices between syncs are not added
+ * together. Each count already includes every write its device has seen, so
+ * adding would count a synced write again on every later merge; telling them
+ * apart needs a count per device. The cost is small and errs safe: one rung
+ * can take an extra clean write to open, never one fewer.
+ */
+export function mergeLadderProgress(a: LadderProgress, b: LadderProgress): LadderProgress {
+  const merged: LadderProgress = { ...a };
+  for (const [rung, writes] of Object.entries(b)) {
+    merged[rung] = Math.max(merged[rung] ?? 0, writes);
+  }
+  return merged;
 }

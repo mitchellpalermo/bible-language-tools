@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { type Attempt, MAX_ATTEMPTS } from './attempt-log';
 import { emptyStats, type SRSCard, type StudyStats } from './srs';
-import { mergeSRSStores, mergeStudyStats } from './sync-merge';
+import { mergeAttempts, mergeLadderProgress, mergeSRSStores, mergeStudyStats } from './sync-merge';
 
 function makeCard(overrides: Partial<SRSCard> = {}): SRSCard {
   return {
@@ -206,5 +207,69 @@ describe('mergeStudyStats', () => {
       totalCorrect: 180,
     });
     expect(mergeStudyStats(only, only)).toEqual(only);
+  });
+});
+
+// ─── mergeAttempts ──────────────────────────────────────────────────────────
+
+describe('mergeAttempts', () => {
+  const at = (id: string, time: number, correct = true): Attempt => ({
+    id,
+    concept: 'paradigm/qal-3ms',
+    correct,
+    at: time,
+  });
+
+  it('is a union by id, oldest first', () => {
+    const merged = mergeAttempts([at('a', 1), at('c', 3)], [at('b', 2), at('c', 3)]);
+    expect(merged.map((a) => a.id)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('keeps two answers that differ only in id', () => {
+    expect(mergeAttempts([at('x', 1)], [at('y', 1)])).toHaveLength(2);
+  });
+
+  it('keeps the newest MAX_ATTEMPTS across both sides', () => {
+    const local = Array.from({ length: MAX_ATTEMPTS }, (_, i) => at(`l${i}`, i * 2));
+    const remote = [at('r-old', -1), at('r-new', MAX_ATTEMPTS * 2)];
+    const merged = mergeAttempts(local, remote);
+    expect(merged).toHaveLength(MAX_ATTEMPTS);
+    expect(merged[0].id).toBe('l1');
+    expect(merged.at(-1)?.id).toBe('r-new');
+  });
+
+  it('is symmetric, including on a clash of ids and a tie of times', () => {
+    const a = [at('same', 1, true), at('p', 5), at('q', 5)];
+    const b = [at('same', 1, false), at('q', 5), at('r', 4)];
+    expect(mergeAttempts(a, b)).toEqual(mergeAttempts(b, a));
+    expect(mergeAttempts(a, b)).toHaveLength(4);
+  });
+
+  it('merges with an empty side to the other side', () => {
+    expect(mergeAttempts([], [at('a', 1)])).toEqual([at('a', 1)]);
+    expect(mergeAttempts([], [])).toEqual([]);
+  });
+});
+
+// ─── mergeLadderProgress ────────────────────────────────────────────────────
+
+describe('mergeLadderProgress', () => {
+  it('takes the larger count per rung and keeps rungs on one side only', () => {
+    expect(mergeLadderProgress({ one: 3, two: 1 }, { two: 2, three: 1 })).toEqual({
+      one: 3,
+      two: 2,
+      three: 1,
+    });
+  });
+
+  it('never closes a rung: an empty side changes nothing', () => {
+    expect(mergeLadderProgress({ one: 2 }, {})).toEqual({ one: 2 });
+    expect(mergeLadderProgress({}, { one: 2 })).toEqual({ one: 2 });
+  });
+
+  it('is symmetric', () => {
+    const a = { one: 2, two: 0 };
+    const b = { one: 1, two: 4, three: 2 };
+    expect(mergeLadderProgress(a, b)).toEqual(mergeLadderProgress(b, a));
   });
 });

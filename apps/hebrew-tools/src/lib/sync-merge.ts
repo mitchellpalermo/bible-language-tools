@@ -10,22 +10,33 @@
 // The card and stats rules are identical in greek-tools, so they live in
 // @tools/shared/sync-merge and are re-exported here.
 
+import type { LadderProgress } from '@tools/shared/ladder';
 import type { SRSCard, StudyStats } from '@tools/shared/srs';
 import {
   emptyStudyStreak,
   mergeStudyStreak,
   type StudyStreakData,
 } from '@tools/shared/study-streak';
-import { mergeSRSStores, mergeStudyStats } from '@tools/shared/sync-merge';
+import {
+  mergeAttempts,
+  mergeLadderProgress,
+  mergeSRSStores,
+  mergeStudyStats,
+} from '@tools/shared/sync-merge';
 
-export { mergeSRSStores, mergeStudyStats };
+export { mergeAttempts, mergeLadderProgress, mergeSRSStores, mergeStudyStats };
 
 export interface ProgressSnapshot {
   srsStore: Record<string, SRSCard>;
   studyStats: StudyStats;
   /** Absent from a snapshot taken before the Today session shipped. */
   studyStreak?: StudyStreakData;
+  /** Absent from a snapshot taken before the ladder synced. */
+  ladderProgress?: LadderProgress;
 }
+
+// The attempt log is not part of the snapshot: it syncs on its own endpoint,
+// merged with `mergeAttempts` (see sync-manager.ts).
 
 export function mergeProgress(a: ProgressSnapshot, b: ProgressSnapshot): ProgressSnapshot {
   return {
@@ -36,5 +47,7 @@ export function mergeProgress(a: ProgressSnapshot, b: ProgressSnapshot): Progres
       a.studyStreak ?? emptyStudyStreak(),
       b.studyStreak ?? emptyStudyStreak(),
     ),
+    // An absent ladder is a fresh one, which every real count beats.
+    ladderProgress: mergeLadderProgress(a.ladderProgress ?? {}, b.ladderProgress ?? {}),
   };
 }

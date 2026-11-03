@@ -58,7 +58,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/srs` | SM-2 spaced repetition algorithm, types, and pure stats functions |
 | `@tools/shared/daily` | `dayIndex()` verse-of-the-day cycling and the `createDailyStreak(storageKey)` read-it-daily streak |
 | `@tools/shared/daily-dose` | The Daily Dose of Scripture feed behind both apps' `/daily`: `createDailyDoseSource({ categoryId, toVerse, cacheKeyPrefix })`, `parseLessonTitle`, and `cspAllowsDailyDose` for each app's `_headers` test. Each app keeps only its category ID and book names |
-| `@tools/shared/sync-merge` | Merge rules for cross-device sync of SRS cards and study stats |
+| `@tools/shared/sync-merge` | Merge rules for cross-device sync: SRS cards, study stats, the attempt log (`mergeAttempts`, a union by id) and ladder progress (`mergeLadderProgress`, max per rung) |
 | `@tools/shared/quiz-settings` | `createQuizSettings(storageKey, overrides?)` factory for persisting quiz difficulty; `overrides` sets one app's defaults |
 | `@tools/shared/paradigm-quiz` | The paradigm quiz engine — `TableModel`, `getQuizCells`, `applyDensity`. Which tables exist and how an answer is graded stay in each app |
 | `@tools/shared/flashcard-settings` | `createFlashcardSettings(storageKey)` factory for what the flashcard face shows before you answer |
@@ -66,8 +66,8 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/use-flashcard-session` | `useFlashcardSession<T>()` — the flashcard session engine: dealing, SRS grading, drills, Endless, typed answers, the keyboard. Both apps' `Flashcards.tsx` run on it. See "The flashcard session engine" below |
 | `@tools/shared/use-stored-state` | `useStoredState(load, fallback, save?)` and `useHydrated()` — state seeded from storage without breaking hydration. See "Hydration" below |
 | `@tools/shared/step-drill` | The step-gated drill engine: `stepDrillReducer`, `isCleanPass`, and `canSkipScaffold` / `createStepDrillHistory(storageKey)` for speed mode. See "The step-gated drill" below |
-| `@tools/shared/ladder` | The paradigm ladder (#186): `rungStates`, `isCleanWrite`, `recordWrite`, `newlyUnlocked`, and `createLadderProgress(storageKey)`. See "The paradigm ladder" below |
-| `@tools/shared/attempt-log` | `createAttemptLog(storageKey)` — every checked answer, by concept, for the mastery levels (#187). Local only for now |
+| `@tools/shared/ladder` | The paradigm ladder (#186): `rungStates`, `isCleanWrite`, `recordWrite`, `newlyUnlocked`, `isLadderProgress`, and `createLadderProgress(storageKey)`. See "The paradigm ladder" below |
+| `@tools/shared/attempt-log` | `createAttemptLog(storageKey)` — every checked answer, by concept and id, for the mastery levels (#187) — plus `parseAttempt` and `planAttemptPush` for syncing it. See "The attempt log syncs on its own" below |
 | `@tools/shared/today` | Today's Session (#184): `buildTodayPlan` (fill a time budget, due before weak before new), `canStartNext` and `createActiveClock` (the budget while it runs), `summarizeSession`. See "Today's Session" below |
 | `@tools/shared/study-streak` | `createStudyStreak(storageKey)` — days with a finished Today session — and `mergeStudyStreak` for sync |
 | `@tools/shared/components/TodaySession` | `BudgetPicker` (20 / 45 / 90 minutes) and `SessionSummaryCard` (React) |
@@ -229,8 +229,12 @@ grading; the module owns the unlock rule and `components/Ladder` draws it.
   written cleanly opens the next one in the usual way.
 - **A locked rung is visible and can be opened anyway**, through its own
   button rather than a tap on the card, so the override is deliberate.
-- **Progress is local**, stored per app by `createLadderProgress(key)`, like
-  the attempt log. Syncing waits on #196's sign-in decision.
+- **Progress syncs when signed in**, stored per app by
+  `createLadderProgress(key)`. It rides in the progress payload, one row per
+  rung in `ladder_progress`, and merges by the larger count per rung, so a rung
+  that opened on one device is open on all of them. Clean writes made on two
+  devices between syncs are not added together (see `mergeLadderProgress`):
+  the cost is at most one extra clean write, never a rung opened early.
 
 ### Today's Session
 
@@ -263,6 +267,35 @@ rules in "Streaks, study days, and sync merges": local dates, `streak` travels
 with `lastSessionDate`, the later date wins, and the merge is symmetric. On the
 server it is two columns on `study_stats` (`study_streak`,
 `last_session_date`); greek.tools' rows take the defaults until #197.
+
+### The attempt log syncs on its own
+
+The attempt log (#196) syncs to a signed-in account on its own endpoint,
+`/api/attempts`, not in the progress `PUT`. A full log is 5,000 attempts at
+~130 bytes each, past both the `PUT`'s 512 KB body limit and the 64 KB a
+keepalive request may carry, and a full replace would rewrite thousands of rows
+on every tab switch. hebrew.tools does this today; greek.tools reuses the
+shared parts when #200 needs them. The rules:
+
+- **Every attempt has a random `id`**, and the merge is a union by it, oldest
+  first, keeping the newest `MAX_ATTEMPTS` (`mergeAttempts`). Entries logged
+  before ids existed get a stable `legacy-<at>-<n>` id on read and keep it once
+  the log is next written. The server's `INSERT OR IGNORE` is the same union, so
+  sending an attempt twice is harmless, and it prunes to the same window.
+- **A push sends what was logged since a cursor; a pull sends exactly what the
+  account lacks.** The cursor is this device's clock when the last accepted
+  push began (`planAttemptPush`), so it errs toward sending twice. The two ways
+  it can skip one (a clock set backwards, one check logging more than a batch)
+  are repaired by the next pull, which diffs by id.
+- **A keepalive push carries at most `KEEPALIVE_ATTEMPTS`**, and is started
+  before the progress push is awaited: a page that is unloading may not run
+  anything after an `await`. Each page load sends whatever is still owed
+  (`drainOwedAttempts`), which covers a keepalive push whose answer no page
+  was left to record, and a backlog past the cap.
+- **`DELETE /api/progress` clears the log and the ladder too**, and resets the
+  cursor, because a merge cannot express a deletion. The account reset keeps
+  both locally and its push puts them back; "Start fresh" clears them locally
+  (`clearLocalProgress`) so the next push has nothing to upload.
 
 **Every migration is tested against data written before it.** The database is
 live and shared by both apps, so `packages/db/src/migrations.test.ts` builds it

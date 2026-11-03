@@ -9,6 +9,9 @@ import {
   saveSRSStore,
   saveStats,
 } from '../data/srs';
+import { loadAttempts, logAttempts } from '../lib/attempt-log';
+import { loadLadderProgress, saveLadderProgress } from '../lib/suffix-ladder';
+import { ATTEMPT_CURSOR_KEY } from '../lib/sync-manager';
 import ResetProgress, { ERASES } from './ResetProgress';
 
 vi.mock('posthog-js', () => ({
@@ -115,6 +118,27 @@ describe('hebrew.tools ResetProgress', () => {
     const body = JSON.parse(init.body);
     expect(body.srsStore).toEqual({});
     expect(body.studyStats.totalReviewed).toBe(120);
+  });
+
+  it('keeps the ladder and the attempt log, and puts both back on the account', async () => {
+    // Already synced: the cursor says the account had these attempts.
+    saveLadderProgress({ 'suffix-bare-type1': 2 });
+    logAttempts([{ concept: 'paradigm/x', correct: true }], 100);
+    localStorage.setItem(ATTEMPT_CURSOR_KEY, '200');
+    render(<ResetProgress signedIn />);
+    await confirmReset();
+    await screen.findByRole('status');
+
+    expect(loadLadderProgress()).toEqual({ 'suffix-bare-type1': 2 });
+    expect(loadAttempts()).toHaveLength(1);
+    // The DELETE took them off the account, so the push sends them again.
+    const sent = Object.fromEntries(
+      fetchMock.mock.calls.slice(1).map(([url, init]) => [url, JSON.parse(init.body)]),
+    );
+    expect(sent['/api/progress'].ladderProgress).toEqual({ 'suffix-bare-type1': 2 });
+    expect(sent['/api/attempts'].attempts.map((a: { concept: string }) => a.concept)).toEqual([
+      'paradigm/x',
+    ]);
   });
 
   it('does not push when the delete fails', async () => {

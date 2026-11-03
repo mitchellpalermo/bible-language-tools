@@ -151,7 +151,7 @@ The Accent-Shift Trainer spends a fifth, `accent:<item id>` in `src/lib/accent-s
 The confusable decks deliberately get no prefix of their own — they drill the same letters the alphabet deck does, so grading ד in one must move the card the other sees.
 - **Deck selection is persisted separately from the SRS store** (`hebrew-tools-deck-v1`, `src/lib/deck-selection.ts`) and is never synced. It decides which due cards you see, not what is due, so it stays local to the browser.
 - **What the card front shows is persisted the same way** (`hebrew-tools-flashcard-display-v1`, `src/lib/flashcard-settings.ts`, over `@tools/shared/flashcard-settings`) and is likewise never synced. Today it holds one boolean: whether the part of speech appears on the front of a flashcard, which defaults to off. See the repo CLAUDE.md under "What the card front gives away".
-- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`, `hebrew-tools-reader-prefs`, `hebrew-tools-daily-v1`, `hebrew-tools-accent-scaffold-v1` (speed mode), `hebrew-tools-attempts-v1` (attempt log, not synced), `hebrew-tools-suffix-ladder-v1` (suffix ladder progress, not synced, kept by the account reset), `hebrew-tools-study-streak-v1` (the Today session streak, **synced**, kept by the account reset), `hebrew-tools-today-budget-v1` (the last time budget picked, not synced). Signed-in students sync the SRS store, the stats and the study streak (see "Study sync"); everything else on this list is per-browser.
+- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`, `hebrew-tools-reader-prefs`, `hebrew-tools-daily-v1`, `hebrew-tools-accent-scaffold-v1` (speed mode), `hebrew-tools-attempts-v1` (attempt log, **synced** on its own endpoint, kept by the account reset), `hebrew-tools-attempts-pushed-through` (the attempt log's push cursor), `hebrew-tools-suffix-ladder-v1` (suffix ladder progress, **synced**, kept by the account reset), `hebrew-tools-study-streak-v1` (the Today session streak, **synced**, kept by the account reset), `hebrew-tools-today-budget-v1` (the last time budget picked, not synced). Signed-in students sync the SRS store, the stats, the study streak, the suffix ladder and the attempt log (see "Study sync"); everything else on this list is per-browser.
 
 ### OSHB data pipeline (issue #75)
 
@@ -620,6 +620,7 @@ Signed-in users get their SRS cards and study stats persisted server-side and me
 | `src/lib/sync-manager.ts` | Client lifecycle: push, pullAndMerge, session-end push |
 | `src/lib/progress-store.ts` | Server persistence. **Every statement scoped by `LANGUAGE`** |
 | `src/pages/api/progress.ts` | GET/PUT/DELETE, with full payload validation |
+| `src/pages/api/attempts.ts` | GET/POST for the attempt log, append-only; its DELETE is `/api/progress`'s |
 
 Things that will bite if changed carelessly:
 
@@ -665,7 +666,25 @@ Things that will bite if changed carelessly:
   real one. A reset's `DELETE` takes it with the stats and the push straight
   after puts it back, so the reset keeps it.
 
-Cross-device behaviour can't be covered by unit tests. `docs/sync-test-plan.md` is the manual plan; run test 15 (greek.tools isolation) after any change to `progress-store.ts`, and test 18 after any change to the study streak.
+- **The suffix ladder syncs in the payload** (#196): `ladderProgress`, one
+  `ladder_progress` row per rung, `mergeLadderProgress` (the larger count) in
+  `mergeProgress`. Optional in a `PUT` like the streak. `writeLocalProgress`
+  merges it with what is stored again rather than overwriting, so a clean
+  write checked while a pull was in flight survives the pull.
+- **The attempt log syncs on `/api/attempts`, not in the payload** — see "The
+  attempt log syncs on its own" in the repo CLAUDE.md for why and for the
+  cursor rules. Server-side, `appendAttempts` inserts each chunk of 250 as
+  **one statement over `json_each`**, not a multi-row `VALUES` list: at 8
+  columns that would be 12 rows a statement, some 84 statements for one
+  1,000-attempt request against D1's per-request query budget. On
+  better-sqlite3 `db.run` executes when it is built, unlike the query
+  builders, so build statements in the order they run.
+- **"Start fresh" clears everything it would otherwise upload**, through
+  `clearLocalProgress()`. It used to remove the SRS and stats keys by hand,
+  which left the Today streak (#184) for the next push to upload; a new synced
+  key goes in that function's list.
+
+Cross-device behaviour can't be covered by unit tests. `docs/sync-test-plan.md` is the manual plan; run test 15 (greek.tools isolation) after any change to `progress-store.ts`, test 18 after any change to the study streak, and test 19 after any change to the ladder or attempt-log sync.
 
 ### Textbook chapter decks
 

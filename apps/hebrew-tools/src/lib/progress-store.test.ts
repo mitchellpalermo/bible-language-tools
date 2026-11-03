@@ -4,12 +4,28 @@
 // The database is shared with greek-tools, so several of these tests exist
 // specifically to prove hebrew writes never touch greek rows.
 
-import { srsCards, studyStats as studyStatsTable, syncState, users } from '@tools/db/schema';
+import {
+  attempts as attemptsTable,
+  ladderProgress as ladderProgressTable,
+  srsCards,
+  studyStats as studyStatsTable,
+  syncState,
+  users,
+} from '@tools/db/schema';
 import { createTestDb, createTestDbAt } from '@tools/db/test-utils';
+import { type Attempt, MAX_ATTEMPTS } from '@tools/shared/attempt-log';
 import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { SRSCard, StudyStats } from '../data/srs';
-import { deleteProgress, getProgress, type ProgressDb, putProgress } from './progress-store';
+import {
+  ATTEMPT_INSERT_CHUNK,
+  appendAttempts,
+  deleteProgress,
+  getAttempts,
+  getProgress,
+  type ProgressDb,
+  putProgress,
+} from './progress-store';
 
 const USER = 'user-1';
 const OTHER_USER = 'user-2';
@@ -304,6 +320,20 @@ describe('greek-tools isolation', () => {
 });
 
 describe('deleteProgress', () => {
+  it('clears the attempt log and the ladder too, or the next pull would bring them back', async () => {
+    await putProgress(db, USER, {
+      srsStore: {},
+      studyStats: stats(),
+      ladderProgress: { r1: 2 },
+    });
+    await appendAttempts(db, USER, [attempt('a', 1)]);
+
+    await deleteProgress(db, USER);
+
+    expect(await getAttempts(db, USER)).toEqual([]);
+    expect(await db.select().from(ladderProgressTable)).toEqual([]);
+  });
+
   it('clears cards, stats, and sync state', async () => {
     await putProgress(db, USER, { srsStore: { מֶלֶךְ: card() }, studyStats: stats() });
 
@@ -442,5 +472,188 @@ describe('an account synced before migration 0003', () => {
     expect(
       sqlite.prepare("SELECT word_key, interval FROM srs_cards WHERE language = 'greek'").all(),
     ).toEqual([{ word_key: 'λόγος', interval: 15 }]);
+  });
+});
+
+function attempt(id: string, at: number, overrides: Partial<Attempt> = {}): Attempt {
+  return { id, concept: 'paradigm/qal-qatal-strong:3ms', correct: true, at, ...overrides };
+}
+
+describe('ladder progress', () => {
+  it('reads back empty when it was never sent', async () => {
+    await putProgress(db, USER, { srsStore: {}, studyStats: stats() });
+    expect((await getProgress(db, USER))?.ladderProgress).toEqual({});
+  });
+
+  it('round-trips, one row per rung', async () => {
+    const ladderProgress = { 'suffix-bare-type1': 2, 'suffix-prep-le': 1 };
+    await putProgress(db, USER, { srsStore: {}, studyStats: stats(), ladderProgress });
+    expect((await getProgress(db, USER))?.ladderProgress).toEqual(ladderProgress);
+    expect(await db.select().from(ladderProgressTable)).toHaveLength(2);
+  });
+
+  it('round-trips more rungs than one insert chunk', async () => {
+    const ladderProgress = Object.fromEntries(Array.from({ length: 60 }, (_, i) => [`r${i}`, i]));
+    await putProgress(db, USER, { srsStore: {}, studyStats: stats(), ladderProgress });
+    expect((await getProgress(db, USER))?.ladderProgress).toEqual(ladderProgress);
+  });
+
+  it('is not rolled back by a stale client, and never closes a rung', async () => {
+    await putProgress(db, USER, {
+      srsStore: {},
+      studyStats: stats(),
+      ladderProgress: { r1: 3, r2: 2 },
+    });
+    // A device that saw less, and one from before the ladder synced.
+    await putProgress(db, USER, {
+      srsStore: {},
+      studyStats: stats(),
+      ladderProgress: { r1: 1, r3: 1 },
+    });
+    await putProgress(db, USER, { srsStore: {}, studyStats: stats() });
+    expect((await getProgress(db, USER))?.ladderProgress).toEqual({ r1: 3, r2: 2, r3: 1 });
+  });
+
+  it('keeps each user’s and each app’s rungs apart', async () => {
+    (db as never as ReturnType<typeof createTestDb>)
+      .insert(ladderProgressTable)
+      .values({ userId: USER, language: 'greek', rungId: 'r1', cleanWrites: 9 })
+      .run();
+    await putProgress(db, OTHER_USER, {
+      srsStore: {},
+      studyStats: stats(),
+      ladderProgress: { r1: 5 },
+    });
+    await putProgress(db, USER, { srsStore: {}, studyStats: stats(), ladderProgress: { r1: 1 } });
+    await deleteProgress(db, USER);
+
+    expect(await getProgress(db, OTHER_USER)).toMatchObject({ ladderProgress: { r1: 5 } });
+    expect(
+      await db.select().from(ladderProgressTable).where(eq(ladderProgressTable.language, 'greek')),
+    ).toEqual([{ userId: USER, language: 'greek', rungId: 'r1', cleanWrites: 9 }]);
+  });
+});
+
+describe('the attempt log', () => {
+  it('is empty for an account that has none', async () => {
+    expect(await getAttempts(db, USER)).toEqual([]);
+  });
+
+  it('round-trips every field, and leaves absent ones absent', async () => {
+    const full = attempt('a', 1, { correct: false, ms: 1840, confidence: 2 });
+    const bare = attempt('b', 2);
+    await appendAttempts(db, USER, [full, bare]);
+    expect(await getAttempts(db, USER)).toEqual([full, bare]);
+  });
+
+  it('reads back oldest first, by time and then id', async () => {
+    await appendAttempts(db, USER, [attempt('c', 5), attempt('a', 9), attempt('b', 5)]);
+    expect((await getAttempts(db, USER)).map((a) => a.id)).toEqual(['b', 'c', 'a']);
+  });
+
+  it('ignores an id it already has, so a push may send one twice', async () => {
+    await appendAttempts(db, USER, [attempt('a', 1)]);
+    await appendAttempts(db, USER, [attempt('a', 1, { correct: false }), attempt('b', 2)]);
+    expect(await getAttempts(db, USER)).toEqual([attempt('a', 1), attempt('b', 2)]);
+  });
+
+  it('writes more than one insert chunk in a request', async () => {
+    const many = Array.from({ length: ATTEMPT_INSERT_CHUNK * 2 + 1 }, (_, i) =>
+      attempt(`a${i}`, i),
+    );
+    await appendAttempts(db, USER, many);
+    expect(await getAttempts(db, USER)).toHaveLength(many.length);
+  });
+
+  it('keeps only the newest MAX_ATTEMPTS, the window every device keeps', async () => {
+    const many = Array.from({ length: MAX_ATTEMPTS }, (_, i) => attempt(`a${i}`, 100 + i));
+    await appendAttempts(db, USER, many);
+    await appendAttempts(db, USER, [attempt('older', 1), attempt('newer', 1e9)]);
+
+    const kept = await getAttempts(db, USER);
+    expect(kept).toHaveLength(MAX_ATTEMPTS);
+    expect(kept[0].id).toBe('a1');
+    expect(kept.at(-1)?.id).toBe('newer');
+    expect(kept.some((a) => a.id === 'older')).toBe(false);
+  });
+
+  it('does nothing for an empty request', async () => {
+    await expect(appendAttempts(db, USER, [])).resolves.toBeUndefined();
+  });
+
+  it('never prunes, reads or writes another user’s or greek.tools’ attempts', async () => {
+    (db as never as ReturnType<typeof createTestDb>)
+      .insert(attemptsTable)
+      .values({ userId: USER, language: 'greek', id: 'g', concept: 'g', correct: true, at: 0 })
+      .run();
+    await appendAttempts(db, OTHER_USER, [attempt('theirs', 0)]);
+    const many = Array.from({ length: MAX_ATTEMPTS + 1 }, (_, i) => attempt(`a${i}`, 100 + i));
+    await appendAttempts(db, USER, many);
+
+    expect(await getAttempts(db, OTHER_USER)).toEqual([attempt('theirs', 0)]);
+    expect((await getAttempts(db, USER)).some((a) => a.id === 'g')).toBe(false);
+    const greek = await db.select().from(attemptsTable).where(eq(attemptsTable.language, 'greek'));
+    expect(greek).toHaveLength(1);
+
+    await deleteProgress(db, USER);
+    expect(await db.select().from(attemptsTable)).toHaveLength(2);
+  });
+
+  it('is not part of the progress payload', async () => {
+    await appendAttempts(db, USER, [attempt('a', 1)]);
+    await putProgress(db, USER, { srsStore: {}, studyStats: stats() });
+    expect(await getProgress(db, USER)).not.toHaveProperty('attempts');
+    expect(await getAttempts(db, USER)).toHaveLength(1);
+  });
+});
+
+describe('an account synced before migration 0004', () => {
+  function migratedAccount() {
+    const { sqlite, db: oldDb, migrateRest } = createTestDbAt('0003');
+    sqlite
+      .prepare("INSERT INTO users (id, email, created_at) VALUES ('u', 'u@example.com', 0)")
+      .run();
+    sqlite
+      .prepare(
+        "INSERT INTO srs_cards (user_id, language, word_key, interval, repetition, ease_factor, due_date, last_reviewed) VALUES ('u', 'hebrew', 'מֶלֶךְ', 6, 2, 2.36, '2026-11-08', '2026-11-02')",
+      )
+      .run();
+    sqlite
+      .prepare(
+        "INSERT INTO study_stats (user_id, language, streak, last_streak_date, cards_studied_today, last_study_date, total_reviewed, total_correct, study_streak, last_session_date) VALUES ('u', 'hebrew', 4, '2026-11-02', 10, '2026-11-02', 380, 301, 3, '2026-11-02')",
+      )
+      .run();
+    sqlite
+      .prepare(
+        "INSERT INTO sync_state (user_id, language, synced_at) VALUES ('u', 'hebrew', '2026-11-02T09:00:00.000Z')",
+      )
+      .run();
+    migrateRest();
+    return oldDb as unknown as ProgressDb;
+  }
+
+  it('reads back with an empty ladder and an empty attempt log', async () => {
+    const migrated = migratedAccount();
+    const progress = await getProgress(migrated, 'u');
+    expect(progress?.ladderProgress).toEqual({});
+    expect(progress?.studyStreak).toEqual({ streak: 3, lastSessionDate: '2026-11-02' });
+    expect(Object.keys(progress?.srsStore ?? {})).toEqual(['מֶלֶךְ']);
+    expect(await getAttempts(migrated, 'u')).toEqual([]);
+  });
+
+  it('takes the first ladder and attempts and keeps everything else', async () => {
+    const migrated = migratedAccount();
+    await putProgress(migrated, 'u', {
+      srsStore: {},
+      studyStats: stats({ totalReviewed: 1 }),
+      ladderProgress: { r1: 2 },
+    });
+    await appendAttempts(migrated, 'u', [attempt('a', 1)]);
+    const progress = await getProgress(migrated, 'u');
+    expect(progress?.ladderProgress).toEqual({ r1: 2 });
+    expect(progress?.studyStats.totalReviewed).toBe(380);
+    expect(progress?.studyStreak).toEqual({ streak: 3, lastSessionDate: '2026-11-02' });
+    expect(Object.keys(progress?.srsStore ?? {})).toEqual(['מֶלֶךְ']);
+    expect(await getAttempts(migrated, 'u')).toEqual([attempt('a', 1)]);
   });
 });

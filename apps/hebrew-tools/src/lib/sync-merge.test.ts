@@ -169,3 +169,20 @@ describe('mergeProgress and the Today study streak', () => {
     expect(mergeProgress(base, base).studyStreak).toEqual({ streak: 0, lastSessionDate: '' });
   });
 });
+
+describe('mergeProgress and the suffix ladder', () => {
+  const base = { srsStore: {}, studyStats: stats() };
+
+  it('keeps the larger count per rung, symmetrically', () => {
+    const a = { ...base, ladderProgress: { r1: 2, r2: 1 } };
+    const b = { ...base, ladderProgress: { r1: 1, r3: 1 } };
+    expect(mergeProgress(a, b).ladderProgress).toEqual({ r1: 2, r2: 1, r3: 1 });
+    expect(mergeProgress(b, a)).toEqual(mergeProgress(a, b));
+  });
+
+  it('treats a snapshot without one as a fresh ladder', () => {
+    const b = { ...base, ladderProgress: { r1: 2 } };
+    expect(mergeProgress(base, b).ladderProgress).toEqual({ r1: 2 });
+    expect(mergeProgress(base, base).ladderProgress).toEqual({});
+  });
+});

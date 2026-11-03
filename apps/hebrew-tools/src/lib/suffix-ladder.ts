@@ -1,7 +1,7 @@
 // This app's binding of `@tools/shared/ladder` for the pronominal suffix
 // ladder (#186). The rungs are `src/data/suffix-ladder.ts`; the unlock rule is
-// the shared module's. Progress is local only, like the attempt log, and is
-// kept apart from greek.tools' by its key.
+// the shared module's. Progress is kept apart from greek.tools' by its key, and
+// synced when signed in, through `sync-manager.ts`.
 
 import {
   CLEAN_WRITES_TO_UNLOCK,

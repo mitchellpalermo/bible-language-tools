@@ -48,15 +48,13 @@ if (!user) {
 
 <script>
   import {
+    clearLocalProgress,
     deleteServerProgress,
     hasImportBeenOffered,
     hasLocalProgress,
     markImportOffered,
     push,
   } from '../../lib/sync-manager';
-
-  const SRS_KEY = 'hebrew-tools-srs-v1';
-  const STATS_KEY = 'hebrew-tools-stats-v1';
 
   const userId = document.querySelector<HTMLElement>('[data-welcome]')?.dataset.userId ?? '';
 
@@ -79,9 +77,10 @@ if (!user) {
     document.getElementById('start-fresh-button')?.addEventListener('click', async () => {
       await deleteServerProgress();
       // Clear this device's progress too — otherwise the next automatic push
-      // would re-upload exactly what the user chose not to import.
-      localStorage.removeItem(SRS_KEY);
-      localStorage.removeItem(STATS_KEY);
+      // would re-upload exactly what the user chose not to import. All of it:
+      // anything this misses, the next push uploads (the Today streak, the
+      // ladder and the attempt log each did, until they were listed).
+      clearLocalProgress();
       finish();
     });
   }
