@@ -1,3 +1,4 @@
+import type { StudyStreakData } from '@tools/shared/study-streak';
 import type { SRSCard, StudyStats } from '../data/srs';
 
 // The full study-progress snapshot exchanged with /api/progress.
@@ -9,6 +10,11 @@ import type { SRSCard, StudyStats } from '../data/srs';
 export interface ProgressPayload {
   srsStore: Record<string, SRSCard>;
   studyStats: StudyStats;
+  /**
+   * The Today session streak (#184). Optional on the way in, so a page loaded
+   * before it shipped can still push; the server always sends it back.
+   */
+  studyStreak?: StudyStreakData;
   /** ISO timestamp, server-assigned on write. Client-provided values are ignored. */
   syncedAt: string;
 }

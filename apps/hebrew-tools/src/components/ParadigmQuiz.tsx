@@ -27,6 +27,10 @@
  * - **The Suffix ladder tab is the same quiz on ordered tables** (#186). Every
  *   mode works on every rung; only a clean Full-table write counts toward the
  *   next one (`lib/suffix-ladder.ts`), and a locked rung can be opened anyway.
+ * - **Today's Session runs one table at a time through `session`** (#184).
+ *   The table and its blanks are chosen for it, so there is no select screen,
+ *   and the results end on Continue rather than Try again: the session, not
+ *   the student, decides what comes next.
  */
 
 import { LadderRungList } from '@tools/shared/components/Ladder';
@@ -91,6 +95,24 @@ type Phase =
       /** What the attempt did on the ladder, for a rung's table. */
       ladder?: LadderOutcome;
     };
+
+/** One table for Today's Session (`TodaySession.tsx`) to put in front of the student. */
+export interface ParadigmSession {
+  table: TableModel;
+  /** Cell ids to blank. Every other cell is shown filled in. */
+  blankIds: readonly string[];
+  /** Forms asked before they are due: graded, but never promoted (`recordAttempt`). */
+  practice?: boolean;
+  /** Every blank form, once checked. */
+  onChecked: (outcomes: { id: string; correct: boolean }[]) => void;
+  onContinue: () => void;
+}
+
+function sessionPhase({ table, blankIds }: ParadigmSession): Phase {
+  const ids = new Set(blankIds);
+  const cells = getQuizCells(table).map((c) => ({ ...c, isBlank: !!c.id && ids.has(c.id) }));
+  return { name: 'quiz', table, cells, mode: 'due' };
+}
 
 /** What the keypad needs from whichever cell it is typing into. */
 interface CellHandle {
@@ -689,9 +711,11 @@ function Legend() {
 const EMPTY_STORE: Record<string, SRSCard> = {};
 const EMPTY_LADDER: LadderProgress = {};
 
-function ParadigmQuizInner() {
+function ParadigmQuizInner({ session }: { session?: ParadigmSession }) {
   const tables = useMemo(() => buildTableModels(), []);
-  const [phase, setPhase] = useState<Phase>({ name: 'select' });
+  const [phase, setPhase] = useState<Phase>(() =>
+    session ? sessionPhase(session) : { name: 'select' },
+  );
   const [inputs, setInputs] = useState<InputMap>({});
   const [peeking, setPeeking] = useState(false);
   // Read after hydration, and saved by the setter rather than by an effect:
@@ -803,7 +827,7 @@ function ParadigmQuizInner() {
       loadSRSStore(),
       loadStats(),
       phase.cells.filter((c) => c.isBlank).map((c) => ({ id: c.id, result: results[c.index] })),
-      { strict, peeked },
+      { strict, peeked, practice: session?.practice },
     );
     saveSRSStore(outcome.store);
     saveStats(outcome.stats);
@@ -854,6 +878,14 @@ function ParadigmQuizInner() {
       peeked,
       ladder: ladderResult,
     });
+    session?.onChecked(
+      phase.cells
+        .filter((c) => c.isBlank && c.id)
+        .map((c) => ({
+          id: c.id as string,
+          correct: countsAsCorrect(results[c.index], strict),
+        })),
+    );
   };
 
   const backToSelect = () => {
@@ -892,7 +924,8 @@ function ParadigmQuizInner() {
           </h2>
           <div className="flex items-center gap-3 flex-wrap">
             <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-              {MODE_LABELS[phase.mode].name} — {blanks} blank{blanks === 1 ? '' : 's'}
+              {session ? 'Today' : MODE_LABELS[phase.mode].name} — {blanks} blank
+              {blanks === 1 ? '' : 's'}
             </span>
             <ToggleSwitch
               checked={strict}
@@ -902,9 +935,15 @@ function ParadigmQuizInner() {
             />
           </div>
         </div>
-        <button type="button" onClick={backToSelect} className="text-sm underline text-text-muted">
-          ← Choose another table
-        </button>
+        {!session && (
+          <button
+            type="button"
+            onClick={backToSelect}
+            className="text-sm underline text-text-muted"
+          >
+            ← Choose another table
+          </button>
+        )}
       </div>
 
       {phase.name === 'results' && (
@@ -1012,6 +1051,14 @@ function ParadigmQuizInner() {
             </p>
           )}
         </>
+      ) : session ? (
+        <button
+          type="button"
+          onClick={session.onContinue}
+          className="w-full px-6 py-2.5 rounded-xl font-bold text-sm bg-primary text-white"
+        >
+          Continue
+        </button>
       ) : (
         <div className="flex gap-3 flex-wrap">
           <button
@@ -1034,10 +1081,10 @@ function ParadigmQuizInner() {
   );
 }
 
-export default function ParadigmQuiz() {
+export default function ParadigmQuiz({ session }: { session?: ParadigmSession } = {}) {
   return (
     <ErrorBoundary component="ParadigmQuiz">
-      <ParadigmQuizInner />
+      <ParadigmQuizInner session={session} />
     </ErrorBoundary>
   );
 }

@@ -10,6 +10,7 @@
 
 import { loadSRSStore, loadStats, saveSRSStore, saveStats } from '../data/srs';
 import { hasAuthHint } from './auth-cookie';
+import { loadStudyStreak, saveStudyStreak } from './study-streak';
 import { mergeProgress, type ProgressSnapshot } from './sync-merge';
 import type { ProgressPayload } from './sync-types';
 
@@ -55,12 +56,14 @@ export function readLocalProgress(): ProgressSnapshot {
   return {
     srsStore: loadSRSStore(),
     studyStats: loadStats(),
+    studyStreak: loadStudyStreak(),
   };
 }
 
 export function writeLocalProgress(snapshot: ProgressSnapshot): void {
   saveSRSStore(snapshot.srsStore);
   saveStats(snapshot.studyStats);
+  if (snapshot.studyStreak) saveStudyStreak(snapshot.studyStreak);
 }
 
 /** Does this device have any study progress worth importing? */

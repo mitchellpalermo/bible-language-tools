@@ -101,6 +101,34 @@ describe('PUT validation', () => {
     expect(vi.mocked(putProgress).mock.calls[0][2]).not.toHaveProperty('syncedAt');
   });
 
+  it('passes a valid Today study streak through', async () => {
+    vi.mocked(putProgress).mockResolvedValue('server-time');
+    const studyStreak = { streak: 2, lastSessionDate: '2026-11-02' };
+
+    const response = await PUT(ctx({ srsStore: {}, studyStats: validStats, studyStreak }) as never);
+
+    expect(response.status).toBe(200);
+    expect(vi.mocked(putProgress).mock.calls[0][2].studyStreak).toEqual(studyStreak);
+  });
+
+  it('accepts a payload with no study streak, from a page loaded before it existed', async () => {
+    vi.mocked(putProgress).mockResolvedValue('server-time');
+    const response = await PUT(ctx({ srsStore: {}, studyStats: validStats }) as never);
+    expect(response.status).toBe(200);
+    expect(vi.mocked(putProgress).mock.calls[0][2].studyStreak).toBeUndefined();
+  });
+
+  it.each([
+    { streak: '2', lastSessionDate: '2026-11-02' },
+    { streak: 2, lastSessionDate: 'Monday' },
+    { streak: -1, lastSessionDate: '' },
+    null,
+  ])('rejects a malformed study streak %j with 400', async (studyStreak) => {
+    const response = await PUT(ctx({ srsStore: {}, studyStats: validStats, studyStreak }) as never);
+    expect(response.status).toBe(400);
+    expect(putProgress).not.toHaveBeenCalled();
+  });
+
   it('rejects malformed JSON with 400', async () => {
     const response = await PUT(ctx('{not json') as never);
     expect(response.status).toBe(400);

@@ -68,6 +68,9 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/step-drill` | The step-gated drill engine: `stepDrillReducer`, `isCleanPass`, and `canSkipScaffold` / `createStepDrillHistory(storageKey)` for speed mode. See "The step-gated drill" below |
 | `@tools/shared/ladder` | The paradigm ladder (#186): `rungStates`, `isCleanWrite`, `recordWrite`, `newlyUnlocked`, and `createLadderProgress(storageKey)`. See "The paradigm ladder" below |
 | `@tools/shared/attempt-log` | `createAttemptLog(storageKey)` — every checked answer, by concept, for the mastery levels (#187). Local only for now |
+| `@tools/shared/today` | Today's Session (#184): `buildTodayPlan` (fill a time budget, due before weak before new), `canStartNext` and `createActiveClock` (the budget while it runs), `summarizeSession`. See "Today's Session" below |
+| `@tools/shared/study-streak` | `createStudyStreak(storageKey)` — days with a finished Today session — and `mergeStudyStreak` for sync |
+| `@tools/shared/components/TodaySession` | `BudgetPicker` (20 / 45 / 90 minutes) and `SessionSummaryCard` (React) |
 | `@tools/shared/test/hydration` | `hydrationErrors(ui, { seed })` — test helper: server-render with storage hidden, seed, hydrate, return every mismatch React reports |
 | `@tools/shared/reset-progress` | `resetSrsProgress` and `isResetConfirmed` — erase the SRS store, this browser first, then the account copy via `DELETE`; a server failure never undoes the local reset |
 | `@tools/shared/nav` | `NavLink` type and the active-route predicates the nav renders with |
@@ -228,6 +231,47 @@ grading; the module owns the unlock rule and `components/Ladder` draws it.
   button rather than a tap on the card, so the override is deliberate.
 - **Progress is local**, stored per app by `createLadderProgress(key)`, like
   the attempt log. Syncing waits on #196's sign-in decision.
+
+### Today's Session
+
+`@tools/shared/today` builds one daily session to a time budget of 20, 45 or
+90 minutes (#184 on hebrew.tools, #197 to come on greek.tools). An app supplies
+sections of candidates — each with a tier and a time estimate — and one drill;
+the module decides what fits. Rules that are pedagogy rather than plumbing:
+
+- **Due before weak before new, across every section.** A tier is offered to
+  every section before the next tier is offered to any, and once a tier leaves
+  something out for lack of room the lower tiers get nothing. A new card in a
+  session that left a due card behind is how review piles grow.
+- **Within a tier, sections share the time** by whichever has spent least, so
+  a vocabulary backlog cannot starve the paradigms.
+- **The drill is reserved first.** It is the part of the session that is not
+  review.
+- **The plan fits the budget; the clock holds it.** Estimates are estimates,
+  so while the session runs `canStartNext` refuses the next item once the
+  budget is used, or if the item would end more than 10% past it. A started
+  item is always finished. The clock pauses while the tab is hidden.
+- **A weak item is practice, not a review.** It is not due, so answering it
+  must not move its schedule forward. Each app enforces that in its own
+  grading (hebrew.tools: weak vocabulary runs as a drill, weak forms with
+  `practice`).
+- **Only an item's first answer counts in the summary**, as in the drills.
+
+The study streak (`@tools/shared/study-streak`) is separate from the Daily
+verse streak and the flashcard streak, and it **syncs**, so it follows the
+rules in "Streaks, study days, and sync merges": local dates, `streak` travels
+with `lastSessionDate`, the later date wins, and the merge is symmetric. On the
+server it is two columns on `study_stats` (`study_streak`,
+`last_session_date`); greek.tools' rows take the defaults until #197.
+
+**Every migration is tested against data written before it.** The database is
+live and shared by both apps, so `packages/db/src/migrations.test.ts` builds it
+at the previous schema with `createTestDbAt('<previous>')` from
+`@tools/db/test-utils`, fills every table for both languages, runs
+`migrateRest()`, and checks that no existing row changed. A new migration adds
+its own `describe` there. Both deploy workflows apply migrations *before* the
+new code ships, so a migration must also leave the previous code working: add
+columns with a constant default, never rename or drop in the same release.
 
 ### Drill modes answer Missed / Got it
 

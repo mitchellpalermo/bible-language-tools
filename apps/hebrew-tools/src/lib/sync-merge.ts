@@ -11,6 +11,11 @@
 // @tools/shared/sync-merge and are re-exported here.
 
 import type { SRSCard, StudyStats } from '@tools/shared/srs';
+import {
+  emptyStudyStreak,
+  mergeStudyStreak,
+  type StudyStreakData,
+} from '@tools/shared/study-streak';
 import { mergeSRSStores, mergeStudyStats } from '@tools/shared/sync-merge';
 
 export { mergeSRSStores, mergeStudyStats };
@@ -18,11 +23,18 @@ export { mergeSRSStores, mergeStudyStats };
 export interface ProgressSnapshot {
   srsStore: Record<string, SRSCard>;
   studyStats: StudyStats;
+  /** Absent from a snapshot taken before the Today session shipped. */
+  studyStreak?: StudyStreakData;
 }
 
 export function mergeProgress(a: ProgressSnapshot, b: ProgressSnapshot): ProgressSnapshot {
   return {
     srsStore: mergeSRSStores(a.srsStore, b.srsStore),
     studyStats: mergeStudyStats(a.studyStats, b.studyStats),
+    // An absent streak is "never studied", which loses to any real one.
+    studyStreak: mergeStudyStreak(
+      a.studyStreak ?? emptyStudyStreak(),
+      b.studyStreak ?? emptyStudyStreak(),
+    ),
   };
 }

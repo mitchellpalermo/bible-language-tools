@@ -151,7 +151,7 @@ The Accent-Shift Trainer spends a fifth, `accent:<item id>` in `src/lib/accent-s
 The confusable decks deliberately get no prefix of their own — they drill the same letters the alphabet deck does, so grading ד in one must move the card the other sees.
 - **Deck selection is persisted separately from the SRS store** (`hebrew-tools-deck-v1`, `src/lib/deck-selection.ts`) and is never synced. It decides which due cards you see, not what is due, so it stays local to the browser.
 - **What the card front shows is persisted the same way** (`hebrew-tools-flashcard-display-v1`, `src/lib/flashcard-settings.ts`, over `@tools/shared/flashcard-settings`) and is likewise never synced. Today it holds one boolean: whether the part of speech appears on the front of a flashcard, which defaults to off. See the repo CLAUDE.md under "What the card front gives away".
-- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`, `hebrew-tools-reader-prefs`, `hebrew-tools-daily-v1`, `hebrew-tools-accent-scaffold-v1` (speed mode), `hebrew-tools-attempts-v1` (attempt log, not synced), `hebrew-tools-suffix-ladder-v1` (suffix ladder progress, not synced, kept by the account reset). There is still no auth or sync in this app — **all study progress is per-browser only.** The D1 plumbing exists (see below), but nothing reads or writes it yet.
+- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`, `hebrew-tools-reader-prefs`, `hebrew-tools-daily-v1`, `hebrew-tools-accent-scaffold-v1` (speed mode), `hebrew-tools-attempts-v1` (attempt log, not synced), `hebrew-tools-suffix-ladder-v1` (suffix ladder progress, not synced, kept by the account reset), `hebrew-tools-study-streak-v1` (the Today session streak, **synced**, kept by the account reset), `hebrew-tools-today-budget-v1` (the last time budget picked, not synced). Signed-in students sync the SRS store, the stats and the study streak (see "Study sync"); everything else on this list is per-browser.
 
 ### OSHB data pipeline (issue #75)
 
@@ -656,7 +656,16 @@ Things that will bite if changed carelessly:
   - **Stats survive on both sides because the reset pushes straight after the delete.** `deleteProgress` removes `study_stats` and `sync_state` with the cards, while the client keeps its streak and accuracy; `clearServerSrs` then calls `push()`, which writes them back (with `sync_state` gone it is a plain insert, and an empty store adds no cards). A failed push leaves the gap until the next session-end push, and does not change the reset's outcome.
   - **Other devices are not reset.** A device still holding the old cards pushes them on its next session end, and the merge keeps them. The confirmation says so; there is no tombstone to stop it.
 
-Cross-device behaviour can't be covered by unit tests. `docs/sync-test-plan.md` is the manual plan; run test 15 (greek.tools isolation) after any change to `progress-store.ts`.
+- **The Today study streak syncs beside the stats** (#184). It is
+  `studyStreak` in the payload, two columns on the `study_stats` row
+  (`study_streak`, `last_session_date`), and `mergeStudyStreak` in
+  `mergeProgress`: the later day wins and brings its own streak. It is
+  **optional in a `PUT`**, because a page loaded before it shipped still
+  pushes; an absent streak merges as "never studied" and cannot overwrite a
+  real one. A reset's `DELETE` takes it with the stats and the push straight
+  after puts it back, so the reset keeps it.
+
+Cross-device behaviour can't be covered by unit tests. `docs/sync-test-plan.md` is the manual plan; run test 15 (greek.tools isolation) after any change to `progress-store.ts`, and test 18 after any change to the study streak.
 
 ### Textbook chapter decks
 
@@ -953,6 +962,54 @@ Things that will bite if changed carelessly:
   under 3fp until #186.
 - **Every unaided paradigm answer is logged** to the attempt log as
   `paradigm/<cellId>`, ladder or not. A peeked attempt logs nothing.
+
+### Today's Session (issue #184)
+
+`/today` runs one session sized to a time budget: due vocabulary, then due
+paradigm forms, then one drill, ending on a summary of what was reviewed,
+missed and is due tomorrow. `/study` leads with it — each budget there is a
+link to `/today?start=<minutes>`, so a session is one tap away — and it is the
+first child under Study in the nav. The plan and the clock are
+`@tools/shared/today` (see the repo CLAUDE.md, "Today's Session").
+
+| File | Role |
+|---|---|
+| `src/lib/today.ts` | Where due, weak and new come from here; the drill rotation; estimates; `dueTomorrow` |
+| `src/lib/study-streak.ts` | The streak's binding (`hebrew-tools-study-streak-v1`) |
+| `src/components/TodaySession.tsx` | The page: plan preview, the run, the summary |
+| `src/components/VocabCard.tsx` | The flashcard face, shared with `/flashcards` |
+
+Things that will bite if changed carelessly:
+
+- **Every part is the page it comes from, in a session mode.** Vocabulary is
+  `useFlashcardSession` over `VocabCard`; forms and the ladder are
+  `ParadigmQuiz`'s `session` prop; Accent Shift is `AccentTrainer`'s. The
+  grading, scheduling and attempt log are theirs and unchanged — do not give
+  Today its own.
+- **Due work ignores the deck choice; new work follows it.** A due card is
+  due whichever chapter /flashcards is set to. New words come from that
+  selection, most frequent first on the whole vocabulary.
+- **Weak items never promote.** Weak vocabulary runs as a drill (Missed / Got
+  it, no SRS write); weak forms and the mixed review are graded with
+  `recordAttempt`'s `practice`, which demotes on a miss and otherwise leaves
+  the card alone. Recalling something before it is due is not the spaced
+  recall its interval assumes.
+- **New forms come only from tables the student has started.** The app has
+  no way to know which tables the course has reached.
+- **A form is asked in its narrowest table** (`formHomes`): its own verb's
+  table rather than the summary beside the other classes.
+- **The drill rotates by local day**: Accent Shift, the suffix ladder (the
+  highest open rung, as a Full-table write so it counts toward the next), then
+  a mixed review of learned forms. A drill with nothing to offer — mixed review
+  before any form is learned — passes to the next.
+- **The estimates are first guesses** (`SECONDS`): 10 seconds a card, 15 a
+  form, 90 an accent item. They decide the plan; the clock decides the
+  session, so a wrong estimate ends a session early or on time, never 10%
+  late on a card already started. #190 will measure each student's pace.
+- **New items are capped per day** (`MAX_NEW`), so a long session does not
+  pile up tomorrow's reviews.
+- **The streak counts a session once anything was answered.** Ending early
+  or running out of time still counts; opening the page does not.
 
 ### Accent-Shift Trainer (issue #185)
 

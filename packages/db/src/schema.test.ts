@@ -51,7 +51,9 @@ describe('schema smoke tests', () => {
 
     const [result] = await db.select().from(studyStats).where(eq(studyStats.userId, TEST_USER.id));
 
-    expect(result).toEqual(stats);
+    // A row written without the Today streak (greek.tools, until #197) takes
+    // its defaults.
+    expect(result).toEqual({ ...stats, studyStreak: 0, lastSessionDate: '' });
   });
 
   it('inserts and reads back a custom_deck row', async () => {

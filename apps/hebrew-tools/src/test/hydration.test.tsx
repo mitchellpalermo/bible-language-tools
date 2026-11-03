@@ -24,6 +24,7 @@ import HebrewReader from '../components/HebrewReader';
 import ParadigmQuiz from '../components/ParadigmQuiz';
 import ResetProgress from '../components/ResetProgress';
 import SyncControls from '../components/SyncControls';
+import TodaySession from '../components/TodaySession';
 import Writing from '../components/Writing';
 import { markReadToday } from '../data/dailyVerses';
 import { newCard, nextSRS, recordReview, saveSRSStore, saveStats } from '../data/srs';
@@ -35,8 +36,10 @@ import { saveFlashcardSettings } from '../lib/flashcard-settings';
 import { buildTableModels, getQuizCells } from '../lib/paradigm-quiz';
 import { paradigmCardKey } from '../lib/paradigm-srs';
 import { saveQuizSettings } from '../lib/quiz-settings';
+import { markSessionComplete } from '../lib/study-streak';
 import { saveLadderProgress } from '../lib/suffix-ladder';
 import { setLastSyncedAt } from '../lib/sync-manager';
+import { saveBudget } from '../lib/today';
 
 vi.mock('posthog-js', () => ({
   default: { capture: vi.fn(), captureException: vi.fn() },
@@ -76,6 +79,10 @@ function seedReturningStudent() {
   saveSelection({ deck: 'garrett-derouchie', chapters: [2, 3], categories: ['core'] });
   setLastSyncedAt(new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString());
   markReadToday();
+  // A Today session finished and a longer budget picked, so the streak line
+  // and the picker both differ from the server's defaults.
+  markSessionComplete();
+  saveBudget(45);
   // Enough scaffold history to unlock speed mode, which changes the step row.
   localStorage.setItem(SCAFFOLD_HISTORY_KEY, JSON.stringify(Array(20).fill(true)));
 }
@@ -91,6 +98,7 @@ const ISLANDS: Record<string, () => ReactElement> = {
   ParadigmQuiz: () => <ParadigmQuiz />,
   ResetProgress: () => <ResetProgress signedIn />,
   SyncControls: () => <SyncControls />,
+  TodaySession: () => <TodaySession />,
   Writing: () => <Writing />,
 };
 

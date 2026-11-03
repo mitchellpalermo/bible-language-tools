@@ -1,4 +1,5 @@
 import { createDb } from '@tools/db';
+import { parseStudyStreak } from '@tools/shared/study-streak';
 import type { APIRoute } from 'astro';
 import { deleteProgress, getProgress, putProgress } from '../../lib/progress-store';
 import type { ProgressPayload } from '../../lib/sync-types';
@@ -35,11 +36,21 @@ const STATS_STRING_FIELDS = ['lastStreakDate', 'lastStudyDate'] as const;
  * user-controlled and lands in typed columns, so a wrong type here is a 500 at
  * best. Returns null on any violation; the caller turns that into a 400.
  */
-function validatePayload(body: unknown): Pick<ProgressPayload, 'srsStore' | 'studyStats'> | null {
+function validatePayload(
+  body: unknown,
+): Pick<ProgressPayload, 'srsStore' | 'studyStats' | 'studyStreak'> | null {
   if (!isRecord(body)) return null;
 
   const { srsStore, studyStats } = body;
   if (!isRecord(srsStore)) return null;
+
+  // Optional: a page loaded before the Today session shipped does not send it.
+  let studyStreak: ProgressPayload['studyStreak'];
+  if (body.studyStreak !== undefined) {
+    const parsed = parseStudyStreak(body.studyStreak);
+    if (!parsed) return null;
+    studyStreak = parsed;
+  }
 
   if (!isRecord(studyStats)) return null;
   if (STATS_NUMBER_FIELDS.some((f) => typeof studyStats[f] !== 'number')) return null;
@@ -61,7 +72,10 @@ function validatePayload(body: unknown): Pick<ProgressPayload, 'srsStore' | 'stu
   // Every field above has been checked at runtime; the cast is what carries
   // that knowledge into the type system. Widen through `unknown` because the
   // validated records are structurally opaque to TypeScript.
-  return { srsStore, studyStats } as unknown as Pick<ProgressPayload, 'srsStore' | 'studyStats'>;
+  return { srsStore, studyStats, studyStreak } as unknown as Pick<
+    ProgressPayload,
+    'srsStore' | 'studyStats' | 'studyStreak'
+  >;
 }
 
 export const GET: APIRoute = async ({ locals }) => {
