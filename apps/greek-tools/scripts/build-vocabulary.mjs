@@ -12,6 +12,7 @@
 import { access, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { fetchWithRetry } from '@tools/shared/fetch-retry';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const MORPHGNT_DIR = join(__dirname, '..', 'public', 'data', 'morphgnt');
@@ -199,7 +200,7 @@ function derivePOS(posCountEntry) {
  * Returns a Map from the primary lemma form (first word of <orth>) → brief gloss.
  */
 async function fetchDodsonGlosses() {
-  const res = await fetch(DODSON_URL);
+  const res = await fetchWithRetry(DODSON_URL);
   if (!res.ok) {
     throw new Error(`HTTP ${res.status} fetching Dodson XML: ${DODSON_URL}`);
   }
@@ -348,6 +349,7 @@ async function main() {
   await writeFile(OUT_FILE, source, 'utf-8');
 }
 
-main().catch((_err) => {
+main().catch((err) => {
+  process.stderr.write(`vocabulary build failed: ${err.message}\n`);
   process.exit(1);
 });
