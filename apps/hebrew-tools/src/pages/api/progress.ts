@@ -1,4 +1,5 @@
 import { createDb } from '@tools/db';
+import { parseDeckList } from '@tools/shared/custom-decks';
 import { isLadderProgress } from '@tools/shared/ladder';
 import { parseStudyStreak } from '@tools/shared/study-streak';
 import type { APIRoute } from 'astro';
@@ -43,7 +44,10 @@ const STATS_STRING_FIELDS = ['lastStreakDate', 'lastStudyDate'] as const;
  */
 function validatePayload(
   body: unknown,
-): Pick<ProgressPayload, 'srsStore' | 'studyStats' | 'studyStreak' | 'ladderProgress'> | null {
+): Pick<
+  ProgressPayload,
+  'srsStore' | 'studyStats' | 'studyStreak' | 'ladderProgress' | 'customDecks'
+> | null {
   if (!isRecord(body)) return null;
 
   const { srsStore, studyStats } = body;
@@ -66,6 +70,15 @@ function validatePayload(
     if (rungs.some((id) => id.length === 0 || id.length > MAX_RUNG_ID_LENGTH)) return null;
   }
 
+  // Optional too. All or nothing: one malformed deck rejects the request, so a
+  // partial list is never written over the account's.
+  let customDecks: ProgressPayload['customDecks'];
+  if (body.customDecks !== undefined) {
+    const parsed = parseDeckList(body.customDecks);
+    if (!parsed) return null;
+    customDecks = parsed;
+  }
+
   if (!isRecord(studyStats)) return null;
   if (STATS_NUMBER_FIELDS.some((f) => typeof studyStats[f] !== 'number')) return null;
   if (STATS_STRING_FIELDS.some((f) => typeof studyStats[f] !== 'string')) return null;
@@ -86,9 +99,9 @@ function validatePayload(
   // Every field above has been checked at runtime; the cast is what carries
   // that knowledge into the type system. Widen through `unknown` because the
   // validated records are structurally opaque to TypeScript.
-  return { srsStore, studyStats, studyStreak, ladderProgress } as unknown as Pick<
+  return { srsStore, studyStats, studyStreak, ladderProgress, customDecks } as unknown as Pick<
     ProgressPayload,
-    'srsStore' | 'studyStats' | 'studyStreak' | 'ladderProgress'
+    'srsStore' | 'studyStats' | 'studyStreak' | 'ladderProgress' | 'customDecks'
   >;
 }
 

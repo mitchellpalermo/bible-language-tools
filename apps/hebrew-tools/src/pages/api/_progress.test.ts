@@ -142,6 +142,59 @@ describe('PUT validation', () => {
     expect(vi.mocked(putProgress).mock.calls[1][2].ladderProgress).toBeUndefined();
   });
 
+  it('passes valid custom decks through, tombstones included, and accepts a payload without them', async () => {
+    vi.mocked(putProgress).mockResolvedValue('server-time');
+    const live = {
+      id: 'deck-1',
+      name: 'Genesis 1',
+      wordKeys: ['b', 'a'],
+      createdAt: '2026-11-01T00:00:00.000Z',
+      updatedAt: '2026-11-01T00:00:00.000Z',
+    };
+    const gone = {
+      ...live,
+      id: 'deck-2',
+      wordKeys: [],
+      deletedAt: '2026-11-02T00:00:00.000Z',
+    };
+
+    expect(
+      (await PUT(ctx({ srsStore: {}, studyStats: validStats, customDecks: [live, gone] }) as never))
+        .status,
+    ).toBe(200);
+    // Parsed, so the words arrive sorted.
+    expect(vi.mocked(putProgress).mock.calls[0][2].customDecks).toEqual([
+      { ...live, wordKeys: ['a', 'b'] },
+      gone,
+    ]);
+
+    expect((await PUT(ctx({ srsStore: {}, studyStats: validStats }) as never)).status).toBe(200);
+    expect(vi.mocked(putProgress).mock.calls[1][2].customDecks).toBeUndefined();
+  });
+
+  const at = '2026-11-01T00:00:00.000Z';
+  it.each([
+    ['not an array', { id: 'x' }],
+    ['a deck with no id', [{ name: 'x', wordKeys: [], createdAt: at }]],
+    [
+      'a deck with an over-long name',
+      [{ id: 'x', name: 'n'.repeat(61), wordKeys: [], createdAt: at }],
+    ],
+    ['a deck with a non-string word', [{ id: 'x', name: 'n', wordKeys: [1], createdAt: at }]],
+    ['a deck with a bad date', [{ id: 'x', name: 'n', wordKeys: [], createdAt: 'soon' }]],
+    [
+      'two decks with one id',
+      [
+        { id: 'x', name: 'n', wordKeys: [], createdAt: at },
+        { id: 'x', name: 'm', wordKeys: [], createdAt: at },
+      ],
+    ],
+  ])('rejects custom decks that are %s with 400', async (_label, customDecks) => {
+    const response = await PUT(ctx({ srsStore: {}, studyStats: validStats, customDecks }) as never);
+    expect(response.status).toBe(400);
+    expect(putProgress).not.toHaveBeenCalled();
+  });
+
   it.each([
     ['an array', []],
     ['null', null],

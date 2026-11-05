@@ -10,13 +10,19 @@
 // due; it only decides which due cards are in front of you right now, so it
 // stays local to the browser and is never synced.
 
+import { type CustomDeck, findDeck } from '@tools/shared/custom-decks';
 import { CATEGORY_IDS, TEXTBOOK_IDS, type TextbookId, type VocabCategory } from '../data/textbooks';
 
 const STORAGE_KEY = 'hebrew-tools-deck-v1';
 
 export interface DeckSelection {
-  /** `'all'` is the whole vocabulary; otherwise a textbook's chapter decks. */
-  deck: 'all' | TextbookId;
+  /**
+   * `'all'` is the whole vocabulary; `'custom'` is the student's own deck, named
+   * by `customDeckId`; otherwise a textbook's chapter decks.
+   */
+  deck: 'all' | 'custom' | TextbookId;
+  /** Which custom deck. Null unless `deck` is `'custom'`: `normalizeSelection` enforces it. */
+  customDeckId: string | null;
   /** Selected chapter numbers. Empty means every chapter — see `wordsInChapters`. */
   chapters: number[];
   /** Textbook sections to include. Never empty after `normalizeSelection`. */
@@ -25,6 +31,7 @@ export interface DeckSelection {
 
 export const DEFAULT_SELECTION: DeckSelection = {
   deck: 'all',
+  customDeckId: null,
   chapters: [],
   categories: ['core'],
 };
@@ -42,10 +49,19 @@ export function normalizeSelection(raw: unknown): DeckSelection {
   if (typeof raw !== 'object' || raw === null) return { ...DEFAULT_SELECTION };
   const input = raw as Partial<Record<keyof DeckSelection, unknown>>;
 
+  // A custom deck with no id names nothing, so it is the whole vocabulary rather
+  // than an empty deck with no visible cause.
+  const customDeckId =
+    typeof input.customDeckId === 'string' && input.customDeckId.length > 0
+      ? input.customDeckId
+      : null;
+
   const deck =
     input.deck === 'all' || TEXTBOOK_IDS.includes(input.deck as TextbookId)
       ? (input.deck as 'all' | TextbookId)
-      : DEFAULT_SELECTION.deck;
+      : input.deck === 'custom' && customDeckId !== null
+        ? 'custom'
+        : DEFAULT_SELECTION.deck;
 
   const chapters = Array.isArray(input.chapters)
     ? [...new Set(input.chapters.filter((c): c is number => Number.isInteger(c) && c > 0))].sort(
@@ -59,6 +75,7 @@ export function normalizeSelection(raw: unknown): DeckSelection {
 
   return {
     deck,
+    customDeckId: deck === 'custom' ? customDeckId : null,
     chapters,
     categories: categories.length > 0 ? categories : [...DEFAULT_SELECTION.categories],
   };
@@ -80,4 +97,16 @@ export function saveSelection(selection: DeckSelection): void {
   } catch {
     // A full or disabled localStorage must not interrupt a study session.
   }
+}
+
+/**
+ * The selection as the student can actually study it. A custom deck that has
+ * since been deleted — here, or on another device and synced — is no deck, and
+ * the selection falls back to the whole vocabulary instead of dealing nothing.
+ * The stored selection is left alone: it is corrected the next time the student
+ * picks a deck.
+ */
+export function effectiveSelection(selection: DeckSelection, decks: CustomDeck[]): DeckSelection {
+  if (selection.deck !== 'custom' || findDeck(decks, selection.customDeckId)) return selection;
+  return { ...selection, deck: 'all', customDeckId: null };
 }

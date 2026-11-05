@@ -5,6 +5,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { loadSRSStore, loadStats, newCard, normalizeKey, saveSRSStore } from '../data/srs';
 import { chapterStats, TEXTBOOKS, wordsInChapters } from '../data/textbooks';
 import { cardKey, type HebrewVocabWord, vocabulary } from '../data/vocabulary';
+import { customDeckStore, deckKey } from '../lib/custom-decks';
+import { saveSelection } from '../lib/deck-selection';
 import Flashcards, { FREQ_FILTERS, GENDER_LABELS, matchFreq } from './Flashcards';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
@@ -301,7 +303,11 @@ describe('Flashcards chapter decks', () => {
   }
 
   function openPicker(user: ReturnType<typeof userEvent.setup>) {
-    return user.click(screen.getByRole('button', { expanded: false }));
+    return user.click(
+      screen
+        .getAllByRole('button', { expanded: false })
+        .find((b) => b.hasAttribute('aria-controls')) as HTMLElement,
+    );
   }
 
   function chapterButton(chapter: number) {
@@ -769,5 +775,149 @@ describe('drill answers', () => {
       expect(screen.getByText('Session Complete')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Add 1 to SRS Review' })).toBeInTheDocument();
     });
+  });
+});
+
+// ─── Custom decks ─────────────────────────────────────────────────────────────
+
+describe('Flashcards custom decks', () => {
+  const words = vocabulary.slice(0, 5);
+  const keys = words.map(deckKey);
+
+  function studyAll(user: ReturnType<typeof userEvent.setup>) {
+    return user.click(getStudyAllButton());
+  }
+
+  it('offers to create a deck when there are none', () => {
+    renderFlashcards();
+    expect(screen.getByRole('button', { name: '+ Create deck' })).toBeTruthy();
+  });
+
+  it('builds a deck, picks it, and deals exactly its words', async () => {
+    const user = userEvent.setup();
+    renderFlashcards();
+    await user.click(screen.getByRole('button', { name: '+ Create deck' }));
+    await user.click(screen.getByRole('button', { name: 'New deck' }));
+    await user.type(screen.getByLabelText('Deck name'), 'My five');
+    await user.type(screen.getByLabelText('Find words'), words[0].gloss);
+    await user.click(screen.getByRole('button', { name: /^Add all \d+ match/ }));
+    expect(screen.getByRole('status').textContent).toMatch(/selected/);
+    await user.click(screen.getByRole('button', { name: 'Create deck' }));
+
+    expect(customDeckStore.load()).toHaveLength(1);
+    await user.click(screen.getByRole('button', { name: 'Study My five' }));
+    await studyAll(user);
+    expect(screen.getByRole('button', { name: /My five/, pressed: true })).toBeTruthy();
+    expect(screen.getByTestId('card-progress').textContent).toMatch(/^1\/\d+$/);
+  });
+
+  it('deals the words of a stored selection, and not the rest of the vocabulary', async () => {
+    const user = userEvent.setup();
+    const deck = customDeckStore.create('Five', keys);
+    saveSelection({ deck: 'custom', customDeckId: deck.id, chapters: [], categories: ['core'] });
+    renderFlashcards();
+    await studyAll(user);
+    const total = Number(screen.getByTestId('card-progress').textContent?.split('/')[1]);
+    expect(total).toBe(wordsInDeckCount(keys));
+    expect(screen.getByText(/\d+ words · Five/)).toBeTruthy();
+    // The frequency bands do not apply to a custom deck.
+    expect(screen.queryByRole('button', { name: /^2000\+/ })).toBeNull();
+  });
+
+  function wordsInDeckCount(deckKeys: string[]) {
+    const set = new Set(deckKeys);
+    return vocabulary.filter((w) => set.has(deckKey(w))).length;
+  }
+
+  it('falls back to the whole vocabulary when the picked deck is gone', () => {
+    saveSelection({
+      deck: 'custom',
+      customDeckId: 'deleted-elsewhere',
+      chapters: [],
+      categories: ['core'],
+    });
+    renderFlashcards();
+    // `normalizeSelection` accepts the id; the deck simply is not there.
+    expect(screen.getByRole('button', { name: /All vocabulary/, pressed: true })).toBeTruthy();
+  });
+
+  it('keeps the session when a deck is renamed, and deals a new one when its words change', async () => {
+    const user = userEvent.setup();
+    const deck = customDeckStore.create('Five', keys);
+    saveSelection({ deck: 'custom', customDeckId: deck.id, chapters: [], categories: ['core'] });
+    renderFlashcards();
+    await studyAll(user);
+    await user.click(getCard());
+    await user.click(screen.getByRole('button', { name: /^got it/i }));
+    expect(screen.getByTestId('card-progress').textContent).toMatch(/^2\//);
+
+    // Rename: same words, so the session carries on.
+    await user.click(screen.getByRole('button', { name: 'Manage decks' }));
+    await user.click(screen.getByRole('button', { name: 'Edit Five' }));
+    await user.clear(screen.getByLabelText('Deck name'));
+    await user.type(screen.getByLabelText('Deck name'), 'Renamed');
+    await user.click(screen.getByRole('button', { name: 'Save changes' }));
+    expect(screen.getByRole('button', { name: /^Renamed \(/ })).toBeTruthy();
+    expect(screen.getByTestId('card-progress').textContent).toMatch(/^2\//);
+
+    // Change a word: a new session.
+    await user.click(screen.getByRole('button', { name: 'Edit Renamed' }));
+    await user.click(
+      screen.getAllByRole('checkbox').filter((c) => (c as HTMLInputElement).checked)[0],
+    );
+    await user.click(screen.getByRole('button', { name: 'Save changes' }));
+    expect(screen.getByTestId('card-progress').textContent).toMatch(/^1\//);
+  });
+
+  it('deleting the picked deck returns to the whole vocabulary', async () => {
+    const user = userEvent.setup();
+    const deck = customDeckStore.create('Five', keys);
+    saveSelection({ deck: 'custom', customDeckId: deck.id, chapters: [], categories: ['core'] });
+    renderFlashcards();
+    await studyAll(user);
+    window.confirm = vi.fn(() => true);
+    await user.click(screen.getByRole('button', { name: 'Manage decks' }));
+    await user.click(screen.getByRole('button', { name: 'Delete Five' }));
+    expect(screen.getByRole('button', { name: /All vocabulary/, pressed: true })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /^Five/ })).toBeNull();
+    // Tombstoned, not erased, so the deletion syncs.
+    expect(customDeckStore.loadAll()).toHaveLength(1);
+  });
+
+  it('a custom deck with no words in the vocabulary can be cleared', async () => {
+    const user = userEvent.setup();
+    const deck = customDeckStore.create('Ghost', ['no-such-word']);
+    saveSelection({ deck: 'custom', customDeckId: deck.id, chapters: [], categories: ['core'] });
+    renderFlashcards();
+    await user.click(screen.getByRole('button', { name: 'Study ahead anyway' }));
+    await user.click(screen.getByRole('button', { name: 'Clear filter' }));
+    expect(screen.getByTestId('card-progress')).toBeTruthy();
+  });
+
+  it('studying a word through a deck moves the same card as everywhere else', async () => {
+    const user = userEvent.setup();
+    const deck = customDeckStore.create('One', [keys[0]]);
+    saveSelection({ deck: 'custom', customDeckId: deck.id, chapters: [], categories: ['core'] });
+    renderFlashcards();
+    await user.click(getCard());
+    await user.click(screen.getByRole('button', { name: /^good/i }));
+    expect(Object.keys(loadSRSStore())).toEqual([keys[0]]);
+  });
+
+  it('can pick the whole vocabulary or a textbook after a custom deck', async () => {
+    const user = userEvent.setup();
+    const deck = customDeckStore.create('Five', keys);
+    saveSelection({ deck: 'custom', customDeckId: deck.id, chapters: [], categories: ['core'] });
+    renderFlashcards();
+    await studyAll(user);
+    await user.click(
+      screen.getByRole('button', { name: TEXTBOOKS['garrett-derouchie'].shortTitle }),
+    );
+    expect(JSON.parse(localStorage.getItem('hebrew-tools-deck-v1') ?? '{}')).toMatchObject({
+      deck: 'garrett-derouchie',
+      customDeckId: null,
+    });
+    await user.click(screen.getByRole('button', { name: /All vocabulary/ }));
+    expect(JSON.parse(localStorage.getItem('hebrew-tools-deck-v1') ?? '{}').deck).toBe('all');
   });
 });

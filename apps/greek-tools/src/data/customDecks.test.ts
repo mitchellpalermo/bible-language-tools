@@ -1,3 +1,8 @@
+import {
+  mergeCustomDecks,
+  parseDecks,
+  type CustomDeck as SharedDeck,
+} from '@tools/shared/custom-decks';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
   CUSTOM_DECKS_KEY,
@@ -204,5 +209,31 @@ describe('deleteCustomDeck', () => {
     const result = deleteCustomDeck(d2.id);
     expect(result).toHaveLength(1);
     expect(result[0].name).toBe('A');
+  });
+});
+
+// ─── The shared module ────────────────────────────────────────────────────────
+//
+// greek.tools keeps this file until it adopts @tools/shared/custom-decks (see
+// "Custom decks" in the repo CLAUDE.md). Until then these pin that the two
+// agree on the shape, so the adoption is a swap and not a migration.
+
+describe('compatibility with @tools/shared/custom-decks', () => {
+  it('reads every deck greek.tools stores, which have no update time', () => {
+    createCustomDeck('Week 1', ['καί', 'ὁ']);
+    createCustomDeck('Week 2', ['λόγος']);
+    const parsed = parseDecks(loadCustomDecks());
+    expect(parsed.map((d) => d.name)).toEqual(['Week 1', 'Week 2']);
+    expect(parsed.every((d) => d.updatedAt === undefined)).toBe(true);
+  });
+
+  it('merges them, the later change winning, as the shared sync would', () => {
+    const old = createCustomDeck('Old name', ['καί']);
+    const edited: SharedDeck = {
+      ...old,
+      name: 'New name',
+      updatedAt: new Date(Date.parse(old.createdAt) + 1000).toISOString(),
+    };
+    expect(mergeCustomDecks(loadCustomDecks(), [edited])[0].name).toBe('New name');
   });
 });

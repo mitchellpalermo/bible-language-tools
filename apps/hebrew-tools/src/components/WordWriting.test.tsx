@@ -1,6 +1,8 @@
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { wordsForSelection } from '../data/writing-words';
+import { customDeckStore, deckKey } from '../lib/custom-decks';
 import { saveSelection } from '../lib/deck-selection';
 import WordWriting from './WordWriting';
 
@@ -14,7 +16,12 @@ import WordWriting from './WordWriting';
 beforeEach(() => {
   localStorage.clear();
   // A single small chapter keeps the queue predictable.
-  saveSelection({ deck: 'garrett-derouchie', chapters: [2], categories: ['core'] });
+  saveSelection({
+    deck: 'garrett-derouchie',
+    customDeckId: null,
+    chapters: [2],
+    categories: ['core'],
+  });
 });
 
 function grid() {
@@ -95,7 +102,12 @@ describe('WordWriting', () => {
     // Chapter 25 is entirely generated, so nothing in it carries a
     // romanization — OSHB has none and inventing 546 of them would be errors
     // the data tests cannot catch.
-    saveSelection({ deck: 'garrett-derouchie', chapters: [25], categories: ['core'] });
+    saveSelection({
+      deck: 'garrett-derouchie',
+      customDeckId: null,
+      chapters: [25],
+      categories: ['core'],
+    });
     render(<WordWriting />);
 
     await user.click(screen.getByRole('button', { name: /from the sound/i }));
@@ -112,6 +124,33 @@ describe('WordWriting', () => {
     await user.click(screen.getByRole('button', { name: 'All words' }));
 
     expect(JSON.parse(localStorage.getItem('hebrew-tools-deck-v1') ?? '{}').deck).toBe('all');
+  });
+
+  it('offers the decks the student made and writes only their words', async () => {
+    const user = userEvent.setup();
+    const picked = wordsForSelection('garrett-derouchie', [2], ['core']).slice(0, 3);
+    customDeckStore.create('Three words', picked.map(deckKey));
+    render(<WordWriting />);
+
+    await user.click(screen.getByRole('button', { name: 'Three words' }));
+
+    expect(screen.getByText('3 words')).toBeTruthy();
+    expect(JSON.parse(localStorage.getItem('hebrew-tools-deck-v1') ?? '{}')).toMatchObject({
+      deck: 'custom',
+      customDeckId: expect.any(String),
+    });
+    // And back to everything.
+    await user.click(screen.getByRole('button', { name: 'All words' }));
+    expect(
+      JSON.parse(localStorage.getItem('hebrew-tools-deck-v1') ?? '{}').customDeckId,
+    ).toBeNull();
+  });
+
+  it('falls back to every word when the picked deck has been deleted', () => {
+    saveSelection({ deck: 'custom', customDeckId: 'gone', chapters: [], categories: ['core'] });
+    render(<WordWriting />);
+
+    expect(screen.getByRole('button', { name: 'All words', pressed: true })).toBeTruthy();
   });
 
   it('holds the grade buttons back until the word has been compared', () => {

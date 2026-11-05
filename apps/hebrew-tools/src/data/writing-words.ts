@@ -18,7 +18,9 @@
 // has to guess where one letter stops and the next begins. That is the whole
 // reason word mode is tractable at all without a recognition model.
 
+import type { CustomDeck } from '@tools/shared/custom-decks';
 import { type GlyphCluster, splitClusters } from '@tools/shared/ink';
+import { wordsOfDeck } from '../lib/custom-decks';
 import { isDue, type SRSCard } from './srs';
 import { type TextbookId, type VocabCategory, wordsInChapters } from './textbooks';
 import { vocabulary } from './vocabulary';
@@ -146,10 +148,12 @@ export function promptText(word: HebrewVocabWord, prompt: WordPrompt): string | 
  * 1–8, core only" for the week expects that to hold across the app.
  */
 export function wordsForSelection(
-  deck: 'all' | TextbookId,
+  deck: 'all' | 'custom' | TextbookId,
   chapters: number[],
   categories: VocabCategory[],
+  customDeck: CustomDeck | null = null,
 ): HebrewVocabWord[] {
+  if (deck === 'custom') return wordsOfDeck(customDeck);
   return deck === 'all' ? [...vocabulary] : wordsInChapters(deck, chapters, categories);
 }
 
