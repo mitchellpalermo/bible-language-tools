@@ -974,7 +974,7 @@ first child under Study in the nav. The plan and the clock are
 
 | File | Role |
 |---|---|
-| `src/lib/today.ts` | Where due, weak and new come from here; the drill rotation; estimates; `dueTomorrow` |
+| `src/lib/today.ts` | Where due vocabulary, and due, weak and new forms, come from; the drill rotation; estimates; `dueTomorrow` |
 | `src/lib/study-streak.ts` | The streak's binding (`hebrew-tools-study-streak-v1`) |
 | `src/components/TodaySession.tsx` | The page: plan preview, the run, the summary |
 | `src/components/VocabCard.tsx` | The flashcard face, shared with `/flashcards` |
@@ -986,11 +986,10 @@ Things that will bite if changed carelessly:
   `ParadigmQuiz`'s `session` prop; Accent Shift is `AccentTrainer`'s. The
   grading, scheduling and attempt log are theirs and unchanged — do not give
   Today its own.
-- **Due work ignores the deck choice; new work follows it.** A due card is
-  due whichever chapter /flashcards is set to. New words come from that
-  selection, most frequent first on the whole vocabulary.
-- **Weak items never promote.** Weak vocabulary runs as a drill (Missed / Got
-  it, no SRS write); weak forms and the mixed review are graded with
+- **Vocabulary is due cards only** (#224). A due card is due whichever chapter
+  /flashcards is set to. No new words and no weak ones: new words are
+  introduced on /flashcards, and with nothing due the plan screen says so.
+- **Weak forms never promote.** Weak forms and the mixed review are graded with
   `recordAttempt`'s `practice`, which demotes on a miss and otherwise leaves
   the card alone. Recalling something before it is due is not the spaced
   recall its interval assumes.
@@ -1006,7 +1005,7 @@ Things that will bite if changed carelessly:
   form, 90 an accent item. They decide the plan; the clock decides the
   session, so a wrong estimate ends a session early or on time, never 10%
   late on a card already started. #190 will measure each student's pace.
-- **New items are capped per day** (`MAX_NEW`), so a long session does not
+- **New forms are capped per day** (`MAX_NEW`), so a long session does not
   pile up tomorrow's reviews.
 - **The streak counts a session once anything was answered.** Ending early
   or running out of time still counts; opening the page does not.

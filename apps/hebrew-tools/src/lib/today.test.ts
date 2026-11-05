@@ -5,7 +5,6 @@ import { daysFromNow, newCard, type SRSCard, todayStr } from '../data/srs';
 import { LADDER_RUNG_IDS } from '../data/suffix-ladder';
 import { vocabulary } from '../data/vocabulary';
 import { accentCardKey } from './accent-shift';
-import { DEFAULT_SELECTION } from './deck-selection';
 import { buildTableModels, getQuizCells } from './paradigm-quiz';
 import { paradigmCardKey } from './paradigm-srs';
 import {
@@ -61,49 +60,26 @@ describe('isWeak', () => {
 describe('vocabCandidates', () => {
   const [w1, w2, w3] = vocabulary;
 
-  it('puts due cards first, most overdue first, then weak, then new from the deck', () => {
+  it('deals due cards only, most overdue first', () => {
     const store = {
       [vocabSrsKey(w1)]: card(vocabSrsKey(w1), { due: 0 }),
       [vocabSrsKey(w2)]: card(vocabSrsKey(w2), { due: -4 }),
       [vocabSrsKey(w3)]: card(vocabSrsKey(w3), { due: 5, ease: 1.6 }),
     };
-    const out = vocabCandidates(store, DEFAULT_SELECTION);
-    expect(out.slice(0, 3).map((c) => [c.id, c.tier])).toEqual([
+    const out = vocabCandidates(store);
+    expect(out.map((c) => [c.id, c.tier])).toEqual([
       [vocabSrsKey(w2), 'due'],
       [vocabSrsKey(w1), 'due'],
-      [vocabSrsKey(w3), 'weak'],
     ]);
-    expect(out.slice(3).every((c) => c.tier === 'new')).toBe(true);
-    expect(new Set(out.map((c) => c.id)).size).toBe(out.length);
   });
 
   it('leaves out a card that is scheduled and healthy', () => {
     const store = { [vocabSrsKey(w1)]: card(vocabSrsKey(w1), { due: 5 }) };
-    expect(vocabCandidates(store, DEFAULT_SELECTION).some((c) => c.id === vocabSrsKey(w1))).toBe(
-      false,
-    );
+    expect(vocabCandidates(store)).toEqual([]);
   });
 
-  it('takes new words from a textbook selection in its own order', () => {
-    const out = vocabCandidates(
-      {},
-      { deck: 'garrett-derouchie', chapters: [2], categories: ['core'] },
-    );
-    expect(out.length).toBeGreaterThan(0);
-    expect(
-      out.every((c) =>
-        c.payload.kind === 'vocab'
-          ? c.payload.word.chapters?.some((r) => r.chapter === 2 && r.category === 'core')
-          : false,
-      ),
-    ).toBe(true);
-  });
-
-  it('orders the whole vocabulary by frequency', () => {
-    const freqs = vocabCandidates({}, DEFAULT_SELECTION)
-      .slice(0, 20)
-      .map((c) => (c.payload.kind === 'vocab' ? (c.payload.word.frequency ?? -1) : 0));
-    expect(freqs).toEqual([...freqs].sort((a, b) => b - a));
+  it('deals nothing to a student with no due cards and many unseen words', () => {
+    expect(vocabCandidates({})).toEqual([]);
   });
 });
 
@@ -210,7 +186,7 @@ describe('the drill', () => {
 });
 
 describe('buildHebrewPlan', () => {
-  it('fits the budget, due before new, and plans a drill', () => {
+  it('fits the budget and plans a drill', () => {
     const due = vocabulary.slice(0, 300);
     const store = Object.fromEntries(
       due.map((w) => [vocabSrsKey(w), card(vocabSrsKey(w), { due: -1 })]),
@@ -218,7 +194,6 @@ describe('buildHebrewPlan', () => {
     const plan = buildHebrewPlan({
       budget: 20,
       store,
-      selection: DEFAULT_SELECTION,
       ladder: {},
       random: fixed,
     });
@@ -230,16 +205,9 @@ describe('buildHebrewPlan', () => {
     expect(plan.leftOut.due).toBeGreaterThan(0);
   });
 
-  it('plans new vocabulary for a first-day student, capped', () => {
-    const plan = buildHebrewPlan({
-      budget: 20,
-      store: {},
-      selection: DEFAULT_SELECTION,
-      ladder: {},
-      random: fixed,
-    });
-    const vocab = plan.sections.find((s) => s.id === 'vocab')?.items ?? [];
-    expect(vocab).toHaveLength(10);
+  it('plans an empty vocabulary section for a first-day student', () => {
+    const plan = buildHebrewPlan({ budget: 20, store: {}, ladder: {}, random: fixed });
+    expect(plan.sections.find((s) => s.id === 'vocab')?.items ?? []).toHaveLength(0);
     expect(countForms(plan)).toBe(0);
   });
 });
