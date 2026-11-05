@@ -356,7 +356,7 @@ Things to know before changing it:
 
 ## Favicons
 
-Each app ships `public/favicon.svg`, `favicon.ico` (16/32/48) and `apple-touch-icon.png` (180), all drawn from the same glyph (α, א) as a filled gradient tile with the glyph converted to a path. Two things went wrong before (Nov 2026):
+Each app ships `public/favicon.svg`, `favicon.ico` (16/32/48) and `apple-touch-icon.png` (180), all drawn from the same glyph (α, א) as a tile in the site's primary color (greek `#1D4ED8` blue, hebrew `#15803D` green) with the glyph in the accent `#F59E0B`, converted to a path. Two things went wrong before (Nov 2026):
 
 - **A browser that skips the SVG `<link>` asks for `/favicon.ico` itself** (Safari, a cached tab, error pages). greek.tools still had Astro's starter `favicon.ico`, so its tab flipped to the Astro logo on some pages; hebrew.tools had none. Both layouts now declare all three icons, and `@tools/shared/test/favicons` (run by each app's `src/test/favicons.test.ts`) fails if a declared icon has no file or one of the three is not declared.
 - **The old SVG was unfilled `<text>` in `font-family="serif"`**: black on transparent, so invisible in a dark tab, and drawn in whatever serif the machine had. Keep the glyph as a path and give it a background.
