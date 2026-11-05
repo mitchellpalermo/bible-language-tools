@@ -291,6 +291,12 @@ function HebrewReaderInner() {
         </PrefToggle>
 
         <div className="flex gap-1 ms-auto">
+          <a
+            href={`/export?ref=${formatRef({ book, chapter })}`}
+            className="px-3 py-2 border-2 border-primary/10 rounded-xl text-sm font-semibold hover:border-primary/40 transition-colors"
+          >
+            Export PDF
+          </a>
           <button
             type="button"
             onClick={() => goToChapter(chapter - 1)}
