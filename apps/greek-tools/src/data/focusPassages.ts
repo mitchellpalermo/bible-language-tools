@@ -1,3 +1,5 @@
+import { loadAttempts, logAttempts, saveAttempts } from '../lib/attempt-log';
+import { parseConcept } from '../lib/parse-attempts';
 import type { SRSCard } from './srs';
 
 export interface FocusPassage {
@@ -54,11 +56,31 @@ export function recordParseSession(id: string, correct: number, total: number): 
   saveParseHistoryStore(store);
 }
 
+/**
+ * Record one finished parse session: the aggregate totals (which sync) and one
+ * attempt per answer (the shared log, #209). One entry point for both, so they
+ * cannot drift apart. `outcomes` is one boolean per answer, true when correct.
+ */
+export function recordParseResults(id: string, outcomes: readonly boolean[]): void {
+  recordParseSession(id, outcomes.filter(Boolean).length, outcomes.length);
+  logAttempts(outcomes.map((correct) => ({ concept: parseConcept(id), correct })));
+}
+
+/**
+ * Remove a passage and everything recorded against it. The attempt log is one
+ * of those stores: leaving its answers behind would resurrect them as history
+ * for a passage that no longer exists.
+ */
 export function deletePassage(id: string): void {
   saveFocusPassages(loadFocusPassages().filter((p) => p.id !== id));
   const store = loadParseHistoryStore();
   delete store[id];
   saveParseHistoryStore(store);
+  const concept = parseConcept(id);
+  const attempts = loadAttempts();
+  if (attempts.some((a) => a.concept === concept)) {
+    saveAttempts(attempts.filter((a) => a.concept !== concept));
+  }
 }
 
 export type MaturityLevel = 0 | 1 | 2 | 3;
