@@ -2,6 +2,8 @@
 import MorphWordmark from '@tools/shared/components/MorphWordmark.astro';
 import SiteNav from '@tools/shared/components/SiteNav.astro';
 import type { NavLink } from '@tools/shared/nav';
+import { studyNavChildren } from '@tools/shared/study-modes';
+import { studyModes } from '../lib/study-modes';
 import '../styles/global.css';
 
 interface Props {
@@ -25,13 +27,7 @@ const navLinks: NavLink[] = [
   {
     href: '/study',
     label: 'Study',
-    children: [
-      { href: '/flashcards', label: 'Flashcards' },
-      { href: '/quiz', label: 'Quiz' },
-      { href: '/paradigms', label: 'Paradigms' },
-      { href: '/parse', label: 'Parse' },
-      { href: '/focus', label: 'Focus Passages' },
-    ],
+    children: studyNavChildren(studyModes),
   },
 ];
 

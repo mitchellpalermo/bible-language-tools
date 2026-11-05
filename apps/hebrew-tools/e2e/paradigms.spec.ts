@@ -34,5 +34,5 @@ test('is reachable from the Study hub', async ({ page }) => {
   await page.goto('/study');
   await page.getByRole('link', { name: /Paradigms/ }).click();
   await expect(page).toHaveURL(/\/paradigms/);
-  await expect(page.getByRole('heading', { name: 'Paradigm Quiz' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Paradigms' })).toBeVisible();
 });

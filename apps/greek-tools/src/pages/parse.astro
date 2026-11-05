@@ -7,7 +7,7 @@ import Layout from '../layouts/Layout.astro';
   title="Verb Parsing"
   description="Practice parsing Greek verb forms — identify tense, voice, mood, person, and number for λύω paradigm forms."
 >
-  <a href="/quiz" class="inline-flex items-center gap-1 text-sm text-text-muted hover:text-text transition-colors mb-4">
+  <a href="/study" class="inline-flex items-center gap-1 text-sm text-text-muted hover:text-text transition-colors mb-4">
     ← Back
   </a>
   <div class="mb-8">
@@ -22,5 +22,9 @@ import Layout from '../layouts/Layout.astro';
       All forms are drawn from the standard λύω paradigms.
     </p>
   </div>
+  <p class="text-sm text-text-muted mb-6">
+    Rather parse in context?
+    <a href="/parse/gnt" class="underline hover:text-text transition-colors">Parse a chapter of the Greek New Testament →</a>
+  </p>
   <VerbParseChallenge client:load />
 </Layout>

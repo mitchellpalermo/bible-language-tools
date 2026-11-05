@@ -124,6 +124,10 @@ Both apps render `@tools/shared/components/SiteNav.astro` inside their layout he
 
 Adding a destination means adding one entry to that app's `navLinks` array in `Layout.astro`. Nothing else needs touching; the desktop nav, the drawer, and active-route highlighting all read the same list.
 
+**The Study group is built from one list per app** (#229): `src/lib/study-modes.ts` exports `studyModes`, `Layout.astro` takes the Study children from it with `studyNavChildren(studyModes, ...)`, and `pages/study.astro` draws a card for each. A new study mode is one entry there, and it gets its card and its nav child together. `src/test/study-modes.test.ts` in each app runs `studyModeProblems` (`@tools/shared/study-modes`), which fails when the nav or the hub stops reading the list, when a mode has no page, or when a shared mode is named differently from the other app (`STUDY_LABELS`: Flashcards, Paradigms, Parse). Things that are not modes (hebrew.tools' Today, the routine the modes make up) go in `studyNavChildren`'s second argument and get their own panel on `/study`.
+
+**There is no `/quiz` hub in either app.** greek.tools dropped it: it was one extra tap in front of Paradigms and Parse, hebrew.tools never had one, and a hub that hides modes is how `/study` lost them. `/quiz` redirects to `/study`. Page titles and nav labels agree (Paradigms, Reader); a quiz-type split can come back as a card's detail text, not a route.
+
 Things to know before changing it:
 
 - **A `NavLink` with `children` is still a link.** Both apps' Study entry points at `/study` *and* lists its sub-routes (Flashcards, Paradigms and Accent Shift on hebrew.tools), so the hub page stays reachable and the sub-routes are one tap away. **The children appear in the mobile drawer only** — the desktop row shows the group — so every study mode needs a card on its app's `/study` page as well as an entry in `children`. The children also serve as the active-path list — that's what lights Study up on `/flashcards`, replacing the old hand-written `STUDY_PATHS` constant.
