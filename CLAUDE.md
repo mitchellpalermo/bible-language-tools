@@ -511,6 +511,17 @@ one of these chores gains a step, add it to the script.
 
 ### Screenshots are required for any UI-affecting change
 
+**This is enforced by CI, not by this paragraph.** The `pr-screenshots` workflow
+(`.github/workflows/pr-screenshots.yml`, rule in
+`packages/dev-tasks/src/pr-evidence.ts`) fails a PR that changes components,
+pages, layouts, styles, `.astro` or `.css` files unless its body links PNGs from
+that PR's `assets/pr-<N>` branch covering both mobile and desktop. Waive it with
+the `no-screenshots-needed` label or a `Screenshots: N/A - <reason>` line. It
+re-runs when the PR body is edited, so open the PR, run `pnpm shots publish`,
+then paste the table in. The check only advises until it is a *required* status
+check in the repo ruleset; and it proves images exist, not that they show the
+right state, so still look at them.
+
 If a change alters what the app looks like, **capture screenshots and attach them to the PR**. This applies to layout, styling, component markup, new or changed pages, and anything responsive. It does not apply to pure logic, data, or build changes.
 
 What to capture:
