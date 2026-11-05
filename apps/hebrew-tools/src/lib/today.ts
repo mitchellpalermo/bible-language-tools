@@ -2,17 +2,16 @@
 // which drill fills today's slot. The queue builder, the clock and the summary
 // are `@tools/shared/today`; this file supplies the candidates.
 //
-// The session runs in this order: due vocabulary, due paradigm forms, one
-// drill. The rules that decide what goes in, each of which looks arbitrary
+// The session runs in this order: due vocabulary, paradigm forms, one drill.
+// Vocabulary is due cards only (#224); new words are introduced on /flashcards. The rules that decide what goes in, each of which looks arbitrary
 // without its reason:
 //
 // - **Due work is everything the schedule says is due**, whatever deck the
-//   student has picked on /flashcards. The deck picks what is *new*; a due card
-//   outside it is still due.
-// - **A weak item is practice, never a review.** It is not due, so answering
-//   it must not move its schedule forward: weak vocabulary runs as a drill
-//   (Missed / Got it, no SRS write) and weak forms are graded with `practice`,
-//   which can demote a card and never promote it.
+//   student has picked on /flashcards.
+// - **Vocabulary is due only**: no new words, no weak ones.
+// - **A weak form is practice, never a review.** It is not due, so answering
+//   it must not move its schedule forward: weak forms are graded with
+//   `practice`, which can demote a card and never promote it.
 // - **New paradigm forms come only from tables the student has started.** The
 //   app cannot know which tables the course has reached; a table with no
 //   answered form in it is one the student has not been taught.
@@ -36,10 +35,8 @@ import {
 import type { ShiftItem } from '../data/accent-shift';
 import { daysFromNow, isDue, normalizeKey, type SRSCard, todayStr } from '../data/srs';
 import { LADDER_RUNG_IDS } from '../data/suffix-ladder';
-import { wordsInChapters } from '../data/textbooks';
 import { cardKey, type HebrewVocabWord, vocabulary } from '../data/vocabulary';
 import { ACCENT_KEY_PREFIX, buildQueue as buildAccentQueue } from './accent-shift';
-import type { DeckSelection } from './deck-selection';
 import { buildTableModels, getQuizCells, type TableModel } from './paradigm-quiz';
 import { PARADIGM_KEY_PREFIX, paradigmCardKey } from './paradigm-srs';
 
@@ -61,11 +58,11 @@ export const SECONDS = {
 /** About how long the drill slot is, by budget. */
 export const DRILL_SECONDS: Record<TimeBudget, number> = { 20: 240, 45: 480, 90: 720 };
 
-/** At most this many new items a day, by budget, so new cards do not pile up tomorrow's reviews. */
-export const MAX_NEW: Record<TimeBudget, { vocab: number; forms: number }> = {
-  20: { vocab: 10, forms: 10 },
-  45: { vocab: 20, forms: 20 },
-  90: { vocab: 30, forms: 30 },
+/** At most this many new paradigm forms a day, by budget, so new cards do not pile up tomorrow's reviews. */
+export const MAX_NEW: Record<TimeBudget, { forms: number }> = {
+  20: { forms: 10 },
+  45: { forms: 20 },
+  90: { forms: 30 },
 };
 
 /** Forms per paradigm item. Smaller items share the time more evenly. */
@@ -133,33 +130,27 @@ function byUrgency(a: SRSCard | undefined, b: SRSCard | undefined): number {
 
 // ─── Vocabulary ───────────────────────────────────────────────────────────────
 
-/** The deck the student picked on /flashcards, most frequent first on the whole vocabulary. */
-function newWordOrder(selection: DeckSelection): HebrewVocabWord[] {
-  if (selection.deck !== 'all') {
-    return wordsInChapters(selection.deck, selection.chapters, selection.categories);
-  }
-  return [...vocabulary].sort((a, b) => (b.frequency ?? -1) - (a.frequency ?? -1));
-}
-
-export function vocabCandidates(store: Store, selection: DeckSelection): Candidate<TodayItem>[] {
-  const reviewing: { word: HebrewVocabWord; card: SRSCard; tier: Tier }[] = [];
+/**
+ * Vocabulary that is due, most overdue first. Never new words (#224): Today is
+ * review, and a student introduces words on /flashcards. Never weak words
+ * either: a card that is not due is practice, not review.
+ */
+export function vocabCandidates(store: Store): Candidate<TodayItem>[] {
+  const due: { word: HebrewVocabWord; card: SRSCard }[] = [];
   for (const word of vocabulary) {
     const card = store[vocabSrsKey(word)];
-    const tier = card && tierOf(card);
-    if (card && tier) reviewing.push({ word, card, tier });
+    if (card && isDue(card)) due.push({ word, card });
   }
-  reviewing.sort((a, b) => byUrgency(a.card, b.card));
+  due.sort((a, b) => byUrgency(a.card, b.card));
 
   const seen = new Set<string>();
   const out: Candidate<TodayItem>[] = [];
-  const add = (word: HebrewVocabWord, tier: Tier) => {
+  for (const { word } of due) {
     const id = vocabSrsKey(word);
-    if (seen.has(id)) return;
+    if (seen.has(id)) continue;
     seen.add(id);
-    out.push({ id, tier, seconds: SECONDS.vocab, payload: { kind: 'vocab', word } });
-  };
-  for (const { word, tier } of reviewing) add(word, tier);
-  for (const word of newWordOrder(selection)) if (!store[vocabSrsKey(word)]) add(word, 'new');
+    out.push({ id, tier: 'due', seconds: SECONDS.vocab, payload: { kind: 'vocab', word } });
+  }
   return out;
 }
 
@@ -309,7 +300,6 @@ export function todaysDrill(context: DrillContext, now = new Date()): DrillSlot<
 export interface PlanContext {
   budget: TimeBudget;
   store: Store;
-  selection: DeckSelection;
   ladder: LadderProgress;
   now?: Date;
   random?: () => number;
@@ -318,14 +308,13 @@ export interface PlanContext {
 export function buildHebrewPlan({
   budget,
   store,
-  selection,
   ladder,
   now = new Date(),
   random = Math.random,
 }: PlanContext): HebrewTodayPlan {
   const homes = formHomes();
   const sections: SectionInput<TodayItem>[] = [
-    { id: 'vocab', candidates: vocabCandidates(store, selection), maxNew: MAX_NEW[budget].vocab },
+    { id: 'vocab', candidates: vocabCandidates(store) },
     { id: 'forms', candidates: formCandidates(store, homes), maxNew: MAX_NEW[budget].forms },
   ];
   return buildTodayPlan({

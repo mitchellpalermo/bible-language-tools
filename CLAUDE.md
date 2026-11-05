@@ -255,9 +255,14 @@ the module decides what fits. Rules that are pedagogy rather than plumbing:
   so while the session runs `canStartNext` refuses the next item once the
   budget is used, or if the item would end more than 10% past it. A started
   item is always finished. The clock pauses while the tab is hidden.
+- **An app may deal fewer tiers than the module offers.** hebrew.tools' Today
+  deals vocabulary that is **due only** (#224): no new words, no weak ones.
+  Introducing words is `/flashcards`' job, and a review session that adds
+  strangers piles up tomorrow's reviews. The module keeps `new` and `maxNew`
+  because the forms section still uses them.
 - **A weak item is practice, not a review.** It is not due, so answering it
   must not move its schedule forward. Each app enforces that in its own
-  grading (hebrew.tools: weak vocabulary runs as a drill, weak forms with
+  grading (hebrew.tools: weak forms with
   `practice`).
 - **Only an item's first answer counts in the summary**, as in the drills.
 

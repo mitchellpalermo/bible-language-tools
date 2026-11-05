@@ -49,7 +49,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ShiftItem } from '../data/accent-shift';
 import { loadSRSStore, loadStats, newCard, saveSRSStore, saveStats } from '../data/srs';
 import type { HebrewVocabWord } from '../data/vocabulary';
-import { loadSelection } from '../lib/deck-selection';
 import { loadFlashcardSettings } from '../lib/flashcard-settings';
 import { getQuizCells } from '../lib/paradigm-quiz';
 import { loadStudyStreak, markSessionComplete } from '../lib/study-streak';
@@ -101,8 +100,7 @@ export type Step =
 type EndReason = 'done' | 'time' | 'early';
 
 /**
- * The plan as steps. Weak vocabulary is its own drill step after the review,
- * because a card that is not due must not be graded into the schedule.
+ * The plan as steps. Vocabulary is due cards only (#224).
  */
 export function planSteps(plan: HebrewTodayPlan): Step[] {
   const steps: Step[] = [];
@@ -113,12 +111,8 @@ export function planSteps(plan: HebrewTodayPlan): Step[] {
     vocab.flatMap((i) =>
       tiers.includes(i.tier) && i.payload.kind === 'vocab' ? [i.payload.word] : [],
     );
-  const review = words(['due', 'new']);
-  const weak = words(['weak']);
+  const review = words(['due']);
   if (review.length) steps.push({ kind: 'vocab', mode: 'srs', words: review, label: 'Vocabulary' });
-  if (weak.length) {
-    steps.push({ kind: 'vocab', mode: 'all', words: weak, label: 'Vocabulary to strengthen' });
-  }
 
   const rounds = items('forms').flatMap((i) =>
     i.payload.kind === 'forms'
@@ -383,7 +377,7 @@ function PlanPreview({ plan }: { plan: HebrewTodayPlan }) {
       .join(', ');
 
   const vocab = tiers('vocab');
-  const vocabTotal = vocab.due + vocab.weak + vocab.new;
+  const vocabTotal = vocab.due;
   const forms = countForms(plan);
   const drill = plan.drill?.payload;
   const waiting = plan.leftOut.due;
@@ -394,7 +388,7 @@ function PlanPreview({ plan }: { plan: HebrewTodayPlan }) {
         <li className="flex justify-between gap-3">
           <span className="font-semibold text-text">1. Vocabulary</span>
           <span className="text-text-muted text-right">
-            {vocabTotal ? `${count(vocabTotal, 'card')} (${describe(vocab)})` : 'Nothing due'}
+            {vocabTotal ? `${count(vocabTotal, 'card')} due` : 'Nothing due'}
           </span>
         </li>
         <li className="flex justify-between gap-3">
@@ -410,6 +404,15 @@ function PlanPreview({ plan }: { plan: HebrewTodayPlan }) {
           </span>
         </li>
       </ol>
+      {vocabTotal + forms === 0 && (
+        <p className="text-sm text-text-muted" data-testid="nothing-due">
+          Nothing is due today. New words are introduced on{' '}
+          <a href="/flashcards" className="text-primary underline">
+            Flashcards
+          </a>
+          .
+        </p>
+      )}
       <p className="text-sm text-text-muted">
         About {formatMinutes(plan.plannedSeconds)} of {plan.budget}.
         {waiting > 0 &&
@@ -470,7 +473,6 @@ function TodaySessionInner() {
         ? buildHebrewPlan({
             budget,
             store: loadSRSStore(),
-            selection: loadSelection(),
             ladder: loadLadderProgress(),
           })
         : null,
@@ -503,7 +505,6 @@ function TodaySessionInner() {
       buildHebrewPlan({
         budget: requested,
         store: loadSRSStore(),
-        selection: loadSelection(),
         ladder: loadLadderProgress(),
       }),
     );

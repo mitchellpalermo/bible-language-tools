@@ -55,12 +55,17 @@ describe('the plan screen', () => {
     seedDueWords(2);
     render(<TodaySession />);
 
-    expect(screen.getByText('2 cards (2 due)')).toBeInTheDocument();
+    expect(screen.getByText('2 cards due')).toBeInTheDocument();
     expect(screen.getByText(/^About \d+ minutes? of 20\./)).toBeInTheDocument();
 
     await user.click(screen.getByRole('radio', { name: /45/ }));
     expect(localStorage.getItem(BUDGET_KEY)).toBe('45');
     expect(screen.getByRole('button', { name: 'Start 45-minute session' })).toBeEnabled();
+  });
+
+  it('says nothing is due when there is nothing to review', () => {
+    render(<TodaySession />);
+    expect(screen.getByTestId('nothing-due')).toHaveTextContent('Nothing is due today');
   });
 
   it('invites a first session when there is no streak', () => {
@@ -201,7 +206,7 @@ describe('planSteps', () => {
     payload: { kind: 'vocab', word } as TodayItem,
   });
 
-  it('runs weak vocabulary as practice after the review, and weak forms as practice', () => {
+  it('runs only due vocabulary, and weak forms as practice', () => {
     const plan = buildTodayPlan<TodayItem, TodayDrill>({
       budget: 20,
       sections: [
@@ -220,14 +225,9 @@ describe('planSteps', () => {
       ],
     });
     const steps = planSteps(plan);
-    expect(steps.map((s) => s.label)).toEqual([
-      'Vocabulary',
-      'Vocabulary to strengthen',
-      'Paradigm forms',
-    ]);
-    expect(steps[0]).toMatchObject({ mode: 'srs', words: [w1, w3] });
-    expect(steps[1]).toMatchObject({ mode: 'all', words: [w2] });
-    expect(steps[2]).toMatchObject({ rounds: [{ practice: true }] });
+    expect(steps.map((s) => s.label)).toEqual(['Vocabulary', 'Paradigm forms']);
+    expect(steps[0]).toMatchObject({ mode: 'srs', words: [w1] });
+    expect(steps[1]).toMatchObject({ rounds: [{ practice: true }] });
   });
 
   it('makes the ladder a Full-table write and mixed review practice', () => {
