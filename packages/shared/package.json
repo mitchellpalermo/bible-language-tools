@@ -24,6 +24,7 @@
     "./attempt-log": "./src/attempt-log.ts",
     "./ladder": "./src/ladder.ts",
     "./today": "./src/today.ts",
+    "./pdf-export": "./src/pdf-export.ts",
     "./study-streak": "./src/study-streak.ts",
     "./test/hydration": "./src/test/hydration.ts",
     "./test/favicons": "./src/test/favicons.ts",
@@ -49,6 +50,10 @@
     "./components/StepDrill": "./src/components/StepDrill.tsx",
     "./components/Ladder": "./src/components/Ladder.tsx",
     "./components/TodaySession": "./src/components/TodaySession.tsx"
+  },
+  "dependencies": {
+    "@pdf-lib/fontkit": "^1.1.1",
+    "pdf-lib": "^1.17.1"
   },
   "peerDependencies": {
     "react": "^19.0.0"

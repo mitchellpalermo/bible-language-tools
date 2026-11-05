@@ -447,6 +447,26 @@ Things that will bite if changed carelessly:
   feature for a much later student — and the strip is never applied to a word's
   trailing punctuation, so the sof pasuq and the maqqef survive it.
 
+### Export to PDF (issue #227)
+
+`/export` downloads a verse range as a PDF to translate on paper or an iPad. The
+layout is `@tools/shared/pdf-export` (see "The export PDF" in the root
+CLAUDE.md, which covers why Hebrew needs per-cluster shaping); `src/lib/pdf-export.ts`
+is the Hebrew half: `extractVerses`, `normalizeRange`, `exportText`,
+`toExportVerses` and the font load.
+
+- **Options mirror the reader's**: pointed (default) or consonants only, and
+  cantillation, which starts from the reader's own stored preference.
+  Cantillation goes through `stripCantillation`, so the page matches the reader.
+- **There is no nav entry, on purpose.** The page is reached from the reader's
+  "Export PDF" link, which carries `?ref=BOOK.CH`. A Study card or nav entry
+  waits on the Study nav rework (#229).
+- **`?ref=` with no verse means the whole chapter**; the last verse is filled in
+  once the book loads. Changing book does the same for chapter 1.
+- **Verify on a rendered page.** A PDF whose Hebrew is wrong still opens and
+  still has the right text in it. Render it (`pdftoppm -r 300 -png`) and look at
+  where the vowels sit under the letters.
+
 ### Daily Verse (issue #76)
 
 `src/data/dailyVerses.ts` is the curated list behind `/daily` — 85 verses across
