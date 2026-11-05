@@ -31,6 +31,7 @@
     "./nav": "./src/nav.ts",
     "./nav-menu": "./src/nav-menu.ts",
     "./posthog-host": "./src/posthog-host.ts",
+    "./fetch-retry": "./src/fetch-retry.mjs",
     "./posthog-host-integration": "./src/posthog-host-integration.ts",
     "./ink": "./src/ink/index.ts",
     "./components/InkCanvas": "./src/ink/components/InkCanvas.tsx",

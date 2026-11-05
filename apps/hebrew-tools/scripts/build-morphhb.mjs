@@ -24,6 +24,7 @@
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { fetchWithRetry } from '@tools/shared/fetch-retry';
 
 import { BOOKS } from './lib/books.mjs';
 import {
@@ -56,7 +57,7 @@ async function fileExists(path) {
 }
 
 async function fetchText(url) {
-  const res = await fetch(url);
+  const res = await fetchWithRetry(url);
   if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${url}`);
   return res.text();
 }
