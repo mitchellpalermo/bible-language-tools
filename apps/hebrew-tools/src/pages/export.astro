@@ -1,0 +1,11 @@
+---
+import TranslationPDFExport from '../components/TranslationPDFExport';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Export for Translation Practice"
+  description="Export a passage of the Hebrew Bible as a printable PDF, set right to left, with ruled lines for your translation."
+>
+  <TranslationPDFExport client:load />
+</Layout>

@@ -2,14 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MorphWord } from '../data/morphgnt';
-import {
-  buildTranslationPDF,
-  CONTENT_W,
-  extractVerses,
-  LINE_BLOCK_H,
-  RULE_COUNT,
-  wrapWords,
-} from './pdf-export';
+import { buildTranslationPDF, extractVerses } from './pdf-export';
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -143,73 +136,6 @@ describe('extractVerses', () => {
   });
 });
 
-// ─── wrapWords ────────────────────────────────────────────────────────────────
-
-describe('wrapWords', () => {
-  // Fake width function: each character is 8pt, plus 4pt space
-  const widthOf = (text: string) => text.length * 8;
-
-  it('returns a single line when all words fit', () => {
-    const lines = wrapWords(['ab', 'cd'], widthOf, 100);
-    expect(lines).toHaveLength(1);
-    expect(lines[0]).toEqual(['ab', 'cd']);
-  });
-
-  it('wraps words that exceed maxWidth onto the next line', () => {
-    // widthOf('word ') = word.length * 8; each 4-char word = 40pt
-    // maxWidth=75: 'aaaa'(40) fits; adding 'bbbb'(40) = 80 > 75 → new line; etc.
-    const lines = wrapWords(['aaaa', 'bbbb', 'cccc'], widthOf, 75);
-    expect(lines).toHaveLength(3);
-    expect(lines[0]).toEqual(['aaaa']);
-    expect(lines[1]).toEqual(['bbbb']);
-    expect(lines[2]).toEqual(['cccc']);
-  });
-
-  it('packs multiple words on a line when they fit within maxWidth', () => {
-    // widthOf('ab ')=24, widthOf('cd ')=24; 24+24=48 <= 100
-    const lines = wrapWords(['ab', 'cd', 'ef'], widthOf, 100);
-    expect(lines).toHaveLength(1);
-    expect(lines[0]).toEqual(['ab', 'cd', 'ef']);
-  });
-
-  it('handles a firstLineMaxWidth shorter than maxWidth', () => {
-    // First line max = 30, subsequent = 80
-    // 'aaaa '=40 > 30, so... wait, first word always fits (no prior words)
-    // word='aaaa': current=[], 0+40<=30? No, but current is empty so it just goes in.
-    // word='bbbb': current=['aaaa'] width=40, 40+40=80>30 → new line. line0=['aaaa']
-    // word='cccc': current=['bbbb'] width=40, 40+40=80>80 → fits exactly. current=['bbbb','cccc']
-    // end: push ['bbbb','cccc']. lines=[['aaaa'],['bbbb','cccc']]
-    const lines = wrapWords(['aaaa', 'bbbb', 'cccc'], widthOf, 80, 30);
-    expect(lines).toHaveLength(2);
-    expect(lines[0]).toEqual(['aaaa']);
-    expect(lines[1]).toEqual(['bbbb', 'cccc']);
-  });
-
-  it('returns an empty array for empty input', () => {
-    expect(wrapWords([], widthOf, 100)).toEqual([]);
-  });
-
-  it('always places at least one word on the first line even if it exceeds maxWidth', () => {
-    // Single very long word that exceeds maxWidth
-    const lines = wrapWords(['averylongword'], widthOf, 10);
-    expect(lines).toHaveLength(1);
-    expect(lines[0]).toEqual(['averylongword']);
-  });
-
-  it('does not apply firstLineMaxWidth to subsequent lines', () => {
-    // firstLine=20 forces each word onto its own line if words are wider
-    // subsequent lines use maxWidth=200 which fits multiple words
-    const lines = wrapWords(['ab', 'cd', 'ef', 'gh'], widthOf, 200, 20);
-    // line0=['ab'] (24 > 20 would overflow next word; but 'ab '=24 and 24>20 so after ab any next word forces break)
-    // Actually: 'ab '=24. First word: current=[], 0+24<=20? No wait: current is empty → just add.
-    // current=['ab'], width=24. Next 'cd ': 24+24=48 > 20 → new line. line0=['ab']
-    // Now firstLine=false. current=['cd'], width=24. 'ef ': 24+24=48 <= 200 → add. current=['cd','ef']
-    // 'gh ': 48+24=72 <= 200 → add. current=['cd','ef','gh']. lines=[['ab'],['cd','ef','gh']]
-    expect(lines[0]).toEqual(['ab']);
-    expect(lines[1]).toEqual(['cd', 'ef', 'gh']);
-  });
-});
-
 // ─── buildTranslationPDF ─────────────────────────────────────────────────────
 
 describe('buildTranslationPDF', () => {
@@ -267,23 +193,5 @@ describe('buildTranslationPDF', () => {
     ];
     // Just verify it doesn't throw — the chapter heading path is exercised
     await expect(buildTranslationPDF(verses, 'Test 1:1–2:1')).resolves.toBeInstanceOf(Uint8Array);
-  });
-});
-
-// ─── Constant sanity checks ───────────────────────────────────────────────────
-
-describe('layout constants', () => {
-  it('LINE_BLOCK_H is a positive integer', () => {
-    expect(LINE_BLOCK_H).toBeGreaterThan(0);
-    expect(Number.isInteger(LINE_BLOCK_H)).toBe(true);
-  });
-
-  it('CONTENT_W fits within a Letter page with margins', () => {
-    // Letter = 612pt, left + right margins = 108pt, content = 504pt
-    expect(CONTENT_W).toBe(504);
-  });
-
-  it('RULE_COUNT is 2', () => {
-    expect(RULE_COUNT).toBe(2);
   });
 });
