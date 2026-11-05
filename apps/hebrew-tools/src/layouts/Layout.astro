@@ -2,6 +2,8 @@
 import MorphWordmark from '@tools/shared/components/MorphWordmark.astro';
 import SiteNav from '@tools/shared/components/SiteNav.astro';
 import type { NavLink } from '@tools/shared/nav';
+import { studyNavChildren } from '@tools/shared/study-modes';
+import { studyModes } from '../lib/study-modes';
 import '../styles/global.css';
 
 interface Props {
@@ -18,17 +20,12 @@ const navLinks: NavLink[] = [
   { href: '/keyboard', label: 'Type' },
   { href: '/write', label: 'Write' },
   { href: '/daily', label: 'Daily' },
-  { href: '/reader', label: 'Read' },
+  { href: '/reader', label: 'Reader' },
   { href: '/grammar', label: 'Grammar' },
   {
     href: '/study',
     label: 'Study',
-    children: [
-      { href: '/today', label: 'Today' },
-      { href: '/flashcards', label: 'Flashcards' },
-      { href: '/paradigms', label: 'Paradigms' },
-      { href: '/accent', label: 'Accent Shift' },
-    ],
+    children: studyNavChildren(studyModes, [{ href: '/today', label: 'Today' }]),
   },
 ];
 

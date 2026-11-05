@@ -38,7 +38,6 @@ test.describe('Mobile navigation menu', () => {
       'Grammar',
       'Study',
       'Flashcards',
-      'Quiz',
       'Paradigms',
       'Parse',
       'Focus Passages',
