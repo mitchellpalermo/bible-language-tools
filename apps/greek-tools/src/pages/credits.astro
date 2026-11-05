@@ -1,0 +1,9 @@
+---
+import CreditsPage from '@tools/shared/components/CreditsPage.astro';
+import { creditSources, creditsCopy } from '../data/credits';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title={creditsCopy.title} description={creditsCopy.intro}>
+  <CreditsPage copy={creditsCopy} sources={creditSources} accent="var(--color-coral)" />
+</Layout>
