@@ -212,6 +212,31 @@ The `component` prop is tagged on every captured exception so errors can be filt
 
 **Viewing errors in PostHog** — errors appear under "Error tracking" in the PostHog sidebar, grouped by message and stack trace, with links to session recordings. Filter by the `component` property to isolate errors to a specific island.
 
+## Parse history and the shared attempt log (#209)
+
+Parse history is a per-passage `{ correct, total }` pair (`greek-tools-focus-parse-v1`),
+and **it is still what syncs**, in `/api/progress`. The shared attempt log has a
+Greek binding (`src/lib/attempt-log.ts`, key `greek-tools-attempts-v1`) that is
+device-local until #200 adds the account endpoint.
+
+- **Record a session through `recordParseResults`**, which updates the totals and
+  logs one attempt per answer (`parse/passage/<id>`). Calling `recordParseSession`
+  alone leaves the log short; the two must not drift.
+- **Old totals read as attempts through `parseHistoryAsAttempts`** (`src/lib/parse-attempts.ts`):
+  read-only, deterministic ids `legacy-parse-<passage>-<n>`, `at: 0`, and never
+  counting an answer that is already in the log. Do not write the synthetic
+  attempts into the log: they would be counted again on the next read.
+- **Deleting a passage clears its attempts too** (`deletePassage`). Any new store
+  keyed by passage id needs the same line.
+- **Known limit, unchanged:** `mergeParseHistory` takes the higher total per
+  passage, so sessions parsed on two devices between syncs are not added. The
+  fix is syncing the attempt log (a union by id), not changing this rule.
+- **What is not duplicated:** SRS cards and stats merge in `@tools/shared/sync-merge`
+  (re-exported by `src/lib/sync-merge.ts`); quiz and flashcard settings are
+  `createQuizSettings` / `createFlashcardSettings` bindings; the daily verse
+  streak is `createDailyStreak`. Decks, focus passages and parse-history totals
+  are greek-only merges with no shared counterpart.
+
 ## Architecture Decisions
 
 See `docs/adr/` for recorded decisions:
