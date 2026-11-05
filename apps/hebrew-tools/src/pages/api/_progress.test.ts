@@ -9,7 +9,7 @@ vi.mock('../../lib/progress-store', () => ({
 }));
 
 import { deleteProgress, getProgress, putProgress } from '../../lib/progress-store';
-import { DELETE, GET, MAX_BODY_BYTES, PUT } from './progress';
+import { DELETE, GET, MAX_BODY_BYTES, MAX_RUNG_ID_LENGTH, MAX_RUNGS, PUT } from './progress';
 
 const validStats = {
   streak: 3,
@@ -125,6 +125,39 @@ describe('PUT validation', () => {
     null,
   ])('rejects a malformed study streak %j with 400', async (studyStreak) => {
     const response = await PUT(ctx({ srsStore: {}, studyStats: validStats, studyStreak }) as never);
+    expect(response.status).toBe(400);
+    expect(putProgress).not.toHaveBeenCalled();
+  });
+
+  it('passes valid ladder progress through, and accepts a payload without it', async () => {
+    vi.mocked(putProgress).mockResolvedValue('server-time');
+    const ladderProgress = { 'suffix-bare-type1': 2, 'suffix-prep-le': 0 };
+
+    expect(
+      (await PUT(ctx({ srsStore: {}, studyStats: validStats, ladderProgress }) as never)).status,
+    ).toBe(200);
+    expect(vi.mocked(putProgress).mock.calls[0][2].ladderProgress).toEqual(ladderProgress);
+
+    expect((await PUT(ctx({ srsStore: {}, studyStats: validStats }) as never)).status).toBe(200);
+    expect(vi.mocked(putProgress).mock.calls[1][2].ladderProgress).toBeUndefined();
+  });
+
+  it.each([
+    ['an array', []],
+    ['null', null],
+    ['a negative count', { r1: -1 }],
+    ['a fractional count', { r1: 1.5 }],
+    ['a string count', { r1: '2' }],
+    ['an empty rung id', { '': 1 }],
+    ['an over-long rung id', { ['r'.repeat(MAX_RUNG_ID_LENGTH + 1)]: 1 }],
+    [
+      'too many rungs',
+      Object.fromEntries(Array.from({ length: MAX_RUNGS + 1 }, (_, i) => [`r${i}`, 1])),
+    ],
+  ])('rejects ladder progress that is %s with 400', async (_label, ladderProgress) => {
+    const response = await PUT(
+      ctx({ srsStore: {}, studyStats: validStats, ladderProgress }) as never,
+    );
     expect(response.status).toBe(400);
     expect(putProgress).not.toHaveBeenCalled();
   });

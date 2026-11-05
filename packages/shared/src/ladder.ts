@@ -90,22 +90,24 @@ export function lockText(state: RungState): string {
   return `Opens after ${CLEAN_WRITES_TO_UNLOCK} clean writes of rung ${state.number - 1} (${so} of ${CLEAN_WRITES_TO_UNLOCK} so far).`;
 }
 
-function isProgress(v: unknown): v is LadderProgress {
+/** Rung ids, as data from storage or a request body: clean-write counts that are whole and not negative. */
+export function isLadderProgress(v: unknown): v is LadderProgress {
   if (typeof v !== 'object' || v === null || Array.isArray(v)) return false;
   return Object.values(v).every((n) => typeof n === 'number' && Number.isInteger(n) && n >= 0);
 }
 
 /**
  * Bind ladder progress to one app's storage key; neither app may read the
- * other's. Local only, like the attempt log: syncing waits on #196's sign-in
- * decision. A storage failure is swallowed, and a corrupt value reads as a
- * fresh ladder — the worst case is a locked rung the student can open anyway.
+ * other's. It syncs to a signed-in account (#196): rungs never close, so the
+ * merge is the larger count per rung (`mergeLadderProgress` in ./sync-merge).
+ * A storage failure is swallowed, and a corrupt value reads as a fresh ladder
+ * — the worst case is a locked rung the student can open anyway.
  */
 export function createLadderProgress(storageKey: string) {
   function loadLadderProgress(): LadderProgress {
     try {
       const raw: unknown = JSON.parse(localStorage.getItem(storageKey) ?? '{}');
-      return isProgress(raw) ? raw : {};
+      return isLadderProgress(raw) ? raw : {};
     } catch {
       return {};
     }

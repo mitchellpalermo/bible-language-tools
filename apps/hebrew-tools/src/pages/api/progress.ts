@@ -1,4 +1,5 @@
 import { createDb } from '@tools/db';
+import { isLadderProgress } from '@tools/shared/ladder';
 import { parseStudyStreak } from '@tools/shared/study-streak';
 import type { APIRoute } from 'astro';
 import { deleteProgress, getProgress, putProgress } from '../../lib/progress-store';
@@ -8,6 +9,10 @@ export const prerender = false;
 
 /** Reject request bodies larger than this (decoded bytes). */
 export const MAX_BODY_BYTES = 512 * 1024;
+
+/** The ladder has a handful of rungs; these bounds only stop a hostile body. */
+export const MAX_RUNGS = 200;
+export const MAX_RUNG_ID_LENGTH = 100;
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -38,7 +43,7 @@ const STATS_STRING_FIELDS = ['lastStreakDate', 'lastStudyDate'] as const;
  */
 function validatePayload(
   body: unknown,
-): Pick<ProgressPayload, 'srsStore' | 'studyStats' | 'studyStreak'> | null {
+): Pick<ProgressPayload, 'srsStore' | 'studyStats' | 'studyStreak' | 'ladderProgress'> | null {
   if (!isRecord(body)) return null;
 
   const { srsStore, studyStats } = body;
@@ -50,6 +55,15 @@ function validatePayload(
     const parsed = parseStudyStreak(body.studyStreak);
     if (!parsed) return null;
     studyStreak = parsed;
+  }
+
+  // Optional too, for the same reason.
+  const { ladderProgress } = body;
+  if (ladderProgress !== undefined) {
+    if (!isLadderProgress(ladderProgress)) return null;
+    const rungs = Object.keys(ladderProgress);
+    if (rungs.length > MAX_RUNGS) return null;
+    if (rungs.some((id) => id.length === 0 || id.length > MAX_RUNG_ID_LENGTH)) return null;
   }
 
   if (!isRecord(studyStats)) return null;
@@ -72,9 +86,9 @@ function validatePayload(
   // Every field above has been checked at runtime; the cast is what carries
   // that knowledge into the type system. Widen through `unknown` because the
   // validated records are structurally opaque to TypeScript.
-  return { srsStore, studyStats, studyStreak } as unknown as Pick<
+  return { srsStore, studyStats, studyStreak, ladderProgress } as unknown as Pick<
     ProgressPayload,
-    'srsStore' | 'studyStats' | 'studyStreak'
+    'srsStore' | 'studyStats' | 'studyStreak' | 'ladderProgress'
   >;
 }
 

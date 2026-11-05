@@ -9,7 +9,7 @@ the OAuth round trip, and keepalive pushes all behave differently locally.
 
 ## Before you start: how sync actually fires
 
-There are exactly three moments progress moves, and knowing which is which
+There are exactly four moments progress moves, and knowing which is which
 explains almost every surprising result:
 
 | Trigger | Operation | Direction |
@@ -17,10 +17,11 @@ explains almost every surprising result:
 | Sign-in (`/account/syncing`) | `pullAndMerge()` | server → merge → both |
 | "Sync now" on `/account` | `pullAndMerge()` | server → merge → both |
 | Tab hidden (any page, signed in) | `push()` | local → server, no client-side merge |
+| Page load (any page, signed in) | `drainOwedAttempts()` | attempts owed since the last push → server; usually nothing |
 
 The third sends this browser's localStorage as-is — it is a one-shot keepalive
 request and cannot pull first. Nothing pulls on ordinary page load either, only
-on sign-in and "Sync now."
+on sign-in and "Sync now." The fourth only ever pushes attempts (test 19).
 
 **The server merges on write**, which is what makes that safe. `PUT
 /api/progress` merges the incoming payload into what is stored rather than
@@ -495,6 +496,65 @@ done." After step 3, both devices still read 1 day, and `/api/progress` has
 
 **Watch for:** 40 winning in step 3 — that is the merge picking by number.
 Also run test 15: the new columns must stay at their defaults on greek rows.
+
+---
+
+### 19. Ladder rungs and drill history follow the student
+
+**Why:** the suffix ladder and the attempt log (#196) are the first synced data
+that is not in the SRS store. The ladder rides in `/api/progress` and merges by
+the larger count per rung. The attempt log goes to `/api/attempts` on its own,
+in batches, and a push sends only what was logged since the last one, so this
+is the test that a real tab switch on a real iPad carries it.
+
+Use the iPad as **A** if you have it: the session-end push is the trigger most
+likely to differ there.
+
+Inspect both with, in the console:
+
+```js
+const log = JSON.parse(localStorage.getItem('hebrew-tools-attempts-v1') || '[]');
+console.table({
+  attempts: log.length,
+  newest: log.at(-1)?.concept,
+  cursor: localStorage.getItem('hebrew-tools-attempts-pushed-through'),
+  ladder: localStorage.getItem('hebrew-tools-suffix-ladder-v1'),
+});
+```
+
+1. On **A**, open `/paradigms` → Suffix ladder, and write rung 1 as a Full
+   table, exactly right, twice. The results read "Rung 2 is open."
+2. On **A**, open `/accent-shift` and answer three steps. Note `attempts` and
+   `newest` from the snippet.
+3. On **A**, switch to another app or tab (the session-end push), wait a few
+   seconds, and come back. Visit `https://hebrew.tools/api/attempts`.
+4. On **B**, click **Sync now**, then open `/paradigms` → Suffix ladder and
+   run the snippet.
+5. On **B**, write rung 2 cleanly once and click **Sync now**. On **A**, click
+   **Sync now** and open the Suffix ladder.
+6. On **A**, on `/account`, reset SRS progress (type RESET). Then visit
+   `/api/attempts` and `/api/progress` again.
+
+**Expect:** after step 3, `/api/attempts` lists every attempt from step 2, with
+the `id`s in A's log, and `cursor` on A is a recent timestamp. After step 4, B
+shows rung 2 open and the same `attempts` count and `newest` concept as A. After
+step 5, A shows rung 2 at 1 of 2 clean writes. After step 6, A's ladder and
+attempt count are unchanged, `/api/progress` still has `ladderProgress`, and
+`/api/attempts` lists the whole log again (the reset deletes it and the push
+straight after puts it back).
+
+**Watch for:** an empty `/api/attempts` after step 3 — the keepalive push did
+not send them. Reload any page on A: the page-load drain should send them, and
+if it does, the keepalive half is what failed. A rung that is open on one device
+and locked on the other after both synced. Any attempt count on B larger than
+A's, which would mean an attempt arrived twice under two ids. Also run test 15:
+`attempts` and `ladder_progress` rows must all carry `language = 'hebrew'`:
+
+```bash
+cd apps/hebrew-tools
+pnpm wrangler d1 execute bible-language-tools --remote \
+  --command "SELECT 'attempts', language, COUNT(*) FROM attempts GROUP BY language UNION ALL SELECT 'ladder', language, COUNT(*) FROM ladder_progress GROUP BY language"
+```
 
 ---
 

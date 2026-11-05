@@ -189,3 +189,104 @@ describe('0003: the Today study streak on study_stats', () => {
     ).toMatchObject({ streak: 13, total_reviewed: 4214, study_streak: 0, last_session_date: '' });
   });
 });
+
+describe('0004: the attempt log and ladder progress, as new tables', () => {
+  /** The database as 0003 left it, with Today streaks written by the code that shipped with it. */
+  function at0003() {
+    const built = createTestDbAt('0003');
+    seedExistingUsers(built.sqlite);
+    built.sqlite
+      .prepare(
+        "UPDATE study_stats SET study_streak = ?, last_session_date = ? WHERE user_id = ? AND language = 'hebrew'",
+      )
+      .run(6, '2026-11-02', 'hebrew-only');
+    return built;
+  }
+
+  it('changes no existing row, in any table, for either app', () => {
+    const { sqlite, migrateRest } = at0003();
+    const before = snapshot(sqlite);
+    migrateRest();
+    expect(snapshot(sqlite)).toEqual(before);
+    // The comparison had rows to check, including a 0003-era streak.
+    expect(before.srs_cards).toHaveLength(16);
+    expect(before.study_stats).toContainEqual(
+      expect.objectContaining({ user_id: 'hebrew-only', study_streak: 6 }),
+    );
+  });
+
+  it('leaves every existing table its exact shape', () => {
+    const { sqlite, migrateRest } = at0003();
+    const shapes = Object.fromEntries(TABLES.map((t) => [t, columns(sqlite, t)]));
+    migrateRest();
+    for (const table of TABLES) expect(columns(sqlite, table), table).toEqual(shapes[table]);
+  });
+
+  it('adds the two tables, empty, keyed by user, language and their own id', () => {
+    const { sqlite, migrateRest } = at0003();
+    migrateRest();
+    expect(sqlite.prepare('SELECT COUNT(*) AS n FROM attempts').get()).toEqual({ n: 0 });
+    expect(sqlite.prepare('SELECT COUNT(*) AS n FROM ladder_progress').get()).toEqual({ n: 0 });
+
+    const key = (table: string) =>
+      columns(sqlite, table)
+        .filter((c) => Number(c.pk) > 0)
+        .sort((a, b) => Number(a.pk) - Number(b.pk))
+        .map((c) => c.name);
+    expect(key('attempts')).toEqual(['user_id', 'language', 'id']);
+    expect(key('ladder_progress')).toEqual(['user_id', 'language', 'rung_id']);
+    expect(columns(sqlite, 'attempts')).toMatchObject([
+      { name: 'user_id', notnull: 1 },
+      { name: 'language', notnull: 1 },
+      { name: 'id', notnull: 1 },
+      { name: 'concept', notnull: 1 },
+      { name: 'correct', notnull: 1 },
+      { name: 'ms', notnull: 0 },
+      { name: 'confidence', notnull: 0 },
+      { name: 'at', notnull: 1 },
+    ]);
+  });
+
+  it('leaves the database consistent', () => {
+    const { sqlite, migrateRest } = at0003();
+    migrateRest();
+    expect(sqlite.prepare('PRAGMA integrity_check').all()).toEqual([{ integrity_check: 'ok' }]);
+    expect(sqlite.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
+  });
+
+  it('keeps the code before it working: its progress writes touch neither table', () => {
+    // The deploy migrates first and ships code second, so for a moment the old
+    // code (and greek.tools) writes progress as it always has.
+    const { sqlite, migrateRest } = at0003();
+    migrateRest();
+    sqlite.prepare("DELETE FROM study_stats WHERE user_id = 'both' AND language = 'hebrew'").run();
+    sqlite
+      .prepare(
+        'INSERT INTO study_stats (user_id, language, streak, last_streak_date, cards_studied_today, last_study_date, total_reviewed, total_correct, study_streak, last_session_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      )
+      .run('both', 'hebrew', 2, '2026-11-02', 5, '2026-11-02', 82, 64, 1, '2026-11-02');
+    expect(
+      sqlite
+        .prepare("SELECT * FROM study_stats WHERE user_id = 'both' AND language = 'hebrew'")
+        .get(),
+    ).toMatchObject({ streak: 2, total_reviewed: 82, study_streak: 1 });
+  });
+
+  it('removes a user’s attempts and rungs with the user', () => {
+    const { sqlite, migrateRest } = at0003();
+    migrateRest();
+    sqlite
+      .prepare(
+        "INSERT INTO attempts (user_id, language, id, concept, correct, ms, confidence, at) VALUES ('hebrew-only', 'hebrew', 'a1', 'paradigm/x', 1, NULL, NULL, 1)",
+      )
+      .run();
+    sqlite
+      .prepare(
+        "INSERT INTO ladder_progress (user_id, language, rung_id, clean_writes) VALUES ('hebrew-only', 'hebrew', 'suffix-bare-type1', 2)",
+      )
+      .run();
+    sqlite.prepare("DELETE FROM users WHERE id = 'hebrew-only'").run();
+    expect(sqlite.prepare('SELECT COUNT(*) AS n FROM attempts').get()).toEqual({ n: 0 });
+    expect(sqlite.prepare('SELECT COUNT(*) AS n FROM ladder_progress').get()).toEqual({ n: 0 });
+  });
+});

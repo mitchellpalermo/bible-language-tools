@@ -1,3 +1,5 @@
+import type { Attempt } from '@tools/shared/attempt-log';
+import type { LadderProgress } from '@tools/shared/ladder';
 import type { StudyStreakData } from '@tools/shared/study-streak';
 import type { SRSCard, StudyStats } from '../data/srs';
 
@@ -15,6 +17,21 @@ export interface ProgressPayload {
    * before it shipped can still push; the server always sends it back.
    */
   studyStreak?: StudyStreakData;
+  /**
+   * Clean writes per suffix-ladder rung (#186). Optional on the way in, like
+   * the streak; the server always sends it back.
+   */
+  ladderProgress?: LadderProgress;
   /** ISO timestamp, server-assigned on write. Client-provided values are ignored. */
   syncedAt: string;
+}
+
+/**
+ * `/api/attempts`: the attempt log travels on its own, append-only, because a
+ * full log is too large for the progress payload (see progress-store.ts).
+ * GET returns the newest `MAX_ATTEMPTS`; POST adds up to
+ * `MAX_ATTEMPTS_PER_REQUEST` and ignores ids the account already has.
+ */
+export interface AttemptsPayload {
+  attempts: Attempt[];
 }

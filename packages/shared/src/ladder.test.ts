@@ -3,6 +3,7 @@ import {
   CLEAN_WRITES_TO_UNLOCK,
   createLadderProgress,
   isCleanWrite,
+  isLadderProgress,
   lockText,
   newlyUnlocked,
   recordWrite,
@@ -79,6 +80,16 @@ describe('lockText', () => {
     const [, two] = rungStates(IDS, { one: 1 });
     expect(lockText(two)).toBe('Opens after 2 clean writes of rung 1 (1 of 2 so far).');
     expect(lockText({ ...two, belowWrites: 5 })).toContain('(2 of 2 so far)');
+  });
+});
+
+describe('isLadderProgress', () => {
+  it('accepts whole, non-negative counts and nothing else', () => {
+    expect(isLadderProgress({})).toBe(true);
+    expect(isLadderProgress({ one: 0, two: 3 })).toBe(true);
+    for (const bad of [null, [], 'x', { one: -1 }, { one: 1.5 }, { one: '2' }]) {
+      expect(isLadderProgress(bad), JSON.stringify(bad)).toBe(false);
+    }
   });
 });
 

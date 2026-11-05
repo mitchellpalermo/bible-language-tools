@@ -36,8 +36,9 @@ export function clearLocalSrs(): void {
 /**
  * Delete the account's copy, then push this browser's back.
  *
- * `DELETE /api/progress` removes the stats and the sync record along with the
- * cards, while this browser keeps its stats. Without the push, the account
+ * `DELETE /api/progress` removes the stats, the ladder, the attempt log and the
+ * sync record along with the cards, while this browser keeps all but the cards.
+ * The delete resets the attempt cursor, so the push sends the whole log back. Without the push, the account
  * would sit with no stats — and no record of ever having synced — until the
  * next session-end push. PUT merges server-side, so pushing an empty store
  * onto an empty account adds no cards back. The push's result does not decide

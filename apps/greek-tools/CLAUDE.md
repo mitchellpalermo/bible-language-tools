@@ -219,3 +219,4 @@ See `docs/adr/` for recorded decisions:
 - `002-github-issues-for-task-tracking.md` — why GitHub Issues replaced PRDs
 - `006-hydration-client-only-state.md` — why an island's first render must not depend on storage, and the test that enforces it (governs both apps)
 - `007-posthog-first-party-ingest-host.md` — why events go through `t.greek.tools`, and the build guard that enforces it
+- `008-cross-device-study-history.md` — why the attempt log and ladder progress sync for signed-in students (governs both apps; hebrew.tools first)
