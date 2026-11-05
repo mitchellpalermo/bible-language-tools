@@ -120,7 +120,7 @@ describe('0003: the Today study streak on study_stats', () => {
     const { sqlite, migrateRest } = createTestDbAt('0002');
     seedExistingUsers(sqlite);
     const before = snapshot(sqlite);
-    migrateRest();
+    migrateRest('0003');
     const after = snapshot(sqlite);
 
     for (const table of TABLES) {
@@ -139,7 +139,7 @@ describe('0003: the Today study streak on study_stats', () => {
     const { sqlite, migrateRest } = createTestDbAt('0002');
     seedExistingUsers(sqlite);
     const before = snapshot(sqlite).study_stats;
-    migrateRest();
+    migrateRest('0003');
     const after = snapshot(sqlite).study_stats;
     expect(after).toEqual(
       before.map((row) => ({ ...row, study_streak: 0, last_session_date: '' })),
@@ -149,7 +149,7 @@ describe('0003: the Today study streak on study_stats', () => {
   it('only adds the two columns; every other table keeps its exact shape', () => {
     const { sqlite, migrateRest } = createTestDbAt('0002');
     const shapes = Object.fromEntries(TABLES.map((t) => [t, columns(sqlite, t)]));
-    migrateRest();
+    migrateRest('0003');
     for (const table of TABLES) {
       const now = columns(sqlite, table);
       if (table !== 'study_stats') {
@@ -167,7 +167,7 @@ describe('0003: the Today study streak on study_stats', () => {
   it('leaves the database consistent', () => {
     const { sqlite, migrateRest } = createTestDbAt('0002');
     seedExistingUsers(sqlite);
-    migrateRest();
+    migrateRest('0003');
     expect(sqlite.prepare('PRAGMA integrity_check').all()).toEqual([{ integrity_check: 'ok' }]);
     expect(sqlite.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
   });
@@ -177,7 +177,7 @@ describe('0003: the Today study streak on study_stats', () => {
     // code (and greek.tools until #197) writes rows that do not name them.
     const { sqlite, migrateRest } = createTestDbAt('0002');
     seedExistingUsers(sqlite);
-    migrateRest();
+    migrateRest('0003');
     sqlite.prepare("DELETE FROM study_stats WHERE user_id = 'greek-only'").run();
     sqlite
       .prepare(
@@ -206,7 +206,7 @@ describe('0004: the attempt log and ladder progress, as new tables', () => {
   it('changes no existing row, in any table, for either app', () => {
     const { sqlite, migrateRest } = at0003();
     const before = snapshot(sqlite);
-    migrateRest();
+    migrateRest('0004');
     expect(snapshot(sqlite)).toEqual(before);
     // The comparison had rows to check, including a 0003-era streak.
     expect(before.srs_cards).toHaveLength(16);
@@ -218,13 +218,13 @@ describe('0004: the attempt log and ladder progress, as new tables', () => {
   it('leaves every existing table its exact shape', () => {
     const { sqlite, migrateRest } = at0003();
     const shapes = Object.fromEntries(TABLES.map((t) => [t, columns(sqlite, t)]));
-    migrateRest();
+    migrateRest('0004');
     for (const table of TABLES) expect(columns(sqlite, table), table).toEqual(shapes[table]);
   });
 
   it('adds the two tables, empty, keyed by user, language and their own id', () => {
     const { sqlite, migrateRest } = at0003();
-    migrateRest();
+    migrateRest('0004');
     expect(sqlite.prepare('SELECT COUNT(*) AS n FROM attempts').get()).toEqual({ n: 0 });
     expect(sqlite.prepare('SELECT COUNT(*) AS n FROM ladder_progress').get()).toEqual({ n: 0 });
 
@@ -249,7 +249,7 @@ describe('0004: the attempt log and ladder progress, as new tables', () => {
 
   it('leaves the database consistent', () => {
     const { sqlite, migrateRest } = at0003();
-    migrateRest();
+    migrateRest('0004');
     expect(sqlite.prepare('PRAGMA integrity_check').all()).toEqual([{ integrity_check: 'ok' }]);
     expect(sqlite.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
   });
@@ -258,7 +258,7 @@ describe('0004: the attempt log and ladder progress, as new tables', () => {
     // The deploy migrates first and ships code second, so for a moment the old
     // code (and greek.tools) writes progress as it always has.
     const { sqlite, migrateRest } = at0003();
-    migrateRest();
+    migrateRest('0004');
     sqlite.prepare("DELETE FROM study_stats WHERE user_id = 'both' AND language = 'hebrew'").run();
     sqlite
       .prepare(
@@ -274,7 +274,7 @@ describe('0004: the attempt log and ladder progress, as new tables', () => {
 
   it('removes a user’s attempts and rungs with the user', () => {
     const { sqlite, migrateRest } = at0003();
-    migrateRest();
+    migrateRest('0004');
     sqlite
       .prepare(
         "INSERT INTO attempts (user_id, language, id, concept, correct, ms, confidence, at) VALUES ('hebrew-only', 'hebrew', 'a1', 'paradigm/x', 1, NULL, NULL, 1)",
@@ -288,5 +288,87 @@ describe('0004: the attempt log and ladder progress, as new tables', () => {
     sqlite.prepare("DELETE FROM users WHERE id = 'hebrew-only'").run();
     expect(sqlite.prepare('SELECT COUNT(*) AS n FROM attempts').get()).toEqual({ n: 0 });
     expect(sqlite.prepare('SELECT COUNT(*) AS n FROM ladder_progress').get()).toEqual({ n: 0 });
+  });
+});
+
+describe('0005: tombstones and an update time on custom_decks', () => {
+  /** The database as 0004 left it, with a greek deck written by the code before this change. */
+  function at0004() {
+    const built = createTestDbAt('0004');
+    seedExistingUsers(built.sqlite);
+    return built;
+  }
+
+  it('changes no existing value, in any table, for either app', () => {
+    const { sqlite, migrateRest } = at0004();
+    const before = snapshot(sqlite);
+    migrateRest();
+    const after = snapshot(sqlite);
+    for (const table of TABLES) {
+      expect(after[table], table).toHaveLength(before[table].length);
+      after[table].forEach((row, i) => {
+        expect(row, `${table} row ${i}`).toMatchObject(before[table][i]);
+      });
+    }
+    // The comparison had a deck to check.
+    expect(before.custom_decks).toHaveLength(1);
+  });
+
+  it('gives an existing deck an empty update time and no tombstone', () => {
+    const { sqlite, migrateRest } = at0004();
+    migrateRest();
+    expect(sqlite.prepare('SELECT * FROM custom_decks').all()).toEqual([
+      {
+        id: 'd1',
+        user_id: 'greek-only',
+        language: 'greek',
+        name: 'John 1',
+        word_keys: '["λόγος","καί"]',
+        created_at: '2026-09-01',
+        updated_at: '',
+        deleted_at: null,
+      },
+    ]);
+  });
+
+  it('only adds the two columns; every other table keeps its exact shape', () => {
+    const { sqlite, migrateRest } = at0004();
+    const shapes = Object.fromEntries(TABLES.map((t) => [t, columns(sqlite, t)]));
+    migrateRest();
+    for (const table of TABLES) {
+      const now = columns(sqlite, table);
+      if (table !== 'custom_decks') {
+        expect(now, table).toEqual(shapes[table]);
+        continue;
+      }
+      expect(now.slice(0, shapes[table].length)).toEqual(shapes[table]);
+      expect(now.slice(shapes[table].length)).toMatchObject([
+        { name: 'updated_at', type: 'TEXT', notnull: 1, dflt_value: "''" },
+        { name: 'deleted_at', type: 'TEXT', notnull: 0, dflt_value: null },
+      ]);
+    }
+  });
+
+  it('leaves the database consistent', () => {
+    const { sqlite, migrateRest } = at0004();
+    migrateRest();
+    expect(sqlite.prepare('PRAGMA integrity_check').all()).toEqual([{ integrity_check: 'ok' }]);
+    expect(sqlite.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
+  });
+
+  it('still accepts a deck row written without the new columns, as greek.tools does', () => {
+    // The deploy migrates first and ships code second, and greek.tools does not
+    // name the columns at all.
+    const { sqlite, migrateRest } = at0004();
+    migrateRest();
+    sqlite
+      .prepare(
+        'INSERT INTO custom_decks (id, user_id, language, name, word_keys, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+      )
+      .run('d2', 'both', 'greek', 'Romans 8', '["πνεῦμα"]', '2026-10-01');
+    expect(sqlite.prepare("SELECT * FROM custom_decks WHERE id = 'd2'").get()).toMatchObject({
+      updated_at: '',
+      deleted_at: null,
+    });
   });
 });

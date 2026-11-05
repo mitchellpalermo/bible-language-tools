@@ -1,6 +1,8 @@
+import type { CustomDeck } from '@tools/shared/custom-decks';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   DEFAULT_SELECTION,
+  effectiveSelection,
   loadSelection,
   normalizeSelection,
   saveSelection,
@@ -21,6 +23,7 @@ describe('normalizeSelection', () => {
   it('keeps a valid selection intact', () => {
     const input = {
       deck: 'garrett-derouchie',
+      customDeckId: null,
       chapters: [1, 2, 3],
       categories: ['core', 'proper'],
     };
@@ -64,6 +67,7 @@ describe('loadSelection / saveSelection', () => {
   it('round-trips a selection', () => {
     const selection = {
       deck: 'garrett-derouchie' as const,
+      customDeckId: null,
       chapters: [4, 5],
       categories: ['core' as const],
     };
@@ -97,5 +101,54 @@ describe('loadSelection / saveSelection', () => {
       throw new Error('SecurityError');
     });
     expect(loadSelection()).toEqual(DEFAULT_SELECTION);
+  });
+});
+
+describe('a custom deck in the selection', () => {
+  it('keeps a custom deck that names itself', () => {
+    expect(normalizeSelection({ deck: 'custom', customDeckId: 'd1' })).toMatchObject({
+      deck: 'custom',
+      customDeckId: 'd1',
+    });
+  });
+
+  it('falls back to the whole vocabulary when no deck is named', () => {
+    for (const customDeckId of [undefined, null, '', 7]) {
+      expect(normalizeSelection({ deck: 'custom', customDeckId }).deck).toBe('all');
+    }
+  });
+
+  it('forgets a deck id once another deck is chosen', () => {
+    expect(normalizeSelection({ deck: 'all', customDeckId: 'd1' }).customDeckId).toBeNull();
+  });
+
+  it('round-trips through storage', () => {
+    const selection = { ...DEFAULT_SELECTION, deck: 'custom' as const, customDeckId: 'd1' };
+    saveSelection(selection);
+    expect(loadSelection()).toEqual(selection);
+  });
+
+  describe('effectiveSelection', () => {
+    const live: CustomDeck = {
+      id: 'd1',
+      name: 'Mine',
+      wordKeys: ['a'],
+      createdAt: '2026-11-01T00:00:00.000Z',
+    };
+    const gone: CustomDeck = { ...live, wordKeys: [], deletedAt: '2026-11-02T00:00:00.000Z' };
+    const picked = { ...DEFAULT_SELECTION, deck: 'custom' as const, customDeckId: 'd1' };
+
+    it('leaves a selection whose deck exists alone', () => {
+      expect(effectiveSelection(picked, [live])).toBe(picked);
+    });
+
+    it('leaves a non-custom selection alone', () => {
+      expect(effectiveSelection(DEFAULT_SELECTION, [])).toBe(DEFAULT_SELECTION);
+    });
+
+    it('falls back to the whole vocabulary when the deck was deleted or never arrived', () => {
+      expect(effectiveSelection(picked, [gone])).toMatchObject({ deck: 'all', customDeckId: null });
+      expect(effectiveSelection(picked, [])).toMatchObject({ deck: 'all', customDeckId: null });
+    });
   });
 });

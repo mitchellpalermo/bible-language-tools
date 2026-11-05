@@ -10,6 +10,7 @@ import {
   saveStats,
 } from '../data/srs';
 import { loadAttempts, logAttempts } from '../lib/attempt-log';
+import { customDeckStore } from '../lib/custom-decks';
 import { loadLadderProgress, saveLadderProgress } from '../lib/suffix-ladder';
 import { ATTEMPT_CURSOR_KEY } from '../lib/sync-manager';
 import ResetProgress, { ERASES } from './ResetProgress';
@@ -71,7 +72,7 @@ describe('hebrew.tools ResetProgress', () => {
     expect(panel).toHaveTextContent(/Paradigm quiz/);
     expect(panel).toHaveTextContent(/Accent-shift trainer/);
     expect(panel).toHaveTextContent(
-      'Kept: your streaks, accuracy stats, deck choices and suffix ladder rungs.',
+      'Kept: your streaks, accuracy stats, deck choices, custom decks and suffix ladder rungs.',
     );
     expect(ERASES).toHaveLength(5);
   });
@@ -85,6 +86,15 @@ describe('hebrew.tools ResetProgress', () => {
     );
     expect(loadSRSStore()).toEqual({});
     expect(loadStats()).toMatchObject({ totalReviewed: 120, totalCorrect: 100 });
+  });
+
+  it('leaves custom decks alone: they are the student’s own work, not progress', async () => {
+    customDeckStore.create('Genesis 1', ['אָב']);
+    render(<ResetProgress signedIn={false} />);
+    await confirmReset();
+
+    await screen.findByRole('status');
+    expect(customDeckStore.load().map((d) => d.name)).toEqual(['Genesis 1']);
   });
 
   it('never calls the server for a signed-out visitor', async () => {

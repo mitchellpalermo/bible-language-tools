@@ -151,6 +151,13 @@ export const syncState = sqliteTable(
   (t) => [primaryKey({ columns: [t.userId, t.language] })],
 );
 
+// A deck is a name and a set of word keys (@tools/shared/custom-decks). The
+// last two columns were added for hebrew.tools' sync (#225): `updated_at` picks
+// the winner when two devices edited a deck, and `deleted_at` marks a deleted
+// deck as a tombstone so a stale device cannot bring it back. Both default so
+// the code that wrote rows before them (greek.tools) keeps working: it leaves
+// `updated_at` empty, which the merge reads as "the creation time", and never
+// writes a tombstone.
 export const customDecks = sqliteTable('custom_decks', {
   id: text('id').primaryKey(),
   userId: text('user_id')
@@ -160,6 +167,8 @@ export const customDecks = sqliteTable('custom_decks', {
   name: text('name').notNull(),
   wordKeys: text('word_keys').notNull(),
   createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull().default(''),
+  deletedAt: text('deleted_at'),
 });
 
 export const focusPassages = sqliteTable(

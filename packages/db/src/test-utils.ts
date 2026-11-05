@@ -43,8 +43,12 @@ export function createTestDbAt(lastApplied: string) {
   return {
     sqlite,
     db: drizzle(sqlite, { schema }),
-    migrateRest() {
-      for (const file of files.slice(cut + 1)) applyMigration(sqlite, file);
+    /** Apply what is left, or only up to and including `through` (a prefix, like `lastApplied`). */
+    migrateRest(through?: string) {
+      const end =
+        through === undefined ? files.length : files.findIndex((f) => f.startsWith(through)) + 1;
+      if (end === 0) throw new Error(`No migration named ${through}`);
+      for (const file of files.slice(cut + 1, end)) applyMigration(sqlite, file);
     },
   };
 }

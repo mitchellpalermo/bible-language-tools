@@ -6,6 +6,7 @@
 
 import {
   attempts as attemptsTable,
+  customDecks as customDecksTable,
   ladderProgress as ladderProgressTable,
   srsCards,
   studyStats as studyStatsTable,
@@ -14,6 +15,7 @@ import {
 } from '@tools/db/schema';
 import { createTestDb, createTestDbAt } from '@tools/db/test-utils';
 import { type Attempt, MAX_ATTEMPTS } from '@tools/shared/attempt-log';
+import { type CustomDeck, TOMBSTONE_TTL_DAYS } from '@tools/shared/custom-decks';
 import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { SRSCard, StudyStats } from '../data/srs';
@@ -655,5 +657,215 @@ describe('an account synced before migration 0004', () => {
     expect(progress?.studyStreak).toEqual({ streak: 3, lastSessionDate: '2026-11-02' });
     expect(Object.keys(progress?.srsStore ?? {})).toEqual(['מֶלֶךְ']);
     expect(await getAttempts(migrated, 'u')).toEqual([attempt('a', 1)]);
+  });
+});
+
+describe('custom decks', () => {
+  const deck = (over: Partial<CustomDeck> = {}): CustomDeck => ({
+    id: 'deck-1',
+    name: 'Genesis 1',
+    wordKeys: ['אֵם', 'אָב'],
+    createdAt: '2026-11-01T00:00:00.000Z',
+    updatedAt: '2026-11-01T00:00:00.000Z',
+    ...over,
+  });
+  const base = { srsStore: {}, studyStats: stats() };
+  const tombstone = (over: Partial<CustomDeck> = {}) =>
+    deck({
+      wordKeys: [],
+      updatedAt: '2026-11-03T00:00:00.000Z',
+      deletedAt: '2026-11-03T00:00:00.000Z',
+      ...over,
+    });
+  const recent = () => new Date(Date.now() - 86_400_000).toISOString();
+  const raw = () => db as never as ReturnType<typeof createTestDb>;
+
+  it('reads back empty when none were sent', async () => {
+    await putProgress(db, USER, base);
+    expect((await getProgress(db, USER))?.customDecks).toEqual([]);
+  });
+
+  it('round-trips a deck with its words, stamps and tombstone', async () => {
+    const live = deck();
+    const gone = tombstone({ id: 'deck-2', name: 'Old', deletedAt: recent(), updatedAt: recent() });
+    await putProgress(db, USER, { ...base, customDecks: [live, gone] });
+    expect((await getProgress(db, USER))?.customDecks).toEqual([live, gone]);
+  });
+
+  it('stores the words as JSON in the existing column', async () => {
+    await putProgress(db, USER, { ...base, customDecks: [deck()] });
+    const [row] = raw().select().from(customDecksTable).all();
+    expect(JSON.parse(row.wordKeys)).toEqual(['אֵם', 'אָב']);
+    expect(row).toMatchObject({ language: 'hebrew', userId: USER, deletedAt: null });
+  });
+
+  it('round-trips more decks than one insert chunk', async () => {
+    const many = Array.from({ length: 30 }, (_, i) =>
+      deck({ id: `d${String(i).padStart(2, '0')}`, name: `Deck ${i}` }),
+    );
+    await putProgress(db, USER, { ...base, customDecks: many });
+    expect((await getProgress(db, USER))?.customDecks).toHaveLength(30);
+  });
+
+  it('merges with what is stored: a deck from another device is not lost', async () => {
+    await putProgress(db, USER, { ...base, customDecks: [deck()] });
+    await putProgress(db, USER, { ...base, customDecks: [deck({ id: 'deck-2', name: 'Two' })] });
+    const ids = (await getProgress(db, USER))?.customDecks?.map((d) => d.id).sort();
+    expect(ids).toEqual(['deck-1', 'deck-2']);
+  });
+
+  it('keeps a deck deleted when a stale client pushes it back', async () => {
+    await putProgress(db, USER, { ...base, customDecks: [deck()] });
+    await putProgress(db, USER, {
+      ...base,
+      customDecks: [tombstone({ deletedAt: recent(), updatedAt: recent() })],
+    });
+    // A device that was offline holds the deck as it was.
+    await putProgress(db, USER, { ...base, customDecks: [deck()] });
+    const [only] = (await getProgress(db, USER))?.customDecks ?? [];
+    expect(only.deletedAt).toBeDefined();
+    expect(only.wordKeys).toEqual([]);
+  });
+
+  it('accepts a newer edit and ignores an older one', async () => {
+    await putProgress(db, USER, {
+      ...base,
+      customDecks: [deck({ name: 'New', updatedAt: '2026-11-04T00:00:00.000Z' })],
+    });
+    await putProgress(db, USER, { ...base, customDecks: [deck({ name: 'Old' })] });
+    expect((await getProgress(db, USER))?.customDecks?.[0].name).toBe('New');
+  });
+
+  it('keeps decks when a page from before decks synced pushes without them', async () => {
+    await putProgress(db, USER, { ...base, customDecks: [deck()] });
+    await putProgress(db, USER, base);
+    expect((await getProgress(db, USER))?.customDecks).toHaveLength(1);
+  });
+
+  it('drops a tombstone older than the TTL', async () => {
+    const old = new Date(Date.now() - (TOMBSTONE_TTL_DAYS + 1) * 86_400_000).toISOString();
+    await putProgress(db, USER, {
+      ...base,
+      customDecks: [tombstone({ deletedAt: old, updatedAt: old }), deck({ id: 'live' })],
+    });
+    expect((await getProgress(db, USER))?.customDecks?.map((d) => d.id)).toEqual(['live']);
+  });
+
+  it('survives deleteProgress: decks are the student’s own work, not progress', async () => {
+    await putProgress(db, USER, { ...base, customDecks: [deck()] });
+    await deleteProgress(db, USER);
+    await putProgress(db, USER, base);
+    expect((await getProgress(db, USER))?.customDecks).toHaveLength(1);
+  });
+
+  it('keeps each user’s decks apart', async () => {
+    await putProgress(db, USER, { ...base, customDecks: [deck()] });
+    await putProgress(db, OTHER_USER, base);
+    expect((await getProgress(db, OTHER_USER))?.customDecks).toEqual([]);
+  });
+
+  it('never reads or writes greek.tools’ decks', async () => {
+    raw()
+      .insert(customDecksTable)
+      .values({
+        id: 'greek-deck',
+        userId: USER,
+        language: 'greek',
+        name: 'John 1',
+        wordKeys: '["λόγος"]',
+        createdAt: '2026-09-01T00:00:00.000Z',
+      })
+      .run();
+    await putProgress(db, USER, { ...base, customDecks: [deck()] });
+    expect((await getProgress(db, USER))?.customDecks?.map((d) => d.id)).toEqual(['deck-1']);
+    const greek = raw()
+      .select()
+      .from(customDecksTable)
+      .all()
+      .filter((r) => r.language === 'greek');
+    expect(greek).toEqual([
+      expect.objectContaining({ id: 'greek-deck', name: 'John 1', updatedAt: '', deletedAt: null }),
+    ]);
+  });
+
+  it('skips a stored row that is not a deck instead of failing the sync', async () => {
+    await putProgress(db, USER, { ...base, customDecks: [deck()] });
+    raw()
+      .insert(customDecksTable)
+      .values({
+        id: 'broken',
+        userId: USER,
+        language: 'hebrew',
+        name: 'x'.repeat(200),
+        wordKeys: '[]',
+        createdAt: '2026-09-01T00:00:00.000Z',
+      })
+      .run();
+    expect((await getProgress(db, USER))?.customDecks?.map((d) => d.id)).toEqual(['deck-1']);
+  });
+
+  it('reads a bad word list as no words', async () => {
+    await putProgress(db, USER, base);
+    raw()
+      .insert(customDecksTable)
+      .values({
+        id: 'bad-json',
+        userId: USER,
+        language: 'hebrew',
+        name: 'Bad JSON',
+        wordKeys: '{not json',
+        createdAt: '2026-09-01T00:00:00.000Z',
+      })
+      .run();
+    expect((await getProgress(db, USER))?.customDecks).toMatchObject([
+      { id: 'bad-json', wordKeys: [] },
+    ]);
+  });
+});
+
+describe('an account with a greek deck written before migration 0005', () => {
+  it('reads hebrew decks as empty and never alters the greek row', async () => {
+    const { sqlite, db: oldDb, migrateRest } = createTestDbAt('0004');
+    sqlite
+      .prepare("INSERT INTO users (id, email, created_at) VALUES ('u', 'u@example.com', 0)")
+      .run();
+    sqlite
+      .prepare(
+        "INSERT INTO custom_decks (id, user_id, language, name, word_keys, created_at) VALUES ('g', 'u', 'greek', 'John 1', '[\"λόγος\"]', '2026-09-01')",
+      )
+      .run();
+    sqlite
+      .prepare(
+        "INSERT INTO sync_state (user_id, language, synced_at) VALUES ('u', 'hebrew', '2026-11-02T09:00:00.000Z')",
+      )
+      .run();
+    migrateRest();
+    const migrated = oldDb as unknown as ProgressDb;
+    expect((await getProgress(migrated, 'u'))?.customDecks).toEqual([]);
+    await putProgress(migrated, 'u', {
+      srsStore: {},
+      studyStats: stats(),
+      customDecks: [
+        {
+          id: 'h',
+          name: 'Mine',
+          wordKeys: ['אָב'],
+          createdAt: '2026-11-01T00:00:00.000Z',
+          updatedAt: '2026-11-01T00:00:00.000Z',
+        },
+      ],
+    });
+    expect(sqlite.prepare("SELECT * FROM custom_decks WHERE language = 'greek'").all()).toEqual([
+      {
+        id: 'g',
+        user_id: 'u',
+        language: 'greek',
+        name: 'John 1',
+        word_keys: '["λόγος"]',
+        created_at: '2026-09-01',
+        updated_at: '',
+        deleted_at: null,
+      },
+    ]);
   });
 });

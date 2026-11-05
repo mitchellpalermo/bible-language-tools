@@ -36,6 +36,13 @@
       "when": 1793674429171,
       "tag": "0004_attempts_ladder_sync",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1793900505823,
+      "tag": "0005_custom_decks_tombstones",
+      "breakpoints": true
     }
   ]
 }
