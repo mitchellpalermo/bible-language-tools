@@ -61,6 +61,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/sync-merge` | Merge rules for cross-device sync: SRS cards, study stats, the attempt log (`mergeAttempts`, a union by id) and ladder progress (`mergeLadderProgress`, max per rung) |
 | `@tools/shared/quiz-settings` | `createQuizSettings(storageKey, overrides?)` factory for persisting quiz difficulty; `overrides` sets one app's defaults |
 | `@tools/shared/paradigm-quiz` | The paradigm quiz engine — `TableModel`, `getQuizCells`, `applyDensity`. Which tables exist and how an answer is graded stay in each app |
+| `@tools/shared/custom-decks` | Custom flashcard decks (#225): the `CustomDeck` shape, `createCustomDeckStore(storageKey)`, `mergeCustomDecks` (with tombstones), `parseDeck`/`parseDeckList` for storage and request bodies, and the selection helpers `findDeck`, `wordsInDeck`, `deckRestartPart`. See "Custom decks" below |
 | `@tools/shared/flashcard-settings` | `createFlashcardSettings(storageKey)` factory for what the flashcard face shows before you answer |
 | `@tools/shared/flashcard-session` | `shuffle`, `nextRound` and `requeueMissed` — pure flashcard queue rules: Endless mode's reshuffle, and the drill modes' re-queue of a missed card. Used through `use-flashcard-session` |
 | `@tools/shared/use-flashcard-session` | `useFlashcardSession<T>()` — the flashcard session engine: dealing, SRS grading, drills, Endless, typed answers, the keyboard. Both apps' `Flashcards.tsx` run on it. See "The flashcard session engine" below |
@@ -80,6 +81,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/components/WritingGrid` | The row of per-letter guide boxes a word is written into (React) |
 | `@tools/shared/components/SiteNav.astro` | The site navigation for both apps (see below) |
 | `@tools/shared/components/MorphWordmark.astro` | The footer's "hebrew tools" / "greek tools" that slides into the original language on hover (see "Clipping boxes size from their content" below) |
+| `@tools/shared/components/DeckBuilder` | List, create, edit and delete custom decks over a vocabulary the app passes in (React; inline-styled, accent passed in) |
 | `@tools/shared/components/GradeButtons` | The Again/Hard/Good/Easy answer row, with per-grade interval previews (React) |
 | `@tools/shared/components/DrillButtons` | The Missed / Got it answer row for the drill modes, which schedule nothing (React) |
 | `@tools/shared/components/ResetProgress` | The account page's "Danger zone": open, type RESET, erase. Each app wraps it in `src/components/ResetProgress.tsx` with its own list of what is erased and kept (React) |
@@ -452,7 +454,69 @@ and calls `DELETE /api/progress` when signed in. Three things to know:
 - **The same gap exists for greek's deck deletion.** `deleteCustomDeck` is
   local-only and `mergeCustomDecks` is a union, so a deleted deck that the
   account still holds can come back on the next pull. Closing it properly needs
-  tombstones, not another `DELETE`.
+  tombstones, not another `DELETE`. hebrew.tools did that (#225, see "Custom
+  decks" below); greek.tools gets it by adopting the shared module.
+
+## Custom decks
+
+A custom deck is a name and a set of SRS store keys, so it is a *selection* and
+never owns progress: a word reviewed through a deck, a textbook chapter or the
+whole vocabulary moves one card. hebrew.tools has them (#225); the storage
+factory, the merge and the builder are in `@tools/shared/custom-decks` and
+`@tools/shared/components/DeckBuilder`, bound per app by a storage key
+(`hebrew-tools-custom-decks-v1`, in `apps/hebrew-tools/src/lib/custom-decks.ts`).
+
+- **Deleting leaves a tombstone, on purpose.** The sync merge is a union, so a
+  plain delete comes back from any device that still holds the deck. A delete
+  therefore keeps the row with `deletedAt` set and no words, and the merge
+  treats it as the newest edit. Decision (Nov 2026): tombstones, not "live with
+  the gap" as greek.tools does today. The costs are small and named:
+  - **Per deck, the later `updatedAt` wins, whole.** A rename on one device and
+    a word added on another do not combine. A deck edited *after* its deletion
+    elsewhere comes back; one edited before does not. A tie goes to the delete.
+    The comparison is between two devices' clocks; a badly wrong clock can make
+    a stale edit win, which costs one deck an older word list and no reviews.
+  - **Tombstones are pruned after `TOMBSTONE_TTL_DAYS` (180)**, in the merge, on
+    the server and on the client. A device offline for longer than that and still
+    holding the deck brings it back.
+  - **The tombstone rides in the payload** (`ProgressPayload.customDecks`), so
+    `PUT /api/progress` is how a deck is deleted. This is the one thing PUT
+    removes; cards still go only through `DELETE`.
+- **Decks are not progress.** `DELETE /api/progress` (the account reset, "Start
+  fresh") and `clearLocalProgress` leave them alone, and the reset's "keeps" list
+  says so. `putProgress` merges decks against the `custom_decks` table itself,
+  not against `getProgress()`, because that is null once `sync_state` is deleted
+  and the decks must outlive it. greek.tools' `DELETE` still removes its decks.
+- **`custom_decks` gained `updated_at` and `deleted_at` (migration 0005),**
+  additive, constant defaults (`''` and null), so greek.tools' inserts, which
+  name neither, keep working. An empty `updated_at` is read as `createdAt`.
+  `migrations.test.ts` has a 0005 block; its 0003 and 0004 blocks now call
+  `migrateRest('0003')` / `('0004')` so they keep testing their own migration,
+  not every one after it.
+- **The selection model is `DeckSelection` plus two shared helpers.**
+  `deck: 'all' | 'custom' | <textbook>` with `customDeckId`, which
+  `normalizeSelection` forces to null unless the deck is `'custom'`. A custom
+  deck that no longer exists (deleted here or on another device) resolves to the
+  whole vocabulary through `effectiveSelection`; **memoize its result**, because
+  the fallback is a new object each call and `/write`'s queue depends on it (an
+  unmemoized version looped the render until the worker ran out of memory).
+  `wordsInDeck` returns words in vocabulary order, not the order they were added.
+- **`restartKey` takes the id and the sorted words, never the name**
+  (`deckRestartPart`). Renaming a deck keeps the session; editing its words
+  deals a new one.
+- **Today's Session ignores the picked deck.** Due cards are due whatever deck is
+  open on `/flashcards`, and a deck that narrowed Today would leave a due card
+  unseen. `/write` word mode does follow the deck, through `wordsForSelection`.
+- **greek.tools has not adopted this yet.** It keeps `customDecks.ts`,
+  `mergeCustomDecks` and its own `DeckBuilder`, which also builds decks from a
+  GNT book or a passage and needs its corpus. A compatibility test in
+  `customDecks.test.ts` pins that its decks parse and merge under the shared
+  rules. Adopting it gives greek tombstones and closes the deletion gap above.
+  #228 (textbook chapter decks on greek.tools) should build on `DeckSelection`
+  and `wordsInDeck` here rather than a second selection model.
+- **The builder lists at most 150 matches at once** (`VISIBLE_WORDS`); the search
+  box narrows them. It saves through the store and reports a failed write
+  instead of looking saved.
 
 ## Hydration: the first render matches the server's
 

@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SRSCard } from '../data/srs';
 import { loadSRSStore, loadStats, SRS_KEY, STATS_KEY } from '../data/srs';
 import { ATTEMPT_LOG_KEY, loadAttempts, logAttempts } from './attempt-log';
+import { CUSTOM_DECKS_KEY, customDeckStore } from './custom-decks';
 import { loadStudyStreak, STUDY_STREAK_KEY } from './study-streak';
 import { LADDER_PROGRESS_KEY, loadLadderProgress, saveLadderProgress } from './suffix-ladder';
 import {
@@ -640,5 +641,76 @@ describe('formatRelativeTime', () => {
     ['4 days ago', 4 * 24 * 60 * 60_000],
   ])('renders %s', (expected, elapsed) => {
     expect(formatRelativeTime(ago(elapsed), now)).toBe(expected);
+  });
+});
+
+describe('custom decks', () => {
+  it('reads them, tombstones included, and writes them back', () => {
+    const kept = customDeckStore.create('Kept', ['a']);
+    const dropped = customDeckStore.create('Dropped', ['b']);
+    customDeckStore.remove(dropped.id);
+
+    const snapshot = readLocalProgress();
+    expect(snapshot.customDecks?.map((d) => d.id).sort()).toEqual([kept.id, dropped.id].sort());
+
+    localStorage.clear();
+    writeLocalProgress({ srsStore: {}, studyStats: emptyStats, customDecks: snapshot.customDecks });
+    expect(customDeckStore.load().map((d) => d.name)).toEqual(['Kept']);
+    expect(customDeckStore.loadAll()).toHaveLength(2);
+  });
+
+  it('never loses a deck made while the pull was in flight', () => {
+    const mine = customDeckStore.create('Made meanwhile', ['a']);
+    writeLocalProgress({ srsStore: {}, studyStats: emptyStats, customDecks: [] });
+    expect(customDeckStore.load().map((d) => d.id)).toEqual([mine.id]);
+  });
+
+  it('a snapshot with no decks leaves the stored ones alone', () => {
+    customDeckStore.create('Mine', ['a']);
+    writeLocalProgress({ srsStore: {}, studyStats: emptyStats });
+    expect(customDeckStore.load()).toHaveLength(1);
+  });
+
+  it('syncs a deck to another device', async () => {
+    const { account } = fakeAccount();
+    customDeckStore.create('Genesis 1', ['a', 'b']);
+    await pullAndMerge();
+    expect((account.progress?.customDecks as unknown[]).length).toBe(1);
+
+    newDevice();
+    await pullAndMerge();
+    expect(customDeckStore.load().map((d) => d.name)).toEqual(['Genesis 1']);
+  });
+
+  it('keeps a deck deleted on one device deleted on the other, even from a stale copy', async () => {
+    const { account } = fakeAccount();
+    const deck = customDeckStore.create('Genesis 1', ['a']);
+    await pullAndMerge(); // device A uploads
+    const stale = localStorage.getItem(CUSTOM_DECKS_KEY) as string;
+
+    newDevice();
+    await pullAndMerge(); // device B has it
+    customDeckStore.remove(deck.id);
+    await pullAndMerge(); // device B deletes and syncs
+    expect(customDeckStore.load()).toEqual([]);
+
+    // Device A comes back with its week-old copy of the deck and syncs.
+    newDevice();
+    localStorage.setItem(CUSTOM_DECKS_KEY, stale);
+    expect(customDeckStore.load()).toHaveLength(1);
+    await pullAndMerge();
+    expect(customDeckStore.load()).toEqual([]);
+    const onServer = account.progress?.customDecks as Array<{ deletedAt?: string }>;
+    expect(onServer[0].deletedAt).toBeDefined();
+  });
+
+  it('survives "Start fresh": decks are not progress', async () => {
+    customDeckStore.create('Mine', ['a']);
+    const { account } = fakeAccount();
+    await pullAndMerge();
+    await deleteServerProgress();
+    clearLocalProgress();
+    expect(customDeckStore.load()).toHaveLength(1);
+    expect(account.progress).toBeNull();
   });
 });

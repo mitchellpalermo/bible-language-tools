@@ -73,7 +73,17 @@ describe('schema smoke tests', () => {
 
     const [result] = await db.select().from(customDecks).where(eq(customDecks.id, 'deck-1'));
 
-    expect(result).toEqual(deck);
+    // A row written without the tombstone columns takes their defaults.
+    expect(result).toEqual({ ...deck, updatedAt: '', deletedAt: null });
+
+    await db.insert(customDecks).values({
+      ...deck,
+      id: 'deck-2',
+      updatedAt: '2026-06-10T10:00:00.000Z',
+      deletedAt: '2026-06-10T10:00:00.000Z',
+    });
+    const [tomb] = await db.select().from(customDecks).where(eq(customDecks.id, 'deck-2'));
+    expect(tomb.deletedAt).toBe('2026-06-10T10:00:00.000Z');
   });
 
   it('cascades deletes from users to all progress tables', async () => {

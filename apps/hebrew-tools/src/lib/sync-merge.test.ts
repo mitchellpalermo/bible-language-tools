@@ -186,3 +186,37 @@ describe('mergeProgress and the suffix ladder', () => {
     expect(mergeProgress(base, base).ladderProgress).toEqual({});
   });
 });
+
+describe('mergeProgress and custom decks', () => {
+  const base = { srsStore: {}, studyStats: stats() };
+  const deck = (over = {}) => ({
+    id: 'd1',
+    name: 'Genesis 1',
+    wordKeys: ['a'],
+    createdAt: '2026-11-01T00:00:00.000Z',
+    updatedAt: '2026-11-01T00:00:00.000Z',
+    ...over,
+  });
+
+  it('unions decks, and treats a snapshot with none as having none', () => {
+    const merged = mergeProgress(
+      { ...base, customDecks: [deck()] },
+      { ...base, customDecks: [deck({ id: 'd2' })] },
+    );
+    expect(merged.customDecks?.map((d) => d.id)).toEqual(['d1', 'd2']);
+    expect(mergeProgress(base, { ...base, customDecks: [deck()] }).customDecks).toHaveLength(1);
+    expect(mergeProgress(base, base).customDecks).toEqual([]);
+  });
+
+  it('is symmetric, and a deletion survives', () => {
+    const tomb = deck({
+      wordKeys: [],
+      updatedAt: '2026-11-03T00:00:00.000Z',
+      deletedAt: '2026-11-03T00:00:00.000Z',
+    });
+    const ab = mergeProgress({ ...base, customDecks: [deck()] }, { ...base, customDecks: [tomb] });
+    const ba = mergeProgress({ ...base, customDecks: [tomb] }, { ...base, customDecks: [deck()] });
+    expect(ab.customDecks).toEqual(ba.customDecks);
+    expect(ab.customDecks?.[0].deletedAt).toBeDefined();
+  });
+});

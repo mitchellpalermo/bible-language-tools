@@ -31,6 +31,7 @@ import { newCard, nextSRS, recordReview, saveSRSStore, saveStats } from '../data
 import { cardKey, vocabulary } from '../data/vocabulary';
 import { buildDecks, writingCardKey } from '../data/writing';
 import { accentCardKey, SCAFFOLD_HISTORY_KEY } from '../lib/accent-shift';
+import { customDeckStore, deckKey } from '../lib/custom-decks';
 import { saveSelection } from '../lib/deck-selection';
 import { saveFlashcardSettings } from '../lib/flashcard-settings';
 import { buildTableModels, getQuizCells } from '../lib/paradigm-quiz';
@@ -76,7 +77,16 @@ function seedReturningStudent() {
   // Two suffix-ladder rungs climbed, so the ladder tab has open rungs past the first.
   saveLadderProgress({ suffixes: 2, sus: 2 });
   saveFlashcardSettings({ showPartOfSpeech: true });
-  saveSelection({ deck: 'garrett-derouchie', chapters: [2, 3], categories: ['core'] });
+  saveSelection({
+    deck: 'garrett-derouchie',
+    customDeckId: null,
+    chapters: [2, 3],
+    categories: ['core'],
+  });
+  // Two custom decks, one of them deleted: the deck chips, the builder's list
+  // and a tombstone in storage all differ from what the server rendered.
+  customDeckStore.create('Genesis 1', vocabulary.slice(0, 8).map(deckKey));
+  customDeckStore.remove(customDeckStore.create('Deleted', ['x']).id);
   setLastSyncedAt(new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString());
   markReadToday();
   // A Today session finished and a longer budget picked, so the streak line
@@ -119,6 +129,28 @@ afterEach(() => {
 describe('hydration for a returning student', () => {
   it.each(Object.keys(ISLANDS))('%s matches its server HTML', async (name) => {
     expect(await hydrationErrors(ISLANDS[name](), { seed: seedReturningStudent })).toEqual([]);
+  });
+});
+
+describe('hydration with a custom deck picked', () => {
+  // The deck selection is read by Flashcards and by /write's word mode, and
+  // Today deals due cards whatever is picked. All three must still match.
+  function seedCustomDeckPicked() {
+    seedReturningStudent();
+    const deck = customDeckStore.load()[0];
+    saveSelection({ deck: 'custom', customDeckId: deck.id, chapters: [], categories: ['core'] });
+  }
+
+  it.each(['Flashcards', 'Writing', 'TodaySession'])('%s matches its server HTML', async (name) => {
+    expect(await hydrationErrors(ISLANDS[name](), { seed: seedCustomDeckPicked })).toEqual([]);
+  });
+
+  it('also when the picked deck has since been deleted', async () => {
+    const seedGone = () => {
+      seedReturningStudent();
+      saveSelection({ deck: 'custom', customDeckId: 'gone', chapters: [], categories: ['core'] });
+    };
+    expect(await hydrationErrors(<Flashcards />, { seed: seedGone })).toEqual([]);
   });
 });
 

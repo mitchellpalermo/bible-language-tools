@@ -24,10 +24,12 @@ import {
 import { loadSRSStore, loadStats, SRS_KEY, STATS_KEY, saveSRSStore, saveStats } from '../data/srs';
 import { ATTEMPT_LOG_KEY, loadAttempts, saveAttempts } from './attempt-log';
 import { hasAuthHint } from './auth-cookie';
+import { customDeckStore } from './custom-decks';
 import { loadStudyStreak, STUDY_STREAK_KEY, saveStudyStreak } from './study-streak';
 import { LADDER_PROGRESS_KEY, loadLadderProgress, saveLadderProgress } from './suffix-ladder';
 import {
   mergeAttempts,
+  mergeCustomDecks,
   mergeLadderProgress,
   mergeProgress,
   type ProgressSnapshot,
@@ -84,6 +86,8 @@ export function readLocalProgress(): ProgressSnapshot {
     studyStats: loadStats(),
     studyStreak: loadStudyStreak(),
     ladderProgress: loadLadderProgress(),
+    // Tombstones too: they are how a deletion reaches the other devices.
+    customDecks: customDeckStore.loadAll(),
   };
 }
 
@@ -97,12 +101,21 @@ export function writeLocalProgress(snapshot: ProgressSnapshot): void {
   if (snapshot.ladderProgress) {
     saveLadderProgress(mergeLadderProgress(loadLadderProgress(), snapshot.ladderProgress));
   }
+  // Merged with what is stored now for the same reason: a deck made, edited or
+  // deleted while the pull was in flight must not be lost to it.
+  if (snapshot.customDecks) {
+    customDeckStore.saveAll(mergeCustomDecks(customDeckStore.loadAll(), snapshot.customDecks));
+  }
 }
 
 /**
- * Erase everything this device would sync — the "Start fresh" import option,
+ * Erase the progress this device would sync — the "Start fresh" import option,
  * which must leave nothing for the next push to upload. Throws if storage
  * cannot be written.
+ *
+ * Custom decks are not progress and are not erased, here or by the account
+ * reset: they are the student's own work, the server copy is left alone by
+ * `DELETE /api/progress` too, and the reset's "keeps" list says so.
  */
 export function clearLocalProgress(): void {
   for (const key of [

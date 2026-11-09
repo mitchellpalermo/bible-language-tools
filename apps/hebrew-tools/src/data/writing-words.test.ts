@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { deckKey } from '../lib/custom-decks';
 import { newCard, type SRSCard } from './srs';
 import { vocabulary } from './vocabulary';
 import type { HebrewVocabWord } from './vocabulary-types';
@@ -180,6 +181,26 @@ describe('wordsForSelection', () => {
         (w.chapters ?? []).some((c) => c.chapter === 2 && c.category === 'core'),
       ),
     ).toBe(true);
+  });
+});
+
+describe('wordsForSelection with a custom deck', () => {
+  const deck = {
+    id: 'd1',
+    name: 'Mine',
+    wordKeys: [] as string[],
+    createdAt: '2026-11-01T00:00:00.000Z',
+  };
+
+  it('is the deck’s words, whatever chapters are also selected', () => {
+    const some = wordsForSelection('all', [], ['core']).slice(0, 4);
+    const mine = { ...deck, wordKeys: some.map(deckKey) };
+    expect(wordsForSelection('custom', [2], ['core'], mine)).toEqual(some);
+  });
+
+  it('is empty without a deck, rather than the whole vocabulary', () => {
+    expect(wordsForSelection('custom', [], ['core'], null)).toEqual([]);
+    expect(wordsForSelection('custom', [], ['core'])).toEqual([]);
   });
 });
 

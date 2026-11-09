@@ -13,12 +13,14 @@
 import type * as schema from '@tools/db/schema';
 import {
   attempts as attemptsTable,
+  customDecks as customDecksTable,
   ladderProgress as ladderProgressTable,
   srsCards as srsCardsTable,
   studyStats as studyStatsTable,
   syncState as syncStateTable,
 } from '@tools/db/schema';
 import { type Attempt, MAX_ATTEMPTS } from '@tools/shared/attempt-log';
+import { type CustomDeck, mergeCustomDecks, parseDeck } from '@tools/shared/custom-decks';
 import type { LadderProgress } from '@tools/shared/ladder';
 import { emptyStudyStreak, type StudyStreakData } from '@tools/shared/study-streak';
 import { and, desc, eq, notInArray, sql } from 'drizzle-orm';
@@ -36,6 +38,8 @@ export type ProgressDb = BaseSQLiteDatabase<'sync' | 'async', unknown, typeof sc
 const SRS_CHUNK = 12;
 // ladder_progress has 4 columns → 25 rows per statement.
 const LADDER_CHUNK = 25;
+// custom_decks has 8 columns → 12 rows per statement.
+const DECK_CHUNK = 12;
 // Attempts go in as one JSON parameter per statement (see appendAttempts), so
 // the parameter limit does not bind. 250 keeps a statement under D1's 100 KB
 // limit even if the parameter counts toward it and every attempt is as long as
@@ -122,7 +126,61 @@ export async function getProgress(db: ProgressDb, userId: string): Promise<Progr
   const ladderProgress: LadderProgress = {};
   for (const row of rungRows) ladderProgress[row.rungId] = row.cleanWrites;
 
-  return { srsStore, studyStats, studyStreak, ladderProgress, syncedAt: state.syncedAt };
+  // Tombstones come back too: the client's merge needs them to keep a deleted
+  // deck deleted. Rows that do not parse are skipped rather than failing a sync.
+  const customDecks = await readCustomDecks(db, userId);
+
+  return {
+    srsStore,
+    studyStats,
+    studyStreak,
+    ladderProgress,
+    customDecks,
+    syncedAt: state.syncedAt,
+  };
+}
+
+/** Every deck stored for the user, tombstones included. Rows that are not decks are skipped. */
+async function readCustomDecks(db: ProgressDb, userId: string): Promise<CustomDeck[]> {
+  const rows = await db
+    .select()
+    .from(customDecksTable)
+    .where(and(eq(customDecksTable.userId, userId), eq(customDecksTable.language, LANGUAGE)));
+  return rows.flatMap((row) => {
+    const deck = parseDeck(deckFromRow(row));
+    return deck ? [deck] : [];
+  });
+}
+
+/** A stored row as the object `parseDeck` reads. `wordKeys` is JSON text in the column. */
+function deckFromRow(row: typeof customDecksTable.$inferSelect): unknown {
+  let wordKeys: unknown = [];
+  try {
+    wordKeys = JSON.parse(row.wordKeys);
+  } catch {
+    // Left empty; parseDeck then reads the deck as holding no words.
+  }
+  return {
+    id: row.id,
+    name: row.name,
+    wordKeys,
+    createdAt: row.createdAt,
+    // The column defaults to '' for a row written before it existed.
+    updatedAt: row.updatedAt || undefined,
+    deletedAt: row.deletedAt ?? undefined,
+  };
+}
+
+function rowFromDeck(userLang: { userId: string; language: typeof LANGUAGE }, deck: CustomDeck) {
+  return {
+    ...userLang,
+    id: deck.id,
+    name: deck.name,
+    wordKeys: JSON.stringify(deck.wordKeys),
+    createdAt: deck.createdAt,
+    updatedAt: deck.updatedAt ?? '',
+    deletedAt: deck.deletedAt ?? null,
+  };
 }
 
 /**
@@ -142,13 +200,20 @@ export async function getProgress(db: ProgressDb, userId: string): Promise<Progr
  * goes through deleteProgress() instead — that is what "Reset SRS" and the
  * "Start fresh" import option call.
  *
+ * Custom decks are the exception that proves the rule: they ARE deleted through
+ * PUT, as tombstones (a deck with `deletedAt`), which the merge treats as the
+ * newest edit. Tombstones older than TOMBSTONE_TTL_DAYS are dropped here.
+ *
  * sync_state is written last: its presence is what marks the account as having
  * synced, so it must not appear before the data it describes.
  */
 export async function putProgress(
   db: ProgressDb,
   userId: string,
-  payload: Pick<ProgressPayload, 'srsStore' | 'studyStats' | 'studyStreak' | 'ladderProgress'>,
+  payload: Pick<
+    ProgressPayload,
+    'srsStore' | 'studyStats' | 'studyStreak' | 'ladderProgress' | 'customDecks'
+  >,
 ): Promise<string> {
   const syncedAt = new Date().toISOString();
   const userLang = { userId, language: LANGUAGE };
@@ -162,6 +227,12 @@ export async function putProgress(
     rungId,
     cleanWrites,
   }));
+
+  // Decks merge against their own table, not `existing`: `existing` is null
+  // for an account whose sync record was deleted (the reset), and decks outlive
+  // that. This is also where tombstones past their TTL are dropped.
+  const decks = mergeCustomDecks(await readCustomDecks(db, userId), payload.customDecks ?? []);
+  const deckRows = decks.map((deck) => rowFromDeck(userLang, deck));
 
   const cardRows = Object.entries(merged.srsStore).map(([wordKey, card]) => ({
     ...userLang,
@@ -194,6 +265,10 @@ export async function putProgress(
       ),
     ...chunk(rungRows, LADDER_CHUNK).map((rows) => db.insert(ladderProgressTable).values(rows)),
     db
+      .delete(customDecksTable)
+      .where(and(eq(customDecksTable.userId, userId), eq(customDecksTable.language, LANGUAGE))),
+    ...chunk(deckRows, DECK_CHUNK).map((rows) => db.insert(customDecksTable).values(rows)),
+    db
       .delete(syncStateTable)
       .where(and(eq(syncStateTable.userId, userId), eq(syncStateTable.language, LANGUAGE))),
     db.insert(syncStateTable).values({ ...userLang, syncedAt }),
@@ -208,6 +283,9 @@ export async function putProgress(
  * fresh" import option. Everything synced goes, the attempt log and the ladder
  * included — a merge cannot express a deletion, so anything left here would
  * come back on the next pull. The reset then pushes back what it keeps.
+ *
+ * Custom decks are NOT deleted: they are the student's own work, not progress,
+ * and the account page says the reset keeps them.
  */
 export async function deleteProgress(db: ProgressDb, userId: string): Promise<void> {
   await runAtomic(db, [

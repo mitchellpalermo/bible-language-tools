@@ -1,5 +1,6 @@
 import InkCanvas from '@tools/shared/components/InkCanvas';
 import WritingGrid, { type WritingGridCell } from '@tools/shared/components/WritingGrid';
+import { type CustomDeck, findDeck } from '@tools/shared/custom-decks';
 import {
   type GlyphCluster,
   type GlyphMask,
@@ -39,7 +40,13 @@ import {
   wordScore,
   wordsForSelection,
 } from '../data/writing-words';
-import { type DeckSelection, loadSelection, saveSelection } from '../lib/deck-selection';
+import { customDeckStore } from '../lib/custom-decks';
+import {
+  type DeckSelection,
+  effectiveSelection,
+  loadSelection,
+  saveSelection,
+} from '../lib/deck-selection';
 import ErrorBoundary from './ErrorBoundary';
 
 /** Fisher-Yates. The queue shuffles within a band; see `buildWordQueue`. */
@@ -75,7 +82,17 @@ const MASK_OPTIONS = {
 function WordWritingInner() {
   const [srsStore, setSrsStore] = useState<Record<string, SRSCard>>(() => loadSRSStore());
   const [, setStats] = useState(() => loadStats());
-  const [selection, setSelection] = useState<DeckSelection>(() => loadSelection());
+  const [storedSelection, setSelection] = useState<DeckSelection>(() => loadSelection());
+  // The decks the student made on /flashcards. This tab only picks one; the
+  // builder lives there.
+  const [customDecks] = useState(() => customDeckStore.load());
+  // A deck deleted since it was picked falls back to every word.
+  // Memoized: a fallback is a new object, and `words` below depends on it.
+  const selection = useMemo(
+    () => effectiveSelection(storedSelection, customDecks),
+    [storedSelection, customDecks],
+  );
+  const customDeck = findDeck(customDecks, selection.customDeckId);
   const [prompt, setPrompt] = useState<WordPrompt>('gloss');
 
   const [index, setIndex] = useState(0);
@@ -89,8 +106,8 @@ function WordWritingInner() {
   const [penDetected, setPenDetected] = useState(false);
 
   const words = useMemo(
-    () => wordsForSelection(selection.deck, selection.chapters, selection.categories),
-    [selection],
+    () => wordsForSelection(selection.deck, selection.chapters, selection.categories, customDeck),
+    [selection, customDeck],
   );
 
   // Built once per session, not per review, so grading a word cannot reorder
@@ -227,6 +244,7 @@ function WordWritingInner() {
   const picker = (
     <DeckControls
       selection={selection}
+      customDecks={customDecks}
       prompt={prompt}
       promptable={countPromptable(words, prompt)}
       onChange={restart}
@@ -448,11 +466,13 @@ function WordWritingInner() {
  */
 function DeckControls({
   selection,
+  customDecks,
   prompt,
   promptable,
   onChange,
 }: {
   selection: DeckSelection;
+  customDecks: CustomDeck[];
   prompt: WordPrompt;
   promptable: number;
   onChange: (patch?: Partial<DeckSelection>, prompt?: WordPrompt) => void;
@@ -466,13 +486,21 @@ function DeckControls({
         <Chip
           label="All words"
           active={selection.deck === 'all'}
-          onClick={() => onChange({ deck: 'all', chapters: [] })}
+          onClick={() => onChange({ deck: 'all', customDeckId: null, chapters: [] })}
         />
         <Chip
           label={TEXTBOOKS[textbook].shortTitle}
           active={selection.deck === textbook}
-          onClick={() => onChange({ deck: textbook })}
+          onClick={() => onChange({ deck: textbook, customDeckId: null })}
         />
+        {customDecks.map((deck) => (
+          <Chip
+            key={deck.id}
+            label={deck.name}
+            active={selection.customDeckId === deck.id}
+            onClick={() => onChange({ deck: 'custom', customDeckId: deck.id })}
+          />
+        ))}
         <span className="text-xs text-text-muted ml-auto">{promptable} words</span>
       </div>
 

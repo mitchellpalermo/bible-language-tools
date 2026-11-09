@@ -5,6 +5,8 @@ import posthog from 'posthog-js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { daysFromNow, loadSRSStore, type SRSCard, saveSRSStore } from '../data/srs';
 import { vocabulary } from '../data/vocabulary';
+import { customDeckStore } from '../lib/custom-decks';
+import { saveSelection } from '../lib/deck-selection';
 import { buildTableModels, getQuizCells } from '../lib/paradigm-quiz';
 import { paradigmCardKey } from '../lib/paradigm-srs';
 import { loadStudyStreak } from '../lib/study-streak';
@@ -71,6 +73,32 @@ describe('the plan screen', () => {
   it('invites a first session when there is no streak', () => {
     render(<TodaySession />);
     expect(screen.getByTestId('today-streak')).toHaveTextContent('Finish a session to start');
+  });
+});
+
+describe('with a custom deck picked on /flashcards', () => {
+  it('deals every due card, not just the deck’s: due work is due whatever deck is open', () => {
+    // Review is the schedule's job. A deck narrows what /flashcards deals; if it
+    // narrowed Today too, a card due outside it would wait unseen.
+    seedDueWords(3);
+    const deck = customDeckStore.create('One word', [vocabSrsKey(vocabulary[40])]);
+    saveSelection({ deck: 'custom', customDeckId: deck.id, chapters: [], categories: ['core'] });
+    render(<TodaySession />);
+
+    expect(screen.getByText('3 cards due')).toBeInTheDocument();
+  });
+
+  it('deals a due card that is in the deck and one that is not, by the same rules', () => {
+    const store = {
+      [vocabSrsKey(vocabulary[0])]: card(vocabSrsKey(vocabulary[0]), 0),
+      [vocabSrsKey(vocabulary[1])]: card(vocabSrsKey(vocabulary[1]), 0),
+    };
+    saveSRSStore(store);
+    const deck = customDeckStore.create('First', [vocabSrsKey(vocabulary[0])]);
+    saveSelection({ deck: 'custom', customDeckId: deck.id, chapters: [], categories: ['core'] });
+    render(<TodaySession />);
+
+    expect(screen.getByText('2 cards due')).toBeInTheDocument();
   });
 });
 

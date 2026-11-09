@@ -1,6 +1,8 @@
+import DeckBuilder from '@tools/shared/components/DeckBuilder';
 import DrillButtons from '@tools/shared/components/DrillButtons';
 import GradeButtons from '@tools/shared/components/GradeButtons';
 import ToggleSwitch from '@tools/shared/components/ToggleSwitch';
+import { type CustomDeck, deckRestartPart, findDeck } from '@tools/shared/custom-decks';
 import {
   type FlashcardSessionEvent,
   type FlashcardStorage,
@@ -29,7 +31,13 @@ import {
   wordsInChapters,
 } from '../data/textbooks';
 import { cardKey, type HebrewVocabWord, vocabulary } from '../data/vocabulary';
-import { type DeckSelection, loadSelection, saveSelection } from '../lib/deck-selection';
+import { builderWords, customDeckStore, wordsOfDeck } from '../lib/custom-decks';
+import {
+  type DeckSelection,
+  effectiveSelection,
+  loadSelection,
+  saveSelection,
+} from '../lib/deck-selection';
 import { loadFlashcardSettings, saveFlashcardSettings } from '../lib/flashcard-settings';
 import ChapterPicker from './ChapterPicker';
 import ErrorBoundary from './ErrorBoundary';
@@ -106,7 +114,21 @@ function FlashcardsInner() {
   const [studyMode, setStudyMode] = useState<StudyMode>('srs');
 
   // Deck, chapters and categories — persisted across visits.
-  const [selection, setSelection] = useState<DeckSelection>(() => loadSelection());
+  const [storedSelection, setSelection] = useState<DeckSelection>(() => loadSelection());
+
+  // The student's own decks. Read in an initializer: the first render is the
+  // empty state either way, so this cannot differ from the server's (see
+  // "Hydration" in the repo CLAUDE.md).
+  const [customDecks, setCustomDecks] = useState<CustomDeck[]>(() => customDeckStore.load());
+  const [showDeckBuilder, setShowDeckBuilder] = useState(false);
+
+  // A custom deck that was deleted, here or on another device, is no deck.
+  const selection = useMemo(
+    () => effectiveSelection(storedSelection, customDecks),
+    [storedSelection, customDecks],
+  );
+  const customDeck = findDeck(customDecks, selection.customDeckId);
+  const builderVocabulary = useMemo(() => builderWords(), []);
 
   // Filter (only meaningful for the whole-vocabulary deck)
   const [freqFilter, setFreqFilter] = useState<FreqFilter>('all');
@@ -134,17 +156,17 @@ function FlashcardsInner() {
 
   // ─── Filtered vocabulary ────────────────────────────────────────────────────
 
-  const textbookId = selection.deck === 'all' ? null : selection.deck;
+  const textbookId =
+    selection.deck === 'all' || selection.deck === 'custom' ? null : selection.deck;
 
-  // A textbook selection is already a deliberate chapter set, so the frequency
-  // bands don't apply to it — they only narrow the whole-vocabulary deck.
-  const filteredVocab = useMemo(
-    () =>
-      textbookId
-        ? wordsInChapters(textbookId, selection.chapters, selection.categories)
-        : vocabulary.filter((w) => matchFreq(w.frequency, freqFilter)),
-    [textbookId, selection.chapters, selection.categories, freqFilter],
-  );
+  // A textbook or custom selection is already a deliberate set, so the
+  // frequency bands don't apply to it — they only narrow the whole vocabulary.
+  const filteredVocab = useMemo(() => {
+    if (customDeck) return wordsOfDeck(customDeck);
+    return textbookId
+      ? wordsInChapters(textbookId, selection.chapters, selection.categories)
+      : vocabulary.filter((w) => matchFreq(w.frequency, freqFilter));
+  }, [customDeck, textbookId, selection.chapters, selection.categories, freqFilter]);
 
   // Counts for the category chips reflect the chapters currently selected, so
   // switching a category on shows exactly how many cards it would add.
@@ -215,7 +237,9 @@ function FlashcardsInner() {
     studyMode,
     // A new deck or filter deals a new session. Compared by value, so
     // re-selecting what is already selected does not throw away the session.
-    restartKey: JSON.stringify([selection, freqFilter]),
+    // A custom deck contributes its id and its *sorted words*, never its name:
+    // renaming a deck keeps the session, editing its words deals a new one.
+    restartKey: JSON.stringify([selection, freqFilter, deckRestartPart(customDeck)]),
     storage: STORAGE,
     onEvent,
   });
@@ -306,18 +330,19 @@ function FlashcardsInner() {
             Study ahead anyway
           </button>
         )}
-        {studyMode !== 'srs' && (freqFilter !== 'all' || textbookId !== null) && (
-          <button
-            type="button"
-            onClick={() => {
-              setFreqFilter('all');
-              updateSelection({ deck: 'all', chapters: [] });
-            }}
-            className="px-5 py-2.5 border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-          >
-            Clear filter
-          </button>
-        )}
+        {studyMode !== 'srs' &&
+          (freqFilter !== 'all' || textbookId !== null || customDeck !== null) && (
+            <button
+              type="button"
+              onClick={() => {
+                setFreqFilter('all');
+                updateSelection({ deck: 'all', customDeckId: null, chapters: [] });
+              }}
+              className="px-5 py-2.5 border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            >
+              Clear filter
+            </button>
+          )}
       </div>
     );
   }
@@ -333,16 +358,18 @@ function FlashcardsInner() {
         </span>
         <button
           type="button"
-          onClick={() => updateSelection({ deck: 'all' })}
-          aria-pressed={textbookId === null}
+          onClick={() => updateSelection({ deck: 'all', customDeckId: null })}
+          aria-pressed={selection.deck === 'all'}
           className={`px-3 py-1 rounded-full text-sm border-2 font-medium transition-colors ${
-            textbookId === null
+            selection.deck === 'all'
               ? 'bg-primary text-white border-primary'
               : 'border-primary/10 text-text-muted hover:border-primary/40 hover:text-text'
           }`}
         >
           All vocabulary{' '}
-          <span className={`text-xs ${textbookId === null ? 'text-white/70' : 'text-text-muted'}`}>
+          <span
+            className={`text-xs ${selection.deck === 'all' ? 'text-white/70' : 'text-text-muted'}`}
+          >
             ({vocabulary.length})
           </span>
         </button>
@@ -353,7 +380,7 @@ function FlashcardsInner() {
             <button
               type="button"
               key={id}
-              onClick={() => updateSelection({ deck: id })}
+              onClick={() => updateSelection({ deck: id, customDeckId: null })}
               aria-pressed={active}
               title={TEXTBOOKS[id].title}
               className={`px-3 py-1 rounded-full text-sm border-2 font-medium transition-colors ${
@@ -366,7 +393,60 @@ function FlashcardsInner() {
             </button>
           );
         })}
+
+        {customDecks.map((deck) => {
+          const active = customDeck?.id === deck.id;
+          return (
+            <button
+              type="button"
+              key={deck.id}
+              onClick={() => updateSelection({ deck: 'custom', customDeckId: deck.id })}
+              aria-pressed={active}
+              className={`px-3 py-1 rounded-full text-sm border-2 font-medium transition-colors ${
+                active
+                  ? 'bg-primary text-white border-primary'
+                  : 'border-primary/10 text-text-muted hover:border-primary/40 hover:text-text'
+              }`}
+            >
+              {deck.name}{' '}
+              <span className={`text-xs ${active ? 'text-white/70' : 'text-text-muted'}`}>
+                ({deck.wordKeys.length})
+              </span>
+            </button>
+          );
+        })}
+
+        <button
+          type="button"
+          onClick={() => setShowDeckBuilder((open) => !open)}
+          aria-expanded={showDeckBuilder}
+          className="px-3 py-1 rounded-full text-sm border-2 border-dashed border-primary/30 text-primary font-medium hover:bg-primary/5 transition-colors"
+        >
+          {customDecks.length === 0 ? '+ Create deck' : 'Manage decks'}
+        </button>
       </div>
+
+      {showDeckBuilder && (
+        <DeckBuilder
+          decks={customDecks}
+          words={builderVocabulary}
+          store={customDeckStore}
+          activeDeckId={customDeck?.id ?? null}
+          onActivateDeck={(id) =>
+            updateSelection(
+              id === null
+                ? { deck: 'all', customDeckId: null }
+                : { deck: 'custom', customDeckId: id },
+            )
+          }
+          onDecksChange={setCustomDecks}
+          onClose={() => setShowDeckBuilder(false)}
+          accent="var(--color-primary, #15803D)"
+          labelDir="rtl"
+          labelLang="he"
+          labelFontFamily="var(--font-hebrew, 'Noto Sans Hebrew', sans-serif)"
+        />
+      )}
 
       {/* ── Chapter picker and category filter (textbook decks only) ──────── */}
       {textbookId !== null && catCounts !== null && (
@@ -463,7 +543,11 @@ function FlashcardsInner() {
         </div>
 
         {/* Frequency filter — only applies to the whole-vocabulary deck */}
-        {textbookId !== null ? (
+        {customDeck ? (
+          <p className="text-sm text-text-muted">
+            {filteredVocab.length} words &middot; {customDeck.name}
+          </p>
+        ) : textbookId !== null ? (
           <p className="text-sm text-text-muted">
             {filteredVocab.length} words &middot; {describeChapters(textbookId, selection.chapters)}
           </p>
