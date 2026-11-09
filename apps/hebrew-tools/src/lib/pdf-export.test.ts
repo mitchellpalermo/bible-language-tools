@@ -1,8 +1,9 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { HebrewBook, HebrewWord } from '../data/morphhb';
 import {
+  bhsBookName,
   buildHebrewPDF,
   DEFAULT_EXPORT_OPTIONS,
   exportFilename,
@@ -38,6 +39,7 @@ const BOOK: HebrewBook = {
 
 const RANGE = { book: 'GEN', startChapter: 1, startVerse: 1, endChapter: 1, endVerse: 3 };
 
+const BOOKS_JSON = resolve(__dirname, '../../public/data/morphhb/books.json');
 const LATIN = new Uint8Array(
   readFileSync(resolve(__dirname, '../../public/fonts/NotoSans-Regular.ttf')),
 );
@@ -213,6 +215,35 @@ describe('loadHebrewFont', () => {
     stubFetch(new TextEncoder().encode('<!doctype html><title>Not found</title>'));
     await expect(loadHebrewFont()).rejects.toThrow(/did not load/);
   });
+});
+
+describe('bhsBookName', () => {
+  it('prints a pointed name as BHS does: consonants and shin dots', () => {
+    expect(bhsBookName('בְּרֵאשִׁית')).toBe('בראשׁית');
+    expect(bhsBookName('שִׁיר הַשִּׁירִים')).toBe('שׁיר השׁירים');
+    expect(bhsBookName('יְשַׁעְיָהוּ')).toBe('ישׁעיהו');
+  });
+
+  it('keeps the two-part names whole, with their letter', () => {
+    expect(bhsBookName('שְׁמוּאֵל א')).toBe('שׁמואל א');
+    expect(bhsBookName('דִּבְרֵי הַיָּמִים ב')).toBe('דברי הימים ב');
+  });
+
+  it('keeps the sin dot and leaves bare text alone', () => {
+    expect(bhsBookName('שֹׂ')).toBe('שׂ');
+    expect(bhsBookName('רות')).toBe('רות');
+  });
+
+  it.skipIf(!existsSync(BOOKS_JSON))(
+    'is the book list with only marks removed, for every book',
+    () => {
+      const books = JSON.parse(readFileSync(BOOKS_JSON, 'utf8')) as { hebrew: string }[];
+      for (const { hebrew } of books) {
+        const bare = bhsBookName(hebrew);
+        expect(bare.replace(/[\u05C1\u05C2]/g, '')).toBe(hebrew.replace(/[\u0591-\u05C7]/g, ''));
+      }
+    },
+  );
 });
 
 describe('loadLatinFont', () => {

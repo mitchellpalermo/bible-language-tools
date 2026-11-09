@@ -221,7 +221,7 @@ a font, and a direction; the module owns the page.
   uses) for the heading, verse numbers and watermark, and the two PDFs share one
   typographic voice. Greek's font covers both and passes `chromeFont: 'script'`.
   The page is greek.tools' mirrored: the reference stays at the left margin, the
-  book's Hebrew name (`titleScript`, pointed as `books.json` has it) takes the right,
+  book's Hebrew name (`titleScript`, in the BHS form) takes the right,
   and chapter headings and verse numbers sit at the right with the Hebrew. Hebrew is
   set at 18/30pt against Greek's 13/18 because its points and accents need the room.
 - **Embed the whole font, never a subset**, and pass `requiredCodePoint` so a

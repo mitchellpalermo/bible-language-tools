@@ -458,9 +458,12 @@ is the Hebrew half: `extractVerses`, `normalizeRange`, `exportText`,
 - **Options mirror the reader's**: pointed (default) or consonants only, and
   cantillation, which starts from the reader's own stored preference.
   Cantillation goes through `stripCantillation`, so the page matches the reader.
-- **There is no nav entry, on purpose.** The page is reached from the reader's
-  "Export PDF" link, which carries `?ref=BOOK.CH`. A Study card or nav entry
-  waits on the Study nav rework (#229).
+- **It is a study mode** (`src/lib/study-modes.ts`: a `/study` card and a Study nav
+  child), and is also reached from the reader's "Export PDF" link, which carries
+  `?ref=BOOK.CH`.
+- **The Hebrew name in the heading is the BHS form** (`bhsBookName`): the spelling
+  in `books.json` with vowel points and cantillation removed and the shin and sin
+  dots kept (שׁמואל א, דברי הימים א). The pointed `books.json` form is not printed.
 - **`?ref=` with no verse means the whole chapter**; the last verse is filled in
   once the book loads. Changing book does the same for chapter 1.
 - **Verify on a rendered page.** A PDF whose Hebrew is wrong still opens and

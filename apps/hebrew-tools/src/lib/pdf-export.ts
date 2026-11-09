@@ -169,8 +169,23 @@ export const loadHebrewFont = () => loadFont(HEBREW_FONT_URL, 'Hebrew');
 export const loadLatinFont = () => loadFont(LATIN_FONT_URL, 'Latin');
 
 /**
- * `bookHebrew` is the book's name as `books.json` has it — pointed — and is
- * printed as is, opposite the reference.
+ * A book's name as BHS prints it: consonants, with the shin and sin dots and
+ * nothing else. `books.json` has the names pointed (שְׁמוּאֵל א); BHS's running
+ * headings do not point them (שׁמואל א). The spelling is the same, including
+ * the two-part names — שׁמואל א, דברי הימים א — so this only removes marks.
+ *
+ * Removed: vowel points, dagesh, meteg, rafe and cantillation. Kept: U+05C1
+ * and U+05C2, the dots that tell שׁ from שׂ.
+ */
+const NOT_BHS_TITLE = /[\u0591-\u05AF\u05B0-\u05BD\u05BF\u05C4\u05C5\u05C7]/g;
+
+export function bhsBookName(pointed: string): string {
+  return pointed.replace(NOT_BHS_TITLE, '');
+}
+
+/**
+ * `bookHebrew` is the book's name as `books.json` has it; it is printed in the
+ * BHS form (`bhsBookName`) opposite the reference.
  */
 export async function buildHebrewPDF(
   verses: ExportVerseWords[],
@@ -182,7 +197,7 @@ export async function buildHebrewPDF(
   return buildTranslationPDF({
     verses: toExportVerses(verses, options),
     title: passageRef,
-    titleScript: bookHebrew,
+    titleScript: bookHebrew ? bhsBookName(bookHebrew) : undefined,
     fontBytes,
     chromeFontBytes,
     direction: 'rtl',
