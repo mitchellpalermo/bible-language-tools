@@ -25,11 +25,13 @@ import { loadSRSStore, loadStats, SRS_KEY, STATS_KEY, saveSRSStore, saveStats } 
 import { ATTEMPT_LOG_KEY, loadAttempts, saveAttempts } from './attempt-log';
 import { hasAuthHint } from './auth-cookie';
 import { customDeckStore } from './custom-decks';
+import { focusPassageStore } from './focus-passages';
 import { loadStudyStreak, STUDY_STREAK_KEY, saveStudyStreak } from './study-streak';
 import { LADDER_PROGRESS_KEY, loadLadderProgress, saveLadderProgress } from './suffix-ladder';
 import {
   mergeAttempts,
   mergeCustomDecks,
+  mergeFocusPassages,
   mergeLadderProgress,
   mergeProgress,
   type ProgressSnapshot,
@@ -88,6 +90,7 @@ export function readLocalProgress(): ProgressSnapshot {
     ladderProgress: loadLadderProgress(),
     // Tombstones too: they are how a deletion reaches the other devices.
     customDecks: customDeckStore.loadAll(),
+    focusPassages: focusPassageStore.loadAll(),
   };
 }
 
@@ -106,6 +109,11 @@ export function writeLocalProgress(snapshot: ProgressSnapshot): void {
   if (snapshot.customDecks) {
     customDeckStore.saveAll(mergeCustomDecks(customDeckStore.loadAll(), snapshot.customDecks));
   }
+  if (snapshot.focusPassages) {
+    focusPassageStore.saveAll(
+      mergeFocusPassages(focusPassageStore.loadAll(), snapshot.focusPassages),
+    );
+  }
 }
 
 /**
@@ -113,8 +121,8 @@ export function writeLocalProgress(snapshot: ProgressSnapshot): void {
  * which must leave nothing for the next push to upload. Throws if storage
  * cannot be written.
  *
- * Custom decks are not progress and are not erased, here or by the account
- * reset: they are the student's own work, the server copy is left alone by
+ * Custom decks and focus passages are not progress and are not erased, here or
+ * by the account reset: they are the student's own work, the server copy is left alone by
  * `DELETE /api/progress` too, and the reset's "keeps" list says so.
  */
 export function clearLocalProgress(): void {

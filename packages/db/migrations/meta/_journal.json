@@ -43,6 +43,13 @@
       "when": 1793900505823,
       "tag": "0005_custom_decks_tombstones",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1794243498555,
+      "tag": "0006_focus_passages_per_language",
+      "breakpoints": true
     }
   ]
 }

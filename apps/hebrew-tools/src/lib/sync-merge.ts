@@ -11,6 +11,7 @@
 // @tools/shared/sync-merge and are re-exported here.
 
 import { type CustomDeck, mergeCustomDecks } from '@tools/shared/custom-decks';
+import { type FocusPassage, mergeFocusPassages } from '@tools/shared/focus-passages';
 import type { LadderProgress } from '@tools/shared/ladder';
 import type { SRSCard, StudyStats } from '@tools/shared/srs';
 import {
@@ -25,7 +26,14 @@ import {
   mergeStudyStats,
 } from '@tools/shared/sync-merge';
 
-export { mergeAttempts, mergeCustomDecks, mergeLadderProgress, mergeSRSStores, mergeStudyStats };
+export {
+  mergeAttempts,
+  mergeCustomDecks,
+  mergeFocusPassages,
+  mergeLadderProgress,
+  mergeSRSStores,
+  mergeStudyStats,
+};
 
 export interface ProgressSnapshot {
   srsStore: Record<string, SRSCard>;
@@ -36,6 +44,8 @@ export interface ProgressSnapshot {
   ladderProgress?: LadderProgress;
   /** Absent from a snapshot taken before decks synced. Tombstones included. */
   customDecks?: CustomDeck[];
+  /** Absent from a snapshot taken before passages synced. Tombstones included. */
+  focusPassages?: FocusPassage[];
 }
 
 // The attempt log is not part of the snapshot: it syncs on its own endpoint,
@@ -55,5 +65,7 @@ export function mergeProgress(a: ProgressSnapshot, b: ProgressSnapshot): Progres
     // Absent decks are "none yet", which every real deck beats; a tombstone
     // beats the deck it replaces. See mergeCustomDecks.
     customDecks: mergeCustomDecks(a.customDecks ?? [], b.customDecks ?? []),
+    // The same for focus passages, by the same rules.
+    focusPassages: mergeFocusPassages(a.focusPassages ?? [], b.focusPassages ?? []),
   };
 }

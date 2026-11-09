@@ -1,3 +1,8 @@
+import {
+  mergeFocusPassages as mergeSharedPassages,
+  parsePassage,
+  parsePassages,
+} from '@tools/shared/focus-passages';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { loadAttempts } from '../lib/attempt-log';
 import { parseConcept } from '../lib/parse-attempts';
@@ -260,5 +265,34 @@ describe('generateId', () => {
   it('generates unique ids', () => {
     const ids = new Set(Array.from({ length: 20 }, generateId));
     expect(ids.size).toBe(20);
+  });
+});
+
+// ─── The shared module ──────────────────────────────────────────────────────
+//
+// greek.tools keeps this file until it adopts @tools/shared/focus-passages (see
+// "Focus passages" in the repo CLAUDE.md). Until then these pin that the two
+// agree on the shape, so the adoption is a swap and not a migration.
+
+describe('compatibility with @tools/shared/focus-passages', () => {
+  it('reads every passage greek.tools stores, ids and all, which have no update time', () => {
+    saveFocusPassages([
+      makePassage({ id: generateId(), label: 'Letter to Ephesus', startVerse: 1, endVerse: 7 }),
+      makePassage({ id: generateId(), label: undefined, book: 'JHN', endChapter: 2 }),
+    ]);
+    const parsed = parsePassages(loadFocusPassages());
+    expect(parsed).toHaveLength(2);
+    expect(parsed.every((p) => p.updatedAt === undefined)).toBe(true);
+    expect(parsed[0].label).toBe('Letter to Ephesus');
+  });
+
+  it('accepts a passage greek.tools renamed to an empty label', () => {
+    expect(parsePassage({ ...makePassage(), label: '' })?.label).toBeUndefined();
+  });
+
+  it('merges them, the later change winning, as the shared sync would', () => {
+    const old = makePassage({ label: 'Old' });
+    const renamed = { ...old, label: 'New', updatedAt: '2026-02-01T00:00:00.000Z' };
+    expect(mergeSharedPassages([old], [renamed])[0].label).toBe('New');
   });
 });

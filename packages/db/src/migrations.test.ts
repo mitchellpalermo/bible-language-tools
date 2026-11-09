@@ -302,7 +302,7 @@ describe('0005: tombstones and an update time on custom_decks', () => {
   it('changes no existing value, in any table, for either app', () => {
     const { sqlite, migrateRest } = at0004();
     const before = snapshot(sqlite);
-    migrateRest();
+    migrateRest('0005');
     const after = snapshot(sqlite);
     for (const table of TABLES) {
       expect(after[table], table).toHaveLength(before[table].length);
@@ -316,7 +316,7 @@ describe('0005: tombstones and an update time on custom_decks', () => {
 
   it('gives an existing deck an empty update time and no tombstone', () => {
     const { sqlite, migrateRest } = at0004();
-    migrateRest();
+    migrateRest('0005');
     expect(sqlite.prepare('SELECT * FROM custom_decks').all()).toEqual([
       {
         id: 'd1',
@@ -334,7 +334,7 @@ describe('0005: tombstones and an update time on custom_decks', () => {
   it('only adds the two columns; every other table keeps its exact shape', () => {
     const { sqlite, migrateRest } = at0004();
     const shapes = Object.fromEntries(TABLES.map((t) => [t, columns(sqlite, t)]));
-    migrateRest();
+    migrateRest('0005');
     for (const table of TABLES) {
       const now = columns(sqlite, table);
       if (table !== 'custom_decks') {
@@ -351,7 +351,7 @@ describe('0005: tombstones and an update time on custom_decks', () => {
 
   it('leaves the database consistent', () => {
     const { sqlite, migrateRest } = at0004();
-    migrateRest();
+    migrateRest('0005');
     expect(sqlite.prepare('PRAGMA integrity_check').all()).toEqual([{ integrity_check: 'ok' }]);
     expect(sqlite.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
   });
@@ -360,7 +360,7 @@ describe('0005: tombstones and an update time on custom_decks', () => {
     // The deploy migrates first and ships code second, and greek.tools does not
     // name the columns at all.
     const { sqlite, migrateRest } = at0004();
-    migrateRest();
+    migrateRest('0005');
     sqlite
       .prepare(
         'INSERT INTO custom_decks (id, user_id, language, name, word_keys, created_at) VALUES (?, ?, ?, ?, ?, ?)',
@@ -370,5 +370,125 @@ describe('0005: tombstones and an update time on custom_decks', () => {
       updated_at: '',
       deleted_at: null,
     });
+  });
+});
+
+describe('0006: focus passages per language, with tombstones', () => {
+  /** The database as 0005 left it: a greek passage written by the code before this change. */
+  function at0005() {
+    const built = createTestDbAt('0005');
+    seedExistingUsers(built.sqlite);
+    return built;
+  }
+
+  it('changes no existing value, in any table, for either app', () => {
+    const { sqlite, migrateRest } = at0005();
+    const before = snapshot(sqlite);
+    migrateRest();
+    const after = snapshot(sqlite);
+    for (const table of TABLES) {
+      expect(after[table], table).toHaveLength(before[table].length);
+      after[table].forEach((row, i) => {
+        expect(row, `${table} row ${i}`).toMatchObject(before[table][i]);
+      });
+    }
+    // The comparison had a passage and its parse history to check.
+    expect(before.focus_passages).toHaveLength(1);
+    expect(before.focus_parse_history).toHaveLength(1);
+  });
+
+  it('reads every existing passage as greek, with an empty update time and no tombstone', () => {
+    const { sqlite, migrateRest } = at0005();
+    migrateRest();
+    expect(sqlite.prepare('SELECT * FROM focus_passages').all()).toEqual([
+      {
+        user_id: 'greek-only',
+        id: 'p1',
+        label: 'Prologue',
+        book: 'JHN',
+        start_chapter: 1,
+        start_verse: 1,
+        end_chapter: 1,
+        end_verse: 18,
+        created_at: '2026-09-02',
+        language: 'greek',
+        updated_at: '',
+        deleted_at: null,
+      },
+    ]);
+  });
+
+  it('only adds the three columns; every other table keeps its exact shape', () => {
+    const { sqlite, migrateRest } = at0005();
+    const shapes = Object.fromEntries(TABLES.map((t) => [t, columns(sqlite, t)]));
+    migrateRest();
+    for (const table of TABLES) {
+      const now = columns(sqlite, table);
+      if (table !== 'focus_passages') {
+        expect(now, table).toEqual(shapes[table]);
+        continue;
+      }
+      expect(now.slice(0, shapes[table].length)).toEqual(shapes[table]);
+      expect(now.slice(shapes[table].length)).toMatchObject([
+        { name: 'language', type: 'TEXT', notnull: 1, dflt_value: "'greek'" },
+        { name: 'updated_at', type: 'TEXT', notnull: 1, dflt_value: "''" },
+        { name: 'deleted_at', type: 'TEXT', notnull: 0, dflt_value: null },
+      ]);
+    }
+  });
+
+  it('leaves the database consistent', () => {
+    const { sqlite, migrateRest } = at0005();
+    migrateRest();
+    expect(sqlite.prepare('PRAGMA integrity_check').all()).toEqual([{ integrity_check: 'ok' }]);
+    expect(sqlite.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
+  });
+
+  it('still accepts a passage row written without the new columns, as greek.tools does', () => {
+    // The deploy migrates first and ships code second, and greek.tools names
+    // none of the new columns, so its rows must come out as greek.
+    const { sqlite, migrateRest } = at0005();
+    migrateRest();
+    sqlite
+      .prepare(
+        'INSERT INTO focus_passages (user_id, id, label, book, start_chapter, start_verse, end_chapter, end_verse, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      )
+      .run('both', 'k3ab9x2q', null, 'ROM', 8, 1, 8, 17, '2026-10-01');
+    expect(
+      sqlite.prepare("SELECT * FROM focus_passages WHERE id = 'k3ab9x2q'").get(),
+    ).toMatchObject({
+      language: 'greek',
+      updated_at: '',
+      deleted_at: null,
+    });
+  });
+
+  it('holds a hebrew passage beside a greek one for the same student, apart by language', () => {
+    const { sqlite, migrateRest } = at0005();
+    migrateRest();
+    sqlite
+      .prepare(
+        'INSERT INTO focus_passages (user_id, language, id, book, start_chapter, start_verse, end_chapter, end_verse, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      )
+      .run(
+        'greek-only',
+        'hebrew',
+        'a-uuid',
+        'GEN',
+        1,
+        1,
+        1,
+        5,
+        '2026-11-02',
+        '2026-11-03',
+        '2026-11-03',
+      );
+    const rows = sqlite
+      .prepare('SELECT id, language, deleted_at FROM focus_passages ORDER BY id')
+      .all();
+    expect(rows).toEqual([
+      { id: 'a-uuid', language: 'hebrew', deleted_at: '2026-11-03' },
+      { id: 'p1', language: 'greek', deleted_at: null },
+    ]);
   });
 });

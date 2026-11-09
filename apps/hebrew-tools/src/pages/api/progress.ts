@@ -1,5 +1,6 @@
 import { createDb } from '@tools/db';
 import { parseDeckList } from '@tools/shared/custom-decks';
+import { parsePassageList } from '@tools/shared/focus-passages';
 import { isLadderProgress } from '@tools/shared/ladder';
 import { parseStudyStreak } from '@tools/shared/study-streak';
 import type { APIRoute } from 'astro';
@@ -46,7 +47,7 @@ function validatePayload(
   body: unknown,
 ): Pick<
   ProgressPayload,
-  'srsStore' | 'studyStats' | 'studyStreak' | 'ladderProgress' | 'customDecks'
+  'srsStore' | 'studyStats' | 'studyStreak' | 'ladderProgress' | 'customDecks' | 'focusPassages'
 > | null {
   if (!isRecord(body)) return null;
 
@@ -79,6 +80,14 @@ function validatePayload(
     customDecks = parsed;
   }
 
+  // Focus passages (#226): optional, all or nothing, like decks.
+  let focusPassages: ProgressPayload['focusPassages'];
+  if (body.focusPassages !== undefined) {
+    const parsed = parsePassageList(body.focusPassages);
+    if (!parsed) return null;
+    focusPassages = parsed;
+  }
+
   if (!isRecord(studyStats)) return null;
   if (STATS_NUMBER_FIELDS.some((f) => typeof studyStats[f] !== 'number')) return null;
   if (STATS_STRING_FIELDS.some((f) => typeof studyStats[f] !== 'string')) return null;
@@ -99,9 +108,16 @@ function validatePayload(
   // Every field above has been checked at runtime; the cast is what carries
   // that knowledge into the type system. Widen through `unknown` because the
   // validated records are structurally opaque to TypeScript.
-  return { srsStore, studyStats, studyStreak, ladderProgress, customDecks } as unknown as Pick<
+  return {
+    srsStore,
+    studyStats,
+    studyStreak,
+    ladderProgress,
+    customDecks,
+    focusPassages,
+  } as unknown as Pick<
     ProgressPayload,
-    'srsStore' | 'studyStats' | 'studyStreak' | 'ladderProgress' | 'customDecks'
+    'srsStore' | 'studyStats' | 'studyStreak' | 'ladderProgress' | 'customDecks' | 'focusPassages'
   >;
 }
 

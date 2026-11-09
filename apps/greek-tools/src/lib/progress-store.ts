@@ -85,7 +85,7 @@ export async function getProgress(db: ProgressDb, userId: string): Promise<Progr
   const passageRows = await db
     .select()
     .from(focusPassagesTable)
-    .where(eq(focusPassagesTable.userId, userId));
+    .where(and(eq(focusPassagesTable.userId, userId), eq(focusPassagesTable.language, LANGUAGE)));
   const parseHistoryRows = await db
     .select()
     .from(focusParseHistoryTable)
@@ -212,7 +212,9 @@ export async function putProgress(
       .delete(customDecksTable)
       .where(and(eq(customDecksTable.userId, userId), eq(customDecksTable.language, LANGUAGE))),
     ...chunk(deckRows, DECK_CHUNK).map((rows) => db.insert(customDecksTable).values(rows)),
-    db.delete(focusPassagesTable).where(eq(focusPassagesTable.userId, userId)),
+    db
+      .delete(focusPassagesTable)
+      .where(and(eq(focusPassagesTable.userId, userId), eq(focusPassagesTable.language, LANGUAGE))),
     ...chunk(passageRows, PASSAGE_CHUNK).map((rows) => db.insert(focusPassagesTable).values(rows)),
     db.delete(focusParseHistoryTable).where(eq(focusParseHistoryTable.userId, userId)),
     ...chunk(parseHistoryRows, PARSE_HISTORY_CHUNK).map((rows) =>
@@ -240,7 +242,9 @@ export async function deleteProgress(db: ProgressDb, userId: string): Promise<vo
     db
       .delete(customDecksTable)
       .where(and(eq(customDecksTable.userId, userId), eq(customDecksTable.language, LANGUAGE))),
-    db.delete(focusPassagesTable).where(eq(focusPassagesTable.userId, userId)),
+    db
+      .delete(focusPassagesTable)
+      .where(and(eq(focusPassagesTable.userId, userId), eq(focusPassagesTable.language, LANGUAGE))),
     db.delete(focusParseHistoryTable).where(eq(focusParseHistoryTable.userId, userId)),
     db
       .delete(syncStateTable)

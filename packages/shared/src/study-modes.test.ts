@@ -112,6 +112,11 @@ describe('studyModeProblems', () => {
   });
 
   it('names the modes both apps share', () => {
-    expect(Object.keys(STUDY_LABELS).sort()).toEqual(['/flashcards', '/paradigms', '/parse']);
+    expect(Object.keys(STUDY_LABELS).sort()).toEqual([
+      '/flashcards',
+      '/focus',
+      '/paradigms',
+      '/parse',
+    ]);
   });
 });

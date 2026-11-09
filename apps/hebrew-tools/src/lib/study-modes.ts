@@ -49,4 +49,16 @@ export const studyModes: readonly StudyMode[] = [
     ),
     detail: 'Syllables · Accent · Vowel reduction',
   },
+  {
+    href: '/focus',
+    label: 'Focus Passages',
+    description:
+      'Pick a stretch of the Hebrew Bible and study it: the course vocabulary it uses, its text, and how well you know it.',
+    accentColor: '#059669',
+    bgColor: '#ECFDF5',
+    icon: svg(
+      '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>',
+    ),
+    detail: 'Passage vocabulary · Reading · Progress',
+  },
 ];
