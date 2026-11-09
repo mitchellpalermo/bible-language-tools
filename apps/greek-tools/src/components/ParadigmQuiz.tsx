@@ -9,12 +9,21 @@
  * Grading options:
  *   - accentStrict: when false (default) accent errors are treated as correct;
  *     when true, accent errors are marked wrong (yellow).
+ *
+ * The Ladder tab (#199) is the same quiz on tables in order of difficulty. A
+ * rung opens after two clean writes of the one below (`lib/paradigm-ladder.ts`),
+ * and a locked rung can be opened anyway. Any checked write of a rung's table
+ * counts, from the Ladder tab or from its own category tab.
  */
 
+import { LadderRungList } from '@tools/shared/components/Ladder';
+import { type LadderProgress, rungStates } from '@tools/shared/ladder';
 import { useStoredState } from '@tools/shared/use-stored-state';
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { verbParadigms } from '../data/grammar';
+import { LADDER_RUNG_IDS, LADDER_RUNGS } from '../data/paradigm-ladder';
+import { logAttempts } from '../lib/attempt-log';
 import {
   applyFinalSigma,
   checkAnswer,
@@ -22,6 +31,13 @@ import {
   processGreekKey,
   translateGreekInput,
 } from '../lib/greek-input';
+import {
+  type LadderOutcome,
+  ladderNote,
+  ladderOutcome,
+  loadLadderProgress,
+  saveLadderProgress,
+} from '../lib/paradigm-ladder';
 import {
   ALL_CATEGORIES,
   applyDensity,
@@ -98,7 +114,15 @@ const DIACRITIC_ENTRIES: { key: string; name: string; example: string }[] = [
 type Phase =
   | { name: 'select' }
   | { name: 'quiz'; table: TableModel; cells: QuizCell[]; density: Density }
-  | { name: 'results'; table: TableModel; cells: QuizCell[]; inputs: InputMap; density: Density };
+  | {
+      name: 'results';
+      table: TableModel;
+      cells: QuizCell[];
+      inputs: InputMap;
+      density: Density;
+      /** What the write did on the ladder, for a rung's table. */
+      ladder?: LadderOutcome;
+    };
 
 type InputMap = Record<number, string>; // cell.index → raw text
 
@@ -117,6 +141,15 @@ const DENSITY_DESCS: Record<Density, string> = {
   medium: 'Half of the cells are blank.',
   hard: 'Every cell is blank — full recall from memory.',
 };
+
+/** The Ladder tab sits beside the categories, before them. */
+type Tab = Category | 'ladder';
+const TABS: readonly Tab[] = ['ladder', ...ALL_CATEGORIES];
+const tabLabel = (tab: Tab): string => (tab === 'ladder' ? 'Ladder' : CATEGORY_LABELS[tab]);
+
+/** The app's primary, for the shared ladder's accents: white text on it passes contrast. */
+const PRIMARY = 'var(--color-primary, #1D4ED8)';
+const EMPTY_LADDER: LadderProgress = {};
 
 /** Raw result styles — used when accentStrict is on, or for non-accent results. */
 const RESULT_STYLES: Record<CellResult, { bg: string; border: string; text: string }> = {
@@ -428,6 +461,11 @@ function HintTrigger({ onShow, onHide }: HintTriggerProps) {
   );
 }
 
+function countCells(table: TableModel | undefined): number {
+  if (!table) return 0;
+  return table.rows.reduce((sum, row) => sum + row.answers.filter((a) => a !== null).length, 0);
+}
+
 // ---------------------------------------------------------------------------
 // ParadigmSelector — phase 1
 // ---------------------------------------------------------------------------
@@ -437,6 +475,7 @@ interface ParadigmSelectorProps {
   onToggleAccent: (value: boolean) => void;
   density: Density;
   onDensityChange: (d: Density) => void;
+  ladder: LadderProgress;
   onStart: (table: TableModel, density: Density) => void;
 }
 
@@ -445,15 +484,26 @@ function ParadigmSelector({
   onToggleAccent,
   density,
   onDensityChange,
+  ladder,
   onStart,
 }: ParadigmSelectorProps) {
   const tables = useMemo(() => buildTableModels(), []);
-  const [activeCategory, setActiveCategory] = useState<Category>('noun');
+  const [activeCategory, setActiveCategory] = useState<Tab>('noun');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeMood, setActiveMood] = useState<Mood>('indicative');
 
+  const isLadder = activeCategory === 'ladder';
   const filtered = tables.filter((t) => t.category === activeCategory);
-  const selected = filtered.find((t) => t.id === selectedId) ?? null;
+  // The ladder's tables, in ladder order. Built from the ids, so a rung whose
+  // table was renamed fails loudly in the data test and not as a missing card.
+  const rungTables = useMemo(
+    () =>
+      LADDER_RUNGS.map((r) => tables.find((t) => t.id === r.id)).filter(
+        (t): t is TableModel => t !== undefined,
+      ),
+    [tables],
+  );
+  const selected = (isLadder ? rungTables : filtered).find((t) => t.id === selectedId) ?? null;
 
   // Split verb tables into grid-eligible (standard λύω conjugations) and supplemental
   const verbGridIds = useMemo(() => new Set(verbParadigms.map((p) => `verb-${p.id}`)), []);
@@ -514,10 +564,7 @@ function ParadigmSelector({
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       {tablesToShow.map((table) => {
         const isSelected = table.id === selectedId;
-        const totalCells = table.rows.reduce(
-          (sum, row) => sum + row.answers.filter((a) => a !== null).length,
-          0,
-        );
+        const totalCells = countCells(table);
         return (
           <button
             key={table.id}
@@ -547,7 +594,7 @@ function ParadigmSelector({
     <div className="space-y-6">
       {/* Category tabs */}
       <div className="flex gap-1 flex-wrap">
-        {ALL_CATEGORIES.map((cat) => (
+        {TABS.map((cat) => (
           <button
             key={cat}
             onClick={() => {
@@ -565,13 +612,26 @@ function ParadigmSelector({
                   }
             }
           >
-            {CATEGORY_LABELS[cat]}
+            {tabLabel(cat)}
           </button>
         ))}
       </div>
 
       {/* Paradigm selection */}
-      {activeCategory === 'verb' ? (
+      {isLadder ? (
+        <LadderRungList
+          rungs={LADDER_RUNGS.map((r, i) => ({
+            id: r.id,
+            title: <span style={{ fontFamily: 'var(--font-greek)' }}>{rungTables[i]?.label}</span>,
+            detail: r.detail,
+            meta: `${countCells(rungTables[i])} forms`,
+          }))}
+          states={rungStates(LADDER_RUNG_IDS, ladder)}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          accent={PRIMARY}
+        />
+      ) : activeCategory === 'verb' ? (
         <>
           {/* VerbParadigmGrid for standard λύω conjugations */}
           <VerbParadigmGrid
@@ -605,6 +665,13 @@ function ParadigmSelector({
       {/* Settings + start button */}
       <div className="space-y-4">
         {settingsCard}
+
+        {isLadder && density !== 'hard' && (
+          <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+            Only a Full Recall write counts toward the next rung. Easy and Medium still work on any
+            open rung.
+          </p>
+        )}
 
         {/* Keyboard hint */}
         <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
@@ -881,6 +948,12 @@ function ParadigmQuizInner() {
   const [inputs, setInputs] = useState<InputMap>({});
   const [results, setResults] = useState<Record<number, CellResult>>({});
   const [showHints, setShowHints] = useState(false);
+  // Whether the answers were shown at any point in this attempt. A write that
+  // was peeked at is not recall, so it is neither a clean write nor logged.
+  const peekedRef = useRef(false);
+  // Which rungs are open. Read after hydration (ADR 006), and saved explicitly
+  // on submit from a fresh read, so a sync pull in between is not overwritten.
+  const [ladder, setLadder] = useStoredState<LadderProgress>(loadLadderProgress, EMPTY_LADDER);
   // Settings persist to localStorage across sessions. Read after hydration,
   // and saved by the setter rather than by an effect (ADR 006).
   const [settings, setSettings] = useStoredState(
@@ -906,6 +979,7 @@ function ParadigmQuizInner() {
     setInputs({});
     setResults({});
     setShowHints(false);
+    peekedRef.current = false;
     setPhase({ name: 'quiz', table, cells, density });
     posthog.capture('paradigm_quiz_started', { quiz_type: table.label });
   }, []);
@@ -925,6 +999,39 @@ function ParadigmQuizInner() {
     }
     const vals = Object.values(newResults);
     const correct = vals.filter((r) => r === 'correct').length;
+    const peeked = peekedRef.current;
+
+    // Every unaided answer goes to the attempt log. A peeked attempt is not
+    // unaided recall, so none of it is logged. Right or wrong is judged the way
+    // the student sees it, under their Accents setting.
+    if (!peeked) {
+      logAttempts(
+        cells
+          .filter((c) => c.isBlank)
+          .map((c) => ({
+            concept: `paradigm/${table.id}/r${c.rowIndex}c${c.colIndex}`,
+            correct: resolveDisplayResult(newResults[c.index], accentStrict) === 'correct',
+          })),
+      );
+    }
+
+    let ladderResult: LadderOutcome | undefined;
+    if (LADDER_RUNG_IDS.includes(table.id)) {
+      // Read fresh rather than from state: a sync pull may have raised a count.
+      ladderResult = ladderOutcome(
+        loadLadderProgress(),
+        table.id,
+        cells,
+        inputs,
+        peeked,
+        accentStrict,
+      );
+      if (ladderResult.clean) {
+        saveLadderProgress(ladderResult.progress);
+        setLadder(ladderResult.progress);
+      }
+    }
+
     posthog.capture('paradigm_quiz_answered', {
       paradigm: table.label,
       correct,
@@ -932,8 +1039,8 @@ function ParadigmQuizInner() {
     });
     setResults(newResults);
     setShowHints(false);
-    setPhase({ name: 'results', table, cells, density, inputs });
-  }, [phase, inputs]);
+    setPhase({ name: 'results', table, cells, density, inputs, ladder: ladderResult });
+  }, [phase, inputs, accentStrict, setLadder]);
 
   const handleRetry = useCallback(() => {
     if (phase.name !== 'results') return;
@@ -967,6 +1074,7 @@ function ParadigmQuizInner() {
         onToggleAccent={setAccentStrict}
         density={density}
         onDensityChange={setDensity}
+        ladder={ladder}
         onStart={handleStart}
       />
     );
@@ -1033,6 +1141,18 @@ function ParadigmQuizInner() {
         </div>
       )}
 
+      {phase.name === 'results' && phase.ladder && (
+        <p
+          className="text-sm font-semibold"
+          style={{
+            color: phase.ladder.clean ? 'var(--color-jade, #059669)' : 'var(--color-text-muted)',
+          }}
+          aria-live="polite"
+        >
+          {ladderNote(phase.ladder)}
+        </p>
+      )}
+
       {/* Table */}
       <QuizTable
         table={table}
@@ -1047,7 +1167,13 @@ function ParadigmQuizInner() {
 
       {/* Hint trigger (quiz phase only) */}
       {phase.name === 'quiz' && (
-        <HintTrigger onShow={() => setShowHints(true)} onHide={() => setShowHints(false)} />
+        <HintTrigger
+          onShow={() => {
+            peekedRef.current = true;
+            setShowHints(true);
+          }}
+          onHide={() => setShowHints(false)}
+        />
       )}
 
       {/* Legend (results phase) */}

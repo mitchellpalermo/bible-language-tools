@@ -35,6 +35,7 @@ import { recordParseResults, saveFocusPassages } from '../data/focusPassages';
 import { newCard, nextSRS, recordReview, saveSRSStore, saveStats } from '../data/srs';
 import { vocabulary } from '../data/vocabulary';
 import { saveFlashcardSettings } from '../lib/flashcard-settings';
+import { saveLadderProgress } from '../lib/paradigm-ladder';
 import { saveQuizSettings } from '../lib/quiz-settings';
 import { setLastSyncedAt } from '../lib/sync-manager';
 
@@ -76,6 +77,9 @@ function seedReturningStudent() {
   // Parse history and the attempt log it now feeds (#209): stored values no
   // island may let leak into its first render.
   recordParseResults(PASSAGE_ID, [true, false, true, true]);
+  // Paradigm ladder (#199): which rungs are open. Read through `useStoredState`,
+  // so the Ladder tab must draw every rung locked until hydration has finished.
+  saveLadderProgress({ article: 2, 'noun-2m-os': 2, 'noun-2n-on': 1 });
   setLastSyncedAt(new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString());
   markReadToday();
 }

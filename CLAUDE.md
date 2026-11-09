@@ -222,14 +222,17 @@ language. Rules that are pedagogy rather than plumbing:
 ### The paradigm ladder
 
 `@tools/shared/ladder` orders paradigm tables by difficulty and opens each
-once the one below has been written cleanly (#186 on hebrew.tools, #199 to
-come on greek.tools). An app supplies the rungs (one table each) and its own
+once the one below has been written cleanly (#186 on hebrew.tools, #199 on
+greek.tools). An app supplies the rungs (one table each) and its own
 grading; the module owns the unlock rule and `components/Ladder` draws it.
 
 - **A clean write is a Full table, every form exactly right, no peek.** A
   pointing slip that lenient marking forgives is not clean: the rung asks for
   the table reproduced. Easy, Medium and Due still work on every rung and
   still schedule SRS cards; they just do not count toward the next rung.
+  "Exactly right" is the app's to define, and each says so: hebrew.tools wants
+  the pointing, greek.tools wants letters, breathings and iota subscripts always
+  and accents only while the student's Accents switch is on.
 - **Two clean writes of the rung directly below open a rung**, and a rung
   never closes again. Only the rung below counts, so a rung opened anyway and
   written cleanly opens the next one in the usual way.

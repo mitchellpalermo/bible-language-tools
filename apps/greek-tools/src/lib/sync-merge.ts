@@ -7,13 +7,14 @@
 // live in @tools/shared/sync-merge and are re-exported here. Everything below
 // is greek-tools-specific: decks, focus passages, and parse history.
 
+import type { LadderProgress } from '@tools/shared/ladder';
 import type { SRSCard, StudyStats } from '@tools/shared/srs';
-import { mergeSRSStores, mergeStudyStats } from '@tools/shared/sync-merge';
+import { mergeLadderProgress, mergeSRSStores, mergeStudyStats } from '@tools/shared/sync-merge';
 
 import type { CustomDeck } from '../data/customDecks';
 import type { FocusPassage, ParseHistory } from '../data/focusPassages';
 
-export { mergeSRSStores, mergeStudyStats };
+export { mergeLadderProgress, mergeSRSStores, mergeStudyStats };
 
 /** Union by deck id; duplicate ids resolved by the later createdAt. */
 export function mergeCustomDecks(a: CustomDeck[], b: CustomDeck[]): CustomDeck[] {
@@ -72,6 +73,8 @@ export interface ProgressSnapshot {
   customDecks: CustomDeck[];
   focusPassages: FocusPassage[];
   parseHistory: Record<string, ParseHistory>;
+  /** Absent from a snapshot taken before the ladder synced. */
+  ladderProgress?: LadderProgress;
 }
 
 export function mergeProgress(a: ProgressSnapshot, b: ProgressSnapshot): ProgressSnapshot {
@@ -81,5 +84,7 @@ export function mergeProgress(a: ProgressSnapshot, b: ProgressSnapshot): Progres
     customDecks: mergeCustomDecks(a.customDecks, b.customDecks),
     focusPassages: mergeFocusPassages(a.focusPassages, b.focusPassages),
     parseHistory: mergeParseHistory(a.parseHistory, b.parseHistory),
+    // An absent ladder is a fresh one, which every real count beats.
+    ladderProgress: mergeLadderProgress(a.ladderProgress ?? {}, b.ladderProgress ?? {}),
   };
 }

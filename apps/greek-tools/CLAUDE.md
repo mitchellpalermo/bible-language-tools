@@ -237,6 +237,32 @@ device-local until #200 adds the account endpoint.
   streak is `createDailyStreak`. Decks, focus passages and parse-history totals
   are greek-only merges with no shared counterpart.
 
+## The paradigm ladder (#199)
+
+The **Ladder** tab on `/paradigms` orders 23 tables by difficulty — the article,
+the nouns, the adjectives and the present active participle read as a noun, three
+pronouns, then the verb (active before middle and passive) — and opens each after
+two clean writes of the one below. The unlock rule, the locked-rung list and its
+"Open anyway" button are `@tools/shared/ladder` (see the repo `CLAUDE.md`, "The
+paradigm ladder"); this app supplies the rungs and the grading.
+
+| File | What it owns |
+|---|---|
+| `src/data/paradigm-ladder.ts` | The rungs, in order. A rung id is a `TableModel` id, so **never rename a table id** (`noun-2m-os`): progress is stored under it |
+| `src/lib/paradigm-ladder.ts` | The storage binding (`greek-tools-paradigm-ladder-v1`), `ladderOutcome` and the results sentence |
+| `src/lib/greek-input.ts` | `isExactAnswer`, the ladder's grading |
+| `src/data/paradigm-ladder.test.ts` | Every rung's forms against the Greek New Testament |
+
+Rules worth keeping:
+
+- **A clean write is exact in letters, breathings and iota subscripts, always; in accent marks only when Accents is on.** `stripDiacritics` (used by the quiz's "accent-only" result) removes breathings and iota subscripts too, so on its own it would pass ἡμέρα for the dative ἡμέρᾳ. The ladder uses `stripAccentMarks`, which removes only acute, grave and circumflex. The accent rule follows the student's own Accents setting because Greek courses commonly do not test accents (#198 was closed for that reason), and an accent-off student is told so on the results screen. The quiz's own Accents-off scoring still ignores breathings and subscripts; that is existing behaviour, not changed here.
+- **Any checked write of a rung's table counts**, from the Ladder tab or the table's own category tab. Only Full Recall (every cell blank) counts; a peek (the hint button) voids the write and logs nothing.
+- **Every answer is logged** to the attempt log as `paradigm/<table id>/r<row>c<column>` (row and column positions in the table). Renaming a table id or reordering its rows splits that history. A peeked attempt logs nothing. The log is still device-local until #200.
+- **Sync is `ladderProgress` in `/api/progress`**, rows in `ladder_progress` with `language = 'greek'` (no migration: the table and its primary key already allow it). The greek `PUT` is a full replace, but **the ladder is merged server-side** with the account's rows by the larger count, so a session-end push from a device that is behind, or from a page that predates the ladder (no `ladderProgress`), can never lower a rung. `DELETE` clears it, and the account reset keeps it in this browser and pushes it back.
+- **The verb rungs cannot be checked form by form.** λύω is a model verb and most of its forms are not in the text, so the test splits each form into the stem and what follows and requires that tail to end an attested word of the same person, number, tense, voice and mood. That vouches for endings and formatives, not for stems, augments, reduplication or accents. The noun, adjective, article and pronoun rungs are looked up by lemma, case, number and gender; what the text lacks is named in `UNATTESTED`, and a second test fails if a listed form turns out to be attested.
+- **The corpus is gitignored.** `pnpm --filter greek-tools exec node scripts/build-morphgnt.mjs` builds it; CI does so before the tests, and `src/test/corpus.test.ts` fails there if it is missing, so the checks cannot quietly skip.
+- **A Greek instructor still needs to review** the order and the forms the corpus cannot vouch for (see the PR for the list).
+
 ## Architecture Decisions
 
 See `docs/adr/` for recorded decisions:

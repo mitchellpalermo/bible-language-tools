@@ -118,6 +118,7 @@ describe('a returning student, seeded as before the move', () => {
       customDecks: DECKS,
       focusPassages: PASSAGES,
       parseHistory: PARSE,
+      ladderProgress: {},
     });
   });
 

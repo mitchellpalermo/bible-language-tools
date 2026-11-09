@@ -15,7 +15,8 @@ import {
 } from '../data/focusPassages';
 import { loadSRSStore, loadStats, saveSRSStore, saveStats } from '../data/srs';
 import { hasAuthHint } from './auth-cookie';
-import { mergeProgress, type ProgressSnapshot } from './sync-merge';
+import { loadLadderProgress, saveLadderProgress } from './paradigm-ladder';
+import { mergeLadderProgress, mergeProgress, type ProgressSnapshot } from './sync-merge';
 import type { ProgressPayload } from './sync-types';
 
 export const LAST_SYNCED_KEY = 'greek-tools-last-synced';
@@ -63,6 +64,7 @@ export function readLocalProgress(): ProgressSnapshot {
     customDecks: loadCustomDecks(),
     focusPassages: loadFocusPassages(),
     parseHistory: loadParseHistoryStore(),
+    ladderProgress: loadLadderProgress(),
   };
 }
 
@@ -72,12 +74,19 @@ export function writeLocalProgress(snapshot: ProgressSnapshot): void {
   saveCustomDecks(snapshot.customDecks);
   saveFocusPassages(snapshot.focusPassages);
   saveParseHistoryStore(snapshot.parseHistory);
+  // Merged again with what is stored now, not just written: a clean write
+  // checked while the pull was in flight must not be lost to it. The merge only
+  // ever raises a count, so this is safe whatever the snapshot holds.
+  if (snapshot.ladderProgress) {
+    saveLadderProgress(mergeLadderProgress(loadLadderProgress(), snapshot.ladderProgress));
+  }
 }
 
 /** Does this device have any study progress worth importing? */
 export function hasLocalProgress(): boolean {
-  const { srsStore, customDecks } = readLocalProgress();
+  const { srsStore, customDecks, ladderProgress } = readLocalProgress();
   if (customDecks.length > 0) return true;
+  if (Object.keys(ladderProgress ?? {}).length > 0) return true;
   return Object.values(srsStore).some((card) => card.repetition > 0);
 }
 

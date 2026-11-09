@@ -163,6 +163,43 @@ export function checkAnswer(userInput: string, correctAnswer: string): AnswerRes
   return 'wrong';
 }
 
+/**
+ * Strip only the accent marks (acute, grave, circumflex), leaving breathings,
+ * iota subscripts and diaeresis in place.
+ *
+ * `stripDiacritics` removes all of them, which is right for "same letters" but
+ * hides real slips: an iota subscript is what makes ἡμέρᾳ a dative and ἡμέρα a
+ * nominative, and a breathing is what separates ὁ from ὀ. Those are spelling.
+ * Accent placement is the one thing a Greek course commonly leaves unmarked.
+ */
+export function stripAccentMarks(s: string): string {
+  return s
+    .normalize('NFD')
+    .replace(/[\u0300\u0301\u0342]/g, '')
+    .normalize('NFC');
+}
+
+/**
+ * Is the input exactly right for a ladder write (#199)?
+ *
+ * Letters, breathings and iota subscripts must always match. Accent marks must
+ * match only when `accentStrict` is on, the same switch the quiz already has,
+ * so a student who is not being tested on accents is not blocked on them and
+ * one who is cannot slip past. Moveable nu is tolerated as everywhere else.
+ */
+export function isExactAnswer(
+  userInput: string,
+  correctAnswer: string,
+  accentStrict: boolean,
+): boolean {
+  const user = normalizeUserInput(userInput);
+  const variants = getAcceptableVariants(correctAnswer);
+  if (variants.some((v) => user === v)) return true;
+  if (accentStrict) return false;
+  const bare = stripAccentMarks(user);
+  return variants.some((v) => bare === stripAccentMarks(v));
+}
+
 // ---------------------------------------------------------------------------
 // Keyboard event handler
 // ---------------------------------------------------------------------------

@@ -1,4 +1,5 @@
 import { createDb } from '@tools/db';
+import { isLadderProgress } from '@tools/shared/ladder';
 import type { APIRoute } from 'astro';
 import { deleteProgress, getProgress, putProgress } from '../../lib/progress-store';
 import type { ProgressPayload } from '../../lib/sync-types';
@@ -22,6 +23,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
+/** The ladder has a couple of dozen rungs; these bounds only stop a hostile body. */
+const MAX_RUNGS = 200;
+const MAX_RUNG_ID_LENGTH = 80;
+
 const STATS_NUMBER_FIELDS = [
   'streak',
   'cardsStudiedToday',
@@ -34,7 +39,7 @@ function validatePayload(
   body: unknown,
 ): Pick<
   ProgressPayload,
-  'srsStore' | 'studyStats' | 'customDecks' | 'focusPassages' | 'parseHistory'
+  'srsStore' | 'studyStats' | 'customDecks' | 'focusPassages' | 'parseHistory' | 'ladderProgress'
 > | null {
   if (!isRecord(body)) return null;
 
@@ -89,13 +94,23 @@ function validatePayload(
     if (typeof entry.correct !== 'number' || typeof entry.total !== 'number') return null;
   }
 
+  // Optional too, for the same reason: a page loaded before the ladder shipped
+  // does not send it, and the server then leaves the account's rungs alone.
+  const { ladderProgress } = body;
+  if (ladderProgress !== undefined) {
+    if (!isLadderProgress(ladderProgress)) return null;
+    const rungs = Object.keys(ladderProgress);
+    if (rungs.length > MAX_RUNGS) return null;
+    if (rungs.some((id) => id.length === 0 || id.length > MAX_RUNG_ID_LENGTH)) return null;
+  }
+
   return {
     ...(body as object),
     focusPassages: passages,
     parseHistory: history,
   } as Pick<
     ProgressPayload,
-    'srsStore' | 'studyStats' | 'customDecks' | 'focusPassages' | 'parseHistory'
+    'srsStore' | 'studyStats' | 'customDecks' | 'focusPassages' | 'parseHistory' | 'ladderProgress'
   >;
 }
 

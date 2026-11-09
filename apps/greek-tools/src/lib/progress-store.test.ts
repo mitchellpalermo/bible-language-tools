@@ -74,6 +74,7 @@ describe('progress-store', () => {
       customDecks: [deck],
       focusPassages: [passage],
       parseHistory,
+      ladderProgress: { article: 2 },
     });
 
     const result = await getProgress(db, USER_ID);
@@ -83,6 +84,7 @@ describe('progress-store', () => {
       customDecks: [deck],
       focusPassages: [passage],
       parseHistory,
+      ladderProgress: { article: 2 },
       syncedAt,
     });
   });
@@ -164,6 +166,67 @@ describe('progress-store', () => {
     await deleteProgress(db, USER_ID);
 
     expect(await getProgress(db, USER_ID)).toBeNull();
+  });
+
+  describe('the paradigm ladder (#199)', () => {
+    const base = {
+      srsStore: {},
+      studyStats: stats,
+      customDecks: [],
+      focusPassages: [],
+      parseHistory: {},
+    };
+
+    it('reads as an empty ladder for an account that has none', async () => {
+      await putProgress(db, USER_ID, base);
+      expect((await getProgress(db, USER_ID))?.ladderProgress).toEqual({});
+    });
+
+    it('never lowers a rung: a push from a device that is behind keeps the larger count', async () => {
+      await putProgress(db, USER_ID, { ...base, ladderProgress: { article: 3, 'noun-2m-os': 2 } });
+      await putProgress(db, USER_ID, { ...base, ladderProgress: { article: 1, 'noun-2n-on': 1 } });
+
+      expect((await getProgress(db, USER_ID))?.ladderProgress).toEqual({
+        article: 3,
+        'noun-2m-os': 2,
+        'noun-2n-on': 1,
+      });
+    });
+
+    it('leaves the account ladder alone when a page that predates it pushes', async () => {
+      await putProgress(db, USER_ID, { ...base, ladderProgress: { article: 2 } });
+      await putProgress(db, USER_ID, base);
+
+      expect((await getProgress(db, USER_ID))?.ladderProgress).toEqual({ article: 2 });
+    });
+
+    it('handles a ladder larger than one insert chunk', async () => {
+      const ladderProgress = Object.fromEntries(Array.from({ length: 60 }, (_, i) => [`r${i}`, i]));
+      await putProgress(db, USER_ID, { ...base, ladderProgress });
+      expect((await getProgress(db, USER_ID))?.ladderProgress).toEqual(ladderProgress);
+    });
+
+    it('is erased by deleteProgress, because a merge cannot express a deletion', async () => {
+      await putProgress(db, USER_ID, { ...base, ladderProgress: { article: 2 } });
+      await deleteProgress(db, USER_ID);
+      await putProgress(db, USER_ID, base);
+
+      expect((await getProgress(db, USER_ID))?.ladderProgress).toEqual({});
+    });
+
+    it('keeps greek rungs apart from hebrew rungs under the same user', async () => {
+      const { ladderProgress: table } = await import('@tools/db/schema');
+      await db
+        .insert(table)
+        .values({ userId: USER_ID, language: 'hebrew', rungId: 'suffixes', cleanWrites: 5 });
+      await putProgress(db, USER_ID, { ...base, ladderProgress: { article: 1 } });
+      await deleteProgress(db, USER_ID);
+
+      const rows = await db.select().from(table);
+      expect(rows).toEqual([
+        { userId: USER_ID, language: 'hebrew', rungId: 'suffixes', cleanWrites: 5 },
+      ]);
+    });
   });
 
   it('round-trips a passage without a label', async () => {

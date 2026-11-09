@@ -33,6 +33,11 @@ jobs:
       - run: pnpm --filter @tools/shared typecheck
       - run: pnpm --filter @tools/db test:run
       - run: pnpm --filter @tools/db typecheck
+      # The paradigm ladder's forms are looked up in the Greek New Testament
+      # (src/data/paradigm-ladder.test.ts). Without the corpus those checks skip,
+      # and src/test/corpus.test.ts fails when CI has none, so this step cannot
+      # be dropped quietly.
+      - run: pnpm --filter greek-tools exec node scripts/build-morphgnt.mjs
       - run: pnpm --filter greek-tools test:run
       - run: pnpm --filter greek-tools typecheck
 

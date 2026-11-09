@@ -12,10 +12,12 @@ import {
   DIACRITIC_MAP,
   GREEK_MAP,
   getAcceptableVariants,
+  isExactAnswer,
   normalizeAnswer,
   normalizeUserInput,
   processGreekInput,
   processGreekKey,
+  stripAccentMarks,
   stripDiacritics,
   translateGreekInput,
 } from './greek-input';
@@ -440,5 +442,67 @@ describe('translateGreekInput', () => {
 
   it('returns empty string for empty input', () => {
     expect(translateGreekInput('')).toBe('');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// stripAccentMarks and isExactAnswer (the ladder's grading, #199)
+// ---------------------------------------------------------------------------
+
+describe('stripAccentMarks', () => {
+  it('removes acute, grave and circumflex', () => {
+    expect(stripAccentMarks('λόγος')).toBe('λογος');
+    expect(stripAccentMarks('τὸν')).toBe('τον');
+    expect(stripAccentMarks('δόξῃ')).toBe('δοξῃ');
+    expect(stripAccentMarks('ἀγαθῶν')).toBe('ἀγαθων');
+  });
+
+  it('keeps breathings, iota subscripts and diaeresis, which are spelling', () => {
+    expect(stripAccentMarks('ἡμέρᾳ')).toBe('ἡμερᾳ');
+    expect(stripAccentMarks('ὁ')).toBe('ὁ');
+    expect(stripAccentMarks('ἀ')).toBe('ἀ');
+    expect(stripAccentMarks('προϊέναι')).toBe('προϊεναι');
+  });
+});
+
+describe('isExactAnswer', () => {
+  it('accepts the exact form either way', () => {
+    expect(isExactAnswer('λόγου', 'λόγου', false)).toBe(true);
+    expect(isExactAnswer('λόγου', 'λόγου', true)).toBe(true);
+  });
+
+  it('forgives an accent slip only while Accents is off', () => {
+    expect(isExactAnswer('λογου', 'λόγου', false)).toBe(true);
+    expect(isExactAnswer('λογου', 'λόγου', true)).toBe(false);
+    expect(isExactAnswer('λόγοῦ', 'λόγου', false)).toBe(true);
+    expect(isExactAnswer('λόγοῦ', 'λόγου', true)).toBe(false);
+  });
+
+  it('never forgives a missing iota subscript, which is the dative', () => {
+    expect(isExactAnswer('ἡμέρα', 'ἡμέρᾳ', false)).toBe(false);
+    expect(isExactAnswer('λογω', 'λόγῳ', false)).toBe(false);
+    expect(isExactAnswer('λογῳ', 'λόγῳ', false)).toBe(true);
+  });
+
+  it('never forgives a wrong breathing', () => {
+    expect(isExactAnswer('ὀ', 'ὁ', false)).toBe(false);
+    expect(isExactAnswer('ο', 'ὁ', false)).toBe(false);
+    expect(isExactAnswer('οἱ', 'οἱ', false)).toBe(true);
+    expect(isExactAnswer('οἰ', 'οἱ', false)).toBe(false);
+  });
+
+  it('never forgives a wrong letter', () => {
+    expect(isExactAnswer('λόγον', 'λόγου', false)).toBe(false);
+    expect(isExactAnswer('', 'λόγου', false)).toBe(false);
+  });
+
+  it('tolerates moveable nu, and a final sigma typed as σ', () => {
+    expect(isExactAnswer('λύουσι', 'λύουσι(ν)', true)).toBe(true);
+    expect(isExactAnswer('λύουσιν', 'λύουσι(ν)', true)).toBe(true);
+    expect(isExactAnswer('λόγοσ', 'λόγος', true)).toBe(true);
+  });
+
+  it('compares composed and decomposed input as the same text', () => {
+    expect(isExactAnswer('λο\u0301γου', 'λόγου', true)).toBe(true);
   });
 });
