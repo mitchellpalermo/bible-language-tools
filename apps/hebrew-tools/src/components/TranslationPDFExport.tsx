@@ -300,7 +300,7 @@ function ExportInner() {
         type="button"
         onClick={handleExport}
         disabled={generating}
-        className="w-full py-3 rounded-xl text-base font-bold bg-[var(--color-accent)] text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+        className="w-full py-3 rounded-xl text-base font-bold bg-primary text-white hover:opacity-90 transition-opacity disabled:opacity-50"
       >
         {generating ? 'Generating PDF…' : 'Download PDF'}
       </button>
