@@ -1,4 +1,5 @@
 import { createDb } from '@tools/db';
+import { parseStudyStreak } from '@tools/shared/study-streak';
 import type { APIRoute } from 'astro';
 import { deleteProgress, getProgress, putProgress } from '../../lib/progress-store';
 import type { ProgressPayload } from '../../lib/sync-types';
@@ -34,12 +35,15 @@ function validatePayload(
   body: unknown,
 ): Pick<
   ProgressPayload,
-  'srsStore' | 'studyStats' | 'customDecks' | 'focusPassages' | 'parseHistory'
+  'srsStore' | 'studyStats' | 'studyStreak' | 'customDecks' | 'focusPassages' | 'parseHistory'
 > | null {
   if (!isRecord(body)) return null;
 
   const { srsStore, studyStats, customDecks, focusPassages, parseHistory } = body;
   if (!isRecord(srsStore)) return null;
+
+  // Optional: a page loaded before the Today session shipped does not send it.
+  if (body.studyStreak !== undefined && !parseStudyStreak(body.studyStreak)) return null;
 
   if (!isRecord(studyStats)) return null;
   if (STATS_NUMBER_FIELDS.some((f) => typeof studyStats[f] !== 'number')) return null;
@@ -95,7 +99,7 @@ function validatePayload(
     parseHistory: history,
   } as Pick<
     ProgressPayload,
-    'srsStore' | 'studyStats' | 'customDecks' | 'focusPassages' | 'parseHistory'
+    'srsStore' | 'studyStats' | 'studyStreak' | 'customDecks' | 'focusPassages' | 'parseHistory'
   >;
 }
 

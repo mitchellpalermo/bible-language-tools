@@ -237,6 +237,45 @@ device-local until #200 adds the account endpoint.
   streak is `createDailyStreak`. Decks, focus passages and parse-history totals
   are greek-only merges with no shared counterpart.
 
+## Today's Session (#197)
+
+`/today` runs one session sized to a time budget (20, 45 or 90 minutes): due
+vocabulary, then one drill, ending on a summary. The queue builder, the clock,
+the summary card and the study streak are shared (`@tools/shared/today`,
+`@tools/shared/study-streak`, `components/TodaySession`); the repo CLAUDE.md
+"Today's Session" has the rules. What is specific here:
+
+| File | What it holds |
+|---|---|
+| `src/lib/today.ts` | Due vocabulary, the drill providers and rotation, estimates, `dueTomorrow`, the budget preference |
+| `src/components/TodaySession.tsx` | The page: plan preview, the run, the summary |
+| `src/components/VocabCard.tsx` | The flashcard face, shared by `/flashcards` and Today |
+| `src/lib/study-streak.ts` | `createStudyStreak('greek-tools-study-streak-v1')`; **synced**, kept by the account reset |
+
+- **Vocabulary is due only**: no new words, no weak ones. Due means every card the
+  schedule says is due, whatever deck or frequency band `/flashcards` has open.
+- **There is no paradigm section.** The paradigm quiz schedules no cells, so
+  nothing is "due" there. Do not invent a schedule for it here; the ladder (#199)
+  is where paradigms join Today.
+- **Parse history has no due date**, so it is never a tier. It enters two ways:
+  the parse drill asks about the tense-voice-mood kinds the attempt log says are
+  missed (`parse/paradigm/<tense>-<voice>-<mood>`, written by the drill through
+  `logAttempts`), and the plan and summary name the focus passage parsed worst
+  (`weakestPassage`, reading old totals through `parseHistoryAsAttempts`).
+  Passage answers cannot be mapped to a kind of form, so they only feed the hint.
+- **The drill rotates by day among `DRILL_PROVIDERS`**: the parse quiz and a mixed
+  review (learned words that are not due, answered Missed / Got it, never
+  scheduled). **The seam for the ladder (#199):** add a `ladder` provider, a
+  `{ kind: 'ladder' }` variant to `TodayDrill` and a branch in `planSteps`; `ladder`
+  is already in `DRILL_ROTATION`, and a test pins that it is the only kind
+  without a provider. There is deliberately no accent-trainer seam (#198 was closed).
+- **The study streak syncs** on two columns of `study_stats`. `PUT /api/progress`
+  replaces that row, so `putProgress` merges the incoming streak with the stored
+  one first. `DELETE` clears it with the rest of the row, and the account reset's
+  follow-up push restores it from this browser.
+- **The attempt log still does not sync** (#200), so the parse drill's history is
+  per device for now.
+
 ## Architecture Decisions
 
 See `docs/adr/` for recorded decisions:

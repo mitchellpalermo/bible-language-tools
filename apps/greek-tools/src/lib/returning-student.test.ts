@@ -115,6 +115,8 @@ describe('a returning student, seeded as before the move', () => {
     expect(body).toEqual({
       srsStore: SRS,
       studyStats: STATS,
+      // Never studied a Today session: the streak travels as "never".
+      studyStreak: { streak: 0, lastSessionDate: '' },
       customDecks: DECKS,
       focusPassages: PASSAGES,
       parseHistory: PARSE,

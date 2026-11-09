@@ -14,6 +14,16 @@ const svg = (body: string) =>
 
 export const studyModes: readonly StudyMode[] = [
   {
+    href: '/today',
+    label: "Today's Session",
+    description:
+      'One daily session sized to your time: due vocabulary first, then a short drill. Pick 20, 45 or 90 minutes.',
+    accentColor: '#1D4ED8',
+    bgColor: '#EEF2FF',
+    icon: svg('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'),
+    detail: 'Due vocabulary · One drill · Study streak',
+  },
+  {
     href: '/flashcards',
     label: 'Flashcards',
     description:

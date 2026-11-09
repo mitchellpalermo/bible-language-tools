@@ -24,6 +24,7 @@ import { type VocabWord, vocabulary } from '../data/vocabulary';
 import { loadFlashcardSettings, saveFlashcardSettings } from '../lib/flashcard-settings';
 import DeckBuilder from './DeckBuilder';
 import ErrorBoundary from './ErrorBoundary';
+import VocabCard, { type Direction } from './VocabCard';
 
 // The session itself — dealing, grading, the drill modes, typed-answer state
 // and the keyboard — is `useFlashcardSession` in @tools/shared (#87). This file
@@ -37,7 +38,6 @@ const STUDY_MODES: { mode: StudyMode; label: string }[] = [
   { mode: 'all', label: 'Study All' },
   { mode: 'endless', label: 'Endless' },
 ];
-type Direction = 'gr-en' | 'en-gr';
 type FreqFilter = 'all' | '500+' | '100-499' | '50-99' | '<50';
 
 // ─── Frequency presets ────────────────────────────────────────────────────────
@@ -264,7 +264,6 @@ function FlashcardsInner() {
 
   // ─── Derived values ──────────────────────────────────────────────────────────
 
-  const front = card ? (direction === 'gr-en' ? card.greek : card.gloss) : '';
   const back = card ? expectedAnswer(card, direction) : '';
   const hasActiveFilters = freqFilter !== 'all' || posFilter.length > 0 || activeDeckId !== null;
   const activePreset = FREQ_PRESETS.find((p) => p.filter === freqFilter) ?? FREQ_PRESETS[0];
@@ -708,119 +707,23 @@ function FlashcardsInner() {
       </div>
 
       {/* ── Card ──────────────────────────────────────────────────────────── */}
-      <div
-        onClick={answerMode === 'flip' && !flipped ? handleFlip : undefined}
-        className={`bg-bg-card rounded-2xl shadow-md border-2 border-indigo-100 px-4 py-6 sm:px-10 sm:py-8 text-center select-none min-h-[200px] sm:min-h-[220px] flex flex-col items-center justify-center transition-all ${
-          answerMode === 'flip' && !flipped
-            ? 'cursor-pointer active:shadow-lg hover:shadow-lg hover:border-grape/30'
-            : ''
-        }`}
-      >
-        {/* Front side */}
-        <p
-          className="leading-tight"
-          style={{
-            fontSize: direction === 'gr-en' ? '3rem' : '1.8rem',
-            fontFamily: direction === 'gr-en' ? 'var(--font-greek)' : 'var(--font-sans)',
-            fontWeight: direction === 'gr-en' ? '700' : '600',
-            color: direction === 'gr-en' ? 'var(--color-greek)' : 'var(--color-text)',
-          }}
-        >
-          {front}
-        </p>
-        {/* The part of speech is a hint before the answer and a fact after it.
-            With the toggle off it waits for the reveal rather than
-            disappearing: "verb" narrows a word to a fraction of the lexicon,
-            which is help you did not ask for while recalling, and worth having
-            once you have. (In English → Greek the front is the gloss and there
-            is no such line to withhold; the back carries it as before.) */}
-        {direction === 'gr-en' && (showPartOfSpeech || revealed) && (
-          <p className="text-text-muted text-sm mt-2 font-medium uppercase tracking-wide text-xs">
-            {card.partOfSpeech}
-          </p>
-        )}
-
-        {/* Flip mode: reveal hint */}
-        {answerMode === 'flip' && !flipped && (
-          <p className="text-text-muted/60 text-xs mt-6">
-            <span className="sm:hidden">tap to reveal</span>
-            <span className="hidden sm:inline">click or press space to reveal</span>
-          </p>
-        )}
-
-        {/* Flip mode: back side */}
-        {answerMode === 'flip' && flipped && (
-          <div className="mt-4 pt-4 border-t-2 border-indigo-50 w-full text-center">
-            <p
-              className="leading-tight"
-              style={{
-                fontSize: direction === 'en-gr' ? '3rem' : '1.8rem',
-                fontFamily: direction === 'en-gr' ? 'var(--font-greek)' : 'var(--font-sans)',
-                fontWeight: direction === 'en-gr' ? '700' : '600',
-                color: direction === 'en-gr' ? 'var(--color-greek)' : 'var(--color-text)',
-              }}
-            >
-              {back}
-            </p>
-            <p className="text-text-muted text-xs mt-2 uppercase tracking-wide font-medium">
-              {direction === 'gr-en'
-                ? `occurs ${card.frequency.toLocaleString()}× in GNT`
-                : card.partOfSpeech}
-            </p>
-          </div>
-        )}
-
-        {/* Type mode: input */}
-        {answerMode === 'type' && answerResult === null && (
-          <div className="mt-6 flex flex-col sm:flex-row gap-2 w-full max-w-sm">
-            <input
-              ref={inputRef}
-              type="text"
-              value={typedAnswer}
-              onChange={(e) => setTypedAnswer(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleTypeSubmit();
-              }}
-              placeholder={
-                direction === 'gr-en' ? 'Type the English gloss…' : 'Type the Greek word…'
-              }
-              className="flex-1 px-3 py-2.5 border-2 border-indigo-100 rounded-xl focus:border-grape focus:outline-none text-base sm:text-sm"
-              autoComplete="off"
-              spellCheck={false}
-            />
-            <button
-              onClick={handleTypeSubmit}
-              className="px-4 py-2.5 bg-grape text-white rounded-xl hover:opacity-90 text-sm font-semibold transition-opacity shadow-sm"
-            >
-              Check
-            </button>
-          </div>
-        )}
-
-        {/* Type mode: result feedback */}
-        {answerMode === 'type' && answerResult !== null && (
-          <div
-            className={`mt-4 px-4 py-3 rounded-xl w-full max-w-sm text-center border-2 ${
-              answerResult ? 'bg-jade/5 border-jade/30' : 'bg-coral/5 border-coral/30'
-            }`}
-          >
-            {answerResult ? (
-              <p className="font-bold" style={{ color: 'var(--color-jade)' }}>
-                Correct!
-              </p>
-            ) : (
-              <>
-                <p className="font-bold" style={{ color: 'var(--color-coral)' }}>
-                  Not quite
-                </p>
-                <p className="text-text-muted text-sm mt-1">
-                  Answer: <span className="font-semibold text-text">{back}</span>
-                </p>
-              </>
-            )}
-          </div>
-        )}
-      </div>
+      <VocabCard
+        card={card}
+        direction={direction}
+        answerMode={answerMode}
+        flipped={flipped}
+        revealed={revealed}
+        onFlip={handleFlip}
+        showPartOfSpeech={showPartOfSpeech}
+        back={back}
+        typed={{
+          value: typedAnswer,
+          onChange: setTypedAnswer,
+          onSubmit: handleTypeSubmit,
+          result: answerResult,
+          inputRef,
+        }}
+      />
 
       {/* ── Action buttons ────────────────────────────────────────────────── */}
       {/* The SRS grades schedule the card, so they preview the interval each
