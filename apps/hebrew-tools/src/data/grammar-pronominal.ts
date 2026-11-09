@@ -29,13 +29,14 @@ import { type Pgn, pgnLabel } from './verb-paradigms';
 
 export interface PronounEntry {
   /** e.g. '1cs' — the row label, with the full label on hover. */
-  pgn: Pgn | '1cs-alt' | '3fp-alt';
+  pgn: Pgn | '1cs-alt' | '3mp-alt';
   hebrew: string;
   gloss: string;
 }
 
 /**
- * The independent personal pronouns. אֲנִי and הֵנָּה have longer alternates;
+ * The independent personal pronouns. אֲנִי and הֵם have longer alternates
+ * (הֵמָּה is the 3mp, as OSHB parses all of its 218 occurrences);
  * the 2fp is אַתֵּנָה — the short אַתֵּן occurs only bound to what precedes it
  * (וְאַתֵּן).
  */
@@ -50,13 +51,13 @@ export const personalPronouns: PronounEntry[] = [
   { pgn: '2mp', hebrew: 'אַתֶּם', gloss: 'you' },
   { pgn: '2fp', hebrew: 'אַתֵּנָה', gloss: 'you' },
   { pgn: '3mp', hebrew: 'הֵם', gloss: 'they' },
+  { pgn: '3mp-alt', hebrew: 'הֵמָּה', gloss: 'they' },
   { pgn: '3fp', hebrew: 'הֵנָּה', gloss: 'they' },
-  { pgn: '3fp-alt', hebrew: 'הֵמָּה', gloss: 'they' },
 ];
 
 export function pronounPgnLabel(pgn: PronounEntry['pgn']): string {
   if (pgn === '1cs-alt') return `${pgnLabel('1cs')} (alternate)`;
-  if (pgn === '3fp-alt') return `${pgnLabel('3fp')} (alternate)`;
+  if (pgn === '3mp-alt') return `${pgnLabel('3mp')} (alternate)`;
   return pgnLabel(pgn);
 }
 

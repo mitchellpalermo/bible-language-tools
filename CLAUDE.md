@@ -10,6 +10,7 @@ apps/
   hebrew-tools/  — hebrew.tools (in development, see ROADMAP.md)
 packages/
   shared/        — language-agnostic utilities shared by both apps
+  dev-tasks/     — `pnpm shots` and `pnpm checks`: PR screenshots and the repo's checks, as scripts
 ```
 
 ## Running the apps
@@ -25,6 +26,10 @@ pnpm build:hebrew       # build hebrew-tools for production
 
 pnpm test               # run all tests across all packages
 pnpm typecheck          # typecheck all packages
+
+pnpm checks             # the data checks: corpus gate, --check scripts, verses, pins
+pnpm checks ci          # everything both CI workflows run, in one report
+pnpm shots capture <list.json> --before main   # PR screenshots from a shot list
 ```
 
 To work on a single app directly:
@@ -53,13 +58,19 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/srs` | SM-2 spaced repetition algorithm, types, and pure stats functions |
 | `@tools/shared/daily` | `dayIndex()` verse-of-the-day cycling and the `createDailyStreak(storageKey)` read-it-daily streak |
 | `@tools/shared/daily-dose` | The Daily Dose of Scripture feed behind both apps' `/daily`: `createDailyDoseSource({ categoryId, toVerse, cacheKeyPrefix })`, `parseLessonTitle`, and `cspAllowsDailyDose` for each app's `_headers` test. Each app keeps only its category ID and book names |
-| `@tools/shared/sync-merge` | Merge rules for cross-device sync of SRS cards and study stats |
+| `@tools/shared/sync-merge` | Merge rules for cross-device sync: SRS cards, study stats, the attempt log (`mergeAttempts`, a union by id) and ladder progress (`mergeLadderProgress`, max per rung) |
 | `@tools/shared/quiz-settings` | `createQuizSettings(storageKey, overrides?)` factory for persisting quiz difficulty; `overrides` sets one app's defaults |
 | `@tools/shared/paradigm-quiz` | The paradigm quiz engine — `TableModel`, `getQuizCells`, `applyDensity`. Which tables exist and how an answer is graded stay in each app |
 | `@tools/shared/flashcard-settings` | `createFlashcardSettings(storageKey)` factory for what the flashcard face shows before you answer |
 | `@tools/shared/flashcard-session` | `shuffle`, `nextRound` and `requeueMissed` — pure flashcard queue rules: Endless mode's reshuffle, and the drill modes' re-queue of a missed card. Used through `use-flashcard-session` |
 | `@tools/shared/use-flashcard-session` | `useFlashcardSession<T>()` — the flashcard session engine: dealing, SRS grading, drills, Endless, typed answers, the keyboard. Both apps' `Flashcards.tsx` run on it. See "The flashcard session engine" below |
 | `@tools/shared/use-stored-state` | `useStoredState(load, fallback, save?)` and `useHydrated()` — state seeded from storage without breaking hydration. See "Hydration" below |
+| `@tools/shared/step-drill` | The step-gated drill engine: `stepDrillReducer`, `isCleanPass`, and `canSkipScaffold` / `createStepDrillHistory(storageKey)` for speed mode. See "The step-gated drill" below |
+| `@tools/shared/ladder` | The paradigm ladder (#186): `rungStates`, `isCleanWrite`, `recordWrite`, `newlyUnlocked`, `isLadderProgress`, and `createLadderProgress(storageKey)`. See "The paradigm ladder" below |
+| `@tools/shared/attempt-log` | `createAttemptLog(storageKey)` — every checked answer, by concept and id, for the mastery levels (#187) — plus `parseAttempt` and `planAttemptPush` for syncing it. See "The attempt log syncs on its own" below |
+| `@tools/shared/today` | Today's Session (#184): `buildTodayPlan` (fill a time budget, due before weak before new), `canStartNext` and `createActiveClock` (the budget while it runs), `summarizeSession`. See "Today's Session" below |
+| `@tools/shared/study-streak` | `createStudyStreak(storageKey)` — days with a finished Today session — and `mergeStudyStreak` for sync |
+| `@tools/shared/components/TodaySession` | `BudgetPicker` (20 / 45 / 90 minutes) and `SessionSummaryCard` (React) |
 | `@tools/shared/test/hydration` | `hydrationErrors(ui, { seed })` — test helper: server-render with storage hidden, seed, hydrate, return every mismatch React reports |
 | `@tools/shared/reset-progress` | `resetSrsProgress` and `isResetConfirmed` — erase the SRS store, this browser first, then the account copy via `DELETE`; a server failure never undoes the local reset |
 | `@tools/shared/nav` | `NavLink` type and the active-route predicates the nav renders with |
@@ -72,6 +83,8 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/components/GradeButtons` | The Again/Hard/Good/Easy answer row, with per-grade interval previews (React) |
 | `@tools/shared/components/DrillButtons` | The Missed / Got it answer row for the drill modes, which schedule nothing (React) |
 | `@tools/shared/components/ResetProgress` | The account page's "Danger zone": open, type RESET, erase. Each app wraps it in `src/components/ResetProgress.tsx` with its own list of what is erased and kept (React) |
+| `@tools/shared/components/StepDrill` | `StepList` (the step row; locked steps stay visible) and `RuleFeedback` (a miss names the rule and links to it) (React) |
+| `@tools/shared/components/Ladder` | `LadderRungList` — the rungs in order, locked ones visible with what opens them and an "Open anyway" button (React) |
 | `@tools/shared/components/ToggleSwitch` | Labelled on/off switch — `role="switch"`, app accent passed in (React) |
 | `@tools/shared/components/NumberToggle` | Sg/Pl pill toggle (mobile only) |
 | `@tools/shared/components/EndingsToggle` | Full forms / Endings only toggle |
@@ -111,9 +124,13 @@ Both apps render `@tools/shared/components/SiteNav.astro` inside their layout he
 
 Adding a destination means adding one entry to that app's `navLinks` array in `Layout.astro`. Nothing else needs touching; the desktop nav, the drawer, and active-route highlighting all read the same list.
 
+**The Study group is built from one list per app** (#229): `src/lib/study-modes.ts` exports `studyModes`, `Layout.astro` takes the Study children from it with `studyNavChildren(studyModes, ...)`, and `pages/study.astro` draws a card for each. A new study mode is one entry there, and it gets its card and its nav child together. `src/test/study-modes.test.ts` in each app runs `studyModeProblems` (`@tools/shared/study-modes`), which fails when the nav or the hub stops reading the list, when a mode has no page, or when a shared mode is named differently from the other app (`STUDY_LABELS`: Flashcards, Paradigms, Parse). Things that are not modes (hebrew.tools' Today, the routine the modes make up) go in `studyNavChildren`'s second argument and get their own panel on `/study`.
+
+**There is no `/quiz` hub in either app.** greek.tools dropped it: it was one extra tap in front of Paradigms and Parse, hebrew.tools never had one, and a hub that hides modes is how `/study` lost them. `/quiz` redirects to `/study`. Page titles and nav labels agree (Paradigms, Reader); a quiz-type split can come back as a card's detail text, not a route.
+
 Things to know before changing it:
 
-- **A `NavLink` with `children` is still a link.** Both apps' Study entry points at `/study` *and* lists its sub-routes (Flashcards and Paradigms on hebrew.tools), so the hub page stays reachable and the sub-routes are one tap away. **The children appear in the mobile drawer only** — the desktop row shows the group — so every study mode needs a card on its app's `/study` page as well as an entry in `children`. The children also serve as the active-path list — that's what lights Study up on `/flashcards`, replacing the old hand-written `STUDY_PATHS` constant.
+- **A `NavLink` with `children` is still a link.** Both apps' Study entry points at `/study` *and* lists its sub-routes (Flashcards, Paradigms and Accent Shift on hebrew.tools), so the hub page stays reachable and the sub-routes are one tap away. **The children appear in the mobile drawer only** — the desktop row shows the group — so every study mode needs a card on its app's `/study` page as well as an entry in `children`. The children also serve as the active-path list — that's what lights Study up on `/flashcards`, replacing the old hand-written `STUDY_PATHS` constant.
 - **`isNavLinkActive` is the section, `isNavLinkCurrent` is the page.** The former drives highlighting (a group heading lights on any child route), the latter drives `aria-current="page"` (so a heading and its child don't both claim it).
 - **The account link keeps `data-account-link` / `data-account-label`.** Each app's inline auth-hint script corrects those on prerendered pages, which ship with no session. The hint cookie has no authority — it only swaps the label and href.
 - **The drawer's `visibility` transition is stepped, not eased** (`visibility 0s linear 220ms`, and `0s` on open). `initNavMenu` moves focus into the panel in the same tick it opens it, and a mid-transition `visibility` value would leave that focus call a no-op.
@@ -179,6 +196,124 @@ Two things about it that are pedagogy rather than plumbing:
   (`revealed` covers both the flip and a checked typed answer), and its English →
   Greek direction is untouched: the front is the gloss there, so there is no
   such line to withhold.
+
+### The step-gated drill
+
+`@tools/shared/step-drill` runs one item through a fixed sequence of steps,
+each checked before the next unlocks (#185 on hebrew.tools, #198 to come on
+greek.tools). An app supplies the steps, the checks and the rule text; the
+module and `components/StepDrill` own the gate. Nothing in either names a
+language. Rules that are pedagogy rather than plumbing:
+
+- **A step is scored on its first try.** A miss leaves it open with the
+  feedback in view, so the second try is not unaided recall. Only the first
+  try is logged and counted.
+- **"Show me" fills in the answer and counts as a miss**, so a student stuck
+  on step 1 can still reach what the item is about.
+- **Speed mode is earned on evidence** — `canSkipScaffold` wants a full window
+  of scaffold steps (20) at 90%. Speed mode answers no scaffold steps, so it
+  stays earned until the student goes back and misses enough to lose it.
+- **Every checked answer goes to the attempt log** (`@tools/shared/attempt-log`)
+  from the day a drill ships, so the mastery map in #187 starts with history.
+  Concept ids are stable strings; renaming one splits its history.
+
+### The paradigm ladder
+
+`@tools/shared/ladder` orders paradigm tables by difficulty and opens each
+once the one below has been written cleanly (#186 on hebrew.tools, #199 to
+come on greek.tools). An app supplies the rungs (one table each) and its own
+grading; the module owns the unlock rule and `components/Ladder` draws it.
+
+- **A clean write is a Full table, every form exactly right, no peek.** A
+  pointing slip that lenient marking forgives is not clean: the rung asks for
+  the table reproduced. Easy, Medium and Due still work on every rung and
+  still schedule SRS cards; they just do not count toward the next rung.
+- **Two clean writes of the rung directly below open a rung**, and a rung
+  never closes again. Only the rung below counts, so a rung opened anyway and
+  written cleanly opens the next one in the usual way.
+- **A locked rung is visible and can be opened anyway**, through its own
+  button rather than a tap on the card, so the override is deliberate.
+- **Progress syncs when signed in**, stored per app by
+  `createLadderProgress(key)`. It rides in the progress payload, one row per
+  rung in `ladder_progress`, and merges by the larger count per rung, so a rung
+  that opened on one device is open on all of them. Clean writes made on two
+  devices between syncs are not added together (see `mergeLadderProgress`):
+  the cost is at most one extra clean write, never a rung opened early.
+
+### Today's Session
+
+`@tools/shared/today` builds one daily session to a time budget of 20, 45 or
+90 minutes (#184 on hebrew.tools, #197 to come on greek.tools). An app supplies
+sections of candidates — each with a tier and a time estimate — and one drill;
+the module decides what fits. Rules that are pedagogy rather than plumbing:
+
+- **Due before weak before new, across every section.** A tier is offered to
+  every section before the next tier is offered to any, and once a tier leaves
+  something out for lack of room the lower tiers get nothing. A new card in a
+  session that left a due card behind is how review piles grow.
+- **Within a tier, sections share the time** by whichever has spent least, so
+  a vocabulary backlog cannot starve the paradigms.
+- **The drill is reserved first.** It is the part of the session that is not
+  review.
+- **The plan fits the budget; the clock holds it.** Estimates are estimates,
+  so while the session runs `canStartNext` refuses the next item once the
+  budget is used, or if the item would end more than 10% past it. A started
+  item is always finished. The clock pauses while the tab is hidden.
+- **An app may deal fewer tiers than the module offers.** hebrew.tools' Today
+  deals vocabulary that is **due only** (#224): no new words, no weak ones.
+  Introducing words is `/flashcards`' job, and a review session that adds
+  strangers piles up tomorrow's reviews. The module keeps `new` and `maxNew`
+  because the forms section still uses them.
+- **A weak item is practice, not a review.** It is not due, so answering it
+  must not move its schedule forward. Each app enforces that in its own
+  grading (hebrew.tools: weak forms with
+  `practice`).
+- **Only an item's first answer counts in the summary**, as in the drills.
+
+The study streak (`@tools/shared/study-streak`) is separate from the Daily
+verse streak and the flashcard streak, and it **syncs**, so it follows the
+rules in "Streaks, study days, and sync merges": local dates, `streak` travels
+with `lastSessionDate`, the later date wins, and the merge is symmetric. On the
+server it is two columns on `study_stats` (`study_streak`,
+`last_session_date`); greek.tools' rows take the defaults until #197.
+
+### The attempt log syncs on its own
+
+The attempt log (#196) syncs to a signed-in account on its own endpoint,
+`/api/attempts`, not in the progress `PUT`. A full log is 5,000 attempts at
+~130 bytes each, past both the `PUT`'s 512 KB body limit and the 64 KB a
+keepalive request may carry, and a full replace would rewrite thousands of rows
+on every tab switch. hebrew.tools does this today; greek.tools reuses the
+shared parts when #200 needs them. The rules:
+
+- **Every attempt has a random `id`**, and the merge is a union by it, oldest
+  first, keeping the newest `MAX_ATTEMPTS` (`mergeAttempts`). Entries logged
+  before ids existed get a stable `legacy-<at>-<n>` id on read and keep it once
+  the log is next written. The server's `INSERT OR IGNORE` is the same union, so
+  sending an attempt twice is harmless, and it prunes to the same window.
+- **A push sends what was logged since a cursor; a pull sends exactly what the
+  account lacks.** The cursor is this device's clock when the last accepted
+  push began (`planAttemptPush`), so it errs toward sending twice. The two ways
+  it can skip one (a clock set backwards, one check logging more than a batch)
+  are repaired by the next pull, which diffs by id.
+- **A keepalive push carries at most `KEEPALIVE_ATTEMPTS`**, and is started
+  before the progress push is awaited: a page that is unloading may not run
+  anything after an `await`. Each page load sends whatever is still owed
+  (`drainOwedAttempts`), which covers a keepalive push whose answer no page
+  was left to record, and a backlog past the cap.
+- **`DELETE /api/progress` clears the log and the ladder too**, and resets the
+  cursor, because a merge cannot express a deletion. The account reset keeps
+  both locally and its push puts them back; "Start fresh" clears them locally
+  (`clearLocalProgress`) so the next push has nothing to upload.
+
+**Every migration is tested against data written before it.** The database is
+live and shared by both apps, so `packages/db/src/migrations.test.ts` builds it
+at the previous schema with `createTestDbAt('<previous>')` from
+`@tools/db/test-utils`, fills every table for both languages, runs
+`migrateRest()`, and checks that no existing row changed. A new migration adds
+its own `describe` there. Both deploy workflows apply migrations *before* the
+new code ships, so a migration must also leave the previous code working: add
+columns with a constant default, never rename or drop in the same release.
 
 ### Drill modes answer Missed / Got it
 
@@ -261,6 +396,15 @@ Things to know before changing it:
   behind a typed confirmation and with the server copy cleared too. A reset on
   a study screen sits one tap from a session, which is why it moved.
 
+## Favicons
+
+Each app ships `public/favicon.svg`, `favicon.ico` (16/32/48) and `apple-touch-icon.png` (180), all drawn from the same glyph (α, א) as a tile in the site's primary color (greek `#1D4ED8` blue, hebrew `#15803D` green) with the glyph in the accent `#F59E0B`, converted to a path. Two things went wrong before (Nov 2026):
+
+- **A browser that skips the SVG `<link>` asks for `/favicon.ico` itself** (Safari, a cached tab, error pages). greek.tools still had Astro's starter `favicon.ico`, so its tab flipped to the Astro logo on some pages; hebrew.tools had none. Both layouts now declare all three icons, and `@tools/shared/test/favicons` (run by each app's `src/test/favicons.test.ts`) fails if a declared icon has no file or one of the three is not declared.
+- **The old SVG was unfilled `<text>` in `font-family="serif"`**: black on transparent, so invisible in a dark tab, and drawn in whatever serif the machine had. Keep the glyph as a path and give it a background.
+
+To regenerate the rasters from the SVG: `rsvg-convert -w 180 -h 180 favicon.svg -o apple-touch-icon.png`, and `magick` over 16/32/48 renders for the `.ico`.
+
 ## Streaks, study days, and sync merges
 
 Three defects lived here at once (fixed Aug 2026). All three are easy to
@@ -338,6 +482,35 @@ both apps.
   island needs a case there. A new stored value needs seeding there, or the
   test cannot see it differ.
 
+## Delegating chores to Haiku
+
+Two chores are mechanical enough to hand to a smaller model, and each has a
+Haiku agent in `.claude/agents/` and a script in `packages/dev-tasks` (see its
+README). **Use the agent for these; do not do them in the main session:**
+
+| Chore | Agent | Script |
+|---|---|---|
+| PR screenshots | `screenshotter` | `pnpm shots` |
+| The corpus gate, the `--check` scripts, `check:verses`, `check:pins`, or a full CI-equivalent run | `checker` | `pnpm checks` |
+
+The main session still owns the judgement either side of the agent:
+
+- **For screenshots, it writes the shot list.** It picks the routes and the
+  state, and for each shot an `expect` text that only appears in that state —
+  "Again" proves a flashcard is revealed, "Flashcards" does not. The script
+  refuses to capture without it, so a missing or vague brief fails loudly
+  rather than producing a shot of the home page. Afterwards **it looks at the
+  PNGs itself** before they go on a PR; the agent does not judge images.
+- **For checks, it reads the report and decides what to do.** The agent
+  returns the report verbatim and fixes nothing. A failure in a `--check`
+  script usually means regenerating a committed file, which is a change to
+  review, not one for a small model to make.
+
+The scripts are what make this safe to delegate: every step that is easy to
+forget — the dev toolbar, the webfont check, `CI=1` on the corpus gate,
+building the corpus first — is in code, not in the agent's instructions. When
+one of these chores gains a step, add it to the script.
+
 ## Pull requests
 
 ### Screenshots are required for any UI-affecting change
@@ -350,23 +523,26 @@ What to capture:
 - **Before and after**, when changing something that already existed. The "before" is the point — a lone "after" shot doesn't show what moved.
 - **Both apps**, when the change touches `packages/shared`. It ships to greek.tools and hebrew.tools at once.
 
-How to capture: drive a Playwright script against `pnpm dev` rather than taking manual screenshots — it is repeatable, and it gets exact viewport sizes. Two things to remember:
+How to capture: write a shot list and send it to the `screenshotter` agent, which runs `pnpm shots capture` (see "Delegating chores to Haiku" above, and `packages/dev-tasks/README.md` for the format). The script handles the points below; they are here so the reasons stay written down.
 
 - **Hide the Astro dev toolbar**, or it floats over the bottom of every shot: `page.addStyleTag({ content: 'astro-dev-toolbar { display: none !important; }' })`.
-- **Only one dev server can hold port 4321.** Both apps use it, and Playwright's `reuseExistingServer` means a stale server from the other app will silently serve the wrong site. Kill it between runs: `lsof -ti:4321 | xargs -r kill -9`.
-- **Check that the webfont actually loaded before trusting a shot of Hebrew or Greek.** Both apps load their script face from Google Fonts, and if the browser cannot reach that host the page renders in a system fallback — which looks plausible in a thumbnail and is not what the app ships. Nikud land wrong and the letterforms differ. Where the browser has no route to the CDN, fetch the CSS and its `woff2` files once with `curl` and serve them to the page with `context.route('https://fonts.googleapis.com/**', ...)` and the same for `fonts.gstatic.com`.
+- **Never reuse, or kill, the dev server on port 4321.** Both apps default to it, so a stale server from the other app will silently serve the wrong site — and the server on it is often one you are using from another worktree. `pnpm shots` starts its own server on a spare port and checks every page title names the right app.
+- **Check that the webfont actually loaded before trusting a shot of Hebrew or Greek.** Both apps load their script face from Google Fonts, and if the browser cannot reach that host the page renders in a system fallback — which looks plausible in a thumbnail and is not what the app ships. Nikud land wrong and the letterforms differ. `pnpm shots` refuses to capture when the page shows the script and its face never loaded. Where the browser has no route to the CDN, fetch the CSS and its `woff2` files once with `curl` and serve them to the page with `context.route('https://fonts.googleapis.com/**', ...)` and the same for `fonts.gstatic.com`.
 
-How to attach: GitHub's image upload is web-UI only — there is no API for it, so `gh` cannot upload to it. Commit the images to an orphan branch (`assets/pr-<N>`) and reference them from the PR body by their `raw.githubusercontent.com` URL. That keeps binaries out of `main`'s history, and the branch can be deleted after the merge. The repo is public, so raw URLs render for everyone.
+How to attach: `pnpm shots publish <dir> --pr <N>` does all of the following and prints the PR-body table. GitHub's image upload is web-UI only — there is no API for it, so `gh` cannot upload to it. Commit the images to an orphan branch (`assets/pr-<N>`) and reference them from the PR body by their `raw.githubusercontent.com` URL. That keeps binaries out of `main`'s history, and the branch can be deleted after the merge. The repo is public, so raw URLs render for everyone.
 
 **Build that orphan branch in a throwaway directory, never in the working tree.** `git init` a temp dir, add the remote, commit the PNGs, push the branch, delete the dir:
 
 ```bash
+NAME=$(git config user.name) EMAIL=$(git config user.email)   # run in the repo first
 WT=$(mktemp -d) && cd "$WT" && git init -q .
 git remote add origin https://github.com/mitchellpalermo/bible-language-tools.git
 cp /path/to/shots/*.png . && git add *.png
-git commit -q -m "assets: screenshots for PR #<N>"
+git -c user.name="$NAME" -c user.email="$EMAIL" commit -q -m "assets: screenshots for PR #<N>"
 git branch -M assets/pr-<N> && git push -q origin assets/pr-<N>
 ```
+
+**A fresh `git init` has no identity of its own.** It reads only global config, and on a machine where the name and email are set per repository its commit fails with "Author identity unknown". Read them in the repo and pass them with `-c`, as above; `pnpm shots publish` does the same (`identityArgs` in `packages/dev-tasks/src/git.ts`). The same applies to any script that commits outside the working tree.
 
 Never `git checkout --orphan` + `git clean -fdx` in the repo: it deletes ignored files (`.dev.vars`, `.wrangler/`, `public/data/`) and untracked directories like `.claude/`, unrecoverably — and `-e` exclusions do not reliably stop it.
 
@@ -450,7 +626,10 @@ Things to know before changing it:
 - **greek-tools has no equivalent.** Nothing compares `grammar.ts` to MorphGNT,
   in CI or locally; its workflow builds the corpus only in the deploy job.
 
-To run the gate locally: `pnpm --filter hebrew-tools build:data`, then the tests.
+To run the gate locally: `pnpm checks data` (or the `checker` agent). It builds
+the corpus, then runs the tests with `CI=1` so a missing corpus fails rather
+than skips, plus the `--check` scripts. By hand it is
+`pnpm --filter hebrew-tools build:data`, then the tests.
 Details of what is checked and why are in `apps/hebrew-tools/CLAUDE.md` under
 "The corpus gate".
 

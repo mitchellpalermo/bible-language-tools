@@ -12,11 +12,16 @@
 
 import type * as schema from '@tools/db/schema';
 import {
+  attempts as attemptsTable,
+  ladderProgress as ladderProgressTable,
   srsCards as srsCardsTable,
   studyStats as studyStatsTable,
   syncState as syncStateTable,
 } from '@tools/db/schema';
-import { and, eq } from 'drizzle-orm';
+import { type Attempt, MAX_ATTEMPTS } from '@tools/shared/attempt-log';
+import type { LadderProgress } from '@tools/shared/ladder';
+import { emptyStudyStreak, type StudyStreakData } from '@tools/shared/study-streak';
+import { and, desc, eq, notInArray, sql } from 'drizzle-orm';
 import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
 import type { SRSCard, StudyStats } from '../data/srs';
 import { LANGUAGE } from './db';
@@ -29,6 +34,13 @@ export type ProgressDb = BaseSQLiteDatabase<'sync' | 'async', unknown, typeof sc
 // chunked by column count: srs_cards has 8 columns → 12 rows per statement.
 // Recompute this if the table gains or loses a column.
 const SRS_CHUNK = 12;
+// ladder_progress has 4 columns → 25 rows per statement.
+const LADDER_CHUNK = 25;
+// Attempts go in as one JSON parameter per statement (see appendAttempts), so
+// the parameter limit does not bind. 250 keeps a statement under D1's 100 KB
+// limit even if the parameter counts toward it and every attempt is as long as
+// parseAttempt allows (~330 bytes); a real one is ~130.
+export const ATTEMPT_INSERT_CHUNK = 250;
 
 function chunk<T>(items: T[], size: number): T[][] {
   const out: T[][] = [];
@@ -98,7 +110,19 @@ export async function getProgress(db: ProgressDb, userId: string): Promise<Progr
       }
     : emptyStats();
 
-  return { srsStore, studyStats, syncedAt: state.syncedAt };
+  // The Today streak shares the stats row; see the columns in packages/db.
+  const studyStreak: StudyStreakData = statsRow
+    ? { streak: statsRow.studyStreak, lastSessionDate: statsRow.lastSessionDate }
+    : emptyStudyStreak();
+
+  const rungRows = await db
+    .select()
+    .from(ladderProgressTable)
+    .where(and(eq(ladderProgressTable.userId, userId), eq(ladderProgressTable.language, LANGUAGE)));
+  const ladderProgress: LadderProgress = {};
+  for (const row of rungRows) ladderProgress[row.rungId] = row.cleanWrites;
+
+  return { srsStore, studyStats, studyStreak, ladderProgress, syncedAt: state.syncedAt };
 }
 
 /**
@@ -124,16 +148,20 @@ export async function getProgress(db: ProgressDb, userId: string): Promise<Progr
 export async function putProgress(
   db: ProgressDb,
   userId: string,
-  payload: Pick<ProgressPayload, 'srsStore' | 'studyStats'>,
+  payload: Pick<ProgressPayload, 'srsStore' | 'studyStats' | 'studyStreak' | 'ladderProgress'>,
 ): Promise<string> {
   const syncedAt = new Date().toISOString();
   const userLang = { userId, language: LANGUAGE };
 
   const existing = await getProgress(db, userId);
   // mergeProgress is symmetric, so argument order carries no meaning here.
-  const merged = existing
-    ? mergeProgress({ srsStore: existing.srsStore, studyStats: existing.studyStats }, payload)
-    : payload;
+  const merged = existing ? mergeProgress(existing, payload) : payload;
+  const studyStreak = merged.studyStreak ?? emptyStudyStreak();
+  const rungRows = Object.entries(merged.ladderProgress ?? {}).map(([rungId, cleanWrites]) => ({
+    ...userLang,
+    rungId,
+    cleanWrites,
+  }));
 
   const cardRows = Object.entries(merged.srsStore).map(([wordKey, card]) => ({
     ...userLang,
@@ -153,7 +181,18 @@ export async function putProgress(
     db
       .delete(studyStatsTable)
       .where(and(eq(studyStatsTable.userId, userId), eq(studyStatsTable.language, LANGUAGE))),
-    db.insert(studyStatsTable).values({ ...userLang, ...merged.studyStats }),
+    db.insert(studyStatsTable).values({
+      ...userLang,
+      ...merged.studyStats,
+      studyStreak: studyStreak.streak,
+      lastSessionDate: studyStreak.lastSessionDate,
+    }),
+    db
+      .delete(ladderProgressTable)
+      .where(
+        and(eq(ladderProgressTable.userId, userId), eq(ladderProgressTable.language, LANGUAGE)),
+      ),
+    ...chunk(rungRows, LADDER_CHUNK).map((rows) => db.insert(ladderProgressTable).values(rows)),
     db
       .delete(syncStateTable)
       .where(and(eq(syncStateTable.userId, userId), eq(syncStateTable.language, LANGUAGE))),
@@ -164,9 +203,22 @@ export async function putProgress(
   return syncedAt;
 }
 
-/** Delete the user's Hebrew progress (the "Start fresh" import option). */
+/**
+ * Delete the user's Hebrew progress: the account page's reset and the "Start
+ * fresh" import option. Everything synced goes, the attempt log and the ladder
+ * included — a merge cannot express a deletion, so anything left here would
+ * come back on the next pull. The reset then pushes back what it keeps.
+ */
 export async function deleteProgress(db: ProgressDb, userId: string): Promise<void> {
   await runAtomic(db, [
+    db
+      .delete(attemptsTable)
+      .where(and(eq(attemptsTable.userId, userId), eq(attemptsTable.language, LANGUAGE))),
+    db
+      .delete(ladderProgressTable)
+      .where(
+        and(eq(ladderProgressTable.userId, userId), eq(ladderProgressTable.language, LANGUAGE)),
+      ),
     db
       .delete(srsCardsTable)
       .where(and(eq(srsCardsTable.userId, userId), eq(srsCardsTable.language, LANGUAGE))),
@@ -177,4 +229,75 @@ export async function deleteProgress(db: ProgressDb, userId: string): Promise<vo
       .delete(syncStateTable)
       .where(and(eq(syncStateTable.userId, userId), eq(syncStateTable.language, LANGUAGE))),
   ]);
+}
+
+// ─── The attempt log ─────────────────────────────────────────────────────────
+//
+// Not part of the progress payload: a full log is several hundred kilobytes,
+// past both the PUT's body limit and the 64 KB a keepalive push may carry. It
+// is append-only on the server too, so it needs no read-merge-replace: an
+// insert that ignores an id already present is the union merge.
+
+/** The user's newest `MAX_ATTEMPTS` attempts, oldest first. */
+export async function getAttempts(db: ProgressDb, userId: string): Promise<Attempt[]> {
+  const rows = await db
+    .select()
+    .from(attemptsTable)
+    .where(and(eq(attemptsTable.userId, userId), eq(attemptsTable.language, LANGUAGE)))
+    .orderBy(desc(attemptsTable.at), desc(attemptsTable.id))
+    .limit(MAX_ATTEMPTS);
+  return rows.reverse().map((row) => {
+    const attempt: Attempt = { id: row.id, concept: row.concept, correct: row.correct, at: row.at };
+    if (row.ms !== null) attempt.ms = row.ms;
+    if (row.confidence !== null) attempt.confidence = row.confidence as Attempt['confidence'];
+    return attempt;
+  });
+}
+
+/**
+ * Add attempts the account does not have yet, then keep only the newest
+ * `MAX_ATTEMPTS` — the same window, in the same order, as `mergeAttempts`, so
+ * the server never holds history no device will be sent.
+ *
+ * An id already stored is ignored, so a push may safely send an attempt twice.
+ * Each chunk is a single statement over `json_each`, one bound parameter, rather
+ * than a multi-row VALUES list at 12 rows a statement: a 1,000-attempt push
+ * would otherwise be some 84 statements against D1's per-request query budget.
+ *
+ * On better-sqlite3 `db.run` executes when it is built, unlike the query
+ * builders, so the statements are built in the order they must run.
+ */
+export async function appendAttempts(
+  db: ProgressDb,
+  userId: string,
+  attempts: readonly Attempt[],
+): Promise<void> {
+  if (attempts.length === 0) return;
+  const inserts = chunk([...attempts], ATTEMPT_INSERT_CHUNK).map((rows) =>
+    db.run(sql`
+      INSERT OR IGNORE INTO attempts (user_id, language, id, concept, correct, ms, confidence, at)
+      SELECT ${userId}, ${LANGUAGE},
+        json_extract(value, '$.id'), json_extract(value, '$.concept'),
+        json_extract(value, '$.correct'), json_extract(value, '$.ms'),
+        json_extract(value, '$.confidence'), json_extract(value, '$.at')
+      FROM json_each(${JSON.stringify(rows)})`),
+  );
+  const userLang = and(eq(attemptsTable.userId, userId), eq(attemptsTable.language, LANGUAGE));
+  const prune = db
+    .delete(attemptsTable)
+    .where(
+      and(
+        userLang,
+        notInArray(
+          attemptsTable.id,
+          db
+            .select({ id: attemptsTable.id })
+            .from(attemptsTable)
+            .where(userLang)
+            .orderBy(desc(attemptsTable.at), desc(attemptsTable.id))
+            .limit(MAX_ATTEMPTS),
+        ),
+      ),
+    );
+  await runAtomic(db, [...inserts, prune]);
 }

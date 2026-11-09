@@ -34,3 +34,7 @@ coverage/
 # Playwright test results
 playwright-report/
 test-results/
+
+# packages/dev-tasks output
+.shots/
+.checks/

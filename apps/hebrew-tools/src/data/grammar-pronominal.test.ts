@@ -63,6 +63,11 @@ describe('personal pronouns', () => {
     expect(pronounPgnLabel('1cs-alt')).toContain('alternate');
   });
 
+  it('files הֵמָּה under the masculine plural, beside הֵם', () => {
+    expect(personalPronouns.find((p) => p.hebrew === 'הֵמָּה')?.pgn).toBe('3mp-alt');
+    expect(pronounPgnLabel('3mp-alt')).toBe(`${pronounPgnLabel('3mp')} (alternate)`);
+  });
+
   it('keeps the longer alternates beside their plain forms', () => {
     const hebrew = personalPronouns.map((p) => p.hebrew);
     expect(hebrew).toContain('אֲנִי');

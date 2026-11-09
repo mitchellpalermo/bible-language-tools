@@ -1,0 +1,24 @@
+{
+  "name": "@tools/dev-tasks",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Mechanical dev chores — PR screenshots and the data checks — packaged so a small model can run them.",
+  "bin": {
+    "shots": "./src/shots-cli.ts",
+    "checks": "./src/checks-cli.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.9.2",
+    "@vitest/coverage-v8": "^4.0.18",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}

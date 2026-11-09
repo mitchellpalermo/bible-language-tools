@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { suffixParadigms } from '../data/pronominal-suffixes';
+import { BARE_SUFFIXES, SUFFIX_PGNS, suffixParadigms } from '../data/pronominal-suffixes';
+import { LADDER_RUNG_IDS, ladderRungs } from '../data/suffix-ladder';
 import { getParadigm, type VerbParadigm, verbParadigms } from '../data/verb-paradigms';
 import {
   ALL_CATEGORIES,
+  buildLadderTable,
   buildSummaryTable,
   buildTableModels,
   buildVerbTable,
@@ -125,10 +127,10 @@ describe('buildTableModels', () => {
   const tables = buildTableModels();
 
   it('builds a verb table for every paradigm and a summary per conjugation', () => {
-    const verbTables = tables.filter((t) => t.category !== 'suffixes');
+    const verbTables = tables.filter((t) => t.category !== 'suffixes' && t.category !== 'ladder');
     expect(verbTables.filter((t) => t.layout === 'verb')).toHaveLength(verbParadigms.length);
     expect(verbTables.filter((t) => t.layout === 'summary').map((t) => t.category)).toEqual(
-      ALL_CATEGORIES.filter((c) => c !== 'suffixes'),
+      ALL_CATEGORIES.filter((c) => c !== 'suffixes' && c !== 'ladder'),
     );
   });
 
@@ -149,7 +151,32 @@ describe('buildTableModels', () => {
     expect(gradeCell('דְּבָרוֹ', suffixParadigms[0].forms['3ms'])).toBe('correct');
   });
 
+  it('builds one table per ladder rung, in rung order', () => {
+    const ladder = tables.filter((t) => t.category === 'ladder');
+    expect(ladder.map((t) => t.rung)).toEqual(LADDER_RUNG_IDS);
+    expect(ladder[0].label).toBe('Rung 1 — The suffixes alone');
+    expect(ladder[0].cols).toEqual(['Type 1', 'Type 2']);
+    expect(ladder[0].rows.map((r) => r.label)).toEqual(SUFFIX_PGNS);
+  });
+
+  it('keys a ladder cell by its paradigm, so a form keeps one card across tabs', () => {
+    const dabar = tables.find((t) => t.id === 'suffix-type1-dabar') ?? fail();
+    const rung = tables.find((t) => t.id === 'ladder-dabar') ?? fail();
+    const ids = new Set(getQuizCells(rung).map((c) => c.id));
+    for (const cell of getQuizCells(dabar)) expect(ids.has(cell.id)).toBe(true);
+    // Rung 8's suffix columns are rung 1's cells.
+    const bare = new Set(getQuizCells(buildLadderTable(ladderRungs[0], 0)).map((c) => c.id));
+    const pronouns = getQuizCells(buildLadderTable(ladderRungs[7], 7));
+    expect(pronouns.filter((c) => bare.has(c.id))).toHaveLength(20);
+  });
+
+  it('grades a bare suffix typed with no consonant under it', () => {
+    expect(gradeCell('ְכֶם', BARE_SUFFIXES.type1['2mp'])).toBe('correct');
+    expect(gradeCell('ֵיהֶם', BARE_SUFFIXES.type1['2mp'])).toBe('wrong');
+  });
+
   it('labels every tab', () => {
+    expect(categoryTabLabel('ladder')).toBe('Suffix ladder');
     expect(categoryTabLabel('suffixes')).toBe('Noun suffixes');
     expect(categoryTabLabel('qatal')).toBe('Qal Qatal (Perfect)');
   });

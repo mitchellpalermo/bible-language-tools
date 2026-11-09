@@ -15,6 +15,7 @@ import { emptyStats } from '@tools/shared/srs';
 import { hydrationErrors } from '@tools/shared/test/hydration';
 import type { ReactElement } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import AccentTrainer from '../components/AccentTrainer';
 import DailyVerse from '../components/DailyVerse';
 import Flashcards from '../components/Flashcards';
 import GrammarReference from '../components/GrammarReference';
@@ -23,17 +24,22 @@ import HebrewReader from '../components/HebrewReader';
 import ParadigmQuiz from '../components/ParadigmQuiz';
 import ResetProgress from '../components/ResetProgress';
 import SyncControls from '../components/SyncControls';
+import TodaySession from '../components/TodaySession';
 import Writing from '../components/Writing';
 import { markReadToday } from '../data/dailyVerses';
 import { newCard, nextSRS, recordReview, saveSRSStore, saveStats } from '../data/srs';
 import { cardKey, vocabulary } from '../data/vocabulary';
 import { buildDecks, writingCardKey } from '../data/writing';
+import { accentCardKey, SCAFFOLD_HISTORY_KEY } from '../lib/accent-shift';
 import { saveSelection } from '../lib/deck-selection';
 import { saveFlashcardSettings } from '../lib/flashcard-settings';
 import { buildTableModels, getQuizCells } from '../lib/paradigm-quiz';
 import { paradigmCardKey } from '../lib/paradigm-srs';
 import { saveQuizSettings } from '../lib/quiz-settings';
+import { markSessionComplete } from '../lib/study-streak';
+import { saveLadderProgress } from '../lib/suffix-ladder';
 import { setLastSyncedAt } from '../lib/sync-manager';
+import { saveBudget } from '../lib/today';
 
 vi.mock('posthog-js', () => ({
   default: { capture: vi.fn(), captureException: vi.fn() },
@@ -57,6 +63,8 @@ function seedReturningStudent() {
       .filter((c) => c.id)
       .slice(0, 4)
       .map((c) => [paradigmCardKey(c.id as string), reviewed(paradigmCardKey(c.id as string))]),
+    // An accent-shift item worked through, so the queue is not all new.
+    [accentCardKey('davar-pl'), reviewed(accentCardKey('davar-pl'))],
   ]);
   saveSRSStore(store);
 
@@ -65,14 +73,23 @@ function seedReturningStudent() {
   saveStats(stats);
 
   saveQuizSettings({ accentStrict: true, density: 'easy' });
+  // Two suffix-ladder rungs climbed, so the ladder tab has open rungs past the first.
+  saveLadderProgress({ suffixes: 2, sus: 2 });
   saveFlashcardSettings({ showPartOfSpeech: true });
   saveSelection({ deck: 'garrett-derouchie', chapters: [2, 3], categories: ['core'] });
   setLastSyncedAt(new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString());
   markReadToday();
+  // A Today session finished and a longer budget picked, so the streak line
+  // and the picker both differ from the server's defaults.
+  markSessionComplete();
+  saveBudget(45);
+  // Enough scaffold history to unlock speed mode, which changes the step row.
+  localStorage.setItem(SCAFFOLD_HISTORY_KEY, JSON.stringify(Array(20).fill(true)));
 }
 
 /** One case per island. The key is the component's name as the pages use it. */
 const ISLANDS: Record<string, () => ReactElement> = {
+  AccentTrainer: () => <AccentTrainer />,
   DailyVerse: () => <DailyVerse />,
   Flashcards: () => <Flashcards />,
   GrammarReference: () => <GrammarReference />,
@@ -81,6 +98,7 @@ const ISLANDS: Record<string, () => ReactElement> = {
   ParadigmQuiz: () => <ParadigmQuiz />,
   ResetProgress: () => <ResetProgress signedIn />,
   SyncControls: () => <SyncControls />,
+  TodaySession: () => <TodaySession />,
   Writing: () => <Writing />,
 };
 

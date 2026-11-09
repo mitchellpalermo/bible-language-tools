@@ -152,3 +152,37 @@ describe('mergeProgress', () => {
     expect(merged.srsStore.מֶלֶךְ.repetition).toBe(3);
   });
 });
+
+describe('mergeProgress and the Today study streak', () => {
+  const base = { srsStore: {}, studyStats: stats() };
+
+  it('keeps the later session date and its own streak', () => {
+    const a = { ...base, studyStreak: { streak: 30, lastSessionDate: '2026-09-01' } };
+    const b = { ...base, studyStreak: { streak: 2, lastSessionDate: '2026-11-02' } };
+    expect(mergeProgress(a, b).studyStreak).toEqual({ streak: 2, lastSessionDate: '2026-11-02' });
+    expect(mergeProgress(b, a).studyStreak).toEqual(mergeProgress(a, b).studyStreak);
+  });
+
+  it('treats a snapshot without one as never studied', () => {
+    const b = { ...base, studyStreak: { streak: 4, lastSessionDate: '2026-11-02' } };
+    expect(mergeProgress(base, b).studyStreak).toEqual(b.studyStreak);
+    expect(mergeProgress(base, base).studyStreak).toEqual({ streak: 0, lastSessionDate: '' });
+  });
+});
+
+describe('mergeProgress and the suffix ladder', () => {
+  const base = { srsStore: {}, studyStats: stats() };
+
+  it('keeps the larger count per rung, symmetrically', () => {
+    const a = { ...base, ladderProgress: { r1: 2, r2: 1 } };
+    const b = { ...base, ladderProgress: { r1: 1, r3: 1 } };
+    expect(mergeProgress(a, b).ladderProgress).toEqual({ r1: 2, r2: 1, r3: 1 });
+    expect(mergeProgress(b, a)).toEqual(mergeProgress(a, b));
+  });
+
+  it('treats a snapshot without one as a fresh ladder', () => {
+    const b = { ...base, ladderProgress: { r1: 2 } };
+    expect(mergeProgress(base, b).ladderProgress).toEqual({ r1: 2 });
+    expect(mergeProgress(base, base).ladderProgress).toEqual({});
+  });
+});

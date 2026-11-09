@@ -15,6 +15,7 @@
 import { access, mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { fetchWithRetry } from '@tools/shared/fetch-retry';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = join(__dirname, '..', 'public', 'data', 'morphgnt');
@@ -110,7 +111,7 @@ async function processBook(book) {
 
   const url = `${BASE_URL}/${book.file}`;
 
-  const res = await fetch(url);
+  const res = await fetchWithRetry(url);
   if (!res.ok) {
     throw new Error(
       `HTTP ${res.status} fetching ${url}\n  Check that the file exists at this path in the morphgnt/sblgnt repository.`,
@@ -140,8 +141,9 @@ async function main() {
     try {
       const info = await processBook(book);
       bookIndex.push(info);
-    } catch (_err) {
+    } catch (err) {
       errors++;
+      process.stderr.write(`morphgnt: ${book.code} failed: ${err.message}\n`);
     }
   }
 
@@ -154,6 +156,7 @@ async function main() {
   }
 }
 
-main().catch((_err) => {
+main().catch((err) => {
+  process.stderr.write(`morphgnt build failed: ${err.message}\n`);
   process.exit(1);
 });

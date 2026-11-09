@@ -106,6 +106,53 @@ export const SUFFIX_RULES: SuffixRule[] = [
   },
 ];
 
+// ─── The suffixes alone ───────────────────────────────────────────────────────
+
+/**
+ * The suffixes with no noun under them (#186, the ladder's first rung). Each
+ * starts with the mark the noun's last letter takes — the ־ִ of ־ִי sits on
+ * whatever consonant the stem ends in — so a stem plus one of these is the
+ * suffixed form. `pronominal-suffixes.test.ts` checks every noun paradigm in
+ * this file is exactly that, cell by cell, which is what guards the cells the
+ * corpus cannot.
+ */
+export const BARE_SUFFIXES: Record<SuffixSet, Record<SuffixPgn, string>> = {
+  type1: {
+    '1cs': 'ִי',
+    '2ms': 'ְךָ',
+    '2fs': 'ֵךְ',
+    '3ms': 'וֹ',
+    '3fs': 'ָהּ',
+    '1cp': 'ֵנוּ',
+    '2mp': 'ְכֶם',
+    '2fp': 'ְכֶן',
+    '3mp': 'ָם',
+    '3fp': 'ָן',
+  },
+  type2: {
+    '1cs': 'ַי',
+    '2ms': 'ֶיךָ',
+    '2fs': 'ַיִךְ',
+    '3ms': 'ָיו',
+    '3fs': 'ֶיהָ',
+    '1cp': 'ֵינוּ',
+    '2mp': 'ֵיכֶם',
+    '2fp': 'ֵיכֶן',
+    '3mp': 'ֵיהֶם',
+    '3fp': 'ֵיהֶן',
+  },
+};
+
+/**
+ * The heavy suffixes: the ones that take the accent themselves, so a
+ * changeable vowel in the stem reduces before them (דְּבַרְכֶם, דִּבְרֵיהֶם).
+ * In Type 1 that is ־כֶם and ־כֶן; in Type 2 the third plurals join them.
+ */
+export const HEAVY_SUFFIXES: Record<SuffixSet, readonly SuffixPgn[]> = {
+  type1: ['2mp', '2fp'],
+  type2: ['2mp', '2fp', '3mp', '3fp'],
+};
+
 // ─── Paradigms ────────────────────────────────────────────────────────────────
 
 export function suffixParadigmId(set: SuffixSet, noun: string): string {
@@ -174,8 +221,138 @@ export const suffixParadigms: SuffixParadigm[] = [
   },
 ];
 
+/**
+ * The model nouns only the suffix ladder uses (#186), one pair per thing a
+ * stem can do. Kept out of `suffixParadigms` so the Noun suffixes tab and its
+ * summary stay three columns wide; the ladder sets each pair side by side.
+ *
+ * - סוּס: every vowel unchangeable, so the stem never moves.
+ * - מֶלֶךְ: a segholate, whose singular suffixes go on the old one-syllable
+ *   stem מַלְכּ־ and whose plural reduces like דְּבָרִים.
+ * - עַם: a geminate, whose doubled last letter returns before any suffix.
+ */
+export const ladderNounParadigms: SuffixParadigm[] = [
+  {
+    id: suffixParadigmId('type1', 'sus'),
+    set: 'type1',
+    lemma: 'סוּס',
+    gloss: 'horse',
+    shape: 'masculine singular',
+    forms: {
+      '1cs': 'סוּסִי',
+      '2ms': 'סוּסְךָ',
+      '2fs': 'סוּסֵךְ',
+      '3ms': 'סוּסוֹ',
+      '3fs': 'סוּסָהּ',
+      '1cp': 'סוּסֵנוּ',
+      '2mp': 'סוּסְכֶם',
+      '2fp': 'סוּסְכֶן',
+      '3mp': 'סוּסָם',
+      '3fp': 'סוּסָן',
+    },
+  },
+  {
+    id: suffixParadigmId('type2', 'susim'),
+    set: 'type2',
+    lemma: 'סוּסִים',
+    gloss: 'horses',
+    shape: 'masculine plural',
+    forms: {
+      '1cs': 'סוּסַי',
+      '2ms': 'סוּסֶיךָ',
+      '2fs': 'סוּסַיִךְ',
+      '3ms': 'סוּסָיו',
+      '3fs': 'סוּסֶיהָ',
+      '1cp': 'סוּסֵינוּ',
+      '2mp': 'סוּסֵיכֶם',
+      '2fp': 'סוּסֵיכֶן',
+      '3mp': 'סוּסֵיהֶם',
+      '3fp': 'סוּסֵיהֶן',
+    },
+  },
+  {
+    id: suffixParadigmId('type1', 'melek'),
+    set: 'type1',
+    lemma: 'מֶלֶךְ',
+    gloss: 'king',
+    shape: 'masculine singular',
+    forms: {
+      '1cs': 'מַלְכִּי',
+      '2ms': 'מַלְכְּךָ',
+      '2fs': 'מַלְכֵּךְ',
+      '3ms': 'מַלְכּוֹ',
+      '3fs': 'מַלְכָּהּ',
+      '1cp': 'מַלְכֵּנוּ',
+      '2mp': 'מַלְכְּכֶם',
+      '2fp': 'מַלְכְּכֶן',
+      '3mp': 'מַלְכָּם',
+      '3fp': 'מַלְכָּן',
+    },
+  },
+  {
+    id: suffixParadigmId('type2', 'melakim'),
+    set: 'type2',
+    lemma: 'מְלָכִים',
+    gloss: 'kings',
+    shape: 'masculine plural',
+    forms: {
+      '1cs': 'מְלָכַי',
+      '2ms': 'מְלָכֶיךָ',
+      '2fs': 'מְלָכַיִךְ',
+      '3ms': 'מְלָכָיו',
+      '3fs': 'מְלָכֶיהָ',
+      '1cp': 'מְלָכֵינוּ',
+      '2mp': 'מַלְכֵיכֶם',
+      '2fp': 'מַלְכֵיכֶן',
+      '3mp': 'מַלְכֵיהֶם',
+      '3fp': 'מַלְכֵיהֶן',
+    },
+  },
+  {
+    id: suffixParadigmId('type1', 'am'),
+    set: 'type1',
+    lemma: 'עַם',
+    gloss: 'people',
+    shape: 'masculine singular',
+    forms: {
+      '1cs': 'עַמִּי',
+      '2ms': 'עַמְּךָ',
+      '2fs': 'עַמֵּךְ',
+      '3ms': 'עַמּוֹ',
+      '3fs': 'עַמָּהּ',
+      '1cp': 'עַמֵּנוּ',
+      '2mp': 'עַמְּכֶם',
+      '2fp': 'עַמְּכֶן',
+      '3mp': 'עַמָּם',
+      '3fp': 'עַמָּן',
+    },
+  },
+  {
+    id: suffixParadigmId('type2', 'ammim'),
+    set: 'type2',
+    lemma: 'עַמִּים',
+    gloss: 'peoples',
+    shape: 'masculine plural',
+    forms: {
+      '1cs': 'עַמַּי',
+      '2ms': 'עַמֶּיךָ',
+      '2fs': 'עַמַּיִךְ',
+      '3ms': 'עַמָּיו',
+      '3fs': 'עַמֶּיהָ',
+      '1cp': 'עַמֵּינוּ',
+      '2mp': 'עַמֵּיכֶם',
+      '2fp': 'עַמֵּיכֶן',
+      '3mp': 'עַמֵּיהֶם',
+      '3fp': 'עַמֵּיהֶן',
+    },
+  },
+];
+
+/** Every noun suffix paradigm: the tab's three and the ladder's six. */
+export const allSuffixParadigms: SuffixParadigm[] = [...suffixParadigms, ...ladderNounParadigms];
+
 // ─── Lookup ───────────────────────────────────────────────────────────────────
 
 export function getSuffixParadigm(id: string): SuffixParadigm | undefined {
-  return suffixParadigms.find((p) => p.id === id);
+  return allSuffixParadigms.find((p) => p.id === id);
 }

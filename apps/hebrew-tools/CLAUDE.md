@@ -146,10 +146,12 @@ Word-mode writing (#102) spends a third, `write:word:<cardKey>` in `src/data/wri
 
 The paradigm quiz spends a fourth, `paradigm:<cellId>` in `src/lib/paradigm-srs.ts` — `paradigm:qal-qatal-begadkephat:3ms`. The suffix is `cellId()`, never a row and column, so a form is one card whether it was answered in its own verb's table or in the summary table beside the other classes.
 
+The Accent-Shift Trainer spends a fifth, `accent:<item id>` in `src/lib/accent-shift.ts` — `accent:davar-pl`. One card per item (a noun and an ending), not per step: a clean pass is `good`, any miss or "Show me" is `again`. Item ids are card keys, so never rename one.
+
 The confusable decks deliberately get no prefix of their own — they drill the same letters the alphabet deck does, so grading ד in one must move the card the other sees.
 - **Deck selection is persisted separately from the SRS store** (`hebrew-tools-deck-v1`, `src/lib/deck-selection.ts`) and is never synced. It decides which due cards you see, not what is due, so it stays local to the browser.
 - **What the card front shows is persisted the same way** (`hebrew-tools-flashcard-display-v1`, `src/lib/flashcard-settings.ts`, over `@tools/shared/flashcard-settings`) and is likewise never synced. Today it holds one boolean: whether the part of speech appears on the front of a flashcard, which defaults to off. See the repo CLAUDE.md under "What the card front gives away".
-- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`, `hebrew-tools-reader-prefs`, `hebrew-tools-daily-v1`. There is still no auth or sync in this app — **all study progress is per-browser only.** The D1 plumbing exists (see below), but nothing reads or writes it yet.
+- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`, `hebrew-tools-reader-prefs`, `hebrew-tools-daily-v1`, `hebrew-tools-accent-scaffold-v1` (speed mode), `hebrew-tools-attempts-v1` (attempt log, **synced** on its own endpoint, kept by the account reset), `hebrew-tools-attempts-pushed-through` (the attempt log's push cursor), `hebrew-tools-suffix-ladder-v1` (suffix ladder progress, **synced**, kept by the account reset), `hebrew-tools-study-streak-v1` (the Today session streak, **synced**, kept by the account reset), `hebrew-tools-today-budget-v1` (the last time budget picked, not synced). Signed-in students sync the SRS store, the stats, the study streak, the suffix ladder and the attempt log (see "Study sync"); everything else on this list is per-browser.
 
 ### OSHB data pipeline (issue #75)
 
@@ -618,6 +620,7 @@ Signed-in users get their SRS cards and study stats persisted server-side and me
 | `src/lib/sync-manager.ts` | Client lifecycle: push, pullAndMerge, session-end push |
 | `src/lib/progress-store.ts` | Server persistence. **Every statement scoped by `LANGUAGE`** |
 | `src/pages/api/progress.ts` | GET/PUT/DELETE, with full payload validation |
+| `src/pages/api/attempts.ts` | GET/POST for the attempt log, append-only; its DELETE is `/api/progress`'s |
 
 Things that will bite if changed carelessly:
 
@@ -654,7 +657,34 @@ Things that will bite if changed carelessly:
   - **Stats survive on both sides because the reset pushes straight after the delete.** `deleteProgress` removes `study_stats` and `sync_state` with the cards, while the client keeps its streak and accuracy; `clearServerSrs` then calls `push()`, which writes them back (with `sync_state` gone it is a plain insert, and an empty store adds no cards). A failed push leaves the gap until the next session-end push, and does not change the reset's outcome.
   - **Other devices are not reset.** A device still holding the old cards pushes them on its next session end, and the merge keeps them. The confirmation says so; there is no tombstone to stop it.
 
-Cross-device behaviour can't be covered by unit tests. `docs/sync-test-plan.md` is the manual plan; run test 15 (greek.tools isolation) after any change to `progress-store.ts`.
+- **The Today study streak syncs beside the stats** (#184). It is
+  `studyStreak` in the payload, two columns on the `study_stats` row
+  (`study_streak`, `last_session_date`), and `mergeStudyStreak` in
+  `mergeProgress`: the later day wins and brings its own streak. It is
+  **optional in a `PUT`**, because a page loaded before it shipped still
+  pushes; an absent streak merges as "never studied" and cannot overwrite a
+  real one. A reset's `DELETE` takes it with the stats and the push straight
+  after puts it back, so the reset keeps it.
+
+- **The suffix ladder syncs in the payload** (#196): `ladderProgress`, one
+  `ladder_progress` row per rung, `mergeLadderProgress` (the larger count) in
+  `mergeProgress`. Optional in a `PUT` like the streak. `writeLocalProgress`
+  merges it with what is stored again rather than overwriting, so a clean
+  write checked while a pull was in flight survives the pull.
+- **The attempt log syncs on `/api/attempts`, not in the payload** — see "The
+  attempt log syncs on its own" in the repo CLAUDE.md for why and for the
+  cursor rules. Server-side, `appendAttempts` inserts each chunk of 250 as
+  **one statement over `json_each`**, not a multi-row `VALUES` list: at 8
+  columns that would be 12 rows a statement, some 84 statements for one
+  1,000-attempt request against D1's per-request query budget. On
+  better-sqlite3 `db.run` executes when it is built, unlike the query
+  builders, so build statements in the order they run.
+- **"Start fresh" clears everything it would otherwise upload**, through
+  `clearLocalProgress()`. It used to remove the SRS and stats keys by hand,
+  which left the Today streak (#184) for the next push to upload; a new synced
+  key goes in that function's list.
+
+Cross-device behaviour can't be covered by unit tests. `docs/sync-test-plan.md` is the manual plan; run test 15 (greek.tools isolation) after any change to `progress-store.ts`, test 18 after any change to the study streak, and test 19 after any change to the ladder or attempt-log sync.
 
 ### Textbook chapter decks
 
@@ -916,6 +946,126 @@ Things that will bite if changed carelessly:
   letter is stored as כ and shown as ך so the next letter can still attach.
   Comparing a raw value to an answer fails on every word ending in ך ם ן ף ץ —
   `gradeCell` finalizes first.
+
+### Suffix ladder (issue #186)
+
+The "Suffix ladder" tab on `/paradigms` is eight suffix tables in order of
+difficulty: the bare suffixes, סוּס, דָּבָר, חָכְמָה, מֶלֶךְ, עַם, the
+prepositions לְ and אֶל, then the pronouns beside their suffixes. It is the
+ordinary paradigm quiz on ordered tables; the unlock rule is
+`@tools/shared/ladder` (see the repo CLAUDE.md, "The paradigm ladder").
+
+| File | Role |
+|---|---|
+| `src/data/suffix-ladder.ts` | The rungs: columns, notes, `LADDER_RUNG_IDS` (stored, never rename) |
+| `src/data/pronominal-suffixes.ts` | `BARE_SUFFIXES`, `HEAVY_SUFFIXES`, and the ladder's nouns (`ladderNounParadigms`) |
+| `src/lib/suffix-ladder.ts` | Storage binding, `ladderOutcome` and the results sentence |
+
+Things that will bite if changed carelessly:
+
+- **Every rung is one table, PGN down the side**, so "two clean writes of the
+  rung" has one meaning. A singular and its plural sit side by side.
+- **A column's id is its paradigm's**, so a form is one SRS card in every tab:
+  rung 3's דָּבָר is the Noun suffixes tab's, and rung 8's suffix columns are
+  rung 1's.
+- **Every noun form is stem + bare suffix, and the test checks it cell by
+  cell** (`STEMS` in `pronominal-suffixes.test.ts`). The corpus cannot witness
+  most of סוּס or עַמִּים, so this is the guard there. The ladder's nouns are
+  kept out of `suffixParadigms` so the Noun suffixes summary stays three
+  columns wide; read through `allSuffixParadigms` or `getSuffixParadigm`.
+- **A bare suffix is typed with no consonant under it and graded as typed**;
+  only the display puts it on a dotted circle (`affixText`, now in
+  `HebrewRuns.tsx`).
+- **Rung 8 asks for each pronoun's everyday form** from `personalPronouns`.
+  הֵמָּה is the 3mp alternate (OSHB parses all 218 that way); it was filed
+  under 3fp until #186.
+- **Every unaided paradigm answer is logged** to the attempt log as
+  `paradigm/<cellId>`, ladder or not. A peeked attempt logs nothing.
+
+### Today's Session (issue #184)
+
+`/today` runs one session sized to a time budget: due vocabulary, then due
+paradigm forms, then one drill, ending on a summary of what was reviewed,
+missed and is due tomorrow. `/study` leads with it — each budget there is a
+link to `/today?start=<minutes>`, so a session is one tap away — and it is the
+first child under Study in the nav. The plan and the clock are
+`@tools/shared/today` (see the repo CLAUDE.md, "Today's Session").
+
+| File | Role |
+|---|---|
+| `src/lib/today.ts` | Where due vocabulary, and due, weak and new forms, come from; the drill rotation; estimates; `dueTomorrow` |
+| `src/lib/study-streak.ts` | The streak's binding (`hebrew-tools-study-streak-v1`) |
+| `src/components/TodaySession.tsx` | The page: plan preview, the run, the summary |
+| `src/components/VocabCard.tsx` | The flashcard face, shared with `/flashcards` |
+
+Things that will bite if changed carelessly:
+
+- **Every part is the page it comes from, in a session mode.** Vocabulary is
+  `useFlashcardSession` over `VocabCard`; forms and the ladder are
+  `ParadigmQuiz`'s `session` prop; Accent Shift is `AccentTrainer`'s. The
+  grading, scheduling and attempt log are theirs and unchanged — do not give
+  Today its own.
+- **Vocabulary is due cards only** (#224). A due card is due whichever chapter
+  /flashcards is set to. No new words and no weak ones: new words are
+  introduced on /flashcards, and with nothing due the plan screen says so.
+- **Weak forms never promote.** Weak forms and the mixed review are graded with
+  `recordAttempt`'s `practice`, which demotes on a miss and otherwise leaves
+  the card alone. Recalling something before it is due is not the spaced
+  recall its interval assumes.
+- **New forms come only from tables the student has started.** The app has
+  no way to know which tables the course has reached.
+- **A form is asked in its narrowest table** (`formHomes`): its own verb's
+  table rather than the summary beside the other classes.
+- **The drill rotates by local day**: Accent Shift, the suffix ladder (the
+  highest open rung, as a Full-table write so it counts toward the next), then
+  a mixed review of learned forms. A drill with nothing to offer — mixed review
+  before any form is learned — passes to the next.
+- **The estimates are first guesses** (`SECONDS`): 10 seconds a card, 15 a
+  form, 90 an accent item. They decide the plan; the clock decides the
+  session, so a wrong estimate ends a session early or on time, never 10%
+  late on a card already started. #190 will measure each student's pace.
+- **New forms are capped per day** (`MAX_NEW`), so a long session does not
+  pile up tomorrow's reviews.
+- **The streak counts a session once anything was answered.** Ending early
+  or running out of time still counts; opening the page does not.
+
+### Accent-Shift Trainer (issue #185)
+
+`/accent` drills what an ending does to a noun: divide the new form into
+syllables, mark the accent, label the pretonic and distant syllables, then type
+the form with full pointing. The engine is `@tools/shared/step-drill` (see the
+repo CLAUDE.md, "The step-gated drill").
+
+| File | Role |
+|---|---|
+| `src/data/accent-shift.ts` | Items (noun, ending, form, syllables, a rule per syllable) and the rule text |
+| `src/lib/accent-shift.ts` | The four checks, `accent:` scheduling, the queue, speed-mode storage |
+| `src/lib/attempt-log.ts` | This app's attempt log (`hebrew-tools-attempts-v1`) |
+| `src/components/AccentTrainer.tsx` | The page |
+
+Things that will bite if changed carelessly:
+
+- **The answer key follows the course, not Gesenius.** Garrett & DeRouchie
+  count a vocal sheva as its own syllable (דְּ / בָ / רִים) and call every
+  syllable before the pretonic "distant". GKC § 26 m says a vocal sheva is
+  never a syllable of its own. Step 3 only has an answer under the course's
+  view, and the course is marked against it. The rule text is this app's own
+  wording, as on `/grammar`.
+- **Steps 1–3 show bare letters.** The pointed form is step 4's answer, so the
+  chips come from `letters()`, never from the item's pointed syllables.
+- **Step 4 is checked syllable by syllable.** When only the pointing is wrong,
+  the typed form is split by the item's letter counts, and each wrong syllable
+  names its own rule. A wrong letter cannot be placed, so every unaccented
+  syllable's rule is offered. A missing dagesh is accepted and pointed out —
+  the drill is about vowels.
+- **Every form and base is corpus-checked** in `accent-shift.test.ts`.
+  דְּבַרְכֶם, the textbook-tidy heavy suffix on דָּבָר, never occurs, so
+  לְבַבְכֶם carries that rule. In לְבַבְכֶם and אַדְמָתוֹ the letter after the
+  silent sheva has no dagesh lene in the text; both are flagged for review.
+- **An ending is drawn on a dotted circle only when it begins with a point**
+  (◌ִים, but וֹת). A test enforces it.
+- **The trainer's cards are in the reset.** `ERASES` in `ResetProgress.tsx`
+  lists it; a new drill that keys cards into the store must be added there too.
 
 ### Grammar Reference (issue #79)
 

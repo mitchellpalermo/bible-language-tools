@@ -44,8 +44,8 @@ export {
   yesterdayStr,
 };
 
-const SRS_KEY = 'hebrew-tools-srs-v1';
-const STATS_KEY = 'hebrew-tools-stats-v1';
+export const SRS_KEY = 'hebrew-tools-srs-v1';
+export const STATS_KEY = 'hebrew-tools-stats-v1';
 
 export function loadSRSStore(): Record<string, SRSCard> {
   try {

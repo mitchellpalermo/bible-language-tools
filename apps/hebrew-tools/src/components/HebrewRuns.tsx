@@ -1,5 +1,6 @@
 // Hebrew inside English chrome — shared by the Grammar Reference and the
-// paradigm quiz, which both label tables with strings like "III-ה (בנה)".
+// paradigm quiz, which both label tables with strings like "III-ה (בנה)",
+// and both show bare suffixes.
 
 /** A Hebrew run inside the page's English chrome. */
 export function Hebrew({ children, className = '' }: { children: string; className?: string }) {
@@ -13,6 +14,18 @@ export function Hebrew({ children, className = '' }: { children: string; classNa
       {children}
     </span>
   );
+}
+
+/** Dotted circle — the conventional stand-in for "any consonant" under a bare point. */
+const PLACEHOLDER = '\u25CC';
+
+/**
+ * A bare ending or prefix, for display. One that starts with a vowel point is
+ * shown on a dotted circle, since a point with nothing under it renders as a
+ * stray tick. Display only: grade against the bare string.
+ */
+export function affixText(affix: string): string {
+  return /^[\u05B0-\u05BC]/.test(affix) ? PLACEHOLDER + affix : affix;
 }
 
 const HEBREW_RUN = /([֐-׿]+(?:\s+[֐-׿]+)*)/;

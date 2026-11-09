@@ -2,7 +2,9 @@
 import MorphWordmark from '@tools/shared/components/MorphWordmark.astro';
 import SiteNav from '@tools/shared/components/SiteNav.astro';
 import type { NavLink } from '@tools/shared/nav';
+import { studyNavChildren } from '@tools/shared/study-modes';
 import { creditsCopy } from '../data/credits';
+import { studyModes } from '../lib/study-modes';
 import '../styles/global.css';
 
 interface Props {
@@ -19,15 +21,12 @@ const navLinks: NavLink[] = [
   { href: '/keyboard', label: 'Type' },
   { href: '/write', label: 'Write' },
   { href: '/daily', label: 'Daily' },
-  { href: '/reader', label: 'Read' },
+  { href: '/reader', label: 'Reader' },
   { href: '/grammar', label: 'Grammar' },
   {
     href: '/study',
     label: 'Study',
-    children: [
-      { href: '/flashcards', label: 'Flashcards' },
-      { href: '/paradigms', label: 'Paradigms' },
-    ],
+    children: studyNavChildren(studyModes, [{ href: '/today', label: 'Today' }]),
   },
 ];
 
@@ -47,6 +46,8 @@ const user = Astro.locals.user;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <title>{title} | hebrew.tools</title>
 
     <!-- Google Fonts: Plus Jakarta Sans (all UI) + Noto Sans Hebrew (Hebrew text rendering) -->
@@ -148,10 +149,11 @@ const user = Astro.locals.user;
     <!-- Auth-aware nav + sync-on-hide. Most pages are prerendered with no
          session available, so the account link is corrected client-side from
          the ht-auth hint cookie, and the progress push is registered here so it
-         covers every page a study session might end on. -->
+         covers every page a study session might end on. Each load also sends
+         any attempts the last page's push could not confirm. -->
     <script>
       import { hasAuthHint } from '../lib/auth-cookie';
-      import { registerSessionEndPush } from '../lib/sync-manager';
+      import { drainOwedAttempts, registerSessionEndPush } from '../lib/sync-manager';
 
       const signedIn = hasAuthHint();
       for (const link of document.querySelectorAll<HTMLAnchorElement>('[data-account-link]')) {
@@ -163,6 +165,8 @@ const user = Astro.locals.user;
       }
 
       registerSessionEndPush();
+      // Attempts a keepalive push from the last page could not confirm.
+      drainOwedAttempts();
     </script>
 
   </body>

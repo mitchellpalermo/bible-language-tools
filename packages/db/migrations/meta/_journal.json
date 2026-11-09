@@ -22,6 +22,20 @@
       "when": 1781386112778,
       "tag": "0002_motionless_krista_starr",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1793660854736,
+      "tag": "0003_today_study_streak",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1793674429171,
+      "tag": "0004_attempts_ladder_sync",
+      "breakpoints": true
     }
   ]
 }

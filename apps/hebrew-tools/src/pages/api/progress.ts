@@ -1,4 +1,6 @@
 import { createDb } from '@tools/db';
+import { isLadderProgress } from '@tools/shared/ladder';
+import { parseStudyStreak } from '@tools/shared/study-streak';
 import type { APIRoute } from 'astro';
 import { deleteProgress, getProgress, putProgress } from '../../lib/progress-store';
 import type { ProgressPayload } from '../../lib/sync-types';
@@ -7,6 +9,10 @@ export const prerender = false;
 
 /** Reject request bodies larger than this (decoded bytes). */
 export const MAX_BODY_BYTES = 512 * 1024;
+
+/** The ladder has a handful of rungs; these bounds only stop a hostile body. */
+export const MAX_RUNGS = 200;
+export const MAX_RUNG_ID_LENGTH = 100;
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -35,11 +41,30 @@ const STATS_STRING_FIELDS = ['lastStreakDate', 'lastStudyDate'] as const;
  * user-controlled and lands in typed columns, so a wrong type here is a 500 at
  * best. Returns null on any violation; the caller turns that into a 400.
  */
-function validatePayload(body: unknown): Pick<ProgressPayload, 'srsStore' | 'studyStats'> | null {
+function validatePayload(
+  body: unknown,
+): Pick<ProgressPayload, 'srsStore' | 'studyStats' | 'studyStreak' | 'ladderProgress'> | null {
   if (!isRecord(body)) return null;
 
   const { srsStore, studyStats } = body;
   if (!isRecord(srsStore)) return null;
+
+  // Optional: a page loaded before the Today session shipped does not send it.
+  let studyStreak: ProgressPayload['studyStreak'];
+  if (body.studyStreak !== undefined) {
+    const parsed = parseStudyStreak(body.studyStreak);
+    if (!parsed) return null;
+    studyStreak = parsed;
+  }
+
+  // Optional too, for the same reason.
+  const { ladderProgress } = body;
+  if (ladderProgress !== undefined) {
+    if (!isLadderProgress(ladderProgress)) return null;
+    const rungs = Object.keys(ladderProgress);
+    if (rungs.length > MAX_RUNGS) return null;
+    if (rungs.some((id) => id.length === 0 || id.length > MAX_RUNG_ID_LENGTH)) return null;
+  }
 
   if (!isRecord(studyStats)) return null;
   if (STATS_NUMBER_FIELDS.some((f) => typeof studyStats[f] !== 'number')) return null;
@@ -61,7 +86,10 @@ function validatePayload(body: unknown): Pick<ProgressPayload, 'srsStore' | 'stu
   // Every field above has been checked at runtime; the cast is what carries
   // that knowledge into the type system. Widen through `unknown` because the
   // validated records are structurally opaque to TypeScript.
-  return { srsStore, studyStats } as unknown as Pick<ProgressPayload, 'srsStore' | 'studyStats'>;
+  return { srsStore, studyStats, studyStreak, ladderProgress } as unknown as Pick<
+    ProgressPayload,
+    'srsStore' | 'studyStats' | 'studyStreak' | 'ladderProgress'
+  >;
 }
 
 export const GET: APIRoute = async ({ locals }) => {

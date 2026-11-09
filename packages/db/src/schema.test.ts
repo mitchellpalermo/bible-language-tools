@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
-import { customDecks, srsCards, studyStats, users } from './schema';
+import { attempts, customDecks, ladderProgress, srsCards, studyStats, users } from './schema';
 import { createTestDb } from './test-utils';
 
 const TEST_USER = {
@@ -51,7 +51,9 @@ describe('schema smoke tests', () => {
 
     const [result] = await db.select().from(studyStats).where(eq(studyStats.userId, TEST_USER.id));
 
-    expect(result).toEqual(stats);
+    // A row written without the Today streak (greek.tools, until #197) takes
+    // its defaults.
+    expect(result).toEqual({ ...stats, studyStreak: 0, lastSessionDate: '' });
   });
 
   it('inserts and reads back a custom_deck row', async () => {
@@ -93,5 +95,42 @@ describe('schema smoke tests', () => {
     const cards = await db.select().from(srsCards).where(eq(srsCards.userId, TEST_USER.id));
 
     expect(cards).toHaveLength(0);
+  });
+
+  it('round-trips an attempt, with and without its optional fields', async () => {
+    const db = createTestDb();
+    await db.insert(users).values(TEST_USER);
+    const full = {
+      userId: TEST_USER.id,
+      language: 'hebrew' as const,
+      id: 'a1',
+      concept: 'accent-shift/open-pretonic-long',
+      correct: false,
+      ms: 1840,
+      confidence: 2,
+      at: 1_793_000_000_000,
+    };
+    const bare = { ...full, id: 'a2', correct: true, ms: null, confidence: null };
+    await db.insert(attempts).values([full, bare]);
+    expect(await db.select().from(attempts).orderBy(attempts.id)).toEqual([full, bare]);
+  });
+
+  it('cascades deletes from users to the attempt log and ladder progress', async () => {
+    const db = createTestDb();
+    await db.insert(users).values(TEST_USER);
+    await db.insert(attempts).values({
+      userId: TEST_USER.id,
+      language: 'hebrew',
+      id: 'a1',
+      concept: 'paradigm/x',
+      correct: true,
+      at: 1,
+    });
+    await db
+      .insert(ladderProgress)
+      .values({ userId: TEST_USER.id, language: 'hebrew', rungId: 'r1', cleanWrites: 2 });
+    await db.delete(users).where(eq(users.id, TEST_USER.id));
+    expect(await db.select().from(attempts)).toHaveLength(0);
+    expect(await db.select().from(ladderProgress)).toHaveLength(0);
   });
 });

@@ -24,14 +24,25 @@
  *   decides the score (`countsAsCorrect`); the cell still says "dagesh" or
  *   "vowels", because a student who got the consonants right still needs to
  *   know which mark was off.
+ * - **The Suffix ladder tab is the same quiz on ordered tables** (#186). Every
+ *   mode works on every rung; only a clean Full-table write counts toward the
+ *   next one (`lib/suffix-ladder.ts`), and a locked rung can be opened anyway.
+ * - **Today's Session runs one table at a time through `session`** (#184).
+ *   The table and its blanks are chosen for it, so there is no select screen,
+ *   and the results end on Continue rather than Try again: the session, not
+ *   the student, decides what comes next.
  */
 
+import { LadderRungList } from '@tools/shared/components/Ladder';
 import ToggleSwitch from '@tools/shared/components/ToggleSwitch';
+import { type LadderProgress, rungStates } from '@tools/shared/ladder';
 import { useStoredState } from '@tools/shared/use-stored-state';
 import posthog from 'posthog-js';
 import { type KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { SUFFIX_RULES } from '../data/pronominal-suffixes';
 import { loadSRSStore, loadStats, type SRSCard, saveSRSStore, saveStats } from '../data/srs';
+import { LADDER_RUNG_IDS, ladderRungs } from '../data/suffix-ladder';
+import { logAttempts } from '../lib/attempt-log';
 import {
   ALL_CATEGORIES,
   buildTableModels,
@@ -53,10 +64,17 @@ import {
   tableProgress,
 } from '../lib/paradigm-srs';
 import { defaultQuizSettings, loadQuizSettings, saveQuizSettings } from '../lib/quiz-settings';
+import {
+  type LadderOutcome,
+  ladderNote,
+  ladderOutcome,
+  loadLadderProgress,
+  saveLadderProgress,
+} from '../lib/suffix-ladder';
 import { useHebrewInput } from '../lib/use-hebrew-input';
 import ErrorBoundary from './ErrorBoundary';
 import HebrewKeypad from './HebrewKeypad';
-import { Hebrew, Prose } from './HebrewRuns';
+import { affixText, Hebrew, Prose } from './HebrewRuns';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -74,7 +92,27 @@ type Phase =
       /** Cards the attempt moved — see `recordAttempt`. */
       scheduled: SRSCard[];
       peeked: boolean;
+      /** What the attempt did on the ladder, for a rung's table. */
+      ladder?: LadderOutcome;
     };
+
+/** One table for Today's Session (`TodaySession.tsx`) to put in front of the student. */
+export interface ParadigmSession {
+  table: TableModel;
+  /** Cell ids to blank. Every other cell is shown filled in. */
+  blankIds: readonly string[];
+  /** Forms asked before they are due: graded, but never promoted (`recordAttempt`). */
+  practice?: boolean;
+  /** Every blank form, once checked. */
+  onChecked: (outcomes: { id: string; correct: boolean }[]) => void;
+  onContinue: () => void;
+}
+
+function sessionPhase({ table, blankIds }: ParadigmSession): Phase {
+  const ids = new Set(blankIds);
+  const cells = getQuizCells(table).map((c) => ({ ...c, isBlank: !!c.id && ids.has(c.id) }));
+  return { name: 'quiz', table, cells, mode: 'due' };
+}
 
 /** What the keypad needs from whichever cell it is typing into. */
 interface CellHandle {
@@ -222,6 +260,7 @@ function CellInput({
 interface SelectorProps {
   tables: TableModel[];
   store: Record<string, SRSCard>;
+  ladder: LadderProgress;
   mode: BlankMode;
   onModeChange: (mode: BlankMode) => void;
   strict: boolean;
@@ -257,6 +296,7 @@ function TableCardText({ table }: { table: TableModel }) {
 function ParadigmSelector({
   tables,
   store,
+  ladder,
   mode,
   onModeChange,
   strict,
@@ -301,31 +341,46 @@ function ParadigmSelector({
         ))}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {shown.map((table) => {
-          const isSelected = table.id === selectedId;
-          return (
-            <button
-              key={table.id}
-              type="button"
-              aria-pressed={isSelected}
-              onClick={() => setSelectedId(isSelected ? null : table.id)}
-              className={`text-left rounded-xl p-4 shadow-sm border-2 transition-colors ${
-                isSelected
-                  ? 'border-accent bg-accent/10'
-                  : 'border-primary/10 bg-bg-card hover:border-primary/25'
-              }`}
-            >
-              <span className={`block ${isSelected ? 'text-text' : 'text-primary'}`}>
-                <TableCardText table={table} />
-              </span>
-              <span className="block text-xs text-text-muted mt-2">
-                {progressText(progress.get(table.id) as TableProgress)}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      {category === 'ladder' ? (
+        <LadderRungList
+          rungs={shown.map((table) => ({
+            id: table.id,
+            title: <Prose>{table.label.split(' — ')[1] ?? table.label}</Prose>,
+            detail: table.detail,
+            meta: progressText(progress.get(table.id) as TableProgress),
+          }))}
+          states={rungStates(LADDER_RUNG_IDS, ladder)}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          accent={ACCENT}
+        />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {shown.map((table) => {
+            const isSelected = table.id === selectedId;
+            return (
+              <button
+                key={table.id}
+                type="button"
+                aria-pressed={isSelected}
+                onClick={() => setSelectedId(isSelected ? null : table.id)}
+                className={`text-left rounded-xl p-4 shadow-sm border-2 transition-colors ${
+                  isSelected
+                    ? 'border-accent bg-accent/10'
+                    : 'border-primary/10 bg-bg-card hover:border-primary/25'
+                }`}
+              >
+                <span className={`block ${isSelected ? 'text-text' : 'text-primary'}`}>
+                  <TableCardText table={table} />
+                </span>
+                <span className="block text-xs text-text-muted mt-2">
+                  {progressText(progress.get(table.id) as TableProgress)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       <div className="rounded-xl p-4 space-y-4 bg-bg-card border border-primary/10 shadow-sm">
         <div className="space-y-2">
@@ -416,13 +471,13 @@ function ResultCell({
       style={{ background: style.bg, border: `1px solid ${style.border}`, color: style.text }}
     >
       {result === 'correct' ? (
-        <Hebrew className="text-xl leading-tight">{answer}</Hebrew>
+        <Hebrew className="text-xl leading-tight">{affixText(answer)}</Hebrew>
       ) : (
         <span className="flex flex-col items-center leading-tight">
           <span className="line-through opacity-70 text-base">
-            {input ? <Hebrew>{input}</Hebrew> : '—'}
+            {input ? <Hebrew>{affixText(input)}</Hebrew> : '—'}
           </span>
-          <Hebrew className="text-xl font-bold">{answer}</Hebrew>
+          <Hebrew className="text-xl font-bold">{affixText(answer)}</Hebrew>
         </span>
       )}
       {note && (
@@ -493,7 +548,7 @@ function QuizTable({
                 if (!cell.isBlank) {
                   return (
                     <td key={key} className="px-2 py-1.5 text-center">
-                      <Hebrew className="text-xl leading-tight">{answer}</Hebrew>
+                      <Hebrew className="text-xl leading-tight">{affixText(answer)}</Hebrew>
                     </td>
                   );
                 }
@@ -654,10 +709,13 @@ function Legend() {
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
 const EMPTY_STORE: Record<string, SRSCard> = {};
+const EMPTY_LADDER: LadderProgress = {};
 
-function ParadigmQuizInner() {
+function ParadigmQuizInner({ session }: { session?: ParadigmSession }) {
   const tables = useMemo(() => buildTableModels(), []);
-  const [phase, setPhase] = useState<Phase>({ name: 'select' });
+  const [phase, setPhase] = useState<Phase>(() =>
+    session ? sessionPhase(session) : { name: 'select' },
+  );
   const [inputs, setInputs] = useState<InputMap>({});
   const [peeking, setPeeking] = useState(false);
   // Read after hydration, and saved by the setter rather than by an effect:
@@ -684,6 +742,8 @@ function ParadigmQuizInner() {
   // What is due drives each table's progress line, so it waits for hydration
   // too. Saved explicitly on submit, which reads the store fresh.
   const [store, setStore] = useStoredState<Record<string, SRSCard>>(loadSRSStore, EMPTY_STORE);
+  // Which rungs are open. Saved explicitly on submit, like the store.
+  const [ladder, setLadder] = useStoredState<LadderProgress>(loadLadderProgress, EMPTY_LADDER);
   const peekedRef = useRef(false);
   const [keypadOpen, setKeypadOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -767,11 +827,39 @@ function ParadigmQuizInner() {
       loadSRSStore(),
       loadStats(),
       phase.cells.filter((c) => c.isBlank).map((c) => ({ id: c.id, result: results[c.index] })),
-      { strict, peeked },
+      { strict, peeked, practice: session?.practice },
     );
     saveSRSStore(outcome.store);
     saveStats(outcome.stats);
     setStore(outcome.store);
+
+    // Every unaided answer goes to the attempt log for the mastery map (#187).
+    // A peeked attempt is not unaided recall, so none of it is logged.
+    if (!peeked) {
+      logAttempts(
+        phase.cells
+          .filter((c) => c.isBlank && c.id)
+          .map((c) => ({
+            concept: `paradigm/${c.id}`,
+            correct: countsAsCorrect(results[c.index], strict),
+          })),
+      );
+    }
+
+    let ladderResult: LadderOutcome | undefined;
+    if (phase.table.rung) {
+      ladderResult = ladderOutcome(
+        loadLadderProgress(),
+        phase.table.rung,
+        phase.cells,
+        results,
+        peeked,
+      );
+      if (ladderResult.clean) {
+        saveLadderProgress(ladderResult.progress);
+        setLadder(ladderResult.progress);
+      }
+    }
 
     const values = Object.values(results);
     posthog.capture('hebrew_paradigm_quiz_submitted', {
@@ -782,7 +870,22 @@ function ParadigmQuizInner() {
       peeked,
     });
     setPeeking(false);
-    setPhase({ ...phase, name: 'results', results, scheduled: outcome.scheduled, peeked });
+    setPhase({
+      ...phase,
+      name: 'results',
+      results,
+      scheduled: outcome.scheduled,
+      peeked,
+      ladder: ladderResult,
+    });
+    session?.onChecked(
+      phase.cells
+        .filter((c) => c.isBlank && c.id)
+        .map((c) => ({
+          id: c.id as string,
+          correct: countsAsCorrect(results[c.index], strict),
+        })),
+    );
   };
 
   const backToSelect = () => {
@@ -795,6 +898,7 @@ function ParadigmQuizInner() {
       <ParadigmSelector
         tables={tables}
         store={store}
+        ladder={ladder}
         mode={mode}
         onModeChange={(m) => {
           setDueOnly(m === 'due');
@@ -820,7 +924,8 @@ function ParadigmQuizInner() {
           </h2>
           <div className="flex items-center gap-3 flex-wrap">
             <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-              {MODE_LABELS[phase.mode].name} — {blanks} blank{blanks === 1 ? '' : 's'}
+              {session ? 'Today' : MODE_LABELS[phase.mode].name} — {blanks} blank
+              {blanks === 1 ? '' : 's'}
             </span>
             <ToggleSwitch
               checked={strict}
@@ -830,9 +935,15 @@ function ParadigmQuizInner() {
             />
           </div>
         </div>
-        <button type="button" onClick={backToSelect} className="text-sm underline text-text-muted">
-          ← Choose another table
-        </button>
+        {!session && (
+          <button
+            type="button"
+            onClick={backToSelect}
+            className="text-sm underline text-text-muted"
+          >
+            ← Choose another table
+          </button>
+        )}
       </div>
 
       {phase.name === 'results' && (
@@ -842,6 +953,15 @@ function ParadigmQuizInner() {
           scheduled={phase.scheduled}
           peeked={phase.peeked}
         />
+      )}
+
+      {phase.name === 'results' && phase.ladder && (
+        <p
+          className={`text-sm font-semibold ${phase.ladder.clean ? 'text-jade' : 'text-text-muted'}`}
+          aria-live="polite"
+        >
+          {ladderNote(phase.ladder)}
+        </p>
       )}
 
       <QuizTable
@@ -862,6 +982,18 @@ function ParadigmQuizInner() {
         <p className="text-xs text-text-muted">
           The qatal has one third-person plural, the 3cp, written on the 3m row.
         </p>
+      )}
+
+      {table.rung && (
+        <ul className="text-xs text-text-muted space-y-1 list-disc ps-4">
+          {ladderRungs
+            .find((r) => r.id === table.rung)
+            ?.notes.map((note) => (
+              <li key={note}>
+                <Prose>{note}</Prose>
+              </li>
+            ))}
+        </ul>
       )}
 
       {table.category === 'suffixes' && (
@@ -919,6 +1051,14 @@ function ParadigmQuizInner() {
             </p>
           )}
         </>
+      ) : session ? (
+        <button
+          type="button"
+          onClick={session.onContinue}
+          className="w-full px-6 py-2.5 rounded-xl font-bold text-sm bg-primary text-white"
+        >
+          Continue
+        </button>
       ) : (
         <div className="flex gap-3 flex-wrap">
           <button
@@ -941,10 +1081,10 @@ function ParadigmQuizInner() {
   );
 }
 
-export default function ParadigmQuiz() {
+export default function ParadigmQuiz({ session }: { session?: ParadigmSession } = {}) {
   return (
     <ErrorBoundary component="ParadigmQuiz">
-      <ParadigmQuizInner />
+      <ParadigmQuizInner session={session} />
     </ErrorBoundary>
   );
 }

@@ -18,6 +18,7 @@ export const ERASES = [
   'Vocabulary flashcards — every word you have reviewed',
   'Handwriting practice — letters, vowel points and whole words',
   'Paradigm quiz — every form you have been quizzed on',
+  'Accent-shift trainer — every word you have worked through',
   'The reader’s marks on words you have studied',
 ] as const;
 
@@ -25,7 +26,7 @@ export const ERASES = [
  * Left alone by the reset. On the server `DELETE /api/progress` removes the
  * stats along with the cards; `clearServerSrs` pushes them straight back.
  */
-export const KEEPS = ['streak', 'accuracy stats', 'deck choices'] as const;
+export const KEEPS = ['streaks', 'accuracy stats', 'deck choices', 'suffix ladder rungs'] as const;
 
 /** Empty this browser's SRS store. Throws if storage cannot be written. */
 export function clearLocalSrs(): void {
@@ -35,8 +36,9 @@ export function clearLocalSrs(): void {
 /**
  * Delete the account's copy, then push this browser's back.
  *
- * `DELETE /api/progress` removes the stats and the sync record along with the
- * cards, while this browser keeps its stats. Without the push, the account
+ * `DELETE /api/progress` removes the stats, the ladder, the attempt log and the
+ * sync record along with the cards, while this browser keeps all but the cards.
+ * The delete resets the attempt cursor, so the push sends the whole log back. Without the push, the account
  * would sit with no stats — and no record of ever having synced — until the
  * next session-end push. PUT merges server-side, so pushing an empty store
  * onto an empty account adds no cards back. The push's result does not decide

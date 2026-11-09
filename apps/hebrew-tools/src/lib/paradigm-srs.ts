@@ -86,6 +86,12 @@ export interface AttemptOptions {
   strict: boolean;
   /** Whether Peek was used at any point during the attempt. */
   peeked: boolean;
+  /**
+   * Forms asked before they are due — Today's weak forms and mixed review
+   * (`today.ts`). Like a repeat, it can demote a card but not promote it:
+   * recalling a form early is not the spaced recall its interval assumes.
+   */
+  practice?: boolean;
 }
 
 export interface AttemptOutcome {
@@ -105,7 +111,7 @@ export function recordAttempt(
   store: Store,
   stats: StudyStats,
   cells: GradedCell[],
-  { strict, peeked }: AttemptOptions,
+  { strict, peeked, practice = false }: AttemptOptions,
 ): AttemptOutcome {
   const today = todayStr();
   const next: Store = { ...store };
@@ -119,7 +125,7 @@ export function recordAttempt(
 
     const key = paradigmCardKey(id);
     const card = next[key] ?? newCard(key);
-    const repeat = peeked || card.lastReviewed === today;
+    const repeat = peeked || practice || card.lastReviewed === today;
     if (!shouldUpdateCard(repeat, grade)) continue;
 
     next[key] = nextSRS(card, GRADE_QUALITY[grade]);

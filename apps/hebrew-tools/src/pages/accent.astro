@@ -1,0 +1,21 @@
+---
+import AccentTrainer from '../components/AccentTrainer';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Accent-Shift Trainer"
+  description="Drill how a plural ending or a pronominal suffix moves the accent in a Biblical Hebrew noun and reduces its stem vowels, one step at a time."
+>
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold mb-1" style="color: var(--color-primary);">
+      Accent-Shift Trainer
+    </h1>
+    <p class="text-text-muted">
+      Add an ending to a noun and work out what happens: divide the syllables, find the accent,
+      name the pretonic and distant syllables, then write the new form with its vowels.
+    </p>
+  </div>
+
+  <AccentTrainer client:load />
+</Layout>

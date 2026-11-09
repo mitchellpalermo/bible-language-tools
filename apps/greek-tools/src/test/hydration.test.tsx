@@ -31,7 +31,7 @@ import TranslationPDFExport from '../components/TranslationPDFExport';
 import VerbParseChallenge from '../components/VerbParseChallenge';
 import { saveCustomDecks } from '../data/customDecks';
 import { markReadToday } from '../data/dailyVerses';
-import { saveFocusPassages } from '../data/focusPassages';
+import { recordParseResults, saveFocusPassages } from '../data/focusPassages';
 import { newCard, nextSRS, recordReview, saveSRSStore, saveStats } from '../data/srs';
 import { vocabulary } from '../data/vocabulary';
 import { saveFlashcardSettings } from '../lib/flashcard-settings';
@@ -73,6 +73,9 @@ function seedReturningStudent() {
       createdAt: '2026-10-01T00:00:00.000Z',
     },
   ]);
+  // Parse history and the attempt log it now feeds (#209): stored values no
+  // island may let leak into its first render.
+  recordParseResults(PASSAGE_ID, [true, false, true, true]);
   setLastSyncedAt(new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString());
   markReadToday();
 }

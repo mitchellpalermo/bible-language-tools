@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { integer, primaryKey, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { index, integer, primaryKey, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 // Shape required by Better Auth's user model — name, email_verified, image,
 // and updated_at are managed by Better Auth. SQLite ALTER TABLE ADD COLUMN
@@ -88,7 +88,54 @@ export const studyStats = sqliteTable('study_stats', {
   lastStudyDate: text('last_study_date').notNull().default(''),
   totalReviewed: integer('total_reviewed').notNull().default(0),
   totalCorrect: integer('total_correct').notNull().default(0),
+  // The Today session streak (@tools/shared/study-streak), a different streak
+  // from `streak` above. Only hebrew.tools writes it so far; greek.tools' rows
+  // take the defaults until #197.
+  studyStreak: integer('study_streak').notNull().default(0),
+  lastSessionDate: text('last_session_date').notNull().default(''),
 });
+
+// The attempt log (@tools/shared/attempt-log): every answer a drill checked,
+// for the mastery levels (#187). Append-only — rows are inserted and ignored
+// when their id is already there, never updated — and pruned to the newest
+// MAX_ATTEMPTS per user and language. Its own endpoint writes it, not the
+// progress PUT. Only hebrew.tools writes it so far.
+export const attempts = sqliteTable(
+  'attempts',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    language: text('language').$type<Language>().notNull(),
+    id: text('id').notNull(),
+    concept: text('concept').notNull(),
+    correct: integer('correct', { mode: 'boolean' }).notNull(),
+    ms: integer('ms'),
+    confidence: integer('confidence'),
+    at: integer('at').notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.userId, t.language, t.id] }),
+    // The read and the prune both want a user's newest attempts.
+    index('attempts_user_language_at').on(t.userId, t.language, t.at),
+  ],
+);
+
+// Paradigm ladder progress (@tools/shared/ladder): clean writes per rung. A
+// rung id is a paradigm table's id, unique within an app, so one table serves
+// every ladder an app has. Only hebrew.tools writes it so far.
+export const ladderProgress = sqliteTable(
+  'ladder_progress',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    language: text('language').$type<Language>().notNull(),
+    rungId: text('rung_id').notNull(),
+    cleanWrites: integer('clean_writes').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.language, t.rungId] })],
+);
 
 // One row per user+language, written on every successful progress PUT.
 // Its absence is the signal that the user has never synced (GET → data: null).
