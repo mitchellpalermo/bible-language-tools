@@ -4,7 +4,7 @@
 
 Greek vocabulary and grammar tools for New Testament Greek study. Built with Astro 5 + React 19, deployed to Cloudflare Pages. Routes are file-based under `src/pages/`; interactive features are React islands.
 
-Key routes: `/` (home), `/flashcards`, `/quiz`, `/paradigms`, `/grammar`, `/parse`, `/parse/gnt`, `/reader`, `/daily`, `/keyboard`.
+Key routes: `/` (home), `/flashcards`, `/paradigms`, `/grammar`, `/parse`, `/parse/gnt`, `/reader`, `/daily`, `/keyboard`.
 
 ## Tech Stack
 

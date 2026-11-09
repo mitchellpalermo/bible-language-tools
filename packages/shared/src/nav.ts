@@ -39,7 +39,7 @@ export function navLinkPaths(link: NavLink): string[] {
  *
  * True when the current path matches the link's own href, any of its
  * `matchPaths`, or any of its children's hrefs. The children clause is what
- * keeps greek.tools' Study link lit on `/flashcards`, `/quiz`, `/paradigms`,
+ * keeps greek.tools' Study link lit on `/flashcards`, `/paradigms`,
  * `/parse`, and `/focus` — the job the hand-written `STUDY_PATHS` list did.
  */
 export function isNavLinkActive(link: NavLink, currentPath: string): boolean {

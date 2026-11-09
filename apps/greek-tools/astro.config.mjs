@@ -15,6 +15,9 @@ export default defineConfig({
     }),
   ],
   adapter: cloudflare(),
+  // The /quiz hub was dropped in #229; Paradigms and Parse are reached from
+  // /study. Old links and bookmarks land there.
+  redirects: { '/quiz': '/study' },
   vite: {
     plugins: [tailwindcss()],
   },
