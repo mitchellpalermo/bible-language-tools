@@ -42,12 +42,6 @@ export interface ExportVerse {
 
 export type TextDirection = 'ltr' | 'rtl';
 
-export interface Rgb {
-  r: number;
-  g: number;
-  b: number;
-}
-
 /** Measures and draws a run of the passage's script. */
 export interface ScriptShaper {
   /** Advance width of `text` at `size`, in points. */
@@ -92,12 +86,20 @@ export interface ExportOptions {
   /** Prefix for a chapter's heading; `Chapter` gives "Chapter 3". */
   chapterLabel?: string;
   /**
-   * The face for the heading, verse numbers and watermark. `helvetica` (the
-   * default) needs no file, which suits a script font that has no Latin
-   * letters — Noto Sans Hebrew has none. Greek's font covers both, so it asks
-   * for `script` and embeds the file once.
+   * The face for the heading, verse numbers and watermark. Greek's font covers
+   * Latin too, so it asks for `script` and the file is embedded once. A script
+   * font with no Latin letters (Noto Sans Hebrew) passes `chromeFontBytes`
+   * instead, so both apps print their chrome in the same face. With neither,
+   * Helvetica, which needs no file.
    */
   chromeFont?: 'script' | 'helvetica';
+  chromeFontBytes?: Uint8Array | ArrayBuffer;
+  /**
+   * A line of the script printed on the title row opposite the reference: the
+   * Hebrew name of the book. It sits at the script's leading edge, so in RTL
+   * at the right margin, above the verse numbers.
+   */
+  titleScript?: string;
   /** Points. Default 13; Hebrew wants more room for its points and accents. */
   scriptSize?: number;
   /** Distance from the script baseline to the first ruled line. */
@@ -116,6 +118,7 @@ export const CONTENT_W = PAGE_W - MARGIN_L - MARGIN_R; // 504pt
 
 const FONT_REF = 9;
 const FONT_HEADING = 10;
+const TITLE_SCRIPT_SIZE = 14;
 
 export const DEFAULT_SCRIPT_SIZE = 13;
 export const DEFAULT_SCRIPT_LEADING = 18;
@@ -311,8 +314,11 @@ export async function buildTranslationPDF(options: ExportOptions): Promise<Uint8
       throw new Error('The font has no glyphs for this script; the PDF would be blank boxes.');
     }
   }
-  const chromeFont =
-    options.chromeFont === 'script' ? scriptFont : await doc.embedFont(StandardFonts.Helvetica);
+  const chromeFont = options.chromeFontBytes
+    ? await doc.embedFont(toBytes(options.chromeFontBytes))
+    : options.chromeFont === 'script'
+      ? scriptFont
+      : await doc.embedFont(StandardFonts.Helvetica);
 
   const shaper =
     shaping === 'clustered'
@@ -339,22 +345,35 @@ export async function buildTranslationPDF(options: ExportOptions): Promise<Uint8
     return p;
   }
 
-  /** Chrome is Latin text, so it is placed from the page's leading edge too. */
-  function drawChrome(p: PDFPage, text: string, y: number, size: number, color: Rgb | undefined) {
+  /**
+   * A heading, in the chrome face. `atStart` puts it at the leading edge — the
+   * right margin in RTL, where the verse numbers are — otherwise at the left
+   * margin, where greek.tools puts every heading.
+   */
+  function drawChrome(p: PDFPage, text: string, y: number, size: number, atStart: boolean) {
     const w = chromeFont.widthOfTextAtSize(text, size);
     p.drawText(text, {
-      x: rtl ? PAGE_W - MARGIN_R - w : MARGIN_L,
+      x: rtl && atStart ? PAGE_W - MARGIN_R - w : MARGIN_L,
       y,
       size,
       font: chromeFont,
-      color: color ? rgb(color.r, color.g, color.b) : headingColor,
+      color: headingColor,
     });
   }
+
+  // The edge a line starts from, and the way its words run.
+  const lineStart = rtl ? PAGE_W - MARGIN_R : MARGIN_L;
+  const sign = rtl ? -1 : 1;
 
   let page: PDFPage = addPage();
   let y = PAGE_H - MARGIN_T;
 
-  drawChrome(page, title, y, FONT_HEADING + 1, undefined);
+  // The reference is at the left margin in both languages, exactly as on
+  // greek.tools; the script name of the book takes the opposite end.
+  drawChrome(page, title, y, FONT_HEADING + 1, false);
+  if (options.titleScript) {
+    shaper.draw(page, options.titleScript, lineStart, y, TITLE_SCRIPT_SIZE, headingColor);
+  }
   y -= CHAPTER_HEADING_H + 6;
 
   function ensureSpace(needed: number) {
@@ -364,17 +383,13 @@ export async function buildTranslationPDF(options: ExportOptions): Promise<Uint8
     }
   }
 
-  // The edge a line starts from, and the way its words run.
-  const lineStart = rtl ? PAGE_W - MARGIN_R : MARGIN_L;
-  const sign = rtl ? -1 : 1;
-
   let lastChapter = -1;
 
   for (const { chapter, verse, words } of verses) {
     if (chapter !== lastChapter) {
       ensureSpace(CHAPTER_HEADING_H + blockH);
       if (lastChapter !== -1) y -= VERSE_GAP;
-      drawChrome(page, `${chapterLabel} ${chapter}`, y, FONT_HEADING, undefined);
+      drawChrome(page, `${chapterLabel} ${chapter}`, y, FONT_HEADING, true);
       y -= CHAPTER_HEADING_H;
       lastChapter = chapter;
     }
@@ -397,7 +412,9 @@ export async function buildTranslationPDF(options: ExportOptions): Promise<Uint8
 
       if (i === 0) {
         page.drawText(verseNumStr, {
-          x: rtl ? lineStart - verseNumWidth : lineStart,
+          // In RTL the number's glyphs sit against the margin and its trailing
+          // space is the gap to the text on their left.
+          x: rtl ? lineStart - chromeFont.widthOfTextAtSize(`${verse}`, FONT_REF) : lineStart,
           y: y + 3,
           size: FONT_REF,
           font: chromeFont,

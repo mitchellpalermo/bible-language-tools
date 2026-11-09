@@ -125,7 +125,7 @@ function ExportInner() {
         return;
       }
       const ref = formatPassageRef(meta?.name ?? value.book, value);
-      const bytes = await buildHebrewPDF(verses, ref, options);
+      const bytes = await buildHebrewPDF(verses, ref, options, meta?.hebrew);
       const blob = new Blob([bytes.buffer as ArrayBuffer], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');

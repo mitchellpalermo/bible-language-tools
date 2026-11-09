@@ -216,9 +216,14 @@ a font, and a direction; the module owns the page.
   not hand a whole RTL string to fontkit's `layout`: it returns the glyphs
   already reversed with offsets computed for the logical order, which displaces
   the marks. The check is a rendered page (`pdftoppm -r 300`), not a thumbnail.
-- **The script font may have no Latin.** Noto Sans Hebrew has none, so the
-  heading, verse numbers and watermark use Helvetica (`chromeFont` defaults to
-  it). Greek's font covers both and passes `chromeFont: 'script'`.
+- **The script font may have no Latin.** Noto Sans Hebrew has none, so hebrew.tools
+  passes `chromeFontBytes` (`public/fonts/NotoSans-Regular.ttf`, the face greek.tools
+  uses) for the heading, verse numbers and watermark, and the two PDFs share one
+  typographic voice. Greek's font covers both and passes `chromeFont: 'script'`.
+  The page is greek.tools' mirrored: the reference stays at the left margin, the
+  book's Hebrew name (`titleScript`, pointed as `books.json` has it) takes the right,
+  and chapter headings and verse numbers sit at the right with the Hebrew. Hebrew is
+  set at 18/30pt against Greek's 13/18 because its points and accents need the room.
 - **Embed the whole font, never a subset**, and pass `requiredCodePoint` so a
   font that lacks the script fails the export instead of printing blank boxes.
   `doc.save` leaves object streams off so a test can read `/BaseFont` and see

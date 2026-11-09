@@ -142,37 +142,49 @@ export function toExportVerses(verses: ExportVerseWords[], options: ExportOption
 // ─── PDF ──────────────────────────────────────────────────────────────────────
 
 export const HEBREW_FONT_URL = '/fonts/NotoSansHebrew-Regular.ttf';
+/** Noto Sans Hebrew has no Latin letters; the page's own headings use this face, as greek.tools'. */
+export const LATIN_FONT_URL = '/fonts/NotoSans-Regular.ttf';
 const ALEF = 0x05d0;
 
-/** Hebrew set larger and more loosely than Greek: points and accents need room. */
+/** Hebrew is set larger and more loosely than Greek's 13/18: points and accents need room. */
 const HEBREW_SIZE = 18;
 const HEBREW_LEADING = 30;
 
-/** Fetch the font, and refuse to go on with something that is not a font. */
-export async function loadHebrewFont(): Promise<Uint8Array> {
-  const res = await fetch(HEBREW_FONT_URL);
-  if (!res.ok) throw new Error(`Could not load the Hebrew font: HTTP ${res.status}`);
+/** Fetch a font, and refuse to go on with something that is not one. */
+async function loadFont(url: string, what: string): Promise<Uint8Array> {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Could not load the ${what} font: HTTP ${res.status}`);
   const bytes = new Uint8Array(await res.arrayBuffer());
   // A TrueType file opens with 0x00010000, an OpenType one with "OTTO". A host
   // that answers with its HTML 404 page at HTTP 200 would otherwise surface as
   // an unreadable error out of the PDF library.
   const magic = (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3];
   if (magic !== 0x00010000 && magic !== 0x4f54544f) {
-    throw new Error('The Hebrew font did not load; the PDF would have no Hebrew in it.');
+    throw new Error(`The ${what} font did not load; the PDF would have the wrong letters in it.`);
   }
   return bytes;
 }
 
+export const loadHebrewFont = () => loadFont(HEBREW_FONT_URL, 'Hebrew');
+export const loadLatinFont = () => loadFont(LATIN_FONT_URL, 'Latin');
+
+/**
+ * `bookHebrew` is the book's name as `books.json` has it — pointed — and is
+ * printed as is, opposite the reference.
+ */
 export async function buildHebrewPDF(
   verses: ExportVerseWords[],
   passageRef: string,
   options: ExportOptions,
+  bookHebrew?: string,
 ): Promise<Uint8Array> {
-  const fontBytes = await loadHebrewFont();
+  const [fontBytes, chromeFontBytes] = await Promise.all([loadHebrewFont(), loadLatinFont()]);
   return buildTranslationPDF({
     verses: toExportVerses(verses, options),
     title: passageRef,
+    titleScript: bookHebrew,
     fontBytes,
+    chromeFontBytes,
     direction: 'rtl',
     shaping: 'clustered',
     scriptTag: 'hebr',

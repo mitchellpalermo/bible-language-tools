@@ -157,7 +157,8 @@ describe('TranslationPDFExport', () => {
     await user.click(screen.getByRole('button', { name: /download pdf/i }));
 
     await waitFor(() => expect(buildHebrewPDF).toHaveBeenCalled());
-    const [verses, ref, options] = vi.mocked(buildHebrewPDF).mock.calls[0];
+    const [verses, ref, options, hebrewName] = vi.mocked(buildHebrewPDF).mock.calls[0];
+    expect(hebrewName).toBe('בראשית');
     expect(verses).toHaveLength(3);
     expect(ref).toBe('Genesis 1:1–3');
     expect(options).toEqual({ pointing: 'pointed', cantillation: false });

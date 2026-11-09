@@ -202,6 +202,38 @@ describe('buildTranslationPDF', () => {
     expect(text).toMatch(/\/BaseFont\s*\/Helvetica/);
   });
 
+  it('prints headings in a Latin face of its own when the script font has none', async () => {
+    const text = asText(
+      await buildTranslationPDF(hebrew({ chromeFontBytes: GREEK_FONT, titleScript: 'בְּרֵאשִׁית' })),
+    );
+    expect(text).toMatch(/\/BaseFont\s*\/\w*NotoSansHebrew/);
+    expect(text).toMatch(/\/BaseFont\s*\/\w*NotoSans-Regular/);
+    expect(text).not.toMatch(/\/BaseFont\s*\/Helvetica/);
+  });
+
+  it('draws the title script at the leading edge, opposite the reference', async () => {
+    const draws: { text: string; x: number }[] = [];
+    const real = PDFDocument.prototype.addPage;
+    const spy = vi.spyOn(PDFDocument.prototype, 'addPage').mockImplementation(function (
+      this: PDFDocument,
+      ...a
+    ) {
+      const page = real.apply(this, a as never);
+      const orig = page.drawText.bind(page);
+      page.drawText = ((t: string, o: { x: number }) => {
+        draws.push({ text: t, x: o.x });
+        return orig(t, o as never);
+      }) as never;
+      return page;
+    });
+    await buildTranslationPDF(hebrew({ titleScript: 'א', verses: [] }));
+    spy.mockRestore();
+    const ref = draws.find((d) => d.text === 'Genesis 1:1');
+    const name = draws.find((d) => d.text === 'א');
+    expect(ref?.x).toBe(54);
+    expect(name?.x).toBeGreaterThan(500);
+  });
+
   it('embeds the script font once when it also sets the chrome', async () => {
     const text = asText(await buildTranslationPDF(greek()));
     expect(text).toMatch(/\/BaseFont\s*\/\w*NotoSans/);

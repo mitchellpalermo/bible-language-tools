@@ -11,6 +11,7 @@ import {
   formatPassageRef,
   lastVerse,
   loadHebrewFont,
+  loadLatinFont,
   normalizeRange,
   toExportVerses,
 } from './pdf-export';
@@ -36,6 +37,10 @@ const BOOK: HebrewBook = {
 };
 
 const RANGE = { book: 'GEN', startChapter: 1, startVerse: 1, endChapter: 1, endVerse: 3 };
+
+const LATIN = new Uint8Array(
+  readFileSync(resolve(__dirname, '../../public/fonts/NotoSans-Regular.ttf')),
+);
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -210,25 +215,55 @@ describe('loadHebrewFont', () => {
   });
 });
 
-describe('buildHebrewPDF', () => {
-  it('builds a PDF with the Hebrew font in it', async () => {
+describe('loadLatinFont', () => {
+  it('loads the Latin face the headings use', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({
         ok: true,
         status: 200,
         arrayBuffer: () =>
-          Promise.resolve(FONT.buffer.slice(FONT.byteOffset, FONT.byteOffset + FONT.byteLength)),
+          Promise.resolve(
+            LATIN.buffer.slice(LATIN.byteOffset, LATIN.byteOffset + LATIN.byteLength),
+          ),
       }),
     );
+    expect((await loadLatinFont()).length).toBe(LATIN.length);
+    expect(fetch).toHaveBeenCalledWith('/fonts/NotoSans-Regular.ttf');
+  });
+});
+
+describe('buildHebrewPDF', () => {
+  function stubFonts() {
+    const bytes = (b: Uint8Array) => b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((url: string) =>
+        Promise.resolve({
+          ok: true,
+          status: 200,
+          arrayBuffer: () => Promise.resolve(bytes(url.includes('Hebrew') ? FONT : LATIN)),
+        }),
+      ),
+    );
+  }
+
+  it('builds a PDF with the Hebrew face for the text and the Latin face for the headings', async () => {
+    stubFonts();
     const verses = extractVerses(BOOK, RANGE);
-    const bytes = await buildHebrewPDF(verses, 'Genesis 1:1–3', DEFAULT_EXPORT_OPTIONS);
-    expect(Buffer.from(bytes.slice(0, 5)).toString()).toBe('%PDF-');
-    expect(Buffer.from(bytes).toString('latin1')).toMatch(/\/BaseFont\s*\/\w*NotoSansHebrew/);
-    expect(
-      Buffer.from(bytes)
-        .toString('latin1')
-        .match(/\/Type\s*\/Page\b/g),
-    ).toHaveLength(1);
+    const bytes = await buildHebrewPDF(verses, 'Genesis 1:1–3', DEFAULT_EXPORT_OPTIONS, 'בְּרֵאשִׁית');
+    const text = Buffer.from(bytes).toString('latin1');
+    expect(text.slice(0, 5)).toBe('%PDF-');
+    expect(text).toMatch(/\/BaseFont\s*\/\w*NotoSansHebrew/);
+    expect(text).toMatch(/\/BaseFont\s*\/\w*NotoSans-Regular/);
+    expect(text).not.toMatch(/\/BaseFont\s*\/Helvetica/);
+    expect(text.match(/\/Type\s*\/Page\b/g)).toHaveLength(1);
+  });
+
+  it('builds without a book name', async () => {
+    stubFonts();
+    await expect(
+      buildHebrewPDF(extractVerses(BOOK, RANGE), 'Genesis 1:1–3', DEFAULT_EXPORT_OPTIONS),
+    ).resolves.toBeInstanceOf(Uint8Array);
   });
 });
