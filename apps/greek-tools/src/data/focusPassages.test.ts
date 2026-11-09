@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import { loadAttempts } from '../lib/attempt-log';
+import { parseConcept } from '../lib/parse-attempts';
 import {
   deletePassage,
   type FocusPassage,
@@ -9,6 +11,7 @@ import {
   loadFocusPassages,
   loadParseHistoryStore,
   type MaturityBreakdown,
+  recordParseResults,
   recordParseSession,
   saveFocusPassages,
   saveParseHistoryStore,
@@ -127,6 +130,33 @@ describe('deletePassage', () => {
     saveFocusPassages([makePassage({ id: 'a' })]);
     deletePassage('unknown');
     expect(loadFocusPassages()).toHaveLength(1);
+  });
+
+  it("removes its logged parse attempts and keeps every other passage's", () => {
+    recordParseResults('a', [true, false]);
+    recordParseResults('b', [true]);
+    deletePassage('a');
+    expect(loadAttempts().map((x) => x.concept)).toEqual([parseConcept('b')]);
+  });
+});
+
+describe('recordParseResults', () => {
+  it('updates the totals exactly as recordParseSession does', () => {
+    recordParseResults('p', [true, true, false]);
+    recordParseResults('p', [false]);
+    expect(loadParseHistoryStore().p).toEqual({ correct: 2, total: 4 });
+  });
+
+  it('logs one attempt per answer under the passage concept', () => {
+    recordParseResults('p', [true, false, true]);
+    const attempts = loadAttempts();
+    expect(attempts.map((x) => x.correct)).toEqual([true, false, true]);
+    expect(attempts.every((x) => x.concept === parseConcept('p'))).toBe(true);
+  });
+
+  it('logs nothing for an empty session', () => {
+    recordParseResults('p', []);
+    expect(loadAttempts()).toEqual([]);
   });
 });
 

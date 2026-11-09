@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { FocusPassage } from '../data/focusPassages';
-import { recordParseSession } from '../data/focusPassages';
+import { recordParseResults } from '../data/focusPassages';
 import { fetchBook, fetchBooks } from '../data/morphgnt';
 import {
   deduplicateByLemma,
@@ -132,8 +132,10 @@ export default function FocusPassageParsing({ passage, bookName }: Props) {
     setResults(updated);
     if (currentIndex + 1 >= session.length) {
       // Persist cumulative parse history at session end
-      const correct = updated.filter((r) => r.allCorrect).length;
-      recordParseSession(passage.id, correct, updated.length);
+      recordParseResults(
+        passage.id,
+        updated.map((r) => r.allCorrect),
+      );
       setPhase('results');
     } else {
       setCurrentIndex((i) => i + 1);
