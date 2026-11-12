@@ -151,7 +151,7 @@ The Accent-Shift Trainer spends a fifth, `accent:<item id>` in `src/lib/accent-s
 The confusable decks deliberately get no prefix of their own — they drill the same letters the alphabet deck does, so grading ד in one must move the card the other sees.
 - **Deck selection is persisted separately from the SRS store** (`hebrew-tools-deck-v1`, `src/lib/deck-selection.ts`) and is never synced. It decides which due cards you see, not what is due, so it stays local to the browser.
 - **What the card front shows is persisted the same way** (`hebrew-tools-flashcard-display-v1`, `src/lib/flashcard-settings.ts`, over `@tools/shared/flashcard-settings`) and is likewise never synced. Today it holds one boolean: whether the part of speech appears on the front of a flashcard, which defaults to off. See the repo CLAUDE.md under "What the card front gives away".
-- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`, `hebrew-tools-reader-prefs`, `hebrew-tools-daily-v1`, `hebrew-tools-accent-scaffold-v1` (speed mode), `hebrew-tools-attempts-v1` (attempt log, **synced** on its own endpoint, kept by the account reset), `hebrew-tools-attempts-pushed-through` (the attempt log's push cursor), `hebrew-tools-suffix-ladder-v1` (suffix ladder progress, **synced**, kept by the account reset), `hebrew-tools-study-streak-v1` (the Today session streak, **synced**, kept by the account reset), `hebrew-tools-today-budget-v1` (the last time budget picked, not synced). Signed-in students sync the SRS store, the stats, the study streak, the suffix ladder and the attempt log (see "Study sync"); everything else on this list is per-browser.
+- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`, `hebrew-tools-reader-prefs`, `hebrew-tools-daily-v1`, `hebrew-tools-accent-scaffold-v1` (speed mode), `hebrew-tools-attempts-v1` (attempt log, **synced** on its own endpoint, kept by the account reset), `hebrew-tools-attempts-pushed-through` (the attempt log's push cursor), `hebrew-tools-suffix-ladder-v1` (suffix ladder progress, **synced**, kept by the account reset), `hebrew-tools-study-streak-v1` (the Today session streak, **synced**, kept by the account reset), `hebrew-tools-today-budget-v1` (the last time budget picked, not synced), `hebrew-tools-focus-passages-v1` (focus passages, **synced** with tombstones, kept by the account reset; see "Focus passages" in the repo CLAUDE.md). Signed-in students sync the SRS store, the stats, the study streak, the suffix ladder and the attempt log (see "Study sync"); everything else on this list is per-browser.
 
 ### OSHB data pipeline (issue #75)
 
@@ -446,6 +446,29 @@ Things that will bite if changed carelessly:
   script-side copy against it. Nikud stays — stripping vowels is a different
   feature for a much later student — and the strip is never applied to a word's
   trailing punctuation, so the sof pasuq and the maqqef survive it.
+
+### Export to PDF (issue #227)
+
+`/export` downloads a verse range as a PDF to translate on paper or an iPad. The
+layout is `@tools/shared/pdf-export` (see "The export PDF" in the root
+CLAUDE.md, which covers why Hebrew needs per-cluster shaping); `src/lib/pdf-export.ts`
+is the Hebrew half: `extractVerses`, `normalizeRange`, `exportText`,
+`toExportVerses` and the font load.
+
+- **Options mirror the reader's**: pointed (default) or consonants only, and
+  cantillation, which starts from the reader's own stored preference.
+  Cantillation goes through `stripCantillation`, so the page matches the reader.
+- **It is a study mode** (`src/lib/study-modes.ts`: a `/study` card and a Study nav
+  child), and is also reached from the reader's "Export PDF" link, which carries
+  `?ref=BOOK.CH`.
+- **The Hebrew name in the heading is the BHS form** (`bhsBookName`): the spelling
+  in `books.json` with vowel points and cantillation removed and the shin and sin
+  dots kept (שׁמואל א, דברי הימים א). The pointed `books.json` form is not printed.
+- **`?ref=` with no verse means the whole chapter**; the last verse is filled in
+  once the book loads. Changing book does the same for chapter 1.
+- **Verify on a rendered page.** A PDF whose Hebrew is wrong still opens and
+  still has the right text in it. Render it (`pdftoppm -r 300 -png`) and look at
+  where the vowels sit under the letters.
 
 ### Daily Verse (issue #76)
 

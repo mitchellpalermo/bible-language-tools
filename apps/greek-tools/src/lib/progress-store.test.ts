@@ -1,5 +1,6 @@
-import { users } from '@tools/db/schema';
+import { focusPassages as focusPassagesTable, users } from '@tools/db/schema';
 import { createTestDb } from '@tools/db/test-utils';
+import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { CustomDeck } from '../data/customDecks';
 import type { FocusPassage, ParseHistory } from '../data/focusPassages';
@@ -81,11 +82,73 @@ describe('progress-store', () => {
     expect(result).toEqual({
       srsStore,
       studyStats: stats,
+      studyStreak: { streak: 0, lastSessionDate: '' },
       customDecks: [deck],
       focusPassages: [passage],
       parseHistory,
       ladderProgress: { article: 2 },
       syncedAt,
+    });
+  });
+
+  describe('the Today study streak (#197)', () => {
+    const base = {
+      srsStore: {},
+      studyStats: stats,
+      customDecks: [],
+      focusPassages: [],
+      parseHistory: {},
+    };
+
+    it('round-trips through the stats row', async () => {
+      await putProgress(db, USER_ID, {
+        ...base,
+        studyStreak: { streak: 5, lastSessionDate: '2026-06-09' },
+      });
+      expect((await getProgress(db, USER_ID))?.studyStreak).toEqual({
+        streak: 5,
+        lastSessionDate: '2026-06-09',
+      });
+    });
+
+    it('is kept when a client that predates it pushes', async () => {
+      await putProgress(db, USER_ID, {
+        ...base,
+        studyStreak: { streak: 5, lastSessionDate: '2026-06-09' },
+      });
+      await putProgress(db, USER_ID, base);
+      expect((await getProgress(db, USER_ID))?.studyStreak).toEqual({
+        streak: 5,
+        lastSessionDate: '2026-06-09',
+      });
+    });
+
+    it('does not let a device that is behind overwrite a later session', async () => {
+      await putProgress(db, USER_ID, {
+        ...base,
+        studyStreak: { streak: 5, lastSessionDate: '2026-06-09' },
+      });
+      await putProgress(db, USER_ID, {
+        ...base,
+        studyStreak: { streak: 9, lastSessionDate: '2026-06-01' },
+      });
+      expect((await getProgress(db, USER_ID))?.studyStreak).toEqual({
+        streak: 5,
+        lastSessionDate: '2026-06-09',
+      });
+    });
+
+    it('is erased by DELETE, which clears the whole stats row', async () => {
+      await putProgress(db, USER_ID, {
+        ...base,
+        studyStreak: { streak: 5, lastSessionDate: '2026-06-09' },
+      });
+      await deleteProgress(db, USER_ID);
+      await putProgress(db, USER_ID, base);
+      expect((await getProgress(db, USER_ID))?.studyStreak).toEqual({
+        streak: 0,
+        lastSessionDate: '',
+      });
     });
   });
 
@@ -269,6 +332,71 @@ describe('progress-store', () => {
 
     const result = await getProgress(db, USER_ID);
     expect(result?.parseHistory).toEqual(history);
+  });
+
+  // hebrew.tools keeps its focus passages in the same table (#226), told apart
+  // by `language`. greek's sync is a full replace, so a query without the
+  // language would show a student's Hebrew passages in Greek and then erase them.
+  describe('a student who also has Hebrew focus passages', () => {
+    const hebrewRow = () => ({
+      userId: USER_ID,
+      language: 'hebrew' as const,
+      id: 'hebrew-uuid',
+      book: 'GEN',
+      startChapter: 1,
+      startVerse: 1,
+      endChapter: 1,
+      endVerse: 5,
+      createdAt: '2026-06-01T12:00:00.000Z',
+    });
+
+    beforeEach(async () => {
+      await db.insert(focusPassagesTable).values(hebrewRow());
+    });
+
+    const hebrewIds = async () =>
+      (
+        await db.select().from(focusPassagesTable).where(eq(focusPassagesTable.language, 'hebrew'))
+      ).map((r) => r.id);
+
+    it('does not return them, and keeps them through a push', async () => {
+      await putProgress(db, USER_ID, {
+        srsStore: {},
+        studyStats: stats,
+        customDecks: [],
+        focusPassages: [passage],
+        parseHistory: {},
+      });
+      expect((await getProgress(db, USER_ID))?.focusPassages).toEqual([passage]);
+      expect(await hebrewIds()).toEqual(['hebrew-uuid']);
+    });
+
+    it('keeps them through "Start fresh", while deleting its own', async () => {
+      await putProgress(db, USER_ID, {
+        srsStore: {},
+        studyStats: stats,
+        customDecks: [],
+        focusPassages: [passage],
+        parseHistory: {},
+      });
+      await deleteProgress(db, USER_ID);
+      expect(await hebrewIds()).toEqual(['hebrew-uuid']);
+      expect(await db.select().from(focusPassagesTable)).toHaveLength(1);
+    });
+
+    it('writes its own passages as greek', async () => {
+      await putProgress(db, USER_ID, {
+        srsStore: {},
+        studyStats: stats,
+        customDecks: [],
+        focusPassages: [passage],
+        parseHistory: {},
+      });
+      const row = (
+        await db.select().from(focusPassagesTable).where(eq(focusPassagesTable.id, passage.id))
+      )[0];
+      expect(row.language).toBe('greek');
+    });
   });
 
   it('issues writes through db.batch when the driver supports it', async () => {

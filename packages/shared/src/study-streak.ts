@@ -1,6 +1,6 @@
 /**
  * The study streak: consecutive days on which the student finished a Today
- * session (#184 on hebrew.tools, #197 to come on greek.tools).
+ * session (#184 on hebrew.tools, #197 on greek.tools).
  *
  * It is its own streak, not the Daily verse streak (`./daily`) and not the
  * flashcard streak in `StudyStats`. Reading a verse is not a study session, and

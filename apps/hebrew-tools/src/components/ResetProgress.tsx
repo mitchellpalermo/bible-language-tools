@@ -31,6 +31,7 @@ export const KEEPS = [
   'accuracy stats',
   'deck choices',
   'custom decks',
+  'focus passages',
   'suffix ladder rungs',
 ] as const;
 

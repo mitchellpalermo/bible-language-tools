@@ -8,6 +8,7 @@ import type { SRSCard } from '../data/srs';
 import { loadSRSStore, loadStats, SRS_KEY, STATS_KEY } from '../data/srs';
 import { ATTEMPT_LOG_KEY, loadAttempts, logAttempts } from './attempt-log';
 import { CUSTOM_DECKS_KEY, customDeckStore } from './custom-decks';
+import { FOCUS_PASSAGES_KEY, focusPassageStore } from './focus-passages';
 import { loadStudyStreak, STUDY_STREAK_KEY } from './study-streak';
 import { LADDER_PROGRESS_KEY, loadLadderProgress, saveLadderProgress } from './suffix-ladder';
 import {
@@ -711,6 +712,83 @@ describe('custom decks', () => {
     await deleteServerProgress();
     clearLocalProgress();
     expect(customDeckStore.load()).toHaveLength(1);
+    expect(account.progress).toBeNull();
+  });
+});
+
+describe('focus passages', () => {
+  const range = { book: 'GEN', startChapter: 1, startVerse: 1, endChapter: 1, endVerse: 5 };
+
+  it('reads them, tombstones included, and writes them back', () => {
+    const kept = focusPassageStore.create(range, 'Creation');
+    const dropped = focusPassageStore.create({ ...range, endVerse: 9 });
+    focusPassageStore.remove(dropped.id);
+
+    const snapshot = readLocalProgress();
+    expect(snapshot.focusPassages?.map((p) => p.id).sort()).toEqual([kept.id, dropped.id].sort());
+
+    localStorage.clear();
+    writeLocalProgress({
+      srsStore: {},
+      studyStats: emptyStats,
+      focusPassages: snapshot.focusPassages,
+    });
+    expect(focusPassageStore.load().map((p) => p.label)).toEqual(['Creation']);
+    expect(focusPassageStore.loadAll()).toHaveLength(2);
+  });
+
+  it('never loses a passage made while the pull was in flight', () => {
+    const mine = focusPassageStore.create(range);
+    writeLocalProgress({ srsStore: {}, studyStats: emptyStats, focusPassages: [] });
+    expect(focusPassageStore.load().map((p) => p.id)).toEqual([mine.id]);
+  });
+
+  it('a snapshot with no passages leaves the stored ones alone', () => {
+    focusPassageStore.create(range);
+    writeLocalProgress({ srsStore: {}, studyStats: emptyStats });
+    expect(focusPassageStore.load()).toHaveLength(1);
+  });
+
+  it('syncs a passage to another device', async () => {
+    const { account } = fakeAccount();
+    focusPassageStore.create(range, 'Creation');
+    await pullAndMerge();
+    expect((account.progress?.focusPassages as unknown[]).length).toBe(1);
+
+    newDevice();
+    await pullAndMerge();
+    expect(focusPassageStore.load().map((p) => p.label)).toEqual(['Creation']);
+  });
+
+  it('keeps a passage deleted on one device deleted on the other, even from a stale copy', async () => {
+    const { account } = fakeAccount();
+    const passage = focusPassageStore.create(range);
+    await pullAndMerge(); // device A uploads
+    const stale = localStorage.getItem(FOCUS_PASSAGES_KEY) as string;
+
+    newDevice();
+    await pullAndMerge(); // device B has it
+    focusPassageStore.remove(passage.id);
+    await pullAndMerge(); // device B deletes and syncs
+    expect(focusPassageStore.load()).toEqual([]);
+
+    // Device A comes back with its week-old copy of the passage and syncs.
+    newDevice();
+    localStorage.setItem(FOCUS_PASSAGES_KEY, stale);
+    expect(focusPassageStore.load()).toHaveLength(1);
+    await pullAndMerge();
+    expect(focusPassageStore.load()).toEqual([]);
+    const onServer = account.progress?.focusPassages as Array<{ deletedAt?: string }>;
+    expect(onServer[0].deletedAt).toBeDefined();
+  });
+
+  it('survives "Start fresh": passages are not progress', async () => {
+    focusPassageStore.create(range);
+    const { account } = fakeAccount();
+    await pullAndMerge();
+    await deleteServerProgress();
+    clearLocalProgress();
+    expect(focusPassageStore.load()).toHaveLength(1);
     expect(account.progress).toBeNull();
   });
 });

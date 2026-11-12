@@ -40,6 +40,7 @@ export const STUDY_LABELS: Readonly<Record<string, string>> = {
   '/flashcards': 'Flashcards',
   '/paradigms': 'Paradigms',
   '/parse': 'Parse',
+  '/focus': 'Focus Passages',
 };
 
 /**

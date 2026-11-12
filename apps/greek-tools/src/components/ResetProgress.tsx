@@ -21,6 +21,7 @@ export const ERASES = [
 /** Left alone by the reset, in this browser and — after the push below — on the account. */
 export const KEEPS = [
   'streak',
+  'study streak',
   'accuracy stats',
   'custom decks',
   'focus passages',

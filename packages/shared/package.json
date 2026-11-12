@@ -18,6 +18,8 @@
     "./study-modes": "./src/study-modes.ts",
     "./paradigm-quiz": "./src/paradigm-quiz.ts",
     "./custom-decks": "./src/custom-decks.ts",
+    "./tombstones": "./src/tombstones.ts",
+    "./focus-passages": "./src/focus-passages.ts",
     "./flashcard-settings": "./src/flashcard-settings.ts",
     "./flashcard-session": "./src/flashcard-session.ts",
     "./use-flashcard-session": "./src/use-flashcard-session.ts",
@@ -26,6 +28,7 @@
     "./attempt-log": "./src/attempt-log.ts",
     "./ladder": "./src/ladder.ts",
     "./today": "./src/today.ts",
+    "./pdf-export": "./src/pdf-export.ts",
     "./study-streak": "./src/study-streak.ts",
     "./test/hydration": "./src/test/hydration.ts",
     "./test/favicons": "./src/test/favicons.ts",
@@ -45,6 +48,7 @@
     "./components/DescriptionBar": "./src/components/DescriptionBar.tsx",
     "./components/WritingGrid": "./src/ink/components/WritingGrid.tsx",
     "./components/DeckBuilder": "./src/components/DeckBuilder.tsx",
+    "./components/PassagePicker": "./src/components/PassagePicker.tsx",
     "./components/GradeButtons": "./src/components/GradeButtons.tsx",
     "./components/DrillButtons": "./src/components/DrillButtons.tsx",
     "./components/ToggleSwitch": "./src/components/ToggleSwitch.tsx",
@@ -52,6 +56,10 @@
     "./components/StepDrill": "./src/components/StepDrill.tsx",
     "./components/Ladder": "./src/components/Ladder.tsx",
     "./components/TodaySession": "./src/components/TodaySession.tsx"
+  },
+  "dependencies": {
+    "@pdf-lib/fontkit": "^1.1.1",
+    "pdf-lib": "^1.17.1"
   },
   "peerDependencies": {
     "react": "^19.0.0"

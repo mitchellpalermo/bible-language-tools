@@ -117,6 +117,38 @@ describe('sync-manager', () => {
     });
   });
 
+  describe('the study streak (#197)', () => {
+    it('is read into the snapshot and written back by a pull', async () => {
+      localStorage.setItem(
+        'greek-tools-study-streak-v1',
+        JSON.stringify({ streak: 3, lastSessionDate: '2026-06-09' }),
+      );
+      expect(readLocalProgress().studyStreak).toEqual({ streak: 3, lastSessionDate: '2026-06-09' });
+
+      fetchMock.mockResolvedValueOnce(
+        okJson({
+          data: {
+            srsStore: {},
+            studyStats: stats,
+            studyStreak: { streak: 1, lastSessionDate: '2026-06-10' },
+            customDecks: [],
+            focusPassages: [],
+            parseHistory: {},
+            syncedAt: '2026-06-10T00:00:00.000Z',
+          },
+        }),
+      );
+      fetchMock.mockResolvedValueOnce(okJson({ syncedAt: '2026-06-10T12:00:00.000Z' }));
+      await pullAndMerge();
+
+      // The later date wins, and brings its own streak.
+      expect(JSON.parse(localStorage.getItem('greek-tools-study-streak-v1') as string)).toEqual({
+        streak: 1,
+        lastSessionDate: '2026-06-10',
+      });
+    });
+  });
+
   describe('push', () => {
     it('PUTs local state and records the server syncedAt', async () => {
       seedLocal({ a: makeCard('a') });

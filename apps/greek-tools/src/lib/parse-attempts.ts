@@ -21,8 +21,21 @@
 
 import type { Attempt } from '@tools/shared/attempt-log';
 import type { ParseHistory } from '../data/focusPassages';
+import type { ParseItem } from './verb-parse';
 
 const PARSE_CONCEPT_PREFIX = 'parse/passage/';
+const FORM_CONCEPT_PREFIX = 'parse/paradigm/';
+
+/**
+ * The concept id for one kind of verb form parsed out of context (Today's
+ * parse drill, #197): tense, voice and mood, the three things a student
+ * confuses. Person and number are not part of it; a miss there is a different
+ * slip and would split one habit's history into twelve. Stable: do not rename.
+ * Kept out of the `parse/passage/` namespace, so passage totals never read it.
+ */
+export function parseFormConcept(item: Pick<ParseItem, 'tense' | 'voice' | 'mood'>): string {
+  return `${FORM_CONCEPT_PREFIX}${item.tense}-${item.voice}-${item.mood}`;
+}
 
 /** The concept id for answers parsed within one focus passage. Stable: do not rename. */
 export function parseConcept(passageId: string): string {

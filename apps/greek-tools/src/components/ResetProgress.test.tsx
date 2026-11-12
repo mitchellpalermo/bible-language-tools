@@ -94,7 +94,7 @@ describe('greek.tools ResetProgress', () => {
     expect(panel).toHaveTextContent(/Vocabulary flashcards/);
     expect(panel).toHaveTextContent(/Focus passage vocabulary/);
     expect(panel).toHaveTextContent(
-      'Kept: your streak, accuracy stats, custom decks, focus passages, parse history and paradigm ladder rungs.',
+      'Kept: your streak, study streak, accuracy stats, custom decks, focus passages, parse history and paradigm ladder rungs.',
     );
   });
 

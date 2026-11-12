@@ -16,6 +16,7 @@ import {
 import { loadSRSStore, loadStats, saveSRSStore, saveStats } from '../data/srs';
 import { hasAuthHint } from './auth-cookie';
 import { loadLadderProgress, saveLadderProgress } from './paradigm-ladder';
+import { loadStudyStreak, saveStudyStreak } from './study-streak';
 import { mergeLadderProgress, mergeProgress, type ProgressSnapshot } from './sync-merge';
 import type { ProgressPayload } from './sync-types';
 
@@ -61,6 +62,7 @@ export function readLocalProgress(): ProgressSnapshot {
   return {
     srsStore: loadSRSStore(),
     studyStats: loadStats(),
+    studyStreak: loadStudyStreak(),
     customDecks: loadCustomDecks(),
     focusPassages: loadFocusPassages(),
     parseHistory: loadParseHistoryStore(),
@@ -71,6 +73,7 @@ export function readLocalProgress(): ProgressSnapshot {
 export function writeLocalProgress(snapshot: ProgressSnapshot): void {
   saveSRSStore(snapshot.srsStore);
   saveStats(snapshot.studyStats);
+  if (snapshot.studyStreak) saveStudyStreak(snapshot.studyStreak);
   saveCustomDecks(snapshot.customDecks);
   saveFocusPassages(snapshot.focusPassages);
   saveParseHistoryStore(snapshot.parseHistory);

@@ -17,19 +17,26 @@
 // keeps the row with `deletedAt` set and no words; the merge treats it as the
 // newest edit. See `mergeCustomDecks`.
 
+import {
+  isIso,
+  isLive,
+  isRecord,
+  mergeTombstoned,
+  pruneTombstones,
+  stampOf,
+  TOMBSTONE_TTL_DAYS,
+} from './tombstones';
+
+// The tombstone rules moved to `tombstones.ts` when focus passages (#226)
+// began sharing them; re-exported so this module's callers did not change.
+export { isLive, pruneTombstones, stampOf, TOMBSTONE_TTL_DAYS };
+
 export const MAX_DECK_NAME = 60;
 /** Bounds that only stop a hostile request body; no student reaches them. */
 export const MAX_DECKS = 100;
 export const MAX_DECK_WORDS = 5000;
 export const MAX_ID_LENGTH = 100;
 export const MAX_KEY_LENGTH = 200;
-
-/**
- * How long a tombstone is kept. Past this a device that was offline the whole
- * time and still holds the deck can bring it back, which is cheaper than
- * keeping every deleted deck forever.
- */
-export const TOMBSTONE_TTL_DAYS = 180;
 
 export interface CustomDeck {
   /** `crypto.randomUUID()`. Never reused, so a tombstone cannot hide a new deck. */
@@ -48,23 +55,6 @@ export interface CustomDeck {
   updatedAt?: string;
   /** Set when the deck was deleted. The deck is then a tombstone, not a deck. */
   deletedAt?: string;
-}
-
-export function isLive(deck: CustomDeck): boolean {
-  return deck.deletedAt === undefined;
-}
-
-/** The moment this deck was last changed. */
-export function stampOf(deck: CustomDeck): string {
-  return deck.updatedAt || deck.createdAt;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function isIso(value: unknown): value is string {
-  return typeof value === 'string' && value.length > 0 && !Number.isNaN(Date.parse(value));
 }
 
 /**
@@ -128,50 +118,18 @@ export function parseDeckList(raw: unknown): CustomDeck[] | null {
 
 // ─── The merge ────────────────────────────────────────────────────────────────
 
-/** Positive when `a` is the later change. A total order, so the merge is symmetric. */
-function compareChanges(a: CustomDeck, b: CustomDeck): number {
-  const byTime = stampOf(a).localeCompare(stampOf(b));
-  if (byTime !== 0) return byTime;
-  // The same moment: a deletion beats an edit, so a stale device cannot undo it.
-  const byDeletion = Number(!isLive(a)) - Number(!isLive(b));
-  if (byDeletion !== 0) return byDeletion;
-  // Still tied (two devices, one clock tick): any fixed order will do.
-  return JSON.stringify(a).localeCompare(JSON.stringify(b));
-}
-
-/** Tombstones older than the TTL are dropped. */
-export function pruneTombstones(decks: CustomDeck[], now: Date = new Date()): CustomDeck[] {
-  const cutoff = new Date(now.getTime() - TOMBSTONE_TTL_DAYS * 86_400_000).toISOString();
-  return decks.filter((d) => isLive(d) || (d.deletedAt as string) >= cutoff);
-}
-
 /**
- * Per deck id: the latest change wins, whole. An edit on one device and a
- * rename on another do not combine; the later one stands. A deletion is a
- * change like any other, so a deck edited *after* it was deleted elsewhere
- * comes back, and one edited before does not.
- *
- * Symmetric — `compareChanges` is a total order — and the result is sorted by
- * creation, so both sides of a sync end up with the same list in the same order.
- * Tombstones past `TOMBSTONE_TTL_DAYS` are dropped.
- *
- * KNOWN LIMIT: the comparison is between two devices' clocks. A clock that is
- * badly wrong can make a stale edit win. The failure is one deck holding an
- * older word list, never a lost review, and the next edit corrects it.
+ * Per deck id: the latest change wins, whole — an edit on one device and a
+ * rename on another do not combine. A deck edited *after* it was deleted
+ * elsewhere comes back; one edited before does not. The rules, the symmetry and
+ * the known clock limit are `mergeTombstoned`'s.
  */
 export function mergeCustomDecks(
   a: CustomDeck[],
   b: CustomDeck[],
   now: Date = new Date(),
 ): CustomDeck[] {
-  const byId = new Map<string, CustomDeck>();
-  for (const deck of [...a, ...b]) {
-    const held = byId.get(deck.id);
-    if (!held || compareChanges(deck, held) > 0) byId.set(deck.id, deck);
-  }
-  return pruneTombstones([...byId.values()], now).sort(
-    (x, y) => x.createdAt.localeCompare(y.createdAt) || x.id.localeCompare(y.id),
-  );
+  return mergeTombstoned(a, b, now);
 }
 
 // ─── Rules about names and words ─────────────────────────────────────────────

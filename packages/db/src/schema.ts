@@ -89,8 +89,8 @@ export const studyStats = sqliteTable('study_stats', {
   totalReviewed: integer('total_reviewed').notNull().default(0),
   totalCorrect: integer('total_correct').notNull().default(0),
   // The Today session streak (@tools/shared/study-streak), a different streak
-  // from `streak` above. Only hebrew.tools writes it so far; greek.tools' rows
-  // take the defaults until #197.
+  // from `streak` above. Both apps write it: hebrew.tools since #184,
+  // greek.tools since #197. Rows written before either take the defaults.
   studyStreak: integer('study_streak').notNull().default(0),
   lastSessionDate: text('last_session_date').notNull().default(''),
 });
@@ -172,12 +172,19 @@ export const customDecks = sqliteTable('custom_decks', {
   deletedAt: text('deleted_at'),
 });
 
+// Focus passages are per language since hebrew.tools' (#226): `language` was
+// added with the default 'greek', which is what every row written before it is,
+// and `updated_at` / `deleted_at` make deletion a tombstone as custom_decks'
+// are. The key stays (user_id, id): SQLite cannot change a primary key without
+// rebuilding the table, and ids do not collide (greek's are 8 random characters,
+// hebrew's are UUIDs). greek.tools' code reads and deletes only its own rows.
 export const focusPassages = sqliteTable(
   'focus_passages',
   {
     userId: text('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
+    language: text('language').$type<Language>().notNull().default('greek'),
     id: text('id').notNull(),
     label: text('label'),
     book: text('book').notNull(),
@@ -186,6 +193,8 @@ export const focusPassages = sqliteTable(
     endChapter: integer('end_chapter').notNull(),
     endVerse: integer('end_verse').notNull(),
     createdAt: text('created_at').notNull(),
+    updatedAt: text('updated_at').notNull().default(''),
+    deletedAt: text('deleted_at'),
   },
   (t) => [primaryKey({ columns: [t.userId, t.id] })],
 );

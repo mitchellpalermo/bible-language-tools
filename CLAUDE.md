@@ -62,6 +62,8 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/quiz-settings` | `createQuizSettings(storageKey, overrides?)` factory for persisting quiz difficulty; `overrides` sets one app's defaults |
 | `@tools/shared/paradigm-quiz` | The paradigm quiz engine — `TableModel`, `getQuizCells`, `applyDensity`. Which tables exist and how an answer is graded stay in each app |
 | `@tools/shared/custom-decks` | Custom flashcard decks (#225): the `CustomDeck` shape, `createCustomDeckStore(storageKey)`, `mergeCustomDecks` (with tombstones), `parseDeck`/`parseDeckList` for storage and request bodies, and the selection helpers `findDeck`, `wordsInDeck`, `deckRestartPart`. See "Custom decks" below |
+| `@tools/shared/tombstones` | Deletion by tombstone for any synced list: `mergeTombstoned`, `pruneTombstones`, `isLive`, `stampOf`, `TOMBSTONE_TTL_DAYS`. Decks and focus passages delegate to it. See "Custom decks" and "Focus passages" below |
+| `@tools/shared/focus-passages` | Focus passages (#226): the `FocusPassage` shape, `createFocusPassageStore(storageKey)`, `mergeFocusPassages` (with tombstones), `parsePassage`/`parsePassageList`, range arithmetic (`rangeError`, `versesInRange`, `verseCounts`, `formatPassageRef`) and the maturity bands. See "Focus passages" below |
 | `@tools/shared/flashcard-settings` | `createFlashcardSettings(storageKey)` factory for what the flashcard face shows before you answer |
 | `@tools/shared/flashcard-session` | `shuffle`, `nextRound` and `requeueMissed` — pure flashcard queue rules: Endless mode's reshuffle, and the drill modes' re-queue of a missed card. Used through `use-flashcard-session` |
 | `@tools/shared/use-flashcard-session` | `useFlashcardSession<T>()` — the flashcard session engine: dealing, SRS grading, drills, Endless, typed answers, the keyboard. Both apps' `Flashcards.tsx` run on it. See "The flashcard session engine" below |
@@ -69,6 +71,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/step-drill` | The step-gated drill engine: `stepDrillReducer`, `isCleanPass`, and `canSkipScaffold` / `createStepDrillHistory(storageKey)` for speed mode. See "The step-gated drill" below |
 | `@tools/shared/ladder` | The paradigm ladder (#186): `rungStates`, `isCleanWrite`, `recordWrite`, `newlyUnlocked`, `isLadderProgress`, and `createLadderProgress(storageKey)`. See "The paradigm ladder" below |
 | `@tools/shared/attempt-log` | `createAttemptLog(storageKey)` — every checked answer, by concept and id, for the mastery levels (#187) — plus `parseAttempt` and `planAttemptPush` for syncing it. See "The attempt log syncs on its own" below |
+| `@tools/shared/pdf-export` | The translation-practice PDF behind both apps' `/export`: `buildTranslationPDF({ verses, fontBytes, direction, shaping, ... })`, `wrapWords`, `clusterShaper`. See "The export PDF" below |
 | `@tools/shared/today` | Today's Session (#184): `buildTodayPlan` (fill a time budget, due before weak before new), `canStartNext` and `createActiveClock` (the budget while it runs), `summarizeSession`. See "Today's Session" below |
 | `@tools/shared/study-streak` | `createStudyStreak(storageKey)` — days with a finished Today session — and `mergeStudyStreak` for sync |
 | `@tools/shared/components/TodaySession` | `BudgetPicker` (20 / 45 / 90 minutes) and `SessionSummaryCard` (React) |
@@ -82,6 +85,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/components/SiteNav.astro` | The site navigation for both apps (see below) |
 | `@tools/shared/components/MorphWordmark.astro` | The footer's "hebrew tools" / "greek tools" that slides into the original language on hover (see "Clipping boxes size from their content" below) |
 | `@tools/shared/components/DeckBuilder` | List, create, edit and delete custom decks over a vocabulary the app passes in (React; inline-styled, accent passed in) |
+| `@tools/shared/components/PassagePicker` | Book, start and end menus for a verse range, sized by the verse counts the app passes in (React; inline-styled) |
 | `@tools/shared/components/GradeButtons` | The Again/Hard/Good/Easy answer row, with per-grade interval previews (React) |
 | `@tools/shared/components/DrillButtons` | The Missed / Got it answer row for the drill modes, which schedule nothing (React) |
 | `@tools/shared/components/ResetProgress` | The account page's "Danger zone": open, type RESET, erase. Each app wraps it in `src/components/ResetProgress.tsx` with its own list of what is erased and kept (React) |
@@ -199,6 +203,45 @@ Two things about it that are pedagogy rather than plumbing:
   Greek direction is untouched: the front is the gloss there, so there is no
   such line to withhold.
 
+### The export PDF
+
+`@tools/shared/pdf-export` lays out the PDF that greek.tools (#62) and
+hebrew.tools (#227) both offer at `/export`: a heading, each verse's words
+wrapped to the page, and ruled lines under every line for the student's
+translation. An app supplies verses as lists of strings already in print form,
+a font, and a direction; the module owns the page.
+
+- **`pdf-lib` discards glyph positions, so pointed Hebrew needs `shaping:
+  'clustered'`.** pdf-lib takes only glyph ids out of fontkit's layout. A vowel
+  point or accent is a zero-width glyph the font places with GPOS, so without the
+  positions every mark lands on the pen position and the Hebrew is unreadable.
+  `clusterShaper` shapes one base-plus-marks cluster at a time, left-to-right,
+  draws each glyph at fontkit's offset, and does the right-to-left placement of
+  the clusters itself. Do not "simplify" it into one `drawText` per word, and do
+  not hand a whole RTL string to fontkit's `layout`: it returns the glyphs
+  already reversed with offsets computed for the logical order, which displaces
+  the marks. The check is a rendered page (`pdftoppm -r 300`), not a thumbnail.
+- **The script font may have no Latin.** Noto Sans Hebrew has none, so hebrew.tools
+  passes `chromeFontBytes` (`public/fonts/NotoSans-Regular.ttf`, the face greek.tools
+  uses) for the heading, verse numbers and watermark, and the two PDFs share one
+  typographic voice. Greek's font covers both and passes `chromeFont: 'script'`.
+  The page is greek.tools' mirrored: the reference stays at the left margin, the
+  book's Hebrew name (`titleScript`, in the BHS form) takes the right,
+  and chapter headings and verse numbers sit at the right with the Hebrew. Hebrew is
+  set at 18/30pt against Greek's 13/18 because its points and accents need the room.
+- **Embed the whole font, never a subset**, and pass `requiredCodePoint` so a
+  font that lacks the script fails the export instead of printing blank boxes.
+  `doc.save` leaves object streams off so a test can read `/BaseFont` and see
+  which face went in.
+- **hebrew.tools ships `public/fonts/NotoSansHebrew-Regular.ttf`** (SIL OFL,
+  from notofonts/notofonts.github.io); the export fetches it same-origin, which
+  the CSP's `connect-src 'self'` allows. `loadHebrewFont` rejects a response that
+  is not a TrueType or OpenType file, since a host can answer a missing font with
+  an HTML page at HTTP 200.
+- **Maqqef-joined words print as one token** (`accentUnits`, as in the reader) so a
+  line never breaks inside one. Consonants-only text removes points with its own
+  list rather than `stripNikud`, whose range also takes the maqqef.
+
 ### The step-gated drill
 
 `@tools/shared/step-drill` runs one item through a fixed sequence of steps,
@@ -248,7 +291,7 @@ grading; the module owns the unlock rule and `components/Ladder` draws it.
 ### Today's Session
 
 `@tools/shared/today` builds one daily session to a time budget of 20, 45 or
-90 minutes (#184 on hebrew.tools, #197 to come on greek.tools). An app supplies
+90 minutes (#184 on hebrew.tools, #197 on greek.tools). An app supplies
 sections of candidates — each with a tier and a time estimate — and one drill;
 the module decides what fits. Rules that are pedagogy rather than plumbing:
 
@@ -264,23 +307,34 @@ the module decides what fits. Rules that are pedagogy rather than plumbing:
   so while the session runs `canStartNext` refuses the next item once the
   budget is used, or if the item would end more than 10% past it. A started
   item is always finished. The clock pauses while the tab is hidden.
-- **An app may deal fewer tiers than the module offers.** hebrew.tools' Today
-  deals vocabulary that is **due only** (#224): no new words, no weak ones.
+- **An app may deal fewer tiers than the module offers.** Both apps' Today
+  deal vocabulary that is **due only** (#224, and greek.tools from the start): no new words, no weak ones.
   Introducing words is `/flashcards`' job, and a review session that adds
   strangers piles up tomorrow's reviews. The module keeps `new` and `maxNew`
   because the forms section still uses them.
 - **A weak item is practice, not a review.** It is not due, so answering it
   must not move its schedule forward. Each app enforces that in its own
   grading (hebrew.tools: weak forms with
-  `practice`).
+  `practice`). greek.tools has no weak items at all: its only scheduled store is
+  the vocabulary, and its mixed-review drill is the unscheduled practice.
 - **Only an item's first answer counts in the summary**, as in the drills.
+
+greek.tools differs from hebrew.tools in what it can draw from (see
+`apps/greek-tools/CLAUDE.md`, "Today's Session"): there is no paradigm section
+because its paradigm quiz schedules nothing, and parse history has no due date,
+so it enters through the parse drill rather than the tiers. The drill rotation
+is a `DRILL_PROVIDERS` map; the paradigm ladder (#199) joins by adding an entry.
 
 The study streak (`@tools/shared/study-streak`) is separate from the Daily
 verse streak and the flashcard streak, and it **syncs**, so it follows the
 rules in "Streaks, study days, and sync merges": local dates, `streak` travels
 with `lastSessionDate`, the later date wins, and the merge is symmetric. On the
 server it is two columns on `study_stats` (`study_streak`,
-`last_session_date`); greek.tools' rows take the defaults until #197.
+`last_session_date`), written by both apps. greek.tools' `PUT /api/progress` is
+a full replace of that row, so `putProgress` merges the incoming streak with the
+stored one (`mergeStudyStreak`) before replacing it: a device that is behind
+cannot overwrite a later session, and a client that predates the streak cannot
+reset it.
 
 ### The attempt log syncs on its own
 
@@ -479,7 +533,8 @@ factory, the merge and the builder are in `@tools/shared/custom-decks` and
     elsewhere comes back; one edited before does not. A tie goes to the delete.
     The comparison is between two devices' clocks; a badly wrong clock can make
     a stale edit win, which costs one deck an older word list and no reviews.
-  - **Tombstones are pruned after `TOMBSTONE_TTL_DAYS` (180)**, in the merge, on
+  - **Tombstones are pruned after `TOMBSTONE_TTL_DAYS` (180)** (the rules now live in
+    `@tools/shared/tombstones`, shared with focus passages), in the merge, on
     the server and on the client. A device offline for longer than that and still
     holding the deck brings it back.
   - **The tombstone rides in the payload** (`ProgressPayload.customDecks`), so
@@ -520,6 +575,91 @@ factory, the merge and the builder are in `@tools/shared/custom-decks` and
 - **The builder lists at most 150 matches at once** (`VISIBLE_WORDS`); the search
   box narrows them. It saves through the store and reports a failed write
   instead of looking saved.
+
+## Focus passages
+
+A focus passage is a book and a verse range the student chose and named
+(`Genesis 1:1–5`, "Creation"). hebrew.tools has them (#226): `/focus` lists and
+makes them, `/focus/<id>` is a hub with Reading, Vocabulary and Progress tabs.
+Like a custom deck a passage is a *selection* and owns no progress: its
+vocabulary is the course words whose lexeme occurs in the verses, and "how well
+do I know it" is read from the SRS store each time. The shape, the storage
+factory, the merge, the range arithmetic and the picker are in
+`@tools/shared/focus-passages` and `@tools/shared/components/PassagePicker`; the
+Hebrew part (reading a passage against the vocabulary) is
+`apps/hebrew-tools/src/lib/focus-passages.ts`, bound to
+`hebrew-tools-focus-passages-v1`.
+
+- **Deletion is a tombstone, by the same rules as decks.** Decision (Nov 2026):
+  decks and passages share one implementation, `@tools/shared/tombstones`
+  (`mergeTombstoned`, `pruneTombstones`, `TOMBSTONE_TTL_DAYS`), which
+  `mergeCustomDecks` and `mergeFocusPassages` delegate to, so the two lists
+  cannot drift apart. Per passage the later `updatedAt` wins, whole; a delete is
+  the newest edit; a tie goes to the delete; tombstones are pruned after 180
+  days. A tombstone drops the label and keeps the range, so it is still a valid
+  row. The tombstone rides in `ProgressPayload.focusPassages`.
+- **Passages are not progress.** `DELETE /api/progress`, `clearLocalProgress`
+  and the account reset leave them alone and the reset's "keeps" list says so;
+  `putProgress` merges them against the `focus_passages` table itself, as it
+  does decks, because `getProgress()` is null once `sync_state` is deleted.
+- **`focus_passages` is now per language (migration 0006), and greek.tools had
+  to change with it.** The table had no `language` column and was keyed
+  `(user_id, id)`; greek's sync read and deleted `WHERE user_id = ?` alone, so a
+  hebrew row would have been shown to greek.tools and then erased by its next
+  push. The migration adds `language` (default `'greek'`, which every existing
+  row is), `updated_at` (default `''`) and `deleted_at` (null), all additive, so
+  the previous code keeps working while the deploy migrates first. greek's reads
+  and deletes now carry `language = 'greek'` (`progress-store.test.ts` pins that
+  a hebrew row survives its push, its "Start fresh" and is never returned). The
+  key stays `(user_id, id)`: SQLite cannot change a primary key without
+  rebuilding the table, and ids do not collide (greek's are 8 random characters,
+  hebrew's are UUIDs). A new migration block in `migrations.test.ts` covers it.
+- **The vocabulary join is the reader's, plus one fallback.** A passage word's
+  `lemma` meets a vocabulary entry's `strong` through `lemmaBase`, exactly as
+  the reader's "studied" underline does (see `studied.ts`). 28 vocabulary entries
+  carry no `strong` (curated chapter-1 words: אֶרֶץ, מֶלֶךְ, דָּבָר ...), and a
+  passage that skipped them would call "earth" a word the course lacks, so they
+  are matched by pointed form against the lemma index, to the lexeme that owns
+  at least 90% of the occurrences among the lexemes written that way (מֶלֶךְ is
+  4428, not the three namesakes). A true homograph (אַף "also" and "nose") has no
+  such owner and stays outside rather than being guessed. The reader's underline
+  still has the gap; closing it there is a follow-up.
+- **One card per lexeme in the deck.** The vocabulary lists some lexemes twice
+  (וַיֹּאמֶר beside אָמַר). The deck holds the entry OSHB gave a frequency (the
+  lexical one); progress counts a lexeme known if *any* of its cards has been
+  answered correctly, as the reader's underline does.
+- **"Study these words" saves a custom deck.** `passage-deck.ts` creates (or
+  updates, by its name) a deck called `Passage: <title>` holding the SRS keys,
+  picks it as the flashcards' selection and opens `/flashcards`. So there is no
+  second selection model or deck type: the passage's deck syncs, renames and
+  deletes like any other, and reviewing through it moves the same cards. It is a
+  snapshot, not a rule. Today's Session ignores the pick, as for any deck.
+- **Words outside the course are listed, not carded.** Lexemes with no
+  vocabulary entry (mostly names, rarer words and the direct-object marker) are
+  shown with the lemma index's Hebrew and BDB gloss, so the passage reads, but
+  there is no card to put in a deck. The eight inseparable-prefix codes are
+  skipped: they are not lexemes.
+- **The lemma index may fail; the book may not.** `usePassageData` fetches the
+  book and `lemmas.json` when a passage is opened and never on page load. Without
+  the index a passage still reads and previews; it only finds fewer course words.
+- **The first render matches the server's.** `/focus` reads storage through
+  `useStoredState` and holds back its empty state until `loaded`;
+  `/focus/<id>` is server-rendered (`prerender = false`) and renders "Loading…"
+  until storage is read, then everything else. The hub and the list have cases
+  in `hydration.test.tsx`.
+- **Parsing is not here.** The hub says so in one line; #82 plugs a tab in.
+  #195 (curated passage tags) is separate and keeps its own data: a focus
+  passage is `{ id, book, startChapter, startVerse, endChapter, endVerse, label?,
+  createdAt, updatedAt?, deletedAt? }` and has no concept tags.
+- **greek.tools has not adopted this yet.** It keeps `data/focusPassages.ts`,
+  its own `mergeFocusPassages` (union, later `createdAt`, no tombstones) and its
+  own picker (`CrossChapterSelector`), and a passage deleted there can come back
+  from another device just as a deck can. `focusPassages.test.ts` pins that its
+  rows (no `updatedAt`, 8-character ids, empty labels) parse and merge under the
+  shared rules. Adopting the module gives greek tombstones, `PassagePicker` and
+  the shared maturity bands; its parse history keeps its own table and merge,
+  and a tombstoned passage there should still drop its history, as
+  `deletePassage` does today. Left as a follow-up.
 
 ## Hydration: the first render matches the server's
 

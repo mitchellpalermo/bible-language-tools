@@ -9,6 +9,11 @@
 
 import type { LadderProgress } from '@tools/shared/ladder';
 import type { SRSCard, StudyStats } from '@tools/shared/srs';
+import {
+  emptyStudyStreak,
+  mergeStudyStreak,
+  type StudyStreakData,
+} from '@tools/shared/study-streak';
 import { mergeLadderProgress, mergeSRSStores, mergeStudyStats } from '@tools/shared/sync-merge';
 
 import type { CustomDeck } from '../data/customDecks';
@@ -70,6 +75,8 @@ export function mergeParseHistory(
 export interface ProgressSnapshot {
   srsStore: Record<string, SRSCard>;
   studyStats: StudyStats;
+  /** Absent from a snapshot taken before the Today session shipped. */
+  studyStreak?: StudyStreakData;
   customDecks: CustomDeck[];
   focusPassages: FocusPassage[];
   parseHistory: Record<string, ParseHistory>;
@@ -81,6 +88,11 @@ export function mergeProgress(a: ProgressSnapshot, b: ProgressSnapshot): Progres
   return {
     srsStore: mergeSRSStores(a.srsStore, b.srsStore),
     studyStats: mergeStudyStats(a.studyStats, b.studyStats),
+    // An absent streak is "never studied", which loses to any real one.
+    studyStreak: mergeStudyStreak(
+      a.studyStreak ?? emptyStudyStreak(),
+      b.studyStreak ?? emptyStudyStreak(),
+    ),
     customDecks: mergeCustomDecks(a.customDecks, b.customDecks),
     focusPassages: mergeFocusPassages(a.focusPassages, b.focusPassages),
     parseHistory: mergeParseHistory(a.parseHistory, b.parseHistory),

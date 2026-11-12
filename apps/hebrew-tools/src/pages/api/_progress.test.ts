@@ -195,6 +195,64 @@ describe('PUT validation', () => {
     expect(putProgress).not.toHaveBeenCalled();
   });
 
+  it('passes valid focus passages through, tombstones included, and accepts a payload without them', async () => {
+    vi.mocked(putProgress).mockResolvedValue('server-time');
+    const live = {
+      id: 'p-1',
+      label: ' Creation ',
+      book: 'GEN',
+      startChapter: 1,
+      startVerse: 1,
+      endChapter: 1,
+      endVerse: 5,
+      createdAt: '2026-11-01T00:00:00.000Z',
+      updatedAt: '2026-11-01T00:00:00.000Z',
+    };
+    const gone = { ...live, id: 'p-2', deletedAt: '2026-11-02T00:00:00.000Z' };
+
+    expect(
+      (
+        await PUT(
+          ctx({ srsStore: {}, studyStats: validStats, focusPassages: [live, gone] }) as never,
+        )
+      ).status,
+    ).toBe(200);
+    // Parsed, so the label arrives trimmed and a tombstone carries none.
+    const sent = vi.mocked(putProgress).mock.calls[0][2].focusPassages;
+    expect(sent?.[0]).toEqual({ ...live, label: 'Creation' });
+    expect(sent?.[1].label).toBeUndefined();
+    expect(sent?.[1].deletedAt).toBeDefined();
+
+    expect((await PUT(ctx({ srsStore: {}, studyStats: validStats }) as never)).status).toBe(200);
+    expect(vi.mocked(putProgress).mock.calls[1][2].focusPassages).toBeUndefined();
+  });
+
+  const passageAt = '2026-11-01T00:00:00.000Z';
+  const validPassage = {
+    id: 'x',
+    book: 'GEN',
+    startChapter: 1,
+    startVerse: 1,
+    endChapter: 1,
+    endVerse: 5,
+    createdAt: passageAt,
+  };
+  it.each([
+    ['not an array', { id: 'x' }],
+    ['a passage with no id', [{ ...validPassage, id: undefined }]],
+    ['a passage that ends before it starts', [{ ...validPassage, endVerse: 0, startVerse: 3 }]],
+    ['a passage with a non-numeric verse', [{ ...validPassage, endVerse: '5' }]],
+    ['a passage with an over-long name', [{ ...validPassage, label: 'n'.repeat(101) }]],
+    ['a passage with a bad date', [{ ...validPassage, createdAt: 'soon' }]],
+    ['two passages with one id', [validPassage, validPassage]],
+  ])('rejects focus passages that are %s with 400', async (_label, focusPassages) => {
+    const response = await PUT(
+      ctx({ srsStore: {}, studyStats: validStats, focusPassages }) as never,
+    );
+    expect(response.status).toBe(400);
+    expect(putProgress).not.toHaveBeenCalled();
+  });
+
   it.each([
     ['an array', []],
     ['null', null],
