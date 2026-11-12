@@ -26,6 +26,7 @@ export const KEEPS = [
   'custom decks',
   'focus passages',
   'parse history',
+  'paradigm ladder rungs',
 ] as const;
 
 /** Empty this browser's SRS store. Throws if storage cannot be written. */
@@ -36,8 +37,8 @@ export function clearLocalSrs(): void {
 /**
  * Delete the account's copy, then push this browser's back.
  *
- * greek's `DELETE /api/progress` takes custom decks, focus passages and parse
- * history along with the cards — it was written for "Start fresh", where that
+ * greek's `DELETE /api/progress` takes custom decks, focus passages, parse
+ * history and the paradigm ladder along with the cards — it was written for "Start fresh", where that
  * is the point. A reset is not meant to touch them, so the follow-up push
  * restores them (and the stats) from this browser at once, rather than leaving
  * the account without them until the next session-end push. The push's result

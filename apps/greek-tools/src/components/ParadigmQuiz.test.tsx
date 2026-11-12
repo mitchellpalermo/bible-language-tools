@@ -5,10 +5,19 @@
  * and scoring feedback.
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ATTEMPT_LOG_KEY } from '../lib/attempt-log';
+import { stripAccentMarks } from '../lib/greek-input';
+import { LADDER_PROGRESS_KEY } from '../lib/paradigm-ladder';
+import { buildTableModels } from '../lib/paradigm-quiz';
+import { QUIZ_SETTINGS_KEY } from '../lib/quiz-settings';
 import ParadigmQuiz from './ParadigmQuiz';
+
+vi.mock('posthog-js', () => ({
+  default: { capture: vi.fn(), captureException: vi.fn() },
+}));
 
 beforeEach(() => {
   localStorage.clear();
@@ -559,5 +568,230 @@ describe('ParadigmQuiz — hints', () => {
     await user.click(screen.getByRole('button', { name: /Submit Answers/i }));
     expect(screen.queryAllByRole('textbox').length).toBe(0);
     expect(screen.queryByRole('button', { name: /Peek at answers/i })).not.toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The paradigm ladder (#199)
+// ---------------------------------------------------------------------------
+
+describe('ParadigmQuiz — the ladder', () => {
+  /** A table's forms in the order its inputs appear: row by row. */
+  const answersOf = (id: string): string[] =>
+    (buildTableModels().find((t) => t.id === id)?.rows ?? []).flatMap((r) =>
+      r.answers.filter((a): a is string => a !== null),
+    );
+
+  /** Type `answers` into the quiz's inputs, in order. */
+  function fillIn(answers: string[]) {
+    const fields = screen.getAllByRole('textbox');
+    expect(fields).toHaveLength(answers.length);
+    answers.forEach((a, i) => {
+      fireEvent.change(fields[i], { target: { value: a } });
+    });
+  }
+
+  async function openLadder(user: ReturnType<typeof userEvent.setup>) {
+    render(<ParadigmQuiz />);
+    await user.click(screen.getByRole('button', { name: 'Ladder' }));
+  }
+
+  /** Pick the open rung `name`, at Full Recall, and start it. */
+  async function startRung(user: ReturnType<typeof userEvent.setup>, name: RegExp) {
+    await user.click(screen.getByRole('button', { name }));
+    await user.click(screen.getByRole('button', { name: /Full Recall/i }));
+    await user.click(screen.getByRole('button', { name: /Start Quiz/i }));
+  }
+
+  const submit = (user: ReturnType<typeof userEvent.setup>) =>
+    user.click(screen.getByRole('button', { name: /Submit Answers/i }));
+
+  it('is the first tab, and lists every rung with only the first open', async () => {
+    const user = userEvent.setup();
+    render(<ParadigmQuiz />);
+    await user.click(screen.getByRole('button', { name: 'Ladder' }));
+
+    const rungs = within(screen.getByRole('list', { name: 'Ladder rungs' })).getAllByRole(
+      'listitem',
+    );
+    expect(rungs).toHaveLength(23);
+    expect(rungs.filter((r) => r.dataset.locked)).toHaveLength(22);
+    expect(within(rungs[1]).getByText(/2 clean writes of rung 1 \(0 of 2/)).toBeInTheDocument();
+    expect(within(rungs[0]).getByText('24 forms')).toBeInTheDocument();
+  });
+
+  it('reads saved progress after hydration, so earned rungs are open', async () => {
+    localStorage.setItem(LADDER_PROGRESS_KEY, JSON.stringify({ article: 2, 'noun-2m-os': 1 }));
+    const user = userEvent.setup();
+    await openLadder(user);
+
+    expect(screen.getByRole('listitem', { name: 'Rung 2' })).not.toHaveAttribute('data-locked');
+    expect(screen.getByRole('listitem', { name: 'Rung 3, locked' })).toBeInTheDocument();
+    expect(screen.getByText(/1 of 2 clean writes to open the next rung/)).toBeInTheDocument();
+  });
+
+  it('opens a locked rung anyway, in any difficulty', async () => {
+    const user = userEvent.setup();
+    await openLadder(user);
+
+    const rung = screen.getByRole('listitem', { name: 'Rung 5, locked' });
+    await user.click(within(rung).getByRole('button', { name: 'Open anyway' }));
+    await user.click(screen.getByRole('button', { name: /Easy/i }));
+    await user.click(screen.getByRole('button', { name: /Start Quiz/i }));
+
+    expect(screen.getByRole('heading', { name: /δόξα/ })).toBeInTheDocument();
+    // A quarter of ten forms, rounded.
+    expect(screen.getAllByRole('textbox')).toHaveLength(3);
+  });
+
+  it('says only Full Recall counts, while another difficulty is chosen', async () => {
+    const user = userEvent.setup();
+    await openLadder(user);
+    expect(screen.getByText(/Only a Full Recall write counts/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /Full Recall/i }));
+    expect(screen.queryByText(/Only a Full Recall write counts/)).not.toBeInTheDocument();
+  });
+
+  it('opens rung 2 after a second clean write of rung 1, and logs every answer', async () => {
+    localStorage.setItem(LADDER_PROGRESS_KEY, JSON.stringify({ article: 1 }));
+    const user = userEvent.setup();
+    await openLadder(user);
+    await startRung(user, /Definite Article —/);
+    fillIn(answersOf('article'));
+    await submit(user);
+
+    expect(screen.getByText('24/24')).toBeInTheDocument();
+    expect(screen.getByText('Clean write. Rung 2 is open.')).toBeInTheDocument();
+    expect(JSON.parse(localStorage.getItem(LADDER_PROGRESS_KEY) ?? '')).toEqual({ article: 2 });
+
+    const log = JSON.parse(localStorage.getItem(ATTEMPT_LOG_KEY) ?? '[]');
+    expect(log).toHaveLength(24);
+    expect(log[0]).toMatchObject({ concept: 'paradigm/article/r0c0', correct: true });
+    expect(log[23]).toMatchObject({ concept: 'paradigm/article/r3c5', correct: true });
+
+    await user.click(screen.getByRole('button', { name: /New Paradigm/i }));
+    await user.click(screen.getByRole('button', { name: 'Ladder' }));
+    expect(screen.getByRole('listitem', { name: 'Rung 2' })).not.toHaveAttribute('data-locked');
+  });
+
+  it('counts a write of a rung’s table made from its own category tab', async () => {
+    const user = userEvent.setup();
+    render(<ParadigmQuiz />);
+    await startRung(user, /2nd Decl\. Masculine.*λόγος/i);
+    fillIn(answersOf('noun-2m-os'));
+    await submit(user);
+
+    expect(screen.getByText('Clean write: 1 of 2 toward rung 3.')).toBeInTheDocument();
+    expect(JSON.parse(localStorage.getItem(LADDER_PROGRESS_KEY) ?? '')).toEqual({
+      'noun-2m-os': 1,
+    });
+  });
+
+  it('forgives an accent slip while Accents is off, and still counts the write', async () => {
+    const user = userEvent.setup();
+    await openLadder(user);
+    await startRung(user, /Definite Article —/);
+    const answers = answersOf('article');
+    answers[2] = stripAccentMarks(answers[2]); // τό
+    answers[7] = stripAccentMarks(answers[7]);
+    fillIn(answers);
+    await submit(user);
+
+    expect(screen.getByText('Clean write: 1 of 2 toward rung 2.')).toBeInTheDocument();
+  });
+
+  it('does not forgive an accent slip once Accents is on', async () => {
+    localStorage.setItem(
+      QUIZ_SETTINGS_KEY,
+      JSON.stringify({ accentStrict: true, density: 'hard' }),
+    );
+    const user = userEvent.setup();
+    await openLadder(user);
+    await user.click(screen.getByRole('button', { name: /Definite Article —/ }));
+    await user.click(screen.getByRole('button', { name: /Start Quiz/i }));
+    const answers = answersOf('article');
+    answers[2] = stripAccentMarks(answers[2]); // τό
+    fillIn(answers);
+    await submit(user);
+
+    expect(
+      screen.getByText(/Not a clean write: every form has to be exactly right, accents included/),
+    ).toBeInTheDocument();
+    expect(localStorage.getItem(LADDER_PROGRESS_KEY)).toBeNull();
+    const log = JSON.parse(localStorage.getItem(ATTEMPT_LOG_KEY) ?? '[]');
+    expect(log.filter((a: { correct: boolean }) => !a.correct)).toHaveLength(1);
+  });
+
+  it('never counts a missing iota subscript, even with Accents off', async () => {
+    const user = userEvent.setup();
+    render(<ParadigmQuiz />);
+    await startRung(user, /ἡμέρα.*α-pure/i);
+    const answers = answersOf('noun-1f-alpha-pure');
+    // The dative singular, ἡμέρᾳ, written as the nominative.
+    answers[4] = 'ἡμέρα';
+    fillIn(answers);
+    await submit(user);
+
+    expect(
+      screen.getByText(
+        /Not a clean write: every form has to be exactly right, breathings and iota subscripts included/,
+      ),
+    ).toBeInTheDocument();
+    expect(localStorage.getItem(LADDER_PROGRESS_KEY)).toBeNull();
+  });
+
+  it('says a partial table does not count, and leaves the ladder alone', async () => {
+    const user = userEvent.setup();
+    await openLadder(user);
+    await user.click(screen.getByRole('button', { name: /Definite Article —/ }));
+    await user.click(screen.getByRole('button', { name: /Medium/i }));
+    await user.click(screen.getByRole('button', { name: /Start Quiz/i }));
+    await submit(user);
+
+    expect(
+      screen.getByText('Only a Full Recall write counts toward the next rung.'),
+    ).toBeInTheDocument();
+    expect(localStorage.getItem(LADDER_PROGRESS_KEY)).toBeNull();
+  });
+
+  it('counts and logs nothing from an attempt with a peek', async () => {
+    const user = userEvent.setup();
+    await openLadder(user);
+    await startRung(user, /Definite Article —/);
+    fillIn(answersOf('article'));
+    const peek = screen.getByRole('button', { name: /Peek at answers/i });
+    fireEvent.mouseMove(peek);
+    fireEvent.mouseLeave(peek);
+    await submit(user);
+
+    expect(screen.getByText(/You peeked, so this write does not count/)).toBeInTheDocument();
+    expect(localStorage.getItem(LADDER_PROGRESS_KEY)).toBeNull();
+    expect(localStorage.getItem(ATTEMPT_LOG_KEY)).toBeNull();
+  });
+
+  it('forgets a peek when the quiz is retried', async () => {
+    const user = userEvent.setup();
+    await openLadder(user);
+    await startRung(user, /Definite Article —/);
+    fireEvent.mouseMove(screen.getByRole('button', { name: /Peek at answers/i }));
+    await submit(user);
+    await user.click(screen.getByRole('button', { name: /Try Again/i }));
+    fillIn(answersOf('article'));
+    await submit(user);
+
+    expect(screen.getByText('Clean write: 1 of 2 toward rung 2.')).toBeInTheDocument();
+  });
+
+  it('logs the attempts of a table that is not on the ladder, without a ladder note', async () => {
+    const user = userEvent.setup();
+    render(<ParadigmQuiz />);
+    await user.click(screen.getByRole('button', { name: 'Pronouns' }));
+    await startRung(user, /σύ/);
+    await submit(user);
+
+    expect(screen.queryByText(/Not a clean write/)).not.toBeInTheDocument();
+    const log = JSON.parse(localStorage.getItem(ATTEMPT_LOG_KEY) ?? '[]');
+    expect(log).toHaveLength(8);
+    expect(log[0]).toMatchObject({ concept: 'paradigm/pronoun-su/r0c0', correct: false });
   });
 });

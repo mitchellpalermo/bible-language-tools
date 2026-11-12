@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CUSTOM_DECKS_KEY } from '../data/customDecks';
 import type { SRSCard, StudyStats } from '../data/srs';
+import { LADDER_PROGRESS_KEY } from './paradigm-ladder';
 import {
   formatRelativeTime,
   getLastSyncedAt,
@@ -99,6 +100,11 @@ describe('sync-manager', () => {
 
     it('is true when a card has been reviewed', () => {
       seedLocal({ a: makeCard('a', { repetition: 1 }) });
+      expect(hasLocalProgress()).toBe(true);
+    });
+
+    it('is true when a ladder rung has been written, which is progress worth importing', () => {
+      localStorage.setItem(LADDER_PROGRESS_KEY, JSON.stringify({ article: 1 }));
       expect(hasLocalProgress()).toBe(true);
     });
 
@@ -207,6 +213,51 @@ describe('sync-manager', () => {
 
       const pushed = JSON.parse(fetchMock.mock.calls[1][1].body as string);
       expect(pushed.srsStore.a.repetition).toBe(5);
+    });
+
+    it('merges the ladder by the larger count and pushes it, never lowering a rung', async () => {
+      seedLocal({});
+      localStorage.setItem(LADDER_PROGRESS_KEY, JSON.stringify({ article: 3, 'noun-2m-os': 1 }));
+      const serverPayload = {
+        srsStore: {},
+        studyStats: stats,
+        customDecks: [],
+        focusPassages: [],
+        parseHistory: {},
+        ladderProgress: { article: 1, 'noun-2m-os': 2, 'noun-2n-on': 1 },
+        syncedAt: '2026-06-09T00:00:00.000Z',
+      };
+      fetchMock
+        .mockResolvedValueOnce(okJson({ data: serverPayload }))
+        .mockResolvedValueOnce(okJson({ syncedAt: '2026-06-10T12:00:00.000Z' }));
+
+      await pullAndMerge();
+
+      const expected = { article: 3, 'noun-2m-os': 2, 'noun-2n-on': 1 };
+      expect(readLocalProgress().ladderProgress).toEqual(expected);
+      expect(JSON.parse(fetchMock.mock.calls[1][1].body as string).ladderProgress).toEqual(
+        expected,
+      );
+    });
+
+    it('accepts an account whose payload has no ladder yet', async () => {
+      seedLocal({});
+      localStorage.setItem(LADDER_PROGRESS_KEY, JSON.stringify({ article: 2 }));
+      const serverPayload = {
+        srsStore: {},
+        studyStats: stats,
+        customDecks: [],
+        focusPassages: [],
+        parseHistory: {},
+        syncedAt: '2026-06-09T00:00:00.000Z',
+      };
+      fetchMock
+        .mockResolvedValueOnce(okJson({ data: serverPayload }))
+        .mockResolvedValueOnce(okJson({ syncedAt: '2026-06-10T12:00:00.000Z' }));
+
+      await pullAndMerge();
+
+      expect(readLocalProgress().ladderProgress).toEqual({ article: 2 });
     });
 
     it('leaves local state untouched on network error', async () => {

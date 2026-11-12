@@ -53,6 +53,7 @@ const validPayload = {
     },
   ],
   parseHistory: { 'p-1': { correct: 8, total: 10 } },
+  ladderProgress: { article: 2, 'noun-2m-os': 1 },
 };
 
 function makeContext({
@@ -156,6 +157,30 @@ describe('/api/progress', () => {
   });
 
   describe('PUT validation', () => {
+    it.each([
+      ['ladderProgress is an array', { ...validPayload, ladderProgress: [] }],
+      ['a rung has a negative count', { ...validPayload, ladderProgress: { article: -1 } }],
+      ['a rung count is fractional', { ...validPayload, ladderProgress: { article: 1.5 } }],
+      ['a rung id is empty', { ...validPayload, ladderProgress: { '': 1 } }],
+      ['a rung id is huge', { ...validPayload, ladderProgress: { ['x'.repeat(200)]: 1 } }],
+      [
+        'there are too many rungs',
+        {
+          ...validPayload,
+          ladderProgress: Object.fromEntries(Array.from({ length: 201 }, (_, i) => [`r${i}`, 1])),
+        },
+      ],
+    ])('rejects a ladder where %s', async (_label, payload) => {
+      const response = await PUT(makeContext({ body: JSON.stringify(payload) }));
+      expect(response.status).toBe(400);
+    });
+
+    it('accepts a payload with no ladder, from a page that predates it', async () => {
+      const { ladderProgress: _ladder, ...old } = validPayload;
+      const response = await PUT(makeContext({ body: JSON.stringify(old) }));
+      expect(response.status).toBe(200);
+    });
+
     it('rejects bodies over the size limit with 413', async () => {
       const oversized = JSON.stringify({
         ...validPayload,

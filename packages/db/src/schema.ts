@@ -123,7 +123,8 @@ export const attempts = sqliteTable(
 
 // Paradigm ladder progress (@tools/shared/ladder): clean writes per rung. A
 // rung id is a paradigm table's id, unique within an app, so one table serves
-// every ladder an app has. Only hebrew.tools writes it so far.
+// every ladder an app has. hebrew.tools writes its suffix ladder and greek.tools
+// its paradigm ladder (#199); `language` keeps them apart.
 export const ladderProgress = sqliteTable(
   'ladder_progress',
   {

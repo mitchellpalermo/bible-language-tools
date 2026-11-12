@@ -12,15 +12,18 @@ import {
   focusParseHistory as focusParseHistoryTable,
   focusPassages as focusPassagesTable,
   type Language,
+  ladderProgress as ladderProgressTable,
   srsCards as srsCardsTable,
   studyStats as studyStatsTable,
   syncState as syncStateTable,
 } from '@tools/db/schema';
+import type { LadderProgress } from '@tools/shared/ladder';
 import {
   emptyStudyStreak,
   mergeStudyStreak,
   type StudyStreakData,
 } from '@tools/shared/study-streak';
+import { mergeLadderProgress } from '@tools/shared/sync-merge';
 import { and, eq } from 'drizzle-orm';
 import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
 import type { CustomDeck } from '../data/customDecks';
@@ -34,11 +37,13 @@ const LANGUAGE: Language = 'greek';
 
 // D1 allows at most 100 bound parameters per statement, so bulk inserts are
 // chunked by column count: srs_cards (8 cols → 12/stmt), custom_decks (6 cols → 16/stmt),
-// focus_passages (9 cols → 11/stmt), focus_parse_history (4 cols → 25/stmt).
+// focus_passages (9 cols → 11/stmt), focus_parse_history (4 cols → 25/stmt),
+// ladder_progress (4 cols → 25/stmt).
 const SRS_CHUNK = 12;
 const DECK_CHUNK = 16;
 const PASSAGE_CHUNK = 11;
 const PARSE_HISTORY_CHUNK = 25;
+const LADDER_CHUNK = 25;
 
 function chunk<T>(items: T[], size: number): T[][] {
   const out: T[][] = [];
@@ -63,6 +68,17 @@ const emptyStats = (): StudyStats => ({
   totalReviewed: 0,
   totalCorrect: 0,
 });
+
+/** The account's clean writes per ladder rung (#199). */
+async function readLadderProgress(db: ProgressDb, userId: string): Promise<LadderProgress> {
+  const rows = await db
+    .select()
+    .from(ladderProgressTable)
+    .where(and(eq(ladderProgressTable.userId, userId), eq(ladderProgressTable.language, LANGUAGE)));
+  const progress: LadderProgress = {};
+  for (const row of rows) progress[row.rungId] = row.cleanWrites;
+  return progress;
+}
 
 /**
  * Read the user's full progress. Returns null when the user has never synced
@@ -95,6 +111,8 @@ export async function getProgress(db: ProgressDb, userId: string): Promise<Progr
     .select()
     .from(focusParseHistoryTable)
     .where(eq(focusParseHistoryTable.userId, userId));
+
+  const ladderProgress = await readLadderProgress(db, userId);
 
   const srsStore: Record<string, SRSCard> = {};
   for (const row of cardRows) {
@@ -154,6 +172,7 @@ export async function getProgress(db: ProgressDb, userId: string): Promise<Progr
     customDecks,
     focusPassages,
     parseHistory,
+    ladderProgress,
     syncedAt: state.syncedAt,
   };
 }
@@ -178,12 +197,32 @@ export async function putProgress(
   userId: string,
   payload: Pick<
     ProgressPayload,
-    'srsStore' | 'studyStats' | 'studyStreak' | 'customDecks' | 'focusPassages' | 'parseHistory'
+    | 'srsStore'
+    | 'studyStats'
+    | 'studyStreak'
+    | 'customDecks'
+    | 'focusPassages'
+    | 'parseHistory'
+    | 'ladderProgress'
   >,
 ): Promise<string> {
   const syncedAt = new Date().toISOString();
   const userLang = { userId, language: LANGUAGE };
 
+  // This PUT is a full replace, but ladder rungs never close, so the one thing
+  // here that is merged is the ladder: the larger count per rung, against what
+  // the account holds. A push from a device that is behind (a session-end push
+  // sends local state only) then cannot lower another device's rung, and a push
+  // from a page that predates the ladder (no `ladderProgress`) leaves it alone.
+  const ladder = mergeLadderProgress(
+    await readLadderProgress(db, userId),
+    payload.ladderProgress ?? {},
+  );
+  const ladderRows = Object.entries(ladder).map(([rungId, cleanWrites]) => ({
+    ...userLang,
+    rungId,
+    cleanWrites,
+  }));
   // PUT replaces the stats row, and the streak lives in it. Merged with the
   // row about to be replaced, not just written: a device that is behind must
   // not overwrite a later session, and a client that predates the streak
@@ -250,6 +289,12 @@ export async function putProgress(
       .where(and(eq(customDecksTable.userId, userId), eq(customDecksTable.language, LANGUAGE))),
     ...chunk(deckRows, DECK_CHUNK).map((rows) => db.insert(customDecksTable).values(rows)),
     db
+      .delete(ladderProgressTable)
+      .where(
+        and(eq(ladderProgressTable.userId, userId), eq(ladderProgressTable.language, LANGUAGE)),
+      ),
+    ...chunk(ladderRows, LADDER_CHUNK).map((rows) => db.insert(ladderProgressTable).values(rows)),
+    db
       .delete(focusPassagesTable)
       .where(and(eq(focusPassagesTable.userId, userId), eq(focusPassagesTable.language, LANGUAGE))),
     ...chunk(passageRows, PASSAGE_CHUNK).map((rows) => db.insert(focusPassagesTable).values(rows)),
@@ -270,6 +315,13 @@ export async function putProgress(
 /** Delete all of the user's progress (the "Start fresh" import option). */
 export async function deleteProgress(db: ProgressDb, userId: string): Promise<void> {
   await runAtomic(db, [
+    // The ladder goes too: a merge cannot express a deletion, so a rung left
+    // here would come back on the next pull.
+    db
+      .delete(ladderProgressTable)
+      .where(
+        and(eq(ladderProgressTable.userId, userId), eq(ladderProgressTable.language, LANGUAGE)),
+      ),
     db
       .delete(srsCardsTable)
       .where(and(eq(srsCardsTable.userId, userId), eq(srsCardsTable.language, LANGUAGE))),

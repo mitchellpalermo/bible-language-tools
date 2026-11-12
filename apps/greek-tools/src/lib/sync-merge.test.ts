@@ -5,6 +5,7 @@ import type { SRSCard, StudyStats } from '../data/srs';
 import {
   mergeCustomDecks,
   mergeFocusPassages,
+  mergeLadderProgress,
   mergeParseHistory,
   mergeProgress,
   mergeSRSStores,
@@ -261,5 +262,33 @@ describe('mergeProgress', () => {
     // local p1 had total 20, remote had 10 — local wins
     expect(merged.parseHistory['p1']?.total).toBe(20);
     expect(merged.parseHistory['p2']).toBeDefined();
+  });
+});
+
+describe('the paradigm ladder in mergeProgress (#199)', () => {
+  const base = {
+    srsStore: {},
+    studyStats: makeStats(),
+    customDecks: [],
+    focusPassages: [],
+    parseHistory: {},
+  };
+
+  it('takes the larger count per rung, whichever side holds it', () => {
+    const a = { ...base, ladderProgress: { article: 2, 'noun-2m-os': 1 } };
+    const b = { ...base, ladderProgress: { article: 1, 'noun-2n-on': 4 } };
+    const expected = { article: 2, 'noun-2m-os': 1, 'noun-2n-on': 4 };
+    expect(mergeProgress(a, b).ladderProgress).toEqual(expected);
+    expect(mergeProgress(b, a).ladderProgress).toEqual(expected);
+  });
+
+  it('treats a snapshot with no ladder as a fresh one', () => {
+    const a = { ...base, ladderProgress: { article: 2 } };
+    expect(mergeProgress(a, base).ladderProgress).toEqual({ article: 2 });
+    expect(mergeProgress(base, base).ladderProgress).toEqual({});
+  });
+
+  it('is the shared rule, re-exported', () => {
+    expect(mergeLadderProgress({ a: 1 }, { a: 3 })).toEqual({ a: 3 });
   });
 });
