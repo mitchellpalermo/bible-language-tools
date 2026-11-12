@@ -18,6 +18,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import AccentTrainer from '../components/AccentTrainer';
 import DailyVerse from '../components/DailyVerse';
 import Flashcards from '../components/Flashcards';
+import FocusPassageHub from '../components/FocusPassageHub';
+import FocusPassages from '../components/FocusPassages';
 import GrammarReference from '../components/GrammarReference';
 import HebrewKeyboard from '../components/HebrewKeyboard';
 import HebrewReader from '../components/HebrewReader';
@@ -36,6 +38,7 @@ import { accentCardKey, SCAFFOLD_HISTORY_KEY } from '../lib/accent-shift';
 import { customDeckStore, deckKey } from '../lib/custom-decks';
 import { saveSelection } from '../lib/deck-selection';
 import { saveFlashcardSettings } from '../lib/flashcard-settings';
+import { focusPassageStore } from '../lib/focus-passages';
 import { buildTableModels, getQuizCells } from '../lib/paradigm-quiz';
 import { paradigmCardKey } from '../lib/paradigm-srs';
 import { saveQuizSettings } from '../lib/quiz-settings';
@@ -50,6 +53,9 @@ vi.mock('posthog-js', () => ({
 
 /** Reviewed today, so due again in the future rather than now. */
 const reviewed = (key: string) => nextSRS(newCard(key), 4);
+
+/** The id the seeded focus passage is stored under, for the hub that is opened on it. */
+const SEEDED_PASSAGE = 'seeded-passage';
 
 /** A student who has been at it a while: every stored value off its default. */
 function seedReturningStudent() {
@@ -89,6 +95,14 @@ function seedReturningStudent() {
   // and a tombstone in storage all differ from what the server rendered.
   customDeckStore.create('Genesis 1', vocabulary.slice(0, 8).map(deckKey));
   customDeckStore.remove(customDeckStore.create('Deleted', ['x']).id);
+  // Two focus passages, one of them deleted: the list, the hub's title and a
+  // tombstone in storage all differ from what the server rendered.
+  const range = { book: 'GEN', startChapter: 1, startVerse: 1, endChapter: 1, endVerse: 5 };
+  const stamp = '2026-11-01T00:00:00.000Z';
+  focusPassageStore.saveAll([
+    { ...range, id: SEEDED_PASSAGE, label: 'Creation', createdAt: stamp, updatedAt: stamp },
+  ]);
+  focusPassageStore.remove(focusPassageStore.create({ ...range, endVerse: 9 }).id);
   setLastSyncedAt(new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString());
   markReadToday();
   // Reading with the accents off, which the export page starts from.
@@ -106,6 +120,8 @@ const ISLANDS: Record<string, () => ReactElement> = {
   AccentTrainer: () => <AccentTrainer />,
   DailyVerse: () => <DailyVerse />,
   Flashcards: () => <Flashcards />,
+  FocusPassageHub: () => <FocusPassageHub passageId={SEEDED_PASSAGE} />,
+  FocusPassages: () => <FocusPassages />,
   GrammarReference: () => <GrammarReference />,
   HebrewKeyboard: () => <HebrewKeyboard />,
   HebrewReader: () => <HebrewReader />,

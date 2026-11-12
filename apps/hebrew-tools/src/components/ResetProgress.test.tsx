@@ -11,6 +11,7 @@ import {
 } from '../data/srs';
 import { loadAttempts, logAttempts } from '../lib/attempt-log';
 import { customDeckStore } from '../lib/custom-decks';
+import { focusPassageStore } from '../lib/focus-passages';
 import { loadLadderProgress, saveLadderProgress } from '../lib/suffix-ladder';
 import { ATTEMPT_CURSOR_KEY } from '../lib/sync-manager';
 import ResetProgress, { ERASES } from './ResetProgress';
@@ -72,7 +73,7 @@ describe('hebrew.tools ResetProgress', () => {
     expect(panel).toHaveTextContent(/Paradigm quiz/);
     expect(panel).toHaveTextContent(/Accent-shift trainer/);
     expect(panel).toHaveTextContent(
-      'Kept: your streaks, accuracy stats, deck choices, custom decks and suffix ladder rungs.',
+      'Kept: your streaks, accuracy stats, deck choices, custom decks, focus passages and suffix ladder rungs.',
     );
     expect(ERASES).toHaveLength(5);
   });
@@ -95,6 +96,21 @@ describe('hebrew.tools ResetProgress', () => {
 
     await screen.findByRole('status');
     expect(customDeckStore.load().map((d) => d.name)).toEqual(['Genesis 1']);
+  });
+
+  it('leaves focus passages alone too', async () => {
+    focusPassageStore.create({
+      book: 'GEN',
+      startChapter: 1,
+      startVerse: 1,
+      endChapter: 1,
+      endVerse: 5,
+    });
+    render(<ResetProgress signedIn={false} />);
+    await confirmReset();
+
+    await screen.findByRole('status');
+    expect(focusPassageStore.load()).toHaveLength(1);
   });
 
   it('never calls the server for a signed-out visitor', async () => {

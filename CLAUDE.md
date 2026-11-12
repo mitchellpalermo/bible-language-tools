@@ -62,6 +62,8 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/quiz-settings` | `createQuizSettings(storageKey, overrides?)` factory for persisting quiz difficulty; `overrides` sets one app's defaults |
 | `@tools/shared/paradigm-quiz` | The paradigm quiz engine — `TableModel`, `getQuizCells`, `applyDensity`. Which tables exist and how an answer is graded stay in each app |
 | `@tools/shared/custom-decks` | Custom flashcard decks (#225): the `CustomDeck` shape, `createCustomDeckStore(storageKey)`, `mergeCustomDecks` (with tombstones), `parseDeck`/`parseDeckList` for storage and request bodies, and the selection helpers `findDeck`, `wordsInDeck`, `deckRestartPart`. See "Custom decks" below |
+| `@tools/shared/tombstones` | Deletion by tombstone for any synced list: `mergeTombstoned`, `pruneTombstones`, `isLive`, `stampOf`, `TOMBSTONE_TTL_DAYS`. Decks and focus passages delegate to it. See "Custom decks" and "Focus passages" below |
+| `@tools/shared/focus-passages` | Focus passages (#226): the `FocusPassage` shape, `createFocusPassageStore(storageKey)`, `mergeFocusPassages` (with tombstones), `parsePassage`/`parsePassageList`, range arithmetic (`rangeError`, `versesInRange`, `verseCounts`, `formatPassageRef`) and the maturity bands. See "Focus passages" below |
 | `@tools/shared/flashcard-settings` | `createFlashcardSettings(storageKey)` factory for what the flashcard face shows before you answer |
 | `@tools/shared/flashcard-session` | `shuffle`, `nextRound` and `requeueMissed` — pure flashcard queue rules: Endless mode's reshuffle, and the drill modes' re-queue of a missed card. Used through `use-flashcard-session` |
 | `@tools/shared/use-flashcard-session` | `useFlashcardSession<T>()` — the flashcard session engine: dealing, SRS grading, drills, Endless, typed answers, the keyboard. Both apps' `Flashcards.tsx` run on it. See "The flashcard session engine" below |
@@ -83,6 +85,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/components/SiteNav.astro` | The site navigation for both apps (see below) |
 | `@tools/shared/components/MorphWordmark.astro` | The footer's "hebrew tools" / "greek tools" that slides into the original language on hover (see "Clipping boxes size from their content" below) |
 | `@tools/shared/components/DeckBuilder` | List, create, edit and delete custom decks over a vocabulary the app passes in (React; inline-styled, accent passed in) |
+| `@tools/shared/components/PassagePicker` | Book, start and end menus for a verse range, sized by the verse counts the app passes in (React; inline-styled) |
 | `@tools/shared/components/GradeButtons` | The Again/Hard/Good/Easy answer row, with per-grade interval previews (React) |
 | `@tools/shared/components/DrillButtons` | The Missed / Got it answer row for the drill modes, which schedule nothing (React) |
 | `@tools/shared/components/ResetProgress` | The account page's "Danger zone": open, type RESET, erase. Each app wraps it in `src/components/ResetProgress.tsx` with its own list of what is erased and kept (React) |
@@ -516,7 +519,8 @@ factory, the merge and the builder are in `@tools/shared/custom-decks` and
     elsewhere comes back; one edited before does not. A tie goes to the delete.
     The comparison is between two devices' clocks; a badly wrong clock can make
     a stale edit win, which costs one deck an older word list and no reviews.
-  - **Tombstones are pruned after `TOMBSTONE_TTL_DAYS` (180)**, in the merge, on
+  - **Tombstones are pruned after `TOMBSTONE_TTL_DAYS` (180)** (the rules now live in
+    `@tools/shared/tombstones`, shared with focus passages), in the merge, on
     the server and on the client. A device offline for longer than that and still
     holding the deck brings it back.
   - **The tombstone rides in the payload** (`ProgressPayload.customDecks`), so
@@ -557,6 +561,91 @@ factory, the merge and the builder are in `@tools/shared/custom-decks` and
 - **The builder lists at most 150 matches at once** (`VISIBLE_WORDS`); the search
   box narrows them. It saves through the store and reports a failed write
   instead of looking saved.
+
+## Focus passages
+
+A focus passage is a book and a verse range the student chose and named
+(`Genesis 1:1–5`, "Creation"). hebrew.tools has them (#226): `/focus` lists and
+makes them, `/focus/<id>` is a hub with Reading, Vocabulary and Progress tabs.
+Like a custom deck a passage is a *selection* and owns no progress: its
+vocabulary is the course words whose lexeme occurs in the verses, and "how well
+do I know it" is read from the SRS store each time. The shape, the storage
+factory, the merge, the range arithmetic and the picker are in
+`@tools/shared/focus-passages` and `@tools/shared/components/PassagePicker`; the
+Hebrew part (reading a passage against the vocabulary) is
+`apps/hebrew-tools/src/lib/focus-passages.ts`, bound to
+`hebrew-tools-focus-passages-v1`.
+
+- **Deletion is a tombstone, by the same rules as decks.** Decision (Nov 2026):
+  decks and passages share one implementation, `@tools/shared/tombstones`
+  (`mergeTombstoned`, `pruneTombstones`, `TOMBSTONE_TTL_DAYS`), which
+  `mergeCustomDecks` and `mergeFocusPassages` delegate to, so the two lists
+  cannot drift apart. Per passage the later `updatedAt` wins, whole; a delete is
+  the newest edit; a tie goes to the delete; tombstones are pruned after 180
+  days. A tombstone drops the label and keeps the range, so it is still a valid
+  row. The tombstone rides in `ProgressPayload.focusPassages`.
+- **Passages are not progress.** `DELETE /api/progress`, `clearLocalProgress`
+  and the account reset leave them alone and the reset's "keeps" list says so;
+  `putProgress` merges them against the `focus_passages` table itself, as it
+  does decks, because `getProgress()` is null once `sync_state` is deleted.
+- **`focus_passages` is now per language (migration 0006), and greek.tools had
+  to change with it.** The table had no `language` column and was keyed
+  `(user_id, id)`; greek's sync read and deleted `WHERE user_id = ?` alone, so a
+  hebrew row would have been shown to greek.tools and then erased by its next
+  push. The migration adds `language` (default `'greek'`, which every existing
+  row is), `updated_at` (default `''`) and `deleted_at` (null), all additive, so
+  the previous code keeps working while the deploy migrates first. greek's reads
+  and deletes now carry `language = 'greek'` (`progress-store.test.ts` pins that
+  a hebrew row survives its push, its "Start fresh" and is never returned). The
+  key stays `(user_id, id)`: SQLite cannot change a primary key without
+  rebuilding the table, and ids do not collide (greek's are 8 random characters,
+  hebrew's are UUIDs). A new migration block in `migrations.test.ts` covers it.
+- **The vocabulary join is the reader's, plus one fallback.** A passage word's
+  `lemma` meets a vocabulary entry's `strong` through `lemmaBase`, exactly as
+  the reader's "studied" underline does (see `studied.ts`). 28 vocabulary entries
+  carry no `strong` (curated chapter-1 words: אֶרֶץ, מֶלֶךְ, דָּבָר ...), and a
+  passage that skipped them would call "earth" a word the course lacks, so they
+  are matched by pointed form against the lemma index, to the lexeme that owns
+  at least 90% of the occurrences among the lexemes written that way (מֶלֶךְ is
+  4428, not the three namesakes). A true homograph (אַף "also" and "nose") has no
+  such owner and stays outside rather than being guessed. The reader's underline
+  still has the gap; closing it there is a follow-up.
+- **One card per lexeme in the deck.** The vocabulary lists some lexemes twice
+  (וַיֹּאמֶר beside אָמַר). The deck holds the entry OSHB gave a frequency (the
+  lexical one); progress counts a lexeme known if *any* of its cards has been
+  answered correctly, as the reader's underline does.
+- **"Study these words" saves a custom deck.** `passage-deck.ts` creates (or
+  updates, by its name) a deck called `Passage: <title>` holding the SRS keys,
+  picks it as the flashcards' selection and opens `/flashcards`. So there is no
+  second selection model or deck type: the passage's deck syncs, renames and
+  deletes like any other, and reviewing through it moves the same cards. It is a
+  snapshot, not a rule. Today's Session ignores the pick, as for any deck.
+- **Words outside the course are listed, not carded.** Lexemes with no
+  vocabulary entry (mostly names, rarer words and the direct-object marker) are
+  shown with the lemma index's Hebrew and BDB gloss, so the passage reads, but
+  there is no card to put in a deck. The eight inseparable-prefix codes are
+  skipped: they are not lexemes.
+- **The lemma index may fail; the book may not.** `usePassageData` fetches the
+  book and `lemmas.json` when a passage is opened and never on page load. Without
+  the index a passage still reads and previews; it only finds fewer course words.
+- **The first render matches the server's.** `/focus` reads storage through
+  `useStoredState` and holds back its empty state until `loaded`;
+  `/focus/<id>` is server-rendered (`prerender = false`) and renders "Loading…"
+  until storage is read, then everything else. The hub and the list have cases
+  in `hydration.test.tsx`.
+- **Parsing is not here.** The hub says so in one line; #82 plugs a tab in.
+  #195 (curated passage tags) is separate and keeps its own data: a focus
+  passage is `{ id, book, startChapter, startVerse, endChapter, endVerse, label?,
+  createdAt, updatedAt?, deletedAt? }` and has no concept tags.
+- **greek.tools has not adopted this yet.** It keeps `data/focusPassages.ts`,
+  its own `mergeFocusPassages` (union, later `createdAt`, no tombstones) and its
+  own picker (`CrossChapterSelector`), and a passage deleted there can come back
+  from another device just as a deck can. `focusPassages.test.ts` pins that its
+  rows (no `updatedAt`, 8-character ids, empty labels) parse and merge under the
+  shared rules. Adopting the module gives greek tombstones, `PassagePicker` and
+  the shared maturity bands; its parse history keeps its own table and merge,
+  and a tombstoned passage there should still drop its history, as
+  `deletePassage` does today. Left as a follow-up.
 
 ## Hydration: the first render matches the server's
 

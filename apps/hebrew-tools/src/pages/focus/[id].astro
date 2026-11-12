@@ -1,0 +1,18 @@
+---
+// Server-rendered: the id is a passage the student made, so there is nothing to
+// prerender. The island renders "Loading…" on the server and reads the passage
+// from storage in the browser (see FocusPassageHub).
+export const prerender = false;
+
+import FocusPassageHub from '../../components/FocusPassageHub';
+import Layout from '../../layouts/Layout.astro';
+
+const { id } = Astro.params;
+---
+
+<Layout
+  title="Focus Passage"
+  description="The vocabulary, text and progress for a passage you chose to study."
+>
+  <FocusPassageHub client:load passageId={id!} />
+</Layout>

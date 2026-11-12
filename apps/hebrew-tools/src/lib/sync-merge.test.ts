@@ -220,3 +220,47 @@ describe('mergeProgress and custom decks', () => {
     expect(ab.customDecks?.[0].deletedAt).toBeDefined();
   });
 });
+
+describe('mergeProgress and focus passages', () => {
+  const base = { srsStore: {}, studyStats: stats() };
+  const passage = (over = {}) => ({
+    id: 'p1',
+    book: 'GEN',
+    startChapter: 1,
+    startVerse: 1,
+    endChapter: 1,
+    endVerse: 5,
+    createdAt: '2026-11-01T00:00:00.000Z',
+    updatedAt: '2026-11-01T00:00:00.000Z',
+    ...over,
+  });
+
+  it('unions passages, and treats a snapshot with none as having none', () => {
+    const merged = mergeProgress(
+      { ...base, focusPassages: [passage()] },
+      { ...base, focusPassages: [passage({ id: 'p2' })] },
+    );
+    expect(merged.focusPassages?.map((p) => p.id)).toEqual(['p1', 'p2']);
+    expect(mergeProgress(base, { ...base, focusPassages: [passage()] }).focusPassages).toHaveLength(
+      1,
+    );
+    expect(mergeProgress(base, base).focusPassages).toEqual([]);
+  });
+
+  it('is symmetric, and a deletion survives', () => {
+    const tomb = passage({
+      updatedAt: '2026-11-03T00:00:00.000Z',
+      deletedAt: '2026-11-03T00:00:00.000Z',
+    });
+    const ab = mergeProgress(
+      { ...base, focusPassages: [passage()] },
+      { ...base, focusPassages: [tomb] },
+    );
+    const ba = mergeProgress(
+      { ...base, focusPassages: [tomb] },
+      { ...base, focusPassages: [passage()] },
+    );
+    expect(ab.focusPassages).toEqual(ba.focusPassages);
+    expect(ab.focusPassages?.[0].deletedAt).toBeDefined();
+  });
+});

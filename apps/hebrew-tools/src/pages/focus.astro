@@ -1,0 +1,21 @@
+---
+import FocusPassages from '../components/FocusPassages';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Focus Passages"
+  description="Choose a passage of the Hebrew Bible and study it: the vocabulary it uses, its text, and how well you know it."
+>
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold mb-1" style="color: var(--color-primary);">
+      Focus Passages
+    </h1>
+    <p class="text-text-muted">
+      Pick a stretch of the Hebrew Bible and get its vocabulary, its text and your progress in one
+      place.
+    </p>
+  </div>
+
+  <FocusPassages client:load />
+</Layout>

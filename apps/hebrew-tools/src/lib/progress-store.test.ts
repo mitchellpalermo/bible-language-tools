@@ -7,6 +7,7 @@
 import {
   attempts as attemptsTable,
   customDecks as customDecksTable,
+  focusPassages as focusPassagesTable,
   ladderProgress as ladderProgressTable,
   srsCards,
   studyStats as studyStatsTable,
@@ -16,6 +17,7 @@ import {
 import { createTestDb, createTestDbAt } from '@tools/db/test-utils';
 import { type Attempt, MAX_ATTEMPTS } from '@tools/shared/attempt-log';
 import { type CustomDeck, TOMBSTONE_TTL_DAYS } from '@tools/shared/custom-decks';
+import type { FocusPassage } from '@tools/shared/focus-passages';
 import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { SRSCard, StudyStats } from '../data/srs';
@@ -863,6 +865,226 @@ describe('an account with a greek deck written before migration 0005', () => {
         name: 'John 1',
         word_keys: '["λόγος"]',
         created_at: '2026-09-01',
+        updated_at: '',
+        deleted_at: null,
+      },
+    ]);
+  });
+});
+
+describe('focus passages', () => {
+  const passage = (over: Partial<FocusPassage> = {}): FocusPassage => ({
+    id: 'p-1',
+    book: 'GEN',
+    startChapter: 1,
+    startVerse: 1,
+    endChapter: 1,
+    endVerse: 5,
+    label: 'Creation',
+    createdAt: '2026-11-01T00:00:00.000Z',
+    updatedAt: '2026-11-01T00:00:00.000Z',
+    ...over,
+  });
+  const base = { srsStore: {}, studyStats: stats() };
+  const { label: _label, ...unnamed } = passage();
+  const tombstone = (over: Partial<FocusPassage> = {}): FocusPassage => ({
+    ...unnamed,
+    updatedAt: '2026-11-03T00:00:00.000Z',
+    deletedAt: '2026-11-03T00:00:00.000Z',
+    ...over,
+  });
+  const recent = () => new Date(Date.now() - 86_400_000).toISOString();
+  const raw = () => db as never as ReturnType<typeof createTestDb>;
+
+  it('reads back empty when none were sent', async () => {
+    await putProgress(db, USER, base);
+    expect((await getProgress(db, USER))?.focusPassages).toEqual([]);
+  });
+
+  it('round-trips a passage with its range, name, stamps and tombstone', async () => {
+    const live = passage();
+    const gone = tombstone({ id: 'p-2', deletedAt: recent(), updatedAt: recent() });
+    await putProgress(db, USER, { ...base, focusPassages: [live, gone] });
+    expect((await getProgress(db, USER))?.focusPassages).toEqual([live, gone]);
+  });
+
+  it('stores a passage in the shared table as hebrew', async () => {
+    await putProgress(db, USER, { ...base, focusPassages: [passage()] });
+    const [row] = raw().select().from(focusPassagesTable).all();
+    expect(row).toMatchObject({
+      language: 'hebrew',
+      userId: USER,
+      book: 'GEN',
+      startChapter: 1,
+      endVerse: 5,
+      label: 'Creation',
+      deletedAt: null,
+    });
+  });
+
+  it('keeps a passage with no name as having none', async () => {
+    await putProgress(db, USER, { ...base, focusPassages: [unnamed] });
+    expect((await getProgress(db, USER))?.focusPassages?.[0].label).toBeUndefined();
+  });
+
+  it('round-trips more passages than one insert chunk', async () => {
+    const many = Array.from({ length: 30 }, (_, i) =>
+      passage({ id: `p${String(i).padStart(2, '0')}` }),
+    );
+    await putProgress(db, USER, { ...base, focusPassages: many });
+    expect((await getProgress(db, USER))?.focusPassages).toHaveLength(30);
+  });
+
+  it('merges with what is stored: a passage from another device is not lost', async () => {
+    await putProgress(db, USER, { ...base, focusPassages: [passage()] });
+    await putProgress(db, USER, { ...base, focusPassages: [passage({ id: 'p-2' })] });
+    const ids = (await getProgress(db, USER))?.focusPassages?.map((p) => p.id).sort();
+    expect(ids).toEqual(['p-1', 'p-2']);
+  });
+
+  it('keeps a passage deleted when a stale client pushes it back', async () => {
+    await putProgress(db, USER, { ...base, focusPassages: [passage()] });
+    await putProgress(db, USER, {
+      ...base,
+      focusPassages: [tombstone({ deletedAt: recent(), updatedAt: recent() })],
+    });
+    await putProgress(db, USER, { ...base, focusPassages: [passage()] });
+    const [only] = (await getProgress(db, USER))?.focusPassages ?? [];
+    expect(only.deletedAt).toBeDefined();
+    expect(only.label).toBeUndefined();
+  });
+
+  it('accepts a newer rename and ignores an older one', async () => {
+    await putProgress(db, USER, {
+      ...base,
+      focusPassages: [passage({ label: 'New', updatedAt: '2026-11-04T00:00:00.000Z' })],
+    });
+    await putProgress(db, USER, { ...base, focusPassages: [passage({ label: 'Old' })] });
+    expect((await getProgress(db, USER))?.focusPassages?.[0].label).toBe('New');
+  });
+
+  it('keeps passages when a page from before passages synced pushes without them', async () => {
+    await putProgress(db, USER, { ...base, focusPassages: [passage()] });
+    await putProgress(db, USER, base);
+    expect((await getProgress(db, USER))?.focusPassages).toHaveLength(1);
+  });
+
+  it('drops a tombstone older than the TTL', async () => {
+    const old = new Date(Date.now() - (TOMBSTONE_TTL_DAYS + 1) * 86_400_000).toISOString();
+    await putProgress(db, USER, {
+      ...base,
+      focusPassages: [tombstone({ deletedAt: old, updatedAt: old }), passage({ id: 'live' })],
+    });
+    expect((await getProgress(db, USER))?.focusPassages?.map((p) => p.id)).toEqual(['live']);
+  });
+
+  it('survives deleteProgress: passages are the student’s own choice, not progress', async () => {
+    await putProgress(db, USER, { ...base, focusPassages: [passage()] });
+    await deleteProgress(db, USER);
+    await putProgress(db, USER, base);
+    expect((await getProgress(db, USER))?.focusPassages).toHaveLength(1);
+  });
+
+  it('keeps each user’s passages apart', async () => {
+    await putProgress(db, USER, { ...base, focusPassages: [passage()] });
+    await putProgress(db, OTHER_USER, base);
+    expect((await getProgress(db, OTHER_USER))?.focusPassages).toEqual([]);
+  });
+
+  it('never reads or writes greek.tools’ passages, which share the table', async () => {
+    raw()
+      .insert(focusPassagesTable)
+      .values({
+        id: 'greek-passage',
+        userId: USER,
+        book: 'REV',
+        startChapter: 1,
+        startVerse: 1,
+        endChapter: 1,
+        endVerse: 11,
+        createdAt: '2026-09-01T00:00:00.000Z',
+      })
+      .run();
+    await putProgress(db, USER, { ...base, focusPassages: [passage()] });
+    expect((await getProgress(db, USER))?.focusPassages?.map((p) => p.id)).toEqual(['p-1']);
+    await deleteProgress(db, USER);
+    const greek = raw()
+      .select()
+      .from(focusPassagesTable)
+      .all()
+      .filter((r) => r.language === 'greek');
+    expect(greek).toEqual([
+      expect.objectContaining({ id: 'greek-passage', book: 'REV', updatedAt: '', deletedAt: null }),
+    ]);
+  });
+
+  it('skips a stored row that is not a passage instead of failing the sync', async () => {
+    await putProgress(db, USER, { ...base, focusPassages: [passage()] });
+    raw()
+      .insert(focusPassagesTable)
+      .values({
+        id: 'broken',
+        userId: USER,
+        language: 'hebrew',
+        book: 'GEN',
+        startChapter: 9,
+        startVerse: 1,
+        endChapter: 1,
+        endVerse: 1,
+        createdAt: '2026-09-01T00:00:00.000Z',
+      })
+      .run();
+    expect((await getProgress(db, USER))?.focusPassages?.map((p) => p.id)).toEqual(['p-1']);
+  });
+});
+
+describe('an account with a greek passage written before migration 0006', () => {
+  it('reads hebrew passages as empty and never alters the greek row', async () => {
+    const { sqlite, db: oldDb, migrateRest } = createTestDbAt('0005');
+    sqlite
+      .prepare("INSERT INTO users (id, email, created_at) VALUES ('u', 'u@example.com', 0)")
+      .run();
+    sqlite
+      .prepare(
+        "INSERT INTO focus_passages (user_id, id, label, book, start_chapter, start_verse, end_chapter, end_verse, created_at) VALUES ('u', 'g', 'Prologue', 'JHN', 1, 1, 1, 18, '2026-09-02')",
+      )
+      .run();
+    sqlite
+      .prepare(
+        "INSERT INTO sync_state (user_id, language, synced_at) VALUES ('u', 'hebrew', '2026-11-02T09:00:00.000Z')",
+      )
+      .run();
+    migrateRest();
+    const migrated = oldDb as unknown as ProgressDb;
+    expect((await getProgress(migrated, 'u'))?.focusPassages).toEqual([]);
+    await putProgress(migrated, 'u', {
+      srsStore: {},
+      studyStats: stats(),
+      focusPassages: [
+        {
+          id: 'h',
+          book: 'GEN',
+          startChapter: 1,
+          startVerse: 1,
+          endChapter: 1,
+          endVerse: 5,
+          createdAt: '2026-11-01T00:00:00.000Z',
+          updatedAt: '2026-11-01T00:00:00.000Z',
+        },
+      ],
+    });
+    expect(sqlite.prepare("SELECT * FROM focus_passages WHERE language = 'greek'").all()).toEqual([
+      {
+        user_id: 'u',
+        id: 'g',
+        label: 'Prologue',
+        book: 'JHN',
+        start_chapter: 1,
+        start_verse: 1,
+        end_chapter: 1,
+        end_verse: 18,
+        created_at: '2026-09-02',
+        language: 'greek',
         updated_at: '',
         deleted_at: null,
       },

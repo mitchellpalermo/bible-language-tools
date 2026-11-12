@@ -1,5 +1,6 @@
 import type { Attempt } from '@tools/shared/attempt-log';
 import type { CustomDeck } from '@tools/shared/custom-decks';
+import type { FocusPassage } from '@tools/shared/focus-passages';
 import type { LadderProgress } from '@tools/shared/ladder';
 import type { StudyStreakData } from '@tools/shared/study-streak';
 import type { SRSCard, StudyStats } from '../data/srs';
@@ -7,9 +8,9 @@ import type { SRSCard, StudyStats } from '../data/srs';
 // The full study-progress snapshot exchanged with /api/progress.
 // Maps 1:1 to the existing localStorage shapes — no client-side conversion.
 //
-// Narrower than greek-tools' payload, which also carries focus passages and
-// parse history. hebrew.tools has neither feature, so they are absent rather
-// than sent empty; the server rejects unknown shapes.
+// Narrower than greek-tools' payload, which also carries parse history.
+// hebrew.tools has no parsing practice yet (#82), so it is absent rather than
+// sent empty; the server rejects unknown shapes.
 export interface ProgressPayload {
   srsStore: Record<string, SRSCard>;
   studyStats: StudyStats;
@@ -30,6 +31,12 @@ export interface ProgressPayload {
    * sends it back.
    */
   customDecks?: CustomDeck[];
+  /**
+   * The student's focus passages (#226), tombstones included, by the same
+   * rules as `customDecks`. Optional on the way in; the server always sends it
+   * back.
+   */
+  focusPassages?: FocusPassage[];
   /** ISO timestamp, server-assigned on write. Client-provided values are ignored. */
   syncedAt: string;
 }
