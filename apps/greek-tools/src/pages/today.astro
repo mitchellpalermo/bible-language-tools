@@ -1,0 +1,19 @@
+---
+import TodaySession from '../components/TodaySession';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Today's Session"
+  description="One daily Koine Greek session sized to your time: due vocabulary, then a short drill."
+>
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold mb-1" style="color: var(--color-primary);">
+      Today’s Session
+    </h1>
+    <p class="text-text-muted">
+      Due vocabulary first, then one short drill — sized to the time you have.
+    </p>
+  </div>
+  <TodaySession client:load />
+</Layout>

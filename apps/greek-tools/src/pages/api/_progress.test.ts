@@ -114,7 +114,11 @@ describe('/api/progress', () => {
 
       const getResponse = await GET(makeContext());
       const { data } = (await getResponse.json()) as { data: unknown };
-      expect(data).toEqual({ ...validPayload, syncedAt });
+      expect(data).toEqual({
+        ...validPayload,
+        studyStreak: { streak: 0, lastSessionDate: '' },
+        syncedAt,
+      });
     });
 
     it('assigns syncedAt on the server, ignoring a client-provided value', async () => {
@@ -123,6 +127,24 @@ describe('/api/progress', () => {
       const { syncedAt } = (await response.json()) as { syncedAt: string };
       expect(syncedAt).not.toBe('1999-01-01T00:00:00.000Z');
       expect(new Date(syncedAt).getFullYear()).toBeGreaterThanOrEqual(2026);
+    });
+
+    it('stores and returns the Today study streak', async () => {
+      const studyStreak = { streak: 3, lastSessionDate: '2026-06-09' };
+      await PUT(makeContext({ body: JSON.stringify({ ...validPayload, studyStreak }) }));
+      const { data } = (await (await GET(makeContext())).json()) as {
+        data: { studyStreak: unknown };
+      };
+      expect(data.studyStreak).toEqual(studyStreak);
+    });
+
+    it('rejects a malformed study streak', async () => {
+      for (const studyStreak of [{ streak: -1, lastSessionDate: '' }, 'x', { streak: 1 }]) {
+        const response = await PUT(
+          makeContext({ body: JSON.stringify({ ...validPayload, studyStreak }) }),
+        );
+        expect(response.status).toBe(400);
+      }
     });
 
     it('accepts non-JSON content types (keepalive pushes)', async () => {

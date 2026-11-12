@@ -288,7 +288,7 @@ grading; the module owns the unlock rule and `components/Ladder` draws it.
 ### Today's Session
 
 `@tools/shared/today` builds one daily session to a time budget of 20, 45 or
-90 minutes (#184 on hebrew.tools, #197 to come on greek.tools). An app supplies
+90 minutes (#184 on hebrew.tools, #197 on greek.tools). An app supplies
 sections of candidates — each with a tier and a time estimate — and one drill;
 the module decides what fits. Rules that are pedagogy rather than plumbing:
 
@@ -304,23 +304,34 @@ the module decides what fits. Rules that are pedagogy rather than plumbing:
   so while the session runs `canStartNext` refuses the next item once the
   budget is used, or if the item would end more than 10% past it. A started
   item is always finished. The clock pauses while the tab is hidden.
-- **An app may deal fewer tiers than the module offers.** hebrew.tools' Today
-  deals vocabulary that is **due only** (#224): no new words, no weak ones.
+- **An app may deal fewer tiers than the module offers.** Both apps' Today
+  deal vocabulary that is **due only** (#224, and greek.tools from the start): no new words, no weak ones.
   Introducing words is `/flashcards`' job, and a review session that adds
   strangers piles up tomorrow's reviews. The module keeps `new` and `maxNew`
   because the forms section still uses them.
 - **A weak item is practice, not a review.** It is not due, so answering it
   must not move its schedule forward. Each app enforces that in its own
   grading (hebrew.tools: weak forms with
-  `practice`).
+  `practice`). greek.tools has no weak items at all: its only scheduled store is
+  the vocabulary, and its mixed-review drill is the unscheduled practice.
 - **Only an item's first answer counts in the summary**, as in the drills.
+
+greek.tools differs from hebrew.tools in what it can draw from (see
+`apps/greek-tools/CLAUDE.md`, "Today's Session"): there is no paradigm section
+because its paradigm quiz schedules nothing, and parse history has no due date,
+so it enters through the parse drill rather than the tiers. The drill rotation
+is a `DRILL_PROVIDERS` map; the paradigm ladder (#199) joins by adding an entry.
 
 The study streak (`@tools/shared/study-streak`) is separate from the Daily
 verse streak and the flashcard streak, and it **syncs**, so it follows the
 rules in "Streaks, study days, and sync merges": local dates, `streak` travels
 with `lastSessionDate`, the later date wins, and the merge is symmetric. On the
 server it is two columns on `study_stats` (`study_streak`,
-`last_session_date`); greek.tools' rows take the defaults until #197.
+`last_session_date`), written by both apps. greek.tools' `PUT /api/progress` is
+a full replace of that row, so `putProgress` merges the incoming streak with the
+stored one (`mergeStudyStreak`) before replacing it: a device that is behind
+cannot overwrite a later session, and a client that predates the streak cannot
+reset it.
 
 ### The attempt log syncs on its own
 

@@ -11,7 +11,7 @@
  * page fails the suite until it has a case here.
  */
 
-import { emptyStats, normalizeKey } from '@tools/shared/srs';
+import { emptyStats, localDateStr, normalizeKey } from '@tools/shared/srs';
 import { hydrationErrors } from '@tools/shared/test/hydration';
 import type { ReactElement } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -27,6 +27,7 @@ import GreekInputHub from '../components/GreekInputHub';
 import ParadigmQuiz from '../components/ParadigmQuiz';
 import ResetProgress from '../components/ResetProgress';
 import SyncControls from '../components/SyncControls';
+import TodaySession from '../components/TodaySession';
 import TranslationPDFExport from '../components/TranslationPDFExport';
 import VerbParseChallenge from '../components/VerbParseChallenge';
 import { saveCustomDecks } from '../data/customDecks';
@@ -36,7 +37,9 @@ import { newCard, nextSRS, recordReview, saveSRSStore, saveStats } from '../data
 import { vocabulary } from '../data/vocabulary';
 import { saveFlashcardSettings } from '../lib/flashcard-settings';
 import { saveQuizSettings } from '../lib/quiz-settings';
+import { saveStudyStreak } from '../lib/study-streak';
 import { setLastSyncedAt } from '../lib/sync-manager';
+import { saveBudget } from '../lib/today';
 
 vi.mock('posthog-js', () => ({
   default: { capture: vi.fn(), captureException: vi.fn() },
@@ -76,6 +79,9 @@ function seedReturningStudent() {
   // Parse history and the attempt log it now feeds (#209): stored values no
   // island may let leak into its first render.
   recordParseResults(PASSAGE_ID, [true, false, true, true]);
+  // Today (#197): a stored budget and a streak, both read after hydration.
+  saveBudget(90);
+  saveStudyStreak({ streak: 6, lastSessionDate: localDateStr(new Date()) });
   setLastSyncedAt(new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString());
   markReadToday();
 }
@@ -94,6 +100,7 @@ const ISLANDS: Record<string, () => ReactElement> = {
   ParadigmQuiz: () => <ParadigmQuiz />,
   ResetProgress: () => <ResetProgress signedIn />,
   SyncControls: () => <SyncControls />,
+  TodaySession: () => <TodaySession />,
   TranslationPDFExport: () => <TranslationPDFExport />,
   VerbParseChallenge: () => <VerbParseChallenge />,
 };

@@ -1,3 +1,4 @@
+import type { StudyStreakData } from '@tools/shared/study-streak';
 import type { CustomDeck } from '../data/customDecks';
 import type { FocusPassage, ParseHistory } from '../data/focusPassages';
 import type { SRSCard, StudyStats } from '../data/srs';
@@ -7,6 +8,11 @@ import type { SRSCard, StudyStats } from '../data/srs';
 export interface ProgressPayload {
   srsStore: Record<string, SRSCard>;
   studyStats: StudyStats;
+  /**
+   * The Today session streak (#197). Optional on the way in, so a page loaded
+   * before it shipped can still push; the server always sends it back.
+   */
+  studyStreak?: StudyStreakData;
   customDecks: CustomDeck[];
   focusPassages: FocusPassage[];
   parseHistory: Record<string, ParseHistory>;

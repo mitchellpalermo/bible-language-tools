@@ -16,6 +16,11 @@ import {
   studyStats as studyStatsTable,
   syncState as syncStateTable,
 } from '@tools/db/schema';
+import {
+  emptyStudyStreak,
+  mergeStudyStreak,
+  type StudyStreakData,
+} from '@tools/shared/study-streak';
 import { and, eq } from 'drizzle-orm';
 import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
 import type { CustomDeck } from '../data/customDecks';
@@ -114,6 +119,11 @@ export async function getProgress(db: ProgressDb, userId: string): Promise<Progr
       }
     : emptyStats();
 
+  // The Today streak shares the stats row; see the columns in packages/db.
+  const studyStreak: StudyStreakData = statsRow
+    ? { streak: statsRow.studyStreak, lastSessionDate: statsRow.lastSessionDate }
+    : emptyStudyStreak();
+
   const customDecks: CustomDeck[] = deckRows.map((row) => ({
     id: row.id,
     name: row.name,
@@ -140,11 +150,23 @@ export async function getProgress(db: ProgressDb, userId: string): Promise<Progr
   return {
     srsStore,
     studyStats,
+    studyStreak,
     customDecks,
     focusPassages,
     parseHistory,
     syncedAt: state.syncedAt,
   };
+}
+
+/** The streak columns of the stats row, or "never" when there is none. */
+async function readStudyStreak(db: ProgressDb, userId: string): Promise<StudyStreakData> {
+  const [row] = await db
+    .select()
+    .from(studyStatsTable)
+    .where(and(eq(studyStatsTable.userId, userId), eq(studyStatsTable.language, LANGUAGE)));
+  return row
+    ? { streak: row.studyStreak, lastSessionDate: row.lastSessionDate }
+    : emptyStudyStreak();
 }
 
 /**
@@ -156,11 +178,21 @@ export async function putProgress(
   userId: string,
   payload: Pick<
     ProgressPayload,
-    'srsStore' | 'studyStats' | 'customDecks' | 'focusPassages' | 'parseHistory'
+    'srsStore' | 'studyStats' | 'studyStreak' | 'customDecks' | 'focusPassages' | 'parseHistory'
   >,
 ): Promise<string> {
   const syncedAt = new Date().toISOString();
   const userLang = { userId, language: LANGUAGE };
+
+  // PUT replaces the stats row, and the streak lives in it. Merged with the
+  // row about to be replaced, not just written: a device that is behind must
+  // not overwrite a later session, and a client that predates the streak
+  // (it sends none) must not reset it to the column defaults. The merge is
+  // symmetric, so argument order carries no meaning.
+  const studyStreak = mergeStudyStreak(
+    await readStudyStreak(db, userId),
+    payload.studyStreak ?? emptyStudyStreak(),
+  );
 
   const cardRows = Object.entries(payload.srsStore).map(([wordKey, card]) => ({
     ...userLang,
@@ -207,7 +239,12 @@ export async function putProgress(
     db
       .delete(studyStatsTable)
       .where(and(eq(studyStatsTable.userId, userId), eq(studyStatsTable.language, LANGUAGE))),
-    db.insert(studyStatsTable).values({ ...userLang, ...payload.studyStats }),
+    db.insert(studyStatsTable).values({
+      ...userLang,
+      ...payload.studyStats,
+      studyStreak: studyStreak.streak,
+      lastSessionDate: studyStreak.lastSessionDate,
+    }),
     db
       .delete(customDecksTable)
       .where(and(eq(customDecksTable.userId, userId), eq(customDecksTable.language, LANGUAGE))),

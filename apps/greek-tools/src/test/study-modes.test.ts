@@ -18,7 +18,7 @@ describe('Study area', () => {
   it('lists the modes the parity audit found missing from /study (#229)', () => {
     const hrefs = studyModes.map((m) => m.href);
     expect(hrefs).toEqual(
-      expect.arrayContaining(['/flashcards', '/paradigms', '/parse', '/focus']),
+      expect.arrayContaining(['/today', '/flashcards', '/paradigms', '/parse', '/focus']),
     );
   });
 

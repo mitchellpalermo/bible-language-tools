@@ -81,10 +81,72 @@ describe('progress-store', () => {
     expect(result).toEqual({
       srsStore,
       studyStats: stats,
+      studyStreak: { streak: 0, lastSessionDate: '' },
       customDecks: [deck],
       focusPassages: [passage],
       parseHistory,
       syncedAt,
+    });
+  });
+
+  describe('the Today study streak (#197)', () => {
+    const base = {
+      srsStore: {},
+      studyStats: stats,
+      customDecks: [],
+      focusPassages: [],
+      parseHistory: {},
+    };
+
+    it('round-trips through the stats row', async () => {
+      await putProgress(db, USER_ID, {
+        ...base,
+        studyStreak: { streak: 5, lastSessionDate: '2026-06-09' },
+      });
+      expect((await getProgress(db, USER_ID))?.studyStreak).toEqual({
+        streak: 5,
+        lastSessionDate: '2026-06-09',
+      });
+    });
+
+    it('is kept when a client that predates it pushes', async () => {
+      await putProgress(db, USER_ID, {
+        ...base,
+        studyStreak: { streak: 5, lastSessionDate: '2026-06-09' },
+      });
+      await putProgress(db, USER_ID, base);
+      expect((await getProgress(db, USER_ID))?.studyStreak).toEqual({
+        streak: 5,
+        lastSessionDate: '2026-06-09',
+      });
+    });
+
+    it('does not let a device that is behind overwrite a later session', async () => {
+      await putProgress(db, USER_ID, {
+        ...base,
+        studyStreak: { streak: 5, lastSessionDate: '2026-06-09' },
+      });
+      await putProgress(db, USER_ID, {
+        ...base,
+        studyStreak: { streak: 9, lastSessionDate: '2026-06-01' },
+      });
+      expect((await getProgress(db, USER_ID))?.studyStreak).toEqual({
+        streak: 5,
+        lastSessionDate: '2026-06-09',
+      });
+    });
+
+    it('is erased by DELETE, which clears the whole stats row', async () => {
+      await putProgress(db, USER_ID, {
+        ...base,
+        studyStreak: { streak: 5, lastSessionDate: '2026-06-09' },
+      });
+      await deleteProgress(db, USER_ID);
+      await putProgress(db, USER_ID, base);
+      expect((await getProgress(db, USER_ID))?.studyStreak).toEqual({
+        streak: 0,
+        lastSessionDate: '',
+      });
     });
   });
 

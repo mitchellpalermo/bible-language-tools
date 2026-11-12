@@ -138,6 +138,30 @@ describe('mergeStudyStats', () => {
   });
 });
 
+describe('mergeProgress: the study streak (#197)', () => {
+  const empty = {
+    srsStore: {},
+    studyStats: makeStats(),
+    customDecks: [],
+    focusPassages: [],
+    parseHistory: {},
+  };
+  const old = { streak: 9, lastSessionDate: '2026-06-01' };
+  const recent = { streak: 2, lastSessionDate: '2026-06-09' };
+
+  it('takes the later date with its own streak, in either order', () => {
+    const a = mergeProgress({ ...empty, studyStreak: old }, { ...empty, studyStreak: recent });
+    const b = mergeProgress({ ...empty, studyStreak: recent }, { ...empty, studyStreak: old });
+    expect(a.studyStreak).toEqual(recent);
+    expect(b.studyStreak).toEqual(recent);
+  });
+
+  it('treats an absent streak as never studied', () => {
+    expect(mergeProgress(empty, { ...empty, studyStreak: recent }).studyStreak).toEqual(recent);
+    expect(mergeProgress(empty, empty).studyStreak).toEqual({ streak: 0, lastSessionDate: '' });
+  });
+});
+
 describe('mergeCustomDecks', () => {
   it('unions decks by id', () => {
     const merged = mergeCustomDecks([makeDeck('1')], [makeDeck('2')]);

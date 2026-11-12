@@ -1,6 +1,6 @@
 /**
  * Today's Session: one daily queue sized to a time budget (#184 on
- * hebrew.tools, #197 to come on greek.tools).
+ * hebrew.tools, #197 on greek.tools).
  *
  * This module is the part that names no language: the queue builder, the
  * clock that enforces the budget while the session runs, and the end-of-session
