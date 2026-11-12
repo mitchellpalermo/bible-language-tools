@@ -27,8 +27,10 @@ import ParadigmQuiz from '../components/ParadigmQuiz';
 import ResetProgress from '../components/ResetProgress';
 import SyncControls from '../components/SyncControls';
 import TodaySession from '../components/TodaySession';
+import TranslationPDFExport from '../components/TranslationPDFExport';
 import Writing from '../components/Writing';
 import { markReadToday } from '../data/dailyVerses';
+import { saveReaderPrefs } from '../data/morphhb';
 import { newCard, nextSRS, recordReview, saveSRSStore, saveStats } from '../data/srs';
 import { cardKey, vocabulary } from '../data/vocabulary';
 import { buildDecks, writingCardKey } from '../data/writing';
@@ -103,6 +105,8 @@ function seedReturningStudent() {
   focusPassageStore.remove(focusPassageStore.create({ ...range, endVerse: 9 }).id);
   setLastSyncedAt(new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString());
   markReadToday();
+  // Reading with the accents off, which the export page starts from.
+  saveReaderPrefs({ cantillation: false, studied: true, glosses: false });
   // A Today session finished and a longer budget picked, so the streak line
   // and the picker both differ from the server's defaults.
   markSessionComplete();
@@ -125,6 +129,7 @@ const ISLANDS: Record<string, () => ReactElement> = {
   ResetProgress: () => <ResetProgress signedIn />,
   SyncControls: () => <SyncControls />,
   TodaySession: () => <TodaySession />,
+  TranslationPDFExport: () => <TranslationPDFExport />,
   Writing: () => <Writing />,
 };
 

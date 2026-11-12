@@ -113,7 +113,7 @@ function TranslationPDFExportInner() {
   }
 
   const btnClass =
-    'w-full py-3 rounded-xl text-base font-bold bg-[var(--color-accent)] text-white hover:opacity-90 transition-opacity disabled:opacity-50';
+    'w-full py-3 rounded-xl text-base font-bold bg-primary text-white hover:opacity-90 transition-opacity disabled:opacity-50';
 
   return (
     <div className="max-w-lg mx-auto space-y-8">

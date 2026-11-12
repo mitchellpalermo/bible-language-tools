@@ -71,6 +71,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/step-drill` | The step-gated drill engine: `stepDrillReducer`, `isCleanPass`, and `canSkipScaffold` / `createStepDrillHistory(storageKey)` for speed mode. See "The step-gated drill" below |
 | `@tools/shared/ladder` | The paradigm ladder (#186): `rungStates`, `isCleanWrite`, `recordWrite`, `newlyUnlocked`, `isLadderProgress`, and `createLadderProgress(storageKey)`. See "The paradigm ladder" below |
 | `@tools/shared/attempt-log` | `createAttemptLog(storageKey)` — every checked answer, by concept and id, for the mastery levels (#187) — plus `parseAttempt` and `planAttemptPush` for syncing it. See "The attempt log syncs on its own" below |
+| `@tools/shared/pdf-export` | The translation-practice PDF behind both apps' `/export`: `buildTranslationPDF({ verses, fontBytes, direction, shaping, ... })`, `wrapWords`, `clusterShaper`. See "The export PDF" below |
 | `@tools/shared/today` | Today's Session (#184): `buildTodayPlan` (fill a time budget, due before weak before new), `canStartNext` and `createActiveClock` (the budget while it runs), `summarizeSession`. See "Today's Session" below |
 | `@tools/shared/study-streak` | `createStudyStreak(storageKey)` — days with a finished Today session — and `mergeStudyStreak` for sync |
 | `@tools/shared/components/TodaySession` | `BudgetPicker` (20 / 45 / 90 minutes) and `SessionSummaryCard` (React) |
@@ -201,6 +202,45 @@ Two things about it that are pedagogy rather than plumbing:
   (`revealed` covers both the flip and a checked typed answer), and its English →
   Greek direction is untouched: the front is the gloss there, so there is no
   such line to withhold.
+
+### The export PDF
+
+`@tools/shared/pdf-export` lays out the PDF that greek.tools (#62) and
+hebrew.tools (#227) both offer at `/export`: a heading, each verse's words
+wrapped to the page, and ruled lines under every line for the student's
+translation. An app supplies verses as lists of strings already in print form,
+a font, and a direction; the module owns the page.
+
+- **`pdf-lib` discards glyph positions, so pointed Hebrew needs `shaping:
+  'clustered'`.** pdf-lib takes only glyph ids out of fontkit's layout. A vowel
+  point or accent is a zero-width glyph the font places with GPOS, so without the
+  positions every mark lands on the pen position and the Hebrew is unreadable.
+  `clusterShaper` shapes one base-plus-marks cluster at a time, left-to-right,
+  draws each glyph at fontkit's offset, and does the right-to-left placement of
+  the clusters itself. Do not "simplify" it into one `drawText` per word, and do
+  not hand a whole RTL string to fontkit's `layout`: it returns the glyphs
+  already reversed with offsets computed for the logical order, which displaces
+  the marks. The check is a rendered page (`pdftoppm -r 300`), not a thumbnail.
+- **The script font may have no Latin.** Noto Sans Hebrew has none, so hebrew.tools
+  passes `chromeFontBytes` (`public/fonts/NotoSans-Regular.ttf`, the face greek.tools
+  uses) for the heading, verse numbers and watermark, and the two PDFs share one
+  typographic voice. Greek's font covers both and passes `chromeFont: 'script'`.
+  The page is greek.tools' mirrored: the reference stays at the left margin, the
+  book's Hebrew name (`titleScript`, in the BHS form) takes the right,
+  and chapter headings and verse numbers sit at the right with the Hebrew. Hebrew is
+  set at 18/30pt against Greek's 13/18 because its points and accents need the room.
+- **Embed the whole font, never a subset**, and pass `requiredCodePoint` so a
+  font that lacks the script fails the export instead of printing blank boxes.
+  `doc.save` leaves object streams off so a test can read `/BaseFont` and see
+  which face went in.
+- **hebrew.tools ships `public/fonts/NotoSansHebrew-Regular.ttf`** (SIL OFL,
+  from notofonts/notofonts.github.io); the export fetches it same-origin, which
+  the CSP's `connect-src 'self'` allows. `loadHebrewFont` rejects a response that
+  is not a TrueType or OpenType file, since a host can answer a missing font with
+  an HTML page at HTTP 200.
+- **Maqqef-joined words print as one token** (`accentUnits`, as in the reader) so a
+  line never breaks inside one. Consonants-only text removes points with its own
+  list rather than `stripNikud`, whose range also takes the maqqef.
 
 ### The step-gated drill
 
