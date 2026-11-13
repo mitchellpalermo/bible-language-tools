@@ -8,6 +8,7 @@ import {
   type StudyMode,
   useFlashcardSession,
 } from '@tools/shared/use-flashcard-session';
+import { useStoredState } from '@tools/shared/use-stored-state';
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { type CustomDeck, loadCustomDecks } from '../data/customDecks';
@@ -20,10 +21,13 @@ import {
   saveSRSStore,
   saveStats,
 } from '../data/srs';
+import { type TextbookId, wordsInChapters } from '../data/textbooks';
 import { type VocabWord, vocabulary } from '../data/vocabulary';
+import { DEFAULT_SELECTION, loadSelection, saveSelection, textbookOf } from '../lib/deck-selection';
 import { loadFlashcardSettings, saveFlashcardSettings } from '../lib/flashcard-settings';
 import DeckBuilder from './DeckBuilder';
 import ErrorBoundary from './ErrorBoundary';
+import TextbookDecks from './TextbookDecks';
 import VocabCard, { type Direction } from './VocabCard';
 
 // The session itself — dealing, grading, the drill modes, typed-answer state
@@ -150,6 +154,19 @@ function FlashcardsInner() {
   const [activeDeckId, setActiveDeckId] = useState<string | null>(null);
   const [showDeckBuilder, setShowDeckBuilder] = useState(false);
 
+  // Textbook chapter decks (#228). The selection is stored, and read after
+  // hydration. A custom deck, while one is on, is the deck: the textbook waits
+  // behind it and comes back when the custom deck is switched off.
+  const [selection, setSelection] = useStoredState(loadSelection, DEFAULT_SELECTION, saveSelection);
+  const textbookId = activeDeckId === null ? textbookOf(selection) : null;
+  const selectTextbook = useCallback(
+    (textbook: TextbookId | null) => {
+      setSelection((prev) => ({ ...prev, deck: textbook ?? 'all' }));
+      if (textbook !== null) setActiveDeckId(null);
+    },
+    [setSelection],
+  );
+
   const inputRef = useRef<HTMLInputElement>(null);
 
   // ─── Filtered vocabulary ────────────────────────────────────────────────────
@@ -165,12 +182,20 @@ function FlashcardsInner() {
           (posFilter.length === 0 || posFilter.includes(w.partOfSpeech)),
       );
     }
+    // A textbook's chapters are already a deliberate set, so the frequency
+    // band does not narrow them (the default band would empty most chapters).
+    // The part-of-speech filter still does, as it does for a custom deck.
+    if (textbookId !== null) {
+      return wordsInChapters(textbookId, selection.chapters, selection.categories).filter(
+        (w) => posFilter.length === 0 || posFilter.includes(w.partOfSpeech),
+      );
+    }
     return vocabulary.filter(
       (w) =>
         matchFreq(w.frequency, freqFilter) &&
         (posFilter.length === 0 || posFilter.includes(w.partOfSpeech)),
     );
-  }, [freqFilter, posFilter, activeDeckId, customDecks]);
+  }, [freqFilter, posFilter, activeDeckId, customDecks, textbookId, selection]);
 
   // ─── Session ─────────────────────────────────────────────────────────────────
 
@@ -188,6 +213,11 @@ function FlashcardsInner() {
         posthog.capture('flashcard_session_started', {
           deck_size: event.deckSize,
           study_mode: event.studyMode,
+          // Only a textbook session says which deck: the event is unchanged otherwise.
+          ...(textbookId !== null && {
+            deck: textbookId,
+            chapters: selection.chapters.length || 'all',
+          }),
         });
         break;
       case 'reviewed':
@@ -244,7 +274,16 @@ function FlashcardsInner() {
     studyMode,
     // The inputs that define the deck. Direction, answer mode and the card
     // face are left out: they change how a card is asked, not which cards.
-    restartKey: JSON.stringify([freqFilter, posFilter, activeDeckId, activeDeckWordKeys]),
+    // The textbook and its chapters are compared by value, so picking what is
+    // already picked keeps the session.
+    restartKey: JSON.stringify([
+      freqFilter,
+      posFilter,
+      activeDeckId,
+      activeDeckWordKeys,
+      textbookId,
+      textbookId === null ? [] : selection.chapters,
+    ]),
     storage: STORAGE,
     onEvent,
     answerMode,
@@ -265,7 +304,8 @@ function FlashcardsInner() {
   // ─── Derived values ──────────────────────────────────────────────────────────
 
   const back = card ? expectedAnswer(card, direction) : '';
-  const hasActiveFilters = freqFilter !== 'all' || posFilter.length > 0 || activeDeckId !== null;
+  const hasActiveFilters =
+    freqFilter !== 'all' || posFilter.length > 0 || activeDeckId !== null || textbookId !== null;
   const activePreset = FREQ_PRESETS.find((p) => p.filter === freqFilter) ?? FREQ_PRESETS[0];
 
   // ─── Session complete screen ─────────────────────────────────────────────────
@@ -360,6 +400,7 @@ function FlashcardsInner() {
               setFreqFilter('all');
               setPosFilter([]);
               setActiveDeckId(null);
+              selectTextbook(null);
             }}
             className="px-5 py-2.5 border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-medium"
           >
@@ -459,14 +500,15 @@ function FlashcardsInner() {
                   : 'border-gray-200 text-text-muted hover:border-grape/40'
             }`}
           >
-            {freqFilter !== 'all' ? activePreset.label : 'Filters'}
+            {freqFilter !== 'all' && textbookId === null ? activePreset.label : 'Filters'}
             {hasActiveFilters ? ' ●' : ''}
           </button>
         </div>
       </div>
 
       {/* ── Preset selector ───────────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-center gap-2">
+      {/* Hidden while a textbook is the deck: a frequency band does not narrow a chapter. */}
+      <div className="flex flex-wrap items-center gap-2" hidden={textbookId !== null}>
         <span className="text-xs font-bold text-text-muted uppercase tracking-wider shrink-0">
           Preset
         </span>
@@ -497,6 +539,15 @@ function FlashcardsInner() {
           );
         })}
       </div>
+
+      {/* ── Textbook row and chapter picker ──────────────────────────────── */}
+      <TextbookDecks
+        active={textbookId}
+        chapters={selection.chapters}
+        onTextbookChange={selectTextbook}
+        onChaptersChange={(chapters) => setSelection((prev) => ({ ...prev, chapters }))}
+        wordCount={filteredVocab.length}
+      />
 
       {/* ── My Decks row ─────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-2">
@@ -542,7 +593,7 @@ function FlashcardsInner() {
       {/* ── Filter panel ──────────────────────────────────────────────────── */}
       {showFilters && (
         <div className="bg-bg-card rounded-2xl border-2 border-indigo-100 p-4 space-y-4 shadow-sm">
-          <div>
+          <div hidden={textbookId !== null}>
             <p className="text-xs font-bold text-text-muted uppercase tracking-wider mb-2">
               Frequency (occurrences in GNT)
             </p>
@@ -614,6 +665,7 @@ function FlashcardsInner() {
                   setFreqFilter('all');
                   setPosFilter([]);
                   setActiveDeckId(null);
+                  selectTextbook(null);
                 }}
                 className="text-sm text-coral hover:opacity-80 font-semibold transition-opacity"
               >

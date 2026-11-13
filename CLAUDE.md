@@ -62,6 +62,8 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/quiz-settings` | `createQuizSettings(storageKey, overrides?)` factory for persisting quiz difficulty; `overrides` sets one app's defaults |
 | `@tools/shared/paradigm-quiz` | The paradigm quiz engine — `TableModel`, `getQuizCells`, `applyDensity`. Which tables exist and how an answer is graded stay in each app |
 | `@tools/shared/custom-decks` | Custom flashcard decks (#225): the `CustomDeck` shape, `createCustomDeckStore(storageKey)`, `mergeCustomDecks` (with tombstones), `parseDeck`/`parseDeckList` for storage and request bodies, and the selection helpers `findDeck`, `wordsInDeck`, `deckRestartPart`. See "Custom decks" below |
+| `@tools/shared/textbooks` | Textbook chapter decks: `createTextbookQueries` (which words a set of chapters holds, and the counts the picker shows) and `describeChapters`. See "Textbook chapter decks" below |
+| `@tools/shared/deck-selection` | `createDeckSelection({ storageKey, textbookIds, … })`: the stored choice of deck, chapters and categories, plus `effectiveSelection` and `selectedTextbook` |
 | `@tools/shared/tombstones` | Deletion by tombstone for any synced list: `mergeTombstoned`, `pruneTombstones`, `isLive`, `stampOf`, `TOMBSTONE_TTL_DAYS`. Decks and focus passages delegate to it. See "Custom decks" and "Focus passages" below |
 | `@tools/shared/focus-passages` | Focus passages (#226): the `FocusPassage` shape, `createFocusPassageStore(storageKey)`, `mergeFocusPassages` (with tombstones), `parsePassage`/`parsePassageList`, range arithmetic (`rangeError`, `versesInRange`, `verseCounts`, `formatPassageRef`) and the maturity bands. See "Focus passages" below |
 | `@tools/shared/flashcard-settings` | `createFlashcardSettings(storageKey)` factory for what the flashcard face shows before you answer |
@@ -85,6 +87,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/components/SiteNav.astro` | The site navigation for both apps (see below) |
 | `@tools/shared/components/MorphWordmark.astro` | The footer's "hebrew tools" / "greek tools" that slides into the original language on hover (see "Clipping boxes size from their content" below) |
 | `@tools/shared/components/DeckBuilder` | List, create, edit and delete custom decks over a vocabulary the app passes in (React; inline-styled, accent passed in) |
+| `@tools/shared/components/ChapterPicker` | The textbook chapter picker: one summary button, opening to a grid of chapters (React; inline-styled, accent passed in) |
 | `@tools/shared/components/PassagePicker` | Book, start and end menus for a verse range, sized by the verse counts the app passes in (React; inline-styled) |
 | `@tools/shared/components/GradeButtons` | The Again/Hard/Good/Easy answer row, with per-grade interval previews (React) |
 | `@tools/shared/components/DrillButtons` | The Missed / Got it answer row for the drill modes, which schedule nothing (React) |
@@ -551,7 +554,7 @@ factory, the merge and the builder are in `@tools/shared/custom-decks` and
   `migrations.test.ts` has a 0005 block; its 0003 and 0004 blocks now call
   `migrateRest('0003')` / `('0004')` so they keep testing their own migration,
   not every one after it.
-- **The selection model is `DeckSelection` plus two shared helpers.**
+- **The selection model is `DeckSelection` (`@tools/shared/deck-selection`) plus two shared helpers.**
   `deck: 'all' | 'custom' | <textbook>` with `customDeckId`, which
   `normalizeSelection` forces to null unless the deck is `'custom'`. A custom
   deck that no longer exists (deleted here or on another device) resolves to the
@@ -570,11 +573,51 @@ factory, the merge and the builder are in `@tools/shared/custom-decks` and
   GNT book or a passage and needs its corpus. A compatibility test in
   `customDecks.test.ts` pins that its decks parse and merge under the shared
   rules. Adopting it gives greek tombstones and closes the deletion gap above.
-  #228 (textbook chapter decks on greek.tools) should build on `DeckSelection`
-  and `wordsInDeck` here rather than a second selection model.
+  Its textbook decks (#228) already use the shared `DeckSelection`; its custom
+  decks join that selection when it adopts the shared store (#242).
 - **The builder lists at most 150 matches at once** (`VISIBLE_WORDS`); the search
   box narrows them. It saves through the store and reports a failed write
   instead of looking saved.
+
+## Textbook chapter decks
+
+Both apps let a student study the chapter their course is on. What is shared
+(#228) is everything that does not name a book or a language:
+
+| Module | What it holds |
+|---|---|
+| `@tools/shared/textbooks` | `createTextbookQueries({ words, getRefs, categoryIds })` (`wordsInChapters`, `chapterStats`, `categoryCounts` and the rest) and `describeChapters` |
+| `@tools/shared/deck-selection` | `createDeckSelection({ storageKey, textbookIds, categoryIds, defaultCategories })`, `effectiveSelection`, `selectedTextbook` |
+| `@tools/shared/components/ChapterPicker` | The collapsed summary button and the chapter grid |
+
+Each app keeps its textbook list, its chapter data and its bindings
+(`src/data/textbooks.ts`, `src/lib/deck-selection.ts`). Things to know:
+
+- **`getRefs` is the seam between two data shapes.** hebrew.tools carries a
+  `chapters` tag on each word, written by its vocabulary generator. greek.tools'
+  vocabulary is generated from MorphGNT and Dodson and knows nothing of
+  textbooks, so its tags are looked up from a lemma-to-chapter map
+  (`chaptersOf`). The queries do not care which.
+- **A ref carries a category** because hebrew's textbook prints several lists a
+  chapter. A book with one list a chapter has one category (greek's is
+  `'vocabulary'`), and its app draws no category chips.
+- **An empty chapter list is the whole book; an empty category list is
+  nothing.** `normalizeSelection` never returns an empty category list, so the
+  second cannot happen by accident.
+- **The textbook list is data in each app.** `TEXTBOOK_IDS` drives the chips,
+  the stored selection and the tests. Adding a book is a data change. A stored
+  deck id that is no longer in the list reads as the whole vocabulary.
+- **Never rename a textbook id.** It is stored in the student's selection.
+- **Only facts come from a textbook.** Which headword a chapter assigns is a
+  fact. A book's glosses, cognate notes, mnemonics, tables and prose are not
+  copied into this repository, and neither is the source document. hebrew.tools
+  takes its gloss wording from the course handout by a decision recorded in its
+  own CLAUDE.md; greek.tools takes every gloss from its existing lexicon data.
+- **`ChapterPicker` is inline-styled with the accent passed in**, like every
+  shared React component. Its grid is `auto-fill` columns of at least 2.75rem,
+  so a cell is a finger wide at any width.
+- **Today's Session ignores the textbook**, as it ignores a custom deck: due is
+  due.
 
 ## Focus passages
 

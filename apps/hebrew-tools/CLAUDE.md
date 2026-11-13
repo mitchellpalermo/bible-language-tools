@@ -722,6 +722,8 @@ The vocabulary is split across four modules, and the split is load-bearing:
 | `src/data/vocabulary.ts` | The hand-curated set (incl. chapter 1) + `mergeVocabulary` → `vocabulary` |
 | `src/data/textbooks.ts` | Textbook metadata, categories, and every query over the merged list |
 
+The queries, the selection model and the chapter picker are shared with greek.tools since #228 (`@tools/shared/textbooks`, `@tools/shared/deck-selection`, `@tools/shared/components/ChapterPicker`; see the repo CLAUDE.md, "Textbook chapter decks"). `textbooks.ts`, `src/lib/deck-selection.ts` and `src/components/ChapterPicker.tsx` bind them to this app's vocabulary, storage key and accent, and export what they always did.
+
 **The import graph is a line, not a cycle, and it must stay that way.** `textbooks.ts` reads `vocabulary` at module scope, so `gd()` cannot live there — `vocabulary-garrett.ts` calls it while its own literals evaluate, and a cycle makes it `undefined` at exactly that moment. That is why `gd` sits in `vocabulary-types.ts` (which imports nothing but types) and is merely re-exported from `textbooks.ts`. Symptom if this is broken: `TypeError: gd is not a function` at import time, in every test that touches vocabulary.
 
 **A chapter tag carries a category**, not just a number — `gd(20, 'core')`. The textbook prints Core, Reading, Inflected, Proper Names, derived-stem and Special sections per chapter, and a word can sit in different sections in different chapters (Core in ch. 9, derived stems in ch. 20). Category belongs on the tag; it is not a property of the word.

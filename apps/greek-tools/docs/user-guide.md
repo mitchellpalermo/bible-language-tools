@@ -31,8 +31,13 @@ Study the most common Greek New Testament (GNT) vocabulary with built-in spaced 
 - **Answer mode** — Flip to reveal, or type your answer
 - **Frequency filter** — Focus on words that appear 500+ times, 100–499 times, 50–99 times, or fewer than 50
 - **Part of speech** — Filter by noun, verb, adjective, conjunction, and more
+- **Textbook** — Study the vocabulary your course assigns, chapter by chapter (see below)
 
 In flip mode, use **Space** to reveal the answer, then **Right Arrow** for "Got It" or **Left Arrow** for "Still Learning." In type mode, answers are checked with fuzzy matching so minor typos won't count against you.
+
+**Studying by textbook chapter.** Tap a textbook in the **Textbook** row to study its vocabulary instead of a frequency band. Tap the panel that appears under it to open the chapter grid, then tap the chapters you want. **Through Ch. N** selects everything up to the last chapter you picked, which suits a cumulative quiz; **Only Ch. N** narrows to that one chapter; **All chapters** goes back to the whole book. Your choice is remembered on this device. Tap the textbook again to return to the whole vocabulary.
+
+The supported textbook is Merkle and Plummer, *Beginning with New Testament Greek* (chapters 1 to 23), used with the author's permission. Only the chapter word lists come from the book. The definitions on the cards are greek.tools' own, so the wording can differ from the book's. Three entries have no card yet: ἱερόν (chapter 2), δεῖ (chapter 20) and the phrase ἐὰν μή (chapter 21).
 
 Your study streak tracks consecutive days where you review at least 10 cards. Stats including accuracy and total reviews are tracked automatically.
 
