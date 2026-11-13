@@ -875,9 +875,10 @@ Things to know before changing it:
 
 ### Flashcards: typed answers, directions, filters (issue #74)
 
-`/flashcards` asks a card three ways (Hebrew → English, English → Hebrew,
-Transliteration → Hebrew), takes the answer by flip or typed, and narrows any
-deck by part of speech and root. The session is `useFlashcardSession`; see
+`/flashcards` asks a card two ways (Hebrew → English, English → Hebrew),
+takes the answer by flip or typed, and narrows any deck by part of speech and
+root. A third direction, Transliteration → Hebrew, is deferred (see
+`ROADMAP.md`, Phase 2): only 74 of the 580 words carry a transliteration. The session is `useFlashcardSession`; see
 "The flashcard session engine" and "Drill modes answer Missed / Got it" in the
 repo CLAUDE.md for the rules it owns.
 
@@ -893,16 +894,17 @@ repo CLAUDE.md for the rules it owns.
 Things that will bite if changed carelessly:
 
 - **A direction asks only the words it has a prompt for, and never asks one
-  another way instead.** 74 of the 580 words carry a transliteration (the
-  hand-curated ones; see "Textbook chapter decks"). 25 glosses quote their own
-  Hebrew and cannot be an English prompt even after `glossPrompt` trims the
-  aside. Those words are left out of the deck in that direction, a note under
-  the controls says how many and why, and the Transliteration button is
-  disabled for a deck with none. Same rule as /write's "From the sound".
+  another way instead.** 25 glosses quote their own Hebrew and cannot be an
+  English prompt even after `glossPrompt` trims the aside. Those words are
+  left out of the deck in English → Hebrew, and a note under the controls
+  says how many and why. Same rule as /write's word mode. Any direction added
+  later (transliteration) must follow it: narrow the deck, never fall back.
 - **So direction is in `restartKey` only through the words it leaves out.**
-  Where both directions can ask the whole deck the key is the same and the
-  session is kept, as on greek.tools. Where they cannot, the deck is a
-  different deck and a new one is dealt. Flip / Type never restarts.
+  Hebrew → English can ask every word. Where English → Hebrew can too (a
+  typical chapter or custom deck), the key is the same and switching keeps
+  the session, as on greek.tools. Where it must leave a word out (the whole
+  vocabulary, with its 25), that is a different deck and a new session is
+  dealt. Flip / Type never restarts.
 - **Typed Hebrew is marked with final forms applied, and also as typed.** The
   field's value is raw (see `useHebrewInput`), so מלכ is מלך by the time it is
   compared. But כְּ is a whole entry that ends in a kaf which is not final, and
@@ -916,8 +918,7 @@ Things that will bite if changed carelessly:
   the textbook's asides sit in parentheses. `glossVariants` accepts "wrote".
   The matching itself is `@tools/shared/gloss-answer`, shared with greek.tools.
 - **With the Hebrew as the answer the front has no part of speech**, whatever
-  the switch says, and no transliteration when that is the prompt. Both come
-  with the answer.
+  the switch says. It comes with the answer, as the transliteration always has.
 - **Roots are the vocabulary's `root` field, nothing derived.** It is OSHB's
   (see "Split authority") or hand-entered on a curated word, written with a
   shin or sin dot and a final form. 160 words have none and match no root

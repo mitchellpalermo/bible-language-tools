@@ -220,9 +220,9 @@ function FlashcardsInner() {
     [deckWords, filters],
   );
 
-  // A direction asks only the words it has a prompt for: transliterations
-  // exist on the hand-curated words alone, and a few glosses quote the Hebrew
-  // they translate. See `flashcard-answer.ts`.
+  // A direction asks only the words it has a prompt for: a few glosses quote
+  // the Hebrew they translate and cannot be an English front. See
+  // `flashcard-answer.ts`.
   const filteredVocab = useMemo(
     () => matchedWords.filter((w) => canAsk(w, direction)),
     [matchedWords, direction],
@@ -316,10 +316,10 @@ function FlashcardsInner() {
     // key (sorted: the same choices picked in another order are the same
     // deck). Flip / Type and the card face are not: they change how a card is
     // asked, not which cards. Direction is in between. It is in the key only
-    // through the words it leaves out, so switching between Hebrew → English
-    // and English → Hebrew keeps the session in an ordinary deck, as on
-    // greek.tools, and a direction that cannot ask some of the deck (most
-    // often transliteration) deals the smaller one.
+    // through the words it leaves out, so switching direction keeps the
+    // session in a deck both can ask in full, as on greek.tools. Where
+    // English → Hebrew has to leave a word out (its gloss quotes the Hebrew),
+    // that is a different deck and a new session is dealt.
     restartKey: JSON.stringify([
       selection,
       freqFilter,
@@ -344,10 +344,6 @@ function FlashcardsInner() {
   };
 
   const hasCardFilters = hasFilters(filters);
-  const transliterated = useMemo(
-    () => matchedWords.filter((w) => canAsk(w, 'translit-he')).length,
-    [matchedWords],
-  );
 
   // ─── Session complete screen ─────────────────────────────────────────────────
 
@@ -429,14 +425,10 @@ function FlashcardsInner() {
       return (
         <div className="text-center py-16 space-y-4">
           <p className="text-lg text-text-muted">
-            {direction === 'translit-he'
-              ? 'No word in this deck has a transliteration.'
-              : 'No word in this deck can be asked from its gloss.'}
+            No word in this deck can be asked from its gloss.
           </p>
           <p className="text-sm text-text-muted max-w-md mx-auto">
-            {direction === 'translit-he'
-              ? 'Only the hand-checked words carry one, and a card is never asked some other way instead.'
-              : 'Each gloss here quotes the Hebrew it translates, which would print the answer.'}
+            Each gloss here quotes the Hebrew it translates, which would print the answer.
           </p>
           <button type="button" onClick={() => changeDirection('he-en')} className={outline}>
             Back to Hebrew → English
@@ -673,32 +665,20 @@ function FlashcardsInner() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {/* Direction. Transliteration is offered only where the deck has a
-              word to ask that way; the title says why when it does not. */}
+          {/* Direction */}
           <fieldset className={SEGMENT_GROUP}>
             <legend className="sr-only">Direction</legend>
-            {DIRECTIONS.map(({ id, label }) => {
-              const unavailable = id === 'translit-he' && transliterated === 0;
-              return (
-                <button
-                  type="button"
-                  key={id}
-                  onClick={() => changeDirection(id)}
-                  aria-pressed={direction === id}
-                  disabled={unavailable}
-                  title={
-                    unavailable
-                      ? 'No word in this deck has a transliteration. Only the hand-checked words carry one.'
-                      : undefined
-                  }
-                  className={`${SEGMENT} disabled:opacity-40 disabled:cursor-not-allowed ${
-                    direction === id ? SEGMENT_ON : SEGMENT_OFF
-                  }`}
-                >
-                  {label}
-                </button>
-              );
-            })}
+            {DIRECTIONS.map(({ id, label }) => (
+              <button
+                type="button"
+                key={id}
+                onClick={() => changeDirection(id)}
+                aria-pressed={direction === id}
+                className={`${SEGMENT} ${direction === id ? SEGMENT_ON : SEGMENT_OFF}`}
+              >
+                {label}
+              </button>
+            ))}
           </fieldset>
 
           {/* Answer mode */}
@@ -764,9 +744,8 @@ function FlashcardsInner() {
       {/* A direction that cannot ask the whole deck says so, and why. */}
       {leftOut.length > 0 && (
         <p className="text-xs text-text-muted" data-testid="direction-note">
-          {direction === 'translit-he'
-            ? `${filteredVocab.length} of ${matchedWords.length} words: only the hand-checked words carry a transliteration, and the rest are left out rather than asked another way.`
-            : `${leftOut.length} ${leftOut.length === 1 ? 'word is' : 'words are'} left out: the gloss quotes the Hebrew it translates.`}
+          {leftOut.length} {leftOut.length === 1 ? 'word is' : 'words are'} left out: the gloss
+          quotes the Hebrew it translates.
         </p>
       )}
 

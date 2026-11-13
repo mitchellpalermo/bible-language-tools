@@ -275,35 +275,24 @@ describe('directions', () => {
     expect(screen.getByRole('region', { name: 'Hebrew keypad' })).toBeInTheDocument();
   });
 
-  it('Transliteration → Hebrew asks only the words that have one, and says so', async () => {
-    pickDeck(DAVAR, KATAV);
+  it('offers two directions; transliteration is on the answer side only', async () => {
+    pickDeck(DAVAR);
     const user = userEvent.setup();
     render(<Flashcards />);
-    await studyAll(user);
-    expect(progress()).toBe('1/2');
+    const group = within(screen.getByRole('group', { name: 'Direction' }));
+    expect(group.getAllByRole('button').map((b) => b.textContent)).toEqual([
+      'Hebrew → English',
+      'English → Hebrew',
+    ]);
 
-    await user.click(press('Transliteration → Hebrew'));
-    expect(progress()).toBe('1/1');
-    expect(screen.getByTestId('card-prompt')).toHaveTextContent(DAVAR.transliteration as string);
-    expect(screen.getByTestId('direction-note')).toHaveTextContent('1 of 2 words');
-
+    await user.click(press('English → Hebrew'));
+    expect(screen.queryByText(DAVAR.transliteration as string)).not.toBeInTheDocument();
     await user.click(getCard());
-    expect(screen.getByText(DAVAR.hebrew)).toBeInTheDocument();
-    expect(screen.getByText(DAVAR.gloss)).toBeInTheDocument();
-    // The transliteration was the prompt; the back does not repeat it.
-    expect(screen.getAllByText(DAVAR.transliteration as string)).toHaveLength(1);
-  });
-
-  it('does not offer transliteration for a deck with none', () => {
-    pickDeck(KATAV);
-    render(<Flashcards />);
-    const button = press('Transliteration → Hebrew');
-    expect(button).toBeDisabled();
-    expect(button).toHaveAttribute('title', expect.stringContaining('hand-checked'));
+    expect(screen.getByText(DAVAR.transliteration as string)).toBeInTheDocument();
   });
 
   it('keeps the session between Hebrew → English and English → Hebrew', async () => {
-    const five = vocabulary.filter((w) => w.transliteration && canAsk(w, 'en-he')).slice(0, 5);
+    const five = vocabulary.filter((w) => canAsk(w, 'en-he')).slice(0, 5);
     pickDeck(...five);
     const user = userEvent.setup();
     render(<Flashcards />);
@@ -355,35 +344,30 @@ describe('directions', () => {
       await user.click(press('Back to Hebrew → English'));
       expect(screen.getByText(quoted.hebrew)).toBeInTheDocument();
     });
-  });
 
-  it('says so when a filter leaves transliteration nothing to ask', async () => {
-    pickDeck(DAVAR, KATAV);
-    const user = userEvent.setup();
-    render(<Flashcards />);
-    await user.click(press('Transliteration → Hebrew'));
-    await user.click(press('Toggle filters'));
-    await user.click(press(/^verb/));
-    expect(screen.getByText('No word in this deck has a transliteration.')).toBeTruthy();
-    await user.click(press('Back to Hebrew → English'));
-    expect(screen.getByText(KATAV.hebrew)).toBeInTheDocument();
-  });
+    it('deals a new session for the smaller deck, and records how it is asked', async () => {
+      pickDeck(DAVAR, KATAV, quoted);
+      const user = userEvent.setup();
+      render(<Flashcards />);
+      await studyAll(user);
+      await user.click(getCard());
+      await user.click(press(/got it/i));
+      expect(progress()).toBe('2/3');
 
-  it('records the direction and answer mode on the session-started event', async () => {
-    pickDeck(DAVAR, KATAV);
-    const user = userEvent.setup();
-    render(<Flashcards />);
-    await user.click(press('Type'));
-    await user.click(press('Transliteration → Hebrew'));
-    expect(posthog.capture).toHaveBeenLastCalledWith(
-      'hebrew_flashcard_session_started',
-      expect.objectContaining({
-        direction: 'translit-he',
-        answer_mode: 'type',
-        filtered: false,
-        deck_size: 1,
-      }),
-    );
+      await user.click(press('Type'));
+      await user.click(press('English → Hebrew'));
+      // Two of the three can be asked from their gloss: a different deck.
+      expect(progress()).toBe('1/2');
+      expect(posthog.capture).toHaveBeenLastCalledWith(
+        'hebrew_flashcard_session_started',
+        expect.objectContaining({
+          direction: 'en-he',
+          answer_mode: 'type',
+          filtered: false,
+          deck_size: 2,
+        }),
+      );
+    });
   });
 });
 

@@ -439,7 +439,7 @@ Things to know before changing it:
   card face are not. Its direction is in the key only through the words that
   direction cannot ask (see "Flashcards: typed answers, directions, filters"
   in `apps/hebrew-tools/CLAUDE.md`), so Hebrew → English and English → Hebrew
-  share a session in an ordinary deck and transliteration deals its own.
+  share a session wherever both can ask the whole deck.
   greek.tools keys on the frequency band, the part-of-speech filter and the
   active custom deck's word list, sorted: renaming a deck, flipping direction
   or switching between Flip and Type keeps the session; editing a deck's words

@@ -26,21 +26,21 @@ const KATAV = word('כָּתַב');
 const typed = (keys: string) => translateHebrewInput(keys);
 
 describe('directions', () => {
-  it('offers Hebrew → English first, then the two that ask for the Hebrew', () => {
-    expect(DIRECTIONS.map((d) => d.id)).toEqual(['he-en', 'en-he', 'translit-he']);
-    expect(DIRECTIONS.map((d) => asksForHebrew(d.id))).toEqual([false, true, true]);
+  it('offers Hebrew → English first, then the one that asks for the Hebrew', () => {
+    expect(DIRECTIONS.map((d) => d.id)).toEqual(['he-en', 'en-he']);
+    expect(DIRECTIONS.map((d) => asksForHebrew(d.id))).toEqual([false, true]);
   });
 
-  it('puts the headword, the gloss or the transliteration on the front', () => {
+  it('puts the headword or the gloss on the front', () => {
     expect(frontText(DAVAR, 'he-en')).toBe('דָּבָר');
     expect(frontText(DAVAR, 'en-he')).toBe(DAVAR.gloss);
-    expect(frontText(DAVAR, 'translit-he')).toBe(DAVAR.transliteration);
   });
 
-  it('cannot ask a word from a transliteration it does not have', () => {
-    expect(KATAV.transliteration).toBeUndefined();
-    expect(frontText(KATAV, 'translit-he')).toBeNull();
-    expect(canAsk(KATAV, 'translit-he')).toBe(false);
+  it('cannot ask a word whose gloss still quotes the Hebrew once trimmed', () => {
+    const quoted = vocabulary.filter((w) => !canAsk(w, 'en-he'));
+    expect(quoted.length).toBeGreaterThan(0);
+    expect(quoted.length).toBeLessThan(vocabulary.length / 10);
+    for (const w of quoted) expect(frontText(w, 'en-he')).toBeNull();
     expect(canAsk(KATAV, 'en-he')).toBe(true);
   });
 
@@ -49,24 +49,16 @@ describe('directions', () => {
     expect(frontText(hafets, 'en-he')).toBe('he desired, enjoyed, wanted');
   });
 
-  it('never prints Hebrew on an English or transliterated front', () => {
+  it('never prints Hebrew on an English front', () => {
     const hebrew = /[֐-׿]/;
     for (const w of vocabulary) {
-      for (const direction of ['en-he', 'translit-he'] as const) {
-        const front = frontText(w, direction);
-        if (front !== null) expect(front, w.hebrew).not.toMatch(hebrew);
-      }
+      const front = frontText(w, 'en-he');
+      if (front !== null) expect(front, w.hebrew).not.toMatch(hebrew);
     }
   });
 
   it('can ask every word from its Hebrew', () => {
     expect(vocabulary.every((w) => canAsk(w, 'he-en'))).toBe(true);
-  });
-
-  it('has a transliteration on the hand-curated words only', () => {
-    const count = vocabulary.filter((w) => canAsk(w, 'translit-he')).length;
-    expect(count).toBeGreaterThan(0);
-    expect(count).toBeLessThan(vocabulary.length / 4);
   });
 });
 
@@ -162,14 +154,12 @@ describe('markTypedAnswer', () => {
     });
   });
 
-  it('marks Hebrew in the other two directions, showing final forms as the field did', () => {
-    for (const direction of ['en-he', 'translit-he'] as const) {
-      expect(markTypedAnswer(typed('melek'), MELEK, direction)).toEqual({
-        result: 'nikud-only',
-        answer: MELEK.hebrew,
-        typed: 'מֶלֶך',
-        hebrew: true,
-      });
-    }
+  it('marks Hebrew in English → Hebrew, showing final forms as the field did', () => {
+    expect(markTypedAnswer(typed('melek'), MELEK, 'en-he')).toEqual({
+      result: 'nikud-only',
+      answer: MELEK.hebrew,
+      typed: 'מֶלֶך',
+      hebrew: true,
+    });
   });
 });

@@ -5,12 +5,14 @@
 //
 // Two things here are pedagogy rather than plumbing:
 //
-// **A direction can only ask a word it has a prompt for.** Transliterations
-// exist on the hand-curated words alone (see "Textbook chapter decks" in this
-// app's CLAUDE.md), and a few glosses quote the Hebrew they translate. Such a
-// word is left out of the deck in that direction. It is never asked some other
-// way instead: a prompt that silently changes kind is worse than a smaller
-// deck. Same rule as /write's word mode.
+// **A direction can only ask a word it has a prompt for.** A few glosses quote
+// the Hebrew they translate, which would print the answer on an English front.
+// Such a word is left out of the deck in English → Hebrew. It is never asked
+// some other way instead: a prompt that silently changes kind is worse than a
+// smaller deck. Same rule as /write's word mode.
+//
+// (Transliteration → Hebrew is deferred: only the hand-curated words carry a
+// transliteration. See ROADMAP.md, Phase 2.)
 //
 // **A mark is information, never the answer.** `markTypedAnswer` says how the
 // typed text compares; the student still picks the grade.
@@ -20,24 +22,21 @@ import type { HebrewVocabWord } from '../data/vocabulary-types';
 import { glossPrompt } from './gloss-prompt';
 import { type AnswerResult, applyFinalForms, checkHebrewAnswer } from './hebrew-input';
 
-export type Direction = 'he-en' | 'en-he' | 'translit-he';
+export type Direction = 'he-en' | 'en-he';
 
 export const DIRECTIONS: { id: Direction; label: string }[] = [
   { id: 'he-en', label: 'Hebrew → English' },
   { id: 'en-he', label: 'English → Hebrew' },
-  { id: 'translit-he', label: 'Transliteration → Hebrew' },
 ];
 
 /** Whether the answer side is the Hebrew word, so a typed answer is Hebrew. */
 export function asksForHebrew(direction: Direction): boolean {
-  return direction !== 'he-en';
+  return direction === 'en-he';
 }
 
 /** What the front of the card shows, or null when this word cannot be asked that way. */
 export function frontText(word: HebrewVocabWord, direction: Direction): string | null {
-  if (direction === 'he-en') return word.hebrew;
-  if (direction === 'translit-he') return word.transliteration ?? null;
-  return glossPrompt(word.gloss);
+  return direction === 'he-en' ? word.hebrew : glossPrompt(word.gloss);
 }
 
 export function canAsk(word: HebrewVocabWord, direction: Direction): boolean {

@@ -3,8 +3,8 @@
 // (#184), so a word looks the same wherever it is reviewed. The session that
 // decides which card this is, and what an answer does, is the caller's.
 //
-// /flashcards can also ask a card the other way (#74): the gloss or the
-// transliteration on the front, the Hebrew as the answer. The back is the same
+// /flashcards can also ask a card the other way (#74): the gloss on the
+// front, the Hebrew as the answer. The back is the same
 // either way; only which line is withheld until the reveal changes. And it can
 // take the answer typed (`typed`), which reveals the back on Check instead of
 // on a tap. Today's Session passes neither and gets the card it always had.
@@ -81,20 +81,10 @@ export default function VocabCard({
       }`}
     >
       {/* Front side */}
-      {direction === 'he-en' && <Headword>{front}</Headword>}
-      {direction === 'en-he' && (
+      {direction === 'he-en' ? (
+        <Headword>{front}</Headword>
+      ) : (
         <p className="leading-tight text-3xl font-semibold text-text" data-testid="card-prompt">
-          {front}
-        </p>
-      )}
-      {/* Transliteration is content, not a label, so it keeps its case and
-          takes the italic that is conventional for it (see the back, below). */}
-      {direction === 'translit-he' && (
-        <p
-          className="leading-tight text-3xl font-semibold text-text italic"
-          dir="ltr"
-          data-testid="card-prompt"
-        >
           {front}
         </p>
       )}
@@ -103,9 +93,8 @@ export default function VocabCard({
           With the toggle off it waits for the reveal rather than disappearing:
           "noun" narrows a word to a fraction of the lexicon, which is help
           you did not ask for while recalling, and worth having once you have.
-          (With the Hebrew as the answer the front is a gloss or a
-          transliteration and there is no such line to withhold; it comes with
-          the answer, as on greek.tools.) */}
+          (In English → Hebrew the front is the gloss and there is no such
+          line to withhold; it comes with the answer, as on greek.tools.) */}
       {direction === 'he-en' && (showPartOfSpeech || revealed) && (
         <p className="text-text-muted text-xs mt-2 font-medium uppercase tracking-wide">
           {card.partOfSpeech}
@@ -141,7 +130,7 @@ export default function VocabCard({
           {/* In English → Hebrew the prompt is the gloss with any aside that
               quotes the Hebrew trimmed off. The whole gloss comes back with the
               answer only when it says more than the prompt did. */}
-          {(direction !== 'en-he' || card.gloss !== front) && (
+          {(direction === 'he-en' || card.gloss !== front) && (
             <p className="leading-tight text-2xl font-semibold text-text">{card.gloss}</p>
           )}
 
@@ -150,7 +139,7 @@ export default function VocabCard({
               `uppercase` transform the surrounding micro-labels use.
               Italic is the standard convention for transliterated text.
               Absent on textbook-imported words — see `vocabulary-garrett.ts`. */}
-          {direction !== 'translit-he' && card.transliteration && (
+          {card.transliteration && (
             <p className="text-text-muted text-sm mt-2 italic" dir="ltr">
               {card.transliteration}
             </p>
