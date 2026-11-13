@@ -109,7 +109,7 @@ Features are tracked as GitHub Issues (see `docs/adr/002-github-issues-for-task-
 - Vocabulary data is pre-processed by `scripts/build-vocabulary.mjs`
 - SRS (Spaced Repetition System) state is persisted in `localStorage` via `src/data/srs.ts`
 - Flashcard display preferences are persisted separately (`greek-tools-flashcard-display-v1`, `src/lib/flashcard-settings.ts`, over `@tools/shared/flashcard-settings`). Today that is one boolean: whether the part of speech appears on the front of a flashcard, which defaults to off. See the repo CLAUDE.md under "What the card front gives away".
-- **The flashcard session is `useFlashcardSession` from `@tools/shared`** (#87), shared with hebrew.tools. `Flashcards.tsx` owns the Greek card, the presets, POS filter and custom decks, the Levenshtein `checkAnswer` for typed answers, and the mapping onto `flashcard_*` PostHog events. Study All and Endless are drills that answer Missed / Got it and never write the schedule. Read the repo CLAUDE.md under "The flashcard session engine" and "Drill modes answer Missed / Got it" before changing how a session deals, grades or restarts.
+- **The flashcard session is `useFlashcardSession` from `@tools/shared`** (#87), shared with hebrew.tools. `Flashcards.tsx` owns the Greek card, the presets, POS filter, custom decks and textbook chapter decks (#228, below), the Levenshtein `checkAnswer` for typed answers, and the mapping onto `flashcard_*` PostHog events. Study All and Endless are drills that answer Missed / Got it and never write the schedule. Read the repo CLAUDE.md under "The flashcard session engine" and "Drill modes answer Missed / Got it" before changing how a session deals, grades or restarts.
 - **Syncretic parses are correct on every facet.** Several case/number/gender combinations share one spelling (participle acc. sg. masc. = acc. sg. neut. in 2-1-2 forms, nom./acc. sg. neut. everywhere, and so on). Grading compares a student's (case, number, gender) against every triple the form could carry, via `PARTICIPLE_SYNCRETISMS` and `acceptedParticipleParses` in `src/lib/gnt-parse.ts`. Never compare a participle facet with strict equality on its own: that marks a legitimate reading wrong (issue #46). Identities that hold in only one declension class take an `endsIn` gate, and an identity the gate cannot separate (fem. gen. pl. in 3-3 participles) is left out.
 
 ## Loading book data in a component
@@ -211,6 +211,57 @@ The `component` prop is tagged on every captured exception so errors can be filt
 **When adding a new React island**, follow the same pattern: implement as `ComponentNameInner`, export `ComponentName` as the ErrorBoundary wrapper with the component name as the `component` prop.
 
 **Viewing errors in PostHog** — errors appear under "Error tracking" in the PostHog sidebar, grouped by message and stack trace, with links to session recordings. Filter by the `component` property to isolate errors to a specific island.
+
+## Textbook chapter decks (#228)
+
+`/flashcards` has a **Textbook** row: one chip per textbook, and under the
+active one a chapter picker. Today there is one book, Merkle and Plummer,
+*Beginning with New Testament Greek*, used with Dr. Plummer's permission (Nov
+2026). The queries, the stored selection and the picker are shared with
+hebrew.tools (repo CLAUDE.md, "Textbook chapter decks").
+
+| File | What it holds |
+|---|---|
+| `src/data/textbook-chapters.ts` | Each book's map, chapter number to lemmas, and its headwords with no card |
+| `src/data/textbooks.ts` | The book list (`BOOKS`, `TEXTBOOK_IDS`, `TEXTBOOKS`), the join to the vocabulary (`chaptersOf`) and the bound queries |
+| `src/lib/deck-selection.ts` | The stored selection, `greek-tools-deck-v1`. Local, never synced |
+| `src/components/TextbookDecks.tsx` | The chip row and the picker |
+
+- **Only the chapter assignments come from the book.** A map is lemmas and
+  chapter numbers. Glosses, parts of speech and frequencies are
+  `vocabulary.ts`'s (MorphGNT and Dodson). Do not add a textbook's gloss,
+  cognate, mnemonic or prose anywhere in the repository, and do not commit the
+  source document or an extract of it. `textbook-chapters.test.ts` fails on any
+  map entry that is not Greek letters.
+- **The tag is a lookup, not a field.** `vocabulary.ts` is generated and is not
+  touched. `chaptersOf(word)` reads the maps by the word's `greek` field, so a
+  lemma is spelled as the vocabulary spells it (`'ὁ, ἡ, τό'`, `'ἐκ, ἐξ'`).
+- **To add a textbook:** add its map to `textbook-chapters.ts` and its entry to
+  `BOOKS` in `textbooks.ts`. The chip, the grid, the counts and the stored
+  selection follow. An id is stored in the student's selection: never rename one.
+- **Section numbers map to chapters by the number before the point.** The source
+  heads each list "1.11", "2.12" and so on: chapter 1 section 11, chapter 2
+  section 12. The list runs to chapter 23, fifteen headwords a chapter.
+- **A headword with no vocabulary entry is left out and listed**, with a reason,
+  in `BEGINNING_GREEK_UNRESOLVED`: ἱερόν and δεῖ (MorphGNT files them under
+  ἱερός and δέω) and the phrase ἐὰν μή. So 342 of 345 have cards. A test fails
+  if the vocabulary gains one of them, which is the signal to move it into the map.
+- **How it sits with the other controls.** A custom deck, while on, is the deck;
+  the textbook waits behind it. Choosing a textbook switches the custom deck
+  off. The frequency band does not narrow a chapter (the default band would
+  empty most of them), so the Preset row and the Frequency chips are hidden
+  while a textbook is on. The part-of-speech filter does narrow it, as it does a
+  custom deck.
+- **The session restarts on the textbook and its chapters, by value**
+  (`restartKey`). Picking what is already picked keeps the session.
+- **Today's Session does not take the selection.** It deals due vocabulary
+  whatever deck is open. The paradigm quiz and the parse quizzes have no
+  vocabulary deck to narrow.
+- **The selection is read through `useStoredState`**, so the first render is the
+  default on both sides, and it is seeded in `src/test/hydration.test.tsx`.
+- **The custom-deck half of `DeckSelection` is unused here** until the decks
+  move onto the shared store (#242). A stored `deck: 'custom'` reads as no
+  textbook.
 
 ## Parse history and the shared attempt log (#209)
 
