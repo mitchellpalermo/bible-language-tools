@@ -21,10 +21,15 @@
 import type { CustomDeck } from '@tools/shared/custom-decks';
 import { type GlyphCluster, splitClusters } from '@tools/shared/ink';
 import { wordsOfDeck } from '../lib/custom-decks';
+import { glossPrompt } from '../lib/gloss-prompt';
 import { isDue, type SRSCard } from './srs';
 import { type TextbookId, type VocabCategory, wordsInChapters } from './textbooks';
 import { vocabulary } from './vocabulary';
 import { cardKey, type HebrewVocabWord } from './vocabulary-types';
+
+// Shared with the flashcards' English → Hebrew direction (#74), which has the
+// same contract: the Hebrew is the answer, so the prompt must not quote it.
+export { glossPrompt };
 
 /**
  * SRS namespace for word-writing cards.
@@ -82,39 +87,6 @@ export interface WritingWord {
 
 export function toWritingWord(word: HebrewVocabWord): WritingWord {
   return { word, cells: splitClusters(word.hebrew), key: wordCardKey(word) };
-}
-
-/** Any character in the Hebrew block, including its points. */
-const HEBREW = /[֐-׿יִ-ﭏ]/;
-
-/**
- * A parenthetical aside at the end of a gloss.
- *
- * Garrett & DeRouchie annotate a fair number of entries inline — חָפֵץ reads
- * "desire, enjoy, want (the qatal 3ms is חָפֵץ but other forms are normal…)".
- * That note is useful on a flashcard back and fatal as a writing prompt,
- * because it prints the answer.
- */
-const ASIDE = /\s*\([^()]*\)\s*$/;
-
-/**
- * The gloss, reduced to something that can be asked without giving the word away.
- *
- * Returns null when it cannot be. A writing prompt is a different contract from
- * a flashcard back: the flashcard shows the Hebrew *and* the gloss together, so
- * a note quoting the form costs nothing, while here the student is being asked
- * to produce exactly that form.
- *
- * Trimming the aside recovers most of them. Where Hebrew survives the trim the
- * word is dropped rather than shown with the answer blanked out — a gloss with
- * a hole in it is a worse prompt than one fewer word, and the vocabulary is not
- * short of words.
- */
-export function glossPrompt(gloss: string | undefined): string | null {
-  if (!gloss) return null;
-  const trimmed = (HEBREW.test(gloss) ? gloss.replace(ASIDE, '') : gloss).trim();
-  if (trimmed.length === 0 || HEBREW.test(trimmed)) return null;
-  return trimmed;
 }
 
 /**

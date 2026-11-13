@@ -151,7 +151,7 @@ interface HebrewVocabWord {
 **Direction modes:**
 - Hebrew → English gloss (same as Greek → English)
 - English → Hebrew (typing Hebrew requires the Keyboard tool — consider linking them)
-- Transliteration → Hebrew (useful early in the curriculum)
+- Transliteration → Hebrew (useful early in the curriculum) — deferred, see 2d below
 
 **localStorage keys (new namespace):**
 - `hebrew-tools-srs-v1` — SRS card store
@@ -166,7 +166,20 @@ This phase is scoped as three sequential PRs rather than one, so each is small e
 | 2a | Vocabulary dataset only — ~50 hand-curated, high-confidence words. No UI. | #72 — ✅ done |
 | 2b | Core flashcards UI — SRS + "all" study modes, flip mode only, Hebrew→English only, frequency filter | #73 — ✅ done |
 | 2b′ | Textbook chapter decks (`src/data/textbooks.ts`) + noun gender on cards | — ✅ done |
-| 2c | Typing answer mode (via Phase 1 keyboard), English→Hebrew and transliteration→Hebrew directions, POS/root filters | #74 |
+| 2c | Typing answer mode (via Phase 1 keyboard), English→Hebrew direction, POS/root filters | #74 — ✅ done |
+| 2d | Transliteration→Hebrew direction | deferred, no issue yet |
+
+What 2c shipped, where it differs from the plan above: the root filter reads
+the vocabulary's `root` field as it stands (420 of 580 words). See "Flashcards:
+typed answers, directions, filters" in `CLAUDE.md`.
+
+**Transliteration → Hebrew is deferred** (Mitch, Nov 2026, in review of #74).
+Only the 74 hand-curated words carry a transliteration; the textbook import
+has none by design, because OSHB has no romanization and invented ones would
+be errors the data tests cannot catch. A direction that asks 74 of 580 words
+is not worth a control yet. When it is built, it must narrow the deck to the
+words that have one and never fall back to the gloss, as `/write`'s "From the
+sound" does.
 
 The custom deck builder that greek.tools' `Flashcards.tsx` also has (generate a deck from a passage) is explicitly out of scope here — it's tied to a Focus-Passage-equivalent feature that doesn't exist yet for Hebrew.
 
@@ -824,7 +837,7 @@ The following modules from greek.tools can be copied with minimal or zero change
 | 1 | 1 | Hebrew Keyboard | Medium | None | ✅ Done | #71 (PR) |
 | 2 | 2a | Vocabulary dataset | Low | None | Next up | #72 |
 | 3 | 2b | Core flashcards UI | Low | 2a | Queued | #73 |
-| 4 | 2c | Flashcards: typing + directions + filters | Low–Medium | 2b, Phase 1 | Queued | #74 |
+| 4 | 2c | Flashcards: typing + directions + filters | Low–Medium | 2b, Phase 1 | ✅ Done | #74 |
 | 5 | — | OSHB data pipeline | Medium (mechanical) | None | ✅ Done | #75 |
 | 6 | 3 | Daily Verse | Medium — broken into 3a–3b | OSHB pipeline | ✅ Done | #76 |
 | 6a | 3a | Daily Verse: curated verse list + day cycling + streak | Low | OSHB pipeline | ✅ Done | #128 |

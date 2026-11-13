@@ -890,7 +890,7 @@ describe('Flashcards custom decks', () => {
     saveSelection({ deck: 'custom', customDeckId: deck.id, chapters: [], categories: ['core'] });
     renderFlashcards();
     await user.click(screen.getByRole('button', { name: 'Study ahead anyway' }));
-    await user.click(screen.getByRole('button', { name: 'Clear filter' }));
+    await user.click(screen.getByRole('button', { name: 'Clear filters' }));
     expect(screen.getByTestId('card-progress')).toBeTruthy();
   });
 

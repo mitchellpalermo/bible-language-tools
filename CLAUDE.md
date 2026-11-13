@@ -67,6 +67,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/flashcard-settings` | `createFlashcardSettings(storageKey)` factory for what the flashcard face shows before you answer |
 | `@tools/shared/flashcard-session` | `shuffle`, `nextRound` and `requeueMissed` — pure flashcard queue rules: Endless mode's reshuffle, and the drill modes' re-queue of a missed card. Used through `use-flashcard-session` |
 | `@tools/shared/use-flashcard-session` | `useFlashcardSession<T>()` — the flashcard session engine: dealing, SRS grading, drills, Endless, typed answers, the keyboard. Both apps' `Flashcards.tsx` run on it. See "The flashcard session engine" below |
+| `@tools/shared/gloss-answer` | `checkGlossAnswer(input, gloss, options?)` — marks a typed English gloss: any one sense, a four-letter start, or one slip. Both apps' Type mode uses it; `separators` and `variants` let an app fit its own gloss wording (hebrew.tools accepts "wrote" for "he wrote") |
 | `@tools/shared/use-stored-state` | `useStoredState(load, fallback, save?)` and `useHydrated()` — state seeded from storage without breaking hydration. See "Hydration" below |
 | `@tools/shared/step-drill` | The step-gated drill engine: `stepDrillReducer`, `isCleanPass`, and `canSkipScaffold` / `createStepDrillHistory(storageKey)` for speed mode. See "The step-gated drill" below |
 | `@tools/shared/ladder` | The paradigm ladder (#186): `rungStates`, `isCleanWrite`, `recordWrite`, `newlyUnlocked`, `isLadderProgress`, and `createLadderProgress(storageKey)`. See "The paradigm ladder" below |
@@ -397,15 +398,17 @@ all from the memory research rather than taste:
   scheduled card's interval, ease or due date. A cram helps tomorrow's quiz and
   fades by the exam (Cepeda et al. 2006); this is the bridge to spacing.
   Endless reaches the summary through its "Finish session" button.
-- **A typed answer never answers the card by itself.** On greek.tools, Check
+- **A typed answer never answers the card by itself.** On both apps, Check
   marks the spelling and reveals the card; the student then picks Missed / Got
   it (or a grade in SRS Review). A mistyped word they knew cold is still Got
-  it, and a lucky match they could not have recalled is still Missed.
+  it, and a lucky match they could not have recalled is still Missed. On
+  hebrew.tools the mark has two more tiers, a dagesh slip and a pointing slip
+  (`checkHebrewAnswer`); they are information too, and leave every button live.
 
 ### The part-of-speech control
 
 The control is `ToggleSwitch`, not a pill. Every filter on both flashcard pages
-is a chip that fills with the accent when active, and greek-tools draws its Part
+is a chip that fills with the accent when active, and both apps draw their Part
 of Speech *filter* out of exactly those chips — a setting that stays put must not
 look like one choice from a row of alternatives. It is a `role="switch"` with
 `aria-checked` rather than a button with `aria-pressed`, because it is a state
@@ -432,6 +435,11 @@ Things to know before changing it:
   ref. An app builds the key from the state that defines its deck, so it decides
   what counts as a different deck. hebrew.tools compares by value
   (`JSON.stringify`), so re-selecting the current chapter keeps the session.
+  Its part-of-speech and root filters are in the key; Flip / Type and the
+  card face are not. Its direction is in the key only through the words that
+  direction cannot ask (see "Flashcards: typed answers, directions, filters"
+  in `apps/hebrew-tools/CLAUDE.md`), so Hebrew → English and English → Hebrew
+  share a session wherever both can ask the whole deck.
   greek.tools keys on the frequency band, the part-of-speech filter and the
   active custom deck's word list, sorted: renaming a deck, flipping direction
   or switching between Flip and Type keeps the session; editing a deck's words

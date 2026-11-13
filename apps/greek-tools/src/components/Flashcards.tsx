@@ -1,6 +1,7 @@
 import DrillButtons from '@tools/shared/components/DrillButtons';
 import GradeButtons from '@tools/shared/components/GradeButtons';
 import ToggleSwitch from '@tools/shared/components/ToggleSwitch';
+import { checkGlossAnswer } from '@tools/shared/gloss-answer';
 import {
   type AnswerMode,
   type FlashcardSessionEvent,
@@ -64,36 +65,9 @@ const STORAGE: FlashcardStorage = {
   saveStats,
 };
 
-function levenshtein(a: string, b: string): number {
-  const dp: number[] = Array.from({ length: a.length + 1 }, (_, i) => i);
-  for (let j = 1; j <= b.length; j++) {
-    let prev = dp[0];
-    dp[0] = j;
-    for (let i = 1; i <= a.length; i++) {
-      const tmp = dp[i];
-      dp[i] = a[i - 1] === b[j - 1] ? prev : 1 + Math.min(prev, dp[i - 1], dp[i]);
-      prev = tmp;
-    }
-  }
-  return dp[a.length];
-}
-
 /** What the student is asked to produce: the back of the card. */
 function expectedAnswer(word: VocabWord, direction: Direction): string {
   return direction === 'gr-en' ? word.gloss : word.greek;
-}
-
-function checkAnswer(input: string, gloss: string): boolean {
-  const norm = (s: string) => s.toLowerCase().replace(/[()]/g, '').trim();
-  const ans = norm(input);
-  if (!ans) return false;
-  const parts = gloss.split(/[,/]/).map(norm).filter(Boolean);
-  return parts.some(
-    (p) =>
-      p === ans ||
-      (ans.length >= 4 && p.startsWith(ans)) ||
-      (p.length > 3 && levenshtein(p, ans) <= 1),
-  );
 }
 
 function matchFreq(freq: number, f: FreqFilter): boolean {
@@ -249,7 +223,8 @@ function FlashcardsInner() {
     onEvent,
     answerMode,
     // Read at Check time, so the direction toggle applies to the card on screen.
-    checkAnswer: (input, word) => checkAnswer(input, expectedAnswer(word, direction)),
+    // The marking rule is shared with hebrew.tools: `@tools/shared/gloss-answer`.
+    checkAnswer: (input, word) => checkGlossAnswer(input, expectedAnswer(word, direction)),
   });
 
   // Keep the type input focused on every new card, so a typed session never
