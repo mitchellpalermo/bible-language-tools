@@ -873,6 +873,68 @@ Things to know before changing it:
   handout's literal one ("he was king, ruled"). Both are literal; they differ
   in which senses they list.
 
+### Flashcards: typed answers, directions, filters (issue #74)
+
+`/flashcards` asks a card three ways (Hebrew → English, English → Hebrew,
+Transliteration → Hebrew), takes the answer by flip or typed, and narrows any
+deck by part of speech and root. The session is `useFlashcardSession`; see
+"The flashcard session engine" and "Drill modes answer Missed / Got it" in the
+repo CLAUDE.md for the rules it owns.
+
+| File | Role |
+|---|---|
+| `src/lib/flashcard-answer.ts` | Pure: `Direction`, `frontText` / `canAsk`, and marking (`markTypedAnswer`) |
+| `src/lib/flashcard-filters.ts` | Pure: `matchesFilters`, the chip counts, root search |
+| `src/lib/gloss-prompt.ts` | `glossPrompt`: a gloss with the Hebrew it quotes trimmed off. Shared with /write's word mode |
+| `src/components/TypedAnswer.tsx` | The answer field (English, or Hebrew with the keypad) and the mark |
+| `src/components/FlashcardFilters.tsx` | The filter panel |
+| `src/components/VocabCard.tsx` | The card. Today's Session passes no direction and gets Hebrew → English, flip |
+
+Things that will bite if changed carelessly:
+
+- **A direction asks only the words it has a prompt for, and never asks one
+  another way instead.** 74 of the 580 words carry a transliteration (the
+  hand-curated ones; see "Textbook chapter decks"). 25 glosses quote their own
+  Hebrew and cannot be an English prompt even after `glossPrompt` trims the
+  aside. Those words are left out of the deck in that direction, a note under
+  the controls says how many and why, and the Transliteration button is
+  disabled for a deck with none. Same rule as /write's "From the sound".
+- **So direction is in `restartKey` only through the words it leaves out.**
+  Where both directions can ask the whole deck the key is the same and the
+  session is kept, as on greek.tools. Where they cannot, the deck is a
+  different deck and a new one is dealt. Flip / Type never restarts.
+- **Typed Hebrew is marked with final forms applied, and also as typed.** The
+  field's value is raw (see `useHebrewInput`), so מלכ is מלך by the time it is
+  compared. But כְּ is a whole entry that ends in a kaf which is not final, and
+  the field shows it as ך; the raw spelling is marked too and the better mark
+  stands. `flashcard-answer.test.ts` marks every headword against itself.
+- **A maqqef is typed as a space.** The mapping has no key for it, so both
+  sides are compared with a space there (בַּת־שֶׁבַע).
+- **`alternates` count as right.** אֲנִי is a correct answer on אָנֹכִי's card.
+- **A typed gloss need not repeat what the gloss adds to the word.** A verb's
+  gloss is the form's ("he wrote"), a multi-stem verb labels each stem, and
+  the textbook's asides sit in parentheses. `glossVariants` accepts "wrote".
+  The matching itself is `@tools/shared/gloss-answer`, shared with greek.tools.
+- **With the Hebrew as the answer the front has no part of speech**, whatever
+  the switch says, and no transliteration when that is the prompt. Both come
+  with the answer.
+- **Roots are the vocabulary's `root` field, nothing derived.** It is OSHB's
+  (see "Split authority") or hand-entered on a curated word, written with a
+  shin or sin dot and a final form. 160 words have none and match no root
+  filter. Search compares bare consonants with finals undone
+  (`rootSearchKey`), because a root typed a letter at a time shows אמ as אם.
+- **Filter counts are counts within the selected deck**, and a part of speech
+  the deck lacks is not offered. A chosen filter stays listed at (0) after a
+  change of deck so it can be switched off.
+- **Nothing here is stored.** Direction, answer mode and the filters start
+  fresh each visit, like greek.tools'. The keypad opens on a coarse pointer,
+  read after mount. There is nothing for `hydration.test.tsx` to seed; if one
+  of these becomes a stored preference it goes through `useStoredState`.
+- **The filters and the direction have their own empty states.** "All caught
+  up" would send the student to the wrong control. Clearing the part-of-speech
+  and root filters keeps the deck; the older "Clear filters" (frequency band
+  or an empty deck) still returns to the whole vocabulary.
+
 ### Verb paradigms and the paradigm quiz (issue #80)
 
 `/paradigms` is live, and every form is its own SRS card (steps 7c and 7d). More stems and conjugations are added as the course reaches them — see `ROADMAP.md` Phase 7. The Grammar Reference renders the same forms — see below.

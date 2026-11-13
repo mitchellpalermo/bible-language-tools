@@ -4,13 +4,14 @@ import GradeButtons from '@tools/shared/components/GradeButtons';
 import ToggleSwitch from '@tools/shared/components/ToggleSwitch';
 import { type CustomDeck, deckRestartPart, findDeck } from '@tools/shared/custom-decks';
 import {
+  type AnswerMode,
   type FlashcardSessionEvent,
   type FlashcardStorage,
   type StudyMode,
   useFlashcardSession,
 } from '@tools/shared/use-flashcard-session';
 import posthog from 'posthog-js';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   loadSRSStore,
   loadStats,
@@ -38,19 +39,30 @@ import {
   loadSelection,
   saveSelection,
 } from '../lib/deck-selection';
+import {
+  asksForHebrew,
+  canAsk,
+  DIRECTIONS,
+  type Direction,
+  markTypedAnswer,
+  type TypedMark,
+} from '../lib/flashcard-answer';
+import { type CardFilters, hasFilters, matchesFilters, NO_FILTERS } from '../lib/flashcard-filters';
 import { loadFlashcardSettings, saveFlashcardSettings } from '../lib/flashcard-settings';
 import ChapterPicker from './ChapterPicker';
 import ErrorBoundary from './ErrorBoundary';
+import FlashcardFilters from './FlashcardFilters';
 import VocabCard from './VocabCard';
 
-// Phase 2b scope: SRS, "all" and "endless" study modes, flip answer mode, Hebrew -> English
-// direction, a frequency-band filter, and textbook chapter decks. Typing mode,
-// the reverse direction, and part-of-speech/root filters are Phase 2c (#74).
+// SRS, "all" and "endless" study modes; flip and typed answers; three
+// directions; a frequency-band filter, part-of-speech and root filters; and
+// textbook, custom and passage decks.
 //
-// The session itself — dealing, grading, drills, the keyboard — is
-// `useFlashcardSession` in @tools/shared (#87). This file is the Hebrew card,
-// the deck and filter controls, and the mapping onto this app's storage keys
-// and analytics events.
+// The session itself — dealing, grading, drills, typed-answer state, the
+// keyboard — is `useFlashcardSession` in @tools/shared (#87). This file is the
+// deck and filter controls, and the mapping onto this app's storage keys and
+// analytics events. The card is `VocabCard`; which way it is asked and how a
+// typed answer is marked is `src/lib/flashcard-answer.ts`.
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -58,6 +70,10 @@ const STUDY_MODES: { mode: StudyMode; label: string }[] = [
   { mode: 'srs', label: 'SRS Review' },
   { mode: 'all', label: 'Study All' },
   { mode: 'endless', label: 'Endless' },
+];
+const ANSWER_MODES: { mode: AnswerMode; label: string }[] = [
+  { mode: 'flip', label: 'Flip' },
+  { mode: 'type', label: 'Type' },
 ];
 type FreqFilter = 'all' | '2000+' | '500-1999' | '100-499' | '<100';
 
@@ -109,9 +125,38 @@ const STORAGE: FlashcardStorage = {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
+const SEGMENT = 'px-2.5 py-1 rounded-lg text-xs font-semibold transition-all';
+const SEGMENT_ON = 'bg-primary text-white shadow-sm';
+const SEGMENT_OFF = 'text-text-muted hover:text-text';
+const SEGMENT_GROUP =
+  'min-w-0 flex flex-wrap gap-1 bg-white border border-primary/10 p-1 rounded-xl shadow-sm';
+
+function Kbd({ children }: { children: string }) {
+  return (
+    <kbd className="bg-primary/5 border border-primary/10 px-1.5 rounded text-primary font-mono">
+      {children}
+    </kbd>
+  );
+}
+
 function FlashcardsInner() {
-  // Mode
+  // Mode / direction. Neither is stored: like greek.tools, a visit starts on
+  // Hebrew → English and Flip.
   const [studyMode, setStudyMode] = useState<StudyMode>('srs');
+  const [answerMode, setAnswerMode] = useState<AnswerMode>('flip');
+  const [direction, setDirection] = useState<Direction>('he-en');
+
+  // Part of speech and root. They narrow whichever deck is selected.
+  const [filters, setFilters] = useState<CardFilters>(NO_FILTERS);
+  const [showFilters, setShowFilters] = useState(false);
+
+  // The on-screen Hebrew keypad, for a typed Hebrew answer. A touch screen
+  // starts with it open. Read after mount: the page is prerendered, and the
+  // server has no pointer to ask about.
+  const [keypadOpen, setKeypadOpen] = useState(false);
+  useEffect(() => {
+    setKeypadOpen(window.matchMedia?.('(pointer: coarse)').matches ?? false);
+  }, []);
 
   // Deck, chapters and categories — persisted across visits.
   const [storedSelection, setSelection] = useState<DeckSelection>(() => loadSelection());
@@ -161,12 +206,31 @@ function FlashcardsInner() {
 
   // A textbook or custom selection is already a deliberate set, so the
   // frequency bands don't apply to it — they only narrow the whole vocabulary.
-  const filteredVocab = useMemo(() => {
+  const deckWords = useMemo(() => {
     if (customDeck) return wordsOfDeck(customDeck);
     return textbookId
       ? wordsInChapters(textbookId, selection.chapters, selection.categories)
       : vocabulary.filter((w) => matchFreq(w.frequency, freqFilter));
   }, [customDeck, textbookId, selection.chapters, selection.categories, freqFilter]);
+
+  // The part-of-speech and root filters compose with any deck: the whole
+  // vocabulary, a textbook's chapters, a custom or passage deck.
+  const matchedWords = useMemo(
+    () => (hasFilters(filters) ? deckWords.filter((w) => matchesFilters(w, filters)) : deckWords),
+    [deckWords, filters],
+  );
+
+  // A direction asks only the words it has a prompt for: transliterations
+  // exist on the hand-curated words alone, and a few glosses quote the Hebrew
+  // they translate. See `flashcard-answer.ts`.
+  const filteredVocab = useMemo(
+    () => matchedWords.filter((w) => canAsk(w, direction)),
+    [matchedWords, direction],
+  );
+  const leftOut = useMemo(
+    () => matchedWords.filter((w) => !canAsk(w, direction)).map(srsKey),
+    [matchedWords, direction],
+  );
 
   // Counts for the category chips reflect the chapters currently selected, so
   // switching a category on shows exactly how many cards it would add.
@@ -186,6 +250,9 @@ function FlashcardsInner() {
           chapters: selection.chapters.length > 0 ? selection.chapters.length : 'all',
           categories: selection.categories.join(','),
           study_mode: event.studyMode,
+          direction,
+          answer_mode: answerMode,
+          filtered: hasFilters(filters),
         });
         break;
       case 'reviewed':
@@ -217,6 +284,11 @@ function FlashcardsInner() {
     queue,
     flipped,
     flip: handleFlip,
+    revealed,
+    typedAnswer,
+    setTypedAnswer,
+    answerResult,
+    submitTyped,
     review: handleReview,
     drill: handleDrill,
     sessionScore,
@@ -231,7 +303,7 @@ function FlashcardsInner() {
     missedNotInReview,
     addMissedToReview,
     addedToReview,
-  } = useFlashcardSession({
+  } = useFlashcardSession<HebrewVocabWord, TypedMark>({
     words: filteredVocab,
     getKey: srsKey,
     studyMode,
@@ -239,10 +311,43 @@ function FlashcardsInner() {
     // re-selecting what is already selected does not throw away the session.
     // A custom deck contributes its id and its *sorted words*, never its name:
     // renaming a deck keeps the session, editing its words deals a new one.
-    restartKey: JSON.stringify([selection, freqFilter, deckRestartPart(customDeck)]),
+    //
+    // The part-of-speech and root filters change the deck, so they are in the
+    // key (sorted: the same choices picked in another order are the same
+    // deck). Flip / Type and the card face are not: they change how a card is
+    // asked, not which cards. Direction is in between. It is in the key only
+    // through the words it leaves out, so switching between Hebrew → English
+    // and English → Hebrew keeps the session in an ordinary deck, as on
+    // greek.tools, and a direction that cannot ask some of the deck (most
+    // often transliteration) deals the smaller one.
+    restartKey: JSON.stringify([
+      selection,
+      freqFilter,
+      deckRestartPart(customDeck),
+      [...filters.partsOfSpeech].sort(),
+      [...filters.roots].sort(),
+      [...leftOut].sort(),
+    ]),
     storage: STORAGE,
     onEvent,
+    answerMode,
+    // Read at Check time, so the direction toggle applies to the card on screen.
+    checkAnswer: (input, word) => markTypedAnswer(input, word, direction),
   });
+
+  // A typed answer belongs to the direction it was typed in: English left in
+  // the field would be read as Hebrew keystrokes, and the other way round.
+  const changeDirection = (next: Direction) => {
+    if (next === direction) return;
+    if (answerResult === null) setTypedAnswer('');
+    setDirection(next);
+  };
+
+  const hasCardFilters = hasFilters(filters);
+  const transliterated = useMemo(
+    () => matchedWords.filter((w) => canAsk(w, 'translit-he')).length,
+    [matchedWords],
+  );
 
   // ─── Session complete screen ─────────────────────────────────────────────────
 
@@ -314,12 +419,51 @@ function FlashcardsInner() {
   // ─── Empty state ─────────────────────────────────────────────────────────────
 
   if (!card) {
+    const outline =
+      'px-5 py-2.5 border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-medium';
+
+    // The deck has words and this direction can ask none of them. Saying
+    // "caught up" or "no cards match" here would send the student to the
+    // wrong control.
+    if (matchedWords.length > 0 && filteredVocab.length === 0) {
+      return (
+        <div className="text-center py-16 space-y-4">
+          <p className="text-lg text-text-muted">
+            {direction === 'translit-he'
+              ? 'No word in this deck has a transliteration.'
+              : 'No word in this deck can be asked from its gloss.'}
+          </p>
+          <p className="text-sm text-text-muted max-w-md mx-auto">
+            {direction === 'translit-he'
+              ? 'Only the hand-checked words carry one, and a card is never asked some other way instead.'
+              : 'Each gloss here quotes the Hebrew it translates, which would print the answer.'}
+          </p>
+          <button type="button" onClick={() => changeDirection('he-en')} className={outline}>
+            Back to Hebrew → English
+          </button>
+        </div>
+      );
+    }
+
+    // The part-of-speech and root filters left nothing. This is not "caught
+    // up", whatever the study mode, and clearing them keeps the deck.
+    if (hasCardFilters && matchedWords.length === 0) {
+      return (
+        <div className="text-center py-16 space-y-4">
+          <p className="text-lg text-text-muted">No cards match the current filters.</p>
+          <button type="button" onClick={() => setFilters(NO_FILTERS)} className={outline}>
+            Clear filters
+          </button>
+        </div>
+      );
+    }
+
     return (
       <div className="text-center py-16 space-y-4">
         <p className="text-lg text-text-muted">
           {studyMode === 'srs'
             ? "You're all caught up — no cards due for review."
-            : 'No cards match the current filter.'}
+            : 'No cards match the current filters.'}
         </p>
         {studyMode === 'srs' && (
           <button
@@ -338,9 +482,9 @@ function FlashcardsInner() {
                 setFreqFilter('all');
                 updateSelection({ deck: 'all', customDeckId: null, chapters: [] });
               }}
-              className="px-5 py-2.5 border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              className={outline}
             >
-              Clear filter
+              Clear filters
             </button>
           )}
       </div>
@@ -506,31 +650,78 @@ function FlashcardsInner() {
       )}
 
       {/* ── Top controls bar ──────────────────────────────────────────────── */}
+      {/* Same order as greek.tools: study mode, then direction, answer mode,
+          the card face, and the filters. */}
       <div className="flex flex-wrap items-center justify-between gap-3">
+        {/* Study mode */}
+        <div className="flex gap-1 bg-white border border-primary/10 p-1 rounded-xl shadow-sm">
+          {STUDY_MODES.map(({ mode, label }) => (
+            <button
+              type="button"
+              key={mode}
+              onClick={() => setStudyMode(mode)}
+              aria-pressed={studyMode === mode}
+              className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+                studyMode === mode
+                  ? 'bg-primary text-white shadow-sm'
+                  : 'text-text-muted hover:text-text'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
         <div className="flex flex-wrap items-center gap-2">
-          {/* Study mode */}
-          <div className="flex gap-1 bg-white border border-primary/10 p-1 rounded-xl shadow-sm">
-            {STUDY_MODES.map(({ mode, label }) => (
+          {/* Direction. Transliteration is offered only where the deck has a
+              word to ask that way; the title says why when it does not. */}
+          <fieldset className={SEGMENT_GROUP}>
+            <legend className="sr-only">Direction</legend>
+            {DIRECTIONS.map(({ id, label }) => {
+              const unavailable = id === 'translit-he' && transliterated === 0;
+              return (
+                <button
+                  type="button"
+                  key={id}
+                  onClick={() => changeDirection(id)}
+                  aria-pressed={direction === id}
+                  disabled={unavailable}
+                  title={
+                    unavailable
+                      ? 'No word in this deck has a transliteration. Only the hand-checked words carry one.'
+                      : undefined
+                  }
+                  className={`${SEGMENT} disabled:opacity-40 disabled:cursor-not-allowed ${
+                    direction === id ? SEGMENT_ON : SEGMENT_OFF
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </fieldset>
+
+          {/* Answer mode */}
+          <fieldset className={SEGMENT_GROUP}>
+            <legend className="sr-only">Answer mode</legend>
+            {ANSWER_MODES.map(({ mode, label }) => (
               <button
                 type="button"
                 key={mode}
-                onClick={() => setStudyMode(mode)}
-                aria-pressed={studyMode === mode}
-                className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
-                  studyMode === mode
-                    ? 'bg-primary text-white shadow-sm'
-                    : 'text-text-muted hover:text-text'
-                }`}
+                onClick={() => setAnswerMode(mode)}
+                aria-pressed={answerMode === mode}
+                className={`${SEGMENT} ${answerMode === mode ? SEGMENT_ON : SEGMENT_OFF}`}
               >
                 {label}
               </button>
             ))}
-          </div>
+          </fieldset>
 
           {/* Card face. The part of speech is on the answer side either way —
               this decides only whether it is also on the front. A switch rather
-              than a pill because it is a setting that stays put, not a filter
-              chip picked from a row of alternatives. */}
+              than a pill because it is a setting that stays put — and because
+              the Part of Speech *filter* in the panel below is a row of chips,
+              which this must not be mistaken for. */}
           <div className="flex items-center bg-white border border-primary/10 px-3 py-1 rounded-xl shadow-sm">
             <ToggleSwitch
               checked={showPartOfSpeech}
@@ -540,8 +731,47 @@ function FlashcardsInner() {
               title="Show the part of speech on the front of the card. It is always shown with the answer."
             />
           </div>
-        </div>
 
+          {/* Filters toggle */}
+          <button
+            type="button"
+            onClick={() => setShowFilters((open) => !open)}
+            aria-label="Toggle filters"
+            aria-expanded={showFilters}
+            className={`px-3 py-1.5 rounded-xl text-sm border-2 font-semibold transition-colors ${
+              hasCardFilters
+                ? 'border-primary text-primary bg-primary/5'
+                : showFilters
+                  ? 'border-gray-300 text-text bg-gray-50'
+                  : 'border-gray-200 text-text-muted hover:border-primary/40'
+            }`}
+          >
+            Filters{hasCardFilters ? ' ●' : ''}
+          </button>
+        </div>
+      </div>
+
+      {/* ── Filter panel ──────────────────────────────────────────────────── */}
+      {showFilters && (
+        <FlashcardFilters
+          deckWords={deckWords}
+          filters={filters}
+          onChange={setFilters}
+          matchCount={matchedWords.length}
+        />
+      )}
+
+      {/* A direction that cannot ask the whole deck says so, and why. */}
+      {leftOut.length > 0 && (
+        <p className="text-xs text-text-muted" data-testid="direction-note">
+          {direction === 'translit-he'
+            ? `${filteredVocab.length} of ${matchedWords.length} words: only the hand-checked words carry a transliteration, and the rest are left out rather than asked another way.`
+            : `${leftOut.length} ${leftOut.length === 1 ? 'word is' : 'words are'} left out: the gloss quotes the Hebrew it translates.`}
+        </p>
+      )}
+
+      {/* ── Frequency bands, or what the deck is ──────────────────────────── */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         {/* Frequency filter — only applies to the whole-vocabulary deck */}
         {customDeck ? (
           <p className="text-sm text-text-muted">
@@ -552,7 +782,10 @@ function FlashcardsInner() {
             {filteredVocab.length} words &middot; {describeChapters(textbookId, selection.chapters)}
           </p>
         ) : (
-          <div className="flex flex-wrap gap-2">
+          <>
+            <span className="text-xs font-bold text-text-muted uppercase tracking-wider shrink-0">
+              Frequency
+            </span>
             {FREQ_FILTERS.map(({ filter, label }) => {
               const active = freqFilter === filter;
               const count = vocabulary.filter((w) => matchFreq(w.frequency, filter)).length;
@@ -575,7 +808,7 @@ function FlashcardsInner() {
                 </button>
               );
             })}
-          </div>
+          </>
         )}
       </div>
 
@@ -650,16 +883,36 @@ function FlashcardsInner() {
       {/* ── Card ──────────────────────────────────────────────────────────── */}
       <VocabCard
         card={card}
+        direction={direction}
+        answerMode={answerMode}
         flipped={flipped}
+        revealed={revealed}
         onFlip={handleFlip}
         showPartOfSpeech={showPartOfSpeech}
+        typed={{
+          value: typedAnswer,
+          onChange: setTypedAnswer,
+          onSubmit: submitTyped,
+          mark: answerResult,
+          hebrew: asksForHebrew(direction),
+          // The queue position as well as the card: a one-card Endless deck
+          // deals the same card back, and it still wants the focus.
+          focusKey: `${srsKey(card)}:${index}:${queue.length}`,
+          keypadOpen,
+          onToggleKeypad: () => setKeypadOpen((open) => !open),
+        }}
       />
 
       {/* ── Action buttons ────────────────────────────────────────────────── */}
       {/* The SRS grades schedule the card, so they preview the interval each
           would buy. A drill schedules nothing, so its row asks only whether
-          the card should come back this round. */}
-      {flipped &&
+          the card should come back this round.
+
+          Type mode answers through the same row, and never on its own: every
+          button stays live whether or not the typed answer matched. Checking
+          says whether the spelling was right, not how hard the recall was,
+          and the student is the one who knows. */}
+      {revealed &&
         (studyMode === 'srs' ? (
           <GradeButtons
             card={srsStore[srsKey(card)] ?? newCard(srsKey(card))}
@@ -671,18 +924,9 @@ function FlashcardsInner() {
 
       {/* ── Keyboard hints (desktop only) ────────────────────────────────── */}
       <p className="hidden sm:block text-xs text-text-muted text-center">
-        Keyboard:{' '}
-        <kbd className="bg-primary/5 border border-primary/10 px-1.5 rounded text-primary font-mono">
-          Space
-        </kbd>{' '}
-        flip &middot;{' '}
-        <kbd className="bg-primary/5 border border-primary/10 px-1.5 rounded text-primary font-mono">
-          1
-        </kbd>
-        &ndash;
-        <kbd className="bg-primary/5 border border-primary/10 px-1.5 rounded text-primary font-mono">
-          {studyMode === 'srs' ? 4 : 2}
-        </kbd>{' '}
+        Keyboard: <Kbd>{answerMode === 'flip' ? 'Space' : 'Enter'}</Kbd>{' '}
+        {answerMode === 'flip' ? 'flip' : 'check answer'} &middot; <Kbd>1</Kbd>&ndash;
+        <Kbd>{studyMode === 'srs' ? '4' : '2'}</Kbd>{' '}
         {studyMode === 'srs' ? 'grade (Again, Hard, Good, Easy)' : 'answer (Missed, Got it)'}
       </p>
 

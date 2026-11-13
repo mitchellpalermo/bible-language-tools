@@ -22,6 +22,7 @@
     "./focus-passages": "./src/focus-passages.ts",
     "./flashcard-settings": "./src/flashcard-settings.ts",
     "./flashcard-session": "./src/flashcard-session.ts",
+    "./gloss-answer": "./src/gloss-answer.ts",
     "./use-flashcard-session": "./src/use-flashcard-session.ts",
     "./use-stored-state": "./src/use-stored-state.ts",
     "./step-drill": "./src/step-drill.ts",
