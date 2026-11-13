@@ -35,6 +35,8 @@
     "./test/favicons": "./src/test/favicons.ts",
     "./reset-progress": "./src/reset-progress.ts",
     "./nav": "./src/nav.ts",
+    "./credits": "./src/credits.ts",
+    "./components/CreditsPage.astro": "./src/components/CreditsPage.astro",
     "./nav-menu": "./src/nav-menu.ts",
     "./posthog-host": "./src/posthog-host.ts",
     "./fetch-retry": "./src/fetch-retry.mjs",
