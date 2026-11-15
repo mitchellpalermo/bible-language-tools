@@ -754,6 +754,42 @@ The architecture is shaped so the interesting parts are pure functions over type
 
 ---
 
+## Phase 10 — Gesenius' Hebrew Grammar (`/gesenius`)
+
+**greek.tools analog:** none.
+
+The full text of Gesenius' Hebrew Grammar (Gesenius–Kautzsch–Cowley, GKC, 1910) as a **reference tool, not a study text**. A student reaches it from a citation, a verse or a `/grammar` section; nobody is meant to read it front to back, and nothing in it is quizzed. The source is the private `mitchellpalermo/Genesius-grammar` repository, a Wikisource transcription already marked up with 169 sections (§§), 1,882 paragraph letters and 13,158 Scripture references.
+
+Planned with three specialist reviews (instructional design, information architecture, pedagogy), Nov 2026. Where they agreed: one page per §, kept separate from `/grammar`, a terminology bridge to Garrett & DeRouchie (G&D), and no quizzes built from Gesenius content.
+
+### Decisions (Mitch, Nov 2026)
+
+| Question | Decision |
+|---|---|
+| Publish before the ~161 open review items are resolved? | **Yes, marked provisional.** A § with an open item carries a visible "under review" marker. The marker clears when its last item is resolved. |
+| Editorial notes where scholarship has moved on? | **Decide later.** Ship with terminology mapping and G&D pointers only. No slot for commentary yet. |
+| What to call it in the UI | **"Gesenius"**, at `/gesenius`. |
+| Which text is the authority on a verse | **The Masoretic Text (MT), meaning the Westminster Leningrad Codex (WLC) the reader shows.** Where GKC proposes an emendation, the § page labels it a proposed correction, and the reader never displays it. |
+| Credit for the Wikisource transcription (Creative Commons Attribution-ShareAlike, CC BY-SA) | **A credit line in the footer of every Gesenius page, linking to `/gesenius/about`.** That page names the edition, Wikisource, the license and the corrections made. The converted text is released under CC BY-SA. The app's code is not affected. |
+
+### Bite-sized PR breakdown
+
+| PR | Scope |
+|----|-------|
+| 10a | Converter (in the Gesenius repository) emits JSON alongside Typst: one record per §, paragraph letters, Scripture refs, review-item flags |
+| 10b | `/gesenius` table of contents + one prerendered page per § + `/gesenius/about` with the CC BY-SA credit and footer line |
+| 10c | Citation resolver: "GKC §49a" or "49a" goes to the § and paragraph |
+| 10d | Scripture refs in a § open `/reader` at that verse. Refs are checked against WLC versification, the same trap as Daily Verse |
+| 10e | Emendation flags on § pages (the MT stays the authority) |
+| 10f | Indexes: Passages, Hebrew Words, Subjects |
+| 10g | Search with Pagefind (needs a change to the `public/_headers` CSP) |
+| 10h | Terminology bridge (GKC term → G&D term, e.g. Perfect → qatal) + G&D chapter → § map, hand-checked |
+| 10i | Links into Gesenius from `/grammar` sections and from the reader's word popup (parse → §), using a hand-built mapping |
+
+Open content work, not code: resolve the review items over time, and verify the Passages index against WLC versification.
+
+---
+
 ## Technical Notes
 
 ### Right-to-Left (RTL) layout
@@ -827,6 +863,7 @@ The following modules from greek.tools can be copied with minimal or zero change
 | 18 | 9e | Writing: stroke order + coaching | Medium | 9a | Queued (independent of 9b–9d) | #103 |
 | 19 | 9f | Writing: handwritten paradigms | Medium | 9d, Phase 7 | Queued | #104 |
 | 20 | 9g | Writing: port to greek.tools | Low | 9b (9e for coaching) | Queued | #105 |
+| 21 | 10a–10i | Gesenius' Hebrew Grammar (`/gesenius`) — reference tool, see Phase 10 | High — broken into 10a–10i | 10a needs the Gesenius repository; 10d needs the OSHB pipeline | Decisions made; 10a next | — |
 
 Every row above is one GitHub issue, and every issue is scoped to land as a single PR. Phase 4 and Phase 6 were too large for that and get their own bite-sized sub-issues (same pattern as Phase 2) once picked up — Phase 4 has been, and its five sub-issues are listed as rows 8a–8e; Phase 6's remaining five are rows 9c–9g. Rows marked "independent" have no hard dependency on the row above them — they're placed here for logical flow (data-pipeline-dependent work grouped together) but can be pulled earlier as a change of pace between heavier phases.
 
