@@ -1,8 +1,9 @@
 # @tools/dev-tasks
 
-Two mechanical chores, made into scripts so a small model can run them by
-following a short brief: `pnpm shots` captures PR screenshots, and
-`pnpm checks` runs the repo's checks and prints one report.
+Two mechanical chores, made into scripts: `pnpm shots` captures PR
+screenshots, which CI runs from a shot list in the PR body, and `pnpm checks`
+runs the repo's checks and prints one report, which a small model runs from a
+short brief.
 
 A script is not a convenience here, it is the reason the chores can be handed
 to a small model at all. Every step the root CLAUDE.md lists for these
@@ -11,14 +12,15 @@ before the data tests, set `CI` so the corpus gate cannot skip — lives in the
 code, where it cannot be forgotten. The model only picks a command and
 reports what it printed.
 
-Agents that run these are in `.claude/agents/`: `screenshotter` and
-`checker`, both on Haiku.
+The `checker` agent in `.claude/agents/` runs `pnpm checks` on Haiku.
+Screenshots need no agent: see "Screenshots from the PR body" below.
 
 ## `pnpm shots`
 
 ```bash
 pnpm shots capture <list.json> [--before <ref>] [--out <dir>]
 pnpm shots publish <dir> --pr <N>
+pnpm shots pr <N> [--force]
 ```
 
 `capture` starts the app's dev server on a spare port (never 4321, which your
@@ -30,6 +32,49 @@ With `--before main` it first does the same from a temporary worktree of
 `publish` pushes those PNGs to an orphan `assets/pr-<N>` branch, built in a
 throwaway directory as the root CLAUDE.md requires, and prints a before/after
 markdown table for the PR body.
+
+### Screenshots from the PR body
+
+`pnpm shots pr <N>` is what the `capture` job in
+`.github/workflows/pr-screenshots.yml` runs. It reads the PR body, takes every
+fenced block whose info string is `shots` as a shot list, captures each one
+(before from the PR's base branch unless the list says `"before": false`),
+publishes the PNGs and writes the table into the body between
+`<!-- shots:start -->` and `<!-- shots:end -->`. A body looks like this:
+
+````markdown
+Closes #123.
+
+<details><summary>Shot list</summary>
+
+```shots
+{ "app": "hebrew", "shots": [ { "name": "study", "path": "/study", "expect": "Flashcards" } ] }
+```
+</details>
+````
+
+- **A failed capture writes its error into that section**, so `gh pr view`
+  shows it, and the evidence check fails for want of images.
+- **It skips work already done.** The section carries a key made from the head
+  commit and the lists (`runKey` in `pr-shots.ts`); a body edit that changes
+  neither does not capture again. A push or a changed list does. `--force`
+  captures anyway. A failure is keyed differently, so re-running the job
+  retries it.
+- **Only the section is rewritten**, against the body as it is when the capture
+  ends, so a description edit made meanwhile is kept. Each marker counts only
+  when it is alone on its line: a description that names the markers in prose
+  (this feature's own PR did) is not the section.
+- **The job runs on a pinned runner image** (`ubuntu-24.04`), because
+  Playwright installs browsers only on the OS releases it lists, and
+  `ubuntu-latest` moved to one it did not.
+- **The corpus is built if it is missing** (`build:data`), since CI starts
+  without it. Nothing else in a dev server needs secrets for these pages.
+- **Shot names must be unique across blocks**: one block per app, one assets
+  branch.
+- **Fork PRs are not captured**; their token cannot push the assets branch.
+
+The decisions are in `pr-shots.ts` and tested in `pr-shots.test.ts`; the `gh`
+and git calls are in `shots-cli.ts`.
 
 ### The shot list
 
@@ -54,6 +99,7 @@ markdown table for the PR body.
 | Field | Required | Meaning |
 |---|---|---|
 | `app` | yes | `greek` or `hebrew` |
+| `before` | no | `false` skips the before capture in `pnpm shots pr` (a new page) |
 | `name` | yes | File-name slug, unique in the list |
 | `path` | yes | Route, starting with `/` |
 | `expect` | yes | Text that must be visible before the capture |

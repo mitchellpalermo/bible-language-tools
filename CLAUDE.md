@@ -29,7 +29,8 @@ pnpm typecheck          # typecheck all packages
 
 pnpm checks             # the data checks: corpus gate, --check scripts, verses, pins
 pnpm checks ci          # everything both CI workflows run, in one report
-pnpm shots capture <list.json> --before main   # PR screenshots from a shot list
+pnpm shots capture <list.json> --before main   # screenshots from a shot list, locally
+pnpm shots pr <N>       # capture a PR body's ```shots block and write the table back (CI runs this)
 ```
 
 To work on a single app directly:
@@ -745,51 +746,75 @@ both apps.
   island needs a case there. A new stored value needs seeding there, or the
   test cannot see it differ.
 
-## Delegating chores to Haiku
+## PR screenshots are captured in CI
 
-Two chores are mechanical enough to hand to a smaller model, and each has a
-Haiku agent in `.claude/agents/` and a script in `packages/dev-tasks` (see its
-README). **Use the agent for these; do not do them in the main session:**
+A session never runs the capture. It writes a shot list into the PR body as a
+` ```shots ` fenced block, and the `capture` job in
+`.github/workflows/pr-screenshots.yml` runs `pnpm shots pr <N>`: "before" from
+the base branch, "after" from the PR, both viewports, pushed to
+`assets/pr-<N>`, and the table written into the body between
+`<!-- shots:start -->` and `<!-- shots:end -->`.
 
-| Chore | Agent | Script |
-|---|---|---|
-| PR screenshots | `screenshotter` | `pnpm shots` |
-| The corpus gate, the `--check` scripts, `check:verses`, `check:pins`, or a full CI-equivalent run | `checker` | `pnpm checks` |
+This replaced a Haiku `screenshotter` agent (Nov 2026). Measured over the
+transcripts, screenshot turns were about 6% of a session's cost and up to 16%,
+and the agent ran once in some ten PRs: subagents cannot start subagents, so
+every feature agent in an orchestrated run captured on Opus or Sonnet itself,
+and main sessions skipped the agent. The cost was never the image tokens; it
+was 10–25 turns at a large context — seeding storage, retrying `expect`,
+publishing, pasting the table. In CI none of that is a model turn.
 
-The main session still owns the judgement either side of the agent:
+The session (or a feature subagent) owns the one judgement call:
 
-- **For screenshots, it writes the shot list.** It picks the routes and the
-  state, and for each shot an `expect` text that only appears in that state —
-  "Again" proves a flashcard is revealed, "Flashcards" does not. The script
-  refuses to capture without it, so a missing or vague brief fails loudly
-  rather than producing a shot of the home page. Afterwards **it looks at the
-  PNGs itself** before they go on a PR; the agent does not judge images.
-- **For checks, it reads the report and decides what to do.** The agent
-  returns the report verbatim and fixes nothing. A failure in a `--check`
-  script usually means regenerating a committed file, which is a change to
-  review, not one for a small model to make.
+- **The shot list.** Routes, state, and for each shot an `expect` text that only
+  appears in that state — "Again" proves a flashcard is revealed, "Flashcards"
+  does not. The format is in `packages/dev-tasks/README.md`. Wrap the block in
+  `<details><summary>Shot list</summary> … </details>` so reviewers see the
+  table, not the JSON.
+- **`"before": false`** on a list whose pages are new, where a before capture
+  would be refused for a 404.
+- **One block per app** when a change touches `packages/shared`. Shot names
+  must be unique across blocks; their PNGs share one branch.
 
-The scripts are what make this safe to delegate: every step that is easy to
-forget — the dev toolbar, the webfont check, `CI=1` on the corpus gate,
-building the corpus first — is in code, not in the agent's instructions. When
-one of these chores gains a step, add it to the script.
+Then:
+
+- **Read the result with `gh pr view <N> --json body`** once the `capture` job
+  finishes. On failure the section holds the script's error ("`expect` text not
+  visible", a missed selector), and the fix is the list or the page. Pushing or
+  editing the list re-runs it. An edit that changes neither the commit nor the
+  list (a typo in the description) does not capture again.
+- **The reviewer looks at the images on the PR.** Download one with `curl`
+  only when `expect` cannot tell two states apart.
+- `pnpm shots capture` still works locally for iterating on a list before
+  pushing it, and `pnpm shots pr <N>` runs the CI path from a laptop with a
+  logged-in `gh`.
+
+### Checks are delegated to Haiku
+
+The `checker` agent in `.claude/agents/` runs `pnpm checks` (the corpus gate,
+the `--check` scripts, `check:verses`, `check:pins`, or a full CI-equivalent
+run with `pnpm checks ci`). **Use the agent; do not run these in the main
+session.** It returns the report verbatim and fixes nothing: a failure in a
+`--check` script usually means regenerating a committed file, which is a change
+to review, not one for a small model to make. Every easy-to-forget step (`CI=1`
+on the corpus gate, building the corpus first) is in the script, not the
+agent's instructions; when a check gains a step, add it to the script.
 
 ## Pull requests
 
 ### Screenshots are required for any UI-affecting change
 
-**This is enforced by CI, not by this paragraph.** The `pr-screenshots` workflow
-(`.github/workflows/pr-screenshots.yml`, rule in
+**This is enforced by CI, not by this paragraph.** The `screenshots` job in
+`.github/workflows/pr-screenshots.yml` (rule in
 `packages/dev-tasks/src/pr-evidence.ts`) fails a PR that changes components,
 pages, layouts, styles, `.astro` or `.css` files unless its body links PNGs from
 that PR's `assets/pr-<N>` branch covering both mobile and desktop. Waive it with
 the `no-screenshots-needed` label or a `Screenshots: N/A - <reason>` line. It
-re-runs when the PR body is edited, so open the PR, run `pnpm shots publish`,
-then paste the table in. The check only advises until it is a *required* status
-check in the repo ruleset; and it proves images exist, not that they show the
-right state, so still look at them.
+runs after `capture`, so a ` ```shots ` block in the body satisfies it with no
+further step. The check only advises until it is a *required* status check in
+the repo ruleset; and it proves images exist, not that they show the right
+state, which is what a good `expect` is for.
 
-If a change alters what the app looks like, **capture screenshots and attach them to the PR**. This applies to layout, styling, component markup, new or changed pages, and anything responsive. It does not apply to pure logic, data, or build changes.
+If a change alters what the app looks like, **put a shot list in the PR body**. This applies to layout, styling, component markup, new or changed pages, and anything responsive. It does not apply to pure logic, data, or build changes.
 
 What to capture:
 
@@ -797,28 +822,13 @@ What to capture:
 - **Before and after**, when changing something that already existed. The "before" is the point — a lone "after" shot doesn't show what moved.
 - **Both apps**, when the change touches `packages/shared`. It ships to greek.tools and hebrew.tools at once.
 
-How to capture: write a shot list and send it to the `screenshotter` agent, which runs `pnpm shots capture` (see "Delegating chores to Haiku" above, and `packages/dev-tasks/README.md` for the format). The script handles the points below; they are here so the reasons stay written down.
+The script handles the points below; they are here so the reasons stay written down.
 
-- **Hide the Astro dev toolbar**, or it floats over the bottom of every shot: `page.addStyleTag({ content: 'astro-dev-toolbar { display: none !important; }' })`.
+- **Hide the Astro dev toolbar**, or it floats over the bottom of every shot.
 - **Never reuse, or kill, the dev server on port 4321.** Both apps default to it, so a stale server from the other app will silently serve the wrong site — and the server on it is often one you are using from another worktree. `pnpm shots` starts its own server on a spare port and checks every page title names the right app.
-- **Check that the webfont actually loaded before trusting a shot of Hebrew or Greek.** Both apps load their script face from Google Fonts, and if the browser cannot reach that host the page renders in a system fallback — which looks plausible in a thumbnail and is not what the app ships. Nikud land wrong and the letterforms differ. `pnpm shots` refuses to capture when the page shows the script and its face never loaded. Where the browser has no route to the CDN, fetch the CSS and its `woff2` files once with `curl` and serve them to the page with `context.route('https://fonts.googleapis.com/**', ...)` and the same for `fonts.gstatic.com`.
-
-How to attach: `pnpm shots publish <dir> --pr <N>` does all of the following and prints the PR-body table. GitHub's image upload is web-UI only — there is no API for it, so `gh` cannot upload to it. Commit the images to an orphan branch (`assets/pr-<N>`) and reference them from the PR body by their `raw.githubusercontent.com` URL. That keeps binaries out of `main`'s history, and the branch can be deleted after the merge. The repo is public, so raw URLs render for everyone.
-
-**Build that orphan branch in a throwaway directory, never in the working tree.** `git init` a temp dir, add the remote, commit the PNGs, push the branch, delete the dir:
-
-```bash
-NAME=$(git config user.name) EMAIL=$(git config user.email)   # run in the repo first
-WT=$(mktemp -d) && cd "$WT" && git init -q .
-git remote add origin https://github.com/mitchellpalermo/bible-language-tools.git
-cp /path/to/shots/*.png . && git add *.png
-git -c user.name="$NAME" -c user.email="$EMAIL" commit -q -m "assets: screenshots for PR #<N>"
-git branch -M assets/pr-<N> && git push -q origin assets/pr-<N>
-```
-
-**A fresh `git init` has no identity of its own.** It reads only global config, and on a machine where the name and email are set per repository its commit fails with "Author identity unknown". Read them in the repo and pass them with `-c`, as above; `pnpm shots publish` does the same (`identityArgs` in `packages/dev-tasks/src/git.ts`). The same applies to any script that commits outside the working tree.
-
-Never `git checkout --orphan` + `git clean -fdx` in the repo: it deletes ignored files (`.dev.vars`, `.wrangler/`, `public/data/`) and untracked directories like `.claude/`, unrecoverably — and `-e` exclusions do not reliably stop it.
+- **Check that the webfont actually loaded before trusting a shot of Hebrew or Greek.** If the browser cannot reach Google Fonts the page renders in a system fallback, which looks plausible in a thumbnail and is not what the app ships. `pnpm shots` refuses to capture when the page shows the script and its face never loaded.
+- **The images live on an orphan `assets/pr-<N>` branch**, referenced by `raw.githubusercontent.com` URL, because GitHub's image upload has no API. That keeps binaries out of `main`'s history. The branch is built in a throwaway `git init`, never in the working tree: `git checkout --orphan` + `git clean -fdx` in the repo deletes ignored files (`.dev.vars`, `.wrangler/`, `public/data/`) and `.claude/`, unrecoverably.
+- **A fresh `git init` has no identity of its own.** It reads only global config, so `pnpm shots` passes the repo's name and email with `-c` (`identityArgs` in `packages/dev-tasks/src/git.ts`); in CI the workflow sets a global bot identity and `gh auth setup-git` for the push. The same applies to any script that commits outside the working tree.
 
 ## Cloudflare Workers deployment
 

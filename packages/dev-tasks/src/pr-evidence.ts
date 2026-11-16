@@ -54,8 +54,8 @@ export function screenshotUrls(body: string, repo: string, number: number): stri
 }
 
 const FIX =
-  'Run `pnpm shots capture <list.json> --before main`, then `pnpm shots publish <dir> --pr <N>`, ' +
-  'and paste the table into the PR body. If nothing visible changes, add the ' +
+  'Put a shot list in the PR body as a ```shots block and the capture job adds the table ' +
+  '(see packages/dev-tasks/README.md). If nothing visible changes, add the ' +
   `\`${WAIVER_LABEL}\` label or a "Screenshots: N/A - <reason>" line.`;
 
 export function checkPr({ number, repo, body, labels, files }: PrInput): Verdict {
