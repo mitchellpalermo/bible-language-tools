@@ -19,6 +19,7 @@ export default defineConfig({
         // module beside them.
         'src/shots-cli.ts',
         'src/checks-cli.ts',
+        'src/pr-check-cli.ts',
         'src/dev-server.ts',
         'src/git.ts',
         // Runs inside the browser, where Node's V8 coverage cannot see it.

@@ -1,0 +1,29 @@
+name: pr-screenshots
+
+# Fails a pull request that changes UI files but shows no screenshots. The rule
+# is in packages/dev-tasks/src/pr-evidence.ts. Add this check as *required* in
+# the repo ruleset, or it only advises.
+#
+# `edited` is what makes it work: the images are uploaded after the PR is opened
+# and linked by editing its body, which re-runs the check.
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, edited, labeled, unlabeled]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # No `pnpm install`: the script uses only Node and the runner's `gh`.
+      - run: node packages/dev-tasks/src/pr-check-cli.ts ${{ github.event.pull_request.number }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}

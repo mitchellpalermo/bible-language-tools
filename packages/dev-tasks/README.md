@@ -117,6 +117,14 @@ Two things it does that are easy to get wrong by hand:
 The list of checks is `src/check-list.ts`. When CI gains a step or an app gains
 a `--check` script, add it there.
 
+## The PR screenshots check
+
+`pr-evidence.ts` is the rule CI enforces (`.github/workflows/pr-screenshots.yml`
+runs `pr-check-cli.ts <pr>`): a PR touching UI files must link PNGs from its own
+`assets/pr-<N>` branch, mobile and desktop both, or carry the
+`no-screenshots-needed` label, or a `Screenshots: N/A - <reason>` line. Add the
+check as required in the repo ruleset for it to block merging.
+
 ## Tests
 
 `pnpm --filter @tools/dev-tasks test:run`. `capture.test.ts` drives a real
