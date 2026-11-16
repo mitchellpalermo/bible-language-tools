@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { buildParseForms, poolVerbCode, rootOf, witnessed } from './parse-forms.mjs';
+import {
+  buildParseForms,
+  poolVerbCode,
+  rootOf,
+  withoutVolitives,
+  witnessed,
+} from './parse-forms.mjs';
 
 const w = (text, lemma, parsing, extra = {}) => ({ text, lemma, pos: 'V', parsing, ...extra });
 
@@ -40,6 +46,47 @@ describe('witnessed', () => {
   });
 });
 
+describe('withoutVolitives', () => {
+  it('files a mostly-jussive spelling under the yiqtol the text also reads it as', () => {
+    expect(
+      withoutVolitives([
+        ['1961', 'Vqj3ms', 40],
+        ['1961', 'Vqa', 3],
+        ['1961', 'Vqi3ms', 8],
+      ]),
+    ).toEqual([
+      ['1961', 'Vqi3ms', 8],
+      ['1961', 'Vqa', 3],
+    ]);
+  });
+
+  it('leaves out a mostly-volitive spelling with no yiqtol of its own', () => {
+    expect(
+      withoutVolitives([
+        ['3772', 'Vqh1cp', 1],
+        ['3772', 'VNp3fs', 1],
+      ]),
+    ).toEqual([]);
+    // A yiqtol only witnessed in other words (count 0) does not count.
+    expect(
+      withoutVolitives([
+        ['1', 'Vqj3ms', 2],
+        ['1', 'Vqi3ms', 0],
+      ]),
+    ).toEqual([]);
+    expect(withoutVolitives([])).toEqual([]);
+  });
+
+  it('only drops the volitive readings of a spelling filed under anything else', () => {
+    expect(
+      withoutVolitives([
+        ['1', 'Vqi3ms', 9],
+        ['1', 'C/Vqj3ms', 2],
+      ]),
+    ).toEqual([['1', 'Vqi3ms', 9]]);
+  });
+});
+
 describe('buildParseForms', () => {
   const lemmas = {
     559: { count: 5000, hebrew: 'אָמַר', root: 'אמר' },
@@ -54,6 +101,8 @@ describe('buildParseForms', () => {
         w('שְׁמֹר', '8104', 'HVqv2ms'),
         w('לִ/שְׁמֹר', '8104', 'HR/Vqc'),
         w('נָדַר', '9999', 'HVqp3ms'),
+        // Only ever a cohortative: not in the pool.
+        w('אֶשְׁמְרָה', '8104', 'HVqh1cs'),
       ],
     },
   };
@@ -75,7 +124,7 @@ describe('buildParseForms', () => {
 
   it('leaves out rare verbs and lists the lemmas it used', () => {
     const { forms, lemmas: table } = buildParseForms([book], lemmas);
-    expect(forms.some(([f]) => f.startsWith('נ'))).toBe(false);
+    expect(forms.some(([f]) => f.startsWith('נ') || f.startsWith('א'))).toBe(false);
     expect(table).toEqual({ 559: ['אָמַר', 'אמר'], 8104: ['שָׁמַר', 'שׁמר'] });
   });
 });

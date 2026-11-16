@@ -1148,15 +1148,23 @@ Things that will bite if changed carelessly:
   Hithpael, Hiphil, Hophal), with nothing after the verb (no object suffix,
   no paragogic letter), no ketiv, and only verbs occurring 50 times or more
   (`MIN_LEMMA_COUNT`). Prefixes stay: וַיֹּאמֶר is a wayyiqtol because of its ו.
-  About 10,700 spellings of 236 verbs, 120 KB gzipped.
+  About 10,300 spellings of 236 verbs, 110 KB gzipped.
+- **No jussive or cohortative, for now** (Mitch, Nov 2026: "Let's keep the
+  jussive and cohortative off of this for now. Need to think of a way to
+  include them later."). They are not choices; the build drops every such
+  reading (`withoutVolitives` in `scripts/lib/parse-forms.mjs`); and
+  `readVerbMorph` does not read OSHB's `h` and `j`, so neither can be asked,
+  accepted or logged. A spelling the text uses mostly as a jussive or
+  cohortative stays only if the text also reads that spelling as a yiqtol,
+  and is then filed as that yiqtol (60 spellings); the rest are left out
+  (374). A stored setting that still names either is dropped on load.
 - **A spelling is one item with every reading the text gives it**, and any of
   them is right. Out of context the student cannot know which verse is meant.
   A bare form also takes what its letters are behind a prefix (שְׁמֹר is an
   imperative alone and an infinitive in לִשְׁמֹר), but never a weqatal or
   wayyiqtol, which only a ו makes, and never the other way round.
 - **What the shape cannot tell apart is right both ways** (`readingsOf`): a
-  prefixed 2ms and 3fs, a 2fp and 3fp, a yiqtol and a jussive (2nd and 3rd
-  person) or cohortative (1st), a qatal behind a ו and a weqatal. The corpus
+  prefixed 2ms and 3fs, a 2fp and 3fp, a qatal behind a ו and a weqatal. The corpus
   witnesses some of these and the rule fills in the rest. The feedback says
   "Accepted as …" when an answer matched one of these rather than the text's
   own reading.
@@ -1173,8 +1181,7 @@ Things that will bite if changed carelessly:
   verbs (הָיָה) have no root in the lexicon. It can be switched off.
 - **Names are the app's own.** Stems are `STEM_NAME_LABELS` (the Stems tab),
   and qatal, yiqtol and wayyiqtol are `CONJUGATION_LABELS` (the paradigm
-  quiz). The ids are `STEM_NAMES` and `VERB_CONJUGATIONS`, plus `cohortative`
-  and `jussive`.
+  quiz). The ids are `STEM_NAMES` and `VERB_CONJUGATIONS`.
 - **A form is filed under the reading the text uses most**, and that is what
   the stem and conjugation settings narrow. Defaults: Qal; qatal, yiqtol and
   wayyiqtol (the paradigm quiz's three); root asked; 20 forms.

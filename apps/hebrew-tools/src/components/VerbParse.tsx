@@ -194,9 +194,9 @@ function SettingsPanel({
         onChange={(conjugations) => onChange({ ...settings, conjugations })}
       />
       <p className="-mt-6 text-xs text-text-muted">
-        A form is asked under the conjugation the text uses it as most. Out of context a yiqtol may
-        also be a jussive or cohortative, and a 2nd masculine singular a 3rd feminine; either answer
-        counts.
+        A form is asked under the conjugation the text uses it as most. Out of context a prefixed
+        2nd masculine singular may also be a 3rd feminine, and a qatal after ו a weqatal; either
+        answer counts. Jussives and cohortatives are not asked yet.
       </p>
 
       <section>

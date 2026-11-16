@@ -99,6 +99,15 @@ describe.skipIf(!hasCorpus)('every form /parse can ask', () => {
     }
   });
 
+  it('holds no jussive or cohortative reading, so neither is asked or logged', () => {
+    const volitive = file.forms.flatMap(([form, readings]) =>
+      readings
+        .filter(([, morph]) => 'hj'.includes(morph.split('/').at(-1)?.[2] ?? ''))
+        .map((r) => `${form} ${r[1]}`),
+    );
+    expect(volitive).toEqual([]);
+  });
+
   it('keeps forms unaccented and NFC', () => {
     const odd = pool.items.filter((i) => i.form !== i.form.normalize('NFC') || /[֑-ֽ֯]/.test(i.form));
     expect(odd).toEqual([]);

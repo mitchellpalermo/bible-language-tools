@@ -5,15 +5,18 @@
 // Every parse is OSHB's, never hand-written. What this file adds is the rules a
 // student can be held to when a form is shown out of context:
 //
-// - **Every reading the text gives a spelling is right.** יִהְיֶה is a yiqtol in
-//   one verse and a jussive in another; whichever is answered, it is correct.
+// - **Every reading the text gives a spelling is right.** וַיַּרְא is a Qal in
+//   one verse and a Hiphil in another; whichever is answered, it is correct.
 //   The pool carries them all (`scripts/lib/parse-forms.mjs`).
 // - **A form the shape cannot tell apart is right both ways** (`readingsOf`):
 //   a prefixed 2ms is a 3fs (תִּכְתֹּב "you will write" / "she will write"), a
-//   2fp a 3fp; a yiqtol may be read as a jussive (2nd and 3rd person) or a
-//   cohortative (1st), and the reverse, because the volitive is read off the
-//   verse; a qatal with a ו in front may be a weqatal, and a weqatal a qatal.
-//   The corpus attests these where it happens to, and the rule fills the rest.
+//   2fp a 3fp; a qatal with a ו in front may be a weqatal, and a weqatal a
+//   qatal. The corpus attests these where it happens to, and the rule fills
+//   the rest.
+// - **No jussive or cohortative, for now** (Mitch, Nov 2026). They are not
+//   choices, the pool holds no such reading (`withoutVolitives` in the build),
+//   and `readVerbMorph` does not read their letters, so neither can be asked,
+//   accepted or logged.
 // - **The fields asked follow the conjugation the student picks**, as on
 //   greek.tools' passage parser: a finite verb has person, gender and number, a
 //   participle gender, number and state, an infinitive none of them. A form
@@ -34,8 +37,11 @@ import { rootSearchKey } from './flashcard-filters';
 
 export type ParseStem = StemName;
 
-/** `VERB_CONJUGATIONS`, plus the two volitives a vocabulary card never shows. */
-export type ParseConjugation = VerbConjugation | 'cohortative' | 'jussive';
+/**
+ * `VERB_CONJUGATIONS`. The cohortative and jussive are left out for now
+ * (Mitch, Nov 2026: "Need to think of a way to include them later").
+ */
+export type ParseConjugation = VerbConjugation;
 export type ParsePerson = '1' | '2' | '3';
 export type ParseGender = 'm' | 'f' | 'c';
 export type ParseNumber = 's' | 'p';
@@ -43,14 +49,12 @@ export type ParseState = 'a' | 'c';
 
 export const PARSE_STEMS: readonly ParseStem[] = STEM_NAMES;
 
-/** In the order a grammar teaches them: the four indicatives, the volitives, the rest. */
+/** In the order a grammar teaches them: the four indicatives, then the rest. */
 export const PARSE_CONJUGATIONS: readonly ParseConjugation[] = [
   'qatal',
   'weqatal',
   'yiqtol',
   'wayyiqtol',
-  'cohortative',
-  'jussive',
   'imperative',
   'participle',
   'passive participle',
@@ -72,8 +76,6 @@ export const CONJUGATION_NAMES: Record<ParseConjugation, string> = {
   weqatal: 'Weqatal',
   yiqtol: CONJUGATION_LABELS.yiqtol,
   wayyiqtol: CONJUGATION_LABELS.wayyiqtol,
-  cohortative: 'Cohortative',
-  jussive: 'Jussive',
   imperative: 'Imperative',
   participle: 'Participle',
   'passive participle': 'Passive participle',
@@ -103,14 +105,15 @@ export const STEM_LETTERS: Record<string, ParseStem> = {
   H: 'hophal',
 };
 
-/** OSHB's conjugation letter. */
+/**
+ * OSHB's conjugation letter. The cohortative's `h` and the jussive's `j` are
+ * deliberately absent, so a code carrying either reads as nothing.
+ */
 export const CONJUGATION_LETTERS: Record<string, ParseConjugation> = {
   p: 'qatal',
   q: 'weqatal',
   i: 'yiqtol',
   w: 'wayyiqtol',
-  h: 'cohortative',
-  j: 'jussive',
   v: 'imperative',
   r: 'participle',
   s: 'passive participle',
@@ -200,7 +203,7 @@ export interface ParseItem {
 /** The reading a form is filed under: the one the text uses it in most. */
 export const primaryReading = (item: ParseItem): VerbReading => item.readings[0];
 
-const PREFIXED: readonly ParseConjugation[] = ['yiqtol', 'wayyiqtol', 'jussive'];
+const PREFIXED: readonly ParseConjugation[] = ['yiqtol', 'wayyiqtol'];
 
 /** The person-gender-number pairs a prefixed conjugation spells identically. */
 const SAME_SPELLING: Record<string, [ParsePerson, ParseGender, ParseNumber]> = {
@@ -213,11 +216,6 @@ const SAME_SPELLING: Record<string, [ParsePerson, ParseGender, ParseNumber]> = {
 /** Other conjugations a reading can be given out of context. */
 function alsoConjugations(r: VerbReading): ParseConjugation[] {
   switch (r.conjugation) {
-    case 'yiqtol':
-      return r.person === '1' ? ['cohortative'] : ['jussive'];
-    case 'jussive':
-    case 'cohortative':
-      return ['yiqtol'];
     case 'weqatal':
       return ['qatal'];
     case 'qatal':

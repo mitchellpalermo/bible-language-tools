@@ -69,6 +69,12 @@ describe('readVerbMorph', () => {
     }
   });
 
+  it('does not read a jussive or cohortative at all (not asked for now)', () => {
+    for (const bad of ['Vqj3ms', 'Vqh1cs', 'C/Vhj3ms']) {
+      expect(readVerbMorph('1', bad)).toBeNull();
+    }
+  });
+
   it('names stems as morph-parse.ts does, for every stem and conjugation letter', () => {
     for (const [letter, stem] of Object.entries(STEM_LETTERS)) {
       for (const conj of Object.keys(CONJUGATION_LETTERS)) {
@@ -115,17 +121,12 @@ describe('readingsOf', () => {
   const keys = (i: ParseItem) =>
     readingsOf(i).map((r) => `${r.conjugation} ${r.person}${r.gender}${r.number}`);
 
-  it('treats a prefixed 2ms as a 3fs, and a yiqtol as a jussive', () => {
-    expect(keys(item('תִּשְׁמֹר', ['8104', 'Vqi2ms']))).toEqual([
-      'yiqtol 2ms',
-      'yiqtol 3fs',
-      'jussive 2ms',
-      'jussive 3fs',
-    ]);
+  it('treats a prefixed 2ms as a 3fs, and never a yiqtol as a jussive or cohortative', () => {
+    expect(keys(item('תִּשְׁמֹר', ['8104', 'Vqi2ms']))).toEqual(['yiqtol 2ms', 'yiqtol 3fs']);
+    expect(keys(item('אֶשְׁמֹר', ['8104', 'Vqi1cs']))).toEqual(['yiqtol 1cs']);
   });
 
-  it('pairs a 1st person yiqtol with the cohortative, and a 2fp with a 3fp', () => {
-    expect(keys(item('אֶשְׁמְרָה', ['8104', 'Vqh1cs']))).toEqual(['cohortative 1cs', 'yiqtol 1cs']);
+  it('pairs a 2fp with a 3fp', () => {
     expect(keys(item('וַתִּשְׁמֹרְנָה', ['8104', 'C/Vqw3fp']))).toEqual(['wayyiqtol 3fp', 'wayyiqtol 2fp']);
   });
 
@@ -186,7 +187,7 @@ describe('gradeParse', () => {
     const tokhal = item('תֹּאכַל', ['398', 'Vqi2ms']);
     const g = gradeParse(
       tokhal,
-      answer({ stem: 'qal', conjugation: 'jussive', person: '3', gender: 'f', number: 's' }),
+      answer({ stem: 'qal', conjugation: 'yiqtol', person: '3', gender: 'f', number: 's' }),
       LEMMAS,
       false,
     );

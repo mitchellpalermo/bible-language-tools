@@ -36,6 +36,21 @@ describe('parse settings', () => {
     });
   });
 
+  it('drops a stored jussive or cohortative, which the drill no longer offers', () => {
+    localStorage.setItem(
+      PARSE_SETTINGS_KEY,
+      JSON.stringify({
+        stems: ['qal'],
+        conjugations: ['jussive', 'yiqtol', 'cohortative'],
+        askRoot: true,
+        sessionLength: 20,
+      }),
+    );
+    expect(loadParseSettings().conjugations).toEqual(['yiqtol']);
+    localStorage.setItem(PARSE_SETTINGS_KEY, JSON.stringify({ conjugations: ['jussive'] }));
+    expect(loadParseSettings().conjugations).toEqual([]);
+  });
+
   it('falls back to the defaults on unreadable storage', () => {
     localStorage.setItem(PARSE_SETTINGS_KEY, '{');
     expect(loadParseSettings()).toEqual(DEFAULT_PARSE_SETTINGS);

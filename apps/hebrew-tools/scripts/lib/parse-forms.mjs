@@ -23,9 +23,10 @@
  * - **Verbs occurring at least `MIN_LEMMA_COUNT` times.** A first-year student
  *   parses the verbs a course teaches, which are the common ones, and a hapax
  *   is a lexicon look-up rather than a parse.
+ * - **No jussive or cohortative, for now** (`withoutVolitives`).
  *
  * A spelling is one item, with every reading the corpus gives it (`Vqi3ms` and
- * `Vqj3ms` for יִהְיֶה; Qal and Hiphil for וַיַּרְא). The drill accepts any of
+ * `Vqi3fs` for תֹּאכַל; Qal and Hiphil for וַיַּרְא). The drill accepts any of
  * them: out of context the student cannot know which one a given verse meant.
  */
 
@@ -87,6 +88,30 @@ export function witnessed(own, verbReadings) {
     .map((key) => [...key.split('|'), 0]);
 }
 
+/** OSHB's conjugation letters for the cohortative and the jussive. */
+const VOLITIVE = new Set(['h', 'j']);
+
+const conjugationLetter = (morph) => morph.split('/').at(-1)[2];
+const isVolitive = (reading) => VOLITIVE.has(conjugationLetter(reading[1]));
+
+/**
+ * A spelling's readings with the jussive and cohortative taken out (Mitch,
+ * Nov 2026: "keep the jussive and cohortative off of this for now"). Out of
+ * context they are mostly a yiqtol's letters read by the verse, and the drill
+ * has no fair way to ask for them yet.
+ *
+ * A spelling the text uses mostly as a jussive or cohortative is kept only if
+ * the text also reads that same spelling as a yiqtol, and then it is filed as
+ * that yiqtol (its first reading). Otherwise it is left out (`[]`). A spelling
+ * filed under anything else just loses its volitive readings.
+ */
+export function withoutVolitives(readings) {
+  const rest = readings.filter((r) => !isVolitive(r));
+  if (readings.length === 0 || !isVolitive(readings[0])) return rest;
+  const yiqtol = rest.find((r) => r[2] > 0 && conjugationLetter(r[1]) === 'i');
+  return yiqtol ? [yiqtol, ...rest.filter((r) => r !== yiqtol)] : [];
+}
+
 /**
  * Build `parse-forms.json`.
  *
@@ -106,7 +131,6 @@ export function buildParseForms(books, lemmas, minCount = MIN_LEMMA_COUNT) {
   const byVerbText = new Map();
   /** form → its verb morpheme's letters */
   const verbTextOf = new Map();
-  const used = new Set();
 
   const tally = (map, outer, key) => {
     const inner = map.get(outer) ?? new Map();
@@ -130,24 +154,27 @@ export function buildParseForms(books, lemmas, minCount = MIN_LEMMA_COUNT) {
           tally(byForm, form, `${word.lemma}|${word.parsing.slice(1)}`);
           tally(byVerbText, verbText, `${word.lemma}|${code}`);
           verbTextOf.set(form, verbText);
-          used.add(word.lemma);
         }
       }
     }
   }
 
   const byCount = (a, b) => b[1] - a[1] || a[0].localeCompare(b[0]);
-  const forms = [...byForm].map(([form, readings]) => {
+  const forms = [];
+  for (const [form, readings] of byForm) {
     const own = [...readings].sort(byCount).map(([key, count]) => [...key.split('|'), count]);
     // Only a bare form borrows: a reading of the letters alone says nothing
     // about them behind a prefix (the imperative שְׁמֹר is no reading of לִשְׁמֹר).
     const verbText = verbTextOf.get(form);
     const borrowed = verbText === form ? witnessed(own, byVerbText.get(verbText)) : [];
-    return [form, [...own, ...borrowed]];
-  });
+    const kept = withoutVolitives([...own, ...borrowed]);
+    if (kept.length > 0) forms.push([form, kept]);
+  }
 
   const lemmaTable = Object.fromEntries(
-    [...used].sort().map((lemma) => [lemma, [lemmas[lemma].hebrew, rootOf(lemmas[lemma])]]),
+    [...new Set(forms.flatMap(([, rs]) => rs.map(([lemma]) => lemma)))]
+      .sort()
+      .map((lemma) => [lemma, [lemmas[lemma].hebrew, rootOf(lemmas[lemma])]]),
   );
 
   return { lemmas: lemmaTable, forms };

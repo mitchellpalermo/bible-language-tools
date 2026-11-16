@@ -648,6 +648,8 @@ This mirrors the core skill tested in most Biblical Hebrew exams and differs fro
 
 **Shipped (#82):** `/parse`, verbs only, in the seven stems a course teaches, from verbs that occur at least 50 times. Stem and conjugation are narrowed in settings (default Qal qatal, yiqtol, wayyiqtol), the fields asked follow the conjugation picked, and the root is typed. Every answer goes to the attempt log as `parse/verb/<stem>-<conjugation>`. See CLAUDE.md, "Parsing practice". Not yet: nouns and other parts of speech, verbs with object suffixes, a parse drill in Today's Session, parsing in context (greek.tools' `/parse/gnt`).
 
+**Deferred: the jussive and cohortative.** Left out of `/parse` on purpose (Mitch, Nov 2026: "Let's keep the jussive and cohortative off of this for now. Need to think of a way to include them later."). Out of context they are mostly a yiqtol's letters, told apart only by the verse, so asking for them needs a fair way to show what decides it (the verse, or only the shapes that differ, such as יְהִי and ־ָה). They are not choices, and no form is asked or logged as either.
+
 ### 8C. Binyan Overview / Verb Stems Guide
 
 An interactive explainer of the seven binyanim with:

@@ -15,6 +15,7 @@ const FILE: ParseFormsFile = {
       [
         ['559', 'Vqp3ms', 50],
         ['559', 'Voc', 1],
+        ['559', 'Vqj3ms', 1],
       ],
     ],
     ['bad', [['559', 'Ncmsa', 1]]],
@@ -27,7 +28,7 @@ afterEach(() => {
 });
 
 describe('decodeParseForms', () => {
-  it('reads every form and lemma, dropping a reading it cannot read', () => {
+  it('reads every form and lemma, dropping a reading it cannot read, a jussive included', () => {
     const pool = decodeParseForms(FILE);
     expect(pool.lemmas[559]).toEqual({ headword: 'אָמַר', root: 'אמר' });
     expect(pool.items.map((i) => [i.form, i.readings.length])).toEqual([
