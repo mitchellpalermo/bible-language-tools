@@ -9,10 +9,11 @@ const VIEWPORTS = [
   { name: 'desktop', width: 1280, height: 800 },
 ];
 
-const textbookChip = (page: Page) => page.getByRole('button', { name: /^Merkle & Plummer\s*\(/ });
+const textbookChip = (page: Page) =>
+  page.getByRole('button', { name: /^Beginning with NT Greek\s*\(/ });
 // The picker's own button: the book, then the chapters chosen and how many words.
 const pickerSummary = (page: Page) =>
-  page.getByRole('button', { name: /^Merkle & Plummer\s*(All chapters|Ch\.)/ });
+  page.getByRole('button', { name: /^Beginning with NT Greek\s*(All chapters|Ch\.)/ });
 const chapterCell = (page: Page, n: number) =>
   page.getByRole('button', { name: new RegExp(`^Ch\\. ${n} —`) });
 
@@ -39,6 +40,11 @@ for (const viewport of VIEWPORTS) {
       await expect(chapterCell(page, 1)).toHaveAttribute('aria-pressed', 'true');
       await expect(pickerSummary(page)).toContainText('Ch. 1 · 15 words');
       await expect(page.getByTestId('card-progress')).toHaveText('1/15');
+
+      // The chip names the book by its title and stays on one line.
+      const chip = await textbookChip(page).boundingBox();
+      expect(chip?.height ?? 99).toBeLessThan(44);
+      expect((chip?.x ?? 0) + (chip?.width ?? 0)).toBeLessThanOrEqual(viewport.width);
 
       // Every chapter cell is a full touch target and none runs off the page.
       for (const n of [1, 6, 23]) {

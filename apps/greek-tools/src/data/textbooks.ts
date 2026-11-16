@@ -45,7 +45,10 @@ const BOOKS = {
   'beginning-with-nt-greek': {
     title: 'Beginning with New Testament Greek',
     authors: 'Benjamin L. Merkle and Robert L. Plummer',
-    shortTitle: 'Merkle & Plummer',
+    // The label a student sees on the chip and the picker. It is the title,
+    // not the authors: the same two authors have an intermediate textbook, and
+    // the two must be told apart once that one is added.
+    shortTitle: 'Beginning with NT Greek',
     unitLabel: 'Ch.',
     chapters: BEGINNING_GREEK_CHAPTERS,
     unresolved: BEGINNING_GREEK_UNRESOLVED,

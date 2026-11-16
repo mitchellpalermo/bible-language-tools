@@ -608,6 +608,10 @@ Each app keeps its textbook list, its chapter data and its bindings
   the stored selection and the tests. Adding a book is a data change. A stored
   deck id that is no longer in the list reads as the whole vocabulary.
 - **Never rename a textbook id.** It is stored in the student's selection.
+- **`shortTitle` is what the student reads** on the chip and the picker's
+  header, so it must tell a book from every other in that app's list. Where two
+  books share their authors (greek.tools' beginning and intermediate grammars),
+  it is a short form of the title, not the authors' names.
 - **Only facts come from a textbook.** Which headword a chapter assigns is a
   fact. A book's glosses, cognate notes, mnemonics, tables and prose are not
   copied into this repository, and neither is the source document. hebrew.tools

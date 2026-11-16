@@ -236,6 +236,12 @@ hebrew.tools (repo CLAUDE.md, "Textbook chapter decks").
 - **The tag is a lookup, not a field.** `vocabulary.ts` is generated and is not
   touched. `chaptersOf(word)` reads the maps by the word's `greek` field, so a
   lemma is spelled as the vocabulary spells it (`'ὁ, ἡ, τό'`, `'ἐκ, ἐξ'`).
+- **A book is named by its title, never only by its authors.** The chip and
+  the picker's header show `shortTitle` from the book's entry in `BOOKS`
+  ("Beginning with NT Greek"). The same authors have an intermediate textbook,
+  so the authors' names cannot tell two decks apart. The full title and the
+  authors are in the picker's footer and the chip's `title`. A data test fails
+  on a `shortTitle` that repeats or contains an author's surname.
 - **To add a textbook:** add its map to `textbook-chapters.ts` and its entry to
   `BOOKS` in `textbooks.ts`. The chip, the grid, the counts and the stored
   selection follow. An id is stored in the student's selection: never rename one.

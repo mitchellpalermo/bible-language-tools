@@ -22,7 +22,11 @@ export interface Textbook<B extends string = string> {
   /** Full title, for attribution. */
   title: string;
   authors: string;
-  /** Short label used in deck chips. */
+  /**
+   * The label on the deck chip and the picker's header. It must tell this
+   * book from every other in the app's list, so where two books share their
+   * authors it is a short form of the title, not the authors' names.
+   */
   shortTitle: string;
   /** What the book's numbered divisions are called on a chip: "Ch.", "Unit". */
   unitLabel: string;

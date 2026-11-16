@@ -38,6 +38,26 @@ describe('TEXTBOOKS', () => {
     }
   });
 
+  it('labels every book so it cannot be mistaken for another', () => {
+    // One pair of authors can have two books here, so a label is never only
+    // the authors' names, and no two books share a label or a title.
+    const books = TEXTBOOK_IDS.map((id) => TEXTBOOKS[id]);
+    expect(new Set(books.map((b) => b.shortTitle)).size).toBe(books.length);
+    expect(new Set(books.map((b) => b.title)).size).toBe(books.length);
+    for (const book of books) {
+      const surnames = book.authors
+        .split(/,| and /)
+        .map((name) => name.trim().split(' ').at(-1) ?? '')
+        .filter(Boolean);
+      for (const surname of surnames) expect(book.shortTitle).not.toContain(surname);
+    }
+  });
+
+  it('keeps the id students have stored', () => {
+    expect(TEXTBOOK_IDS).toContain('beginning-with-nt-greek');
+    expect(TEXTBOOKS['beginning-with-nt-greek'].shortTitle).toBe('Beginning with NT Greek');
+  });
+
   it('has a chapter map for every textbook', () => {
     expect(Object.keys(CHAPTER_MAPS)).toEqual(TEXTBOOK_IDS);
   });
