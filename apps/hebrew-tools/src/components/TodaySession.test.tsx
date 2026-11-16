@@ -1,5 +1,6 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { dayIndex } from '@tools/shared/daily';
 import { buildTodayPlan } from '@tools/shared/today';
 import posthog from 'posthog-js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -10,7 +11,13 @@ import { saveSelection } from '../lib/deck-selection';
 import { buildTableModels, getQuizCells } from '../lib/paradigm-quiz';
 import { paradigmCardKey } from '../lib/paradigm-srs';
 import { loadStudyStreak } from '../lib/study-streak';
-import { BUDGET_KEY, type TodayDrill, type TodayItem, vocabSrsKey } from '../lib/today';
+import {
+  BUDGET_KEY,
+  DRILL_ROTATION,
+  type TodayDrill,
+  type TodayItem,
+  vocabSrsKey,
+} from '../lib/today';
 import TodaySession, { planSteps } from './TodaySession';
 
 vi.mock('posthog-js', () => ({
@@ -202,6 +209,53 @@ describe('running a session', () => {
         name: /Paradigm forms 1 1/,
       }),
     ).toBeInTheDocument();
+  });
+
+  it('keeps the keypad as set from one table to the next, and into the drill', async () => {
+    // A day whose drill is the mixed review, which is a paradigm table with a keypad.
+    const day = new Date(2026, 10, 16, 9);
+    while (DRILL_ROTATION[dayIndex(DRILL_ROTATION.length, day)] !== 'mixed') {
+      day.setDate(day.getDate() + 1);
+    }
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(day);
+    try {
+      const user = userEvent.setup();
+      seedDueWords(0);
+      // Two verb tables, one form due in each.
+      const tables = buildTableModels()
+        .filter((t) => t.layout === 'verb')
+        .slice(0, 2);
+      const store = { ...loadSRSStore() };
+      for (const table of tables) {
+        const ids = getQuizCells(table).flatMap((c) => (c.id ? [c.id] : []));
+        ids.forEach((id, i) => {
+          store[paradigmCardKey(id)] = card(paradigmCardKey(id), i === 0 ? -1 : 7);
+        });
+      }
+      saveSRSStore(store);
+      render(<TodaySession />);
+      await user.click(screen.getByRole('button', { name: 'Start 20-minute session' }));
+
+      const keypad = () => screen.getByRole('switch', { name: 'Keypad' });
+      expect(screen.getByText(/^Table 1 of 2/)).toBeInTheDocument();
+      expect(keypad()).toHaveAttribute('aria-checked', 'false');
+      await user.click(keypad());
+
+      await user.click(screen.getByRole('button', { name: 'Check answers' }));
+      await user.click(screen.getByRole('button', { name: 'Continue' }));
+      expect(screen.getByText(/^Table 2 of 2/)).toBeInTheDocument();
+      expect(keypad()).toHaveAttribute('aria-checked', 'true');
+
+      await user.click(screen.getByRole('button', { name: 'Check answers' }));
+      await user.click(screen.getByRole('button', { name: 'Continue' }));
+      expect(
+        screen.getByText('Part 2 of 2: Drill: Mixed review of learned forms'),
+      ).toBeInTheDocument();
+      expect(keypad()).toHaveAttribute('aria-checked', 'true');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('starts at once from /today?start=45 and tidies the address', () => {

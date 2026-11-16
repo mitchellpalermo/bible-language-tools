@@ -68,6 +68,7 @@ import {
 } from '../lib/accent-shift';
 import { logAttempts } from '../lib/attempt-log';
 import { useHebrewInput } from '../lib/use-hebrew-input';
+import { type KeypadState, useKeypad } from '../lib/use-keypad';
 import ErrorBoundary from './ErrorBoundary';
 import HebrewKeypad from './HebrewKeypad';
 import { Hebrew, Prose } from './HebrewRuns';
@@ -359,6 +360,8 @@ export interface AccentSession {
   /** Whether there is time for another item. */
   canContinue: () => boolean;
   onFinished: () => void;
+  /** The keypad, held by the caller so it stays as set from one part to the next. */
+  keypad?: KeypadState;
 }
 
 function AccentTrainerInner({ session }: { session?: AccentSession }) {
@@ -371,7 +374,9 @@ function AccentTrainerInner({ session }: { session?: AccentSession }) {
   const [formCheck, setFormCheck] = useState<FormCheck | null>(null);
   const [history, setHistory] = useStoredState(loadScaffoldHistory, [], saveScaffoldHistory);
   const [tally, setTally] = useState({ done: 0, clean: 0 });
-  const [keypadOpen, setKeypadOpen] = useState(false);
+  const ownKeypad = useKeypad();
+  const keypad = session?.keypad ?? ownKeypad;
+  const keypadOpen = keypad.open;
   const stepOpenedAt = useRef(Date.now());
   // The form field's insert/backspace, for the keypad rendered outside it.
   const keypadTarget = useRef<KeypadTarget | null>(null);
@@ -382,7 +387,6 @@ function AccentTrainerInner({ session }: { session?: AccentSession }) {
   // Dealt after mount: the server has no store, and the first render must match.
   useEffect(() => {
     setQueue(session ? [...session.items] : buildQueue(loadSRSStore()));
-    setKeypadOpen(window.matchMedia?.('(pointer: coarse)').matches ?? false);
   }, []);
 
   const item = queue?.[index % (queue?.length || 1)];
@@ -638,7 +642,7 @@ function AccentTrainerInner({ session }: { session?: AccentSession }) {
             {drill.step === FORM_STEP && (
               <ToggleSwitch
                 checked={keypadOpen}
-                onChange={() => setKeypadOpen(!keypadOpen)}
+                onChange={keypad.toggle}
                 label="Keypad"
                 accent={ACCENT}
               />

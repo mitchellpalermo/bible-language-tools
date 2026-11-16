@@ -30,6 +30,7 @@ import { logAttempts } from '../lib/attempt-log';
 import { glossFor, stemSenses } from '../lib/gloss';
 import { applyFinalForms } from '../lib/hebrew-input';
 import { loadParseSettings, saveParseSettings } from '../lib/parse-settings';
+import { useKeypad } from '../lib/use-keypad';
 import {
   buildSession,
   CONJUGATION_NAMES,
@@ -464,13 +465,8 @@ function VerbParseInner() {
   const [grades, setGrades] = useState<ParseGrade[]>([]);
   // The settings a session was dealt under; changing them mid-session changes nothing.
   const [askRoot, setAskRoot] = useState(settings.askRoot);
-  // The keypad belongs to the page, not to one form: `Question` remounts for
-  // every verb, so state kept there closed the keypad again on each one. A
-  // touch screen starts with it open, read after mount (the page is prerendered).
-  const [keypadOpen, setKeypadOpen] = useState(false);
-  useEffect(() => {
-    setKeypadOpen(window.matchMedia?.('(pointer: coarse)').matches ?? false);
-  }, []);
+  // Held here, not in `Question`, which remounts for every verb.
+  const keypad = useKeypad();
 
   useEffect(() => {
     let cancelled = false;
@@ -550,8 +546,8 @@ function VerbParseInner() {
           total={session.length}
           answer={answer}
           askRoot={askRoot}
-          keypadOpen={keypadOpen}
-          onToggleKeypad={() => setKeypadOpen((o) => !o)}
+          keypadOpen={keypad.open}
+          onToggleKeypad={keypad.toggle}
           onChange={setAnswer}
           onSubmit={submit}
         />

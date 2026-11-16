@@ -1126,6 +1126,12 @@ Things that will bite if changed carelessly:
   pile up tomorrow's reviews.
 - **The streak counts a session once anything was answered.** Ending early
   or running out of time still counts; opening the page does not.
+- **One keypad for the whole run.** `Runner` holds `useKeypad()` and hands it
+  to each part through `session.keypad`, because a part is remounted per step
+  and the paradigm quiz per table (`key={at}`). Kept inside them, the keypad
+  closed again on every table the student had opened it for. Any page with a
+  keypad takes it from `src/lib/use-keypad.ts`, held where it outlives one
+  item: on `/parse` that is the page, not the per-verb `Question`.
 
 ### Parsing practice (issue #82)
 
