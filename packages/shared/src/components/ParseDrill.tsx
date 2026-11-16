@@ -29,10 +29,14 @@ const CARD = 'var(--color-bg-card, #FFFFFF)';
 const TEXT = 'var(--color-text, #1F2937)';
 const MUTED = 'var(--color-text-muted, #6B7280)';
 
-/** Right and wrong, in the shades the greek.tools feedback rows have always used. */
+/**
+ * Right and wrong, in the shades the greek.tools feedback rows have always used,
+ * plus a border: hebrew.tools' page background is the same green-50 as a right
+ * row, which without one does not show at all.
+ */
 export const MARK_COLORS = {
-  right: { bg: '#F0FDF4', text: '#15803D', tick: '#16A34A' },
-  wrong: { bg: '#FEF2F2', text: '#B91C1C', given: '#EF4444', tick: '#DC2626' },
+  right: { bg: '#F0FDF4', border: '#BBF7D0', text: '#15803D', tick: '#16A34A' },
+  wrong: { bg: '#FEF2F2', border: '#FECACA', text: '#B91C1C', given: '#EF4444', tick: '#DC2626' },
 } as const;
 
 const CAPTION: CSSProperties = {
@@ -162,6 +166,7 @@ export function ParseFeedbackRow({ property, correct, given, expected }: ParseFe
         padding: '0.625rem 1rem',
         fontSize: '0.875rem',
         background: tone.bg,
+        border: `1px solid ${tone.border}`,
       }}
     >
       <span style={{ fontWeight: 600, color: tone.text }}>{property}</span>
@@ -195,6 +200,7 @@ export function ParseVerdict({ correct }: { correct: boolean }) {
         fontWeight: 600,
         fontSize: '0.875rem',
         background: tone.bg,
+        border: `1px solid ${tone.border}`,
         color: tone.text,
       }}
     >
