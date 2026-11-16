@@ -28,6 +28,7 @@ import ResetProgress from '../components/ResetProgress';
 import SyncControls from '../components/SyncControls';
 import TodaySession from '../components/TodaySession';
 import TranslationPDFExport from '../components/TranslationPDFExport';
+import VerbParse from '../components/VerbParse';
 import Writing from '../components/Writing';
 import { markReadToday } from '../data/dailyVerses';
 import { saveReaderPrefs } from '../data/morphhb';
@@ -41,6 +42,7 @@ import { saveFlashcardSettings } from '../lib/flashcard-settings';
 import { focusPassageStore } from '../lib/focus-passages';
 import { buildTableModels, getQuizCells } from '../lib/paradigm-quiz';
 import { paradigmCardKey } from '../lib/paradigm-srs';
+import { saveParseSettings } from '../lib/parse-settings';
 import { saveQuizSettings } from '../lib/quiz-settings';
 import { markSessionComplete } from '../lib/study-streak';
 import { saveLadderProgress } from '../lib/suffix-ladder';
@@ -111,6 +113,14 @@ function seedReturningStudent() {
   // and the picker both differ from the server's defaults.
   markSessionComplete();
   saveBudget(45);
+  // Parsing narrowed to the Piel, without the root and in sessions of 10, so
+  // every chip, the switch and the length picker differ from the defaults.
+  saveParseSettings({
+    stems: ['piel', 'hiphil'],
+    conjugations: ['qatal'],
+    askRoot: false,
+    sessionLength: 10,
+  });
   // Enough scaffold history to unlock speed mode, which changes the step row.
   localStorage.setItem(SCAFFOLD_HISTORY_KEY, JSON.stringify(Array(20).fill(true)));
 }
@@ -130,6 +140,7 @@ const ISLANDS: Record<string, () => ReactElement> = {
   SyncControls: () => <SyncControls />,
   TodaySession: () => <TodaySession />,
   TranslationPDFExport: () => <TranslationPDFExport />,
+  VerbParse: () => <VerbParse />,
   Writing: () => <Writing />,
 };
 

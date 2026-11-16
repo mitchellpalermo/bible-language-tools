@@ -1,3 +1,5 @@
+import { SessionLengthPicker, ToggleChip } from '@tools/shared/components/ParseDrill';
+import { toggleValue } from '@tools/shared/parse-drill';
 import type {
   ParseMood,
   ParseSettings as ParseSettingsType,
@@ -18,12 +20,6 @@ interface Props {
   onChange: (s: ParseSettingsType) => void;
   onStart: () => void;
 }
-
-function toggle<T>(arr: T[], val: T): T[] {
-  return arr.includes(val) ? arr.filter((x) => x !== val) : [...arr, val];
-}
-
-const SESSION_LENGTHS = [10, 20, 30] as const;
 
 // Group tenses by indicative-only vs. cross-mood availability
 const _TENSE_GROUPS: { label: string; tenses: ParseTense[] }[] = [
@@ -58,7 +54,7 @@ export default function ParseSettings({ settings, onChange, onStart }: Props) {
               key={t}
               label={TENSE_LABELS[t]}
               active={settings.tenses.includes(t)}
-              onClick={() => setTenses(toggle(settings.tenses, t))}
+              onClick={() => setTenses(toggleValue(settings.tenses, t))}
             />
           ))}
         </div>
@@ -89,7 +85,7 @@ export default function ParseSettings({ settings, onChange, onStart }: Props) {
               key={v}
               label={VOICE_LABELS[v]}
               active={settings.voices.includes(v)}
-              onClick={() => setVoices(toggle(settings.voices, v))}
+              onClick={() => setVoices(toggleValue(settings.voices, v))}
             />
           ))}
         </div>
@@ -109,7 +105,7 @@ export default function ParseSettings({ settings, onChange, onStart }: Props) {
               key={m}
               label={MOOD_LABELS[m]}
               active={settings.moods.includes(m)}
-              onClick={() => setMoods(toggle(settings.moods, m))}
+              onClick={() => setMoods(toggleValue(settings.moods, m))}
             />
           ))}
         </div>
@@ -124,22 +120,10 @@ export default function ParseSettings({ settings, onChange, onStart }: Props) {
         <h2 className="text-sm font-semibold uppercase tracking-wide text-text-muted mb-3">
           Forms per session
         </h2>
-        <div className="flex gap-2">
-          {SESSION_LENGTHS.map((n) => (
-            <button
-              key={n}
-              onClick={() => onChange({ ...settings, sessionLength: n })}
-              className={[
-                'px-4 py-2 rounded-lg text-sm font-semibold border-2 transition-colors',
-                settings.sessionLength === n
-                  ? 'border-[var(--color-accent)] bg-[var(--color-accent)] text-white'
-                  : 'border-bg-card bg-bg-card text-text-muted hover:border-[var(--color-accent)]',
-              ].join(' ')}
-            >
-              {n}
-            </button>
-          ))}
-        </div>
+        <SessionLengthPicker
+          value={settings.sessionLength}
+          onChange={(sessionLength) => onChange({ ...settings, sessionLength })}
+        />
       </section>
 
       {/* ── Start button ────────────────────────────────────────────────── */}
@@ -162,29 +146,5 @@ export default function ParseSettings({ settings, onChange, onStart }: Props) {
         </p>
       )}
     </div>
-  );
-}
-
-function ToggleChip({
-  label,
-  active,
-  onClick,
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={[
-        'px-3 py-1.5 rounded-full text-sm font-medium border-2 transition-colors',
-        active
-          ? 'border-[var(--color-accent)] bg-[var(--color-accent)] text-white'
-          : 'border-bg-card bg-bg-card text-text-muted hover:border-[var(--color-accent)]',
-      ].join(' ')}
-    >
-      {label}
-    </button>
   );
 }

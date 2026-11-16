@@ -1,3 +1,4 @@
+import { ParseProgress, ParseSelect } from '@tools/shared/components/ParseDrill';
 import type {
   ParseAnswer,
   ParseItem,
@@ -39,21 +40,7 @@ export default function ParseQuestion({ item, index, total, answer, onChange, on
 
   return (
     <div className="max-w-lg mx-auto space-y-8">
-      {/* ── Progress ────────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-3">
-        <div className="flex-1 h-1.5 bg-bg-card rounded-full overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all duration-300"
-            style={{
-              width: `${(index / total) * 100}%`,
-              background: 'var(--color-accent)',
-            }}
-          />
-        </div>
-        <span className="text-sm text-text-muted whitespace-nowrap">
-          {index + 1} / {total}
-        </span>
-      </div>
+      <ParseProgress index={index} total={total} />
 
       {/* ── Verb form ───────────────────────────────────────────────────── */}
       <div className="text-center py-8">
@@ -123,53 +110,6 @@ export default function ParseQuestion({ item, index, total, answer, onChange, on
       >
         Submit
       </button>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Reusable dropdown
-// ---------------------------------------------------------------------------
-
-interface SelectProps<T extends string> {
-  label: string;
-  value: T | '';
-  options: readonly T[];
-  labels: Record<T, string>;
-  onChange: (val: T) => void;
-  className?: string;
-}
-
-function ParseSelect<T extends string>({
-  label,
-  value,
-  options,
-  labels,
-  onChange,
-  className = '',
-}: SelectProps<T>) {
-  const id = label.toLowerCase();
-  return (
-    <div className={className}>
-      <label
-        htmlFor={id}
-        className="block text-xs font-semibold uppercase tracking-wide text-text-muted mb-1"
-      >
-        {label}
-      </label>
-      <select
-        id={id}
-        value={value}
-        onChange={(e) => onChange(e.target.value as T)}
-        className="w-full rounded-lg border border-bg-card bg-bg-card px-3 py-2 text-sm text-text focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] appearance-none"
-      >
-        <option value="">— select —</option>
-        {options.map((opt) => (
-          <option key={opt} value={opt}>
-            {labels[opt]}
-          </option>
-        ))}
-      </select>
     </div>
   );
 }

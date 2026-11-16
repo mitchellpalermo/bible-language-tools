@@ -1,0 +1,22 @@
+---
+import VerbParse from '../components/VerbParse';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Verb Parsing"
+  description="Practice parsing Biblical Hebrew verbs: identify the stem, conjugation, person, gender, number and root of forms taken from the Hebrew Bible."
+>
+  <a href="/study" class="inline-flex items-center gap-1 text-sm text-text-muted hover:text-text transition-colors mb-4">
+    ← Back
+  </a>
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold mb-1" style="color: var(--color-primary);">Verb Parsing</h1>
+    <p class="text-text-muted">
+      Given a verb form from the Hebrew Bible, identify its stem, conjugation, person, gender and
+      number, and type its root. Every answer is checked against the Open Scriptures Hebrew Bible's
+      parsing of the text.
+    </p>
+  </div>
+  <VerbParse client:load />
+</Layout>

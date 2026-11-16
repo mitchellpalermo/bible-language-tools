@@ -151,7 +151,7 @@ The Accent-Shift Trainer spends a fifth, `accent:<item id>` in `src/lib/accent-s
 The confusable decks deliberately get no prefix of their own — they drill the same letters the alphabet deck does, so grading ד in one must move the card the other sees.
 - **Deck selection is persisted separately from the SRS store** (`hebrew-tools-deck-v1`, `src/lib/deck-selection.ts`) and is never synced. It decides which due cards you see, not what is due, so it stays local to the browser.
 - **What the card front shows is persisted the same way** (`hebrew-tools-flashcard-display-v1`, `src/lib/flashcard-settings.ts`, over `@tools/shared/flashcard-settings`) and is likewise never synced. Today it holds one boolean: whether the part of speech appears on the front of a flashcard, which defaults to off. See the repo CLAUDE.md under "What the card front gives away".
-- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`, `hebrew-tools-reader-prefs`, `hebrew-tools-daily-v1`, `hebrew-tools-accent-scaffold-v1` (speed mode), `hebrew-tools-attempts-v1` (attempt log, **synced** on its own endpoint, kept by the account reset), `hebrew-tools-attempts-pushed-through` (the attempt log's push cursor), `hebrew-tools-suffix-ladder-v1` (suffix ladder progress, **synced**, kept by the account reset), `hebrew-tools-study-streak-v1` (the Today session streak, **synced**, kept by the account reset), `hebrew-tools-today-budget-v1` (the last time budget picked, not synced), `hebrew-tools-focus-passages-v1` (focus passages, **synced** with tombstones, kept by the account reset; see "Focus passages" in the repo CLAUDE.md). Signed-in students sync the SRS store, the stats, the study streak, the suffix ladder and the attempt log (see "Study sync"); everything else on this list is per-browser.
+- **SRS localStorage keys:** `hebrew-tools-srs-v1`, `hebrew-tools-stats-v1`, `hebrew-tools-reader-last`, `hebrew-tools-reader-prefs`, `hebrew-tools-daily-v1`, `hebrew-tools-accent-scaffold-v1` (speed mode), `hebrew-tools-attempts-v1` (attempt log, **synced** on its own endpoint, kept by the account reset), `hebrew-tools-attempts-pushed-through` (the attempt log's push cursor), `hebrew-tools-suffix-ladder-v1` (suffix ladder progress, **synced**, kept by the account reset), `hebrew-tools-study-streak-v1` (the Today session streak, **synced**, kept by the account reset), `hebrew-tools-today-budget-v1` (the last time budget picked, not synced), `hebrew-tools-parse-settings-v1` (which stems and conjugations `/parse` asks, not synced), `hebrew-tools-focus-passages-v1` (focus passages, **synced** with tombstones, kept by the account reset; see "Focus passages" in the repo CLAUDE.md). Signed-in students sync the SRS store, the stats, the study streak, the suffix ladder and the attempt log (see "Study sync"); everything else on this list is per-browser.
 
 ### OSHB data pipeline (issue #75)
 
@@ -166,6 +166,7 @@ gitignored — it is 24 MB regenerated from upstream, not source.
 | `books.json` | the 39 books in Tanakh order, with `section`, chapter and word counts |
 | `lemmas.json` | 9,256 lemmas → `{ count, hebrew?, xlit?, pos?, gender?, root?, gloss? }` (Strong's gloss) |
 | `glosses.json` | 9,248 lemmas → `{ g, s? }` — BDB's short gloss and a verb's stem senses; see "Glosses" |
+| `parse-forms.json` | `/parse`'s verb forms, each with every parse the text gives it; see "Parsing practice". Rebuilt from the files above on every `build:data`, even when the fetch is skipped |
 
 `src/data/morphhb.ts` is the client side: types, cached fetches, and the text
 helpers. **`lemmas.json` is the app's authoritative frequency source** — real
@@ -1123,6 +1124,70 @@ Things that will bite if changed carelessly:
   pile up tomorrow's reviews.
 - **The streak counts a session once anything was answered.** Ending early
   or running out of time still counts; opening the page does not.
+
+### Parsing practice (issue #82)
+
+`/parse` shows a verb form from the Hebrew Bible and asks for its stem,
+conjugation, the fields that conjugation inflects for, and its root. The flow
+and its components are greek.tools' `/parse`, shared (see "Parsing practice" in
+the repo CLAUDE.md); what is here is the Hebrew.
+
+| File | Role |
+|---|---|
+| `scripts/lib/parse-forms.mjs` | Builds `parse-forms.json` from the corpus: which forms are in the pool, and every reading of each |
+| `src/data/parse-forms.ts` | Fetches and decodes the pool |
+| `src/lib/verb-parse.ts` | Pure: reading an OSHB code, the fields per conjugation, what else a form may be read as, grading, concept ids, sessions |
+| `src/lib/parse-settings.ts` | The stored settings (`hebrew-tools-parse-settings-v1`) |
+| `src/components/VerbParse.tsx` | The page |
+| `src/data/parse-forms.corpus.test.ts` | Every form in the built pool reads, and has an answer among the choices for every field it asks |
+
+Things that will bite if changed carelessly:
+
+- **No parse is hand-written.** The answer is OSHB's code for the word. The
+  pool holds Hebrew verbs only, in the seven stems (Qal, Niphal, Piel, Pual,
+  Hithpael, Hiphil, Hophal), with nothing after the verb (no object suffix,
+  no paragogic letter), no ketiv, and only verbs occurring 50 times or more
+  (`MIN_LEMMA_COUNT`). Prefixes stay: וַיֹּאמֶר is a wayyiqtol because of its ו.
+  About 10,700 spellings of 236 verbs, 120 KB gzipped.
+- **A spelling is one item with every reading the text gives it**, and any of
+  them is right. Out of context the student cannot know which verse is meant.
+  A bare form also takes what its letters are behind a prefix (שְׁמֹר is an
+  imperative alone and an infinitive in לִשְׁמֹר), but never a weqatal or
+  wayyiqtol, which only a ו makes, and never the other way round.
+- **What the shape cannot tell apart is right both ways** (`readingsOf`): a
+  prefixed 2ms and 3fs, a 2fp and 3fp, a yiqtol and a jussive (2nd and 3rd
+  person) or cohortative (1st), a qatal behind a ו and a weqatal. The corpus
+  witnesses some of these and the rule fills in the rest. The feedback says
+  "Accepted as …" when an answer matched one of these rather than the text's
+  own reading.
+- **The fields follow the conjugation the student picks**, as greek.tools'
+  passage parser does: a finite verb asks person, gender and number; a
+  participle gender, number and state; an infinitive nothing more. So the
+  field set does not give the conjugation away, and no form is asked a field
+  its code does not carry.
+- **A miss is graded against the closest reading**, so each wrong field is
+  named against the reading the student was nearest to.
+- **The root is typed**, with the keyboard mapping or the keypad, and compared
+  as bare consonants (`rootSearchKey`): no shin or sin dot, finals undone.
+  The lexicon's root and the headword's consonants both count, since a few
+  verbs (הָיָה) have no root in the lexicon. It can be switched off.
+- **Names are the app's own.** Stems are `STEM_NAME_LABELS` (the Stems tab),
+  and qatal, yiqtol and wayyiqtol are `CONJUGATION_LABELS` (the paradigm
+  quiz). The ids are `STEM_NAMES` and `VERB_CONJUGATIONS`, plus `cohortative`
+  and `jussive`.
+- **A form is filed under the reading the text uses most**, and that is what
+  the stem and conjugation settings narrow. Defaults: Qal; qatal, yiqtol and
+  wayyiqtol (the paradigm quiz's three); root asked; 20 forms.
+- **Every answer is logged** as `parse/verb/<stem>-<conjugation>`, spaces as
+  hyphens (`parse/verb/niphal-infinitive-construct`), under the reading it was
+  graded against. Same shape as greek.tools' `parse/paradigm/<tense>-<voice>-<mood>`.
+  **Never rename one**: it splits that kind's history.
+- **No SRS cards and no per-passage history.** Nothing is added to the reset's
+  `ERASES`, and nothing is written to `focus_parse_history`, which has no
+  `language` column (greek.tools reads and replaces it by user alone).
+- **Not in Today's Session yet.** The pool is a fetched file and the plan is
+  built synchronously; the attempt log already carries what a parse drill
+  would rank by.
 
 ### Accent-Shift Trainer (issue #185)
 

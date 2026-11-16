@@ -646,6 +646,8 @@ This mirrors the core skill tested in most Biblical Hebrew exams and differs fro
 
 **Data source:** Pull random words from OSHB morphological data — the parse answer is embedded in the source.
 
+**Shipped (#82):** `/parse`, verbs only, in the seven stems a course teaches, from verbs that occur at least 50 times. Stem and conjugation are narrowed in settings (default Qal qatal, yiqtol, wayyiqtol), the fields asked follow the conjugation picked, and the root is typed. Every answer goes to the attempt log as `parse/verb/<stem>-<conjugation>`. See CLAUDE.md, "Parsing practice". Not yet: nouns and other parts of speech, verbs with object suffixes, a parse drill in Today's Session, parsing in context (greek.tools' `/parse/gnt`).
+
 ### 8C. Binyan Overview / Verb Stems Guide
 
 An interactive explainer of the seven binyanim with:
@@ -894,7 +896,7 @@ The following modules from greek.tools can be copied with minimal or zero change
 | 10 | 7 | Paradigm Quiz | Medium | Phase 1, Phase 6 | ✅ Done (7a–7d); stems added as the course reaches them | #80 |
 | 11 | 8C | Binyan Guide | Low (content) | None | Queued (independent — can float earlier) | #83 |
 | 12 | 8A | Root Lookup | Medium | Phase 4 data | Queued | #81 |
-| 13 | 8B | Parsing Practice | Medium | Phase 4 data | Queued | #82 |
+| 13 | 8B | Parsing Practice | Medium | Phase 4 data | ✅ Done | #82 |
 | 14 | 9a | Writing: ink engine + `/write` letters | Medium | None | In progress | #99 |
 | 15 | 9b | Writing: mask scoring | Low–Medium | 9a | Queued | #100 |
 | 16 | 9c | Writing: nikud + confusable decks | Low | 9b | Queued | #101 |
