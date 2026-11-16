@@ -776,15 +776,15 @@ Planned with three specialist reviews (instructional design, information archite
 
 | PR | Scope |
 |----|-------|
-| 10a | Converter (in the Gesenius repository) emits JSON alongside Typst: one record per §, paragraph letters, Scripture refs, review-item flags |
-| 10b | `/gesenius` table of contents + one prerendered page per § + `/gesenius/about` with the CC BY-SA credit and footer line |
-| 10c | Citation resolver: "GKC §49a" or "49a" goes to the § and paragraph |
-| 10d | Scripture refs in a § open `/reader` at that verse. Refs are checked against WLC versification, the same trap as Daily Verse |
-| 10e | Emendation flags on § pages (the MT stays the authority) |
-| 10f | Indexes: Passages, Hebrew Words, Subjects |
-| 10g | Search with Pagefind (needs a change to the `public/_headers` CSP) |
-| 10h | Terminology bridge (GKC term → G&D term, e.g. Perfect → qatal) + G&D chapter → § map, hand-checked |
-| 10i | Links into Gesenius from `/grammar` sections and from the reader's word popup (parse → §), using a hand-built mapping |
+| 10a | Converter (in the Gesenius repository) emits JSON alongside Typst: one record per §, paragraph letters, Scripture refs, review-item flags (#252) |
+| 10b | `/gesenius` table of contents + one prerendered page per § + `/gesenius/about` with the CC BY-SA credit and footer line (#253) |
+| 10c | Citation resolver: "GKC §49a" or "49a" goes to the § and paragraph (#254) |
+| 10d | Scripture refs in a § open `/reader` at that verse. Refs are checked against WLC versification, the same trap as Daily Verse (#255) |
+| 10e | Emendation flags on § pages (the MT stays the authority) (#256) |
+| 10f | Indexes: Passages, Hebrew Words, Subjects (#257) |
+| 10g | Search with Pagefind (needs a change to the `public/_headers` CSP) (#258) |
+| 10h | Terminology bridge (GKC term → G&D term, e.g. Perfect → qatal) + G&D chapter → § map, hand-checked (#259) |
+| 10i | Links into Gesenius from `/grammar` sections and from the reader's word popup (parse → §), using a hand-built mapping (#260) |
 
 Open content work, not code: resolve the review items over time, and verify the Passages index against WLC versification.
 
@@ -863,7 +863,7 @@ The following modules from greek.tools can be copied with minimal or zero change
 | 18 | 9e | Writing: stroke order + coaching | Medium | 9a | Queued (independent of 9b–9d) | #103 |
 | 19 | 9f | Writing: handwritten paradigms | Medium | 9d, Phase 7 | Queued | #104 |
 | 20 | 9g | Writing: port to greek.tools | Low | 9b (9e for coaching) | Queued | #105 |
-| 21 | 10a–10i | Gesenius' Hebrew Grammar (`/gesenius`) — reference tool, see Phase 10 | High — broken into 10a–10i | 10a needs the Gesenius repository; 10d needs the OSHB pipeline | Decisions made; 10a next | — |
+| 21 | 10a–10i | Gesenius' Hebrew Grammar (`/gesenius`) — reference tool, see Phase 10 | High — broken into 10a–10i | 10a needs the Gesenius repository; 10d needs the OSHB pipeline | Decisions made; 10a next | #251 |
 
 Every row above is one GitHub issue, and every issue is scoped to land as a single PR. Phase 4 and Phase 6 were too large for that and get their own bite-sized sub-issues (same pattern as Phase 2) once picked up — Phase 4 has been, and its five sub-issues are listed as rows 8a–8e; Phase 6's remaining five are rows 9c–9g. Rows marked "independent" have no hard dependency on the row above them — they're placed here for logical flow (data-pipeline-dependent work grouped together) but can be pulled earlier as a change of pace between heavier phases.
 
