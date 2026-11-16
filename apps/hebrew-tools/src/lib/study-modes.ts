@@ -4,10 +4,11 @@
 // here has its card and its nav child together; src/test/study-modes.test.ts
 // fails when either stops reading it. Today's Session is not in the list: it is
 // the routine the modes make up, so Layout.astro adds it to the nav and the hub
-// gives it its own panel above the cards. Parse (#82) and the greek-only modes
-// join the list when they ship, with the same two edits nowhere else.
+// gives it its own panel above the cards. Parse (#82) takes its label from
+// `STUDY_LABELS`, so it reads the same as greek.tools'. A new mode is one entry
+// here and nowhere else.
 
-import type { StudyMode } from '@tools/shared/study-modes';
+import { STUDY_LABELS, type StudyMode } from '@tools/shared/study-modes';
 
 const svg = (body: string) =>
   `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
@@ -36,6 +37,18 @@ export const studyModes: readonly StudyMode[] = [
       '<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="12" y1="3" x2="12" y2="21"/>',
     ),
     detail: 'Qatal · Yiqtol · Wayyiqtol',
+  },
+  {
+    href: '/parse',
+    label: STUDY_LABELS['/parse'],
+    description:
+      'Identify the stem, conjugation, person, gender, number and root of a verb form taken from the Hebrew Bible.',
+    accentColor: '#1D4ED8',
+    bgColor: '#EEF2FF',
+    icon: svg(
+      '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+    ),
+    detail: 'Stems · Conjugations · Roots',
   },
   {
     href: '/accent',

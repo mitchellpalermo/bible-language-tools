@@ -28,6 +28,7 @@
     "./use-flashcard-session": "./src/use-flashcard-session.ts",
     "./use-stored-state": "./src/use-stored-state.ts",
     "./step-drill": "./src/step-drill.ts",
+    "./parse-drill": "./src/parse-drill.ts",
     "./attempt-log": "./src/attempt-log.ts",
     "./ladder": "./src/ladder.ts",
     "./today": "./src/today.ts",
@@ -58,6 +59,7 @@
     "./components/ToggleSwitch": "./src/components/ToggleSwitch.tsx",
     "./components/ResetProgress": "./src/components/ResetProgress.tsx",
     "./components/StepDrill": "./src/components/StepDrill.tsx",
+    "./components/ParseDrill": "./src/components/ParseDrill.tsx",
     "./components/Ladder": "./src/components/Ladder.tsx",
     "./components/TodaySession": "./src/components/TodaySession.tsx"
   },

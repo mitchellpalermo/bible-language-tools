@@ -9,6 +9,7 @@
  *   books.json    the 39-book index, in Tanakh order
  *   lemmas.json   lemma → { count, hebrew?, xlit?, pos?, gender?, root?, gloss? }
  *   glosses.json  lemma → { g, s? } — BDB's short gloss and a verb's stem senses
+ *   parse-forms.json  the verb forms `/parse` asks, with every parse the text gives each
  *
  * `lemmas.json` is the authoritative frequency source for the app. Its counts are
  * real occurrence counts over the Westminster Leningrad Codex, computed per
@@ -37,6 +38,7 @@ import {
   parseLexicalIndex,
   parseStrongGlosses,
 } from './lib/oshb.mjs';
+import { buildParseForms } from './lib/parse-forms.mjs';
 import { LEXICON_BASE, WLC_BASE } from './lib/sources.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -208,6 +210,25 @@ function reportGlosses({ sources, stemmed }, lemmas) {
   );
 }
 
+/**
+ * `parse-forms.json`, from the books and lemma index already on disk. Runs on
+ * every build, including one that skipped the fetch, so a checkout whose corpus
+ * predates `/parse` gains the file without `--force`. It takes a second or two.
+ */
+async function writeParseForms() {
+  const lemmas = JSON.parse(await readFile(join(OUT_DIR, 'lemmas.json'), 'utf-8'));
+  const books = await Promise.all(
+    BOOKS.map(async (b) => JSON.parse(await readFile(join(OUT_DIR, `${b.code}.json`), 'utf-8'))),
+  );
+  const pool = buildParseForms(books, lemmas);
+  await writeFile(join(OUT_DIR, 'parse-forms.json'), JSON.stringify(pool), 'utf-8');
+  const readings = pool.forms.reduce((n, [, r]) => n + r.length, 0);
+  log(
+    `  parse-forms.json: ${pool.forms.length} verb forms, ${readings} readings, ` +
+      `${Object.keys(pool.lemmas).length} verbs`,
+  );
+}
+
 // Sanity check the written output rather than trusting a clean exit: a silent
 // regression in the parser looks exactly like a successful build.
 async function verify() {
@@ -219,6 +240,7 @@ async function verify() {
 }
 
 main()
+  .then(writeParseForms)
   .then(verify)
   .catch((err) => {
     warn(`morphhb build failed: ${err.message}`);

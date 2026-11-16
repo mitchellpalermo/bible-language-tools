@@ -34,6 +34,13 @@ export interface TypedAnswerProps {
   focusKey: string;
   keypadOpen: boolean;
   onToggleKeypad: () => void;
+  /**
+   * The Hebrew field's own Check button. /parse turns it off: the root is one
+   * field of several, and the parse has one Submit for all of them.
+   */
+  checkButton?: boolean;
+  /** What the Hebrew field says before anything is typed, and to a screen reader. */
+  hebrewPrompt?: { placeholder: string; label: string };
 }
 
 const FIELD =
@@ -89,6 +96,8 @@ function HebrewField({
   focusKey,
   keypadOpen,
   onToggleKeypad,
+  checkButton = true,
+  hebrewPrompt = { placeholder: 'Type the Hebrew word', label: 'Your answer in Hebrew' },
 }: TypedAnswerProps) {
   const input = useHebrewInput({ value, onChange });
   const focusRef = useFocusOnCard(focusKey);
@@ -116,8 +125,8 @@ function HebrewField({
           }}
           inputMode={keypadOpen ? 'none' : 'text'}
           enterKeyHint="done"
-          placeholder="Type the Hebrew word"
-          aria-label="Your answer in Hebrew"
+          placeholder={hebrewPrompt.placeholder}
+          aria-label={hebrewPrompt.label}
           className={`${FIELD} text-2xl placeholder:text-sm placeholder:font-sans`}
           style={{ color: 'var(--color-hebrew)', fontFamily: 'var(--font-hebrew)' }}
           autoComplete="off"
@@ -125,9 +134,11 @@ function HebrewField({
           autoCapitalize="off"
           spellCheck={false}
         />
-        <button type="button" onClick={onSubmit} className={CHECK}>
-          Check
-        </button>
+        {checkButton && (
+          <button type="button" onClick={onSubmit} className={CHECK}>
+            Check
+          </button>
+        )}
       </div>
 
       <div className="flex justify-center">

@@ -72,6 +72,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/use-flashcard-session` | `useFlashcardSession<T>()` — the flashcard session engine: dealing, SRS grading, drills, Endless, typed answers, the keyboard. Both apps' `Flashcards.tsx` run on it. See "The flashcard session engine" below |
 | `@tools/shared/gloss-answer` | `checkGlossAnswer(input, gloss, options?)` — marks a typed English gloss: any one sense, a four-letter start, or one slip. Both apps' Type mode uses it; `separators` and `variants` let an app fit its own gloss wording (hebrew.tools accepts "wrote" for "he wrote") |
 | `@tools/shared/use-stored-state` | `useStoredState(load, fallback, save?)` and `useHydrated()` — state seeded from storage without breaking hydration. See "Hydration" below |
+| `@tools/shared/parse-drill` | Parsing practice (#82), the part that is not about a language: `propertyAccuracy` (each field over the forms that asked it), `scoreColor`, `SESSION_LENGTHS`, `toggleValue`. See "Parsing practice" below |
 | `@tools/shared/step-drill` | The step-gated drill engine: `stepDrillReducer`, `isCleanPass`, and `canSkipScaffold` / `createStepDrillHistory(storageKey)` for speed mode. See "The step-gated drill" below |
 | `@tools/shared/ladder` | The paradigm ladder (#186): `rungStates`, `isCleanWrite`, `recordWrite`, `newlyUnlocked`, `isLadderProgress`, and `createLadderProgress(storageKey)`. See "The paradigm ladder" below |
 | `@tools/shared/attempt-log` | `createAttemptLog(storageKey)` — every checked answer, by concept and id, for the mastery levels (#187) — plus `parseAttempt` and `planAttemptPush` for syncing it. See "The attempt log syncs on its own" below |
@@ -94,6 +95,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/components/GradeButtons` | The Again/Hard/Good/Easy answer row, with per-grade interval previews (React) |
 | `@tools/shared/components/DrillButtons` | The Missed / Got it answer row for the drill modes, which schedule nothing (React) |
 | `@tools/shared/components/ResetProgress` | The account page's "Danger zone": open, type RESET, erase. Each app wraps it in `src/components/ResetProgress.tsx` with its own list of what is erased and kept (React) |
+| `@tools/shared/components/ParseDrill` | `ParseProgress`, `ParseSelect` (one field's choices), `ParseFeedbackRow` and `ParseVerdict` (the marks), `ToggleChip`, `SessionLengthPicker` and `ParseResults` — both apps' `/parse` (React) |
 | `@tools/shared/components/StepDrill` | `StepList` (the step row; locked steps stay visible) and `RuleFeedback` (a miss names the rule and links to it) (React) |
 | `@tools/shared/components/Ladder` | `LadderRungList` — the rungs in order, locked ones visible with what opens them and an "Open anyway" button (React) |
 | `@tools/shared/components/ToggleSwitch` | Labelled on/off switch — `role="switch"`, app accent passed in (React) |
@@ -266,6 +268,25 @@ language. Rules that are pedagogy rather than plumbing:
 - **Every checked answer goes to the attempt log** (`@tools/shared/attempt-log`)
   from the day a drill ships, so the mastery map in #187 starts with history.
   Concept ids are stable strings; renaming one splits its history.
+
+### Parsing practice
+
+Both apps' `/parse` show a verb form and ask for its parse field by field,
+picked from choices, then mark each field and end on a score by field (#82).
+The flow, the progress bar, the choices, the marks, the settings chips and the
+results screen are `@tools/shared/components/ParseDrill` over
+`@tools/shared/parse-drill`. Which fields a form has, where the forms come
+from and how an answer is graded stay in each app: greek.tools grades λύω
+paradigm forms (`src/lib/verb-parse.ts`), hebrew.tools forms from the Hebrew
+Bible against OSHB's parsing (its `src/lib/verb-parse.ts`; see its CLAUDE.md,
+"Parsing practice").
+
+- **A field that was not asked is absent, not right.** An infinitive has no
+  person, so its result has no `person`, and the results screen counts each
+  field over the forms that asked it. greek.tools' passage parser still folds
+  "not asked" into "right" in its own adapter; that is unchanged.
+- **The components are inline-styled**, so they have no hover or custom focus
+  ring; a select keeps the browser's focus outline.
 
 ### The paradigm ladder
 

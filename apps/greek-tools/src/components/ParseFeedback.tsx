@@ -1,3 +1,4 @@
+import { ParseFeedbackRow, ParseVerdict } from '@tools/shared/components/ParseDrill';
 import type { ParseAnswer, ParseItem, ParseResult } from '../lib/verb-parse';
 import {
   MOOD_LABELS,
@@ -37,31 +38,31 @@ export default function ParseFeedback({ item, answer, result, onNext, isLast }: 
 
       {/* ── Property results ────────────────────────────────────────────── */}
       <div className="space-y-2">
-        <FeedbackRow
+        <ParseFeedbackRow
           property="Tense"
           correct={result.tense}
           given={answer.tense ? TENSE_LABELS[answer.tense] : '—'}
           expected={TENSE_LABELS[item.tense]}
         />
-        <FeedbackRow
+        <ParseFeedbackRow
           property="Voice"
           correct={result.voice}
           given={answer.voice ? VOICE_LABELS[answer.voice] : '—'}
           expected={VOICE_LABELS[item.voice]}
         />
-        <FeedbackRow
+        <ParseFeedbackRow
           property="Mood"
           correct={result.mood}
           given={answer.mood ? MOOD_LABELS[answer.mood] : '—'}
           expected={MOOD_LABELS[item.mood]}
         />
-        <FeedbackRow
+        <ParseFeedbackRow
           property="Person"
           correct={result.person}
           given={answer.person ? PERSON_LABELS[answer.person] : '—'}
           expected={PERSON_LABELS[item.person]}
         />
-        <FeedbackRow
+        <ParseFeedbackRow
           property="Number"
           correct={result.number}
           given={answer.number ? NUMBER_LABELS[answer.number] : '—'}
@@ -69,15 +70,7 @@ export default function ParseFeedback({ item, answer, result, onNext, isLast }: 
         />
       </div>
 
-      {/* ── Overall verdict ─────────────────────────────────────────────── */}
-      <div
-        className={[
-          'rounded-xl px-5 py-3 text-center font-semibold text-sm',
-          result.allCorrect ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700',
-        ].join(' ')}
-      >
-        {result.allCorrect ? 'Correct!' : 'Not quite — review the corrections above.'}
-      </div>
+      <ParseVerdict correct={result.allCorrect} />
 
       {/* ── Word definition ─────────────────────────────────────────────── */}
       {vocab && (
@@ -102,46 +95,6 @@ export default function ParseFeedback({ item, answer, result, onNext, isLast }: 
       >
         {isLast ? 'See Results' : 'Next Form'}
       </button>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Single property row
-// ---------------------------------------------------------------------------
-
-function FeedbackRow({
-  property,
-  correct,
-  given,
-  expected,
-}: {
-  property: string;
-  correct: boolean;
-  given: string;
-  expected: string;
-}) {
-  return (
-    <div
-      className={[
-        'flex items-center justify-between rounded-lg px-4 py-2.5 text-sm',
-        correct ? 'bg-green-50' : 'bg-red-50',
-      ].join(' ')}
-    >
-      <span className={['font-semibold', correct ? 'text-green-700' : 'text-red-700'].join(' ')}>
-        {property}
-      </span>
-      <div className="flex items-center gap-2 text-right">
-        {correct ? (
-          <span className="text-green-700 font-medium">{given}</span>
-        ) : (
-          <>
-            <span className="text-red-500 line-through">{given}</span>
-            <span className="text-red-700 font-semibold">{expected}</span>
-          </>
-        )}
-        <span className={correct ? 'text-green-600' : 'text-red-600'}>{correct ? '✓' : '✗'}</span>
-      </div>
     </div>
   );
 }
