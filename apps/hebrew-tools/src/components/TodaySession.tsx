@@ -68,6 +68,7 @@ import {
   saveBudget,
   vocabSrsKey,
 } from '../lib/today';
+import { type KeypadState, useKeypad } from '../lib/use-keypad';
 import AccentTrainer from './AccentTrainer';
 import ErrorBoundary from './ErrorBoundary';
 import ParadigmQuiz from './ParadigmQuiz';
@@ -165,6 +166,8 @@ interface PartProps {
   onOutcome: (section: Section, id: string, correct: boolean) => void;
   canStart: (seconds: number) => boolean;
   onDone: (reason: 'done' | 'time') => void;
+  /** One keypad for the whole session, so it stays as set across tables and parts. */
+  keypad: KeypadState;
 }
 
 function VocabPart({
@@ -239,6 +242,7 @@ function FormsPart({
   onOutcome,
   canStart,
   onDone,
+  keypad,
 }: PartProps & { step: Extract<Step, { kind: 'forms' }> }) {
   const [at, setAt] = useState(0);
   const round = step.rounds[at];
@@ -256,6 +260,7 @@ function FormsPart({
           table: round.table,
           blankIds: round.blankIds,
           practice: round.practice,
+          keypad,
           onChecked: (outcomes) => {
             for (const o of outcomes) onOutcome(step.section, o.id, o.correct);
           },
@@ -276,12 +281,14 @@ function AccentPart({
   onOutcome,
   canStart,
   onDone,
+  keypad,
 }: PartProps & { step: Extract<Step, { kind: 'accent' }> }) {
   const finishedAll = useRef(0);
   return (
     <AccentTrainer
       session={{
         items: step.items,
+        keypad,
         onItemDone: (id, clean) => {
           finishedAll.current++;
           onOutcome('drill', id, clean);
@@ -335,7 +342,8 @@ function Runner({
 
   const step = steps[at];
   const minutes = Math.floor(clock.elapsedMs() / 60_000);
-  const props = { onOutcome, canStart, onDone };
+  const keypad = useKeypad();
+  const props = { onOutcome, canStart, onDone, keypad };
 
   return (
     <div className="space-y-5">

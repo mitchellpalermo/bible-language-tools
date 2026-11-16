@@ -72,6 +72,7 @@ import {
   saveLadderProgress,
 } from '../lib/suffix-ladder';
 import { useHebrewInput } from '../lib/use-hebrew-input';
+import { type KeypadState, useKeypad } from '../lib/use-keypad';
 import ErrorBoundary from './ErrorBoundary';
 import HebrewKeypad from './HebrewKeypad';
 import { affixText, Hebrew, Prose } from './HebrewRuns';
@@ -106,6 +107,8 @@ export interface ParadigmSession {
   /** Every blank form, once checked. */
   onChecked: (outcomes: { id: string; correct: boolean }[]) => void;
   onContinue: () => void;
+  /** The keypad, held by the caller so it stays as set from one table to the next. */
+  keypad?: KeypadState;
 }
 
 function sessionPhase({ table, blankIds }: ParadigmSession): Phase {
@@ -745,15 +748,11 @@ function ParadigmQuizInner({ session }: { session?: ParadigmSession }) {
   // Which rungs are open. Saved explicitly on submit, like the store.
   const [ladder, setLadder] = useStoredState<LadderProgress>(loadLadderProgress, EMPTY_LADDER);
   const peekedRef = useRef(false);
-  const [keypadOpen, setKeypadOpen] = useState(false);
+  const ownKeypad = useKeypad();
+  const keypad = session?.keypad ?? ownKeypad;
+  const keypadOpen = keypad.open;
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const handles = useRef(new Map<number, CellHandle>());
-
-  // A touch screen starts with the keypad open. Read after mount: the page is
-  // prerendered, and the server has no pointer to ask about.
-  useEffect(() => {
-    setKeypadOpen(window.matchMedia?.('(pointer: coarse)').matches ?? false);
-  }, []);
 
   const order = useMemo(
     () => (phase.name === 'select' ? [] : recitationOrder(phase.cells)),
@@ -1027,7 +1026,7 @@ function ParadigmQuizInner({ session }: { session?: ParadigmSession }) {
             <PeekButton onShow={() => peek(true)} onHide={() => peek(false)} />
             <ToggleSwitch
               checked={keypadOpen}
-              onChange={() => setKeypadOpen(!keypadOpen)}
+              onChange={keypad.toggle}
               label="Keypad"
               accent={ACCENT}
             />

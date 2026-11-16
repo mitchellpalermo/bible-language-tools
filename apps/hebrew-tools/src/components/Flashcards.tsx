@@ -11,7 +11,7 @@ import {
   useFlashcardSession,
 } from '@tools/shared/use-flashcard-session';
 import posthog from 'posthog-js';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   loadSRSStore,
   loadStats,
@@ -49,6 +49,7 @@ import {
 } from '../lib/flashcard-answer';
 import { type CardFilters, hasFilters, matchesFilters, NO_FILTERS } from '../lib/flashcard-filters';
 import { loadFlashcardSettings, saveFlashcardSettings } from '../lib/flashcard-settings';
+import { useKeypad } from '../lib/use-keypad';
 import ChapterPicker from './ChapterPicker';
 import ErrorBoundary from './ErrorBoundary';
 import FlashcardFilters from './FlashcardFilters';
@@ -150,13 +151,8 @@ function FlashcardsInner() {
   const [filters, setFilters] = useState<CardFilters>(NO_FILTERS);
   const [showFilters, setShowFilters] = useState(false);
 
-  // The on-screen Hebrew keypad, for a typed Hebrew answer. A touch screen
-  // starts with it open. Read after mount: the page is prerendered, and the
-  // server has no pointer to ask about.
-  const [keypadOpen, setKeypadOpen] = useState(false);
-  useEffect(() => {
-    setKeypadOpen(window.matchMedia?.('(pointer: coarse)').matches ?? false);
-  }, []);
+  // The on-screen Hebrew keypad, for a typed Hebrew answer.
+  const keypad = useKeypad();
 
   // Deck, chapters and categories — persisted across visits.
   const [storedSelection, setSelection] = useState<DeckSelection>(() => loadSelection());
@@ -877,8 +873,8 @@ function FlashcardsInner() {
           // The queue position as well as the card: a one-card Endless deck
           // deals the same card back, and it still wants the focus.
           focusKey: `${srsKey(card)}:${index}:${queue.length}`,
-          keypadOpen,
-          onToggleKeypad: () => setKeypadOpen((open) => !open),
+          keypadOpen: keypad.open,
+          onToggleKeypad: keypad.toggle,
         }}
       />
 

@@ -30,6 +30,7 @@ import { logAttempts } from '../lib/attempt-log';
 import { glossFor, stemSenses } from '../lib/gloss';
 import { applyFinalForms } from '../lib/hebrew-input';
 import { loadParseSettings, saveParseSettings } from '../lib/parse-settings';
+import { useKeypad } from '../lib/use-keypad';
 import {
   buildSession,
   CONJUGATION_NAMES,
@@ -251,6 +252,8 @@ function Question({
   total,
   answer,
   askRoot,
+  keypadOpen,
+  onToggleKeypad,
   onChange,
   onSubmit,
 }: {
@@ -259,13 +262,11 @@ function Question({
   total: number;
   answer: ParseAnswer;
   askRoot: boolean;
+  keypadOpen: boolean;
+  onToggleKeypad: () => void;
   onChange: (a: ParseAnswer) => void;
   onSubmit: () => void;
 }) {
-  const [keypadOpen, setKeypadOpen] = useState(false);
-  useEffect(() => {
-    setKeypadOpen(window.matchMedia?.('(pointer: coarse)').matches ?? false);
-  }, []);
   const canSubmit = isComplete(answer, askRoot);
   const fields = fieldsFor(answer.conjugation);
   const submit = () => {
@@ -321,7 +322,7 @@ function Question({
             hebrew
             focusKey={item.form}
             keypadOpen={keypadOpen}
-            onToggleKeypad={() => setKeypadOpen((o) => !o)}
+            onToggleKeypad={onToggleKeypad}
             checkButton={false}
             hebrewPrompt={{ placeholder: 'Type the root', label: 'Root' }}
           />
@@ -464,6 +465,8 @@ function VerbParseInner() {
   const [grades, setGrades] = useState<ParseGrade[]>([]);
   // The settings a session was dealt under; changing them mid-session changes nothing.
   const [askRoot, setAskRoot] = useState(settings.askRoot);
+  // Held here, not in `Question`, which remounts for every verb.
+  const keypad = useKeypad();
 
   useEffect(() => {
     let cancelled = false;
@@ -543,6 +546,8 @@ function VerbParseInner() {
           total={session.length}
           answer={answer}
           askRoot={askRoot}
+          keypadOpen={keypad.open}
+          onToggleKeypad={keypad.toggle}
           onChange={setAnswer}
           onSubmit={submit}
         />
