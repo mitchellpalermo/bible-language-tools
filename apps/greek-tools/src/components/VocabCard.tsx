@@ -5,7 +5,7 @@
 // caller's.
 
 import type { RefObject } from 'react';
-import type { VocabWord } from '../data/vocabulary';
+import type { VocabWord } from '../data/vocabulary-all';
 
 export type Direction = 'gr-en' | 'en-gr';
 

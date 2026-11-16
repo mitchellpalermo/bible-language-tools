@@ -6,7 +6,7 @@ import posthog from 'posthog-js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { saveFocusPassages, saveParseHistoryStore } from '../data/focusPassages';
 import { daysFromNow, loadSRSStore, type SRSCard, saveSRSStore } from '../data/srs';
-import { vocabulary } from '../data/vocabulary';
+import { vocabulary } from '../data/vocabulary-all';
 import { loadAttempts } from '../lib/attempt-log';
 import { loadStudyStreak } from '../lib/study-streak';
 import { BUDGET_KEY, type TodayDrill, type TodayItem, vocabSrsKey } from '../lib/today';

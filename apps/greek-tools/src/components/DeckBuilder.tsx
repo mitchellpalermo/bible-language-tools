@@ -8,7 +8,7 @@ import {
 } from '../data/customDecks';
 import { type BookMeta, fetchBook, fetchBooks, type MorphBook } from '../data/morphgnt';
 import { getStudiedLemmas, normalizeKey } from '../data/srs';
-import { vocabulary } from '../data/vocabulary';
+import { vocabulary } from '../data/vocabulary-all';
 import { getBookWordKeys } from '../lib/book-deck';
 import {
   buildVocabMap,

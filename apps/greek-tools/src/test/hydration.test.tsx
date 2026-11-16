@@ -35,6 +35,7 @@ import { markReadToday } from '../data/dailyVerses';
 import { recordParseResults, saveFocusPassages } from '../data/focusPassages';
 import { newCard, nextSRS, recordReview, saveSRSStore, saveStats } from '../data/srs';
 import { vocabulary } from '../data/vocabulary';
+import { DEFAULT_SELECTION, saveSelection } from '../lib/deck-selection';
 import { saveFlashcardSettings } from '../lib/flashcard-settings';
 import { saveLadderProgress } from '../lib/paradigm-ladder';
 import { saveQuizSettings } from '../lib/quiz-settings';
@@ -62,6 +63,9 @@ function seedReturningStudent() {
 
   saveQuizSettings({ accentStrict: true, density: 'hard' });
   saveFlashcardSettings({ showPartOfSpeech: true });
+  // Textbook chapter decks (#228): a stored textbook and chapters. Flashcards
+  // reads them through `useStoredState`, so its first render deals none of them.
+  saveSelection({ ...DEFAULT_SELECTION, deck: 'beginning-with-nt-greek', chapters: [1, 2] });
   saveCustomDecks([
     { id: 'deck-1', name: 'Romans 8', wordKeys: keys.slice(0, 10), createdAt: '2026-10-01' },
   ]);
