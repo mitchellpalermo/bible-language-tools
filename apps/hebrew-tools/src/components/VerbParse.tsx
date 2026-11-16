@@ -195,8 +195,8 @@ function SettingsPanel({
       />
       <p className="-mt-6 text-xs text-text-muted">
         A form is asked under the conjugation the text uses it as most. Out of context a prefixed
-        2nd masculine singular may also be a 3rd feminine, and a qatal after ו a weqatal; either
-        answer counts. Jussives and cohortatives are not asked yet.
+        2nd masculine singular may also be a 3rd feminine, and a qatal after the conjunction a
+        weqatal; either answer counts. Jussives and cohortatives are not asked yet.
       </p>
 
       <section>
