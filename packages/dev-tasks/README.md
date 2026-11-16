@@ -61,7 +61,12 @@ Closes #123.
   captures anyway. A failure is keyed differently, so re-running the job
   retries it.
 - **Only the section is rewritten**, against the body as it is when the capture
-  ends, so a description edit made meanwhile is kept.
+  ends, so a description edit made meanwhile is kept. Each marker counts only
+  when it is alone on its line: a description that names the markers in prose
+  (this feature's own PR did) is not the section.
+- **The job runs on a pinned runner image** (`ubuntu-24.04`), because
+  Playwright installs browsers only on the OS releases it lists, and
+  `ubuntu-latest` moved to one it did not.
 - **The corpus is built if it is missing** (`build:data`), since CI starts
   without it. Nothing else in a dev server needs secrets for these pages.
 - **Shot names must be unique across blocks**: one block per app, one assets

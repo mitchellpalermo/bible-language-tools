@@ -111,6 +111,28 @@ describe('withSection', () => {
   });
 });
 
+describe('a marker mentioned in prose', () => {
+  const prose = 'The table goes between `<!-- shots:start -->` and `<!-- shots:end -->`.';
+
+  it('is not taken for the section', () => {
+    const out = withSection(prose, 'table', 'k1');
+    expect(out.startsWith(prose)).toBe(true);
+    expect(out.match(/^<!-- shots:start -->$/gm)).toHaveLength(1);
+    expect(alreadyRun(prose.replace('start -->', 'start -->\n<!-- shots-run: k1 -->'), 'k1')).toBe(
+      false,
+    );
+  });
+
+  it('is left alone when the real section is replaced', () => {
+    const once = withSection(prose, 'old', 'k1');
+    const twice = withSection(once, 'new', 'k2');
+    expect(twice.startsWith(prose)).toBe(true);
+    expect(twice).toContain('new');
+    expect(twice).not.toContain('old');
+    expect(alreadyRun(twice, 'k2')).toBe(true);
+  });
+});
+
 describe('failureContent', () => {
   it('shows the error and how to retry', () => {
     const md = failureContent('  "Again" was not visible  ');

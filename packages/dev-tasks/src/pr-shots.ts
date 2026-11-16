@@ -72,10 +72,15 @@ export function alreadyRun(body: string, key: string): boolean {
   return section(body)?.includes(marker(key)) ?? false;
 }
 
+/**
+ * The section, markers included. Each marker must be alone on its line: a
+ * description that mentions `<!-- shots:start -->` in prose (as this repo's
+ * own PRs do) would otherwise be taken for the section and overwritten.
+ */
+const SECTION = new RegExp(`^${SECTION_START}[ \\t]*\\r?\\n[\\s\\S]*?^${SECTION_END}[ \\t]*$`, 'm');
+
 function section(body: string): string | undefined {
-  const start = body.indexOf(SECTION_START);
-  const end = body.indexOf(SECTION_END, start);
-  return start === -1 || end === -1 ? undefined : body.slice(start, end + SECTION_END.length);
+  return SECTION.exec(body)?.[0];
 }
 
 function stripSection(body: string): string {

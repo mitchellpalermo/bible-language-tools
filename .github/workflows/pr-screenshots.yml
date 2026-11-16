@@ -32,7 +32,11 @@ jobs:
       contains(fromJSON('["opened","reopened","synchronize","edited"]'), github.event.action) &&
       contains(github.event.pull_request.body, '```shots') &&
       github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
+    # Pinned, not ubuntu-latest: Playwright supports a fixed list of OS
+    # releases, and when ubuntu-latest moved to 26.04 Playwright 1.60 refused
+    # to install Chromium on it. Move this when Playwright supports the newer
+    # image, not before.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
       contents: write # push assets/pr-<N>
