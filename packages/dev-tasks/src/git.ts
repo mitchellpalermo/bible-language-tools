@@ -46,6 +46,15 @@ export async function withWorktreeAt<T>(
   }
 }
 
+/**
+ * Fetch `branch` from origin and return a ref to it. CI checks out only the
+ * PR, so the base branch has to be fetched before a "before" worktree of it.
+ */
+export function fetchBranch(root: string, branch: string): string {
+  git(root, 'fetch', '-q', 'origin', `+refs/heads/${branch}:refs/remotes/origin/${branch}`);
+  return `origin/${branch}`;
+}
+
 /** `owner/name` from the origin remote's URL. */
 export function githubRepo(remoteUrl: string): string {
   const match = remoteUrl.match(/github\.com[:/]([^/]+\/[^/]+?)(\.git)?$/);

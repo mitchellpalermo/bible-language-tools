@@ -1,22 +1,84 @@
 name: pr-screenshots
 
-# Fails a pull request that changes UI files but shows no screenshots. The rule
-# is in packages/dev-tasks/src/pr-evidence.ts. Add this check as *required* in
-# the repo ruleset, or it only advises.
+# Two jobs:
 #
-# `edited` is what makes it work: the images are uploaded after the PR is opened
-# and linked by editing its body, which re-runs the check.
+# `capture` takes the screenshots, so no model has to. A PR body that holds a
+# ```shots fenced block (a shot list, packages/dev-tasks/README.md) is captured
+# here with `pnpm shots pr`: before from the base branch, after from the PR,
+# pushed to `assets/pr-<N>`, and the table written back into the body between
+# <!-- shots:start --> and <!-- shots:end -->. A failed capture writes its
+# error there instead.
+#
+# `screenshots` fails a PR that changes UI files but shows no screenshots. The rule is
+# in packages/dev-tasks/src/pr-evidence.ts. Add it as *required* in the repo
+# ruleset, or it only advises. It runs after `capture`, because the body edit
+# made with GITHUB_TOKEN does not trigger a new run of this workflow.
+#
+# `edited` re-runs both when the body changes. `pnpm shots pr` skips the
+# capture when the commit and the shot list are the ones already captured, so a
+# typo fix in the description costs an install, not a capture.
 on:
   pull_request:
     types: [opened, reopened, synchronize, edited, labeled, unlabeled]
 
-permissions:
-  contents: read
-  pull-requests: read
+concurrency:
+  group: pr-screenshots-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
-  screenshots:
+  capture:
+    # Forks get a read-only token and cannot push the assets branch.
+    if: >-
+      contains(fromJSON('["opened","reopened","synchronize","edited"]'), github.event.action) &&
+      contains(github.event.pull_request.body, '```shots') &&
+      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write # push assets/pr-<N>
+      pull-requests: write # write the table into the body
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Playwright version
+        id: pw
+        run: echo "version=$(pnpm --filter @tools/dev-tasks exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        id: pw-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ steps.pw.outputs.version }}
+      - if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: pnpm --filter @tools/dev-tasks exec playwright install --with-deps chromium
+      - if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: pnpm --filter @tools/dev-tasks exec playwright install-deps chromium
+      # `publish` commits in a fresh `git init`, which needs an identity and,
+      # for the push, credentials outside this checkout's config.
+      - name: Git identity and credentials
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          gh auth setup-git
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - run: pnpm shots pr ${{ github.event.pull_request.number }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  screenshots:
+    needs: capture
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

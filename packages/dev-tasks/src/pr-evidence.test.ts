@@ -49,7 +49,7 @@ describe('checkPr', () => {
     const v = checkPr(pr());
     expect(v.ok).toBe(false);
     expect(v.message).toContain('Flashcards.tsx');
-    expect(v.message).toContain('pnpm shots publish');
+    expect(v.message).toContain('```shots block');
   });
 
   it('summarizes a long file list', () => {

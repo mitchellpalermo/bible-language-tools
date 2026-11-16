@@ -7,6 +7,7 @@ describe('parseShotList', () => {
   it('fills in both viewports, no steps and no storage by default', () => {
     expect(parseShotList({ app: 'hebrew', shots: [shot] })).toEqual({
       app: 'hebrew',
+      before: true,
       shots: [
         {
           ...shot,
@@ -17,6 +18,13 @@ describe('parseShotList', () => {
         },
       ],
     });
+  });
+
+  it('captures a before unless the list says not to', () => {
+    expect(parseShotList({ app: 'greek', before: false, shots: [shot] }).before).toBe(false);
+    expect(() => parseShotList({ app: 'greek', before: 'no', shots: [shot] })).toThrow(
+      /"before" must be true or false/,
+    );
   });
 
   it('refuses an empty list rather than capturing a default page', () => {

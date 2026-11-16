@@ -43,6 +43,12 @@ export interface Shot {
 
 export interface ShotList {
   app: App;
+  /**
+   * Whether `pnpm shots pr` captures a "before" from the PR's base branch.
+   * False for a page the base branch does not have, where the before capture
+   * would be refused for a 404.
+   */
+  before: boolean;
   shots: Shot[];
 }
 
@@ -144,6 +150,8 @@ export function parseShotList(raw: unknown): ShotList {
   if (!isObject(raw)) throw new Error('Shot list must be a JSON object with "app" and "shots"');
 
   if (raw.app !== 'greek' && raw.app !== 'hebrew') errors.push('"app" must be "greek" or "hebrew"');
+  if (raw.before !== undefined && typeof raw.before !== 'boolean')
+    errors.push('"before" must be true or false');
   if (!Array.isArray(raw.shots) || raw.shots.length === 0)
     errors.push('"shots" must list at least one shot — the script never picks a page by itself');
 
@@ -155,5 +163,5 @@ export function parseShotList(raw: unknown): ShotList {
     errors.push(`shot name "${dup}" is used more than once`);
 
   if (errors.length > 0) throw new Error(`Invalid shot list:\n  - ${errors.join('\n  - ')}`);
-  return { app: raw.app as App, shots: shots as Shot[] };
+  return { app: raw.app as App, before: raw.before !== false, shots: shots as Shot[] };
 }
