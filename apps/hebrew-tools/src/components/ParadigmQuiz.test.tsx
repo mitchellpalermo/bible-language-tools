@@ -123,6 +123,18 @@ describe('filling in a table', () => {
     });
   });
 
+  it('quizzes the stem names: a row per stem, a blank per pattern', async () => {
+    const user = userEvent.setup();
+    render(<ParadigmQuiz />);
+    await user.click(screen.getByRole('tab', { name: 'Stem names' }));
+    await user.click(screen.getByRole('button', { name: /Each stem/ }));
+    await user.click(screen.getByRole('button', { name: 'Start' }));
+
+    expect(screen.getAllByRole('textbox')).toHaveLength(14);
+    expect(screen.getByRole('rowheader', { name: 'Hophal' })).toBeInTheDocument();
+    expect(screen.getByText(/Every form here is a qatal 3ms/)).toBeInTheDocument();
+  });
+
   it('blanks a quarter of the table on easy and shows the rest', async () => {
     const user = userEvent.setup();
     render(<ParadigmQuiz />);
