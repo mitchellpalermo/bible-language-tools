@@ -19,6 +19,14 @@ import {
   type SuffixPgn,
   suffixParadigms,
 } from '../data/pronominal-suffixes';
+import {
+  STEM_NAME_LABELS,
+  STEM_NAMES,
+  STEM_PATTERN_SOURCE,
+  STEM_PATTERNS,
+  STEM_ROOTS,
+  stemColumnId,
+} from '../data/stem-patterns';
 import { type LadderRung, ladderRungs } from '../data/suffix-ladder';
 import {
   answerForm,
@@ -55,21 +63,32 @@ export {
  * pronominal suffixes on nouns sit in a group of their own, and the suffix
  * ladder (#186) in another.
  */
-export type Category = Conjugation | 'suffixes' | 'ladder';
+export type Category = Conjugation | 'stems' | 'suffixes' | 'ladder';
 
-export const ALL_CATEGORIES: Category[] = ['qatal', 'yiqtol', 'wayyiqtol', 'suffixes', 'ladder'];
+export const ALL_CATEGORIES: Category[] = [
+  'qatal',
+  'yiqtol',
+  'wayyiqtol',
+  'stems',
+  'suffixes',
+  'ladder',
+];
+
+/** A conjugation tab holds Qal verb tables; the other tabs hold something else. */
+export function isConjugation(category: Category): category is Conjugation {
+  return category !== 'stems' && category !== 'suffixes' && category !== 'ladder';
+}
 
 export const CATEGORY_LABELS: Record<Category, string> = {
   ...CONJUGATION_LABELS,
+  stems: 'Stem names',
   suffixes: 'Noun suffixes',
   ladder: 'Suffix ladder',
 };
 
 /** The tab text: a conjugation is a Qal one, the suffix groups are not. */
 export function categoryTabLabel(category: Category): string {
-  return category === 'suffixes' || category === 'ladder'
-    ? CATEGORY_LABELS[category]
-    : `Qal ${CATEGORY_LABELS[category]}`;
+  return isConjugation(category) ? `Qal ${CATEGORY_LABELS[category]}` : CATEGORY_LABELS[category];
 }
 
 /**
@@ -207,6 +226,28 @@ export function buildSuffixTable(paradigm: SuffixParadigm): TableModel {
   };
 }
 
+/**
+ * The seven stems by name, with their qatal 3ms on פעל and on קטל (Table 20.1).
+ * The stem's name is the row label and the form is the blank, so filling the
+ * table is saying which pattern each name stands for. A cell's id is
+ * `stem-pattern-<root>:<stem>`; there is no PGN, because every form is a 3ms.
+ */
+export function buildStemTable(): TableModel {
+  return {
+    id: 'stem-patterns',
+    label: 'Stem names — qatal 3ms patterns',
+    category: 'stems',
+    layout: 'summary',
+    detail: `Each stem’s qatal 3ms · ${STEM_PATTERN_SOURCE}`,
+    cols: STEM_ROOTS.map((c) => c.root),
+    rows: STEM_NAMES.map((stem) => ({
+      label: STEM_NAME_LABELS[stem],
+      answers: STEM_ROOTS.map((c) => answerForm(STEM_PATTERNS[c.id][stem])),
+      ids: STEM_ROOTS.map((c) => `${stemColumnId(c.id)}:${stem}`),
+    })),
+  };
+}
+
 /** The model nouns side by side, one column each, a row per suffix. */
 export function buildSuffixSummaryTable(): TableModel {
   return {
@@ -248,18 +289,17 @@ export function buildLadderTable(rung: LadderRung, index: number): TableModel {
 
 /**
  * Build all available TableModels: each conjugation's summary, then its verbs;
- * then suffixes; then the ladder, in rung order.
+ * then the stem names; then suffixes; then the ladder, in rung order.
  */
 export function buildTableModels(): TableModel[] {
-  const verbTables = ALL_CATEGORIES.filter(
-    (c): c is Conjugation => c !== 'suffixes' && c !== 'ladder',
-  ).flatMap((conjugation) => {
+  const verbTables = ALL_CATEGORIES.filter(isConjugation).flatMap((conjugation) => {
     const summary = buildSummaryTable(conjugation);
     const verbs = verbParadigms.filter((p) => p.conjugation === conjugation).map(buildVerbTable);
     return summary ? [summary, ...verbs] : verbs;
   });
   return [
     ...verbTables,
+    buildStemTable(),
     buildSuffixSummaryTable(),
     ...suffixParadigms.map(buildSuffixTable),
     ...ladderRungs.map(buildLadderTable),

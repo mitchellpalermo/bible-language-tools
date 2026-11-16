@@ -996,6 +996,12 @@ function ParadigmQuizInner({ session }: { session?: ParadigmSession }) {
         </ul>
       )}
 
+      {table.category === 'stems' && (
+        <p className="text-xs text-text-muted">
+          Every form here is a qatal 3ms. The stem names are the forms of <Prose>פעל</Prose>.
+        </p>
+      )}
+
       {table.category === 'suffixes' && (
         <ul className="text-xs text-text-muted space-y-1 list-disc ps-4">
           {SUFFIX_RULES.map((rule) => (

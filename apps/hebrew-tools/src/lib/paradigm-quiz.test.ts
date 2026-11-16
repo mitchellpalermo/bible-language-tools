@@ -5,6 +5,7 @@ import { getParadigm, type VerbParadigm, verbParadigms } from '../data/verb-para
 import {
   ALL_CATEGORIES,
   buildLadderTable,
+  buildStemTable,
   buildSummaryTable,
   buildTableModels,
   buildVerbTable,
@@ -14,6 +15,7 @@ import {
   countsAsCorrect,
   getQuizCells,
   gradeCell,
+  isConjugation,
 } from './paradigm-quiz';
 
 function paradigm(id: string): VerbParadigm {
@@ -127,11 +129,32 @@ describe('buildTableModels', () => {
   const tables = buildTableModels();
 
   it('builds a verb table for every paradigm and a summary per conjugation', () => {
-    const verbTables = tables.filter((t) => t.category !== 'suffixes' && t.category !== 'ladder');
+    const verbTables = tables.filter((t) => isConjugation(t.category));
     expect(verbTables.filter((t) => t.layout === 'verb')).toHaveLength(verbParadigms.length);
     expect(verbTables.filter((t) => t.layout === 'summary').map((t) => t.category)).toEqual(
-      ALL_CATEGORIES.filter((c) => c !== 'suffixes' && c !== 'ladder'),
+      ALL_CATEGORIES.filter(isConjugation),
     );
+  });
+
+  it('builds one stems table: a row per stem name, a column per root', () => {
+    const stems = tables.filter((t) => t.category === 'stems');
+    expect(stems).toHaveLength(1);
+    const table = stems[0];
+    expect(table).toEqual(buildStemTable());
+    expect(table.cols).toEqual(['פעל', 'קטל']);
+    expect(table.rows.map((r) => r.label)).toEqual([
+      'Qal',
+      'Niphal',
+      'Piel',
+      'Pual',
+      'Hithpael',
+      'Hiphil',
+      'Hophal',
+    ]);
+    expect(table.rows[1].answers).toEqual(['נִפְעַל', 'נִקְטַל']);
+    expect(table.rows[1].ids).toEqual(['stem-pattern-pel:niphal', 'stem-pattern-qtl:niphal']);
+    expect(getQuizCells(table)).toHaveLength(14);
+    expect(categoryTabLabel('stems')).toBe('Stem names');
   });
 
   it('builds a summary and a table per model noun for the suffixes', () => {

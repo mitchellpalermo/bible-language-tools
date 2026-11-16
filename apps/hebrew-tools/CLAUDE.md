@@ -944,6 +944,7 @@ Things that will bite if changed carelessly:
 |---|---|
 | `src/data/verb-paradigms.ts` | The answer key — forms transcribed from Garrett & DeRouchie's tables, keyed by person-gender-number (PGN) |
 | `src/data/pronominal-suffixes.ts` | The suffix tables' answer key — Type 1 and Type 2 on model nouns (#159) |
+| `src/data/stem-patterns.ts` | The Stems tab's answer key — Table 20.1: each stem's qatal 3ms on פעל and קטל |
 | `src/lib/paradigm-quiz.ts` | Table builders, cell ids, `gradeCell`. Blanking comes from `@tools/shared/paradigm-quiz` |
 | `src/lib/use-hebrew-input.ts` | The typing behaviour as a hook — shared by `/keyboard` and every quiz cell |
 | `src/lib/quiz-settings.ts` | Binding of the shared settings; default density is `hard` |
@@ -973,6 +974,14 @@ Things that will bite if changed carelessly:
   ־ַת only before ־כֶם/־כֶן** — the issue text said ־ַת throughout; the corpus
   says otherwise. #152 (the reference page) has not landed: when it does, it
   should import these model nouns rather than declare its own.
+- **The Stems tab is one summary table, and its cell ids have no PGN.** Rows
+  are the seven stem names (the name is the label, the form is the blank),
+  columns are פעל and קטל, and a cell is `stem-pattern-<pel|qtl>:<stem>`. Every
+  form is a qatal 3ms, so there is no person to key on. Qal קָטַל repeats
+  `qal-qatal-strong:3ms`'s spelling but keeps its own card. Not corpus-checked
+  (קטל is barely attested), so `stem-patterns.test.ts` checks shape only.
+  `isConjugation()` is the test for "this tab holds Qal verb tables"; do not
+  write `!== 'suffixes' && !== 'ladder'` again.
 - **A cell is identified by `<paradigm>:<pgn>`, never by row and column.** The
   textbook prints one paradigm two ways: one verb as person × number, and verb
   classes side by side as PGN × class. `buildVerbTable` and `buildSummaryTable`
