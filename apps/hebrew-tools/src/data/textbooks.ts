@@ -17,6 +17,11 @@
 // different chapters (learned as Core in ch. 10, revisited under derived stems
 // in ch. 25). Category therefore belongs on the tag, not on the word.
 
+import {
+  createTextbookQueries,
+  describeChapters as describeChapterSet,
+  type ChapterStat as SharedChapterStat,
+} from '@tools/shared/textbooks';
 import { type HebrewVocabWord, vocabulary } from './vocabulary';
 
 // `gd` is defined upstream of this module (see `vocabulary-types.ts`) because
@@ -111,139 +116,39 @@ export function categoryLabel(category: VocabCategory): string {
 }
 
 // ─── Queries ──────────────────────────────────────────────────────────────────
+//
+// The queries themselves are `@tools/shared/textbooks`, shared with greek.tools
+// (#228). This module binds them to the Hebrew vocabulary and its categories;
+// what each one promises is documented there.
 
-export function isInChapter(
-  word: HebrewVocabWord,
-  textbook: TextbookId,
-  chapter: number,
-  categories?: VocabCategory[],
-): boolean {
-  return (word.chapters ?? []).some(
-    (c) =>
-      c.textbook === textbook &&
-      c.chapter === chapter &&
-      (categories === undefined || categories.includes(c.category)),
-  );
-}
+export type ChapterStat = SharedChapterStat<VocabCategory>;
 
-/** Every word tagged for the given textbook chapter, in vocabulary-file order. */
-export function wordsInChapter(
-  textbook: TextbookId,
-  chapter: number,
-  categories?: VocabCategory[],
-): HebrewVocabWord[] {
-  return vocabulary.filter((w) => isInChapter(w, textbook, chapter, categories));
-}
+const NO_CHAPTERS: TextbookChapterRef[] = [];
 
-/** Every chapter number the textbook has vocabulary for, ascending. */
-export function chapterNumbers(textbook: TextbookId): number[] {
-  const chapters = new Set<number>();
-  for (const word of vocabulary) {
-    for (const ref of word.chapters ?? []) {
-      if (ref.textbook === textbook) chapters.add(ref.chapter);
-    }
-  }
-  return [...chapters].sort((a, b) => a - b);
-}
+const queries = createTextbookQueries<HebrewVocabWord, TextbookId, VocabCategory>({
+  words: vocabulary,
+  getRefs: (word) => word.chapters ?? NO_CHAPTERS,
+  categoryIds: CATEGORY_IDS,
+});
 
-/**
- * Words for a set of chapters, narrowed to a set of categories.
- *
- * An empty `chapters` means the whole textbook rather than nothing — the picker
- * treats "no chapter selected" as "not narrowed", which is the state a fresh
- * session starts in. An empty `categories` genuinely means nothing, because the
- * user had to switch every category off to get there.
- *
- * A word tagged in several selected chapters is returned once: the result is a
- * study set, not a tally.
- */
-export function wordsInChapters(
-  textbook: TextbookId,
-  chapters: number[],
-  categories: VocabCategory[],
-): HebrewVocabWord[] {
-  const wanted = chapters.length > 0 ? new Set(chapters) : null;
-  return vocabulary.filter((word) =>
-    (word.chapters ?? []).some(
-      (ref) =>
-        ref.textbook === textbook &&
-        (wanted === null || wanted.has(ref.chapter)) &&
-        categories.includes(ref.category),
-    ),
-  );
-}
-
-export interface ChapterStat {
-  chapter: number;
-  /** Words in this chapter across every category. */
-  total: number;
-  /** Words in this chapter, per category. Absent categories are 0. */
-  byCategory: Record<VocabCategory, number>;
-}
-
-/** Per-chapter counts, for labelling the picker's grid cells. */
-export function chapterStats(textbook: TextbookId): ChapterStat[] {
-  const stats = new Map<number, ChapterStat>();
-  for (const word of vocabulary) {
-    for (const ref of word.chapters ?? []) {
-      if (ref.textbook !== textbook) continue;
-      let stat = stats.get(ref.chapter);
-      if (!stat) {
-        stat = {
-          chapter: ref.chapter,
-          total: 0,
-          byCategory: Object.fromEntries(CATEGORY_IDS.map((c) => [c, 0])) as Record<
-            VocabCategory,
-            number
-          >,
-        };
-        stats.set(ref.chapter, stat);
-      }
-      stat.total += 1;
-      stat.byCategory[ref.category] += 1;
-    }
-  }
-  return [...stats.values()].sort((a, b) => a.chapter - b.chapter);
-}
-
-/** How many words each category would contribute to the current chapter set. */
-export function categoryCounts(
-  textbook: TextbookId,
-  chapters: number[],
-): Record<VocabCategory, number> {
-  const counts = Object.fromEntries(CATEGORY_IDS.map((c) => [c, 0])) as Record<
-    VocabCategory,
-    number
-  >;
-  for (const category of CATEGORY_IDS) {
-    counts[category] = wordsInChapters(textbook, chapters, [category]).length;
-  }
-  return counts;
-}
+export const {
+  isInChapter,
+  /** Every word tagged for the given textbook chapter, in vocabulary-file order. */
+  wordsInChapter,
+  /** Every chapter number the textbook has vocabulary for, ascending. */
+  chapterNumbers,
+  /** Words for a set of chapters and categories. Empty `chapters` is the whole book. */
+  wordsInChapters,
+  /** Per-chapter counts, for labelling the picker's grid cells. */
+  chapterStats,
+  /** How many words each category would contribute to the current chapter set. */
+  categoryCounts,
+} = queries;
 
 /**
  * A short human label for a chapter set: "All chapters", "Ch. 4", "Ch. 1–8",
- * "Ch. 1–8, 12, 20–22". Consecutive runs collapse to a range, which is what
- * makes a section-exam selection readable at a glance in the collapsed picker.
+ * "Ch. 1–8, 12, 20–22".
  */
 export function describeChapters(textbook: TextbookId, chapters: number[]): string {
-  const book = TEXTBOOKS[textbook];
-  if (chapters.length === 0) return 'All chapters';
-
-  const sorted = [...new Set(chapters)].sort((a, b) => a - b);
-  const runs: string[] = [];
-  let start = sorted[0];
-  let prev = sorted[0];
-
-  for (const chapter of sorted.slice(1)) {
-    if (chapter === prev + 1) {
-      prev = chapter;
-      continue;
-    }
-    runs.push(start === prev ? `${start}` : `${start}–${prev}`);
-    start = prev = chapter;
-  }
-  runs.push(start === prev ? `${start}` : `${start}–${prev}`);
-
-  return `${book.unitLabel} ${runs.join(', ')}`;
+  return describeChapterSet(TEXTBOOKS[textbook].unitLabel, chapters);
 }

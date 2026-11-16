@@ -16,7 +16,7 @@ import userEvent from '@testing-library/user-event';
 import posthog from 'posthog-js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { loadSRSStore, loadStats, newCard, normalizeKey } from '../data/srs';
-import { vocabulary } from '../data/vocabulary';
+import { vocabulary } from '../data/vocabulary-all';
 import Flashcards, { DEFAULT_FREQ_PRESET, FREQ_PRESETS } from './Flashcards';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
@@ -753,7 +753,7 @@ describe('Card study flow', () => {
     const user = userEvent.setup();
     // Seed a deck with a known word so we can type the correct gloss
     const { normalizeKey } = await import('../data/srs');
-    const { vocabulary } = await import('../data/vocabulary');
+    const { vocabulary } = await import('../data/vocabulary-all');
     // Find the first word in top-100 and use it
     const word = vocabulary.find((w) => w.frequency >= 500)!;
     localStorage.setItem(

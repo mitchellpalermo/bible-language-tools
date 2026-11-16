@@ -48,7 +48,7 @@ import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { loadFocusPassages, loadParseHistoryStore } from '../data/focusPassages';
 import { loadSRSStore, loadStats, newCard, saveSRSStore, saveStats } from '../data/srs';
-import type { VocabWord } from '../data/vocabulary';
+import type { VocabWord } from '../data/vocabulary-all';
 import { loadAttempts, logAttempts } from '../lib/attempt-log';
 import { loadFlashcardSettings } from '../lib/flashcard-settings';
 import { parseFormConcept } from '../lib/parse-attempts';
