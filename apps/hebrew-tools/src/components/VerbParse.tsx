@@ -251,6 +251,8 @@ function Question({
   total,
   answer,
   askRoot,
+  keypadOpen,
+  onToggleKeypad,
   onChange,
   onSubmit,
 }: {
@@ -259,13 +261,11 @@ function Question({
   total: number;
   answer: ParseAnswer;
   askRoot: boolean;
+  keypadOpen: boolean;
+  onToggleKeypad: () => void;
   onChange: (a: ParseAnswer) => void;
   onSubmit: () => void;
 }) {
-  const [keypadOpen, setKeypadOpen] = useState(false);
-  useEffect(() => {
-    setKeypadOpen(window.matchMedia?.('(pointer: coarse)').matches ?? false);
-  }, []);
   const canSubmit = isComplete(answer, askRoot);
   const fields = fieldsFor(answer.conjugation);
   const submit = () => {
@@ -321,7 +321,7 @@ function Question({
             hebrew
             focusKey={item.form}
             keypadOpen={keypadOpen}
-            onToggleKeypad={() => setKeypadOpen((o) => !o)}
+            onToggleKeypad={onToggleKeypad}
             checkButton={false}
             hebrewPrompt={{ placeholder: 'Type the root', label: 'Root' }}
           />
@@ -464,6 +464,13 @@ function VerbParseInner() {
   const [grades, setGrades] = useState<ParseGrade[]>([]);
   // The settings a session was dealt under; changing them mid-session changes nothing.
   const [askRoot, setAskRoot] = useState(settings.askRoot);
+  // The keypad belongs to the page, not to one form: `Question` remounts for
+  // every verb, so state kept there closed the keypad again on each one. A
+  // touch screen starts with it open, read after mount (the page is prerendered).
+  const [keypadOpen, setKeypadOpen] = useState(false);
+  useEffect(() => {
+    setKeypadOpen(window.matchMedia?.('(pointer: coarse)').matches ?? false);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -543,6 +550,8 @@ function VerbParseInner() {
           total={session.length}
           answer={answer}
           askRoot={askRoot}
+          keypadOpen={keypadOpen}
+          onToggleKeypad={() => setKeypadOpen((o) => !o)}
           onChange={setAnswer}
           onSubmit={submit}
         />

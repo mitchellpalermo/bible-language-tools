@@ -188,4 +188,32 @@ describe('VerbParse — a session', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Correct!');
     expect(screen.queryByText('Root')).not.toBeInTheDocument();
   });
+
+  it('keeps the keypad open from one form to the next once it is opened', async () => {
+    saveParseSettings({
+      stems: ['qal'],
+      conjugations: ['wayyiqtol', 'participle'],
+      askRoot: true,
+      sessionLength: 10,
+    });
+    const user = userEvent.setup();
+    render(<VerbParse />);
+    await start(user);
+
+    const keypadSwitch = () => screen.getByRole('switch', { name: 'Keypad' });
+    expect(keypadSwitch()).toHaveAttribute('aria-checked', 'false');
+    expect(screen.queryByRole('region', { name: 'Hebrew keypad' })).not.toBeInTheDocument();
+    await user.click(keypadSwitch());
+    expect(screen.getByRole('region', { name: 'Hebrew keypad' })).toBeInTheDocument();
+
+    // Answer the first form however it comes, and go on to the second.
+    await user.selectOptions(screen.getByLabelText('Stem'), 'qal');
+    await user.selectOptions(screen.getByLabelText('Conjugation'), 'infinitive construct');
+    await user.type(screen.getByRole('textbox', { name: 'Root' }), 'x{enter}');
+    await user.click(screen.getByRole('button', { name: /Next/ }));
+
+    expect(screen.getByText('2 / 2')).toBeInTheDocument();
+    expect(keypadSwitch()).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByRole('region', { name: 'Hebrew keypad' })).toBeInTheDocument();
+  });
 });
