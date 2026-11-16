@@ -616,7 +616,8 @@ Each app keeps its textbook list, its chapter data and its bindings
   fact. A book's glosses, cognate notes, mnemonics, tables and prose are not
   copied into this repository, and neither is the source document. hebrew.tools
   takes its gloss wording from the course handout by a decision recorded in its
-  own CLAUDE.md; greek.tools takes every gloss from its existing lexicon data.
+  own CLAUDE.md; greek.tools takes its glosses from its existing lexicon data,
+  apart from three hand-kept entries approved one by one (its CLAUDE.md).
 - **`ChapterPicker` is inline-styled with the accent passed in**, like every
   shared React component. Its grid is `auto-fill` columns of at least 2.75rem,
   so a cell is a finger wide at any width.

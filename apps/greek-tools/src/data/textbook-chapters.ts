@@ -2,12 +2,13 @@
 //
 // Each map is "chapter number -> the lexical forms that chapter's vocabulary
 // list assigns", and nothing else. The glosses, the parts of speech and the
-// frequencies a card shows all come from `vocabulary.ts` (MorphGNT and the
-// Dodson lexicon). No gloss, cognate note, mnemonic or sentence from a textbook
+// frequencies a card shows all come from the vocabulary (MorphGNT and the
+// Dodson lexicon; `vocabulary-textbook.ts` for three approved exceptions). No
+// other gloss, cognate note, mnemonic or sentence from a textbook
 // is in this repository, and none may be added: see "Textbook chapter decks" in
 // this app's CLAUDE.md.
 //
-// A lemma is written as `vocabulary.ts` spells its `greek` field, so the
+// A lemma is written as the vocabulary spells its `greek` field, so the
 // article is 'ὁ, ἡ, τό' and ἐκ is 'ἐκ, ἐξ'. Within a chapter the lemmas are in
 // alphabetical order, not the book's. `textbook-chapters.test.ts` fails on a
 // lemma the vocabulary lacks, on one listed twice, and (where the corpus is
@@ -19,14 +20,6 @@
 /** Chapter number -> the `greek` field of each vocabulary entry the chapter assigns. */
 export type ChapterMap = Readonly<Record<number, readonly string[]>>;
 
-/** A headword a textbook lists that this app has no vocabulary entry for. */
-export interface UnresolvedHeadword {
-  chapter: number;
-  headword: string;
-  /** Why it has no card, in terms of this app's data. */
-  reason: string;
-}
-
 /**
  * Merkle and Plummer, *Beginning with New Testament Greek*. Used with the
  * permission of Dr. Plummer (Nov 2026).
@@ -35,7 +28,10 @@ export interface UnresolvedHeadword {
  * chapter ("1.11", "2.12", ...). The number before the point is the chapter;
  * the number after it is only the section's position in that chapter. Mitch
  * confirmed (Nov 2026) that the course takes list N.x as chapter N. The list
- * runs to chapter 23, fifteen headwords a chapter: 345 in all, 342 here.
+ * runs to chapter 23, fifteen headwords a chapter: 345 in all, all here.
+ *
+ * Three of the 345 (ἱερόν, δεῖ, ἐὰν μή) are not MorphGNT lemmas. Their entries
+ * are hand-kept in `vocabulary-textbook.ts`, not generated.
  */
 export const BEGINNING_GREEK_CHAPTERS: ChapterMap = {
   1: [
@@ -61,6 +57,7 @@ export const BEGINNING_GREEK_CHAPTERS: ChapterMap = {
     'ἔργον',
     'εὐαγγέλιον',
     'θεός',
+    'ἱερόν',
     'κόσμος',
     'κύριος',
     'λόγος',
@@ -363,6 +360,7 @@ export const BEGINNING_GREEK_CHAPTERS: ChapterMap = {
   20: [
     'ἁμαρτάνω',
     'βούλομαι',
+    'δεῖ',
     'δοκέω',
     'δύναμαι',
     'θέλημα',
@@ -381,6 +379,7 @@ export const BEGINNING_GREEK_CHAPTERS: ChapterMap = {
     'δέχομαι',
     'δικαιόω',
     'ἐάν',
+    'ἐὰν μή',
     'ἵνα',
     'λογίζομαι',
     'ὅπου',
@@ -427,28 +426,3 @@ export const BEGINNING_GREEK_CHAPTERS: ChapterMap = {
     'φημί',
   ],
 };
-
-/**
- * The three headwords of that list with no card. Each is left out rather than
- * given an invented entry, so the decks for chapters 2, 20 and 21 hold
- * fourteen words.
- */
-export const BEGINNING_GREEK_UNRESOLVED: readonly UnresolvedHeadword[] = [
-  {
-    chapter: 2,
-    headword: 'ἱερόν',
-    reason:
-      'MorphGNT files the noun under the adjective ἱερός, so the vocabulary has no entry for it and no count of its own.',
-  },
-  {
-    chapter: 20,
-    headword: 'δεῖ',
-    reason:
-      'MorphGNT files the impersonal verb under δέω, which is the chapter 18 card with another meaning.',
-  },
-  {
-    chapter: 21,
-    headword: 'ἐὰν μή',
-    reason: 'A phrase of two words. The vocabulary is one entry per lemma; ἐάν is in this chapter.',
-  },
-];

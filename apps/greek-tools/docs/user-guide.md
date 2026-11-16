@@ -37,7 +37,7 @@ In flip mode, use **Space** to reveal the answer, then **Right Arrow** for "Got 
 
 **Studying by textbook chapter.** Tap a textbook in the **Textbook** row (each is named by its title, for example **Beginning with NT Greek**) to study its vocabulary instead of a frequency band. Tap the panel that appears under it to open the chapter grid, then tap the chapters you want. **Through Ch. N** selects everything up to the last chapter you picked, which suits a cumulative quiz; **Only Ch. N** narrows to that one chapter; **All chapters** goes back to the whole book. Your choice is remembered on this device. Tap the textbook again to return to the whole vocabulary.
 
-The supported textbook is Merkle and Plummer, *Beginning with New Testament Greek* (chapters 1 to 23), used with the author's permission. Only the chapter word lists come from the book. The definitions on the cards are greek.tools' own, so the wording can differ from the book's. Three entries have no card yet: ἱερόν (chapter 2), δεῖ (chapter 20) and the phrase ἐὰν μή (chapter 21).
+The supported textbook is Merkle and Plummer, *Beginning with New Testament Greek* (chapters 1 to 23), used with the author's permission. Only the chapter word lists come from the book. The definitions on the cards are greek.tools' own, so the wording can differ from the book's. Every chapter has its full fifteen words.
 
 Your study streak tracks consecutive days where you review at least 10 cards. Stats including accuracy and total reviews are tracked automatically.
 

@@ -12,6 +12,8 @@ import userEvent, { type UserEvent } from '@testing-library/user-event';
 import posthog from 'posthog-js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TEXTBOOKS, wordsInChapters } from '../data/textbooks';
+import { vocabulary as generated } from '../data/vocabulary';
+import { vocabulary } from '../data/vocabulary-all';
 import { DECK_SELECTION_KEY } from '../lib/deck-selection';
 import Flashcards from './Flashcards';
 
@@ -298,5 +300,81 @@ describe('the stored selection', () => {
   it('writes nothing until the student chooses something', () => {
     render(<Flashcards />);
     expect(localStorage.getItem(DECK_SELECTION_KEY)).toBeNull();
+  });
+});
+
+// Three headwords of the book are not MorphGNT lemmas, so their entries are
+// hand-kept (`vocabulary-textbook.ts`). They are ordinary words everywhere.
+describe('the hand-kept textbook words', () => {
+  const deckOf = (key: string) =>
+    localStorage.setItem(
+      'greek-tools-custom-decks-v1',
+      JSON.stringify([{ id: 'one', name: 'One word', wordKeys: [key], createdAt: '2026-11-01' }]),
+    );
+
+  async function studyOnly(user: UserEvent, key: string) {
+    deckOf(key);
+    render(<Flashcards />);
+    await user.click(screen.getByRole('button', { name: 'Study All' }));
+    await user.click(screen.getByRole('button', { name: /^One word/ }));
+    await user.click(screen.getByRole('button', { name: 'Type' }));
+  }
+
+  const typeAndCheck = (user: UserEvent, text: string) =>
+    user.type(screen.getByRole('textbox'), `${text}{Enter}`);
+
+  it('fills chapters 2, 20 and 21 to fifteen words', () => {
+    expect(chapter(2).map((w) => w.greek)).toContain('ἱερόν');
+    expect(chapter(20).map((w) => w.greek)).toContain('δεῖ');
+    expect(chapter(21).map((w) => w.greek)).toContain('ἐὰν μή');
+    for (const n of [2, 20, 21]) expect(chapter(n)).toHaveLength(15);
+  });
+
+  it('are in the whole vocabulary, under the frequency band their count gives them', async () => {
+    const user = userEvent.setup();
+    render(<Flashcards />);
+    await user.click(screen.getByRole('button', { name: 'Study All' }));
+    // δεῖ is counted 101 times: the 100 to 499 band, shown as "101–300".
+    await user.click(within(presetRow()).getByRole('button', { name: /^101–300/ }));
+    await user.click(screen.getByRole('button', { name: /toggle filters/i }));
+    await user.click(screen.getByRole('button', { name: /^verb/ }));
+
+    // Counted, not walked: the band's verbs are the generated ones and δεῖ.
+    const inBand = (w: { frequency: number; partOfSpeech: string }) =>
+      w.frequency >= 100 && w.frequency < 500 && w.partOfSpeech === 'verb';
+    expect(vocabulary.filter(inBand).map((w) => w.greek)).toContain('δεῖ');
+    expect(vocabulary.filter(inBand)).toHaveLength(generated.filter(inBand).length + 1);
+    expect(screen.getByTestId('card-progress')).toHaveTextContent(
+      `1/${vocabulary.filter(inBand).length}`,
+    );
+  });
+
+  it('can be put in a custom deck and studied by key', async () => {
+    const user = userEvent.setup();
+    await studyOnly(user, 'ἱερόν');
+    expect(screen.getByTestId('card-progress')).toHaveTextContent('1/1');
+    expect(cardFront()).toBe('ἱερόν');
+  });
+
+  it('marks a typed gloss for the two-word ἐὰν μή', async () => {
+    const user = userEvent.setup();
+    await studyOnly(user, 'ἐὰν μή');
+    expect(cardFront()).toBe('ἐὰν μή');
+    await typeAndCheck(user, 'unless');
+    expect(screen.getByText('Correct!')).toBeInTheDocument();
+  });
+
+  it('marks the two words typed in Greek, and not the first word alone', async () => {
+    const user = userEvent.setup();
+    await studyOnly(user, 'ἐὰν μή');
+    await user.click(screen.getByRole('button', { name: 'English → Greek' }));
+    await typeAndCheck(user, 'ἐάν');
+    expect(screen.getByText('Not quite')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /got it/i }));
+    // One card, so that answer ended the session.
+    await user.click(screen.getByRole('button', { name: 'Study Again' }));
+    await typeAndCheck(user, 'ἐὰν μή');
+    expect(screen.getByText('Correct!')).toBeInTheDocument();
   });
 });

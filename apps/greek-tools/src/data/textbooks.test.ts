@@ -14,7 +14,7 @@ import {
   wordsInChapter,
   wordsInChapters,
 } from './textbooks';
-import { vocabulary } from './vocabulary';
+import { vocabulary } from './vocabulary-all';
 
 // The queries' rules are tested in @tools/shared's textbooks.test.ts. This
 // checks the join: that a chapter comes back as this app's vocabulary entries.
@@ -82,7 +82,16 @@ describe('chaptersOf', () => {
 
   it('is empty for every word no textbook lists', () => {
     const unlisted = vocabulary.filter((w) => chaptersOf(w).length === 0);
-    expect(unlisted.length).toBe(vocabulary.length - 342);
+    expect(unlisted.length).toBe(vocabulary.length - 345);
+  });
+
+  it('finds the three hand-kept words, which are not generated', () => {
+    expect(chaptersOf(word('ἱερόν'))[0].chapter).toBe(2);
+    expect(chaptersOf(word('δεῖ'))[0].chapter).toBe(20);
+    expect(chaptersOf(word('ἐὰν μή'))[0].chapter).toBe(21);
+    // δέω and ἱερός stay the cards they were, in the chapters they were.
+    expect(chaptersOf(word('δέω'))[0].chapter).toBe(18);
+    expect(chaptersOf(word('ἱερός'))).toEqual([]);
   });
 
   it('keeps τίς and τις apart', () => {
@@ -112,15 +121,15 @@ describe('the queries over the Greek vocabulary', () => {
   });
 
   it('reads no chapters as the whole book', () => {
-    expect(wordsInChapters(BOOK, [], ['vocabulary'])).toHaveLength(342);
-    expect(wordsInChapters(BOOK, [1, 2], ['vocabulary'])).toHaveLength(29);
+    expect(wordsInChapters(BOOK, [], ['vocabulary'])).toHaveLength(345);
+    expect(wordsInChapters(BOOK, [1, 2], ['vocabulary'])).toHaveLength(30);
   });
 
   it('counts each chapter for the picker', () => {
     const stats = chapterStats(BOOK);
     expect(stats).toHaveLength(23);
-    expect(stats.find((s) => s.chapter === 2)?.total).toBe(14);
-    expect(stats.reduce((sum, s) => sum + s.total, 0)).toBe(342);
+    expect(stats.every((s) => s.total === 15)).toBe(true);
+    expect(stats.reduce((sum, s) => sum + s.total, 0)).toBe(345);
     expect(categoryCounts(BOOK, [3])).toEqual({ vocabulary: 15 });
   });
 

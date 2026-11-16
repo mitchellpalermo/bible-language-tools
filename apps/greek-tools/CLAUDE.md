@@ -229,12 +229,12 @@ hebrew.tools (repo CLAUDE.md, "Textbook chapter decks").
 
 - **Only the chapter assignments come from the book.** A map is lemmas and
   chapter numbers. Glosses, parts of speech and frequencies are
-  `vocabulary.ts`'s (MorphGNT and Dodson). Do not add a textbook's gloss,
+  the vocabulary's (MorphGNT and Dodson), with three approved exceptions below. Do not add a textbook's gloss,
   cognate, mnemonic or prose anywhere in the repository, and do not commit the
   source document or an extract of it. `textbook-chapters.test.ts` fails on any
   map entry that is not Greek letters.
 - **The tag is a lookup, not a field.** `vocabulary.ts` is generated and is not
-  touched. `chaptersOf(word)` reads the maps by the word's `greek` field, so a
+  touched, by this or by the three hand-kept words. `chaptersOf(word)` reads the maps by the word's `greek` field, so a
   lemma is spelled as the vocabulary spells it (`'ὁ, ἡ, τό'`, `'ἐκ, ἐξ'`).
 - **A book is named by its title, never only by its authors.** The chip and
   the picker's header show `shortTitle` from the book's entry in `BOOKS`
@@ -250,10 +250,30 @@ hebrew.tools (repo CLAUDE.md, "Textbook chapter decks").
   heads each list "1.11", "2.12" and so on: chapter 1 section 11, chapter 2
   section 12. Mitch confirmed (Nov 2026) that the course takes list N.x as
   chapter N's vocabulary, so the map is not shifted. The list runs to chapter 23, fifteen headwords a chapter.
-- **A headword with no vocabulary entry is left out and listed**, with a reason,
-  in `BEGINNING_GREEK_UNRESOLVED`: ἱερόν and δεῖ (MorphGNT files them under
-  ἱερός and δέω) and the phrase ἐὰν μή. So 342 of 345 have cards. A test fails
-  if the vocabulary gains one of them, which is the signal to move it into the map.
+- **Three headwords are hand-kept, not generated** (`src/data/vocabulary-textbook.ts`):
+  ἱερόν and δεῖ, which MorphGNT files under ἱερός and δέω, and the phrase ἐὰν μή.
+  Mitch approved the textbook as the source for these three (Nov 2026), so all
+  345 headwords have cards. **The approval is for these three entries**: a
+  headword, a part of speech and a short gloss. It does not extend to prose,
+  cognates or mnemonics, or to any other word. Things to know:
+  - **`src/data/vocabulary-all.ts` merges them into the vocabulary.** A module
+    that deals, lists or counts cards imports `vocabulary` from there
+    (`Flashcards.tsx`, `DeckBuilder.tsx`, `today.ts`, `textbooks.ts`). A module
+    that looks a MorphGNT lemma up (the reader popup, book and passage decks)
+    imports the generated `vocabulary.ts`. A test pins both lists of files.
+  - **Each entry says where it came from** in `supplement`: the textbook, whether
+    the gloss is Dodson's (ἱερόν, δεῖ) or the book's (ἐὰν μή; Dodson has no
+    entry), and how its count was taken from MorphGNT. A corpus test recounts all
+    three: ἱερόν 71 (neuter singular forms under ἱερός), δεῖ 101 (present and
+    imperfect active forms under δέω), ἐὰν μή 47 (ἐάν directly followed by μή).
+  - **The SRS key is the plain headword**, as for every word. If the generator
+    ever produces one of these words, `vocabulary-all.test.ts` fails; delete the
+    hand-kept entry and the student's card carries over under the same key.
+  - **The δέω and ἱερός cards are unchanged**, so their counts (154 and 73) still
+    include the occurrences now also counted under δεῖ and ἱερόν. Correcting
+    them is a generator change, left for its own issue.
+  - Regenerating `vocabulary.ts` cannot drop or duplicate them: the generator
+    never sees the supplement, and the merge is not positional.
 - **How it sits with the other controls.** A custom deck, while on, is the deck;
   the textbook waits behind it. Choosing a textbook switches the custom deck
   off. The frequency band does not narrow a chapter (the default band would

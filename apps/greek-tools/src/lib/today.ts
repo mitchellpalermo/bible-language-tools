@@ -34,7 +34,7 @@ import {
 } from '@tools/shared/today';
 import type { FocusPassage, ParseHistory } from '../data/focusPassages';
 import { daysFromNow, isDue, normalizeKey, type SRSCard } from '../data/srs';
-import { type VocabWord, vocabulary } from '../data/vocabulary';
+import { type VocabWord, vocabulary } from '../data/vocabulary-all';
 import { parseConcept, parseFormConcept, parseHistoryAsAttempts } from './parse-attempts';
 import { buildSession, DEFAULT_PARSE_SETTINGS, type ParseItem } from './verb-parse';
 

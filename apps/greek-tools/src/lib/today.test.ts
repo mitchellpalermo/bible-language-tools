@@ -2,7 +2,7 @@ import type { Attempt } from '@tools/shared/attempt-log';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { FocusPassage } from '../data/focusPassages';
 import { daysFromNow, type SRSCard } from '../data/srs';
-import { vocabulary } from '../data/vocabulary';
+import { vocabulary } from '../data/vocabulary-all';
 import { parseConcept, parseFormConcept } from './parse-attempts';
 import {
   BUDGET_KEY,

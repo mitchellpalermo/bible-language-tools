@@ -22,7 +22,7 @@ import {
   saveStats,
 } from '../data/srs';
 import { type TextbookId, wordsInChapters } from '../data/textbooks';
-import { type VocabWord, vocabulary } from '../data/vocabulary';
+import { type VocabWord, vocabulary } from '../data/vocabulary-all';
 import { DEFAULT_SELECTION, loadSelection, saveSelection, textbookOf } from '../lib/deck-selection';
 import { loadFlashcardSettings, saveFlashcardSettings } from '../lib/flashcard-settings';
 import DeckBuilder from './DeckBuilder';

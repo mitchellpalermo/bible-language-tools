@@ -19,13 +19,8 @@ import {
   type ChapterStat as SharedChapterStat,
   type Textbook as SharedTextbook,
 } from '@tools/shared/textbooks';
-import {
-  BEGINNING_GREEK_CHAPTERS,
-  BEGINNING_GREEK_UNRESOLVED,
-  type ChapterMap,
-  type UnresolvedHeadword,
-} from './textbook-chapters';
-import { type VocabWord, vocabulary } from './vocabulary';
+import { BEGINNING_GREEK_CHAPTERS, type ChapterMap } from './textbook-chapters';
+import { type VocabWord, vocabulary } from './vocabulary-all';
 
 /**
  * One list per chapter, so one category. hebrew.tools' textbook prints several
@@ -37,8 +32,6 @@ export const DEFAULT_CATEGORIES: VocabCategory[] = ['vocabulary'];
 
 interface Book extends Omit<SharedTextbook, 'id'> {
   chapters: ChapterMap;
-  /** Headwords the book lists that have no vocabulary entry, so no card. */
-  unresolved: readonly UnresolvedHeadword[];
 }
 
 const BOOKS = {
@@ -51,7 +44,6 @@ const BOOKS = {
     shortTitle: 'Beginning with NT Greek',
     unitLabel: 'Ch.',
     chapters: BEGINNING_GREEK_CHAPTERS,
-    unresolved: BEGINNING_GREEK_UNRESOLVED,
   },
 } satisfies Record<string, Book>;
 
@@ -75,15 +67,10 @@ export const CHAPTER_MAPS = Object.fromEntries(
   TEXTBOOK_IDS.map((id) => [id, BOOKS[id].chapters]),
 ) as Record<TextbookId, ChapterMap>;
 
-/** Each book's headwords with no card, for the data tests and the docs. */
-export const UNRESOLVED_HEADWORDS = Object.fromEntries(
-  TEXTBOOK_IDS.map((id) => [id, BOOKS[id].unresolved]),
-) as Record<TextbookId, readonly UnresolvedHeadword[]>;
-
 // ─── The join ─────────────────────────────────────────────────────────────────
 //
-// `vocabulary.ts` is generated from MorphGNT and Dodson and knows nothing of
-// textbooks, so the tag is not a field on the word: it is looked up here, by
+// The vocabulary (`vocabulary-all.ts`) is the generated MorphGNT and Dodson
+// list plus a small hand-kept supplement, and knows nothing of chapters, so the tag is not a field on the word: it is looked up here, by
 // the word's `greek` field. One word in two books is one entry with two refs.
 
 const NO_CHAPTERS: readonly TextbookChapterRef[] = [];
