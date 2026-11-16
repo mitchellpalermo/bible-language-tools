@@ -33,7 +33,8 @@ export interface UnresolvedHeadword {
  *
  * The source lists vocabulary in a numbered section at the end of each
  * chapter ("1.11", "2.12", ...). The number before the point is the chapter;
- * the number after it is only the section's position in that chapter. The list
+ * the number after it is only the section's position in that chapter. Mitch
+ * confirmed (Nov 2026) that the course takes list N.x as chapter N. The list
  * runs to chapter 23, fifteen headwords a chapter: 345 in all, 342 here.
  */
 export const BEGINNING_GREEK_CHAPTERS: ChapterMap = {

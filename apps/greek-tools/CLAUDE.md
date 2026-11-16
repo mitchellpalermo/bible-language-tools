@@ -216,7 +216,7 @@ The `component` prop is tagged on every captured exception so errors can be filt
 
 `/flashcards` has a **Textbook** row: one chip per textbook, and under the
 active one a chapter picker. Today there is one book, Merkle and Plummer,
-*Beginning with New Testament Greek*, used with Dr. Plummer's permission (Nov
+*Beginning with New Testament Greek* (title confirmed by Mitch), used with Dr. Plummer's permission (Nov
 2026). The queries, the stored selection and the picker are shared with
 hebrew.tools (repo CLAUDE.md, "Textbook chapter decks").
 
@@ -239,7 +239,8 @@ hebrew.tools (repo CLAUDE.md, "Textbook chapter decks").
 - **A book is named by its title, never only by its authors.** The chip and
   the picker's header show `shortTitle` from the book's entry in `BOOKS`
   ("Beginning with NT Greek"). The same authors have an intermediate textbook,
-  so the authors' names cannot tell two decks apart. The full title and the
+  so the authors' names cannot tell two decks apart. Each book's `authors` is
+  its own data too: nothing may assume a book is credited to these two alone. The full title and the
   authors are in the picker's footer and the chip's `title`. A data test fails
   on a `shortTitle` that repeats or contains an author's surname.
 - **To add a textbook:** add its map to `textbook-chapters.ts` and its entry to
@@ -247,7 +248,8 @@ hebrew.tools (repo CLAUDE.md, "Textbook chapter decks").
   selection follow. An id is stored in the student's selection: never rename one.
 - **Section numbers map to chapters by the number before the point.** The source
   heads each list "1.11", "2.12" and so on: chapter 1 section 11, chapter 2
-  section 12. The list runs to chapter 23, fifteen headwords a chapter.
+  section 12. Mitch confirmed (Nov 2026) that the course takes list N.x as
+  chapter N's vocabulary, so the map is not shifted. The list runs to chapter 23, fifteen headwords a chapter.
 - **A headword with no vocabulary entry is left out and listed**, with a reason,
   in `BEGINNING_GREEK_UNRESOLVED`: ἱερόν and δεῖ (MorphGNT files them under
   ἱερός and δέω) and the phrase ἐὰν μή. So 342 of 345 have cards. A test fails
