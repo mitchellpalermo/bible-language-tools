@@ -250,9 +250,15 @@ export function useFlashcardSession<T, R = never>(options: FlashcardSessionOptio
     [index, studyMode, card, deck, getKey, clearCard, random],
   );
 
-  const score = useCallback((correct: boolean) => {
+  /**
+   * `isNewCard` leaves a card's first-ever SRS review out of accuracy (#246).
+   * Drill answers always pass false: Study All and Endless never write the
+   * store, so every card there would look new, and by decision (Nov 2026) drill
+   * answers keep counting toward accuracy as they always have.
+   */
+  const score = useCallback((correct: boolean, isNewCard = false) => {
     setStats((prev) => {
-      const next = recordReview(prev, correct);
+      const next = recordReview(prev, correct, isNewCard);
       latest.current.storage.saveStats(next);
       return next;
     });
@@ -268,6 +274,10 @@ export function useFlashcardSession<T, R = never>(options: FlashcardSessionOptio
       if (card === undefined) return;
       const k = getKey(card);
       const correct = isPassingGrade(grade);
+      // Read before the store is updated below: absent means this is the
+      // card's first-ever review. Only SRS Review creates a card, so a grade
+      // given in a drill mode is never a first review.
+      const isNewCard = studyMode === 'srs' && !(k in srsStore);
 
       if (studyMode === 'srs') {
         setSrsStore((prev) => {
@@ -284,7 +294,7 @@ export function useFlashcardSession<T, R = never>(options: FlashcardSessionOptio
         grade,
         intervalDays: srsStore[k]?.interval ?? 0,
       });
-      score(correct);
+      score(correct, isNewCard);
       advance(queue);
     },
     [card, getKey, studyMode, srsStore, queue, advance, emit, score],

@@ -600,7 +600,7 @@ describe('Card study flow', () => {
     expect(screen.getByText('tap to reveal')).toBeInTheDocument();
   });
 
-  it('shows accuracy in stats bar after a review', async () => {
+  it('shows accuracy in stats bar once a counted review is recorded', async () => {
     const user = userEvent.setup();
     renderFlashcards();
     await act(async () => {
@@ -609,7 +609,18 @@ describe('Card study flow', () => {
     await act(async () => {
       await user.click(screen.getByRole('button', { name: /^good/i }));
     });
-    // After reviewing at least one card, accuracy should appear
+    // A new card's first SRS review is left out of accuracy (#246)...
+    expect(screen.queryByText(/accuracy:/i)).not.toBeInTheDocument();
+    // ...but a drill answer counts.
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /study all/i }));
+    });
+    await act(async () => {
+      await user.click(getCardDiv());
+    });
+    await act(async () => {
+      await user.click(screen.getByRole('button', { name: /^got it/i }));
+    });
     expect(screen.queryByText(/accuracy:/i)).toBeInTheDocument();
   });
 

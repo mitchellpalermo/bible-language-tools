@@ -179,13 +179,14 @@ describe('Flashcards', () => {
     expect(Object.keys(store).length).toBe(1);
   });
 
-  it('updates study stats after a review', async () => {
+  it("counts a new card's first review as study, not toward accuracy (#246)", async () => {
     const user = userEvent.setup();
     renderFlashcards();
     await user.click(getCard());
     await user.click(screen.getByRole('button', { name: /^again/i }));
     const stats = loadStats();
-    expect(stats.totalReviewed).toBe(1);
+    expect(stats.cardsStudiedToday).toBe(1);
+    expect(stats.totalReviewed).toBe(0);
     expect(stats.totalCorrect).toBe(0);
   });
 
@@ -272,12 +273,18 @@ describe('Flashcards', () => {
     expect(screen.getByText('tap to reveal')).toBeInTheDocument();
   });
 
-  it('renders the accuracy stat once a review has been recorded', async () => {
+  it('renders the accuracy stat once a counted review has been recorded', async () => {
     const user = userEvent.setup();
     renderFlashcards();
     expect(screen.queryByText(/Accuracy:/)).not.toBeInTheDocument();
+    // A new card's first SRS review is left out of accuracy (#246)...
     await user.click(getCard());
     await user.click(screen.getByRole('button', { name: /^good/i }));
+    expect(screen.queryByText(/Accuracy:/)).not.toBeInTheDocument();
+    // ...but a drill answer counts.
+    await user.click(getStudyAllButton());
+    await user.click(getCard());
+    await user.click(screen.getByRole('button', { name: /^got it/i }));
     expect(screen.getByText(/Accuracy:/)).toBeInTheDocument();
   });
 

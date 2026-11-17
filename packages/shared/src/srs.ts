@@ -225,7 +225,15 @@ export function nextSRS(card: SRSCard, quality: number): SRSCard {
   };
 }
 
-export function recordReview(prev: StudyStats, correct: boolean): StudyStats {
+/**
+ * Record one graded answer in the study stats.
+ *
+ * `isNewCard` is true for a card's first-ever SRS review (its key not yet in
+ * the store). That review still counts toward `cardsStudiedToday` and the
+ * streak, but not toward `totalReviewed` / `totalCorrect`, so all-time accuracy
+ * measures retention rather than how many new words were added (#246).
+ */
+export function recordReview(prev: StudyStats, correct: boolean, isNewCard = false): StudyStats {
   const today = todayStr();
   const yesterday = yesterdayStr();
   const isNewDay = prev.lastStudyDate !== today;
@@ -255,8 +263,11 @@ export function recordReview(prev: StudyStats, correct: boolean): StudyStats {
     lastStreakDate,
     cardsStudiedToday: cardsToday,
     lastStudyDate: today,
-    totalReviewed: prev.totalReviewed + 1,
-    totalCorrect: prev.totalCorrect + (correct ? 1 : 0),
+    // A card's first-ever review says nothing about retention, so it is left
+    // out of accuracy whether it passed or failed (#246). Skipping only the
+    // misses would bias the figure upward. It still counts as effort above.
+    totalReviewed: prev.totalReviewed + (isNewCard ? 0 : 1),
+    totalCorrect: prev.totalCorrect + (!isNewCard && correct ? 1 : 0),
   };
 }
 

@@ -1,7 +1,7 @@
 import { act, fireEvent, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { REQUEUE_GAP } from './flashcard-session';
-import { daysFromNow, emptyStats, newCard, type StudyStats } from './srs';
+import { daysFromNow, emptyStats, newCard, type StudyStats, todayStr } from './srs';
 import {
   buildQueue,
   type FlashcardSessionOptions,
@@ -243,6 +243,26 @@ describe('SRS Review', () => {
     expect(setup({}, { stats }).result.current.accuracy).toBe(75);
   });
 
+  it("leaves an unseen card's first grade out of accuracy, and counts the second (#246)", () => {
+    const { result, mem } = setup({ words: [word('w0')] });
+    act(() => result.current.review('again'));
+    expect(mem.state.store.w0).toBeDefined();
+    expect(mem.state.stats.totalReviewed).toBe(0);
+    expect(mem.state.stats.totalCorrect).toBe(0);
+    expect(mem.state.stats.cardsStudiedToday).toBe(1);
+    expect(result.current.accuracy).toBeNull();
+    expect(result.current.sessionScore).toEqual({ known: 0, learning: 1 });
+
+    // A later session, once the card falls due: it is in the store now, so
+    // its second grade counts.
+    const store = { w0: { ...mem.state.store.w0, dueDate: todayStr() } };
+    const second = setup({ words: [word('w0')] }, { store, stats: mem.state.stats });
+    act(() => second.result.current.review('good'));
+    expect(second.mem.state.stats.totalReviewed).toBe(1);
+    expect(second.mem.state.stats.totalCorrect).toBe(1);
+    expect(second.result.current.accuracy).toBe(100);
+  });
+
   it('a review outside SRS Review records stats but never writes the schedule', () => {
     const { result, mem } = setup({ studyMode: 'all' });
     act(() => result.current.review('good'));
@@ -286,6 +306,16 @@ describe('drills', () => {
       act(() => result.current.drill('got-it'));
     }
     expect(result.current.sessionDone).toBe(true);
+  });
+
+  it('counts a drill answer toward accuracy even for a card not in the store (#246)', () => {
+    // Decision on #246: drill answers keep counting as they always have.
+    const { result, mem } = setup({ studyMode: 'endless', words: deckOf(2) });
+    act(() => result.current.drill('missed'));
+    act(() => result.current.drill('got-it'));
+    expect(mem.state.store).toEqual({});
+    expect(mem.state.stats.totalReviewed).toBe(2);
+    expect(mem.state.stats.totalCorrect).toBe(1);
   });
 
   it('scores only the first attempt at each card', () => {

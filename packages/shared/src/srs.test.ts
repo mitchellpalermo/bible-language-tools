@@ -355,6 +355,51 @@ describe('recordReview', () => {
   });
 });
 
+// ─── recordReview: a card's first review (#246) ─────────────────────────────
+
+describe('recordReview — first review of a new card', () => {
+  const prev: StudyStats = {
+    streak: 2,
+    lastStreakDate: YESTERDAY,
+    cardsStudiedToday: 0,
+    lastStudyDate: YESTERDAY,
+    totalReviewed: 20,
+    totalCorrect: 15,
+  };
+
+  it('leaves the accuracy totals alone, pass or fail', () => {
+    for (const correct of [true, false]) {
+      const result = recordReview(prev, correct, true);
+      expect(result.totalReviewed).toBe(20);
+      expect(result.totalCorrect).toBe(15);
+    }
+  });
+
+  it('still counts toward the day and records the study date', () => {
+    const result = recordReview(prev, false, true);
+    expect(result.cardsStudiedToday).toBe(1);
+    expect(result.lastStudyDate).toBe(TODAY);
+  });
+
+  it('still earns the streak once the day reaches the threshold', () => {
+    let stats = prev;
+    for (let i = 0; i < STREAK_THRESHOLD; i++) stats = recordReview(stats, true, true);
+    expect(stats.streak).toBe(3);
+    expect(stats.lastStreakDate).toBe(TODAY);
+    expect(stats.totalReviewed).toBe(20);
+  });
+
+  it('counts a review of a card already in the store as before', () => {
+    const result = recordReview(prev, true, false);
+    expect(result.totalReviewed).toBe(21);
+    expect(result.totalCorrect).toBe(16);
+  });
+
+  it('defaults to counting, so callers that pass no flag are unchanged', () => {
+    expect(recordReview(prev, false).totalReviewed).toBe(21);
+  });
+});
+
 // ─── STREAK_THRESHOLD constant ─────────────────────────────────────────────
 
 describe('STREAK_THRESHOLD', () => {

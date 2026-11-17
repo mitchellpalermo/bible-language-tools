@@ -526,6 +526,21 @@ replace with no server-side merge, so a bad client merge overwrites good data.
 Merge rules must also be symmetric — `merge(a, b)` and `merge(b, a)` pick the
 same winners — because both sides of a sync run the same function.
 
+**A card's first SRS review is not counted in accuracy** (#246, Nov 2026).
+Accuracy (`totalCorrect / totalReviewed`) is meant to show what a student
+retains, and a first sight of a word says nothing about that. So
+`recordReview(prev, correct, isNewCard)` leaves both totals alone when
+`isNewCard` is true, pass or fail (skipping only the misses would bias the
+figure upward). The review still counts toward `cardsStudiedToday` and the
+streak, which measure effort, and still creates the card's schedule.
+`useFlashcardSession`'s `review()` sets the flag from `!(k in srsStore)`, read
+before the store is written, and only in SRS Review. **Drill answers always
+count** (Study All, Endless): they never write the store, so every card would
+look new there, and the decision on #246 was to keep counting them as before.
+Stored totals were not rewritten; the old data cannot tell first reviews apart.
+The totals sync and merge exactly as before; only what a future increment means
+changed.
+
 **A merge cannot express a deletion, so erasing goes through `DELETE`.** Every
 merge here is a union: a card or deck missing on one side is read as "not seen
 yet", never "removed". The old Flashcards "Reset SRS" in greek-tools cleared
