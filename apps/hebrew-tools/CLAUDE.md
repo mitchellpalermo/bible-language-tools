@@ -628,7 +628,7 @@ Better Auth with **Google OAuth only** — no email/password. See `apps/greek-to
 
 Running `pnpm dev` on a **non-default port** produces an unregistered callback and Google rejects it with `redirect_uri_mismatch` before any of our code runs. Use the default 4321 when testing sign-in.
 
-Local secrets go in `.dev.vars` (gitignored): `BETTER_AUTH_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`. In production the deploy workflow pushes them with `wrangler secret put`.
+Local secrets go in `.dev.vars` (gitignored): `BETTER_AUTH_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and optionally the four `APPLE_*` values (`docs/apple-sign-in-setup.md`). In production the deploy workflow pushes them with `wrangler secret put`.
 
 Console setup, exact-match traps, and failure modes: `docs/google-oauth-setup.md`.
 

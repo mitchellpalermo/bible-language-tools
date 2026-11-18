@@ -1,7 +1,8 @@
 // Better Auth configuration.
 //
-// Google OAuth is the only provider — email/password would need a reset flow,
-// which needs outbound email, which needs the Workers Paid plan. See
+// Sign-in is OAuth only: Google always, and Apple once its settings are in place
+// (docs/apple-sign-in-setup.md). Email/password would need a reset flow, which
+// needs outbound email, which needs the Workers Paid plan. See
 // apps/greek-tools/docs/adr/005-oauth-as-sole-auth-provider.md.
 //
 // The user/session/account tables live in the shared bible-language-tools
@@ -10,6 +11,7 @@
 // separate, via the `language` column — see src/lib/db.ts.
 
 import { createDb } from '@tools/db';
+import { APPLE_TRUSTED_ORIGIN, type AppleProviderCredentials } from '@tools/shared/apple-sign-in';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { SESSION_MAX_AGE_SECONDS } from './auth-cookie';
@@ -20,6 +22,11 @@ export interface CreateAuthOptions {
   baseURL: string;
   googleClientId: string;
   googleClientSecret: string;
+  /**
+   * Sign in with Apple, when configured. The auth route resolves this (it signs
+   * Apple's client secret); the session check in the middleware leaves it out.
+   */
+  apple?: AppleProviderCredentials;
 }
 
 export function createAuthForDb(db: AuthDb, secret: string, options: CreateAuthOptions) {
@@ -32,9 +39,15 @@ export function createAuthForDb(db: AuthDb, secret: string, options: CreateAuthO
         clientId: options.googleClientId,
         clientSecret: options.googleClientSecret,
       },
+      ...(options.apple ? { apple: options.apple } : {}),
     },
     session: { expiresIn: SESSION_MAX_AGE_SECONDS },
-    trustedOrigins: ['https://hebrew.tools', 'http://localhost:4321'],
+    // Apple answers with a cross-site form POST from its own origin.
+    trustedOrigins: [
+      'https://hebrew.tools',
+      'http://localhost:4321',
+      ...(options.apple ? [APPLE_TRUSTED_ORIGIN] : []),
+    ],
   });
 }
 

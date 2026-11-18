@@ -1,4 +1,5 @@
 import { createDb } from '@tools/db';
+import { APPLE_TRUSTED_ORIGIN, type AppleProviderCredentials } from '@tools/shared/apple-sign-in';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { SESSION_MAX_AGE_SECONDS } from './auth-cookie';
@@ -9,6 +10,11 @@ export interface CreateAuthOptions {
   baseURL: string;
   googleClientId: string;
   googleClientSecret: string;
+  /**
+   * Sign in with Apple, when configured. The auth route resolves this (it signs
+   * Apple's client secret); the session check in the middleware leaves it out.
+   */
+  apple?: AppleProviderCredentials;
 }
 
 export function createAuthForDb(db: AuthDb, secret: string, options: CreateAuthOptions) {
@@ -21,9 +27,15 @@ export function createAuthForDb(db: AuthDb, secret: string, options: CreateAuthO
         clientId: options.googleClientId,
         clientSecret: options.googleClientSecret,
       },
+      ...(options.apple ? { apple: options.apple } : {}),
     },
     session: { expiresIn: SESSION_MAX_AGE_SECONDS },
-    trustedOrigins: ['https://greek.tools', 'http://localhost:4321'],
+    // Apple answers with a cross-site form POST from its own origin.
+    trustedOrigins: [
+      'https://greek.tools',
+      'http://localhost:4321',
+      ...(options.apple ? [APPLE_TRUSTED_ORIGIN] : []),
+    ],
   });
 }
 

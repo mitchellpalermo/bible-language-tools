@@ -81,6 +81,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/study-streak` | `createStudyStreak(storageKey)` — days with a finished Today session — and `mergeStudyStreak` for sync |
 | `@tools/shared/components/TodaySession` | `BudgetPicker` (20 / 45 / 90 minutes) and `SessionSummaryCard` (React) |
 | `@tools/shared/test/hydration` | `hydrationErrors(ui, { seed })` — test helper: server-render with storage hidden, seed, hydrate, return every mismatch React reports |
+| `@tools/shared/apple-sign-in` | Sign in with Apple's settings and client secret: `readAppleConfig(env)` (null unless all four `APPLE_*` values are set), `resolveAppleCredentials(env)` for the auth route, the ES256 signing and its per-isolate cache. See "Sign in with Apple" below |
 | `@tools/shared/reset-progress` | `resetSrsProgress` and `isResetConfirmed` — erase the SRS store, this browser first, then the account copy via `DELETE`; a server failure never undoes the local reset |
 | `@tools/shared/nav` | `NavLink` type and the active-route predicates the nav renders with |
 | `@tools/shared/nav-menu` | `initNavMenu()` — DOM controller for the mobile drawer |
@@ -862,7 +863,31 @@ Secrets required in GitHub repo settings:
 - `PUBLIC_POSTHOG_KEY` and `PUBLIC_POSTHOG_HOST` (see "Analytics ingest host" below — the host is a first-party proxy, not a PostHog domain)
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
+- `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` — optional; Sign in with Apple stays off until all four are set (see "Sign in with Apple" below)
 - `CLAUDE_CODE_OAUTH_TOKEN` (for `@claude` automation)
+
+## Sign in with Apple
+
+Both apps offer Apple beside Google (Better Auth's `apple` provider). The setup
+in Apple's portal, and the four secrets, are in `docs/apple-sign-in-setup.md`.
+Things to know before changing it:
+
+- **Apple is off until all four `APPLE_*` values are set.** `readAppleConfig`
+  returns null otherwise; the sign-in page draws no button and `createAuth`
+  registers no provider. That is what let the code merge before the portal setup.
+- **The client secret is a JWT we sign, not a stored value.** Apple caps one at
+  six months; `getAppleClientSecret` signs a 30-day one per Worker isolate and
+  renews it with a day to spare, so there is no expiry to remember. A key that
+  will not import is logged and leaves Apple off, never Google.
+- **Only the auth route signs it.** The middleware's session check builds its
+  auth instance without Apple, so ordinary page loads never pay for it.
+- **`https://appleid.apple.com` is a trusted origin only while Apple is on.**
+  Apple returns by cross-site form POST, which Better Auth's origin check would
+  otherwise refuse whenever the browser sends a cookie. Vitest skips that check,
+  so `auth.test.ts` asserts the list rather than the refusal.
+- **Apple sends the name once**, on a person's first Apple sign-in, and may send
+  a private relay address. We send no email, so the relay needs no setup; but a
+  relay address never matches a Google email, so it makes a second account.
 
 ## Analytics ingest host
 

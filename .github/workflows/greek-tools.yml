@@ -71,6 +71,27 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      # Sign in with Apple is optional: a secret left unset in GitHub is skipped,
+      # so the app keeps Apple off (or keeps whatever was set on the Worker by hand).
+      # Values go through env rather than being pasted into the script, since the .p8 key is
+      # several lines long.
+      - name: Set Sign in with Apple secrets
+        run: |
+          for name in APPLE_CLIENT_ID APPLE_TEAM_ID APPLE_KEY_ID APPLE_PRIVATE_KEY; do
+            value="${!name}"
+            if [ -n "$value" ]; then
+              printf '%s' "$value" | pnpm wrangler secret put "$name"
+            else
+              echo "$name not set; skipping"
+            fi
+          done
+        env:
+          APPLE_CLIENT_ID: ${{ secrets.APPLE_CLIENT_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
+          APPLE_PRIVATE_KEY: ${{ secrets.APPLE_PRIVATE_KEY }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       - name: Apply D1 migrations
         run: pnpm wrangler d1 migrations apply bible-language-tools --remote
         env:
