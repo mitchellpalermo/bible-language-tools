@@ -109,6 +109,10 @@ and git calls are in `shots-cli.ts`.
 | `fullPage` | no | Capture the whole scrolling page |
 | `element` | no | Capture one element instead of the viewport |
 
+Any other key is refused, so a misplaced one fails loudly instead of doing
+nothing. `before` in particular is the list's, not a shot's: to capture a before
+for some shots and not others, give the PR two ` ```shots ` blocks.
+
 ### What stops a wrong screenshot
 
 The script never picks a page itself, and a capture is refused, with nothing

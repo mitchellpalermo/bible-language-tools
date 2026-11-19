@@ -106,12 +106,46 @@ function parseViewports(raw: unknown, where: string, errors: string[]): Viewport
   return [...new Set(raw as ViewportName[])];
 }
 
+const SHOT_KEYS = [
+  'name',
+  'path',
+  'expect',
+  'steps',
+  'storage',
+  'viewports',
+  'fullPage',
+  'element',
+];
+const LIST_KEYS = ['app', 'before', 'shots'];
+
+/**
+ * A key the script does not read is an error, not a no-op: a misplaced key
+ * (`"before": false` on one shot, when it belongs to the list) would otherwise
+ * be accepted and silently do nothing.
+ */
+function unknownKeys(
+  raw: Record<string, unknown>,
+  known: string[],
+  where: string,
+  errors: string[],
+) {
+  for (const key of Object.keys(raw)) {
+    if (known.includes(key)) continue;
+    errors.push(
+      key === 'before' && where !== 'list'
+        ? `${where}: "before" belongs on the list, not a shot — put shots without a before capture in a list (and \`\`\`shots block) of their own`
+        : `${where}: unknown key "${key}"`,
+    );
+  }
+}
+
 function parseShot(raw: unknown, where: string, errors: string[]): Shot | undefined {
   if (!isObject(raw)) {
     errors.push(`${where}: a shot must be an object`);
     return;
   }
   const before = errors.length;
+  unknownKeys(raw, SHOT_KEYS, where, errors);
   if (!isText(raw.name) || !SLUG.test(raw.name))
     errors.push(`${where}: "name" must be a slug like "flashcards-flipped"`);
   if (!isText(raw.path) || !raw.path.startsWith('/'))
@@ -149,6 +183,7 @@ export function parseShotList(raw: unknown): ShotList {
   const errors: string[] = [];
   if (!isObject(raw)) throw new Error('Shot list must be a JSON object with "app" and "shots"');
 
+  unknownKeys(raw, LIST_KEYS, 'list', errors);
   if (raw.app !== 'greek' && raw.app !== 'hebrew') errors.push('"app" must be "greek" or "hebrew"');
   if (raw.before !== undefined && typeof raw.before !== 'boolean')
     errors.push('"before" must be true or false');
