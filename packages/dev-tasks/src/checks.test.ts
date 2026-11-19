@@ -68,6 +68,12 @@ describe('titleMatchesApp', () => {
     expect(titleMatchesApp('hebrew', 'Flashcards | greek.tools')).toBe(false);
     expect(titleMatchesApp('greek', '404: Not found')).toBe(false);
   });
+
+  it('knows the landing page by its whole title, which carries no app suffix', () => {
+    expect(titleMatchesApp('landing', 'Bible Language Tools')).toBe(true);
+    expect(titleMatchesApp('landing', 'Flashcards | greek.tools')).toBe(false);
+    expect(titleMatchesApp('greek', 'Bible Language Tools')).toBe(false);
+  });
 });
 
 describe('fileName', () => {

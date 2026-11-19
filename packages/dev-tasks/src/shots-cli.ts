@@ -25,7 +25,7 @@ import {
   withSection,
 } from './pr-shots.ts';
 import { screenshotsMarkdown } from './publish.ts';
-import { parseShotList, type ShotList } from './shot-list.ts';
+import { APP_PACKAGE, APPS_WITH_DATA, parseShotList, type ShotList } from './shot-list.ts';
 
 const USAGE = `Usage:
   pnpm shots capture <list.json> [--before <ref>] [--out <dir>]
@@ -117,9 +117,11 @@ function writeSection(pr: number, content: string, key: string) {
 
 /** The corpus is gitignored; pages that read it need it built, as CI starts without. */
 function ensureData(root: string, list: ShotList) {
-  if (existsSync(join(root, `apps/${list.app}-tools/public/data`))) return;
-  console.log(`Building ${list.app}-tools data…`);
-  execFileSync('pnpm', ['--filter', `${list.app}-tools`, 'build:data'], {
+  if (!APPS_WITH_DATA.includes(list.app)) return;
+  const pkg = APP_PACKAGE[list.app];
+  if (existsSync(join(root, `apps/${pkg}/public/data`))) return;
+  console.log(`Building ${pkg} data…`);
+  execFileSync('pnpm', ['--filter', pkg, 'build:data'], {
     cwd: root,
     stdio: 'inherit',
   });

@@ -138,7 +138,7 @@ describe('captureShots', () => {
 
   it('fails when the other app is answering', async () => {
     await expect(run([{ name: 'x', path: '/greek', expect: 'Welcome' }])).rejects.toThrow(
-      /not a hebrew\.tools page/,
+      /not a hebrew page \(expected … \| hebrew\.tools\)/,
     );
   });
 

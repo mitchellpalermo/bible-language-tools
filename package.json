@@ -4,8 +4,10 @@
   "scripts": {
     "dev:greek": "pnpm --filter greek-tools dev",
     "dev:hebrew": "pnpm --filter hebrew-tools dev",
+    "dev:landing": "pnpm --filter landing dev",
     "build:greek": "pnpm --filter greek-tools build",
     "build:hebrew": "pnpm --filter hebrew-tools build",
+    "build:landing": "pnpm --filter landing build",
     "test": "pnpm -r test:run",
     "typecheck": "pnpm -r typecheck",
     "checks": "node packages/dev-tasks/src/checks-cli.ts",

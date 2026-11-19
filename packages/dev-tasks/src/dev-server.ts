@@ -10,7 +10,7 @@
 
 import { type ChildProcess, spawn } from 'node:child_process';
 import { createServer } from 'node:net';
-import type { App } from './shot-list.ts';
+import { APP_PACKAGE, type App } from './shot-list.ts';
 
 const READY_TIMEOUT = 90_000;
 
@@ -47,12 +47,12 @@ export interface DevServer {
   stop(): void;
 }
 
-/** Start `<app>-tools`' dev server from the checkout at `root`. */
+/** Start the app's dev server from the checkout at `root`. */
 export async function startDevServer(app: App, root: string): Promise<DevServer> {
   const port = await freePort();
   const child = spawn(
     'pnpm',
-    ['--filter', `${app}-tools`, 'dev', '--port', String(port), '--host', '127.0.0.1'],
+    ['--filter', APP_PACKAGE[app], 'dev', '--port', String(port), '--host', '127.0.0.1'],
     { cwd: root, detached: true, stdio: ['ignore', 'pipe', 'pipe'] },
   );
   let output = '';

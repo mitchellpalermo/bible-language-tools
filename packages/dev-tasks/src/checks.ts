@@ -10,11 +10,17 @@ import type { App, ViewportName } from './shot-list.ts';
 export const SCRIPT_FONT: Record<App, string> = {
   greek: 'Noto Sans',
   hebrew: 'Noto Sans Hebrew',
+  // The landing page's only script is the alef on the Hebrew card.
+  landing: 'Noto Sans Hebrew',
 };
+
+const HEBREW_CHARS = /[֐-׿יִ-ﭏ]/;
 
 const SCRIPT_CHARS: Record<App, RegExp> = {
   greek: /[Ͱ-Ͽἀ-῿]/,
-  hebrew: /[֐-׿יִ-ﭏ]/,
+  hebrew: HEBREW_CHARS,
+  // The landing page's only script is the alef on the Hebrew card.
+  landing: HEBREW_CHARS,
 };
 
 export interface FaceInfo {
@@ -59,14 +65,22 @@ export function uncoveredChars(app: App, text: string, faces: FaceInfo[]): strin
   });
 }
 
+/** What a page title must look like for each app. */
+export const TITLE_RULE: Record<App, string> = {
+  greek: '… | greek.tools',
+  hebrew: '… | hebrew.tools',
+  landing: 'Bible Language Tools',
+};
+
 /**
- * Every page title ends `| greek.tools` or `| hebrew.tools`. The dev server
- * runs on a fresh port, so the other app answering should be impossible; this
- * is the check that proves it, and also catches a page that rendered without
- * the app's layout.
+ * Every greek.tools and hebrew.tools page title ends `| <app>.tools`, and the
+ * landing page's is `Bible Language Tools`. The dev server runs on a fresh
+ * port, so another app answering should be impossible; this is the check that
+ * proves it, and also catches a page that rendered without the app's layout.
  */
 export function titleMatchesApp(app: App, title: string): boolean {
-  return title.trim().endsWith(`| ${app}.tools`);
+  const t = title.trim();
+  return app === 'landing' ? t === 'Bible Language Tools' : t.endsWith(`| ${app}.tools`);
 }
 
 export type Label = 'before' | 'after';
