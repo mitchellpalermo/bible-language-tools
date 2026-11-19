@@ -32,6 +32,8 @@ colours (greek `#1D4ED8`, hebrew `#15803D`) with the amber accent.
 ## Deployment
 
 Its own Worker (`bible-language-tools-landing`), serving `dist/` as static assets, deployed by
-`.github/workflows/landing.yml` on `apps/landing/**` changes. The custom domain is attached in
-the Cloudflare dashboard, not in `wrangler.jsonc`. `public/_headers` sets the CSP: scripts are
+`.github/workflows/landing.yml` on `apps/landing/**` changes. The custom domains
+`biblelanguage.tools` and `www.biblelanguage.tools` are Custom Domain routes in `wrangler.jsonc`, so
+every deploy keeps them attached; the CI API token must be able to edit that zone's DNS. `www` is
+attached as its own domain and serves the same page, it does not redirect. `public/_headers` sets the CSP: scripts are
 inline-only (the theme toggle) and the sole third party is Google Fonts.

@@ -5,5 +5,9 @@
     "directory": "./dist"
   },
   "workers_dev": false,
+  "routes": [
+    { "pattern": "biblelanguage.tools", "custom_domain": true },
+    { "pattern": "www.biblelanguage.tools", "custom_domain": true }
+  ],
   "observability": { "enabled": true }
 }
