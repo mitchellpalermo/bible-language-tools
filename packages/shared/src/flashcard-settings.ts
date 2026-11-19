@@ -22,10 +22,17 @@ export interface FlashcardSettings {
    * withhold the information.
    */
   showPartOfSpeech: boolean;
+  /**
+   * Show a verse from the deck's own text with the answer (#267), on a deck
+   * built from a book or passage. On by default; the switch is for students
+   * who find it distracting. Never on the front: it is part of the answer.
+   */
+  showVerse: boolean;
 }
 
 export const DEFAULT_FLASHCARD_SETTINGS: FlashcardSettings = {
   showPartOfSpeech: false,
+  showVerse: true,
 };
 
 /**
@@ -43,6 +50,8 @@ export function normalizeFlashcardSettings(raw: unknown): FlashcardSettings {
       typeof input.showPartOfSpeech === 'boolean'
         ? input.showPartOfSpeech
         : DEFAULT_FLASHCARD_SETTINGS.showPartOfSpeech,
+    showVerse:
+      typeof input.showVerse === 'boolean' ? input.showVerse : DEFAULT_FLASHCARD_SETTINGS.showVerse,
   };
 }
 

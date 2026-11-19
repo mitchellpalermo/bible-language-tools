@@ -1,0 +1,1 @@
+ALTER TABLE `custom_decks` ADD `source` text;

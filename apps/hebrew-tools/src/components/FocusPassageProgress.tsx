@@ -1,3 +1,4 @@
+import type { PassageRange } from '@tools/shared/focus-passages';
 import { useEffect, useState } from 'react';
 import { loadSRSStore, type SRSCard } from '../data/srs';
 import { type PassageVocabulary, passageProgress } from '../lib/focus-passages';
@@ -18,9 +19,11 @@ const BANDS = [
 export default function FocusPassageProgress({
   title,
   vocabulary,
+  source,
 }: {
   title: string;
   vocabulary: PassageVocabulary;
+  source?: PassageRange;
 }) {
   const [store, setStore] = useState<Record<string, SRSCard> | null>(null);
   useEffect(() => setStore(loadSRSStore()), []);
@@ -78,7 +81,12 @@ export default function FocusPassageProgress({
         </p>
       </section>
 
-      <StudyDeckButton title={title} vocabulary={vocabulary} label="Study this passage" />
+      <StudyDeckButton
+        title={title}
+        vocabulary={vocabulary}
+        source={source}
+        label="Study this passage"
+      />
 
       <p className="text-sm text-text-muted">
         Parsing drills for a passage are not here yet; the words and the reading are.

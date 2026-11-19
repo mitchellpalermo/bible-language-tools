@@ -384,7 +384,7 @@ describe('0006: focus passages per language, with tombstones', () => {
   it('changes no existing value, in any table, for either app', () => {
     const { sqlite, migrateRest } = at0005();
     const before = snapshot(sqlite);
-    migrateRest();
+    migrateRest('0006');
     const after = snapshot(sqlite);
     for (const table of TABLES) {
       expect(after[table], table).toHaveLength(before[table].length);
@@ -399,7 +399,7 @@ describe('0006: focus passages per language, with tombstones', () => {
 
   it('reads every existing passage as greek, with an empty update time and no tombstone', () => {
     const { sqlite, migrateRest } = at0005();
-    migrateRest();
+    migrateRest('0006');
     expect(sqlite.prepare('SELECT * FROM focus_passages').all()).toEqual([
       {
         user_id: 'greek-only',
@@ -421,7 +421,7 @@ describe('0006: focus passages per language, with tombstones', () => {
   it('only adds the three columns; every other table keeps its exact shape', () => {
     const { sqlite, migrateRest } = at0005();
     const shapes = Object.fromEntries(TABLES.map((t) => [t, columns(sqlite, t)]));
-    migrateRest();
+    migrateRest('0006');
     for (const table of TABLES) {
       const now = columns(sqlite, table);
       if (table !== 'focus_passages') {
@@ -439,7 +439,7 @@ describe('0006: focus passages per language, with tombstones', () => {
 
   it('leaves the database consistent', () => {
     const { sqlite, migrateRest } = at0005();
-    migrateRest();
+    migrateRest('0006');
     expect(sqlite.prepare('PRAGMA integrity_check').all()).toEqual([{ integrity_check: 'ok' }]);
     expect(sqlite.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
   });
@@ -448,7 +448,7 @@ describe('0006: focus passages per language, with tombstones', () => {
     // The deploy migrates first and ships code second, and greek.tools names
     // none of the new columns, so its rows must come out as greek.
     const { sqlite, migrateRest } = at0005();
-    migrateRest();
+    migrateRest('0006');
     sqlite
       .prepare(
         'INSERT INTO focus_passages (user_id, id, label, book, start_chapter, start_verse, end_chapter, end_verse, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
@@ -465,7 +465,7 @@ describe('0006: focus passages per language, with tombstones', () => {
 
   it('holds a hebrew passage beside a greek one for the same student, apart by language', () => {
     const { sqlite, migrateRest } = at0005();
-    migrateRest();
+    migrateRest('0006');
     sqlite
       .prepare(
         'INSERT INTO focus_passages (user_id, language, id, book, start_chapter, start_verse, end_chapter, end_verse, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
@@ -490,5 +490,82 @@ describe('0006: focus passages per language, with tombstones', () => {
       { id: 'a-uuid', language: 'hebrew', deleted_at: '2026-11-03' },
       { id: 'p1', language: 'greek', deleted_at: null },
     ]);
+  });
+});
+
+describe('0007: where a custom deck came from', () => {
+  /** The database as 0006 left it, with decks written by both apps' code before this change. */
+  function at0006() {
+    const built = createTestDbAt('0006');
+    seedExistingUsers(built.sqlite);
+    built.sqlite
+      .prepare(
+        'INSERT INTO custom_decks (id, user_id, language, name, word_keys, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      )
+      .run(
+        'h1',
+        'hebrew-only',
+        'hebrew',
+        'Passage: Creation',
+        '["אֶרֶץ"]',
+        '2026-11-01',
+        '2026-11-02',
+        null,
+      );
+    return built;
+  }
+
+  it('changes no existing value, in any table, for either app', () => {
+    const { sqlite, migrateRest } = at0006();
+    const before = snapshot(sqlite);
+    migrateRest('0007');
+    const after = snapshot(sqlite);
+    for (const table of TABLES) {
+      expect(after[table], table).toHaveLength(before[table].length);
+      after[table].forEach((row, i) => {
+        expect(row, `${table} row ${i}`).toMatchObject(before[table][i]);
+      });
+    }
+    expect(before.custom_decks).toHaveLength(2);
+  });
+
+  it('gives every existing deck no source: none is guessed from its name', () => {
+    const { sqlite, migrateRest } = at0006();
+    migrateRest('0007');
+    expect(sqlite.prepare('SELECT id, source FROM custom_decks ORDER BY id').all()).toEqual([
+      { id: 'd1', source: null },
+      { id: 'h1', source: null },
+    ]);
+  });
+
+  it('only adds the one nullable column; every other table keeps its exact shape', () => {
+    const { sqlite, migrateRest } = at0006();
+    const shapes = Object.fromEntries(TABLES.map((t) => [t, columns(sqlite, t)]));
+    migrateRest('0007');
+    for (const table of TABLES) {
+      const now = columns(sqlite, table);
+      if (table !== 'custom_decks') {
+        expect(now, table).toEqual(shapes[table]);
+        continue;
+      }
+      expect(now.slice(0, shapes[table].length)).toEqual(shapes[table]);
+      expect(now.slice(shapes[table].length)).toMatchObject([
+        { name: 'source', type: 'TEXT', notnull: 0, dflt_value: null },
+      ]);
+    }
+  });
+
+  it('still accepts a row written by code that predates the column', () => {
+    const { sqlite, migrateRest } = at0006();
+    migrateRest('0007');
+    sqlite
+      .prepare(
+        'INSERT INTO custom_decks (id, user_id, language, name, word_keys, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+      )
+      .run('d2', 'both', 'greek', 'Romans 8', '["πνεῦμα"]', '2026-11-10');
+    expect(sqlite.prepare("SELECT source FROM custom_decks WHERE id = 'd2'").get()).toEqual({
+      source: null,
+    });
+    expect(sqlite.prepare('PRAGMA integrity_check').all()).toEqual([{ integrity_check: 'ok' }]);
   });
 });

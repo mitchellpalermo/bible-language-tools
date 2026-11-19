@@ -170,6 +170,11 @@ export const customDecks = sqliteTable('custom_decks', {
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull().default(''),
   deletedAt: text('deleted_at'),
+  // Where a deck built from a book or passage came from (#267, #270): JSON,
+  // `{ book, startChapter, startVerse, endChapter, endVerse }`. Null for a deck
+  // picked by hand and for every deck written before it (migration 0007), so
+  // the code that predates it keeps working.
+  source: text('source'),
 });
 
 // Focus passages are per language since hebrew.tools' (#226): `language` was

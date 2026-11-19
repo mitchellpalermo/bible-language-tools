@@ -9,16 +9,30 @@
 // What the builder does not know is anything about a language. A word arrives
 // as `{ key, label, detail, search }` — the app decides what a word looks like
 // (pointed Hebrew in the Hebrew face, say) and what typing in the search box
-// should find. greek.tools' builder also builds a deck from a GNT book or a
-// passage; those need its corpus, so they stay there until it adopts this.
+// should find.
+//
+// A deck from a whole book (#270) is offered when the app passes `fromBook`:
+// the app reads its own corpus and returns the words and the book's range,
+// which is saved as the deck's source so it can be studied by chapter.
+// greek.tools' builder has its own book and passage views, which need its
+// corpus, and keeps them until it adopts this one.
 
-import { type CSSProperties, useMemo, useState } from 'react';
+import { type CSSProperties, useMemo, useRef, useState } from 'react';
 import {
   type CustomDeck,
   type CustomDeckStore,
+  type DeckSource,
   deckNameError,
   MAX_DECK_NAME,
 } from '../custom-decks';
+
+/** What the builder needs to make a deck from a whole book. */
+export interface FromBookOption {
+  /** The books, in the order the menu lists them. */
+  books: readonly { code: string; name: string }[];
+  /** The book's card keys and its whole range. Rejects when the book cannot be loaded. */
+  build: (code: string) => Promise<{ wordKeys: string[]; source: DeckSource | null }>;
+}
 
 export interface DeckBuilderWord {
   /** The SRS store key the deck holds. */
@@ -46,6 +60,8 @@ export interface DeckBuilderProps {
   labelDir?: 'rtl' | 'ltr';
   labelLang?: string;
   labelFontFamily?: string;
+  /** Offer "From a book". Absent, the builder makes decks by hand only. */
+  fromBook?: FromBookOption;
 }
 
 /** Rows drawn at once. A thousand checkboxes is slow on a tablet; the search box narrows. */
@@ -140,8 +156,9 @@ export default function DeckBuilder({
   labelDir,
   labelLang,
   labelFontFamily,
+  fromBook,
 }: DeckBuilderProps) {
-  const [view, setView] = useState<'list' | 'edit'>('list');
+  const [view, setView] = useState<'list' | 'edit' | 'book'>('list');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [picked, setPicked] = useState<Set<string>>(new Set());
@@ -198,6 +215,23 @@ export default function DeckBuilder({
       if (!next.delete(key)) next.add(key);
       return next;
     });
+  }
+
+  if (view === 'book' && fromBook) {
+    return (
+      <FromBook
+        option={fromBook}
+        decks={decks}
+        store={store}
+        accent={accent}
+        onBack={() => setView('list')}
+        onCreated={(id) => {
+          onDecksChange(store.load());
+          onActivateDeck(id);
+          onClose();
+        }}
+      />
+    );
   }
 
   if (view === 'list') {
@@ -269,10 +303,15 @@ export default function DeckBuilder({
           </ul>
         )}
 
-        <div>
+        <div style={{ ...row, flexWrap: 'wrap' }}>
           <button type="button" onClick={() => open(null)} style={filled(accent)}>
             New deck
           </button>
+          {fromBook && (
+            <button type="button" onClick={() => setView('book')} style={quiet}>
+              From a book
+            </button>
+          )}
         </div>
       </section>
     );
@@ -407,6 +446,151 @@ export default function DeckBuilder({
           {editingId === null ? 'Create deck' : 'Save changes'}
         </button>
         <button type="button" onClick={() => setView('list')} style={quiet}>
+          Cancel
+        </button>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Make a deck of every course word in a book. The deck records the book as its
+ * source, so the flashcards can narrow it to a chapter or a few (#270).
+ */
+function FromBook({
+  option,
+  decks,
+  store,
+  accent,
+  onBack,
+  onCreated,
+}: {
+  option: FromBookOption;
+  decks: CustomDeck[];
+  store: CustomDeckStore;
+  accent: string;
+  onBack: () => void;
+  onCreated: (id: string) => void;
+}) {
+  const [code, setCode] = useState('');
+  const [name, setName] = useState('');
+  const [built, setBuilt] = useState<{
+    code: string;
+    wordKeys: string[];
+    source: DeckSource | null;
+  } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [nameError, setNameError] = useState('');
+  // The book chosen last. A slow book that lands after a later choice is dropped.
+  const latest = useRef('');
+
+  async function choose(next: string) {
+    latest.current = next;
+    setCode(next);
+    setBuilt(null);
+    setError('');
+    setName(option.books.find((b) => b.code === next)?.name ?? '');
+    if (!next) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    try {
+      const result = await option.build(next);
+      if (latest.current === next) setBuilt({ code: next, ...result });
+    } catch {
+      if (latest.current === next) setError('Could not load the book. Try again.');
+    } finally {
+      if (latest.current === next) setLoading(false);
+    }
+  }
+
+  const ready = built !== null && built.code === code;
+
+  function create() {
+    if (!ready) return;
+    const problem = deckNameError(name, decks);
+    setNameError(problem ?? '');
+    if (problem) return;
+    if (built.wordKeys.length === 0) {
+      setError('No course words in this book.');
+      return;
+    }
+    try {
+      onCreated(store.create(name, built.wordKeys, built.source ?? undefined).id);
+    } catch {
+      setError('Could not save the deck. This browser’s storage may be full or turned off.');
+    }
+  }
+
+  return (
+    <section aria-label="Deck from a book" style={panel}>
+      <div style={{ ...row, justifyContent: 'space-between' }}>
+        <h3 style={heading}>Deck from a book</h3>
+        <button type="button" onClick={onBack} style={link(accent)}>
+          ← Back
+        </button>
+      </div>
+      <p style={{ ...small, margin: 0 }}>
+        Every course word the book uses. Study it whole, or a chapter at a time.
+      </p>
+      <div>
+        <label htmlFor="deck-book" style={{ ...small, fontWeight: 700, display: 'block' }}>
+          Book
+        </label>
+        <select id="deck-book" value={code} onChange={(e) => choose(e.target.value)} style={field}>
+          <option value="">Choose a book</option>
+          {option.books.map((b) => (
+            <option key={b.code} value={b.code}>
+              {b.name}
+            </option>
+          ))}
+        </select>
+        <p role="status" style={{ ...small, margin: '4px 0 0' }}>
+          {loading
+            ? 'Loading…'
+            : ready
+              ? `${built.wordKeys.length} course ${built.wordKeys.length === 1 ? 'word' : 'words'}`
+              : ''}
+        </p>
+      </div>
+      <div>
+        <label htmlFor="deck-book-name" style={{ ...small, fontWeight: 700, display: 'block' }}>
+          Deck name
+        </label>
+        <input
+          id="deck-book-name"
+          type="text"
+          value={name}
+          maxLength={MAX_DECK_NAME}
+          autoComplete="off"
+          onChange={(e) => {
+            setName(e.target.value);
+            setNameError('');
+          }}
+          aria-invalid={nameError !== ''}
+          style={{ ...field, borderColor: nameError ? FALLBACK.coral : FALLBACK.border }}
+        />
+        <span role="alert" style={{ ...small, color: FALLBACK.coral }}>
+          {nameError}
+        </span>
+      </div>
+      {error && (
+        <p role="alert" style={{ ...small, color: FALLBACK.coral, margin: 0 }}>
+          {error}
+        </p>
+      )}
+      <div style={row}>
+        <button
+          type="button"
+          onClick={create}
+          disabled={!ready}
+          style={{ ...filled(accent), flex: 1, opacity: ready ? 1 : 0.5 }}
+        >
+          Create deck
+        </button>
+        <button type="button" onClick={onBack} style={quiet}>
           Cancel
         </button>
       </div>

@@ -350,7 +350,9 @@ describe('Custom deck integration', () => {
   });
 
   it('shows "Manage" button when custom decks exist', () => {
-    seedDecks([{ id: '1', name: 'Week 1', wordKeys: ['καί'], createdAt: '' }]);
+    seedDecks([
+      { id: '1', name: 'Week 1', wordKeys: ['καί'], createdAt: '2026-01-01T00:00:00.000Z' },
+    ]);
     renderFlashcards();
     expect(screen.getByRole('button', { name: /manage custom decks/i })).toHaveTextContent(
       'Manage',
@@ -358,7 +360,9 @@ describe('Custom deck integration', () => {
   });
 
   it('renders custom deck buttons with word counts', () => {
-    seedDecks([{ id: '1', name: 'Week 1', wordKeys: ['καί', 'ὁ'], createdAt: '' }]);
+    seedDecks([
+      { id: '1', name: 'Week 1', wordKeys: ['καί', 'ὁ'], createdAt: '2026-01-01T00:00:00.000Z' },
+    ]);
     renderFlashcards();
     const section = getMyDecksSection();
     const deckBtn = within(section).getByText(/Week 1/);
@@ -369,7 +373,9 @@ describe('Custom deck integration', () => {
 
   it('activates a deck when clicked (aria-pressed becomes true)', async () => {
     const user = userEvent.setup();
-    seedDecks([{ id: 'deck-1', name: 'Week 1', wordKeys: ['καί'], createdAt: '' }]);
+    seedDecks([
+      { id: 'deck-1', name: 'Week 1', wordKeys: ['καί'], createdAt: '2026-01-01T00:00:00.000Z' },
+    ]);
     renderFlashcards();
     const section = getMyDecksSection();
     const deckBtn = within(section)
@@ -383,7 +389,9 @@ describe('Custom deck integration', () => {
 
   it('deactivates a deck when clicked again', async () => {
     const user = userEvent.setup();
-    seedDecks([{ id: 'deck-1', name: 'Week 1', wordKeys: ['καί'], createdAt: '' }]);
+    seedDecks([
+      { id: 'deck-1', name: 'Week 1', wordKeys: ['καί'], createdAt: '2026-01-01T00:00:00.000Z' },
+    ]);
     renderFlashcards();
     const section = getMyDecksSection();
     const deckBtn = within(section)
@@ -403,7 +411,9 @@ describe('Custom deck integration', () => {
 
   it('filter badge shows ● when a custom deck is active', async () => {
     const user = userEvent.setup();
-    seedDecks([{ id: 'deck-1', name: 'Week 1', wordKeys: ['καί'], createdAt: '' }]);
+    seedDecks([
+      { id: 'deck-1', name: 'Week 1', wordKeys: ['καί'], createdAt: '2026-01-01T00:00:00.000Z' },
+    ]);
     renderFlashcards();
     const section = getMyDecksSection();
     const deckBtn = within(section)
@@ -457,7 +467,9 @@ describe('Custom deck integration', () => {
   it('empty deck (no words) renders the empty state', async () => {
     const user = userEvent.setup();
     // Seed an empty deck (0 words) — no vocab words map to it
-    seedDecks([{ id: 'empty-deck', name: 'Empty', wordKeys: [], createdAt: '' }]);
+    seedDecks([
+      { id: 'empty-deck', name: 'Empty', wordKeys: [], createdAt: '2026-01-01T00:00:00.000Z' },
+    ]);
     renderFlashcards();
     const section = getMyDecksSection();
     const deckBtn = within(section)
@@ -629,7 +641,14 @@ describe('Card study flow', () => {
     // Use a custom deck with a single word so session completes quickly
     localStorage.setItem(
       'greek-tools-custom-decks-v1',
-      JSON.stringify([{ id: 'one-word', name: 'One Word', wordKeys: ['καί'], createdAt: '' }]),
+      JSON.stringify([
+        {
+          id: 'one-word',
+          name: 'One Word',
+          wordKeys: ['καί'],
+          createdAt: '2026-01-01T00:00:00.000Z',
+        },
+      ]),
     );
     renderFlashcards();
     // Activate the single-word custom deck
@@ -662,7 +681,14 @@ describe('Card study flow', () => {
     // Single-word deck in SRS mode
     localStorage.setItem(
       'greek-tools-custom-decks-v1',
-      JSON.stringify([{ id: 'one-word', name: 'SRS Deck', wordKeys: ['καί'], createdAt: '' }]),
+      JSON.stringify([
+        {
+          id: 'one-word',
+          name: 'SRS Deck',
+          wordKeys: ['καί'],
+          createdAt: '2026-01-01T00:00:00.000Z',
+        },
+      ]),
     );
     renderFlashcards();
     const section = screen.getByText(/^my decks$/i).parentElement!;
@@ -770,7 +796,12 @@ describe('Card study flow', () => {
     localStorage.setItem(
       'greek-tools-custom-decks-v1',
       JSON.stringify([
-        { id: 'type-test', name: 'Type Test', wordKeys: [normalizeKey(word.greek)], createdAt: '' },
+        {
+          id: 'type-test',
+          name: 'Type Test',
+          wordKeys: [normalizeKey(word.greek)],
+          createdAt: '2026-01-01T00:00:00.000Z',
+        },
       ]),
     );
     renderFlashcards();
@@ -810,7 +841,14 @@ describe('DeckBuilder integration', () => {
     const user = userEvent.setup();
     localStorage.setItem(
       'greek-tools-custom-decks-v1',
-      JSON.stringify([{ id: 'study-deck', name: 'Study Me', wordKeys: ['καί'], createdAt: '' }]),
+      JSON.stringify([
+        {
+          id: 'study-deck',
+          name: 'Study Me',
+          wordKeys: ['καί'],
+          createdAt: '2026-01-01T00:00:00.000Z',
+        },
+      ]),
     );
     renderFlashcards();
     // Open the deck builder via "Manage" button
@@ -1000,7 +1038,7 @@ function seedDeck() {
         id: 'three',
         name: DECK_NAME,
         wordKeys: DECK.map((w) => normalizeKey(w.greek)),
-        createdAt: '',
+        createdAt: '2026-01-01T00:00:00.000Z',
       },
     ]),
   );
@@ -1328,7 +1366,9 @@ describe('an empty deck in a drill', () => {
     const user = userEvent.setup();
     localStorage.setItem(
       'greek-tools-custom-decks-v1',
-      JSON.stringify([{ id: 'empty', name: 'Empty', wordKeys: [], createdAt: '' }]),
+      JSON.stringify([
+        { id: 'empty', name: 'Empty', wordKeys: [], createdAt: '2026-01-01T00:00:00.000Z' },
+      ]),
     );
     renderFlashcards();
     await user.click(screen.getByRole('button', { name: /^Empty/ }));

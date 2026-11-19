@@ -62,7 +62,10 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/sync-merge` | Merge rules for cross-device sync: SRS cards, study stats, the attempt log (`mergeAttempts`, a union by id) and ladder progress (`mergeLadderProgress`, max per rung) |
 | `@tools/shared/quiz-settings` | `createQuizSettings(storageKey, overrides?)` factory for persisting quiz difficulty; `overrides` sets one app's defaults |
 | `@tools/shared/paradigm-quiz` | The paradigm quiz engine — `TableModel`, `getQuizCells`, `applyDensity`. Which tables exist and how an answer is graded stay in each app |
-| `@tools/shared/custom-decks` | Custom flashcard decks (#225): the `CustomDeck` shape, `createCustomDeckStore(storageKey)`, `mergeCustomDecks` (with tombstones), `parseDeck`/`parseDeckList` for storage and request bodies, and the selection helpers `findDeck`, `wordsInDeck`, `deckRestartPart`. See "Custom decks" below |
+| `@tools/shared/custom-decks` | Custom flashcard decks (#225, both apps since #242): the `CustomDeck` shape with its optional `source`, `createCustomDeckStore(storageKey)`, `mergeCustomDecks` (with tombstones), `parseDeck`/`parseDeckList` for storage and request bodies, `deckFromRow`/`rowFromDeck` for the `custom_decks` table, and the selection helpers `findDeck`, `wordsInDeck`, `deckRestartPart`. See "Custom decks" below |
+| `@tools/shared/deck-source` | What a deck built from a book or passage knows about its text (#267, #270): `buildDeckSourceIndex` (each card's occurrences, and the chapters they fall in), `wholeBookSource`, `describeSource`, `spansChapters`, `COMMON_WORD_THRESHOLD`, and `createDeckChapterMemory(storageKey)`. See "Decks built from the text" below |
+| `@tools/shared/use-deck-source` | `useDeckSource(source, load)` — fetch and index a deck's text, with the stale-response guards |
+| `@tools/shared/use-sourced-deck` | `useSourcedDeck(deck, load, memory)` — everything `/flashcards` needs for a sourced deck: the chosen chapters per deck, narrowing, the picker's counts, the restart part, the occurrences |
 | `@tools/shared/textbooks` | Textbook chapter decks: `createTextbookQueries` (which words a set of chapters holds, and the counts the picker shows) and `describeChapters`. See "Textbook chapter decks" below |
 | `@tools/shared/deck-selection` | `createDeckSelection({ storageKey, textbookIds, … })`: the stored choice of deck, chapters and categories, plus `effectiveSelection` and `selectedTextbook` |
 | `@tools/shared/tombstones` | Deletion by tombstone for any synced list: `mergeTombstoned`, `pruneTombstones`, `isLive`, `stampOf`, `TOMBSTONE_TTL_DAYS`. Decks and focus passages delegate to it. See "Custom decks" and "Focus passages" below |
@@ -90,7 +93,8 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/components/WritingGrid` | The row of per-letter guide boxes a word is written into (React) |
 | `@tools/shared/components/SiteNav.astro` | The site navigation for both apps (see below) |
 | `@tools/shared/components/MorphWordmark.astro` | The footer's "hebrew tools" / "greek tools" that slides into the original language on hover (see "Clipping boxes size from their content" below) |
-| `@tools/shared/components/DeckBuilder` | List, create, edit and delete custom decks over a vocabulary the app passes in (React; inline-styled, accent passed in) |
+| `@tools/shared/components/DeckBuilder` | List, create, edit and delete custom decks over a vocabulary the app passes in, and, given `fromBook`, make one from a whole book (React; inline-styled, accent passed in) |
+| `@tools/shared/components/SourceVerse` | The verse on reveal (#267): one occurrence with its reference, "1 of 38 in Galatians", arrows, and the fold for very common words. The app draws the verse (React; inline-styled) |
 | `@tools/shared/components/ChapterPicker` | The textbook chapter picker: one summary button, opening to a grid of chapters (React; inline-styled, accent passed in) |
 | `@tools/shared/components/PassagePicker` | Book, start and end menus for a verse range, sized by the verse counts the app passes in (React; inline-styled) |
 | `@tools/shared/components/GradeButtons` | The Again/Hard/Good/Easy answer row, with per-grade interval previews (React) |
@@ -557,26 +561,27 @@ and calls `DELETE /api/progress` when signed in. Three things to know:
   so the account keeps its stats. Both wrappers name it `clearServerSrs`.
 - **It is per device.** Another device still holding the cards pushes them on
   its next session end, and the merge keeps them. The confirmation says so.
-- **The same gap exists for greek's deck deletion.** `deleteCustomDeck` is
-  local-only and `mergeCustomDecks` is a union, so a deleted deck that the
-  account still holds can come back on the next pull. Closing it properly needs
-  tombstones, not another `DELETE`. hebrew.tools did that (#225, see "Custom
-  decks" below); greek.tools gets it by adopting the shared module.
+- **Deck deletion had the same gap on greek.tools, and no longer does.** It
+  needed tombstones, not another `DELETE`. hebrew.tools did that first (#225);
+  greek.tools adopted the shared module in #242 (see "Custom decks" below).
 
 ## Custom decks
 
 A custom deck is a name and a set of SRS store keys, so it is a *selection* and
 never owns progress: a word reviewed through a deck, a textbook chapter or the
-whole vocabulary moves one card. hebrew.tools has them (#225); the storage
-factory, the merge and the builder are in `@tools/shared/custom-decks` and
-`@tools/shared/components/DeckBuilder`, bound per app by a storage key
-(`hebrew-tools-custom-decks-v1`, in `apps/hebrew-tools/src/lib/custom-decks.ts`).
+whole vocabulary moves one card. Both apps have them (#225, and greek.tools on
+the shared store since #242); the storage factory and the merge are in
+`@tools/shared/custom-decks`, bound per app by a storage key
+(`hebrew-tools-custom-decks-v1` in `apps/hebrew-tools/src/lib/custom-decks.ts`,
+`greek-tools-custom-decks-v1` in `apps/greek-tools/src/data/customDecks.ts`).
+hebrew.tools uses the shared `DeckBuilder`; greek.tools keeps its own builder,
+which builds from a GNT book or passage with its corpus.
 
 - **Deleting leaves a tombstone, on purpose.** The sync merge is a union, so a
   plain delete comes back from any device that still holds the deck. A delete
   therefore keeps the row with `deletedAt` set and no words, and the merge
   treats it as the newest edit. Decision (Nov 2026): tombstones, not "live with
-  the gap" as greek.tools does today. The costs are small and named:
+  the gap" as greek.tools did before #242. The costs are small and named:
   - **Per deck, the later `updatedAt` wins, whole.** A rename on one device and
     a word added on another do not combine. A deck edited *after* its deletion
     elsewhere comes back; one edited before does not. A tie goes to the delete.
@@ -593,7 +598,10 @@ factory, the merge and the builder are in `@tools/shared/custom-decks` and
   fresh") and `clearLocalProgress` leave them alone, and the reset's "keeps" list
   says so. `putProgress` merges decks against the `custom_decks` table itself,
   not against `getProgress()`, because that is null once `sync_state` is deleted
-  and the decks must outlive it. greek.tools' `DELETE` still removes its decks.
+  and the decks must outlive it. greek.tools' `DELETE` still removes its decks
+  (it was written for "Start fresh"), but its `PUT` now merges them against the
+  table the same way instead of replacing them, so a push without a deck is a
+  device that has not seen it, not a deletion.
 - **`custom_decks` gained `updated_at` and `deleted_at` (migration 0005),**
   additive, constant defaults (`''` and null), so greek.tools' inserts, which
   name neither, keep working. An empty `updated_at` is read as `createdAt`.
@@ -614,16 +622,91 @@ factory, the merge and the builder are in `@tools/shared/custom-decks` and
 - **Today's Session ignores the picked deck.** Due cards are due whatever deck is
   open on `/flashcards`, and a deck that narrowed Today would leave a due card
   unseen. `/write` word mode does follow the deck, through `wordsForSelection`.
-- **greek.tools has not adopted this yet.** It keeps `customDecks.ts`,
-  `mergeCustomDecks` and its own `DeckBuilder`, which also builds decks from a
-  GNT book or a passage and needs its corpus. A compatibility test in
-  `customDecks.test.ts` pins that its decks parse and merge under the shared
-  rules. Adopting it gives greek tombstones and closes the deletion gap above.
-  Its textbook decks (#228) already use the shared `DeckSelection`; its custom
-  decks join that selection when it adopts the shared store (#242).
+- **greek.tools stores its decks through the shared module (#242).**
+  `data/customDecks.ts` binds `createCustomDeckStore` and keeps the old function
+  names (`loadCustomDecks` is the live decks, `loadAllCustomDecks` what sync
+  sends), `sync-merge.ts` re-exports the shared merge, and `progress-store.ts`
+  reads and writes rows through `deckFromRow`/`rowFromDeck`. Decks stored before
+  it (no `updatedAt`) still load; `customDecks.test.ts` pins that. Two
+  differences from before: a deck's words are kept sorted, and a deck's
+  `createdAt` must be a real date (every deck greek.tools ever wrote has one).
+  Its custom decks are still picked with session state (`activeDeckId`), not
+  through `DeckSelection`.
 - **The builder lists at most 150 matches at once** (`VISIBLE_WORDS`); the search
   box narrows them. It saves through the store and reports a failed write
   instead of looking saved.
+
+## Decks built from the text
+
+A deck built from a book or a passage of the Greek New Testament or the Hebrew
+Bible records where it came from (`CustomDeck.source`, a `PassageRange`; a whole
+book is its full range). Two features read it, built once in `packages/shared`:
+studying the deck a chapter at a time (#270) and a verse from it on reveal (#267).
+
+| Module | What it does |
+|---|---|
+| `@tools/shared/deck-source` | `buildDeckSourceIndex(book, range, keysOf)`: every card's occurrences in the range, and the chapters they fall in |
+| `@tools/shared/use-deck-source` | Loads and indexes the text when a sourced deck is picked |
+| `@tools/shared/use-sourced-deck` | The `/flashcards` wiring both apps share |
+| `@tools/shared/components/SourceVerse` | The verse on reveal |
+
+Each app supplies `load(bookCode)`: its `fetchBook` and a `keysOf` saying which
+cards a word of the text is an occurrence of. greek.tools: the MorphGNT lemma,
+normalized, when the vocabulary has it (`lib/book-deck.ts`). hebrew.tools: every
+card of the word's lexeme through the focus-passage join (`courseKeysOf` in
+`lib/focus-passages.ts`, loaded by `lib/book-deck.ts`), so a chapter's words agree
+with what Focus Passages lists for those verses, the 28 entries with no Strong's
+number are found through the lemma index, and a homograph with no owner is left
+out rather than guessed.
+
+Decisions (Mitch, Nov 2026, on #270; they answer #267's questions 3 and 7 too):
+
+- **A word is in every chapter it occurs in, as one card.** A chapter is a
+  filter over the deck's words, never a copy, so studying πίστις under chapter 4
+  moves the same schedule as under chapter 1 or the whole deck. Both apps'
+  `Flashcards.source.test.tsx` pin it.
+- **Any set of chapters**, through the textbook `ChapterPicker` as it is.
+- **Decks built before this have no source and get no picker or verse.** Nothing
+  is guessed from a deck's name. Rebuilding the deck records one: greek.tools'
+  builder from a book or passage, hebrew.tools' "From a book" or a focus
+  passage's "Study these words" (which updates its deck and adds the range).
+- **The chosen chapters are remembered per deck, on that browser**
+  (`createDeckChapterMemory`: `greek-tools-deck-chapters-v1`,
+  `hebrew-tools-deck-chapters-v1`). Never synced, like the textbook selection.
+- **hebrew.tools builds a deck from a whole book** through the shared
+  `DeckBuilder`'s `fromBook` option.
+
+For #267, the issue's proposed defaults were taken: the count and first
+occurrence are within the deck's own range ("1 of 3 in Galatians 2:11–21");
+every inflected form of the lemma counts; past `COMMON_WORD_THRESHOLD` (50)
+occurrences the verse starts folded behind "Show a verse"; no English
+translation; and a "Verse" switch beside "Part of speech" (`showVerse` in
+`@tools/shared/flashcard-settings`, on by default, local, shown only while a
+sourced deck is picked).
+
+Things to know before changing it:
+
+- **Nothing per word is stored.** A book deck can hold a thousand words, and a
+  chapter list per word would ride in every `PUT /api/progress`. The text does
+  not change, so deriving it is free of drift.
+- **A stale client cannot strip a source.** A page loaded before this shipped
+  parses a deck, drops the field it does not know, and pushes the deck back.
+  `mergeCustomDecks` therefore lets a live deck with no source take the other
+  side's (the later edit's, when both have one). A tombstone carries none.
+- **`source` is a nullable JSON column on `custom_decks` (migration 0007).** It
+  has a block in `migrations.test.ts`; the 0006 block now calls
+  `migrateRest('0006')`. Both apps chunk deck inserts at 11 rows (9 columns).
+- **Chosen chapters wait for the text.** While the book loads, a deck with
+  chapters chosen deals nothing and says "Loading the chapters…" rather than
+  dealing the whole deck and taking it back. A book that fails to load leaves
+  the deck studying whole, with no picker and no verse.
+- **The verse is part of the answer.** It renders only once revealed, keyed by
+  card so the next card starts on its first occurrence, and stepping through it
+  grades, schedules and logs nothing.
+- **Today's Session ignores all of it**, as it ignores any picked deck.
+- **Hydration:** the picker and the verse wait on a fetched book, so neither is
+  in a first render. Both apps' `hydration.test.tsx` seed a sourced deck with
+  chapters chosen.
 
 ## Textbook chapter decks
 

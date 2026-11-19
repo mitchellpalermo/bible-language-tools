@@ -21,7 +21,13 @@ import {
   syncState as syncStateTable,
 } from '@tools/db/schema';
 import { type Attempt, MAX_ATTEMPTS } from '@tools/shared/attempt-log';
-import { type CustomDeck, mergeCustomDecks, parseDeck } from '@tools/shared/custom-decks';
+import {
+  type CustomDeck,
+  deckFromRow,
+  mergeCustomDecks,
+  parseDeck,
+  rowFromDeck,
+} from '@tools/shared/custom-decks';
 import { type FocusPassage, mergeFocusPassages, parsePassage } from '@tools/shared/focus-passages';
 import type { LadderProgress } from '@tools/shared/ladder';
 import { emptyStudyStreak, type StudyStreakData } from '@tools/shared/study-streak';
@@ -40,8 +46,8 @@ export type ProgressDb = BaseSQLiteDatabase<'sync' | 'async', unknown, typeof sc
 const SRS_CHUNK = 12;
 // ladder_progress has 4 columns → 25 rows per statement.
 const LADDER_CHUNK = 25;
-// custom_decks has 8 columns → 12 rows per statement.
-const DECK_CHUNK = 12;
+// custom_decks has 9 columns → 11 rows per statement.
+const DECK_CHUNK = 11;
 // focus_passages has 12 columns → 8 rows per statement.
 const PASSAGE_CHUNK = 8;
 // Attempts go in as one JSON parameter per statement (see appendAttempts), so
@@ -158,35 +164,8 @@ async function readCustomDecks(db: ProgressDb, userId: string): Promise<CustomDe
   });
 }
 
-/** A stored row as the object `parseDeck` reads. `wordKeys` is JSON text in the column. */
-function deckFromRow(row: typeof customDecksTable.$inferSelect): unknown {
-  let wordKeys: unknown = [];
-  try {
-    wordKeys = JSON.parse(row.wordKeys);
-  } catch {
-    // Left empty; parseDeck then reads the deck as holding no words.
-  }
-  return {
-    id: row.id,
-    name: row.name,
-    wordKeys,
-    createdAt: row.createdAt,
-    // The column defaults to '' for a row written before it existed.
-    updatedAt: row.updatedAt || undefined,
-    deletedAt: row.deletedAt ?? undefined,
-  };
-}
-
-function rowFromDeck(userLang: { userId: string; language: typeof LANGUAGE }, deck: CustomDeck) {
-  return {
-    ...userLang,
-    id: deck.id,
-    name: deck.name,
-    wordKeys: JSON.stringify(deck.wordKeys),
-    createdAt: deck.createdAt,
-    updatedAt: deck.updatedAt ?? '',
-    deletedAt: deck.deletedAt ?? null,
-  };
+function rowOf(userLang: { userId: string; language: typeof LANGUAGE }, deck: CustomDeck) {
+  return { ...userLang, ...rowFromDeck(deck) };
 }
 
 /**
@@ -287,7 +266,7 @@ export async function putProgress(
   // for an account whose sync record was deleted (the reset), and decks outlive
   // that. This is also where tombstones past their TTL are dropped.
   const decks = mergeCustomDecks(await readCustomDecks(db, userId), payload.customDecks ?? []);
-  const deckRows = decks.map((deck) => rowFromDeck(userLang, deck));
+  const deckRows = decks.map((deck) => rowOf(userLang, deck));
   // Passages the same way, and for the same reason.
   const passages = mergeFocusPassages(
     await readFocusPassages(db, userId),

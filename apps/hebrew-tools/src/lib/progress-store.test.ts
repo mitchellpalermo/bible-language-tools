@@ -694,6 +694,21 @@ describe('custom decks', () => {
     expect((await getProgress(db, USER))?.customDecks).toEqual([live, gone]);
   });
 
+  it('round-trips where a deck came from, as JSON in its own column (#270)', async () => {
+    const source = { book: 'GEN', startChapter: 1, startVerse: 1, endChapter: 50, endVerse: 26 };
+    await putProgress(db, USER, { ...base, customDecks: [deck({ source })] });
+    expect((await getProgress(db, USER))?.customDecks?.[0].source).toEqual(source);
+    const [row] = raw().select().from(customDecksTable).all();
+    expect(JSON.parse(row.source as string)).toEqual(source);
+  });
+
+  it('keeps a deck’s source when a page from before it pushes the deck without one', async () => {
+    const source = { book: 'GEN', startChapter: 1, startVerse: 1, endChapter: 2, endVerse: 3 };
+    await putProgress(db, USER, { ...base, customDecks: [deck({ source })] });
+    await putProgress(db, USER, { ...base, customDecks: [deck()] });
+    expect((await getProgress(db, USER))?.customDecks?.[0].source).toEqual(source);
+  });
+
   it('stores the words as JSON in the existing column', async () => {
     await putProgress(db, USER, { ...base, customDecks: [deck()] });
     const [row] = raw().select().from(customDecksTable).all();
@@ -867,6 +882,7 @@ describe('an account with a greek deck written before migration 0005', () => {
         created_at: '2026-09-01',
         updated_at: '',
         deleted_at: null,
+        source: null,
       },
     ]);
   });
