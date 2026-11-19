@@ -31,7 +31,7 @@ colours (greek `#1D4ED8`, hebrew `#15803D`) with the amber accent.
 
 ## Deployment
 
-Its own Worker (`bible-language-tools-landing`), serving `dist/` as static assets, deployed by
+Its own Worker (`bible-language-tools`, named for the app; the D1 database of the same name belongs to the other two), serving `dist/` as static assets, deployed by
 `.github/workflows/landing.yml` on `apps/landing/**` changes. The custom domains
 (`biblelanguage.tools` and `www.biblelanguage.tools`) are attached once in the Cloudflare
 dashboard (Worker, Settings, Domains & Routes), not in `wrangler.jsonc`, the same as greek.tools
