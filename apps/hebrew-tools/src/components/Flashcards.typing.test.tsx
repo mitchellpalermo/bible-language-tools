@@ -115,7 +115,9 @@ describe('typed answers', () => {
     await user.type(await typeMode(user), 'word{Enter}');
     expect(mark()).toHaveTextContent('Correct!');
     await user.keyboard('3');
-    expect(loadStats().totalCorrect).toBe(1);
+    // The grade landed; a new card's first review is study, not accuracy (#246).
+    expect(loadStats().cardsStudiedToday).toBe(1);
+    expect(loadStats().totalCorrect).toBe(0);
   });
 
   it('marks an empty answer as a miss rather than ignoring the Check', async () => {
