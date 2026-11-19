@@ -7,7 +7,7 @@
 // The question, the grading and the screens are /parse/gnt's own
 // (`GNTParseQuestion`, `gradeGNTAnswer`, `GNTFeedback`, `ParseResults`).
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   emptyGNTAnswer,
   filterMissedItems,
@@ -55,6 +55,8 @@ export default function VerseParseQuiz({
   const [result, setResult] = useState<GNTParseResult | null>(null);
   const [results, setResults] = useState<GNTParseResult[]>([]);
   const [isReview, setIsReview] = useState(false);
+  const [round, setRound] = useState(0);
+  const rootRef = useRef<HTMLDivElement>(null);
 
   const item = session[index];
   const target = phase === 'results' || !item ? null : item.wordIndex;
@@ -62,6 +64,15 @@ export default function VerseParseQuiz({
   useEffect(() => {
     onTargetChange?.(target);
   }, [target, onTargetChange]);
+
+  // The quiz opens below the passage, which on a phone is off-screen: the only
+  // visible change would be the highlight. Bring it into view when it opens and
+  // when a round restarts; 'nearest' leaves it alone where it already shows.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: runs per round on purpose
+  useEffect(() => {
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    rootRef.current?.scrollIntoView?.({ behavior: reduce ? 'auto' : 'smooth', block: 'nearest' });
+  }, [round]);
 
   // The page's highlight must not outlive the quiz.
   useEffect(() => () => onTargetChange?.(null), [onTargetChange]);
@@ -74,6 +85,7 @@ export default function VerseParseQuiz({
     setResult(null);
     setIsReview(review);
     setPhase('question');
+    setRound((r) => r + 1);
   }
 
   function handleSubmit() {
@@ -98,51 +110,49 @@ export default function VerseParseQuiz({
     setPhase('question');
   }
 
-  if (phase === 'results') {
-    return (
-      <ParseResults
-        sessionResults={toSessionResults(results, session.length)}
-        onRetry={() => start(items, false)}
-        onChangeSettings={onClose}
-        changeSettingsLabel={closeLabel}
-        onReviewMissed={() => start(filterMissedItems(session, results), true)}
-        isReview={isReview}
-      />
-    );
-  }
-
-  if (!item) return null;
-
   return (
-    <div className="space-y-4">
-      <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={onClose}
-          className="px-3 py-1.5 rounded-lg text-sm border border-gray-200 text-text-muted hover:border-gray-300 hover:text-text transition-colors"
-        >
-          {closeLabel}
-        </button>
-      </div>
-      {phase === 'feedback' && result ? (
-        <GNTFeedback
-          item={item}
-          answer={answer}
-          result={result}
-          onNext={handleNext}
-          isLast={index + 1 >= session.length}
+    <div ref={rootRef} className="scroll-mt-4">
+      {phase === 'results' ? (
+        <ParseResults
+          sessionResults={toSessionResults(results, session.length)}
+          onRetry={() => start(items, false)}
+          onChangeSettings={onClose}
+          changeSettingsLabel={closeLabel}
+          onReviewMissed={() => start(filterMissedItems(session, results), true)}
+          isReview={isReview}
         />
-      ) : (
-        <GNTParseQuestion
-          item={item}
-          index={index}
-          total={session.length}
-          answer={answer}
-          onChange={setAnswer}
-          onSubmit={handleSubmit}
-          showContext={false}
-        />
-      )}
+      ) : item ? (
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-3 py-1.5 rounded-lg text-sm border border-gray-200 text-text-muted hover:border-gray-300 hover:text-text transition-colors"
+            >
+              {closeLabel}
+            </button>
+          </div>
+          {phase === 'feedback' && result ? (
+            <GNTFeedback
+              item={item}
+              answer={answer}
+              result={result}
+              onNext={handleNext}
+              isLast={index + 1 >= session.length}
+            />
+          ) : (
+            <GNTParseQuestion
+              item={item}
+              index={index}
+              total={session.length}
+              answer={answer}
+              onChange={setAnswer}
+              onSubmit={handleSubmit}
+              showContext={false}
+            />
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }

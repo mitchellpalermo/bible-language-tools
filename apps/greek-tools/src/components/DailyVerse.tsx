@@ -249,7 +249,10 @@ function DailyVerseInner() {
               // biome-ignore lint/a11y/noStaticElementInteractions: stopPropagation prevents backdrop dismiss
               // biome-ignore lint/a11y/useKeyWithClickEvents: stopPropagation only; no action needed
               <div
-                className="mt-6 pt-6 border-t border-gray-100"
+                // The quiz's menus and bars are drawn in the card color, for the
+                // page background /parse/gnt puts them on. Inside this white card
+                // they need that background back, or they draw with no edges.
+                className="mt-6 -mx-4 sm:mx-0 rounded-xl bg-bg p-4 sm:p-6"
                 onClick={(e) => e.stopPropagation()}
               >
                 <VerseParseQuiz

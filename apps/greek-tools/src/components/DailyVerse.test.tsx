@@ -267,6 +267,34 @@ describe('DailyVerse', () => {
       expect(highlighted()).toHaveTextContent('λέγων');
     });
 
+    it('scrolls the quiz into view when it opens and when a round restarts', async () => {
+      // On a phone the quiz opens below a long verse; without this the only
+      // visible change is the highlight.
+      const scrollIntoView = vi.fn();
+      const original = Element.prototype.scrollIntoView;
+      Element.prototype.scrollIntoView = scrollIntoView;
+      try {
+        const user = userEvent.setup();
+        dailyDoseLesson();
+        render(<DailyVerse />);
+        await start(user);
+        expect(scrollIntoView).toHaveBeenCalledTimes(1);
+        expect(scrollIntoView).toHaveBeenCalledWith(expect.objectContaining({ block: 'nearest' }));
+
+        // Answering does not move the page.
+        await answerFinite(user);
+        await user.click(screen.getByRole('button', { name: 'Next Form' }));
+        await missParticiple(user);
+        await user.click(screen.getByRole('button', { name: 'See Results' }));
+        expect(scrollIntoView).toHaveBeenCalledTimes(1);
+
+        await user.click(screen.getByRole('button', { name: 'Try Again' }));
+        expect(scrollIntoView).toHaveBeenCalledTimes(2);
+      } finally {
+        Element.prototype.scrollIntoView = original;
+      }
+    });
+
     it('starts the round again from the summary', async () => {
       const user = userEvent.setup();
       dailyDoseLesson();
