@@ -52,31 +52,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
         working-directory: .
       - run: pnpm build
-      # TEMPORARY: wrangler says "Could not find zone for biblelanguage.tools".
-      # This prints what the token can see (names, statuses and a yes/no for
-      # "is it the deploy account"; never the token or account id). Remove it
-      # once the domain attaches.
-      - name: Diagnose Cloudflare access (temporary)
-        continue-on-error: true
-        run: |
-          API=https://api.cloudflare.com/client/v4
-          get() { curl -s -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$API/$1"; }
-          echo "== token verify (user token)"
-          get user/tokens/verify | jq '{success, status: .result.status, errors}'
-          echo "== token verify (account token)"
-          get "accounts/$CLOUDFLARE_ACCOUNT_ID/tokens/verify" | jq '{success, status: .result.status, errors}'
-          echo "== zone lookup: biblelanguage.tools"
-          get "zones?name=biblelanguage.tools" | jq --arg a "$CLOUDFLARE_ACCOUNT_ID" \
-            '{success, errors, zones: [.result[]? | {name, status, in_deploy_account: (.account.id == $a)}]}'
-          echo "== accounts the token can see"
-          get accounts | jq --arg a "$CLOUDFLARE_ACCOUNT_ID" \
-            '{success, errors, accounts: [.result[]? | {name, is_deploy_account: (.id == $a)}]}'
-          echo "== zones the token can see"
-          get "zones?per_page=50" | jq --arg a "$CLOUDFLARE_ACCOUNT_ID" \
-            '{success, errors, zones: [.result[]? | {name, status, in_deploy_account: (.account.id == $a)}]}'
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       - name: Deploy to Cloudflare Workers
         run: pnpm wrangler deploy
         env:
