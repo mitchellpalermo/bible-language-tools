@@ -8,6 +8,7 @@ Monorepo for [greek.tools](https://greek.tools) and [hebrew.tools](https://hebre
 apps/
   greek-tools/   — greek.tools (production, all 8 features complete)
   hebrew-tools/  — hebrew.tools (in development, see ROADMAP.md)
+  landing/       — the parent "Bible Language Tools" page linking to both (static, see apps/landing/CLAUDE.md)
 packages/
   shared/        — language-agnostic utilities shared by both apps
   dev-tasks/     — `pnpm shots` and `pnpm checks`: PR screenshots and the repo's checks, as scripts
@@ -20,6 +21,8 @@ pnpm install            # install all workspace dependencies from repo root
 
 pnpm dev:greek          # start greek-tools dev server
 pnpm dev:hebrew         # start hebrew-tools dev server
+
+pnpm dev:landing        # start the landing page dev server
 
 pnpm build:greek        # build greek-tools for production
 pnpm build:hebrew       # build hebrew-tools for production

@@ -1,9 +1,23 @@
 import { describe, expect, it } from 'vitest';
-import { parseShotList } from './shot-list.ts';
+import { APP_PACKAGE, APPS_WITH_DATA, parseShotList } from './shot-list.ts';
 
 const shot = { name: 'flashcards', path: '/flashcards', expect: 'Flashcards' };
 
 describe('parseShotList', () => {
+  it('accepts every app, the landing page included', () => {
+    for (const app of ['greek', 'hebrew', 'landing'])
+      expect(parseShotList({ app, shots: [shot] }).app).toBe(app);
+  });
+
+  it('maps each app to its workspace package, and says which read a corpus', () => {
+    expect(APP_PACKAGE).toEqual({
+      greek: 'greek-tools',
+      hebrew: 'hebrew-tools',
+      landing: 'landing',
+    });
+    expect(APPS_WITH_DATA).toEqual(['greek', 'hebrew']);
+  });
+
   it('fills in both viewports, no steps and no storage by default', () => {
     expect(parseShotList({ app: 'hebrew', shots: [shot] })).toEqual({
       app: 'hebrew',
@@ -49,7 +63,7 @@ describe('parseShotList', () => {
         return (e as Error).message;
       }
     })();
-    expect(err).toMatch(/"app" must be "greek" or "hebrew"/);
+    expect(err).toMatch(/"app" must be one of "greek", "hebrew", "landing"/);
     expect(err).toMatch(/shot 1: "name" must be a slug/);
     expect(err).toMatch(/shot 1: "path" must start with "\/"/);
     expect(err).toMatch(/shot 2: a shot must be an object/);

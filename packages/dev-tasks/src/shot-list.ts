@@ -7,7 +7,21 @@
  * instead of producing a plausible-looking PNG.
  */
 
-export type App = 'greek' | 'hebrew';
+export const APPS = ['greek', 'hebrew', 'landing'] as const;
+
+export type App = (typeof APPS)[number];
+
+/** The workspace package, which is also its directory under `apps/`. */
+export const APP_PACKAGE: Record<App, string> = {
+  greek: 'greek-tools',
+  hebrew: 'hebrew-tools',
+  landing: 'landing',
+};
+
+/** Apps whose pages read a built corpus (`build:data`); the landing page reads none. */
+export const APPS_WITH_DATA: readonly App[] = ['greek', 'hebrew'];
+
+export const isApp = (value: unknown): value is App => APPS.includes(value as App);
 
 export const VIEWPORTS = {
   mobile: { width: 390, height: 844 },
@@ -184,7 +198,7 @@ export function parseShotList(raw: unknown): ShotList {
   if (!isObject(raw)) throw new Error('Shot list must be a JSON object with "app" and "shots"');
 
   unknownKeys(raw, LIST_KEYS, 'list', errors);
-  if (raw.app !== 'greek' && raw.app !== 'hebrew') errors.push('"app" must be "greek" or "hebrew"');
+  if (!isApp(raw.app)) errors.push(`"app" must be one of ${APPS.map((a) => `"${a}"`).join(', ')}`);
   if (raw.before !== undefined && typeof raw.before !== 'boolean')
     errors.push('"before" must be true or false');
   if (!Array.isArray(raw.shots) || raw.shots.length === 0)

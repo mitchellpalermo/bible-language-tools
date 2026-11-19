@@ -7,7 +7,7 @@ import { execFileSync } from 'node:child_process';
 import { cpSync, existsSync, mkdtempSync, rmSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import type { App } from './shot-list.ts';
+import { APP_PACKAGE, type App } from './shot-list.ts';
 
 const git = (cwd: string, ...args: string[]) =>
   execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
@@ -34,7 +34,7 @@ export async function withWorktreeAt<T>(
       cwd: dir,
       stdio: 'ignore',
     });
-    const appDir = `apps/${app}-tools`;
+    const appDir = `apps/${APP_PACKAGE[app]}`;
     const data = join(root, appDir, 'public/data');
     if (existsSync(data) && !existsSync(join(dir, appDir, 'public/data')))
       symlinkSync(data, join(dir, appDir, 'public/data'));

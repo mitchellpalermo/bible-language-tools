@@ -98,7 +98,7 @@ and git calls are in `shots-cli.ts`.
 
 | Field | Required | Meaning |
 |---|---|---|
-| `app` | yes | `greek` or `hebrew` |
+| `app` | yes | `greek`, `hebrew` or `landing` (`apps/landing`, the parent page) |
 | `before` | no | `false` skips the before capture in `pnpm shots pr` (a new page) |
 | `name` | yes | File-name slug, unique in the list |
 | `path` | yes | Route, starting with `/` |
@@ -120,7 +120,7 @@ written, when any of these fail:
 
 - the list has no shots, or a shot has no `expect`;
 - the server answers 4xx/5xx;
-- the page title is not `… | <app>.tools`;
+- the page title is not `… | <app>.tools` (greek, hebrew) or `Bible Language Tools` (landing);
 - a step's selector matches nothing;
 - the `expect` text is not visible after the steps;
 - a Hebrew or Greek character on the page has no loaded face of the app's

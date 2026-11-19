@@ -1,0 +1,9 @@
+{
+  "name": "bible-language-tools",
+  "compatibility_date": "2026-06-10",
+  "assets": {
+    "directory": "./dist"
+  },
+  "workers_dev": false,
+  "observability": { "enabled": true }
+}
