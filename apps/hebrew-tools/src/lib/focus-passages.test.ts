@@ -7,6 +7,7 @@ import { newCard, nextSRS, normalizeKey } from '../data/srs';
 import { cardKey, type HebrewVocabWord, vocabulary } from '../data/vocabulary';
 import { hasCorpus } from '../test/corpus';
 import {
+  courseKeysOf,
   focusPassageStore,
   passageDeckKeys,
   passageProgress,
@@ -164,6 +165,42 @@ describe('passageVocabulary', () => {
       const v = passageVocabulary(verses([word('1')]), LEMMAS, both);
       expect(v.words[0].word.hebrew).toBe('אָב');
     });
+  });
+});
+
+describe('courseKeysOf: the join a deck’s chapters and verses read (#267, #270)', () => {
+  const LEMMAS: LemmaIndex = {
+    '776': { count: 2500, hebrew: 'אֶרֶץ' },
+    '100': { count: 1, hebrew: 'אַף' },
+    '200': { count: 1, hebrew: 'אַף' },
+  };
+  const VOCAB = [
+    entry({ hebrew: 'אָמַר', strong: '559', gloss: 'he said', frequency: 5300 }),
+    entry({ hebrew: 'וַיֹּאמֶר', strong: '559', gloss: 'and he said' }),
+    entry({ hebrew: 'אֶרֶץ', gloss: 'earth', frequency: 2500 }),
+    entry({ hebrew: 'אַף', gloss: 'also' }),
+  ];
+  const keysOf = courseKeysOf(LEMMAS, VOCAB);
+
+  it('gives every card of the lexeme, as the passage word list does', () => {
+    const v = passageVocabulary(verses([word('559')]), LEMMAS, VOCAB);
+    expect(keysOf(word('559'))).toEqual(v.words[0].keys);
+    expect(keysOf(word('559')).length).toBe(2);
+  });
+
+  it('finds a word with no strong number through the lemma index', () => {
+    expect(keysOf(word('776'))).toEqual([passageWordKey(VOCAB[2])]);
+    expect(courseKeysOf(null, VOCAB)(word('776'))).toEqual([]);
+  });
+
+  it('leaves a homograph with no owner out rather than guess', () => {
+    expect(keysOf(word('100'))).toEqual([]);
+    expect(keysOf(word('200'))).toEqual([]);
+  });
+
+  it('gives nothing for a prefix code or a word outside the course', () => {
+    expect(keysOf(word('l'))).toEqual([]);
+    expect(keysOf(word('9999'))).toEqual([]);
   });
 });
 

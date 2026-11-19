@@ -288,9 +288,27 @@ hebrew.tools (repo CLAUDE.md, "Textbook chapter decks").
   vocabulary deck to narrow.
 - **The selection is read through `useStoredState`**, so the first render is the
   default on both sides, and it is seeded in `src/test/hydration.test.tsx`.
-- **The custom-deck half of `DeckSelection` is unused here** until the decks
-  move onto the shared store (#242). A stored `deck: 'custom'` reads as no
-  textbook.
+- **The custom-deck half of `DeckSelection` is unused here.** The decks are on
+  the shared store (#242), but a custom deck is still picked with session
+  state (`activeDeckId`), so a stored `deck: 'custom'` reads as no textbook.
+
+## Decks built from a book or passage (#267, #270)
+
+A deck made in the builder from a GNT book or a passage records the range as
+its `source`, and `/flashcards` then offers a chapter picker under the deck row
+and a verse from the range on reveal. The shared parts and the decisions are in
+the repo CLAUDE.md, "Decks built from the text"; what is here:
+
+| File | What it holds |
+|---|---|
+| `src/lib/book-deck.ts` | `getBookDeck` (words and the whole-book source), `greekKeysOf` (the word join), `loadGreekSource` |
+| `src/lib/deck-chapters.ts` | Chapters chosen per deck, `greek-tools-deck-chapters-v1`. Local, never synced |
+| `src/components/DeckVerse.tsx` | The Greek verse, with the occurrence highlighted |
+
+- **A passage deck's source is the range typed, even with "new words only".**
+  The words left out are still in the text the student chose.
+- **The picker shows only while a sourced deck that spans chapters is on**, and
+  only once its book has loaded.
 
 ## Parse history and the shared attempt log (#209)
 

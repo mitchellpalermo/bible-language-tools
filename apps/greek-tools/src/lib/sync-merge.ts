@@ -5,8 +5,9 @@
 //
 // SRS cards and study stats merge identically in both apps, so those two rules
 // live in @tools/shared/sync-merge and are re-exported here. Everything below
-// is greek-tools-specific: decks, focus passages, and parse history.
+// is greek-tools-specific: focus passages and parse history.
 
+import { type CustomDeck, mergeCustomDecks } from '@tools/shared/custom-decks';
 import type { LadderProgress } from '@tools/shared/ladder';
 import type { SRSCard, StudyStats } from '@tools/shared/srs';
 import {
@@ -15,24 +16,11 @@ import {
   type StudyStreakData,
 } from '@tools/shared/study-streak';
 import { mergeLadderProgress, mergeSRSStores, mergeStudyStats } from '@tools/shared/sync-merge';
-
-import type { CustomDeck } from '../data/customDecks';
 import type { FocusPassage, ParseHistory } from '../data/focusPassages';
 
-export { mergeLadderProgress, mergeSRSStores, mergeStudyStats };
-
-/** Union by deck id; duplicate ids resolved by the later createdAt. */
-export function mergeCustomDecks(a: CustomDeck[], b: CustomDeck[]): CustomDeck[] {
-  const byId = new Map<string, CustomDeck>();
-  for (const deck of a) byId.set(deck.id, deck);
-  for (const deck of b) {
-    const existing = byId.get(deck.id);
-    if (!existing || deck.createdAt > existing.createdAt) {
-      byId.set(deck.id, deck);
-    }
-  }
-  return [...byId.values()];
-}
+// Decks use the shared rules since #242: tombstoned deletes, the later edit
+// wins, and a deck's source survives a client that predates it.
+export { mergeCustomDecks, mergeLadderProgress, mergeSRSStores, mergeStudyStats };
 
 /** Union by passage id; duplicate ids resolved by the later createdAt. */
 export function mergeFocusPassages(a: FocusPassage[], b: FocusPassage[]): FocusPassage[] {

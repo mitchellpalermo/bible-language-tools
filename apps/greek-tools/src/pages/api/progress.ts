@@ -1,4 +1,5 @@
 import { createDb } from '@tools/db';
+import { parseDeckList } from '@tools/shared/custom-decks';
 import { isLadderProgress } from '@tools/shared/ladder';
 import { parseStudyStreak } from '@tools/shared/study-streak';
 import type { APIRoute } from 'astro';
@@ -60,12 +61,9 @@ function validatePayload(
   if (STATS_NUMBER_FIELDS.some((f) => typeof studyStats[f] !== 'number')) return null;
   if (STATS_STRING_FIELDS.some((f) => typeof studyStats[f] !== 'string')) return null;
 
-  if (!Array.isArray(customDecks)) return null;
-  for (const deck of customDecks) {
-    if (!isRecord(deck)) return null;
-    if (typeof deck.id !== 'string' || typeof deck.name !== 'string') return null;
-    if (!Array.isArray(deck.wordKeys) || typeof deck.createdAt !== 'string') return null;
-  }
+  // The shared deck rules (#242): tombstones, update stamps and sources.
+  const decks = parseDeckList(customDecks);
+  if (decks === null) return null;
 
   for (const card of Object.values(srsStore)) {
     if (!isRecord(card)) return null;
@@ -116,6 +114,7 @@ function validatePayload(
 
   return {
     ...(body as object),
+    customDecks: decks,
     focusPassages: passages,
     parseHistory: history,
   } as Pick<

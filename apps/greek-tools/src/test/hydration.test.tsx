@@ -35,6 +35,7 @@ import { markReadToday } from '../data/dailyVerses';
 import { recordParseResults, saveFocusPassages } from '../data/focusPassages';
 import { newCard, nextSRS, recordReview, saveSRSStore, saveStats } from '../data/srs';
 import { vocabulary } from '../data/vocabulary';
+import { deckChapterMemory } from '../lib/deck-chapters';
 import { DEFAULT_SELECTION, saveSelection } from '../lib/deck-selection';
 import { saveFlashcardSettings } from '../lib/flashcard-settings';
 import { saveLadderProgress } from '../lib/paradigm-ladder';
@@ -62,13 +63,22 @@ function seedReturningStudent() {
   saveStats(stats);
 
   saveQuizSettings({ accentStrict: true, density: 'hard' });
-  saveFlashcardSettings({ showPartOfSpeech: true });
+  saveFlashcardSettings({ showPartOfSpeech: true, showVerse: false });
   // Textbook chapter decks (#228): a stored textbook and chapters. Flashcards
   // reads them through `useStoredState`, so its first render deals none of them.
   saveSelection({ ...DEFAULT_SELECTION, deck: 'beginning-with-nt-greek', chapters: [1, 2] });
+  // A deck built from a book (#267, #270), and chapters chosen for it. The
+  // picker and the verse wait on a fetched book, so neither is in a first render.
   saveCustomDecks([
-    { id: 'deck-1', name: 'Romans 8', wordKeys: keys.slice(0, 10), createdAt: '2026-10-01' },
+    {
+      id: 'deck-1',
+      name: 'Romans',
+      wordKeys: keys.slice(0, 10),
+      createdAt: '2026-10-01',
+      source: { book: 'ROM', startChapter: 1, startVerse: 1, endChapter: 16, endVerse: 27 },
+    },
   ]);
+  deckChapterMemory.save({ 'deck-1': [8] });
   saveFocusPassages([
     {
       id: PASSAGE_ID,

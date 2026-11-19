@@ -16,24 +16,25 @@ beforeEach(() => {
 describe('normalizeFlashcardSettings', () => {
   it('defaults the part of speech to hidden', () => {
     expect(DEFAULT_FLASHCARD_SETTINGS.showPartOfSpeech).toBe(false);
-    expect(normalizeFlashcardSettings({})).toEqual({ showPartOfSpeech: false });
+    expect(DEFAULT_FLASHCARD_SETTINGS.showVerse).toBe(true);
+    expect(normalizeFlashcardSettings({})).toMatchObject({ showPartOfSpeech: false });
   });
 
   it('keeps a stored boolean of either value', () => {
-    expect(normalizeFlashcardSettings({ showPartOfSpeech: true })).toEqual({
+    expect(normalizeFlashcardSettings({ showPartOfSpeech: true })).toMatchObject({
       showPartOfSpeech: true,
     });
-    expect(normalizeFlashcardSettings({ showPartOfSpeech: false })).toEqual({
+    expect(normalizeFlashcardSettings({ showPartOfSpeech: false })).toMatchObject({
       showPartOfSpeech: false,
     });
   });
 
   it('falls back to the default for a non-boolean, rather than passing it through', () => {
     // 'yes' is truthy and would switch the hint back on if it reached JSX.
-    expect(normalizeFlashcardSettings({ showPartOfSpeech: 'yes' })).toEqual({
+    expect(normalizeFlashcardSettings({ showPartOfSpeech: 'yes' })).toMatchObject({
       showPartOfSpeech: false,
     });
-    expect(normalizeFlashcardSettings({ showPartOfSpeech: null })).toEqual({
+    expect(normalizeFlashcardSettings({ showPartOfSpeech: null })).toMatchObject({
       showPartOfSpeech: false,
     });
   });
@@ -51,18 +52,20 @@ describe('createFlashcardSettings', () => {
   });
 
   it('round-trips a saved setting', () => {
-    saveFlashcardSettings({ showPartOfSpeech: true });
-    expect(loadFlashcardSettings()).toEqual({ showPartOfSpeech: true });
+    saveFlashcardSettings({ showPartOfSpeech: true, showVerse: true });
+    expect(loadFlashcardSettings()).toMatchObject({ showPartOfSpeech: true });
   });
 
   it('writes to the key it was bound to', () => {
-    saveFlashcardSettings({ showPartOfSpeech: true });
-    expect(JSON.parse(localStorage.getItem(KEY) as string)).toEqual({ showPartOfSpeech: true });
+    saveFlashcardSettings({ showPartOfSpeech: true, showVerse: true });
+    expect(JSON.parse(localStorage.getItem(KEY) as string)).toMatchObject({
+      showPartOfSpeech: true,
+    });
   });
 
   it('keeps each app’s settings separate', () => {
     const other = createFlashcardSettings('other-tools-flashcard-display-v1');
-    saveFlashcardSettings({ showPartOfSpeech: true });
+    saveFlashcardSettings({ showPartOfSpeech: true, showVerse: true });
     expect(other.loadFlashcardSettings()).toEqual(DEFAULT_FLASHCARD_SETTINGS);
   });
 
@@ -82,6 +85,17 @@ describe('createFlashcardSettings', () => {
     vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
       throw new Error('quota exceeded');
     });
-    expect(() => saveFlashcardSettings({ showPartOfSpeech: true })).not.toThrow();
+    expect(() => saveFlashcardSettings({ showPartOfSpeech: true, showVerse: true })).not.toThrow();
+  });
+});
+
+describe('the verse on reveal (#267)', () => {
+  it('is on by default, including for settings saved before it existed', () => {
+    expect(normalizeFlashcardSettings({ showPartOfSpeech: true }).showVerse).toBe(true);
+  });
+
+  it('keeps a stored choice and ignores a non-boolean', () => {
+    expect(normalizeFlashcardSettings({ showVerse: false }).showVerse).toBe(false);
+    expect(normalizeFlashcardSettings({ showVerse: 'no' }).showVerse).toBe(true);
   });
 });

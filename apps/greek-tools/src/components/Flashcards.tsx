@@ -1,6 +1,9 @@
+import ChapterPicker from '@tools/shared/components/ChapterPicker';
 import DrillButtons from '@tools/shared/components/DrillButtons';
 import GradeButtons from '@tools/shared/components/GradeButtons';
 import ToggleSwitch from '@tools/shared/components/ToggleSwitch';
+import { findDeck } from '@tools/shared/custom-decks';
+import { describeSource } from '@tools/shared/deck-source';
 import { checkGlossAnswer } from '@tools/shared/gloss-answer';
 import {
   type AnswerMode,
@@ -9,6 +12,7 @@ import {
   type StudyMode,
   useFlashcardSession,
 } from '@tools/shared/use-flashcard-session';
+import { useSourcedDeck } from '@tools/shared/use-sourced-deck';
 import { useStoredState } from '@tools/shared/use-stored-state';
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -24,9 +28,12 @@ import {
 } from '../data/srs';
 import { type TextbookId, wordsInChapters } from '../data/textbooks';
 import { type VocabWord, vocabulary } from '../data/vocabulary-all';
+import { loadGreekSource } from '../lib/book-deck';
+import { deckChapterMemory } from '../lib/deck-chapters';
 import { DEFAULT_SELECTION, loadSelection, saveSelection, textbookOf } from '../lib/deck-selection';
 import { loadFlashcardSettings, saveFlashcardSettings } from '../lib/flashcard-settings';
 import DeckBuilder from './DeckBuilder';
+import DeckVerse, { bookName } from './DeckVerse';
 import ErrorBoundary from './ErrorBoundary';
 import TextbookDecks from './TextbookDecks';
 import VocabCard, { type Direction } from './VocabCard';
@@ -111,14 +118,13 @@ function FlashcardsInner() {
   // Card face — how much of the card is visible before you answer. Distinct
   // from the part-of-speech *filter* above: that decides which words are in the
   // deck, this decides what a card gives away.
-  const [showPartOfSpeech, setShowPartOfSpeech] = useState(
-    () => loadFlashcardSettings().showPartOfSpeech,
-  );
+  const [cardFace, setCardFace] = useState(loadFlashcardSettings);
+  const { showPartOfSpeech, showVerse } = cardFace;
 
-  const togglePartOfSpeech = useCallback(() => {
-    setShowPartOfSpeech((prev) => {
-      const next = !prev;
-      saveFlashcardSettings({ showPartOfSpeech: next });
+  const toggleSetting = useCallback((field: 'showPartOfSpeech' | 'showVerse') => {
+    setCardFace((prev) => {
+      const next = { ...prev, [field]: !prev[field] };
+      saveFlashcardSettings(next);
       return next;
     });
   }, []);
@@ -127,6 +133,11 @@ function FlashcardsInner() {
   const [customDecks, setCustomDecks] = useState<CustomDeck[]>(() => loadCustomDecks());
   const [activeDeckId, setActiveDeckId] = useState<string | null>(null);
   const [showDeckBuilder, setShowDeckBuilder] = useState(false);
+  const activeDeck = findDeck(customDecks, activeDeckId);
+
+  // A deck built from a book or passage (#267, #270): its text, the chapters
+  // chosen for it (remembered per deck on this browser), and its verses.
+  const sourced = useSourcedDeck(activeDeck, loadGreekSource, deckChapterMemory);
 
   // Textbook chapter decks (#228). The selection is stored, and read after
   // hydration. A custom deck, while one is on, is the deck: the textbook waits
@@ -147,13 +158,16 @@ function FlashcardsInner() {
 
   const filteredVocab = useMemo(() => {
     if (activeDeckId !== null) {
-      const deck = customDecks.find((d) => d.id === activeDeckId);
-      if (!deck) return [];
-      const keySet = new Set(deck.wordKeys);
-      return vocabulary.filter(
-        (w) =>
-          keySet.has(normalizeKey(w.greek)) &&
-          (posFilter.length === 0 || posFilter.includes(w.partOfSpeech)),
+      if (!activeDeck) return [];
+      const keySet = new Set(activeDeck.wordKeys);
+      // Narrowed to the chosen chapters of its source, when it has one.
+      return sourced.narrow(
+        vocabulary.filter(
+          (w) =>
+            keySet.has(normalizeKey(w.greek)) &&
+            (posFilter.length === 0 || posFilter.includes(w.partOfSpeech)),
+        ),
+        srsKey,
       );
     }
     // A textbook's chapters are already a deliberate set, so the frequency
@@ -169,17 +183,14 @@ function FlashcardsInner() {
         matchFreq(w.frequency, freqFilter) &&
         (posFilter.length === 0 || posFilter.includes(w.partOfSpeech)),
     );
-  }, [freqFilter, posFilter, activeDeckId, customDecks, textbookId, selection]);
+  }, [freqFilter, posFilter, activeDeckId, activeDeck, sourced.narrow, textbookId, selection]);
 
   // ─── Session ─────────────────────────────────────────────────────────────────
 
   // The words of the active custom deck, so editing a deck's words deals a new
   // session and renaming it does not. Sorted: the same words in another order
   // are the same deck.
-  const activeDeckWordKeys =
-    activeDeckId !== null
-      ? [...(customDecks.find((d) => d.id === activeDeckId)?.wordKeys ?? [])].sort()
-      : [];
+  const activeDeckWordKeys = activeDeck ? [...activeDeck.wordKeys].sort() : [];
 
   const onEvent = (event: FlashcardSessionEvent) => {
     switch (event.type) {
@@ -191,6 +202,11 @@ function FlashcardsInner() {
           ...(textbookId !== null && {
             deck: textbookId,
             chapters: selection.chapters.length || 'all',
+          }),
+          // A deck built from the text, narrowed by chapter (#270).
+          ...(activeDeck?.source && {
+            deck: 'custom-source',
+            chapters: sourced.chapters.length || 'all',
           }),
         });
         break;
@@ -257,6 +273,8 @@ function FlashcardsInner() {
       activeDeckWordKeys,
       textbookId,
       textbookId === null ? [] : selection.chapters,
+      // The chosen chapters of a deck built from the text (#270).
+      sourced.restartPart,
     ]),
     storage: STORAGE,
     onEvent,
@@ -352,6 +370,10 @@ function FlashcardsInner() {
   }
 
   // ─── Empty state ─────────────────────────────────────────────────────────────
+
+  if (!card && sourced.pending) {
+    return <p className="text-center py-16 text-text-muted">Loading the chapters…</p>;
+  }
 
   if (!card) {
     return (
@@ -453,12 +475,25 @@ function FlashcardsInner() {
           <div className="flex items-center bg-white border border-indigo-100 px-3 py-1 rounded-xl shadow-sm">
             <ToggleSwitch
               checked={showPartOfSpeech}
-              onChange={togglePartOfSpeech}
+              onChange={() => toggleSetting('showPartOfSpeech')}
               label="Part of speech"
               accent="var(--color-grape, #7C3AED)"
               title="Show the part of speech on the front of the card. It is always shown with the answer."
             />
           </div>
+
+          {/* The verse on reveal (#267): only a deck built from the text has one. */}
+          {activeDeck?.source && (
+            <div className="flex items-center bg-white border border-indigo-100 px-3 py-1 rounded-xl shadow-sm">
+              <ToggleSwitch
+                checked={showVerse}
+                onChange={() => toggleSetting('showVerse')}
+                label="Verse"
+                accent="var(--color-grape, #7C3AED)"
+                title="Show a verse from the deck's text with the answer."
+              />
+            </div>
+          )}
 
           {/* Filters toggle */}
           <button
@@ -564,6 +599,30 @@ function FlashcardsInner() {
           {customDecks.length === 0 ? '+ Create deck' : 'Manage'}
         </button>
       </div>
+
+      {/* ── Chapters of a deck built from the text (#270) ─────────────────── */}
+      {/* A chapter is a filter over the deck's words: a word in several
+          chapters is in each of them, as one card with one schedule. */}
+      {activeDeck && sourced.text && sourced.pickerChapters && (
+        <ChapterPicker
+          textbook={{
+            id: activeDeck.id,
+            shortTitle: activeDeck.name,
+            title: describeSource(
+              sourced.text.index.range,
+              sourced.text.book,
+              bookName(sourced.text.index.range.book),
+            ),
+            authors: 'SBL Greek New Testament',
+            unitLabel: 'Ch.',
+          }}
+          chapters={sourced.pickerChapters}
+          selected={sourced.chapters}
+          onChange={sourced.setChapters}
+          wordCount={filteredVocab.length}
+          accent="var(--color-grape, #7C3AED)"
+        />
+      )}
 
       {/* ── Filter panel ──────────────────────────────────────────────────── */}
       {showFilters && (
@@ -751,6 +810,18 @@ function FlashcardsInner() {
           inputRef,
         }}
       />
+
+      {/* ── The word in its text (#267) ───────────────────────────────────── */}
+      {/* Part of the answer, so only once revealed. Keyed by card, so the next
+          card starts on its own first occurrence. */}
+      {revealed && showVerse && sourced.text && (
+        <DeckVerse
+          key={srsKey(card)}
+          text={sourced.text}
+          occurrences={sourced.occurrencesOf(srsKey(card))}
+          headword={card.greek}
+        />
+      )}
 
       {/* ── Action buttons ────────────────────────────────────────────────── */}
       {/* The SRS grades schedule the card, so they preview the interval each

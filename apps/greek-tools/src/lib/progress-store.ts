@@ -17,6 +17,13 @@ import {
   studyStats as studyStatsTable,
   syncState as syncStateTable,
 } from '@tools/db/schema';
+import {
+  type CustomDeck,
+  deckFromRow,
+  mergeCustomDecks,
+  parseDeck,
+  rowFromDeck,
+} from '@tools/shared/custom-decks';
 import type { LadderProgress } from '@tools/shared/ladder';
 import {
   emptyStudyStreak,
@@ -26,7 +33,6 @@ import {
 import { mergeLadderProgress } from '@tools/shared/sync-merge';
 import { and, eq } from 'drizzle-orm';
 import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
-import type { CustomDeck } from '../data/customDecks';
 import type { FocusPassage, ParseHistory } from '../data/focusPassages';
 import type { SRSCard, StudyStats } from '../data/srs';
 import type { ProgressPayload } from './sync-types';
@@ -36,11 +42,11 @@ export type ProgressDb = BaseSQLiteDatabase<'sync' | 'async', unknown, typeof sc
 const LANGUAGE: Language = 'greek';
 
 // D1 allows at most 100 bound parameters per statement, so bulk inserts are
-// chunked by column count: srs_cards (8 cols → 12/stmt), custom_decks (6 cols → 16/stmt),
+// chunked by column count: srs_cards (8 cols → 12/stmt), custom_decks (9 cols → 11/stmt),
 // focus_passages (9 cols → 11/stmt), focus_parse_history (4 cols → 25/stmt),
 // ladder_progress (4 cols → 25/stmt).
 const SRS_CHUNK = 12;
-const DECK_CHUNK = 16;
+const DECK_CHUNK = 11;
 const PASSAGE_CHUNK = 11;
 const PARSE_HISTORY_CHUNK = 25;
 const LADDER_CHUNK = 25;
@@ -99,10 +105,7 @@ export async function getProgress(db: ProgressDb, userId: string): Promise<Progr
     .select()
     .from(studyStatsTable)
     .where(and(eq(studyStatsTable.userId, userId), eq(studyStatsTable.language, LANGUAGE)));
-  const deckRows = await db
-    .select()
-    .from(customDecksTable)
-    .where(and(eq(customDecksTable.userId, userId), eq(customDecksTable.language, LANGUAGE)));
+  const customDecks = await readCustomDecks(db, userId);
   const passageRows = await db
     .select()
     .from(focusPassagesTable)
@@ -142,13 +145,6 @@ export async function getProgress(db: ProgressDb, userId: string): Promise<Progr
     ? { streak: statsRow.studyStreak, lastSessionDate: statsRow.lastSessionDate }
     : emptyStudyStreak();
 
-  const customDecks: CustomDeck[] = deckRows.map((row) => ({
-    id: row.id,
-    name: row.name,
-    wordKeys: JSON.parse(row.wordKeys) as string[],
-    createdAt: row.createdAt,
-  }));
-
   const focusPassages: FocusPassage[] = passageRows.map((row) => ({
     id: row.id,
     ...(row.label !== null ? { label: row.label } : {}),
@@ -175,6 +171,18 @@ export async function getProgress(db: ProgressDb, userId: string): Promise<Progr
     ladderProgress,
     syncedAt: state.syncedAt,
   };
+}
+
+/** Every greek deck stored for the user, tombstones included. Rows that are not decks are skipped. */
+async function readCustomDecks(db: ProgressDb, userId: string): Promise<CustomDeck[]> {
+  const rows = await db
+    .select()
+    .from(customDecksTable)
+    .where(and(eq(customDecksTable.userId, userId), eq(customDecksTable.language, LANGUAGE)));
+  return rows.flatMap((row) => {
+    const deck = parseDeck(deckFromRow(row));
+    return deck ? [deck] : [];
+  });
 }
 
 /** The streak columns of the stats row, or "never" when there is none. */
@@ -243,13 +251,13 @@ export async function putProgress(
     lastReviewed: card.lastReviewed,
   }));
 
-  const deckRows = payload.customDecks.map((deck) => ({
-    ...userLang,
-    id: deck.id,
-    name: deck.name,
-    wordKeys: JSON.stringify(deck.wordKeys),
-    createdAt: deck.createdAt,
-  }));
+  // Decks merge with what the account holds, as hebrew.tools' do (#242): a
+  // deletion is a tombstone, and a push from a device that is behind, or from
+  // a page that predates tombstones or deck sources, cannot bring a deleted
+  // deck back or strip a deck's source.
+  const deckRows = mergeCustomDecks(await readCustomDecks(db, userId), payload.customDecks).map(
+    (deck) => ({ ...userLang, ...rowFromDeck(deck) }),
+  );
 
   const passageRows = payload.focusPassages.map((p) => ({
     userId,

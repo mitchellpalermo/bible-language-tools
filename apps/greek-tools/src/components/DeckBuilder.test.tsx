@@ -17,14 +17,15 @@ vi.mock('../data/morphgnt', () => ({
 }));
 
 vi.mock('../lib/book-deck', () => ({
-  getBookWordKeys: vi.fn(),
+  getBookDeck: vi.fn(),
 }));
 
 import { fetchBook, fetchBooks } from '../data/morphgnt';
-import { getBookWordKeys } from '../lib/book-deck';
+import { getBookDeck } from '../lib/book-deck';
 
 const mockFetchBooks = vi.mocked(fetchBooks);
-const mockGetBookWordKeys = vi.mocked(getBookWordKeys);
+const mockGetBookDeck = vi.mocked(getBookDeck);
+const PHM_SOURCE = { book: 'PHM', startChapter: 1, startVerse: 1, endChapter: 1, endVerse: 25 };
 
 const STUB_BOOKS = [
   { code: 'PHM', name: 'Philemon', chapters: 1 },
@@ -52,7 +53,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   vi.restoreAllMocks();
   mockFetchBooks.mockResolvedValue(STUB_BOOKS);
-  mockGetBookWordKeys.mockResolvedValue(['καί', 'ὁ', 'λόγος']);
+  mockGetBookDeck.mockResolvedValue({ wordKeys: ['καί', 'ὁ', 'λόγος'], source: PHM_SOURCE });
   vi.mocked(fetchBook).mockResolvedValue(MOCK_BOOK);
 });
 
@@ -616,6 +617,8 @@ describe('From GNT Book', () => {
     expect(onDecksChange).toHaveBeenCalled();
     const updatedDecks = onDecksChange.mock.calls[0][0] as CustomDeck[];
     expect(updatedDecks.some((d) => d.name === 'Philemon')).toBe(true);
+    // The whole book is its source (#270), so it can be studied by chapter.
+    expect(updatedDecks.find((d) => d.name === 'Philemon')?.source).toEqual(PHM_SOURCE);
     expect(screen.getByRole('button', { name: /\+ new deck/i })).toBeInTheDocument();
   });
 
@@ -868,6 +871,15 @@ describe('Passage view', () => {
     });
     expect(onDecksChange).toHaveBeenCalled();
     expect(onActivateDeck).toHaveBeenCalledWith(expect.any(String));
+    // The range is the deck's source (#267, #270).
+    const [saved] = onDecksChange.mock.calls[0][0] as CustomDeck[];
+    expect(saved.source).toEqual({
+      book: 'MAT',
+      startChapter: 1,
+      startVerse: 1,
+      endChapter: 1,
+      endVerse: 1,
+    });
   });
 
   it('calls onClose after successful save', async () => {

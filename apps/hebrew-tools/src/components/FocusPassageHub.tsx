@@ -205,10 +205,15 @@ function HubInner({ passageId }: { passageId: string }) {
           <FocusPassageReading passage={passage} verses={data.verses} />
         )}
         {data.status === 'ready' && tab === 'vocabulary' && (
-          <FocusPassageVocabulary title={title} vocabulary={data.vocabulary} lemmas={data.lemmas} />
+          <FocusPassageVocabulary
+            title={title}
+            vocabulary={data.vocabulary}
+            lemmas={data.lemmas}
+            source={passage}
+          />
         )}
         {data.status === 'ready' && tab === 'progress' && (
-          <FocusPassageProgress title={title} vocabulary={data.vocabulary} />
+          <FocusPassageProgress title={title} vocabulary={data.vocabulary} source={passage} />
         )}
       </div>
     </div>

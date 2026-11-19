@@ -37,6 +37,7 @@ import { cardKey, vocabulary } from '../data/vocabulary';
 import { buildDecks, writingCardKey } from '../data/writing';
 import { accentCardKey, SCAFFOLD_HISTORY_KEY } from '../lib/accent-shift';
 import { customDeckStore, deckKey } from '../lib/custom-decks';
+import { deckChapterMemory } from '../lib/deck-chapters';
 import { saveSelection } from '../lib/deck-selection';
 import { saveFlashcardSettings } from '../lib/flashcard-settings';
 import { focusPassageStore } from '../lib/focus-passages';
@@ -86,7 +87,7 @@ function seedReturningStudent() {
   saveQuizSettings({ accentStrict: true, density: 'easy' });
   // Two suffix-ladder rungs climbed, so the ladder tab has open rungs past the first.
   saveLadderProgress({ suffixes: 2, sus: 2 });
-  saveFlashcardSettings({ showPartOfSpeech: true });
+  saveFlashcardSettings({ showPartOfSpeech: true, showVerse: false });
   saveSelection({
     deck: 'garrett-derouchie',
     customDeckId: null,
@@ -175,6 +176,24 @@ describe('hydration with a custom deck picked', () => {
 
   it.each(['Flashcards', 'Writing', 'TodaySession'])('%s matches its server HTML', async (name) => {
     expect(await hydrationErrors(ISLANDS[name](), { seed: seedCustomDeckPicked })).toEqual([]);
+  });
+
+  it('also when the picked deck was built from a book, with chapters chosen (#267, #270)', async () => {
+    const seedSourced = () => {
+      seedReturningStudent();
+      const deck = customDeckStore.create('Genesis', vocabulary.slice(0, 8).map(deckKey), {
+        book: 'GEN',
+        startChapter: 1,
+        startVerse: 1,
+        endChapter: 50,
+        endVerse: 26,
+      });
+      deckChapterMemory.save({ [deck.id]: [1, 2] });
+      saveSelection({ deck: 'custom', customDeckId: deck.id, chapters: [], categories: ['core'] });
+    };
+    for (const name of ['Flashcards', 'Writing', 'TodaySession']) {
+      expect(await hydrationErrors(ISLANDS[name](), { seed: seedSourced }), name).toEqual([]);
+    }
   });
 
   it('also when the picked deck has since been deleted', async () => {

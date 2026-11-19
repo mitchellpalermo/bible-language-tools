@@ -74,7 +74,7 @@ describe('schema smoke tests', () => {
     const [result] = await db.select().from(customDecks).where(eq(customDecks.id, 'deck-1'));
 
     // A row written without the tombstone columns takes their defaults.
-    expect(result).toEqual({ ...deck, updatedAt: '', deletedAt: null });
+    expect(result).toEqual({ ...deck, updatedAt: '', deletedAt: null, source: null });
 
     await db.insert(customDecks).values({
       ...deck,

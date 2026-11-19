@@ -9,6 +9,7 @@ import {
   type CustomDeck,
   createCustomDeck,
   deleteCustomDeck,
+  loadAllCustomDecks,
   loadCustomDecks,
   saveCustomDecks,
   updateCustomDeck,
@@ -60,8 +61,9 @@ describe('saveCustomDecks', () => {
   });
 
   it('overwrites previous data', () => {
-    const first: CustomDeck[] = [{ id: '1', name: 'First', wordKeys: [], createdAt: '' }];
-    const second: CustomDeck[] = [{ id: '2', name: 'Second', wordKeys: ['καί'], createdAt: '' }];
+    const at = '2026-01-01T00:00:00.000Z';
+    const first: CustomDeck[] = [{ id: '1', name: 'First', wordKeys: [], createdAt: at }];
+    const second: CustomDeck[] = [{ id: '2', name: 'Second', wordKeys: ['καί'], createdAt: at }];
     saveCustomDecks(first);
     saveCustomDecks(second);
     expect(loadCustomDecks()).toEqual(second);
@@ -90,7 +92,8 @@ describe('createCustomDeck', () => {
   it('stores the provided wordKeys', () => {
     const keys = ['καί', 'ὁ', 'εἰμί'];
     const deck = createCustomDeck('Deck', keys);
-    expect(deck.wordKeys).toEqual(keys);
+    // Sorted, so two devices that pick the same words hold the same deck.
+    expect(deck.wordKeys).toEqual([...keys].sort());
   });
 
   it('sets createdAt to an ISO date string', () => {
@@ -139,7 +142,7 @@ describe('updateCustomDeck', () => {
     const deck = createCustomDeck('Deck', ['καί']);
     const newKeys = ['ὁ', 'εἰμί', 'λόγος'];
     updateCustomDeck(deck.id, { wordKeys: newKeys });
-    expect(loadCustomDecks().find((d) => d.id === deck.id)?.wordKeys).toEqual(newKeys);
+    expect(loadCustomDecks().find((d) => d.id === deck.id)?.wordKeys).toEqual([...newKeys].sort());
   });
 
   it('is a no-op for an unknown id', () => {
@@ -212,28 +215,55 @@ describe('deleteCustomDeck', () => {
   });
 });
 
-// ─── The shared module ────────────────────────────────────────────────────────
+// ─── The shared module (#242) ─────────────────────────────────────────────────
 //
-// greek.tools keeps this file until it adopts @tools/shared/custom-decks (see
-// "Custom decks" in the repo CLAUDE.md). Until then these pin that the two
-// agree on the shape, so the adoption is a swap and not a migration.
+// greek.tools stores its decks through @tools/shared/custom-decks. Decks saved
+// before that have no update time, and must still read and merge.
 
-describe('compatibility with @tools/shared/custom-decks', () => {
-  it('reads every deck greek.tools stores, which have no update time', () => {
-    createCustomDeck('Week 1', ['καί', 'ὁ']);
-    createCustomDeck('Week 2', ['λόγος']);
-    const parsed = parseDecks(loadCustomDecks());
-    expect(parsed.map((d) => d.name)).toEqual(['Week 1', 'Week 2']);
-    expect(parsed.every((d) => d.updatedAt === undefined)).toBe(true);
+describe('decks stored before the shared module', () => {
+  const legacy = [
+    { id: 'a1b2c3', name: 'Week 1', wordKeys: ['ὁ', 'καί'], createdAt: '2026-03-01T00:00:00.000Z' },
+    { id: 'd4e5f6', name: 'Week 2', wordKeys: ['λόγος'], createdAt: '2026-03-08T00:00:00.000Z' },
+  ];
+
+  it('still load, with no update time and their words sorted', () => {
+    localStorage.setItem(CUSTOM_DECKS_KEY, JSON.stringify(legacy));
+    const decks = loadCustomDecks();
+    expect(decks.map((d) => d.name)).toEqual(['Week 1', 'Week 2']);
+    expect(decks.every((d) => d.updatedAt === undefined)).toBe(true);
+    expect(decks[0].wordKeys).toEqual(['καί', 'ὁ']);
   });
 
-  it('merges them, the later change winning, as the shared sync would', () => {
-    const old = createCustomDeck('Old name', ['καί']);
+  it('merge, the later change winning, as the shared sync does', () => {
+    localStorage.setItem(CUSTOM_DECKS_KEY, JSON.stringify(legacy));
     const edited: SharedDeck = {
-      ...old,
+      ...parseDecks(legacy)[0],
       name: 'New name',
-      updatedAt: new Date(Date.parse(old.createdAt) + 1000).toISOString(),
+      updatedAt: '2026-04-01T00:00:00.000Z',
     };
     expect(mergeCustomDecks(loadCustomDecks(), [edited])[0].name).toBe('New name');
+  });
+
+  it('a deleted deck stays deleted when a device that still holds it syncs', () => {
+    localStorage.setItem(CUSTOM_DECKS_KEY, JSON.stringify(legacy));
+    deleteCustomDeck('a1b2c3');
+    const merged = mergeCustomDecks(loadAllCustomDecks(), parseDecks(legacy));
+    expect(merged.find((d) => d.id === 'a1b2c3')?.deletedAt).toBeDefined();
+    expect(loadCustomDecks().map((d) => d.id)).toEqual(['d4e5f6']);
+  });
+});
+
+describe('a deck built from the text records its source (#270)', () => {
+  const ROM = { book: 'ROM', startChapter: 1, startVerse: 1, endChapter: 16, endVerse: 27 };
+
+  it('is kept by create, and by an edit by hand', () => {
+    const deck = createCustomDeck('Romans', ['πίστις'], ROM);
+    expect(deck.source).toEqual(ROM);
+    updateCustomDeck(deck.id, { name: 'Rom', wordKeys: ['πίστις', 'χάρις'] });
+    expect(loadCustomDecks()[0].source).toEqual(ROM);
+  });
+
+  it('a hand-made deck has none', () => {
+    expect(createCustomDeck('Mine', ['καί'])).not.toHaveProperty('source');
   });
 });

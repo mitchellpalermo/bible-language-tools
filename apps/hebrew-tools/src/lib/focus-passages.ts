@@ -199,6 +199,23 @@ export function passageVocabulary(
   return { words: inCourse, outside, runningWords };
 }
 
+/**
+ * Which cards a word of the text is an occurrence of: every card key of its
+ * lexeme, by the join above. A deck built from a book or passage (#267, #270)
+ * reads its chapters and verses through this, so they agree with the words
+ * `passageVocabulary` lists for the same verses. A word no card is of — a
+ * prefix code, a name, a homograph with no owner — is an occurrence of none.
+ */
+export function courseKeysOf(
+  lemmas?: LemmaIndex | null,
+  vocab: readonly HebrewVocabWord[] = vocabulary,
+): (word: HebrewWord) => readonly string[] {
+  const keysByLemma = new Map(
+    [...entriesByLemma(vocab, lemmas)].map(([base, held]) => [base, held.map(passageWordKey)]),
+  );
+  return (word) => keysByLemma.get(lemmaBase(word.lemma)) ?? [];
+}
+
 /** The SRS keys of the passage's course words, one per lexeme: what a deck made from it holds. */
 export function passageDeckKeys(passageVocab: PassageVocabulary): string[] {
   return passageVocab.words.map(({ word }) => passageWordKey(word));

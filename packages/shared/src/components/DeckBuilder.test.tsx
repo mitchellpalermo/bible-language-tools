@@ -188,3 +188,80 @@ describe('DeckBuilder', () => {
     expect(screen.getByText('1 word')).toBeTruthy();
   });
 });
+
+describe('DeckBuilder: a deck from a book (#270)', () => {
+  const GEN = { book: 'GEN', startChapter: 1, startVerse: 1, endChapter: 50, endVerse: 26 };
+  const BOOKS = [
+    { code: 'GEN', name: 'Genesis' },
+    { code: 'RUT', name: 'Ruth' },
+  ];
+
+  it('is not offered unless the app supplies books', () => {
+    setup();
+    expect(screen.queryByRole('button', { name: 'From a book' })).toBeNull();
+  });
+
+  it('makes a deck of the book’s words with the book as its source, and opens it', async () => {
+    const build = vi.fn(async () => ({ wordKeys: ['k2', 'k1'], source: GEN }));
+    const { props, user } = setup({ fromBook: { books: BOOKS, build } });
+    await user.click(screen.getByRole('button', { name: 'From a book' }));
+    const create = screen.getByRole('button', { name: 'Create deck' });
+    expect(create).toHaveProperty('disabled', true);
+    await user.selectOptions(screen.getByLabelText('Book'), 'GEN');
+    expect((await screen.findByText('2 course words')).textContent).toBe('2 course words');
+    expect((screen.getByLabelText('Deck name') as HTMLInputElement).value).toBe('Genesis');
+    await user.click(create);
+    const [deck] = store.load();
+    expect(deck).toMatchObject({ name: 'Genesis', wordKeys: ['k1', 'k2'], source: GEN });
+    expect(props.onActivateDeck).toHaveBeenCalledWith(deck.id);
+    expect(props.onClose).toHaveBeenCalled();
+  });
+
+  it('refuses a taken name, and a book with no course words', async () => {
+    store.create('Genesis', ['k1']);
+    const build = vi.fn(async (code: string) => ({
+      wordKeys: code === 'GEN' ? ['k1'] : [],
+      source: { ...GEN, book: code },
+    }));
+    const { user } = setup({ decks: store.load(), fromBook: { books: BOOKS, build } });
+    await user.click(screen.getByRole('button', { name: 'From a book' }));
+    await user.selectOptions(screen.getByLabelText('Book'), 'GEN');
+    await screen.findByText('1 course word');
+    await user.click(screen.getByRole('button', { name: 'Create deck' }));
+    expect(screen.getByText('A deck with that name already exists.')).toBeTruthy();
+    await user.selectOptions(screen.getByLabelText('Book'), 'RUT');
+    await screen.findByText('0 course words');
+    await user.click(screen.getByRole('button', { name: 'Create deck' }));
+    expect(screen.getByText('No course words in this book.')).toBeTruthy();
+  });
+
+  it('says so when a book will not load, and a slow book never lands on a later choice', async () => {
+    let resolveGen: (v: { wordKeys: string[]; source: typeof GEN }) => void = () => {};
+    const build = vi.fn((code: string) =>
+      code === 'GEN'
+        ? new Promise<{ wordKeys: string[]; source: typeof GEN }>((r) => {
+            resolveGen = r;
+          })
+        : Promise.reject(new Error('offline')),
+    );
+    const { user } = setup({ fromBook: { books: BOOKS, build } });
+    await user.click(screen.getByRole('button', { name: 'From a book' }));
+    await user.selectOptions(screen.getByLabelText('Book'), 'GEN');
+    await user.selectOptions(screen.getByLabelText('Book'), 'RUT');
+    expect(await screen.findByText('Could not load the book. Try again.')).toBeTruthy();
+    resolveGen({ wordKeys: ['k1'], source: GEN });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(screen.queryByText('1 course word')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Create deck' })).toHaveProperty('disabled', true);
+  });
+
+  it('Back and Cancel return to the list', async () => {
+    const build = vi.fn(async () => ({ wordKeys: ['k1'], source: GEN }));
+    const { user } = setup({ fromBook: { books: BOOKS, build } });
+    await user.click(screen.getByRole('button', { name: 'From a book' }));
+    await user.click(screen.getByRole('button', { name: '← Back' }));
+    await user.click(screen.getByRole('button', { name: 'From a book' }));
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.getByRole('button', { name: 'New deck' })).toBeTruthy();
+  });
+});

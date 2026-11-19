@@ -6,7 +6,7 @@
 // is caught; callers get a boolean and the UI decides whether to surface it
 // (only the account page does).
 
-import { loadCustomDecks, saveCustomDecks } from '../data/customDecks';
+import { loadAllCustomDecks, loadCustomDecks, saveCustomDecks } from '../data/customDecks';
 import {
   loadFocusPassages,
   loadParseHistoryStore,
@@ -63,7 +63,8 @@ export function readLocalProgress(): ProgressSnapshot {
     srsStore: loadSRSStore(),
     studyStats: loadStats(),
     studyStreak: loadStudyStreak(),
-    customDecks: loadCustomDecks(),
+    // Tombstones included: they are how a deletion reaches other devices.
+    customDecks: loadAllCustomDecks(),
     focusPassages: loadFocusPassages(),
     parseHistory: loadParseHistoryStore(),
     ladderProgress: loadLadderProgress(),
@@ -87,8 +88,8 @@ export function writeLocalProgress(snapshot: ProgressSnapshot): void {
 
 /** Does this device have any study progress worth importing? */
 export function hasLocalProgress(): boolean {
-  const { srsStore, customDecks, ladderProgress } = readLocalProgress();
-  if (customDecks.length > 0) return true;
+  const { srsStore, ladderProgress } = readLocalProgress();
+  if (loadCustomDecks().length > 0) return true;
   if (Object.keys(ladderProgress ?? {}).length > 0) return true;
   return Object.values(srsStore).some((card) => card.repetition > 0);
 }

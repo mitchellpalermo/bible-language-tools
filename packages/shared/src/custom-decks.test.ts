@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   type CustomDeck,
   createCustomDeckStore,
+  deckFromRow,
   deckNameError,
   deckRestartPart,
   findDeck,
@@ -14,6 +15,7 @@ import {
   parseDeckList,
   parseDecks,
   pruneTombstones,
+  rowFromDeck,
   stampOf,
   TOMBSTONE_TTL_DAYS,
   wordsInDeck,
@@ -303,5 +305,108 @@ describe('createCustomDeckStore', () => {
   it('uses the real clock by default', () => {
     const created = createCustomDeckStore(KEY).create('Now', ['a']);
     expect(Math.abs(Date.parse(created.createdAt) - Date.now())).toBeLessThan(5000);
+  });
+});
+
+// ─── A deck's source (#267, #270) ────────────────────────────────────────────
+
+describe('a deck built from the text records its source', () => {
+  const GAL = { book: 'GAL', startChapter: 1, startVerse: 1, endChapter: 6, endVerse: 18 };
+  const PASSAGE = { book: 'GAL', startChapter: 1, startVerse: 11, endChapter: 2, endVerse: 21 };
+
+  it('parseDeck round-trips a source', () => {
+    expect(parseDeck(deck({ source: GAL }))?.source).toEqual(GAL);
+  });
+
+  it('a deck without one still parses, and a null column reads as none', () => {
+    expect(parseDeck(deck())).not.toHaveProperty('source');
+    expect(parseDeck({ ...deck(), source: null })).not.toHaveProperty('source');
+  });
+
+  it('rejects a deck whose source is not a range', () => {
+    expect(parseDeck({ ...deck(), source: 'GAL' })).toBeNull();
+    expect(parseDeck(deck({ source: { ...GAL, endChapter: 0 } }))).toBeNull();
+    expect(parseDeck(deck({ source: { ...PASSAGE, endChapter: 1, endVerse: 1 } }))).toBeNull();
+    expect(parseDeck({ ...deck(), source: { ...GAL, book: 7 } })).toBeNull();
+  });
+
+  it('a tombstone carries no source', () => {
+    expect(parseDeck(tomb({ source: GAL }))).not.toHaveProperty('source');
+  });
+
+  it('an old client’s copy at the same moment does not erase it, from either side', () => {
+    const sourced = deck({ source: GAL });
+    const stale = deck();
+    expect(mergeCustomDecks([sourced], [stale], NOW)[0].source).toEqual(GAL);
+    expect(mergeCustomDecks([stale], [sourced], NOW)[0].source).toEqual(GAL);
+  });
+
+  it('nor does a later edit from an old client, which keeps the words it changed', () => {
+    const renamed = deck({ name: 'Gal', updatedAt: '2026-11-04T00:00:00.000Z' });
+    const [merged] = mergeCustomDecks([deck({ source: GAL })], [renamed], NOW);
+    expect(merged).toMatchObject({ name: 'Gal', source: GAL });
+  });
+
+  it('a rebuild’s new source wins over the old one, from either side', () => {
+    const old = deck({ source: PASSAGE });
+    const rebuilt = deck({ source: GAL, updatedAt: '2026-11-04T00:00:00.000Z' });
+    expect(mergeCustomDecks([old], [rebuilt], NOW)[0].source).toEqual(GAL);
+    expect(mergeCustomDecks([rebuilt], [old], NOW)[0].source).toEqual(GAL);
+  });
+
+  it('a deletion does not pick a source back up', () => {
+    expect(mergeCustomDecks([deck({ source: GAL })], [tomb()], NOW)[0]).not.toHaveProperty(
+      'source',
+    );
+  });
+
+  describe('in the store', () => {
+    let store: ReturnType<typeof createCustomDeckStore>;
+    beforeEach(() => {
+      localStorage.clear();
+      store = createCustomDeckStore(KEY, () => NOW);
+    });
+
+    it('create keeps the source; a deck made by hand has none', () => {
+      expect(store.create('Galatians', ['a'], GAL).source).toEqual(GAL);
+      expect(store.create('Mine', ['a'])).not.toHaveProperty('source');
+      expect(store.load()[0].source).toEqual(GAL);
+    });
+
+    it('editing by hand keeps it; a rebuild replaces it; deleting drops it', () => {
+      const { id } = store.create('Galatians', ['a'], GAL);
+      expect(store.update(id, { name: 'Gal', wordKeys: ['a', 'z'] })[0].source).toEqual(GAL);
+      expect(store.update(id, { source: PASSAGE })[0].source).toEqual(PASSAGE);
+      store.remove(id);
+      expect(store.loadAll()[0]).not.toHaveProperty('source');
+    });
+  });
+});
+
+describe('the database row', () => {
+  const GAL = { book: 'GAL', startChapter: 1, startVerse: 1, endChapter: 6, endVerse: 18 };
+
+  it('round-trips a deck with and without a source', () => {
+    for (const d of [deck(), deck({ source: GAL }), tomb()]) {
+      expect(parseDeck(deckFromRow(rowFromDeck(d)))).toEqual(parseDeck(d));
+    }
+  });
+
+  it('reads a row written before 0005 and 0007', () => {
+    const row = { ...rowFromDeck(deck()), updatedAt: '', source: null };
+    expect(parseDeck(deckFromRow(row))).toEqual({
+      id: 'd1',
+      name: 'Genesis 1',
+      wordKeys: ['a', 'b'],
+      createdAt: '2026-11-01T00:00:00.000Z',
+    });
+  });
+
+  it('a damaged column costs the deck its words or its source, never the deck', () => {
+    const row = { ...rowFromDeck(deck({ source: GAL })), wordKeys: '[', source: '{' };
+    expect(parseDeck(deckFromRow(row))).toMatchObject({ id: 'd1', wordKeys: [] });
+    expect(parseDeck(deckFromRow({ ...row, source: '{"book":"GAL"}' }))).not.toHaveProperty(
+      'source',
+    );
   });
 });

@@ -11,6 +11,15 @@ import Flashcards, { FREQ_FILTERS, GENDER_LABELS, matchFreq } from './Flashcards
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
+// The book list and books are fetched only for a deck built from the text or
+// the builder's "From a book"; those are covered in Flashcards.source.test.tsx.
+vi.mock('../data/morphhb', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../data/morphhb')>()),
+  fetchBooks: vi.fn(async () => []),
+  fetchBook: vi.fn(async () => ({})),
+  fetchLemmas: vi.fn(async () => ({})),
+}));
+
 vi.mock('posthog-js', () => ({
   default: { capture: vi.fn(), init: vi.fn(), identify: vi.fn(), captureException: vi.fn() },
 }));

@@ -17,6 +17,7 @@
 // keeps the row with `deletedAt` set and no words; the merge treats it as the
 // newest edit. See `mergeCustomDecks`.
 
+import { type PassageRange, rangeError } from './focus-passages';
 import {
   isIso,
   isLive,
@@ -38,6 +39,19 @@ export const MAX_DECK_WORDS = 5000;
 export const MAX_ID_LENGTH = 100;
 export const MAX_KEY_LENGTH = 200;
 
+/**
+ * The stretch of text a deck was built from (#267, #270): a whole book is its
+ * full range. Only a deck built from a book or a passage has one; a hand-picked
+ * deck, and every deck built before the field existed, does not. Decision
+ * (Nov 2026): a deck without one is never given one by guessing from its name.
+ * Rebuilding it from the book records it.
+ *
+ * Nothing per word is stored. Which chapters a word occurs in, and where, is
+ * read from the text when the deck is studied (`deck-source.ts`), so a book
+ * deck of a thousand words costs the sync payload one small object.
+ */
+export type DeckSource = PassageRange;
+
 export interface CustomDeck {
   /** `crypto.randomUUID()`. Never reused, so a tombstone cannot hide a new deck. */
   id: string;
@@ -55,6 +69,17 @@ export interface CustomDeck {
   updatedAt?: string;
   /** Set when the deck was deleted. The deck is then a tombstone, not a deck. */
   deletedAt?: string;
+  /** Where the deck's words came from, when it was built from a book or passage. Never on a tombstone. */
+  source?: DeckSource;
+}
+
+/** A deck source from untrusted input, or null when it is not a valid range. */
+export function parseDeckSource(raw: unknown): DeckSource | null {
+  if (!isRecord(raw)) return null;
+  const { book, startChapter, startVerse, endChapter, endVerse } = raw;
+  const range = { book, startChapter, startVerse, endChapter, endVerse } as DeckSource;
+  if (typeof book !== 'string') return null;
+  return rangeError(range) === null ? range : null;
 }
 
 /**
@@ -65,7 +90,7 @@ export interface CustomDeck {
  */
 export function parseDeck(raw: unknown): CustomDeck | null {
   if (!isRecord(raw)) return null;
-  const { id, name, wordKeys, createdAt, updatedAt, deletedAt } = raw;
+  const { id, name, wordKeys, createdAt, updatedAt, deletedAt, source } = raw;
   if (typeof id !== 'string' || id.length === 0 || id.length > MAX_ID_LENGTH) return null;
   if (typeof name !== 'string' || name.length > MAX_DECK_NAME) return null;
   if (!isIso(createdAt)) return null;
@@ -75,6 +100,9 @@ export function parseDeck(raw: unknown): CustomDeck | null {
   if (wordKeys.some((k) => typeof k !== 'string' || k.length === 0 || k.length > MAX_KEY_LENGTH)) {
     return null;
   }
+  // Absent and null are both "no source": a database column reads back null.
+  const parsedSource = source === undefined || source === null ? null : parseDeckSource(source);
+  if (source !== undefined && source !== null && parsedSource === null) return null;
 
   const deck: CustomDeck = {
     id,
@@ -84,6 +112,7 @@ export function parseDeck(raw: unknown): CustomDeck | null {
   };
   if (updatedAt !== undefined) deck.updatedAt = updatedAt;
   if (deletedAt !== undefined) deck.deletedAt = deletedAt;
+  else if (parsedSource) deck.source = parsedSource;
   return deck;
 }
 
@@ -129,7 +158,25 @@ export function mergeCustomDecks(
   b: CustomDeck[],
   now: Date = new Date(),
 ): CustomDeck[] {
-  return mergeTombstoned(a, b, now);
+  // A deck's source never changes once recorded except by a rebuild, which
+  // writes a new one. So a live winner with no source takes the other side's:
+  // that is a copy from a client that predates the field (greek.tools before
+  // #242, or any page loaded before this shipped), which parsed the deck,
+  // dropped what it did not know, and pushed it back. Without this, one stale
+  // tab would strip every deck's chapters. Symmetric: whichever side wins, a
+  // source on either side survives.
+  // Where the two sides hold different sources, the later edit's is the one.
+  const sources = new Map<string, { stamp: string; source: DeckSource }>();
+  for (const deck of [...a, ...b]) {
+    if (!deck.source) continue;
+    const held = sources.get(deck.id);
+    const stamp = `${stampOf(deck)}\u0000${JSON.stringify(deck.source)}`;
+    if (!held || stamp > held.stamp) sources.set(deck.id, { stamp, source: deck.source });
+  }
+  return mergeTombstoned(a, b, now).map((deck) => {
+    const held = sources.get(deck.id)?.source;
+    return isLive(deck) && !deck.source && held ? { ...deck, source: held } : deck;
+  });
 }
 
 // ─── Rules about names and words ─────────────────────────────────────────────
@@ -191,10 +238,16 @@ export interface CustomDeckStore {
   load(): CustomDeck[];
   /** Replace what is stored. Throws when storage cannot be written. */
   saveAll(decks: CustomDeck[]): void;
-  /** Throws when storage cannot be written. */
-  create(name: string, wordKeys: string[]): CustomDeck;
-  /** Returns the live decks. */
-  update(id: string, patch: { name?: string; wordKeys?: string[] }): CustomDeck[];
+  /** Throws when storage cannot be written. `source` is given only by a deck built from the text. */
+  create(name: string, wordKeys: string[], source?: DeckSource): CustomDeck;
+  /**
+   * Returns the live decks. An edit keeps the deck's source; `source` replaces
+   * it, for a deck rebuilt from the text.
+   */
+  update(
+    id: string,
+    patch: { name?: string; wordKeys?: string[]; source?: DeckSource },
+  ): CustomDeck[];
   /** Tombstones the deck. Returns the live decks. */
   remove(id: string): CustomDeck[];
 }
@@ -236,7 +289,7 @@ export function createCustomDeckStore(
     loadAll,
     load: () => live(loadAll()),
     saveAll,
-    create(name, wordKeys) {
+    create(name, wordKeys, source) {
       const stamp = clock().toISOString();
       const deck: CustomDeck = {
         id: crypto.randomUUID(),
@@ -245,6 +298,7 @@ export function createCustomDeckStore(
         createdAt: stamp,
         updatedAt: stamp,
       };
+      if (source) deck.source = { ...source };
       saveAll([...loadAll(), deck]);
       return deck;
     },
@@ -254,14 +308,69 @@ export function createCustomDeckStore(
         name: patch.name === undefined ? deck.name : patch.name.trim(),
         wordKeys:
           patch.wordKeys === undefined ? deck.wordKeys : [...new Set(patch.wordKeys)].sort(),
+        ...(patch.source && { source: { ...patch.source } }),
         updatedAt: stamp,
       })),
     remove: (id) =>
-      change(id, (deck, stamp) => ({
-        ...deck,
-        wordKeys: [],
-        updatedAt: stamp,
-        deletedAt: stamp,
-      })),
+      change(id, (deck, stamp) => {
+        const { source: _dropped, ...rest } = deck;
+        return { ...rest, wordKeys: [], updatedAt: stamp, deletedAt: stamp };
+      }),
+  };
+}
+
+// ─── The database row ────────────────────────────────────────────────────────
+
+/** A `custom_decks` row as both apps' progress stores read and write it, less the user and language. */
+export interface StoredDeckRow {
+  id: string;
+  name: string;
+  /** JSON text. */
+  wordKeys: string;
+  createdAt: string;
+  /** '' for a row written before the column existed. */
+  updatedAt: string;
+  deletedAt: string | null;
+  /** JSON text, or null for a deck with no source (every deck before migration 0007). */
+  source: string | null;
+}
+
+function parseJson(text: string | null): unknown {
+  if (text === null) return undefined;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * A stored row as the object `parseDeck` reads. Unreadable word keys read as
+ * none, and an unreadable source as no source: a damaged column costs a deck
+ * its words or its chapters, never the deck.
+ */
+export function deckFromRow(row: StoredDeckRow): unknown {
+  const source = parseDeckSource(parseJson(row.source));
+  return {
+    id: row.id,
+    name: row.name,
+    wordKeys: parseJson(row.wordKeys) ?? [],
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt || undefined,
+    deletedAt: row.deletedAt ?? undefined,
+    ...(source && { source }),
+  };
+}
+
+/** The row a deck is stored as. */
+export function rowFromDeck(deck: CustomDeck): StoredDeckRow {
+  return {
+    id: deck.id,
+    name: deck.name,
+    wordKeys: JSON.stringify(deck.wordKeys),
+    createdAt: deck.createdAt,
+    updatedAt: deck.updatedAt ?? '',
+    deletedAt: deck.deletedAt ?? null,
+    source: deck.source ? JSON.stringify(deck.source) : null,
   };
 }

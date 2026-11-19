@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   type CustomDeck,
   createCustomDeck,
+  type DeckSource,
   deleteCustomDeck,
   loadCustomDecks,
   updateCustomDeck,
@@ -9,7 +10,7 @@ import {
 import { type BookMeta, fetchBook, fetchBooks, type MorphBook } from '../data/morphgnt';
 import { getStudiedLemmas, normalizeKey } from '../data/srs';
 import { vocabulary } from '../data/vocabulary-all';
-import { getBookWordKeys } from '../lib/book-deck';
+import { getBookDeck } from '../lib/book-deck';
 import {
   buildVocabMap,
   extractPassageLemmas,
@@ -53,6 +54,8 @@ export default function DeckBuilder({
   const [fromBookCode, setFromBookCode] = useState('');
   const [fromBookName, setFromBookName] = useState('');
   const [fromBookWordKeys, setFromBookWordKeys] = useState<string[]>([]);
+  // The whole book as the deck's source (#270), so it can be studied by chapter.
+  const [fromBookSource, setFromBookSource] = useState<DeckSource | null>(null);
   const [fromBookLoading, setFromBookLoading] = useState(false);
   const [fromBookError, setFromBookError] = useState('');
   const [fromBookNameError, setFromBookNameError] = useState('');
@@ -222,12 +225,14 @@ export default function DeckBuilder({
     setFromBookCode(code);
     setFromBookName(meta.name);
     setFromBookWordKeys([]);
+    setFromBookSource(null);
     setFromBookError('');
     setFromBookLoading(true);
 
     try {
-      const keys = await getBookWordKeys(code);
-      setFromBookWordKeys(keys);
+      const { wordKeys, source } = await getBookDeck(code);
+      setFromBookWordKeys(wordKeys);
+      setFromBookSource(source);
     } catch {
       setFromBookError('Could not load book data. Try again.');
     } finally {
@@ -253,7 +258,7 @@ export default function DeckBuilder({
     }
     setFromBookNameError('');
 
-    createCustomDeck(trimmed, fromBookWordKeys.sort());
+    createCustomDeck(trimmed, fromBookWordKeys, fromBookSource ?? undefined);
     onDecksChange(loadCustomDecks());
     setView('list');
   }
@@ -604,7 +609,15 @@ export default function DeckBuilder({
       return;
     }
     setPassageSaveError('');
-    const newDeck = createCustomDeck(trimmed, previewLemmas);
+    // The range is the deck's source (#267, #270), even when "new words only"
+    // left some of its words out: it is the text the student chose.
+    const newDeck = createCustomDeck(trimmed, previewLemmas, {
+      book: passageBookCode,
+      startChapter: parseInt(passageStartCh, 10),
+      startVerse: parseInt(passageStartVs, 10),
+      endChapter: parseInt(passageEndCh, 10),
+      endVerse: parseInt(passageEndVs, 10),
+    });
     onDecksChange(loadCustomDecks());
     onActivateDeck(newDeck.id);
     onClose();

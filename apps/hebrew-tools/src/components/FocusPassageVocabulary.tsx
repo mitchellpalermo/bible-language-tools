@@ -1,4 +1,4 @@
-import { maturityLevel } from '@tools/shared/focus-passages';
+import { maturityLevel, type PassageRange } from '@tools/shared/focus-passages';
 import { useEffect, useState } from 'react';
 import type { LemmaIndex } from '../data/morphhb';
 import { loadSRSStore, type SRSCard } from '../data/srs';
@@ -16,10 +16,13 @@ const LEVEL_LABEL = ['New', 'Learning', 'Familiar', 'Mature'] as const;
 export function StudyDeckButton({
   title,
   vocabulary,
+  source,
   label = 'Study these words',
 }: {
   title: string;
   vocabulary: PassageVocabulary;
+  /** The passage's range, saved as the deck's source (#267, #270). */
+  source?: PassageRange;
   label?: string;
 }) {
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +30,17 @@ export function StudyDeckButton({
 
   function study() {
     try {
-      saveStudyDeck(title, keys);
+      saveStudyDeck(
+        title,
+        keys,
+        source && {
+          book: source.book,
+          startChapter: source.startChapter,
+          startVerse: source.startVerse,
+          endChapter: source.endChapter,
+          endVerse: source.endVerse,
+        },
+      );
       window.location.href = '/flashcards';
     } catch {
       setError('The deck could not be saved. This browser may be out of storage.');
@@ -59,10 +72,12 @@ export default function FocusPassageVocabulary({
   title,
   vocabulary,
   lemmas,
+  source,
 }: {
   title: string;
   vocabulary: PassageVocabulary;
   lemmas: LemmaIndex | null;
+  source?: PassageRange;
 }) {
   // Read after mount: the first render matches the server's, which has no store.
   const [store, setStore] = useState<Record<string, SRSCard>>({});
@@ -77,7 +92,7 @@ export default function FocusPassageVocabulary({
           <h2 className="text-lg font-bold text-text">
             {words.length} course {words.length === 1 ? 'word' : 'words'}
           </h2>
-          <StudyDeckButton title={title} vocabulary={vocabulary} />
+          <StudyDeckButton title={title} vocabulary={vocabulary} source={source} />
         </div>
         <p className="text-sm text-text-muted max-w-xl">
           Words from your course vocabulary that this passage uses, commonest here first. Studying

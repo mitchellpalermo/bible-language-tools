@@ -11,7 +11,7 @@ vi.mock('../data/vocabulary', () => ({
 }));
 
 import { fetchBook } from '../data/morphgnt';
-import { getBookWordKeys } from './book-deck';
+import { getBookDeck, getBookWordKeys, greekKeysOf, loadGreekSource } from './book-deck';
 
 const mockFetchBook = vi.mocked(fetchBook);
 
@@ -110,5 +110,37 @@ describe('getBookWordKeys', () => {
     mockFetchBook.mockRejectedValue(new Error('HTTP 404'));
 
     await expect(getBookWordKeys('PHM')).rejects.toThrow('HTTP 404');
+  });
+});
+
+describe('getBookDeck', () => {
+  it('records the whole book as the deck’s source (#270)', async () => {
+    mockFetchBook.mockResolvedValue({
+      '1': { '1': [word('ὁ')], '2': [word('καί')] },
+      '2': { '1': [word('λόγος')], '9': [word('ὁ')] },
+    });
+    const { wordKeys, source } = await getBookDeck('JHN');
+    expect(wordKeys.sort()).toEqual(['καί', 'λόγος', 'ὁ'].sort());
+    expect(source).toEqual({
+      book: 'JHN',
+      startChapter: 1,
+      startVerse: 1,
+      endChapter: 2,
+      endVerse: 9,
+    });
+  });
+});
+
+describe('the word join for chapters and verses', () => {
+  it('a word is an occurrence of its lemma’s card, and of nothing when there is none', () => {
+    expect(greekKeysOf(word('λόγος'))).toEqual(['λόγος']);
+    expect(greekKeysOf(word('Μελχισέδεκ'))).toEqual([]);
+  });
+
+  it('loads a book with that join', async () => {
+    mockFetchBook.mockResolvedValue({ '1': { '1': [word('καί')] } });
+    const loaded = await loadGreekSource('PHM');
+    expect(mockFetchBook).toHaveBeenCalledWith('PHM');
+    expect(loaded.keysOf).toBe(greekKeysOf);
   });
 });

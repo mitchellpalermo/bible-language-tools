@@ -35,6 +35,20 @@ describe('saveStudyDeck', () => {
     expect(customDeckStore.load()[0].wordKeys).toEqual(['a', 'c']);
   });
 
+  it('records the passage’s range as the deck’s source (#267, #270)', () => {
+    const range = { book: 'GEN', startChapter: 1, startVerse: 1, endChapter: 2, endVerse: 3 };
+    saveStudyDeck('Creation', ['a'], range);
+    expect(customDeckStore.load()[0].source).toEqual(range);
+  });
+
+  it('gives a deck saved before sources existed one when its passage is studied again', () => {
+    saveStudyDeck('Creation', ['a']);
+    expect(customDeckStore.load()[0]).not.toHaveProperty('source');
+    const range = { book: 'GEN', startChapter: 1, startVerse: 1, endChapter: 2, endVerse: 3 };
+    saveStudyDeck('Creation', ['a'], range);
+    expect(customDeckStore.load()[0].source).toEqual(range);
+  });
+
   it('gives each passage its own deck', () => {
     saveStudyDeck('Genesis 1:1–5', ['a']);
     saveStudyDeck('Psalm 23', ['b']);

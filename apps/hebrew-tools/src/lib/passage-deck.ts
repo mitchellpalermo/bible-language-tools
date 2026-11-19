@@ -11,7 +11,7 @@
 // fixed), but the vocabulary can, and a deck that followed it would reshuffle
 // under a student mid-review.
 
-import { MAX_DECK_NAME } from '@tools/shared/custom-decks';
+import { type DeckSource, MAX_DECK_NAME } from '@tools/shared/custom-decks';
 import { customDeckStore } from './custom-decks';
 import { loadSelection, saveSelection } from './deck-selection';
 
@@ -24,18 +24,20 @@ export function passageDeckName(title: string): string {
 /**
  * Save the passage's words as a deck and make it the one the flashcards open
  * on. Studying a passage twice updates its deck rather than stacking a second,
- * which is what looking it up by name is for. Returns the deck's id. Throws if
- * storage cannot be written, and changes nothing then.
+ * which is what looking it up by name is for. The passage's range is the deck's
+ * source (#267, #270), so a deck saved before sources existed gains one the
+ * next time its passage is studied. Returns the deck's id. Throws if storage
+ * cannot be written, and changes nothing then.
  */
-export function saveStudyDeck(title: string, wordKeys: string[]): string {
+export function saveStudyDeck(title: string, wordKeys: string[], source?: DeckSource): string {
   const name = passageDeckName(title);
   const held = customDeckStore.load().find((d) => d.name === name);
   let id: string;
   if (held) {
-    customDeckStore.update(held.id, { wordKeys });
+    customDeckStore.update(held.id, { wordKeys, ...(source && { source }) });
     id = held.id;
   } else {
-    id = customDeckStore.create(name, wordKeys).id;
+    id = customDeckStore.create(name, wordKeys, source).id;
   }
   saveSelection({ ...loadSelection(), deck: 'custom', customDeckId: id });
   return id;

@@ -33,7 +33,7 @@ const stats: StudyStats = {
 const deck: CustomDeck = {
   id: 'deck-1',
   name: 'John 1 vocab',
-  wordKeys: ['λόγος', 'θεός', 'ἀρχή'],
+  wordKeys: ['θεός', 'λόγος', 'ἀρχή'],
   createdAt: '2026-06-01T12:00:00.000Z',
 };
 
@@ -165,7 +165,7 @@ describe('progress-store', () => {
     expect(syncedAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
   });
 
-  it('replaces prior progress entirely on put', async () => {
+  it('replaces prior progress entirely on put, except decks, which merge (#242)', async () => {
     await putProgress(db, USER_ID, {
       srsStore: { λόγος: makeCard('λόγος') },
       studyStats: stats,
@@ -184,7 +184,9 @@ describe('progress-store', () => {
     const result = await getProgress(db, USER_ID);
     expect(Object.keys(result?.srsStore ?? {})).toEqual(['καί']);
     expect(result?.studyStats.totalReviewed).toBe(300);
-    expect(result?.customDecks).toEqual([]);
+    // A push without a deck is a device that has not seen it, not a deletion:
+    // deleting is a tombstone, as on hebrew.tools.
+    expect(result?.customDecks?.map((d) => d.id)).toEqual([deck.id]);
     expect(result?.focusPassages).toEqual([]);
     expect(result?.parseHistory).toEqual({});
   });
@@ -425,5 +427,49 @@ describe('progress-store', () => {
     expect(statements.length).toBeGreaterThan(0);
     const result = await getProgress(db, USER_ID);
     expect(result?.srsStore['λόγος']).toEqual(makeCard('λόγος'));
+  });
+});
+
+describe('custom decks on the shared rules (#242, #270)', () => {
+  let db: ProgressDb;
+  beforeEach(async () => {
+    db = createTestDb() as unknown as ProgressDb;
+    await db
+      .insert(users)
+      .values({ id: USER_ID, email: 'test@example.com', createdAt: new Date('2026-01-01') });
+  });
+  const ROM = { book: 'ROM', startChapter: 1, startVerse: 1, endChapter: 16, endVerse: 27 };
+  const payload = (customDecks: CustomDeck[]) => ({
+    srsStore: {},
+    studyStats: stats,
+    customDecks,
+    focusPassages: [],
+    parseHistory: {},
+  });
+
+  it('round-trips a deck’s source and its update stamp', async () => {
+    const sourced = { ...deck, updatedAt: '2026-06-02T00:00:00.000Z', source: ROM };
+    await putProgress(db, USER_ID, payload([sourced]));
+    expect((await getProgress(db, USER_ID))?.customDecks).toEqual([sourced]);
+  });
+
+  it('a deletion is a tombstone that a stale device cannot undo', async () => {
+    await putProgress(db, USER_ID, payload([deck]));
+    const tomb = {
+      ...deck,
+      wordKeys: [],
+      updatedAt: new Date().toISOString(),
+      deletedAt: new Date().toISOString(),
+    };
+    await putProgress(db, USER_ID, payload([tomb]));
+    await putProgress(db, USER_ID, payload([deck]));
+    const [only] = (await getProgress(db, USER_ID))?.customDecks ?? [];
+    expect(only.deletedAt).toBeDefined();
+  });
+
+  it('a page from before sources cannot strip one', async () => {
+    await putProgress(db, USER_ID, payload([{ ...deck, source: ROM }]));
+    await putProgress(db, USER_ID, payload([deck]));
+    expect((await getProgress(db, USER_ID))?.customDecks?.[0].source).toEqual(ROM);
   });
 });

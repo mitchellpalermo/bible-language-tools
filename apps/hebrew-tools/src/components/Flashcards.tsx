@@ -3,6 +3,7 @@ import DrillButtons from '@tools/shared/components/DrillButtons';
 import GradeButtons from '@tools/shared/components/GradeButtons';
 import ToggleSwitch from '@tools/shared/components/ToggleSwitch';
 import { type CustomDeck, deckRestartPart, findDeck } from '@tools/shared/custom-decks';
+import { describeSource } from '@tools/shared/deck-source';
 import {
   type AnswerMode,
   type FlashcardSessionEvent,
@@ -10,8 +11,10 @@ import {
   type StudyMode,
   useFlashcardSession,
 } from '@tools/shared/use-flashcard-session';
+import { useSourcedDeck } from '@tools/shared/use-sourced-deck';
 import posthog from 'posthog-js';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { fetchBooks, type HebrewBookMeta } from '../data/morphhb';
 import {
   loadSRSStore,
   loadStats,
@@ -32,7 +35,9 @@ import {
   wordsInChapters,
 } from '../data/textbooks';
 import { cardKey, type HebrewVocabWord, vocabulary } from '../data/vocabulary';
+import { buildBookDeck, loadHebrewSource } from '../lib/book-deck';
 import { builderWords, customDeckStore, wordsOfDeck } from '../lib/custom-decks';
+import { deckChapterMemory } from '../lib/deck-chapters';
 import {
   type DeckSelection,
   effectiveSelection,
@@ -51,6 +56,7 @@ import { type CardFilters, hasFilters, matchesFilters, NO_FILTERS } from '../lib
 import { loadFlashcardSettings, saveFlashcardSettings } from '../lib/flashcard-settings';
 import { useKeypad } from '../lib/use-keypad';
 import ChapterPicker from './ChapterPicker';
+import DeckVerse from './DeckVerse';
 import ErrorBoundary from './ErrorBoundary';
 import FlashcardFilters from './FlashcardFilters';
 import VocabCard from './VocabCard';
@@ -171,18 +177,42 @@ function FlashcardsInner() {
   const customDeck = findDeck(customDecks, selection.customDeckId);
   const builderVocabulary = useMemo(() => builderWords(), []);
 
+  // A deck built from a book or passage (#267, #270): its text, the chapters
+  // chosen for it (remembered per deck on this browser), and its verses.
+  const sourced = useSourcedDeck(customDeck, loadHebrewSource, deckChapterMemory);
+
+  // The book list, for the builder's "From a book" and for naming a deck's
+  // book. Fetched only once one of those is on screen, never on page load.
+  const [books, setBooks] = useState<HebrewBookMeta[] | null>(null);
+  const needBooks = showDeckBuilder || customDeck?.source !== undefined;
+  useEffect(() => {
+    if (!needBooks || books !== null) return;
+    let cancelled = false;
+    fetchBooks()
+      .then((list) => {
+        if (!cancelled) setBooks(list);
+      })
+      .catch(() => {
+        // No "From a book", and a deck's book goes by its code.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [needBooks, books]);
+  const bookName = (code: string) => books?.find((b) => b.code === code)?.name ?? code;
+  const fromBook = useMemo(() => (books ? { books, build: buildBookDeck } : undefined), [books]);
+
   // Filter (only meaningful for the whole-vocabulary deck)
   const [freqFilter, setFreqFilter] = useState<FreqFilter>('all');
 
   // Card face — how much of the card is visible before you answer.
-  const [showPartOfSpeech, setShowPartOfSpeech] = useState(
-    () => loadFlashcardSettings().showPartOfSpeech,
-  );
+  const [cardFace, setCardFace] = useState(loadFlashcardSettings);
+  const { showPartOfSpeech, showVerse } = cardFace;
 
-  const togglePartOfSpeech = useCallback(() => {
-    setShowPartOfSpeech((prev) => {
-      const next = !prev;
-      saveFlashcardSettings({ showPartOfSpeech: next });
+  const toggleSetting = useCallback((field: 'showPartOfSpeech' | 'showVerse') => {
+    setCardFace((prev) => {
+      const next = { ...prev, [field]: !prev[field] };
+      saveFlashcardSettings(next);
       return next;
     });
   }, []);
@@ -203,11 +233,19 @@ function FlashcardsInner() {
   // A textbook or custom selection is already a deliberate set, so the
   // frequency bands don't apply to it — they only narrow the whole vocabulary.
   const deckWords = useMemo(() => {
-    if (customDeck) return wordsOfDeck(customDeck);
+    // Narrowed to the chosen chapters of its source, when it has one.
+    if (customDeck) return sourced.narrow(wordsOfDeck(customDeck), srsKey);
     return textbookId
       ? wordsInChapters(textbookId, selection.chapters, selection.categories)
       : vocabulary.filter((w) => matchFreq(w.frequency, freqFilter));
-  }, [customDeck, textbookId, selection.chapters, selection.categories, freqFilter]);
+  }, [
+    customDeck,
+    sourced.narrow,
+    textbookId,
+    selection.chapters,
+    selection.categories,
+    freqFilter,
+  ]);
 
   // The part-of-speech and root filters compose with any deck: the whole
   // vocabulary, a textbook's chapters, a custom or passage deck.
@@ -242,8 +280,16 @@ function FlashcardsInner() {
       case 'session_started':
         posthog.capture('hebrew_flashcard_session_started', {
           deck_size: event.deckSize,
-          deck: selection.deck === 'all' ? 'all-vocabulary' : selection.deck,
-          chapters: selection.chapters.length > 0 ? selection.chapters.length : 'all',
+          deck:
+            selection.deck === 'all'
+              ? 'all-vocabulary'
+              : customDeck?.source
+                ? 'custom-source'
+                : selection.deck,
+          chapters: (() => {
+            const chosen = customDeck ? sourced.chapters : selection.chapters;
+            return chosen.length > 0 ? chosen.length : 'all';
+          })(),
           categories: selection.categories.join(','),
           study_mode: event.studyMode,
           direction,
@@ -320,6 +366,8 @@ function FlashcardsInner() {
       selection,
       freqFilter,
       deckRestartPart(customDeck),
+      // The chosen chapters of a deck built from the text (#270).
+      sourced.restartPart,
       [...filters.partsOfSpeech].sort(),
       [...filters.roots].sort(),
       [...leftOut].sort(),
@@ -409,6 +457,10 @@ function FlashcardsInner() {
   }
 
   // ─── Empty state ─────────────────────────────────────────────────────────────
+
+  if (!card && sourced.pending) {
+    return <p className="text-center py-16 text-text-muted">Loading the chapters…</p>;
+  }
 
   if (!card) {
     const outline =
@@ -577,6 +629,30 @@ function FlashcardsInner() {
           labelDir="rtl"
           labelLang="he"
           labelFontFamily="var(--font-hebrew, 'Noto Sans Hebrew', sans-serif)"
+          fromBook={fromBook}
+        />
+      )}
+
+      {/* ── Chapters of a deck built from the text (#270) ─────────────────── */}
+      {/* A chapter is a filter over the deck's words: a word in several
+          chapters is in each of them, as one card with one schedule. */}
+      {customDeck && sourced.text && sourced.pickerChapters && (
+        <ChapterPicker
+          textbook={{
+            id: customDeck.id,
+            shortTitle: customDeck.name,
+            title: describeSource(
+              sourced.text.index.range,
+              sourced.text.book,
+              bookName(sourced.text.index.range.book),
+            ),
+            authors: 'Westminster Leningrad Codex',
+            unitLabel: 'Ch.',
+          }}
+          chapters={sourced.pickerChapters}
+          selected={sourced.chapters}
+          onChange={sourced.setChapters}
+          wordCount={filteredVocab.length}
         />
       )}
 
@@ -701,12 +777,25 @@ function FlashcardsInner() {
           <div className="flex items-center bg-white border border-primary/10 px-3 py-1 rounded-xl shadow-sm">
             <ToggleSwitch
               checked={showPartOfSpeech}
-              onChange={togglePartOfSpeech}
+              onChange={() => toggleSetting('showPartOfSpeech')}
               label="Part of speech"
               accent="var(--color-primary, #15803D)"
               title="Show the part of speech on the front of the card. It is always shown with the answer."
             />
           </div>
+
+          {/* The verse on reveal (#267): only a deck built from the text has one. */}
+          {customDeck?.source && (
+            <div className="flex items-center bg-white border border-primary/10 px-3 py-1 rounded-xl shadow-sm">
+              <ToggleSwitch
+                checked={showVerse}
+                onChange={() => toggleSetting('showVerse')}
+                label="Verse"
+                accent="var(--color-primary, #15803D)"
+                title="Show a verse from the deck's text with the answer."
+              />
+            </div>
+          )}
 
           {/* Filters toggle */}
           <button
@@ -877,6 +966,19 @@ function FlashcardsInner() {
           onToggleKeypad: keypad.toggle,
         }}
       />
+
+      {/* ── The word in its text (#267) ───────────────────────────────────── */}
+      {/* Part of the answer, so only once revealed. Keyed by card, so the next
+          card starts on its own first occurrence. */}
+      {revealed && showVerse && sourced.text && (
+        <DeckVerse
+          key={srsKey(card)}
+          text={sourced.text}
+          bookName={bookName(sourced.text.index.range.book)}
+          occurrences={sourced.occurrencesOf(srsKey(card))}
+          headword={card.hebrew}
+        />
+      )}
 
       {/* ── Action buttons ────────────────────────────────────────────────── */}
       {/* The SRS grades schedule the card, so they preview the interval each
