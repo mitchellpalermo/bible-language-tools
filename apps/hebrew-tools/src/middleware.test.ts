@@ -169,3 +169,44 @@ describe('hint cookie synchronization', () => {
     expect(response.headers.get('set-cookie')).toContain('ht-auth=1');
   });
 });
+
+describe('cross-site form check', () => {
+  // Astro's checkOrigin is off so Apple's form POST can reach its callback;
+  // this middleware is what keeps every other route behind the same check.
+  function crossSite(path: string) {
+    vi.clearAllMocks();
+    const { locals, next } = makeContext(null);
+    const request = new Request(`https://example.test${path}`, {
+      method: 'POST',
+      headers: {
+        origin: 'https://appleid.apple.com',
+        'content-type': 'application/x-www-form-urlencoded',
+      },
+    });
+    return { locals, request, next };
+  }
+
+  it('refuses a cross-site form POST before resolving a session', async () => {
+    const { locals, request, next } = crossSite('/api/auth/signout');
+
+    const response = await onRequest({ locals, request } as never, next);
+
+    expect((response as Response).status).toBe(403);
+    expect(next).not.toHaveBeenCalled();
+    expect(createAuth).not.toHaveBeenCalled();
+  });
+
+  it("lets Apple's form POST reach its callback", async () => {
+    const { locals, request, next } = crossSite('/api/auth/callback/apple');
+
+    await onRequest({ locals, request } as never, next);
+
+    expect(next).toHaveBeenCalled();
+  });
+
+  it("turns Astro's own check off, which would refuse the Apple callback", async () => {
+    const { readFileSync } = await import('node:fs');
+    const config = readFileSync(new URL('../astro.config.mjs', import.meta.url), 'utf8');
+    expect(config).toMatch(/security:\s*\{\s*checkOrigin:\s*false\s*\}/);
+  });
+});

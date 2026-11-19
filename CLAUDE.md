@@ -82,6 +82,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/components/TodaySession` | `BudgetPicker` (20 / 45 / 90 minutes) and `SessionSummaryCard` (React) |
 | `@tools/shared/test/hydration` | `hydrationErrors(ui, { seed })` — test helper: server-render with storage hidden, seed, hydrate, return every mismatch React reports |
 | `@tools/shared/apple-sign-in` | Sign in with Apple's settings and client secret: `readAppleConfig(env)` (null unless all four `APPLE_*` values are set), `resolveAppleCredentials(env)` for the auth route, the ES256 signing and its per-isolate cache. See "Sign in with Apple" below |
+| `@tools/shared/origin-check` | `crossSiteRefusal(request)` — Astro's cross-site form check, run by each app's middleware with Apple's callback exempt; `CROSS_SITE_POST_PATHS`. See "Sign in with Apple" below |
 | `@tools/shared/reset-progress` | `resetSrsProgress` and `isResetConfirmed` — erase the SRS store, this browser first, then the account copy via `DELETE`; a server failure never undoes the local reset |
 | `@tools/shared/nav` | `NavLink` type and the active-route predicates the nav renders with |
 | `@tools/shared/nav-menu` | `initNavMenu()` — DOM controller for the mobile drawer |
@@ -900,6 +901,18 @@ Things to know before changing it:
   Apple returns by cross-site form POST, which Better Auth's origin check would
   otherwise refuse whenever the browser sends a cookie. Vitest skips that check,
   so `auth.test.ts` asserts the list rather than the refusal.
+- **Astro's `security.checkOrigin` is off in both apps, and the middleware
+  does its job.** Apple's form POST to `/api/auth/callback/apple` is
+  cross-site, and Astro's check refuses every cross-site form POST with no way
+  to exempt a route: the first production Apple sign-in ended on a bare "Cross-site POST form
+  submissions are forbidden" page (Nov 2026), which Better Auth never saw. Each
+  app's `middleware.ts` now calls `crossSiteRefusal` (`@tools/shared/origin-check`)
+  before anything else: Astro's rule, unchanged, except for the exact paths in
+  `CROSS_SITE_POST_PATHS`. Turning the config off without the middleware call
+  would drop CSRF protection from every route; each app's `middleware.test.ts`
+  pins both halves. Unit tests never saw this because they call the route
+  handler directly, below Astro's pipeline. Another provider that returns by
+  form POST needs its callback added to that list.
 - **Apple sends the name once**, on a person's first Apple sign-in, and may send
   a private relay address. We send no email, so the relay needs no setup; but a
   relay address never matches a Google email, so it makes a second account.

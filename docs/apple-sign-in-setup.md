@@ -20,7 +20,10 @@ not in an issue, not in a chat.
   needs it and reuses it for up to 30 days, so there is nothing to renew by hand.
 - **Apple answers with a cross-site form POST** (`response_mode=form_post`) from
   `https://appleid.apple.com`. Better Auth turns it into a same-site GET, and the
-  auth config trusts that origin only while Apple is configured.
+  auth config trusts that origin only while Apple is configured. Astro's own
+  cross-site form check would refuse the POST before Better Auth saw it, so it
+  is off in both apps and the middleware runs the same check with this one
+  callback exempt (`@tools/shared/origin-check`).
 - **Apple sends the name once**, on a person's first Apple sign-in. Better Auth
   stores it then; later sign-ins carry only the email.
 - **"Hide My Email"** gives us an `…@privaterelay.appleid.com` address. We send

@@ -1,8 +1,14 @@
 import { defineMiddleware } from 'astro:middleware';
+import { crossSiteRefusal } from '@tools/shared/origin-check';
 import { createAuth } from './lib/auth';
 import { authHintClearCookie, authHintSetCookie } from './lib/auth-cookie';
 
 export const onRequest = defineMiddleware(async ({ locals, request }, next) => {
+  // Stands in for Astro's `security.checkOrigin`, which is off so that Apple's
+  // cross-site POST to its callback can arrive. Must run before anything else.
+  const refusal = crossSiteRefusal(request);
+  if (refusal) return refusal;
+
   const env = locals.runtime?.env;
   if (
     !env?.DB ||
