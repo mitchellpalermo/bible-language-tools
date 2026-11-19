@@ -12,11 +12,11 @@ import {
   type GNTParseResult,
   gradeGNTAnswer,
   sampleVerbs,
+  toSessionResults,
 } from '../lib/gnt-parse';
 import { formatPassageRef } from '../lib/passage-deck';
 import GNTFeedback from './GNTFeedback';
 import GNTParseQuestion from './GNTParseQuestion';
-import type { SessionResults } from './ParseResults';
 import ParseResults from './ParseResults';
 
 type Phase = 'select' | 'question' | 'feedback' | 'results';
@@ -145,17 +145,7 @@ export default function FocusPassageParsing({ passage, bookName }: Props) {
     }
   }
 
-  const sessionResults: SessionResults = {
-    results: results.map((r) => ({
-      tense: r.tense,
-      voice: r.voice,
-      mood: r.mood,
-      person: r.person ?? true,
-      number: r.number ?? true,
-      allCorrect: r.allCorrect,
-    })),
-    total: session.length,
-  };
+  const sessionResults = toSessionResults(results, session.length);
 
   if (phase === 'question' && session[currentIndex]) {
     return (

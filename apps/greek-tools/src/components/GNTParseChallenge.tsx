@@ -18,11 +18,11 @@ import {
   loadGNTSettings,
   sampleVerbs,
   saveGNTSettings,
+  toSessionResults,
 } from '../lib/gnt-parse';
 import ErrorBoundary from './ErrorBoundary';
 import GNTFeedback from './GNTFeedback';
 import GNTParseQuestion from './GNTParseQuestion';
-import type { SessionResults } from './ParseResults';
 import ParseResults from './ParseResults';
 import PassageSelector from './PassageSelector';
 
@@ -156,19 +156,7 @@ function GNTParseChallengeInner() {
     }
   }
 
-  // Adapt GNTParseResult[] → ParseResult[] for the shared ParseResults component
-  const sessionResults: SessionResults = {
-    results: results.map((r) => ({
-      tense: r.tense,
-      voice: r.voice,
-      mood: r.mood,
-      // For person/number/case/gender: count nulls as correct (not graded)
-      person: r.person ?? true,
-      number: r.number ?? true,
-      allCorrect: r.allCorrect,
-    })),
-    total: session.length,
-  };
+  const sessionResults = toSessionResults(results, session.length);
 
   if (!settingsLoaded) return null;
 

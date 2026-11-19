@@ -12,6 +12,7 @@ import {
   emptyGNTAnswer,
   extractVerbs,
   extractVerbsMultiChapter,
+  extractVerseVerbs,
   filterMissedItems,
   formatRangeRef,
   type GNTParseAnswer,
@@ -22,6 +23,7 @@ import {
   gradeGNTVoice,
   loadGNTSettings,
   sampleVerbs,
+  toSessionResults,
 } from './gnt-parse';
 
 // ---------------------------------------------------------------------------
@@ -858,5 +860,55 @@ describe('extractVerbsMultiChapter', () => {
     const book = makeMultiChapterBook();
     const items = extractVerbsMultiChapter(book, 4, 1, 4, 10, 'Test');
     expect(items).toHaveLength(0);
+  });
+});
+
+describe('extractVerseVerbs', () => {
+  const words = [
+    { text: 'Ἐν', lemma: 'ἐν', pos: 'P-', parsing: '--------' },
+    { text: 'ἦν', lemma: 'εἰμί', pos: 'V-', parsing: '3IAI-S--' },
+    { text: 'λέγων,', lemma: 'λέγω', pos: 'V-', parsing: '-PAPNSM-' },
+    { text: 'ἀκούειν', lemma: 'ἀκούω', pos: 'V-', parsing: '-PAN----' },
+  ];
+
+  it('returns every parsable verb of one verse in text order, under the given reference', () => {
+    const items = extractVerseVerbs(words, 'John 1:1');
+    expect(items.map((i) => [i.type, i.form, i.wordIndex, i.verseRef])).toEqual([
+      ['finite', 'ἦν', 1, 'John 1:1'],
+      ['participle', 'λέγων', 2, 'John 1:1'],
+      ['infinitive', 'ἀκούειν', 3, 'John 1:1'],
+    ]);
+  });
+
+  it('agrees with extractVerbs over the same verse', () => {
+    const book: MorphBook = { '1': { '1': words } };
+    expect(extractVerbs(book, '1', 'John', 1, 1)).toEqual(extractVerseVerbs(words, 'John 1:1'));
+  });
+
+  it('returns nothing for a verse with no verbs', () => {
+    expect(extractVerseVerbs(words.slice(0, 1), 'John 1:1')).toEqual([]);
+  });
+});
+
+describe('toSessionResults', () => {
+  it('counts a field the verb type has none of as right, and drops case and gender', () => {
+    const results: GNTParseResult[] = [
+      {
+        tense: true,
+        voice: false,
+        mood: true,
+        person: null,
+        number: null,
+        parseCase: null,
+        gender: null,
+        allCorrect: false,
+      },
+    ];
+    expect(toSessionResults(results, 3)).toEqual({
+      results: [
+        { tense: true, voice: false, mood: true, person: true, number: true, allCorrect: false },
+      ],
+      total: 3,
+    });
   });
 });

@@ -69,6 +69,18 @@ describe('parseShotList', () => {
     expect(err).toMatch(/shot 2: a shot must be an object/);
   });
 
+  it('refuses "before" on a shot, which only the list reads (PR #274)', () => {
+    expect(() => parseShotList({ app: 'greek', shots: [{ ...shot, before: false }] })).toThrow(
+      /shot 1: "before" belongs on the list/,
+    );
+  });
+
+  it('refuses keys it does not read, on the list and on a shot', () => {
+    expect(() =>
+      parseShotList({ app: 'greek', viewport: 'mobile', shots: [{ ...shot, wait: 500 }] }),
+    ).toThrow(/list: unknown key "viewport"[\s\S]*shot 1: unknown key "wait"/);
+  });
+
   it('rejects a non-object list', () => {
     expect(() => parseShotList([])).toThrow(/JSON object/);
   });
