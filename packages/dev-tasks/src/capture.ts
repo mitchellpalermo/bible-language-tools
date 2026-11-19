@@ -12,6 +12,7 @@ import {
   HIDE_DEV_TOOLBAR,
   type Label,
   SCRIPT_FONT,
+  TITLE_RULE,
   titleMatchesApp,
   uncoveredChars,
 } from './checks.ts';
@@ -74,7 +75,9 @@ async function captureOne(
 
     const title = await page.title();
     if (!titleMatchesApp(list.app, title))
-      throw new Error(`${where}: title "${title}" is not a ${list.app}.tools page`);
+      throw new Error(
+        `${where}: title "${title}" is not a ${list.app} page (expected ${TITLE_RULE[list.app]})`,
+      );
 
     await page.addStyleTag({ content: HIDE_DEV_TOOLBAR });
     for (const step of shot.steps) {
