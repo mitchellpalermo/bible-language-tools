@@ -15,6 +15,7 @@ interface Props {
   sessionResults: SessionResults;
   onRetry: () => void;
   onChangeSettings: () => void;
+  changeSettingsLabel?: string;
   onReviewMissed?: () => void;
   isReview?: boolean;
 }

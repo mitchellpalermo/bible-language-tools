@@ -287,6 +287,8 @@ export interface ParseResultsProps {
   properties: readonly ParseProperty[];
   onRetry: () => void;
   onChangeSettings: () => void;
+  /** The second button's text. A screen with no settings (greek.tools' /daily) names where it goes instead. */
+  changeSettingsLabel?: string;
   onReviewMissed?: () => void;
   isReview?: boolean;
 }
@@ -297,6 +299,7 @@ export function ParseResults({
   properties,
   onRetry,
   onChangeSettings,
+  changeSettingsLabel = 'Change Settings',
   onReviewMissed,
   isReview = false,
 }: ParseResultsProps) {
@@ -389,7 +392,7 @@ export function ParseResults({
           onClick={onChangeSettings}
           style={{ ...ACTION, background: CARD, color: TEXT }}
         >
-          Change Settings
+          {changeSettingsLabel}
         </button>
       </div>
       {onReviewMissed && missed > 0 && (

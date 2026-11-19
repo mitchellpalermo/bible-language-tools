@@ -1,7 +1,13 @@
 import type { Attempt } from '@tools/shared/attempt-log';
 import { mergeAttempts } from '@tools/shared/sync-merge';
 import { describe, expect, it } from 'vitest';
-import { parseConcept, parseHistoryAsAttempts, passageIdOfConcept } from './parse-attempts';
+import {
+  dailyParseConcept,
+  parseConcept,
+  parseFormConcept,
+  parseHistoryAsAttempts,
+  passageIdOfConcept,
+} from './parse-attempts';
 
 const logged = (passage: string, correct: boolean, at: number, id: string): Attempt => ({
   id,
@@ -73,5 +79,18 @@ describe('parseHistoryAsAttempts', () => {
     const a = parseHistoryAsAttempts({ p1: { correct: 3, total: 4 } }, []);
     expect(mergeAttempts(a, a)).toHaveLength(4);
     expect(mergeAttempts(a, [])).toEqual(mergeAttempts([], a));
+  });
+});
+
+describe('dailyParseConcept', () => {
+  const kind = { tense: 'aorist', voice: 'passive', mood: 'participle' };
+
+  it('keys a daily-verse answer by its tense, voice and mood', () => {
+    expect(dailyParseConcept(kind)).toBe('parse/daily/aorist-passive-participle');
+  });
+
+  it("stays out of Today's namespace and is never read as a passage", () => {
+    expect(dailyParseConcept(kind)).not.toBe(parseFormConcept(kind as never));
+    expect(passageIdOfConcept(dailyParseConcept(kind))).toBeNull();
   });
 });

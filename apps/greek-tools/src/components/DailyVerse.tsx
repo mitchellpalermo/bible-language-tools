@@ -10,13 +10,23 @@ import {
 } from '../data/dailyVerses';
 import { fetchBook, type MorphVerse, type MorphWord } from '../data/morphgnt';
 import { getStudiedLemmas } from '../data/srs';
+import { logAttempts } from '../lib/attempt-log';
+import { extractVerseVerbs, type GNTParseItem, type GNTParseResult } from '../lib/gnt-parse';
+import { dailyParseConcept } from '../lib/parse-attempts';
 import ErrorBoundary from './ErrorBoundary';
 import { type ActiveWord, WordPopup, WordToken } from './GreekText';
+import VerseParseQuiz from './VerseParseQuiz';
 
 function DailyVerseInner() {
   const [verseRef, setVerseRef] = useState<DailyVerseRef | null>(null);
   const [dailyDoseLink, setDailyDoseLink] = useState<string | null>(null);
   const [verse, setVerse] = useState<MorphVerse | null>(null);
+  const [verbs, setVerbs] = useState<GNTParseItem[]>([]);
+  const [source, setSource] = useState<'daily_dose' | 'curated'>('curated');
+  // The parse quiz (#249) lives in memory only: every visit starts in reading
+  // mode, which also keeps the first render identical to the server's.
+  const [parsing, setParsing] = useState(false);
+  const [parseTarget, setParseTarget] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeWord, setActiveWord] = useState<ActiveWord | null>(null);
@@ -48,6 +58,8 @@ function DailyVerseInner() {
         if (cancelled) return;
         const words = data[String(ref.chapter)]?.[String(ref.verse)] ?? [];
         setVerse(words);
+        setVerbs(extractVerseVerbs(words, ref.displayRef));
+        setSource(dailyDose.ok ? 'daily_dose' : 'curated');
         // `source` is what makes a broken Daily Dose feed visible: the fallback
         // looks like a normal page, so without it the regression in #177 hid
         // for weeks.
@@ -83,11 +95,50 @@ function DailyVerseInner() {
     }
   }, []);
 
-  const handleActivate = useCallback((word: MorphWord, rect: DOMRect) => {
-    setActiveWord((prev) => (prev?.word === word ? null : { word, rect }));
-  }, []);
+  const handleActivate = useCallback(
+    (word: MorphWord, rect: DOMRect) => {
+      // The popup shows the parse, so it stays shut while a verb is being asked.
+      if (parseTarget !== null) return;
+      setActiveWord((prev) => (prev?.word === word ? null : { word, rect }));
+    },
+    [parseTarget],
+  );
 
   const handleClosePopup = useCallback(() => setActiveWord(null), []);
+
+  function startParsing() {
+    if (!verseRef) return;
+    setActiveWord(null);
+    setParsing(true);
+    posthog.capture('daily_verse_parse_started', {
+      verse_reference: verseRef.displayRef,
+      source,
+      verb_count: verbs.length,
+    });
+  }
+
+  const handleParseAnswer = useCallback(
+    (item: GNTParseItem, result: GNTParseResult) => {
+      logAttempts([{ concept: dailyParseConcept(item), correct: result.allCorrect }]);
+      posthog.capture('daily_verse_parse_answered', {
+        verse_reference: verseRef?.displayRef,
+        verb_type: item.type,
+        all_correct: result.allCorrect,
+      });
+    },
+    [verseRef],
+  );
+
+  const handleParseFinish = useCallback(
+    (results: GNTParseResult[]) => {
+      posthog.capture('daily_verse_parse_finished', {
+        verse_reference: verseRef?.displayRef,
+        correct: results.filter((r) => r.allCorrect).length,
+        total: results.length,
+      });
+    },
+    [verseRef],
+  );
 
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: click-outside-to-dismiss backdrop
@@ -137,6 +188,7 @@ function DailyVerseInner() {
                   showGloss={showGlosses}
                   studied={studiedLemmas.has(word.lemma)}
                   onActivate={handleActivate}
+                  highlighted={i === parseTarget}
                 />
               ))}
             </div>
@@ -164,6 +216,15 @@ function DailyVerseInner() {
                 >
                   {showGlosses ? 'Hide glosses' : 'Show glosses'}
                 </button>
+                {verbs.length > 0 && !parsing && (
+                  <button
+                    type="button"
+                    onClick={startParsing}
+                    className="px-3 py-1.5 rounded-lg text-sm border border-primary/40 text-primary hover:border-primary hover:bg-primary/5 transition-colors"
+                  >
+                    Parse this verse
+                  </button>
+                )}
                 <a
                   href={`/reader?ref=${verseRef.book}.${verseRef.chapter}.${verseRef.verse}`}
                   className="px-3 py-1.5 rounded-lg text-sm border border-gray-200 text-text-muted hover:border-gray-300 hover:text-text transition-colors"
@@ -183,6 +244,23 @@ function DailyVerseInner() {
                 )}
               </div>
             </div>
+
+            {parsing && (
+              // biome-ignore lint/a11y/noStaticElementInteractions: stopPropagation prevents backdrop dismiss
+              // biome-ignore lint/a11y/useKeyWithClickEvents: stopPropagation only; no action needed
+              <div
+                className="mt-6 pt-6 border-t border-gray-100"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <VerseParseQuiz
+                  items={verbs}
+                  onClose={() => setParsing(false)}
+                  onTargetChange={setParseTarget}
+                  onAnswer={handleParseAnswer}
+                  onFinish={handleParseFinish}
+                />
+              </div>
+            )}
 
             {/* The page intro credits Daily Dose; say so when this verse is not theirs */}
             {!dailyDoseLink && (

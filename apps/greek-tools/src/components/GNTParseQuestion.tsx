@@ -36,6 +36,11 @@ interface Props {
   answer: GNTParseAnswer;
   onChange: (a: GNTParseAnswer) => void;
   onSubmit: () => void;
+  /**
+   * Draw the verse above the form. Off where the verse is already on screen
+   * with the target marked (/daily, #249), so it is not shown twice.
+   */
+  showContext?: boolean;
 }
 
 export default function GNTParseQuestion({
@@ -45,6 +50,7 @@ export default function GNTParseQuestion({
   answer,
   onChange,
   onSubmit,
+  showContext = true,
 }: Props) {
   const selectedMood = answer.mood as GNTMood | '';
   const isFiniteMood = selectedMood && FINITE_MOODS.includes(selectedMood);
@@ -69,35 +75,37 @@ export default function GNTParseQuestion({
       <ParseProgress index={index} total={total} />
 
       {/* ── Verse context ────────────────────────────────────────────────── */}
-      <div className="bg-bg-card rounded-xl p-4">
-        <p className="text-xs uppercase tracking-widest text-text-muted mb-3">{item.verseRef}</p>
-        <p className="text-lg leading-relaxed" style={{ fontFamily: 'var(--font-greek)' }}>
-          {item.verseWords.map((word, i) => {
-            const [form, punct] = splitWordPunct(word.text);
-            const isTarget = i === item.wordIndex;
-            return (
-              <span key={i}>
-                <span
-                  style={
-                    isTarget
-                      ? {
-                          color: 'var(--color-accent)',
-                          fontWeight: 700,
-                          textDecoration: 'underline',
-                          textDecorationColor: 'var(--color-accent)',
-                        }
-                      : undefined
-                  }
-                >
-                  {form}
+      {showContext && (
+        <div className="bg-bg-card rounded-xl p-4">
+          <p className="text-xs uppercase tracking-widest text-text-muted mb-3">{item.verseRef}</p>
+          <p className="text-lg leading-relaxed" style={{ fontFamily: 'var(--font-greek)' }}>
+            {item.verseWords.map((word, i) => {
+              const [form, punct] = splitWordPunct(word.text);
+              const isTarget = i === item.wordIndex;
+              return (
+                <span key={i}>
+                  <span
+                    style={
+                      isTarget
+                        ? {
+                            color: 'var(--color-accent)',
+                            fontWeight: 700,
+                            textDecoration: 'underline',
+                            textDecorationColor: 'var(--color-accent)',
+                          }
+                        : undefined
+                    }
+                  >
+                    {form}
+                  </span>
+                  <span className="text-text-muted">{punct}</span>
+                  {i < item.verseWords.length - 1 ? ' ' : ''}
                 </span>
-                <span className="text-text-muted">{punct}</span>
-                {i < item.verseWords.length - 1 ? ' ' : ''}
-              </span>
-            );
-          })}
-        </p>
-      </div>
+              );
+            })}
+          </p>
+        </div>
+      )}
 
       {/* ── Parse this form ──────────────────────────────────────────────── */}
       <div>

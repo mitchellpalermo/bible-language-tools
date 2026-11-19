@@ -350,6 +350,26 @@ export function gradeGNTAnswer(item: GNTParseItem, answer: GNTParseAnswer): GNTP
 // Review helpers
 // ---------------------------------------------------------------------------
 
+/**
+ * GNT results in the shape the shared results screen reads (`ParseResults`).
+ * Person and number are null where the verb type has none; those count as
+ * right there, as they always have on /parse/gnt. Case and gender have no
+ * column on that screen.
+ */
+export function toSessionResults(results: GNTParseResult[], total: number) {
+  return {
+    results: results.map((r) => ({
+      tense: r.tense,
+      voice: r.voice,
+      mood: r.mood,
+      person: r.person ?? true,
+      number: r.number ?? true,
+      allCorrect: r.allCorrect,
+    })),
+    total,
+  };
+}
+
 /** Returns the subset of items whose corresponding result was not fully correct. */
 export function filterMissedItems<T>(items: T[], results: GNTParseResult[]): T[] {
   return items.filter((_, i) => i < results.length && !results[i].allCorrect);
@@ -407,6 +427,59 @@ const GENDER_MAP: Record<string, GNTGender> = {
 // ---------------------------------------------------------------------------
 
 /**
+ * Every verb MorphGNT can parse in one verse, in text order. `verseRef` is
+ * what the question shows above the verse ("John 3:16"). `/daily` calls this
+ * on the one verse it already holds (#249); `extractVerbs` calls it per verse.
+ */
+export function extractVerseVerbs(words: MorphWord[], verseRef: string): GNTParseItem[] {
+  const items: GNTParseItem[] = [];
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    if (word.pos !== 'V-') continue;
+    if (word.parsing.length < 7) continue;
+
+    const [p1, p2, p3, p4, p5, p6, p7] = word.parsing;
+
+    const tense = TENSE_MAP[p2];
+    const voice = VOICE_MAP[p3];
+    const mood = MOOD_MAP[p4];
+    if (!tense || !voice || !mood) continue;
+
+    const [form] = splitWordPunct(word.text);
+
+    const base: BaseItem = {
+      form: form || word.text,
+      lemma: word.lemma,
+      verseRef,
+      verseWords: words,
+      wordIndex: i,
+      tense,
+      voice,
+      mood,
+    };
+
+    if (p4 === 'N') {
+      // Infinitive — no person, number, case, gender
+      items.push({ ...base, type: 'infinitive' });
+    } else if (p4 === 'P') {
+      // Participle
+      const parseCase = CASE_MAP[p5];
+      const number = NUMBER_MAP[p6];
+      const gender = GENDER_MAP[p7];
+      if (!parseCase || !number || !gender) continue;
+      items.push({ ...base, type: 'participle', parseCase, number, gender });
+    } else {
+      // Finite verb
+      const person = PERSON_MAP[p1];
+      const number = NUMBER_MAP[p6];
+      if (!person || !number) continue;
+      items.push({ ...base, type: 'finite', person, number });
+    }
+  }
+  return items;
+}
+
+/**
  * Extract all verb parse items from a chapter (or verse range) of MorphGNT data.
  * Returns them in canonical (text order) sequence.
  */
@@ -421,55 +494,11 @@ export function extractVerbs(
   if (!verses) return [];
 
   const items: GNTParseItem[] = [];
-
   for (const [verseNum, words] of Object.entries(verses)) {
     const v = parseInt(verseNum, 10);
     if (v < verseStart || v > verseEnd) continue;
-    for (let i = 0; i < words.length; i++) {
-      const word = words[i];
-      if (word.pos !== 'V-') continue;
-      if (word.parsing.length < 7) continue;
-
-      const [p1, p2, p3, p4, p5, p6, p7] = word.parsing;
-
-      const tense = TENSE_MAP[p2];
-      const voice = VOICE_MAP[p3];
-      const mood = MOOD_MAP[p4];
-      if (!tense || !voice || !mood) continue;
-
-      const [form] = splitWordPunct(word.text);
-
-      const base: BaseItem = {
-        form: form || word.text,
-        lemma: word.lemma,
-        verseRef: `${bookName} ${chapter}:${verseNum}`,
-        verseWords: words,
-        wordIndex: i,
-        tense,
-        voice,
-        mood,
-      };
-
-      if (p4 === 'N') {
-        // Infinitive — no person, number, case, gender
-        items.push({ ...base, type: 'infinitive' });
-      } else if (p4 === 'P') {
-        // Participle
-        const parseCase = CASE_MAP[p5];
-        const number = NUMBER_MAP[p6];
-        const gender = GENDER_MAP[p7];
-        if (!parseCase || !number || !gender) continue;
-        items.push({ ...base, type: 'participle', parseCase, number, gender });
-      } else {
-        // Finite verb
-        const person = PERSON_MAP[p1];
-        const number = NUMBER_MAP[p6];
-        if (!person || !number) continue;
-        items.push({ ...base, type: 'finite', person, number });
-      }
-    }
+    items.push(...extractVerseVerbs(words, `${bookName} ${chapter}:${verseNum}`));
   }
-
   return items;
 }
 

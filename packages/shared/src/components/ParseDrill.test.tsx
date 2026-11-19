@@ -136,4 +136,20 @@ describe('ParseResults', () => {
       true,
     );
   });
+
+  it('names the second button as the screen asks', async () => {
+    const onChangeSettings = vi.fn();
+    render(
+      <ParseResults
+        sessionResults={{ results: [{ allCorrect: true }], total: 1 }}
+        properties={properties}
+        onRetry={vi.fn()}
+        onChangeSettings={onChangeSettings}
+        changeSettingsLabel="Back to reading"
+      />,
+    );
+    expect(screen.queryByRole('button', { name: 'Change Settings' })).toBeNull();
+    await userEvent.click(screen.getByRole('button', { name: 'Back to reading' }));
+    expect(onChangeSettings).toHaveBeenCalledOnce();
+  });
 });

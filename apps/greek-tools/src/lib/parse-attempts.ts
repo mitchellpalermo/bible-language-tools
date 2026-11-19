@@ -25,6 +25,7 @@ import type { ParseItem } from './verb-parse';
 
 const PARSE_CONCEPT_PREFIX = 'parse/passage/';
 const FORM_CONCEPT_PREFIX = 'parse/paradigm/';
+const DAILY_CONCEPT_PREFIX = 'parse/daily/';
 
 /**
  * The concept id for one kind of verb form parsed out of context (Today's
@@ -35,6 +36,16 @@ const FORM_CONCEPT_PREFIX = 'parse/paradigm/';
  */
 export function parseFormConcept(item: Pick<ParseItem, 'tense' | 'voice' | 'mood'>): string {
   return `${FORM_CONCEPT_PREFIX}${item.tense}-${item.voice}-${item.mood}`;
+}
+
+/**
+ * The concept id for a verb parsed in the daily verse on /daily (#249): the
+ * same tense-voice-mood kind as `parseFormConcept`, under its own namespace,
+ * so Today's drill (which reads `parse/paradigm/`) is unchanged until that is
+ * decided on its own. Stable: do not rename.
+ */
+export function dailyParseConcept(item: { tense: string; voice: string; mood: string }): string {
+  return `${DAILY_CONCEPT_PREFIX}${item.tense}-${item.voice}-${item.mood}`;
 }
 
 /** The concept id for answers parsed within one focus passage. Stable: do not rename. */

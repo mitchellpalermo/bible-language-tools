@@ -93,11 +93,14 @@ export function WordToken({
   showGloss,
   studied,
   onActivate,
+  highlighted = false,
 }: {
   word: MorphWord;
   showGloss: boolean;
   studied: boolean;
   onActivate: (word: MorphWord, rect: DOMRect) => void;
+  /** The word a parse quiz is asking about (#249). */
+  highlighted?: boolean;
 }) {
   const [wordText, punct] = splitWordPunct(word.text);
   const spanRef = useRef<HTMLSpanElement>(null);
@@ -120,13 +123,18 @@ export function WordToken({
         <span
           ref={spanRef}
           onClick={handleClick}
+          data-highlighted={highlighted || undefined}
           className={`font-greek cursor-pointer rounded px-0.5 hover:bg-accent/10 transition-colors ${
             studied ? 'underline decoration-accent/60 decoration-dotted underline-offset-2' : ''
           }`}
           style={{
             fontSize: '1.35rem',
             lineHeight: '1.6',
-            color: 'var(--color-greek)',
+            color: highlighted ? 'var(--color-accent)' : 'var(--color-greek)',
+            fontWeight: highlighted ? 700 : undefined,
+            background: highlighted
+              ? 'color-mix(in srgb, var(--color-accent) 12%, transparent)'
+              : undefined,
             touchAction: 'manipulation',
           }}
         >
