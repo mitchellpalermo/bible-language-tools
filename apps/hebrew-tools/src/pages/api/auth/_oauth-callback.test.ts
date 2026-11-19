@@ -5,6 +5,11 @@ vi.mock('../../../lib/auth', () => ({
   createAuth: vi.fn(),
 }));
 
+vi.mock('@tools/shared/apple-sign-in', () => ({
+  resolveAppleCredentials: vi.fn(),
+}));
+
+import { resolveAppleCredentials } from '@tools/shared/apple-sign-in';
 import { createAuth } from '../../../lib/auth';
 import { GET, POST } from './[...all]';
 
@@ -82,5 +87,34 @@ describe('/api/auth/[...all]', () => {
 
     expect(mockAuth.handler).toHaveBeenCalledWith(request);
     expect(response).toBe(expected);
+  });
+
+  it('passes Apple credentials through when Apple is configured', async () => {
+    mockAuth.handler.mockResolvedValue(new Response(null, { status: 200 }));
+    const apple = { clientId: 'tools.bible.signin', clientSecret: 'signed' };
+    (resolveAppleCredentials as Mock).mockResolvedValue(apple);
+
+    const ctx = makeContext('/api/auth/callback/apple?code=c&state=s');
+    await GET(ctx as never);
+
+    expect(resolveAppleCredentials).toHaveBeenCalledWith(ctx.locals.runtime.env);
+    expect(createAuth).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({ apple }),
+    );
+  });
+
+  it('leaves Apple out when it is not configured', async () => {
+    mockAuth.handler.mockResolvedValue(new Response(null, { status: 200 }));
+    (resolveAppleCredentials as Mock).mockResolvedValue(undefined);
+
+    await GET(makeContext() as never);
+
+    expect(createAuth).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({ apple: undefined }),
+    );
   });
 });
