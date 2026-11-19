@@ -15,6 +15,10 @@ export default defineConfig({
     }),
   ],
   adapter: cloudflare(),
+  // Astro's own cross-site form check cannot exempt a route, and Sign in with
+  // Apple returns by a cross-site form POST. The middleware runs the same
+  // check with that one exemption (`@tools/shared/origin-check`).
+  security: { checkOrigin: false },
   vite: {
     plugins: [tailwindcss()],
   },

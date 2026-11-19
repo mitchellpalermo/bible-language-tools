@@ -38,6 +38,7 @@
     "./test/favicons": "./src/test/favicons.ts",
     "./reset-progress": "./src/reset-progress.ts",
     "./apple-sign-in": "./src/apple-sign-in.ts",
+    "./origin-check": "./src/origin-check.ts",
     "./nav": "./src/nav.ts",
     "./nav-menu": "./src/nav-menu.ts",
     "./posthog-host": "./src/posthog-host.ts",
