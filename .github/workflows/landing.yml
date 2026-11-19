@@ -5,11 +5,15 @@ on:
     branches: [main]
     paths:
       - 'apps/landing/**'
+      - '.github/workflows/landing.yml'
       - 'package.json'
       - 'pnpm-workspace.yaml'
   pull_request:
     paths:
       - 'apps/landing/**'
+      - '.github/workflows/landing.yml'
+  # Lets the deploy be re-run by hand without a code change.
+  workflow_dispatch:
 
 jobs:
   test:
