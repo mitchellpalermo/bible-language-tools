@@ -1,5 +1,5 @@
 import posthog from 'posthog-js';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { type DailyDoseFailure, fetchDailyDoseVerse } from '../data/dailyDose';
 import {
   type DailyStreakData,
@@ -11,14 +11,20 @@ import {
   DEFAULT_READER_PREFS,
   fetchBook,
   fetchBooks,
+  fetchLemmas,
   type HebrewBookMeta,
   type HebrewWord,
   loadReaderPrefs,
   type ReaderPrefs,
   saveReaderPrefs,
 } from '../data/morphhb';
+import { logAttempts } from '../lib/attempt-log';
+import { loadParseSettings } from '../lib/parse-settings';
 import { formatRef, hebrewNumeral } from '../lib/reader';
 import { lemmaBase, loadStudiedLemmas } from '../lib/studied';
+import { type ParseGrade, type ParseLemma, parseVerbConcept } from '../lib/verb-parse';
+import { type VerseParseItem, verseLemmas, verseVerbs } from '../lib/verse-parse';
+import DailyVerseParse from './DailyVerseParse';
 import ErrorBoundary from './ErrorBoundary';
 import { type ActiveWord, MarkLegend, useGlossLine, WordPopup, WordRun } from './HebrewText';
 import PrefToggle from './PrefToggle';
@@ -32,6 +38,14 @@ import PrefToggle from './PrefToggle';
  * the cantillation preference is `ReaderPrefs`, highlighting is
  * `loadStudiedLemmas`. What is this page's own is the choice of verse, the
  * streak, and the two references.
+ *
+ * **"Parse this verse" asks the verse's verbs, in context.** The quiz is
+ * `DailyVerseParse`: /parse's screens and grading over the shared inline quiz,
+ * with the verse's own reading as the answer. Which words are asked is /parse's
+ * rule (`verseVerbs`), so a jussive, a verb with an object suffix or a ketiv is
+ * not. Whether the root is asked is /parse's setting, and the lemma index the
+ * root comes from is fetched when the quiz opens, never on page load. Answers
+ * go to the attempt log under the same concepts /parse uses.
  *
  * **The gloss line is BDB's, and it is off until asked for.** Strong's often
  * leads with a word's root sense — "assemblage" for גַּם, "deputyship" for
@@ -51,6 +65,12 @@ import PrefToggle from './PrefToggle';
  */
 
 type FallbackReason = DailyDoseFailure | 'not_in_text';
+
+/** An open quiz: what the grading needs, read when it opened. */
+interface ParseQuiz {
+  askRoot: boolean;
+  lemmas: Record<string, ParseLemma>;
+}
 
 interface Today {
   ref: DailyVerseRef;
@@ -98,6 +118,11 @@ function DailyVerseInner() {
   const [error, setError] = useState<string | null>(null);
   const [active, setActive] = useState<ActiveWord | null>(null);
   const [streak, setStreak] = useState<DailyStreakData>({ streak: 0, lastReadDate: '' });
+  // The quiz lives in memory only: every visit starts in reading mode, which
+  // also keeps the first render identical to the server's.
+  const [quiz, setQuiz] = useState<ParseQuiz | null>(null);
+  const [opening, setOpening] = useState(false);
+  const [parseTarget, setParseTarget] = useState<number | null>(null);
 
   // Read on mount, not during render: the page is prerendered, and
   // localStorage is not there when the markup is built.
@@ -150,9 +175,14 @@ function DailyVerseInner() {
 
   const glossOf = useGlossLine(prefs.glosses);
 
-  const activate = useCallback((word: HebrewWord, rect: DOMRect) => {
-    setActive((prev) => (prev?.word === word ? null : { word, rect }));
-  }, []);
+  const activate = useCallback(
+    (word: HebrewWord, rect: DOMRect) => {
+      // The popup shows the parse, so it stays shut while a verb is being asked.
+      if (parseTarget !== null) return;
+      setActive((prev) => (prev?.word === word ? null : { word, rect }));
+    },
+    [parseTarget],
+  );
   const close = useCallback(() => setActive(null), []);
 
   const isStudied = useCallback(
@@ -161,6 +191,57 @@ function DailyVerseInner() {
   );
 
   const words = today?.words ?? [];
+  const verbs = useMemo(() => verseVerbs(today?.words ?? []), [today]);
+  const verseReference = today?.ref.displayRef;
+
+  async function startParsing() {
+    setActive(null);
+    setOpening(true);
+    let { askRoot } = loadParseSettings();
+    let lemmas: Record<string, ParseLemma> = {};
+    if (askRoot) {
+      // Without the lemma index there is no root to mark against, so the quiz
+      // still opens and leaves the root out.
+      try {
+        lemmas = verseLemmas(verbs, await fetchLemmas());
+      } catch {
+        askRoot = false;
+      }
+    }
+    setOpening(false);
+    setQuiz({ askRoot, lemmas });
+    posthog.capture('hebrew_daily_parse_started', {
+      verse_reference: verseReference,
+      verb_count: verbs.length,
+      ask_root: askRoot,
+    });
+  }
+
+  const closeQuiz = useCallback(() => setQuiz(null), []);
+
+  const handleParseAnswer = useCallback(
+    (_item: VerseParseItem, grade: ParseGrade) => {
+      logAttempts([{ concept: parseVerbConcept(grade.reading), correct: grade.allCorrect }]);
+      posthog.capture('hebrew_daily_parse_answered', {
+        verse_reference: verseReference,
+        stem: grade.reading.stem,
+        conjugation: grade.reading.conjugation,
+        all_correct: grade.allCorrect,
+      });
+    },
+    [verseReference],
+  );
+
+  const handleParseFinish = useCallback(
+    (grades: ParseGrade[]) => {
+      posthog.capture('hebrew_daily_parse_finished', {
+        verse_reference: verseReference,
+        correct: grades.filter((g) => g.allCorrect).length,
+        total: grades.length,
+      });
+    },
+    [verseReference],
+  );
   const marks = {
     studied: words.some(isStudied),
     qere: words.some((w) => w.qere !== undefined || w.qereOnly === true),
@@ -213,7 +294,7 @@ function DailyVerseInner() {
                 words={today.words}
                 cantillation={prefs.cantillation}
                 isStudied={isStudied}
-                active={active?.word ?? null}
+                active={parseTarget !== null ? today.words[parseTarget] : (active?.word ?? null)}
                 onActivate={activate}
                 glossOf={glossOf}
               />
@@ -252,6 +333,16 @@ function DailyVerseInner() {
               <PrefToggle on={prefs.glosses} onChange={toggleGlosses}>
                 Glosses
               </PrefToggle>
+              {verbs.length > 0 && !quiz && (
+                <button
+                  type="button"
+                  onClick={startParsing}
+                  disabled={opening}
+                  className="px-3 py-2 rounded-xl text-sm font-semibold border-2 border-primary/30 text-primary hover:border-primary transition-colors disabled:opacity-60"
+                >
+                  {opening ? 'Loading…' : 'Parse this verse'}
+                </button>
+              )}
               <a
                 href={`/reader?ref=${formatRef(today.ref)}`}
                 className="px-3 py-2 rounded-xl text-sm font-semibold border-2 border-primary/10 text-text-muted hover:border-primary/40 transition-colors"
@@ -270,6 +361,28 @@ function DailyVerseInner() {
                 </a>
               )}
             </div>
+
+            {quiz && (
+              // biome-ignore lint/a11y/noStaticElementInteractions: stopPropagation keeps the backdrop from closing anything
+              // biome-ignore lint/a11y/useKeyWithClickEvents: stopPropagation only
+              <div
+                // The quiz's menus and bars are drawn in the card color, for the
+                // page background /parse puts them on. Inside this white card
+                // they need that background back, or they draw with no edges.
+                className="mt-6 -mx-4 sm:mx-0 rounded-xl bg-bg p-4 sm:p-6"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <DailyVerseParse
+                  items={verbs}
+                  lemmas={quiz.lemmas}
+                  askRoot={quiz.askRoot}
+                  onClose={closeQuiz}
+                  onTargetChange={setParseTarget}
+                  onAnswer={handleParseAnswer}
+                  onFinish={handleParseFinish}
+                />
+              </div>
+            )}
 
             {/* The page intro credits Daily Dose; say so when this verse is not theirs. */}
             {!today.lessonLink && (

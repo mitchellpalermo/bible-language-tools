@@ -105,6 +105,7 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/components/DrillButtons` | The Missed / Got it answer row for the drill modes, which schedule nothing (React) |
 | `@tools/shared/components/ResetProgress` | The account page's "Danger zone": open, type RESET, erase. Each app wraps it in `src/components/ResetProgress.tsx` with its own list of what is erased and kept (React) |
 | `@tools/shared/components/ParseDrill` | `ParseProgress`, `ParseSelect` (one field's choices), `ParseFeedbackRow` and `ParseVerdict` (the marks), `ToggleChip`, `SessionLengthPicker` and `ParseResults` — both apps' `/parse` (React) |
+| `@tools/shared/components/InlineParseQuiz` | The parse quiz drawn under a verse being read: both apps' `/daily`. The rounds, the target word for the page to highlight, scrolling into view, Close quiz and the results; the app passes its own question, feedback and grading (React) |
 | `@tools/shared/components/StepDrill` | `StepList` (the step row; locked steps stay visible) and `RuleFeedback` (a miss names the rule and links to it) (React) |
 | `@tools/shared/components/Ladder` | `LadderRungList` — the rungs in order, locked ones visible with what opens them and an "Open anyway" button (React) |
 | `@tools/shared/components/ToggleSwitch` | Labelled on/off switch — `role="switch"`, app accent passed in (React) |
@@ -295,7 +296,15 @@ Bible against OSHB's parsing (its `src/lib/verb-parse.ts`; see its CLAUDE.md,
   field over the forms that asked it. greek.tools' passage parser still folds
   "not asked" into "right" in its own adapter; that is unchanged.
 - **The components are inline-styled**, so they have no hover or custom focus
-  ring; a select keeps the browser's focus outline.
+  ring; a select keeps the browser's focus outline. They are drawn in the card
+  color for the page background `/parse` puts them on, so inside a white card
+  they need a panel in `bg-bg` behind them, as both `/daily` pages give them.
+- **"Parse this verse" on `/daily` is `InlineParseQuiz`** in both apps: greek.tools'
+  `VerseParseQuiz` and hebrew.tools' `DailyVerseParse` are each a wrapper that
+  passes its own `/parse` screens and grading. The session rules (Try Again,
+  Review Missed, which word is highlighted, scrolling, the highlight cleared on
+  close) are tested once, in `InlineParseQuiz.test.tsx`. #204 (the GNT reader)
+  mounts the same thing.
 
 ### The paradigm ladder
 

@@ -194,6 +194,20 @@ describe('gradeParse', () => {
     expect(g).toMatchObject({ allCorrect: true, alsoAccepted: true });
   });
 
+  it('holds a form read in its verse to the verse’s reading', () => {
+    const tokhal = item('תֹּאכַל', ['398', 'Vqi2ms']);
+    const g = gradeParse(
+      tokhal,
+      answer({ stem: 'qal', conjugation: 'yiqtol', person: '3', gender: 'f', number: 's' }),
+      LEMMAS,
+      false,
+      { inContext: true },
+    );
+    expect(g).toMatchObject({ allCorrect: false, person: false, gender: false, number: true });
+    expect(g.alsoAccepted).toBe(false);
+    expect(describeReading(g.reading)).toBe('Qal Yiqtol (Imperfect) 2nd Masculine Singular');
+  });
+
   it('grades a wrong conjugation against the closest reading, field by field', () => {
     const g = gradeParse(
       wayyomer,
