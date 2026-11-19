@@ -289,7 +289,7 @@ describe('DailyVerse', () => {
       await start(user);
       await answerFinite(user);
 
-      await user.click(screen.getByRole('button', { name: 'Back to reading' }));
+      await user.click(screen.getByRole('button', { name: 'Close quiz' }));
 
       expect(screen.queryByRole('button', { name: 'Next Form' })).not.toBeInTheDocument();
       expect(highlighted()).toBeNull();
@@ -310,7 +310,7 @@ describe('DailyVerse', () => {
       await missParticiple(user);
       await user.click(screen.getByRole('button', { name: 'See Results' }));
 
-      await user.click(screen.getByRole('button', { name: 'Back to reading' }));
+      await user.click(screen.getByRole('button', { name: 'Close quiz' }));
       expect(screen.queryByText('Session Score')).not.toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Parse this verse' })).toBeInTheDocument();
     });

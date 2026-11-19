@@ -287,7 +287,7 @@ export interface ParseResultsProps {
   properties: readonly ParseProperty[];
   onRetry: () => void;
   onChangeSettings: () => void;
-  /** The second button's text. A screen with no settings (greek.tools' /daily) names where it goes instead. */
+  /** The second button's text. A screen with no settings (greek.tools' /daily) names what it does instead. */
   changeSettingsLabel?: string;
   onReviewMissed?: () => void;
   isReview?: boolean;

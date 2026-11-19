@@ -145,11 +145,11 @@ describe('ParseResults', () => {
         properties={properties}
         onRetry={vi.fn()}
         onChangeSettings={onChangeSettings}
-        changeSettingsLabel="Back to reading"
+        changeSettingsLabel="Close quiz"
       />,
     );
     expect(screen.queryByRole('button', { name: 'Change Settings' })).toBeNull();
-    await userEvent.click(screen.getByRole('button', { name: 'Back to reading' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Close quiz' }));
     expect(onChangeSettings).toHaveBeenCalledOnce();
   });
 });

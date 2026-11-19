@@ -46,7 +46,7 @@ export default function VerseParseQuiz({
   onTargetChange,
   onAnswer,
   onFinish,
-  closeLabel = 'Back to reading',
+  closeLabel = 'Close quiz',
 }: VerseParseQuizProps) {
   const [session, setSession] = useState(items);
   const [index, setIndex] = useState(0);
