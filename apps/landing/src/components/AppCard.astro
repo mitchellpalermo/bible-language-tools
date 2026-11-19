@@ -1,0 +1,25 @@
+---
+import { type AppEntry, hostOf } from '../data/apps';
+
+interface Props {
+  app: AppEntry;
+}
+
+const { app } = Astro.props;
+---
+
+<a class={`card ${app.id}`} href={app.url}>
+  <div class="top">
+    <div class="glyph" lang={app.glyphLang} dir={app.dir}>{app.glyph}</div>
+    <span class="arrow" aria-hidden="true">↗</span>
+  </div>
+  <div>
+    <div class="lang">{app.language}</div>
+    <h2>{app.name}</h2>
+    <p>{app.description}</p>
+  </div>
+  <div class="tags">
+    {app.features.map((feature) => <span class="tag">{feature}</span>)}
+  </div>
+  <span class="domain">{hostOf(app.url)}</span>
+</a>

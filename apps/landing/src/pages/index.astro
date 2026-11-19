@@ -1,0 +1,22 @@
+---
+import AppCard from '../components/AppCard.astro';
+import { apps } from '../data/apps';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Bible Language Tools"
+  description="Learn Biblical Greek and Hebrew: flashcards, paradigms, parsing drills, and the real text."
+>
+  <section class="hero">
+    <span class="sticker">Pick a language</span>
+    <h1>Read Scripture <em>in the original.</em></h1>
+    <p class="lede">
+      Two apps for learning Biblical Greek and Hebrew: flashcards, paradigms, parsing drills, and the real text.
+    </p>
+  </section>
+
+  <section class="cards" aria-label="The two apps">
+    {apps.map((app) => <AppCard app={app} />)}
+  </section>
+</Layout>
