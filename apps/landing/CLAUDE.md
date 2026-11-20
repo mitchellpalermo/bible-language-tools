@@ -27,7 +27,7 @@ flat variant with a white header and no card strip, which is a small CSS change 
   import them here. Dark mode is `prefers-color-scheme` plus a `data-theme` override saved in
   `localStorage` (`blt-theme`, in try/catch: storage can be unavailable). The inline script in
   `Layout.astro` applies it before first paint, which is why it is `is:inline`.
-- **Hover lift and the arrow are decoration.** `prefers-reduced-motion` turns the transitions off, and the arrow stays visible where there is no hover.
+- **The tilt, the pill, the glyph wobble and the arrow are decoration, kept light on purpose (Mitch wanted a little fun back, not the first blend).** `prefers-reduced-motion` turns the transitions off, and the arrow stays visible where there is no hover.
 - **No copy that praises itself.** Mitch cut "small, careful" from the lede as silly; keep the
   text plain and descriptive.
 
