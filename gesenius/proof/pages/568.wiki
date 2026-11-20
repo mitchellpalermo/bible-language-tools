@@ -1,0 +1,160 @@
+<noinclude><pagequality level="4" user="BerdeGaraiko" /></noinclude><section begin="index_of_hebrew_words_and_forms" />
+<div style="text-align: center">
+<big>II</big>
+
+<big>INDEX OF HEBREW WORDS AND FORMS</big>
+
+<small>
+The numbers refer to the sections : the ‘superior’ figures after the letters refer to the notes. Doubtful forms are marked ? Corrupt forms with †.
+</small>
+</div>
+{| style="width: 100%; hyphens: auto;"
+|style="width: 33%; vertical-align: top; border-right: solid thin black;"|
+{{GHGheb|text=א|indexitem=1}}as consonant and guttural {{GHGpar|6|c|nosign=1}}, {{GHGpar|22|nosign=1}} ; quiescent {{GHGpar|23|a|nosign=1}}–{{GHGpar|23|i|nonumber=1}}; prosthetic {{GHGpar|19|m|nosign=1}}
+
+{{GHGheb|text=אָב|indexitem=1}}{{GHGpar|96|nosign=1}}
+
+{{GHGheb|text=אָבַד|indexitem=1}}{{GHGpar|68|b|nosign=1}}
+
+{{GHGheb|text=אֹבַד|indexitem=1}}{{GHGpar|50|e|nosign=1}}, {{GHGpar|93|qq|nosign=1}}
+
+{{GHGheb|text=אֲבַדֹּה|indexitem=1}}{{GHGpar|85|v|nosign=1}}
+
+{{GHGheb|text=אָבָה|indexitem=1}}{{GHGpar|68|b|nosign=1}}, {{GHGpar|76|d|nosign=1}}
+
+{{GHGheb|text=? אָבוּא|indexitem=1}}{{GHGpar|23|i|nosign=1}}
+
+{{GHGheb|text=אֲבֽוֹתֵיהֶם|indexitem=1}}{{GHGpar|91|n|nosign=1}}
+
+{{GHGheb|text=אֶֽבֲחַר|indexitem=1}}{{GHGpar|10|g|nosign=1}}<sup>3</sup>
+
+{{GHGheb|text=אָבִי|indexitem=1}}{{GHGpar|74|k|nosign=1}}, {{GHGpar|76|h|nosign=1}}
+
+{{GHGheb|text=אבי|indexitem=1}}for {{GHGheb|text=לוּ}} {{GHGpar|159|cc|nosign=1}}
+
+{{GHGheb|text=אֹבִ֫ידָה|indexitem=1}}{{GHGpar|68|i|nosign=1}}
+
+{{GHGheb|text=אֲבִיר|indexitem=1}}{{GHGpar|84|f|b|nosign=1}}
+
+{{GHGheb|text=אֲבֶל־|indexitem=1}}{{GHGpar|93|hh|nosign=1}}
+
+{{GHGheb|text=? אֶגְאָֽלְתִּי|indexitem=1}}{{GHGpar|53|p|nosign=1}}
+
+{{GHGheb|text=אִגְּרוֹת|indexitem=1}}{{GHGpar|95|q|nosign=1}}
+
+{{GHGheb|text=אֶדַּדֶּה|indexitem=1}}{{GHGpar|55|g|nosign=1}}
+
+{{GHGheb|text=? אָדוֹשׁ|indexitem=1}}{{GHGpar|113|w|nosign=1}}<sup>3</sup>
+
+{{GHGheb|text=אָדָם|indexitem=1}}without article, {{GHGpar|125|f|nosign=1}}, {{GHGpar|126|e|nosign=1}}<sup>1</sup>
+
+{{GHGheb|text=אֲדֹנָי|indexitem=1}}{{GHGpar|87|g|nosign=1}}, as Q<sup>e</sup>rê for {{GHGheb|text=יהוה}} {{GHGpar|102|m|nosign=1}}, force of suffix lost {{GHGpar|135|q|nosign=1}} and note<sup>2</sup>
+
+{{GHGheb|text=אֲדֹנָי בָֿם|indexitem=1}}{{GHGpar|21|c|nosign=1}}
+
+{{GHGheb|text=אֲדֹנִים|indexitem=1}}{{GHGpar|124|i|nosign=1}}, {{GHGpar|145|h|nosign=1}}
+
+{{GHGheb|text=אֵדָֽעֲךָ|indexitem=1}}{{GHGpar|69|b|nosign=1}}<sup>1</sup>
+
+<!--column break-->|style="width: 33%; vertical-align: top; border-right: solid thin black;"|
+{{GHGheb|text=? אִדָּרשׁ|indexitem=1}}{{GHGpar|51|k|nosign=1}}
+
+{{GHGheb|text=אֵהָ֑ב|indexitem=1}}{{GHGpar|68|e|nosign=1}}
+
+{{GHGheb|text=אֶֽהֱבוּ|indexitem=1}}{{GHGpar|64|a|nosign=1}}
+
+{{GHGheb|text=†אָֽהֲבוּ הַ֫בוּ|indexitem=1}}{{GHGpar|55|e|nosign=1}}
+
+{{GHGheb|text=אֲהָהּ|indexitem=1}}{{GHGpar|105|a|nosign=1}}
+
+{{GHGheb|text=אֶהְיֵה|indexitem=1}}{{GHGpar|75|hh|nosign=1}}
+
+{{GHGheb|text=אֹהֶל|indexitem=1}}{{GHGpar|22|h|nosign=1}}
+
+{{GHGheb|text=אָהֳלֹה|indexitem=1}}{{GHGpar|91|e|nosign=1}}
+
+{{GHGheb|text=אֹֽהָלִים|indexitem=1}}{{GHGpar|23|h|nosign=1}}, {{GHGpar|93|r|nosign=1}}
+
+{{GHGheb|text=אֶֽהֱמָ֑יָה|indexitem=1}}{{GHGpar|75|l|nosign=1}}
+
+{{GHGheb|text=אַֽהַרְגָה|indexitem=1}}{{GHGpar|63|f|nosign=1}}
+
+{{GHGheb|text=אוֹ|indexitem=1}}{{GHGpar|104|c|nosign=1}}, in disjunctive questions {{GHGpar|150|g|nosign=1}}, in indirect questions {{GHGpar|150|i|nosign=1}}, in conditional sentences {{GHGpar|159|cc|nosign=1}}, in disjunctive sentences {{GHGpar|162|nosign=1}}
+
+{{GHGheb|text=אוֹבִיל|indexitem=1}}{{GHGpar|50|e|nosign=1}}
+
+{{GHGheb|text=אוֹי|indexitem=1}}{{GHGpar|105|a|nosign=1}}
+
+{{GHGheb|text=א֫וֹיָה|indexitem=1}}{{GHGpar|105|a|nosign=1}}
+
+{{GHGheb|text=אֱוִיל|indexitem=1}}{{GHGpar|84|o|a|nosign=1}}
+
+{{GHGheb|text=אוֹכִיל|indexitem=1}}{{GHGpar|68|i|nosign=1}}
+
+{{GHGheb|text=אוּלָם|indexitem=1}}{{GHGpar|92|g|nosign=1}}
+
+{{GHGheb|text=אִוֶּלֶת|indexitem=1}}{{GHGpar|84|c|b|nosign=1}}
+
+{{GHGheb|text=אֽוֹנִיּוֹת|indexitem=1}}{{GHGpar|93|r|nosign=1}}
+
+{{GHGheb|text=אוֹפַן|indexitem=1}}{{GHGpar|84|r|a|nosign=1}}
+
+{{GHGheb|text=אוֹר|indexitem=1}}{{GHGpar|72|c|nosign=1}}<sup>2</sup>, {{GHGpar|72|n|nonumber=1}}
+
+{{GHGheb|text=אוֹת|indexitem=1}}{{GHGpar|95|n|nosign=1}}
+
+{{GHGheb|text=אֽוֹתְהֶם|indexitem=1}}{{GHGpar|103|b|nosign=1}}
+
+<!--column break-->|style="width: 33%; vertical-align: top"|
+{{GHGheb|text=אֽוֹתְהֶן|indexitem=1}}{{GHGpar|103|b|nosign=1}}
+
+{{GHGheb|text=אֽוֹתְכֶם|indexitem=1}}{{GHGpar|103|b|nosign=1}}
+
+{{GHGheb|text=אָז|indexitem=1}}{{GHGpar|100|i|nosign=1}}, with perf. and imperf. {{GHGpar|107|c|nosign=1}}, {{GHGpar|108|g|nosign=1}}<sup>1</sup>
+
+{{GHGheb|text=אֵזוֹר|indexitem=1}}{{GHGpar|23|h|nosign=1}}
+
+{{GHGheb|text=אָזִין|indexitem=1}}{{GHGpar|68|i|nosign=1}}
+
+{{GHGheb|text=אַזְכָּרָה|indexitem=1}}{{GHGpar|85|b|nosign=1}}
+
+{{GHGheb|text=אָֽזְלַת|indexitem=1}}{{GHGpar|44|f|nosign=1}}
+
+{{GHGheb|text=אֱזָרֵה|indexitem=1}}{{GHGpar|75|hh|nosign=1}}
+
+{{GHGheb|text=אֶזְרוֹעַ|indexitem=1}}{{GHGpar|84|n|a|nosign=1}}
+
+{{GHGheb|text=אָח|indexitem=1}}{{GHGpar|96|nosign=1}}, {{GHGpar|105|a|nosign=1}}
+
+{{GHGheb|text=אֶחָד|indexitem=1}}{{GHGpar|96|nosign=1}}
+
+{{GHGheb|text=אַחַד|vocalized=1|indexitem=1}}not in constr. st. {{GHGpar|130|g|nosign=1}}
+
+{{GHGheb|text=אַחְדְּלָה|indexitem=1}}{{GHGpar|63|f|nosign=1}}
+
+{{GHGheb|text=אָחוּ|indexitem=1}}{{GHGpar|1|i|nosign=1}}
+
+{{GHGheb|text=אֲחַוְךָ|indexitem=1}}{{GHGpar|75|bb|nosign=1}}
+
+{{GHGheb|text=אֲחוּמַי|indexitem=1}}{{GHGpar|90|k|nosign=1}}
+
+{{GHGheb|text=אָחוֹת|indexitem=1}}p. {{GHGpage|283}}
+
+{{GHGheb|text=אֱחֹ֑זוּ|indexitem=1}}{{GHGpar|64|c|nosign=1}}
+
+{{GHGheb|text=אֱחֳזִי|indexitem=1}}{{GHGpar|64|c|nosign=1}}
+
+{{GHGheb|text=אֲחַטֶּ֫נָּה|indexitem=1}}{{GHGpar|23|f|nosign=1}}, {{GHGpar|75|oo|nosign=1}}
+
+{{GHGheb|text=אַֽחֲיוֹתֵךְ|indexitem=1}}{{GHGpar|91|n|nosign=1}}
+
+{{GHGheb|text=אַחֵל|indexitem=1}}{{GHGpar|67|y|nosign=1}}
+
+{{GHGheb|text=אַחֲלֵי, אַחְלַי|indexitem=1}}in wishes {{GHGpar|151|nosign=1}}
+
+{{GHGheb|text=אַחַר, אַֽחֲרֵי|indexitem=1}}{{GHGpar|103|o|nosign=1}}
+
+{{GHGheb|text=אֵחַר|indexitem=1}}{{GHGpar|64|d|nosign=1}}
+
+{{GHGheb|text=אֶֽחֱרוּ|indexitem=1}}{{GHGpar|64|h|nosign=1}}
+|}<noinclude><references/></noinclude>

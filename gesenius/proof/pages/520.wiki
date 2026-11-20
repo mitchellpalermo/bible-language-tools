@@ -1,0 +1,40 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par159 />{{GHGmargin-letter|159|o}}
+(''d'') {{GHGterm|Perfect consecutive}} (see the examples in {{GHGpar|112|gg}}), e.g. {{GHGbible-ref|book=Gn|chapter=43|verse=9}} {{GHGheb|text=אִם־לֹא הֲבִֽיאֹתִיו וג׳|translate=if I bring him not... then I shall have sinned}}, &c.; {{GHGbible-ref|book=Ju|chapter=16|verse=17}}, {{GHGbible-ref|book=2 S|chapter=15|verse=33}}, {{GHGbible-ref|book=2 K|chapter=7|verse=4}}. On the other hand, e.g. {{GHGbible-ref|book=Gn|chapter=47|verse=6}}, {{GHGbible-ref|book=Mi|chapter=5|verse=7}}, {{GHGbible-ref|book=Jb|chapter=7|verse=4}} refer to actions already completed; in {{GHGbible-ref|book=Gn|chapter=38|verse=9}} and {{GHGbible-ref|book=Nu|chapter=21|verse=9}} the perfect with {{GHGheb|text=וְ}} is a perfect frequentative and refers to past time.
+
+(''e'') {{GHGterm|Imperfect consecutive}} (see {{GHGpar|111|q}}), e.g. {{GHGbible-ref|book=Jb|chapter=8|verse=4}} ''if thy children have sinned'' ({{GHGheb|text=חָֽטְאוּ}})..., {{GHGheb|text=וַיְשַׁלְּחֵם|translate=he has delivered them}}, &c.
+
+(''f'') {{GHGterm|Imperative}}, e.g. {{GHGbible-ref|book=Gn|chapter=50|verse=4}} {{GHGheb|text=אִם־נָא מָצָ֫אתִי חֵן בְּעֵֽינֵיכֶם דַּבְּרוּ־נָא לג׳|translate=if now I have found grace in your eyes, speak, I pray you}}, &c.; the imperative precedes in {{GHGbible-ref|book=Gn|chapter=47|verse=16}} and {{GHGbible-ref|book=Jb|chapter=38|verse=4}}, 18.
+
+{{GHGmargin-letter|159|p}}
+(''g'') A (complete or incomplete) noun-clause, e.g. {{GHGbible-ref|book=Jer|chapter=14|verse=18}} (a vivid realization of the future) ''if I have gone forth into the field'' (= ''if I go'', &c.), ''then, behold, the slain with the sword!'' &c.; {{GHGbible-ref|book=Pr|chapter=24|verse=14}} (apodosis with {{GHGterm|wāw apodosis}}).
+
+{{GHGmargin-letter|159|q}}
+2. {{GHGheb|text=אִם}} with {{GHGterm|imperfect}} in the protasis, to express what is possible in the present or future, as well as (according to {{GHGpar|107|b}}) what has continued or been repeated in the past. The apodosis takes—
+
+(''a'') The {{GHGterm|perfect}}, e.g. {{GHGbible-ref|book=Nu|chapter=32|verse=23}} {{GHGheb|text=וְאִם־לֹא תַֽעֲשׂוּן כֵּן הִנֵּה חֲטָאתֶם|translate=but if ye will not do so, behold, ye have sinned}}; here the apodosis represents the time when the consequence has already taken place; so also {{GHGbible-ref|book=Jb|chapter=20|verse=12}}–14. On the other hand, {{GHGbible-ref|book=Nu|chapter=16|verse=29}} (as also {{GHGbible-ref|book=1 S|chapter=6|verse=9}} and {{GHGbible-ref|book=1 K|chapter=22|verse=28}}) is a case of a pregnant construction, ''if these men die as all men die, then'' (it will follow from this) ''the Lord hath not sent me''.
+
+{{GHGmargin-letter|159|r}}
+(''b'') The {{GHGterm|imperfect}}, e.g. {{GHGbible-ref|book=2 K|chapter=7|verse=4}} {{GHGheb|text=אִם־יֶחַיֻּ֫נוּ נִֽחְיֶה|translate=if they save us alive, we shall live}}, &c.; {{GHGbible-ref|book=Gn|chapter=13|verse=16}}, {{GHGbible-ref|book=Gn|chapter=18|verse=28|hidebook=1}}, 30, 28:20 ff., {{GHGbible-ref|book=Ex|chapter=20|verse=25}} (the second imperfect is equivalent to a {{GHGterm|jussive}}); {{GHGbible-ref|book=Is|chapter=1|verse=18}}, {{GHGbible-ref|book=Is|chapter=10|verse=22|hidebook=1}}, {{GHGbible-ref|book=Am|chapter=9|verse=2}}–4, {{GHGbible-ref|book=Ps|chapter=50|verse=12}} (where {{GHGheb|text=אִם}} ironically represents an impossibility as possible); {{GHGbible-ref|book=Jb|chapter=8|verse=5}} f. (with the insertion of a second condition in the form of a noun-clause); 9:3, 20, 14:7; a frequentative imperfect referring to the past, {{GHGbible-ref|book=Gn|chapter=31|verse=8}} {{GHGheb|text=אִם־כֹּה יֹאמַר|translate=if}} (ever) ''he said thus''..., {{GHGheb|text=וְיָֽלְדוּ|translate=then they bare}}...; {{GHGbible-ref|book=Ex|chapter=40|verse=37}}. In {{GHGbible-ref|book=Gn|chapter=42|verse=37}} the consequence (on {{GHGheb|text=תָּמִית}} cf. {{GHGpar|107|s}}) precedes the condition.
+
+(''c'') The {{GHGterm|jussive}} (or ''optative''), e.g. {{GHGbible-ref|book=Ps|chapter=137|verse=5}}; cf. {{GHGpar|109|h}}.
+
+(''d'') The ''cohortative'', e.g. {{GHGbible-ref|book=Gn|chapter=13|verse=9}}, {{GHGbible-ref|book=Jb|chapter=31|verse=7}}; cf. {{GHGpar|108|f}}.
+
+{{GHGmargin-letter|159|s}}
+(''e'') The {{GHGterm|perfect consecutive}} (see the examples in {{GHGpar|112|ff}} and ''gg''), e.g. {{GHGbible-ref|book=1 S|chapter=20|verse=6}} {{GHGheb|text=אִם־פָּקֹד יִפְקְדֵ֫נִי אָבִ֫יךָ וְאָֽמַרְתָּ|translate=if thy father miss me at all, then shalt thou say}}, &c.; {{GHGbible-ref|book=Gn|chapter=24|verse=41}}, {{GHGbible-ref|book=Ju|chapter=4|verse=20}}; with a frequentative perfect consecutive, {{GHGbible-ref|book=Gn|chapter=31|verse=8}} ''if he said'' (as often happened)..., ''then'', &c.
+
+(''f'') The {{GHGterm|imperfect consecutive}}; so perhaps {{GHGbible-ref|book=Ps|chapter=59|verse=16}}, if {{GHGheb|text=וַיָּלִ֫ינוּ}} is to be explained according to {{GHGpar|111|t}}.
+
+(''g'') The {{GHGterm|imperative}}, e.g. {{GHGbible-ref|book=Gn|chapter=31|verse=50}}, {{GHGbible-ref|book=1 S|chapter=20|verse=21}} (with {{GHGterm|wāw apodosis}}, but in verse 22 simply {{GHGheb|text=לֵךְ}}), 21:10, {{GHGbible-ref|book=Jb|chapter=33|verse=5}}.
+
+{{GHGmargin-letter|159|t}}
+(''h'') A noun-clause, e.g. {{GHGbible-ref|book=Gn|chapter=4|verse=7}}, {{GHGbible-ref|book=Ps|chapter=139|verse=8}}, {{GHGbible-ref|book=Jb|chapter=8|verse=6}}, {{GHGbible-ref|book=Jb|chapter=31|verse=26|hidebook=1}} f.
+
+3. {{GHGheb|text=אִם}} with ''cohortative'', e.g. {{GHGbible-ref|book=Gn|chapter=30|verse=31}}; cf. the passages in {{GHGpar|108|e}}.
+
+{{GHGmargin-letter|159|u}}
+4. {{GHGheb|text=אִם}} with {{GHGterm|infinitive}}, {{GHGbible-ref|book=Jb|chapter=9|verse=27}} {{GHGheb|text=אִם־אָמְרִי}} prop. ''if my saying is'' (but probably we should read {{GHGheb|text=אָמַ֫רְתִּי}}).
+
+{{GHGmargin-letter|159|v}}
+5. {{GHGheb|text=אִם}} with a noun-clause, e.g. {{GHGbible-ref|book=Dt|chapter=5|verse=22}} (in the apodosis a perfect with {{GHGterm|wāw apodosis}}), {{GHGbible-ref|book=Gn|chapter=27|verse=46}}, {{GHGbible-ref|book=Ju|chapter=9|verse=15}} (imperative in the apodosis); 11:9 (imperfect in the apodosis); {{GHGbible-ref|book=2 S|chapter=12|verse=8}} (cohortative in the apodosis); {{GHGbible-ref|book=Ho|chapter=12|verse=12}}; especially if the subject of the conditional clause be a personal pronoun. In an affirmative sentence this pronoun is often joined to {{GHGheb|text=יֵשׁ}}, in a negative sentence to {{GHGheb|text=אֵין}} (cf. on both, {{GHGpar|100|o}}), while the predicate (cf. {{GHGpar|116|q}}) is represented by a participle, usually expressing the future, e.g. {{GHGbible-ref|book=Ju|chapter=6|verse=36}} f. {{GHGheb|text=אִם־יֶשְׁךָ מוֹשִׁיעַ}}<section end=par159 /><noinclude>
+<references/></noinclude>

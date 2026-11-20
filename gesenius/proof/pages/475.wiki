@@ -1,0 +1,23 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><section begin="par140" />with a participial predicate, except that in their case the event or action (as distinguished from that expressed by the verbal-clause) is of a fixed and abiding character.
+
+{{GHGmargin-letter|140|f}}
+Rem. By the Arab grammarians every clause beginning with an independent subject is regarded as a noun-clause, and every clause beginning with a finite verb as verbal. If a finite verb follows the noun-subject the two together (since the verb comprises its own subject and is thus a complete verbal-clause) form a compound noun-sentence, just as when the predicate consists of an independent noun-clause. Though this definition of the different kinds of sentence, which we formerly accepted (in {{GHGpar|144|a}} of the 22nd to the 24th German editions of this Grammar), is rejected above, ''a–d'', we must, nevertheless, mention here the point in which this more complicated view of the Arab grammarians may be regarded as at least relatively correct, namely, in classifying verbal-clauses according as the subject precedes or follows the verb, a distinction which is often of great importance in Hebrew also; see further, in {{GHGpar|142|a}}.
+<section end="par140" />
+<section begin="par141" />{{GHGpar-heading|141|The Noun-clause}}
+
+{{GHGmargin-letter|141|a}}
+'''1.''' The ''subject'' of a noun-clause (see {{GHGpar|140|a}}) may be—
+
+(''a'') A substantive, e.g. {{GHGheb|text=וְנָהָר יֹצֵא מֵעֵ֫דֶן|translate=and a river went out}} (was going out) ''of Eden'', {{GHGbible-ref|book=Gn|chapter=2|verse=10}}.
+
+(''b'') A pronoun, e.g. {{GHGbible-ref|book=Gn|chapter=7|verse=4}} {{GHGheb|text=אָֽנֹכִי מַמְטִיר|translate=I will cause it to rain}}; {{GHGbible-ref|book=Gn|chapter=14|verse=18|hidebook=1}} {{GHGheb|text=וְהוּא כֹהֵן|translate=and he was priest}}; {{GHGbible-ref|book=Gn|chapter=2|verse=23|hidebook=1}} ({{GHGheb|text=זֹאת}} before a feminine predicate, as {{GHGheb|text=אֵ֫לֶּה}} before a plural in {{GHGbible-ref|book=Ex|chapter=32|verse=4}}); {{GHGheb|text=מִי חָכָם|translate=who is wise?}} {{GHGbible-ref|book=Ho|chapter=14|verse=10}}.—In {{GHGbible-ref|book=1 Ch|chapter=5|verse=2}} {{GHGheb|text=וּלְנָגִיד מִמֶּ֫נּוּ|translate=and of him}} one became ''a prince'', the subject is contained in {{GHGheb|text=מִמֶּ֫נּוּ}}.<ref>For other remarkable instances of ellipse in the Chronicler, see Driver, ''Introduction'', ed. 8, p. 537, no. 27.</ref>
+
+{{GHGmargin-letter|141|b}}
+'''2.''' The ''predicate'' of a noun-clause may be—
+
+(''a'') A substantive, e.g. {{GHGbible-ref|book=Dt|chapter=14|verse=1}} {{GHGheb|text=בָּנִים אַתֶּם וגו׳|translate=ye are children of the Lord your God}}; {{GHGbible-ref|book=Gn|chapter=42|verse=13}}. Specially characteristic of the Semitic mode of expression are the cases in which both subject and predicate are substantives, thus emphasizing their identity (‘the thing is its measure, material, or equivalent’), e.g. {{GHGbible-ref|book=Ez|chapter=41|verse=22}} {{GHGheb|text=הַמִּזְבֵּחַ עֵץ ... וְקִֽירֹתָיו עֵץ|translate=the altar}} (was) ''wood ..., and the walls thereof'' (were) ''wood'', i.e. of wood. Cf. below, ''c''.
+
+(''b'') An adjective or participle, e.g. {{GHGbible-ref|book=Gn|chapter=2|verse=12}} {{GHGheb|text=וּֽזֲהַב הָאָ֫רֶץ הַהִיא טוֹב|translate=and the gold of that land is good}}; {{GHGheb|text=וְעֶפְרוֹן יֹשֵׁב|translate=now Ephron was sitting}}, &c., {{GHGbible-ref|book=Gn|chapter=23|verse=10}}.<ref>Cf. the numerous examples in {{GHGpar|116|n}}–''p''.</ref> Very frequently such noun-clauses, attached by {{GHGterm|Wāw}} to a verbal-clause, are used to represent a state ''contemporaneous'' with the principal action; cf. ''e'' below.
+
+(''c'') A numeral, e.g. {{GHGbible-ref|book=Gn|chapter=42|verse=13}} {{GHGheb|text=שְׁנֵים עָשָׂר עֲבָדֶ֫יךָ|translate=the twelve}} (of us) ''are thy servants''.<section end="par141" /><noinclude>
+<references/></noinclude>

@@ -1,0 +1,249 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude>{{center|''D. Verbs primae gutturalis''}}
+
+<div align="center">
+{|
+|
+|
+|
+! colspan="2" | {{GHGterm|Qal}}.
+! {{GHGterm|Niphʿal}}.
+! {{GHGterm|Hiphʿîl}}.
+! {{GHGterm|Hophʿal}}.
+|-
+| ''Perf''.
+| ''Sing''.
+| 3. ''m''.
+| colspan="2" | {{GHGheb|text=עָמַד}}
+| {{GHGheb|text=נֶֽעֱמַד}}<sup>*</sup>
+| {{GHGheb|text=הֶֽעֱמִיד}}<sup>*</sup>
+| {{GHGheb|text=הָֽעֳמַד}}<sup>*</sup>
+|-
+|
+|
+| 3. ''f''.
+| colspan="2" | {{GHGheb|text=עָֽמְדָה}}
+| {{GHGheb|text=נֶֽעֶמְדָה}}<sup>*</sup>
+| {{GHGheb|text=הֶֽעֱמִידָה}}
+| {{GHGheb|text=הָֽעָמְדָה}}<sup>*</sup>
+|-
+|
+|
+| 2. ''m''.
+| colspan="2" | {{GHGheb|text=עָמַ֫דְתָּ}}
+| {{GHGheb|text=נֶֽעֱמַ֫דְתָּ}}
+| {{GHGheb|text=הֶֽעֱמַ֫דְתָּ}}
+| {{GHGheb|text=הָֽעֳמַ֫דְתָּ}}
+|-
+|
+|
+| 2. ''f''.
+| colspan="2" | {{GHGheb|text=עָמַדְתְּ}}
+| {{GHGheb|text=נֶֽעֱמַדְתְּ}}
+| {{GHGheb|text=הֶֽעֱמַדְתְּ}}
+| {{GHGheb|text=הָֽעֳמַדְתְּ}}
+|-
+|
+|
+| 1. ''c''.
+| colspan="2" | {{GHGheb|text=עָמַ֫דְתִּי}}
+| {{GHGheb|text=נֶֽעֱמַ֫דְתִּי}}
+| {{GHGheb|text=הֶֽעֱמַ֫דְתִּיּ}}
+| {{GHGheb|text=הָֽעֳמַ֫דְתִּי}}
+|-
+|
+| ''Plur''.
+| 3. ''c''.
+| colspan="2" | {{GHGheb|text=עָֽמְדוּ}}
+| {{GHGheb|text=נֶֽעֶמְדוּ}}
+| {{GHGheb|text=הֶֽעֱמִ֫ידוּ}}
+| {{GHGheb|text=הָֽעָמְדוּ}}
+|-
+|
+|
+| 2. ''m''.
+| colspan="2" | {{GHGheb|text=עֲמַדְתֶּם}}<sup>*</sup>
+| {{GHGheb|text=נֶֽעֱמַדְתֶּם}}
+| {{GHGheb|text=הֶֽעֱמַדְתֶּם}}
+| {{GHGheb|text=הָֽעֳמַדְתֶּם}}
+|-
+|
+|
+| 2. ''f''.
+| colspan="2" | {{GHGheb|text=עֲמַדְתֶּן}}<sup>*</sup>
+| {{GHGheb|text=נֶֽעֱמַדְתֶּן}}
+| {{GHGheb|text=הֶֽעֱמַדְתֶּן}}
+| {{GHGheb|text=הָֽעֳמַדְתֶּן}}
+|-
+|
+|
+| 1. ''c''.
+| colspan="2" | {{GHGheb|text=עָמַ֫דְנוּ}}
+| {{GHGheb|text=נֶֽעֱמַ֫דְנוּ}}
+| {{GHGheb|text=הֶֽעֱמַ֫דְנוּ}}
+| {{GHGheb|text=הֶֽעֳמַ֫דְנוּ}}
+|-
+| ''Inf''.
+|
+|
+| colspan="2" | {{GHGheb|text=עֲמֹד}}<sup>*</sup>
+| {{GHGheb|text=הֵֽעָמֵד}}<sup>*</sup>
+| {{GHGheb|text=הַֽעֲמִיד}}<sup>*</sup>
+|
+|-
+| ''Inf''.
+| ''absol''.
+|
+| colspan="2" | {{GHGheb|text=עָמוֹד}}
+| {{GHGheb|text=הֵֽאָסֹף}}, {{GHGheb|text=נַֽעֲמוֹד}}<sup>*</sup>
+| {{GHGheb|text=הַֽעֲמֵד}}<sup>*</sup>
+| {{GHGheb|text=הָֽעֳמֵד}}<sup>*</sup>
+|-
+| ''Imp''.
+| ''Sing''.
+| ''m''.
+| {{GHGheb|text=עֲמֹד}}<sup>*</sup>
+| {{GHGheb|text=חֲזַק}}<sup>*</sup>
+| {{GHGheb|text=הֵֽעָמֵד}}<sup>*</sup>
+| {{GHGheb|text=הַֽעֲמֵד}}
+|
+|-
+| .
+|
+| ''f''.
+| {{GHGheb|text=עִמְדִי}}
+| {{GHGheb|text=חִזְקִי}}
+| {{GHGheb|text=הֵעָֽמְדִי}}
+| {{GHGheb|text=הַֽעֲמִ֫ידִי}}
+| wanting.
+|-
+|
+| ''Plur''.
+| ''m''.
+| {{GHGheb|text=עִמְדוּ}}
+| {{GHGheb|text=חִזְקוּ}}
+| {{GHGheb|text=הֵעָֽמְדוּ}}
+| {{GHGheb|text=הַֽעֲמִ֫ידוּ}}
+|
+|-
+|
+|
+| ''f''.
+| {{GHGheb|text=עֲמֹ֫דְנָה}}<sup>*</sup>
+| {{GHGheb|text=חֲזַ֫קְנָה}}<sup>*</sup>
+| {{GHGheb|text=הֵֽעָמַ֫דְנָה}}
+| {{GHGheb|text=הַֽעֲמֵ֫דְנָה}}
+|
+|-
+| ''Impf''.
+| ''Sing''.
+| 3. ''m''.
+| {{GHGheb|text=יַֽעֲמֹד}}<sup>*</sup>
+| {{GHGheb|text=יֶֽחֱזַק}}<sup>*</sup>
+| {{GHGheb|text=יֵֽעָמֵד}}<sup>*</sup>
+| {{GHGheb|text=יַֽעֲמִיד}}<sup>*</sup>
+| {{GHGheb|text=יַֽעֳמַד}}<sup>*</sup>
+|-
+|
+|
+| 3. ''f''.
+| {{GHGheb|text=תַּֽעֲמֹד}}
+| {{GHGheb|text=תֶּֽחֱזַק}}
+| {{GHGheb|text=תֵּֽעָמֵד}}
+| {{GHGheb|text=תַּֽעֲמִיד}}
+| {{GHGheb|text=תָּֽעֳמַד}}
+|-
+|
+|
+| 2. ''m''.
+| {{GHGheb|text=תַּֽעֲמֹד}}
+| {{GHGheb|text=תֶּֽהֱזַק}}
+| {{GHGheb|text=תֵּֽעָמֵד}}
+| {{GHGheb|text=תַּֽעֲמִיד}}
+| {{GHGheb|text=תָּֽעֳמַד}}
+|-
+|
+|
+| 2. ''f''.
+| {{GHGheb|text=תַּֽעַמְדִי}}<sup>*</sup>
+| {{GHGheb|text=תֶּֽחֶזְקִי}}<sup>*</sup>
+| {{GHGheb|text=תֵּעָֽמְדִי}}
+| {{GHGheb|text=תַּֽעֲמִ֫ידִי}}
+| {{GHGheb|text=תָּֽעָמְדִי}}<sup>*</sup>
+|-
+|
+|
+| 1. ''c''.
+| {{GHGheb|text=אֶֽעֱמֹד}}<sup>*</sup>
+| {{GHGheb|text=אֶֽחֱזַק}}
+| {{GHGheb|text=אֵֽעָמֵד}}
+| {{GHGheb|text=אַֽעֲמִיד}}
+| {{GHGheb|text=אָֽעֳמֵד}}
+|-
+|
+| ''Plur''.
+| 3. ''m''.
+| {{GHGheb|text=יַֽעַמְדוּ}}<sup>*</sup>
+| {{GHGheb|text=יֶֽחֶזְקוּ}}<sup>*</sup>
+| {{GHGheb|text=יֵעָֽמְדוּ}}
+| {{GHGheb|text=יַֽעֲמִ֫ידוּ}}
+| {{GHGheb|text=יָֽעָמְדוּ}}
+|-
+|
+|
+| 3. ''f''.
+| {{GHGheb|text=תַּֽעֲמֹ֫דְנָה}}
+| {{GHGheb|text=תֶּֽחֱזַ֫קְנָה}}
+| {{GHGheb|text=תֵּֽעָמַ֫דְנָה}}
+| {{GHGheb|text=תַּֽעֲמֵ֫דְנָה}}
+| {{GHGheb|text=תָּֽעֳמַ֫דְנָ֫ה}}
+|-
+|
+|
+| 2. ''m''.
+| {{GHGheb|text=תַּֽעַמְדוּ}}
+| {{GHGheb|text=תֶּֽחֶוְקוּ}}
+| {{GHGheb|text=תֵּעָֽמְדוּ}}
+| {{GHGheb|text=תַּֽעֲמִ֫ידוּ}}
+| {{GHGheb|text=תָּֽעָמְדוּ}}
+|-
+|
+|
+| 2. ''f''.
+| {{GHGheb|text=תַּֽעֲמֹ֫דְנָה}}
+| {{GHGheb|text=תֶּֽחֱזַ֫קְנָה}}
+| {{GHGheb|text=תֵּֽעָמַ֫דְנָה}}
+| {{GHGheb|text=תַּֽעֲמֵ֫דְנָה}}
+| {{GHGheb|text=תָּֽעֳמַ֫דְנָה}}
+|-
+|
+|
+| 1. ''c''.
+| {{GHGheb|text=נַֽעֲמֹד}}
+| {{GHGheb|text=נֶֽחֱזַק}}
+| {{GHGheb|text=נֵֽעָמֵד}}
+| {{GHGheb|text=נַֽעֲמִיד}}
+| {{GHGheb|text=נָעֳמַד}}
+|-
+| colspan="3" | ''Shortened Impf''. ({{GHGterm|Jussive}}.)
+| colspan="3" |
+| {{GHGheb|text=יַֽעֲמֵד}}
+|
+|-
+| ''Part''.
+| ''act''.
+|
+| colspan="2" | {{GHGheb|text=עֹמֵד}}
+| {{GHGheb|text=נֶֽעֱמָד}}<sup>*</sup>
+| {{GHGheb|text=מַעֲמִיד}}<sup>*</sup>
+|
+|-
+|
+| ''pass''.
+|
+| colspan="2" | {{GHGheb|text=עָמוּד}}
+|
+|
+| {{GHGheb|text=מָֽעֳמָד}}
+|}
+</div><noinclude>
+<references/></noinclude>

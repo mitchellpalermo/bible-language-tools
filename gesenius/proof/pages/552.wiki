@@ -1,0 +1,207 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><div align="center">
+{|
+| 
+|
+|
+! {{GHGterm|Qal}}. || {{GHGterm|Niphʿal}}. || {{GHGterm|Piʿēl}}.
+|-
+| ''Perf''.
+| ''Sing''.
+| 3. ''m''.
+| {{GHGhebT|text=גָּלָה<sup>*</sup>}}
+| {{GHGhebT|text=נִגְלָה<sup>*</sup>}}
+| {{GHGhebT|text=גִּלָּה<sup>*</sup>}}
+|-
+|
+|
+| 3. ''f''.
+| {{GHGhebT|text=גָּֽלְתָה<sup>*</sup>}}
+| {{GHGhebT|text=נִגְלְתָה<sup>*</sup>}}
+| {{GHGhebT|text=גִּלְּתָה<sup>*</sup>}}
+|-
+|
+|
+| 2. ''m''.
+| {{GHGhebT|text=גָּלִ֫יתָ<sup>*</sup>}}
+| {{GHGhebT|text=־ִיתָּ}}, {{GHGhebT|text=נִגְלֵ֫יתָ<sup>*</sup>}}
+| {{GHGhebT|text=גִּלִּ֫יתָ<sup>*</sup>}}
+|-
+|
+|
+| 2. ''f''.
+| {{GHGhebT|text=גָּלִית}}
+| {{GHGhebT|text=נִגְלֵית}}
+| {{GHGhebT|text=גִּלִּית}}
+|-
+|
+|
+| 1. ''c''.
+| {{GHGhebT|text=גָּלִ֫יתִי}}
+| {{GHGhebT|text=נִגְלֵ֫יתִי}}
+| {{GHGhebT|text=גִּלֵּ֫יתִי}}, {{GHGhebT|text=גִּלִּ֫יתִי}}
+|-
+|
+| ''Plur''.
+| 3. ''c''.
+| {{GHGhebT|text=גָּלוּ<sup>*</sup>}}
+| {{GHGhebT|text=נִגְלוּ}}
+| {{GHGhebT|text=גִּלּוּ}}
+|-
+|
+|
+| 2. ''m''.
+| {{GHGhebT|text=גְּלִיתֶם}}
+| {{GHGhebT|text=נִגְלֵיתֶם]}}
+| {{GHGhebT|text=גִּלִּיתֶם}}
+|-
+|
+|
+| 2. ''f''.
+| {{GHGhebT|text=גְּלִיתֶן}}
+| {{GHGhebT|text=[נִגְלֵיתֶן}}
+| {{GHGhebT|text=[גִּלִּיתֶן]}}
+|-
+|
+|
+| 1. ''c''.
+| {{GHGhebT|text=גָּלִ֫ינוּ}}
+| {{GHGhebT|text=נִגְלִ֫ינוּ}}
+| {{GHGhebT|text=גִּלִּ֫ינוּ}}
+|-
+| ''Inf''.
+|
+|
+| {{GHGhebT|text=גְּלוֹת<sup>*</sup>}}
+| {{GHGhebT|text=הִגָּלוֹת<sup>*</sup>}}
+| {{GHGhebT|text=גַּלּוֹת<sup>*</sup>}}
+|-
+| ''Inf''.
+| ''absol''.
+|
+| {{GHGhebT|text=גָּלֹה}}
+| {{GHGhebT|text=הִנָּקֵה}}, {{GHGhebT|text=נִגְלֹה}}
+| {{GHGhebT|text=גַּלֵּה}}, {{GHGhebT|text=גַּלֹּה}}
+|-
+| ''Imp''.
+| ''Sing''.
+| ''m''.
+| {{GHGhebT|text=גְּלֵה<sup>*</sup>}}
+| {{GHGhebT|text=הִגָּלֵה<sup>*</sup>}}
+| {{GHGhebT|text=גַּל}}, {{GHGhebT|text=גַּלֵּה<sup>*</sup>}}
+|-
+|
+|
+| ''f''.
+| {{GHGhebT|text=גְּלִי<sup>*</sup>}}
+| {{GHGhebT|text=הִגָּלִי<sup>*</sup>}}
+| {{GHGhebT|text=גַּלִּי<sup>*</sup>}}
+|-
+|
+| ''Plur''.
+| ''m''.
+| {{GHGhebT|text=גְּלוּ}}
+| {{GHGhebT|text=הִגָּלוּ}}
+| {{GHGhebT|text=גַּלּוּ}}
+|-
+|
+|
+| ''f''.
+| {{GHGhebT|text=גְּלֶ֫ינָה<sup>*</sup>}}
+| {{GHGhebT|text=[הִגָּלֶ֫ינָה]}}
+| {{GHGhebT|text=[גַּלֶּ֫ינָה]}}
+|-
+| ''Impf''.
+| ''Sing''.
+| 3. ''m''.
+| {{GHGhebT|text=יִגְלֶה<sup>*</sup>}}
+| {{GHGhebT|text=יִגָּלֶה<sup>*</sup>}}
+| {{GHGhebT|text=יְגַלֶּה<sup>*</sup>}}
+|-
+|
+|
+| 3. ''f''.
+| {{GHGhebT|text=תִּגְלֶה}}
+| {{GHGhebT|text=תִּגָּלֶה}}
+| {{GHGhebT|text=תְּגַלֶּה}}
+|-
+|
+|
+| 2. ''m''.
+| {{GHGhebT|text=תִּגְלֶה}}
+| {{GHGhebT|text=תִּגָּלֶה}}
+| {{GHGhebT|text=תְּגַלֶּה}}
+|-
+|
+|
+| 2. ''f''.
+| {{GHGhebT|text=תִּגְלִי<sup>*</sup>}}
+| {{GHGhebT|text=[תִּגָּלִי]}}
+| {{GHGhebT|text=תְּגַלִּי<sup>*</sup>}}
+|-
+|
+|
+| 1. ''c''.
+| {{GHGhebT|text=אֶגְלֶה}}
+| {{GHGhebT|text=אִגָּ׳}}, {{GHGhebT|text=אֶגָּלֶה}}
+| {{GHGhebT|text=אֲגַלֶּה}}
+|-
+|
+| ''Plur''.
+| 3. ''m''.
+| {{GHGhebT|text=יִגְלוּ}}
+| {{GHGhebT|text=יִגָּלוּ}}
+| {{GHGhebT|text=יְגַלּוּ}}
+|-
+|
+|
+| 3. ''f''.
+| {{GHGhebT|text=תִּגְלֶ֫ינָה<sup>*</sup>}}
+| {{GHGhebT|text=תִּגָּלֶ֫ינָה<sup>*</sup>}}
+| {{GHGhebT|text=תְּגַלֶּ֫ינָה<sup>*</sup>}}
+|-
+|
+|
+| 2. ''m''.
+| {{GHGhebT|text=תִּגְלוּ}}
+| {{GHGhebT|text=תִּגָּלוּ}}
+| {{GHGhebT|text=תְּגַלּוּ}}
+|-
+|
+|
+| 2. ''f''.
+| {{GHGhebT|text=תִּגְלֶ֫ינָה}}
+| {{GHGhebT|text=תִּגָּלֶ֫ינָה}}
+| {{GHGhebT|text=תְּגַלֶּ֫ינָה}}
+|-
+|
+|
+| 1. ''c''.
+| {{GHGhebT|text=נִגְלֶה}}
+| {{GHGhebT|text=[נִגָּלֶה]}}
+| {{GHGhebT|text=נְגַלֶּה}}
+|-
+| colspan="3" | ''Shortened. Impf''.
+| {{GHGhebT|text=יִ֫גֶל<sup>*</sup>}}
+| {{GHGhebT|text=יִגָּלּ<sup>*</sup>}}
+| {{GHGhebT|text=יְגַל<sup>*</sup>}}
+|-
+| colspan="3" | ''Impf. with Suff''.
+| {{GHGhebT|text=יִגְלֵ֫נִי<sup>*</sup>}}, {{GHGhebT|text=יִגְלְךָ}}
+| 
+| {{GHGhebT|text=יְגַלֵ֫נִי<sup>*</sup>}}, {{GHGhebT|text=יְגַלְךָ}}
+|-
+| ''Part''.
+| ''act''.
+|
+| {{GHGhebT|text=גֹּלֶה<sup>*</sup>}}
+| {{GHGhebT|text=נִגְלֶה<sup>*</sup>}}
+| {{GHGhebT|text=מְגַלֶּה<sup>*</sup>}}
+|-
+|
+| ''pass''.
+|
+| {{GHGhebT|text=גָּלוּי<sup>*</sup>}}
+| colspan="3" | 
+|}
+</div><noinclude>
+<references/></noinclude>

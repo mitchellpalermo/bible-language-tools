@@ -1,0 +1,26 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par75 />Of quite a different class are those verbs of which the third radical is a ''consonantal'' {{GHGheb|text=ה}} (distinguished by {{GHGterm|Mappiq}}). These are inflected throughout like verbs ''tertiae gutturalis''. Cf. §65 note on the heading.
+
+{{GHGmargin-letter|75|c}}
+The grammatical structure of verbs {{GHGheb|text=ל״ה}} (see Paradigm ''P'') is based on the following laws:—
+
+'''1.''' In all forms in which the original {{GHGterm|Yôdh}} or {{GHGterm|Wāw}} would stand at the end of the word, it is dropped (cf. {{GHGpar|24|g}}) and {{GHGheb|text=ה}} takes its place as an orthographic indication of the preceding long vowel. Such an indication would have been indispensable, on practical grounds, in the still unvocalized consonantal text. But even after the addition of the vowel signs, the orthographic rule remained, with insignificant exceptions (see {{GHGpar|8|k}}, and ''ā'' in {{GHGheb|text=קָטַ֫לְתָּ}}, &c.), that a final vowel must be indicated by a vowel letter. In verbs {{GHGheb|text=ל״ה}} the {{GHGheb|text=ה}} which is here employed as a vowel letter is preceded by the same vowel in the same part of the verb throughout all the conjugations. Thus the endings are—
+
+{{GHGheb|text=־ָה}} in all perfects, {{GHGheb|text=גָּלָה}}, {{GHGheb|text=נִגְלָה}}, {{GHGheb|text=גִּלָּה}}, &c.
+
+{{GHGheb|text=־ֶה}} in all imperfects and participles, {{GHGheb|text=יִגְלֶה}}, {{GHGheb|text=גֹּלֶה}}, &c.
+
+{{GHGheb|text=־ֵה}} in all imperatives, {{GHGheb|text=גְּלֵה}}, {{GHGheb|text=גַּלֵּה}}, &c.
+
+{{GHGheb|text=־ֹה}} in the infinitive absolute ({{GHGheb|text=גָּלֹה}}, &c.), except in ''Hiphʿîl, Hophʿal'', and generally also ''Piʿēl'', see aa and ff.
+
+The ''participle passive Qal'' alone forms an exception, the original {{GHGheb|text=י}} (or {{GHGheb|text=ו}}, see v) reappearing at the end, {{GHGheb|text=גָּלוּי}}; and so also some derived nouns ({{GHGpar|84|c|a}}, ε, &c.).
+
+The {{GHGterm|infinitive construct}} always has the ending {{GHGheb|text=וֹת}} (with {{GHGheb|text=ת|translate=feminine}}); {{GHGterm|Qal}} {{GHGheb|text=גְּלוֹת}}, {{GHGterm|Piʿēl}} {{GHGheb|text=גַּלּוֹת}}, &c.; for exceptions, see n and y.
+
+{{GHGmargin-letter|75|d}}
+These forms may be explained as follows:—in the {{GHGterm|perfect Qal}} {{GHGheb|text=גָּלָה}} stands, according to the above, for ({{GHGheb|text=י}}){{GHGheb|text=גָּלַ}}, and, similarly, in ''Niphʿal, Puʿal'', and {{GHGterm|Hophʿal}}. The {{GHGterm|Piʿēl}} and {{GHGterm|Hithpaʿēl}} may be based on the forms {{GHGheb|text=קִטַּל}}, {{GHGheb|text=הִתְקַטַּל}} ({{GHGpar|52|l}}; and {{GHGpar|54|k}}), and {{GHGterm|Hiphʿîl}} on the form {{GHGheb|text=הִקְטַל}}, on the analogy of the ''ă'' in the second syllable of the Arabic ''ʾáqtălă'' ({{GHGpar|53|a}}). Perhaps, however, the final ''ā'' of these conjugations simply follows the analogy of the other conjugations.
+
+{{GHGmargin-letter|75|e}}
+The explanation of the final tone-bearing {{GHGheb|text=־ֶה}} of the {{GHGterm|imperfect}} is still a matter of dispute. As to the various treatments of it, see Barth, {{GHGcite|title=Nominalbildung}}, i. p. xxx ff, with § 136, Rem., and {{GHGcite|title={{abbr|ZDMG.|Zeitschrift der deutschen morgenländischen Gesellschaft, Lpz. 1846 ff., since 1903 ed. by A. Fischer.}}}} xliv. 695 f., against Philippi’s objections in the ''Zeitschrift für Völkerpsychologie'', 1890, p. 356 f.; also {{GHGcite|title={{abbr|ZDMG.|Zeitschrift der deutschen morgenländischen Gesellschaft, Lpz. 1846 ff., since 1903 ed. by A. Fischer.}}}} lvi. 244, where Barth appeals to the rule that, in the period before the differentiation of the North Semitic dialects, final ''iy'' becomes {{GHGheb|text=־ֶ}} ({{GHGterm|constr.}} {{GHGheb|text=־ֵה}}), not ''î''; M. Lambert, Journ. Asiat. 1893, p. 285; Prätorius, {{GHGcite|title={{abbr|ZDMG.|Zeitschrift der deutschen morgenländischen Gesellschaft, Lpz. 1846 ff., since 1903 ed. by A. Fischer.}}}} lv. 365. The most probable explanation now seems to be, first, that the uniform pronunciation of ''all'' imperfects and participles with {{GHGterm|S<sup>e</sup>ghôl}} in the last syllable merely follows the analogy of the ''impf. Qal'', and secondly, that the {{GHGterm|S<sup>e</sup>ghôl}} of the ''impf. Qal'' does perhaps ultimately represent a contraction of the original termination {{GHGheb|text=־ַי}} (= ''ai''), although elsewhere (e.g. in the {{GHGterm|imperative}} of {{GHGheb|text=ל״ה}}) ''ai'' is usually contracted to ''ê''.
+<section end=par75 /><noinclude>
+<references/></noinclude>

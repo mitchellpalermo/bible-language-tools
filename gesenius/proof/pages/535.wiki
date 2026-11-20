@@ -1,0 +1,145 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><div align="center">
+{|
+! {{GHGterm|Puʿal}}.|| ''Hiphiʿîl''.|| {{GHGterm|Hophʿal}}.|| {{GHGterm|Hithpaʿēl}}.
+|-
+| {{GHGheb|text=קֻטַּל}}<sup>*</sup>
+| {{GHGheb|text=הִקְטִיל}}<sup>*</sup>
+| {{GHGheb|text=הָקְטַל}}<sup>*</sup>
+| {{GHGheb|text=הִתְקַטֵּל}}<sup>*</sup>
+|-
+| {{GHGheb|text=קֻטְּלָה}}<sup>*</sup>
+| {{GHGheb|text=הִקְטִ֫ילָה}}<sup>*</sup>
+| {{GHGheb|text=הָקְטְלָה}}<sup>*</sup>
+| {{GHGheb|text=הִתְקַטְּלָה}}<sup>*</sup>
+|-
+| {{GHGheb|text=קֻטַּ֫לְתָּ}}<sup>*</sup>
+| {{GHGheb|text=הִקְטַ֫לְתָּ}}<sup>*</sup>
+| {{GHGheb|text=הָקְטַ֫לְתָּ}}<sup>*</sup>
+| {{GHGheb|text=הִתְקַטַּ֫לְתָּ}}<sup>*</sup>
+|-
+| {{GHGheb|text=קֻטַּלְתְּ}}
+| {{GHGheb|text=הִקְטַלְתְּ}}
+| {{GHGheb|text=הָקְטַלְתְּ}}
+| {{GHGheb|text=הִתְקַטַּלְתְּ}}
+|-
+| {{GHGheb|text=קֻטַּ֫לְתִּי}}
+| {{GHGheb|text=הִקְטַ֫לְתִּי}}
+| {{GHGheb|text=הָקְטַ֫לְתִּי}}
+| {{GHGheb|text=תִתְקַטַּ֫לְתִּי}}
+|-
+| {{GHGheb|text=קֻטְּלוּ}}
+| {{GHGheb|text=הִקְטִ֫ילוּ}}
+| {{GHGheb|text=הָקְטְלוּ}}
+| {{GHGheb|text=הִתְקַטְּלוּ}}
+|-
+| {{GHGheb|text=קֻטַּלְתֶּם}}
+| {{GHGheb|text=הִקְטַלְתֶּם}}
+| {{GHGheb|text=הָקְטַלְתֶּם}}
+| {{GHGheb|text=הִתְקַטַּלְתֶּם}}
+|-
+| {{GHGheb|text=קֻטַּלְתֶּן}}
+| {{GHGheb|text=הִקְטַלְתֶּן}}
+| {{GHGheb|text=הָקְטַלְתֶּן}}
+| {{GHGheb|text=הִתְקַטַּלְתֶּן}}
+|-
+| {{GHGheb|text=קֻטַּ֫לְנוּ}}
+| {{GHGheb|text=הִקְטַ֫לְנוּ}}
+| {{GHGheb|text=הָקְטַ֫לְנוּ}}
+| {{GHGheb|text=הִתְקַטַּ֫לְנוּ}}
+|-
+| {{GHGheb|text=הַקְטִיל}}<sup>*</sup>
+| wanting.
+| {{GHGheb|text=הִתְקַטֵּל}}<sup>*</sup>
+|
+|-
+| {{GHGheb|text=הַקְטֵל}}<sup>*</sup>
+| {{GHGheb|text=הָקְטֵל}}<sup>*</sup>
+| {{GHGheb|text=הִתְקַטֵּל}}<sup>*</sup>
+|
+|-
+|
+| {{GHGheb|text=הַקְטֵל}}<sup>*</sup>
+|
+| {{GHGheb|text=הִתְקַטֵּל}}<sup>*</sup>
+|-
+| wanting.
+| {{GHGheb|text=הַקְטִ֫ילִי}}<sup>*</sup>
+| wanting.
+| {{GHGheb|text=הִתְקַטְּלִי}}<sup>*</sup>
+|-
+|
+| {{GHGheb|text=הַקְטִ֫ילוּ}}
+|
+| {{GHGheb|text=הִתְקַטְּלוּ}}
+|-
+|
+| {{GHGheb|text=הַקְטֵ֫לְנָה}}<sup>*</sup>
+|
+| {{GHGheb|text=הִתְקַטֵּ֫לְנָה}}<sup>*</sup>
+|-
+| {{GHGheb|text=יְקֻטַּל}}<sup>*</sup>
+| {{GHGheb|text=יַקְטִיל}}<sup>*</sup>
+| {{GHGheb|text=יָקְטַל}}<sup>*</sup>
+| {{GHGheb|text=יִתְקַטֵּל}}<sup>*</sup>
+|-
+| {{GHGheb|text=תְּקֻטַּל}}
+| {{GHGheb|text=תַּקְטִיל}}
+| {{GHGheb|text=תָּקְטַל}}
+| {{GHGheb|text=תִּתְקַטֵּל}}
+|-
+| {{GHGheb|text=תְּקֻטַּל}}
+| {{GHGheb|text=תַּקְטִיל}}
+| {{GHGheb|text=תָּקְטַל}}
+| {{GHGheb|text=תִּתְקַטֵּל}}
+|-
+| {{GHGheb|text=תְּקֻטְּלִי}}<sup>*</sup>
+| {{GHGheb|text=תַּקְטִ֫ילִי}}<sup>*</sup>
+| {{GHGheb|text=תָּקְטְלִי}}<sup>*</sup>
+| {{GHGheb|text=תִּתְקַטְּלִי}}<sup>*</sup>
+|-
+| {{GHGheb|text=אֲקֻטַּל}}
+| {{GHGheb|text=אַקְטִיל}}
+| {{GHGheb|text=אָקְטַל}}
+| {{GHGheb|text=אֶתְקַטֵּל}}
+|-
+| {{GHGheb|text=יְקֻטְּלוּ}}
+| {{GHGheb|text=יַקְטִ֫ילוּ}}
+| {{GHGheb|text=יָקְטְלוּ}}
+| {{GHGheb|text=יִתְקַטְּלוּ}}
+|-
+| {{GHGheb|text=תְּקֻטַּ֫לְנָה}}<sup>*</sup>
+| {{GHGheb|text=תַּקְטֵ֫לְנָה}}<sup>*</sup>
+| {{GHGheb|text=תָּקְטַ֫לְנָה}}<sup>*</sup>
+| {{GHGheb|text=תִּתְקַטֵּ֫לְנָה}}<sup>*</sup>
+|-
+| {{GHGheb|text=תְּקֻטְּלוּ}}
+| {{GHGheb|text=תַּקְטִ֫ילוּ}}
+| {{GHGheb|text=תָּקְטְלוּ}}
+| {{GHGheb|text=תִּתְקַטְּלוּ}}
+|-
+| {{GHGheb|text=תְּקֻטַּ֫לְנָה}}
+| {{GHGheb|text=תַּקְטֵ֫לְנָה}}
+| {{GHGheb|text=תָּקְטַ֫לְנָה}}
+| {{GHGheb|text=תִּתְקַטֵּ֫לְנָה}}
+|-
+| {{GHGheb|text=נְקֻטַּל}}
+| {{GHGheb|text=נַקְטִיל}}
+| {{GHGheb|text=נָקֻטַל}}
+| {{GHGheb|text=נִתְקַטֵּל}}
+|-
+| {{GHGheb|text=יַקְטֵל}}<sup>*</sup>
+| colspan="2" |
+|
+|-
+|
+| {{GHGheb|text=מַקְטִיל}}<sup>*</sup>
+|
+| {{GHGheb|text=מִתְקַטֵּל}}<sup>*</sup>
+|-
+| {{GHGheb|text=מְקֻטָּל}}<sup>*</sup>
+|
+| {{GHGheb|text=מָקְטָל}}<sup>*</sup>
+|
+|}
+</div><noinclude>
+<references/></noinclude>

@@ -1,0 +1,172 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par40 />{{GHGpar-heading|40|Tenses. Moods. Flexion}}
+
+A. Ungnad, ‘Die gegenseitigen Beziehungen der Verbalformen im Grundstamm des semit. Verbs,’ in {{GHGcite|title={{abbr|ZDMG.|Zeitschrift der deutschen morgenländischen Gesellschaft, Lpz. 1846 ff., since 1903 ed. by A. Fischer.}}}} 59 (1905), 766 ff., and his ‘Zum hebr. Verbalsystem’, in {{GHGcite|title=Beiträge zur Assyriologie}} ed. by Fr. Delitzsch and P. Haupt, 1907, p. 55 ff.
+
+{{GHGmargin-letter|40|a}}
+'''1.''' While the Hebrew verb, owing to these derivative forms or conjugations, possesses a certain richness and copiousness, it is, on the other hand, poor in the matter of ''tenses'' and ''moods''. The verb has only two ''tense''-forms ({{GHGterm|Perfect}} and {{GHGterm|Imperfect}}, see the note on {{GHGpar|47|a}}), besides an {{GHGterm|Imperative}} (but only in the active), two ''Infinitives'' and a {{GHGterm|Participle}}. All relations of time, absolute and relative, are expressed either by these forms (hence a certain diversity in their meaning, {{GHGpar|106|ff}}.) or by syntactical combinations. Of moods properly so called (besides the {{GHGterm|Imperfect Indicative}} and {{GHGterm|Imperative}}), only the {{GHGterm|Jussive}} and {{GHGterm|Optative}} are sometimes indicated by express modifications of the Imperfect-form (§ 48).
+
+{{GHGmargin-letter|40|b}}
+'''2.''' The ''inflexion'' of the ''Perfect, Imperfect'', and {{GHGterm|Imperative}} as to persons, differs from that of the Western languages in having, to a great extent, distinct forms for the two genders, which correspond to the different forms of the ''personal pronoun. It is from the union of the pronoun with the verbal stem that the personal inflexions of these tenses arise''.
+
+{{GHGmargin-letter|40|c}}
+The following table will serve for the beginner as a provisional scheme of the formative syllables (''afformatives'' and ''preformatives'') of the two ''tenses''. The three stem-consonants of the strong verb are denoted by dots. Cf. {{GHGpar|44|ff}}. and the Paradigms.
+
+<div align="center">
+{| cellspacing="0" cellpadding="0" border="0"
+! colspan="14" | Perfect
+|-
+! colspan="7" | ''Singular''.
+! colspan="7" | ''Plural''.
+|-
+| 3.
+| ''m''.
+|
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| colspan="2" | 3.
+| ''c''.
+| {{GHGheb|text=וּ}}
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+|
+|-
+| 3.
+| ''f''.
+| {{GHGheb|text=־ָה}}
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| colspan="2" |
+|
+|
+|
+|
+|
+|
+|-
+| 2.
+| ''m''.
+| {{GHGheb|text=תָּ}}
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| colspan="2" | 2.
+| ''m''.
+| {{GHGheb|text=תֶּם}}
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+|
+|-
+| 2.
+| ''f''.
+| {{GHGheb|text=תְּ}}
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| colspan="2" | 2.
+| ''f''.
+| {{GHGheb|text=תֶּן}}
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+|
+|-
+| 1.
+| ''c''.
+| {{GHGheb|text=תִּי}}
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| colspan="2" | 1.
+| ''c''.
+| {{GHGheb|text=נוּ}}
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+|
+|-
+! colspan="14" | Imperfect
+|-
+! colspan="7" | ''Singular''.
+! colspan="7" | ''Plural''.
+|-
+| 3.
+| ''m''.
+|
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| {{GHGheb|text=י}}
+| 3.
+| ''m''.
+| {{GHGheb|text=וּ}}
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| {{GHGheb|text=י}}
+|-
+| 3.
+| ''f''.
+|
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| {{GHGheb|text=תּ}}
+| 3.
+| ''f''.
+| {{GHGheb|text=נָה}}
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| {{GHGheb|text=תּ}}
+|-
+| 2.
+| ''m''.
+|
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| {{GHGheb|text=תּ}}
+| 2.
+| ''m''.
+| {{GHGheb|text=וּ}}
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| {{GHGheb|text=תּ}}
+|-
+| 2.
+| ''f''.
+| {{GHGheb|text=־ִי}}
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| {{GHGheb|text=תּ}}
+| 2.
+| ''f''.
+| {{GHGheb|text=נָה}}
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| {{GHGheb|text=תּ}}
+|-
+| 1.
+| ''c''.
+|
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| {{GHGheb|text=א}}
+| 1.
+| ''c''.
+|
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| &nbsp;∙&nbsp;
+| {{GHGheb|text=נ‍}}
+|}
+</div><section end=par40 /><noinclude>
+<references/></noinclude>

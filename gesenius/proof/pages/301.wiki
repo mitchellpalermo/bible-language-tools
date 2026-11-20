@@ -1,0 +1,89 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par95 />feminines also: (1) a tone-lengthened vowel on the removal of the tone reverts to its original shortness (thus the ''ā'' of the termination {{GHGheb|text=־ָה}} becomes again ''ă'' in the ''construct st.'' {{GHGheb|text=־ַת}}). On the other hand, even an originally short vowel is retained as (a long) pretonic vowel ''before'' the endings {{GHGheb|text=־ָה}} and {{GHGheb|text=וֹת}} in the ''abs. st.'', e.g. {{GHGheb|text=צְדָקָה}}; (2) without the tone or foretone an originally short vowel almost always becomes {{GHGterm|Š<sup>e</sup>wâ}}; on the other hand, ''before'' a vowel which had thus become {{GHGterm|Š<sup>e</sup>wâ}} the ''ă'' in the first syllable which had hitherto also been reduced to {{GHGterm|Š<sup>e</sup>wâ}} returns, although usually attenuated to ''ĭ'', e.g. {{GHGheb|text=צִדְקַת}} from ''ṣădhăqăth''; (3) in the plural of the feminines of segholate forms before the termination of {{GHGheb|text=וֹת}} or {{GHGheb|text=־ִים}}, and in formations of the latter kind also before the light suffixes, a ''pretonic Qameṣ'' reappears, while the short vowel of the first syllable becomes {{GHGterm|Š<sup>e</sup>wâ}}. This short vowel, however, returns in the ''construct st. plur.'', whether ending in {{GHGheb|text=וֹת}} or {{GHGheb|text=־ֵי}}; in formations of the latter kind also before the grave suffixes.
+
+The following Paradigms (with the exception of I, ''d'') deal only with such of the forms treated in § 94 as incur some vowel changes or other. All forms with unchangeable vowels follow the analogy of Paradigm I, ''d''.
+
+{{GHGmargin-letter|95|b}}
+<div align="center">
+{|
+|
+! colspan="6" | I.
+|-
+|
+! ''a''.
+!colspan=2| ''b''.
+! ''c''.|| ''d''.|| ''e''.
+|-
+| ''Sing. absolute''
+| {{GHGhebT|text=מַלְכָּה}}
+| {{GHGhebT|text=[כִּלְיָה]}}
+| {{GHGhebT|text=חֶרְפָּה}}
+| {{GHGhebT|text=חָרְבָּה}}
+| {{GHGhebT|text=חֻקָּה}}
+| {{GHGhebT|text=[גְּבִירָה]}}
+|-
+|
+| (''queen'')
+| (''kidney'')
+| (''reproach'')
+| (''waste'')
+| (''statute'')
+| (''mistress'')
+|-
+| Sing. ''construct''
+| {{GHGhebT|text=מַלְכַּת}}
+|
+| {{GHGhebT|text=חֶרְפַּת}}
+| {{GHGhebT|text=חָרְבַּת}}
+| {{GHGhebT|text=חֻקַּת}}
+| {{GHGhebT|text=גְּבֶ֫רֶת}}
+|-
+| Sing. ''with light suff.''
+| {{GHGhebT|text=מַלְכָּתִי}}
+|
+| {{GHGhebT|text=חֶרְפָּתִי}}
+| {{GHGhebT|text=חָרְבָּתִי}}
+| {{GHGhebT|text=חֻקָּתִי}}
+| {{GHGhebT|text=גְּבִרְתִּי}}
+|-
+| Sing. ''with grave suff.''
+| {{GHGhebT|text=מַלְכַּתְכֶם}}
+|
+| {{GHGhebT|text=חֶרְפַּתְכֶם}}
+| {{GHGhebT|text=חָרְבַּתְכֶם}}
+| {{GHGhebT|text=חֻקַּתְכֶם}}
+| {{GHGhebT|text=גְּבִרְתְּכֶם}}
+|-
+| ''Plur. absolute''
+| {{GHGhebT|text=מְלָכוֹת}}
+| {{GHGhebT|text=כְּלָיוֹת}}
+| {{GHGhebT|text=חֲרָפוֹת}}
+| {{GHGhebT|text=חֳרָבוֹת}}
+| {{GHGhebT|text=חֻקּוֹת}}
+|
+|-
+| Plur. ''construct''
+| {{GHGhebT|text=מַלְכוֹת}}
+| {{GHGhebT|text=כִּלְיוֹת}}
+| {{GHGhebT|text=חֶרְפּוֹת<ref>Only in {{GHGbible-ref|book=Ps|chapter=69|verse=10}}, contrary to rule, with a firmly closed syllable, cf. {{GHGpar|93|m}}.</ref>}}
+| {{GHGhebT|text=חָרְבוֹת}}
+| {{GHGhebT|text=חֻקּוֹת}}
+|
+|-
+| Plur. ''with suff.''
+| {{GHGhebT|text=מַלְכוֹתַי}}
+| {{GHGhebT|text=כִּלְיוֹתַי}}
+|
+| {{GHGhebT|text=חָרְבוֹתַי}}
+| {{GHGhebT|text=חֻקּוֹתַי}}
+|
+|-
+| ''Dual absolute''
+|
+|
+| {{GHGhebT|text=רִקְמָתַ֫יִם<br>(''a double piece of embroidery'')}}
+|
+|
+| {{GHGhebT|text=מְצִלְתַּ֫יִם<br>(''cymbals'')}}
+|}
+</div><section end=par95 /><noinclude>
+<references/></noinclude>

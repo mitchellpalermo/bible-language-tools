@@ -1,0 +1,25 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><section begin=par75 />{{GHGmargin-letter|75|f}}
+'''2.''' When the original {{GHGterm|Yôdh}} stands at the end of the syllable before an afformative beginning with a consonant ({{GHGheb|text=ת}}, {{GHGheb|text=נ‍}}) there arises (''a'') in the ''perfects'', primarily the diphthong ''ai'' ({{GHGheb|text=־ַי}}). In the middle of the word this ought always to be contracted to ''ê'' ({{GHGheb|text=־ֵי}}), but this ''ê'' is only found consistently in the passive conjugations, whilst regularly in {{GHGterm|Qal}}, and frequently in the other active and reflexive conjugations (especially in {{GHGterm|Piʿēl}}), it appears as ''î'' (cf. x, z, ee). This ''î'', however, in the ''perf. Qal'' is not to be explained as a weakening of an original ''ê'', but as the original vowel of the ''intransitive'' form. It then became usual also in the ''transitive'' forms of {{GHGterm|Qal}} (and in some other conjugations on this analogy), whereas e.g. in Syriac the two kinds of forms are still carefully distinguished.—(''b'') In the ''imperfects'' and ''imperatives'', {{GHGheb|text=־ֶי}} with the tone always appears before the afformative {{GHGheb|text=נָה}}. On the most probable explanation of this {{GHGheb|text=־ֶי}}, see above, e.
+
+{{GHGmargin-letter|75|g}}
+'''Summary.''' Accordingly before afformatives beginning with a consonant the principal vowel is—
+
+In the perfect ''Qal î'', e.g. {{GHGheb|text=גָּ֫לִיתָ}};
+
+In the perfects of the other active and reflexive conjugations, sometimes ''ê'', sometimes ''î'', {{GHGheb|text=גִּלֵּ֫יתָ}} and {{GHGheb|text=גִּלִּ֫יתָ}}; {{GHGheb|text=נִגְלֵ֫יתָ}} and {{GHGheb|text=נִגְלִ֫יתָ}};
+
+In the perfects passive always ''ê'', e.g. {{GHGheb|text=גֻּלֵּ֫יתָ}};
+
+In the imperfects and imperatives always {{GHGheb|text=־ֶי}}, e.g. {{GHGheb|text=גְּלֶ֫ינָה}}, {{GHGheb|text=תִּגְלֶ֫ינָה}}.
+
+The diphthongal forms have been systematically retained in Arabic and Ethiopic; only as an exception and in the popular language is the diphthong contracted. In Aramaic the contracted forms predominate, yet the Syriac, for example, has in {{GHGterm|Qal}} 2nd ''pers. sing. g<sup>e</sup>lait'' (but 1st ''pers. sing.'' {{GHGheb|text=גְּלִית}}), and so too the Western Aramaic {{GHGheb|text=גְּלַיתָ}}, but also {{GHGheb|text=גְּלֵיתָ}}.
+
+{{GHGmargin-letter|75|h}}
+'''3.''' Before the vocalic afformatives ({{GHGheb|text=וּ}}, {{GHGheb|text=־ִי}}, {{GHGheb|text=־ָה}}) the {{GHGterm|Yôdh}} is usually dropped altogether, e.g. {{GHGheb|text=גָּלוּ}} (ground-form ''gălăyû''), {{GHGheb|text=תִּגְלִי}}, {{GHGterm|participle fem.}} {{GHGheb|text=גֹּלָה}}, ''plur. masc.'' {{GHGheb|text=גֹּלִים}}; yet the old full forms also not infrequently occur, especially in {{GHGterm|pause}}, see u. The elision of the {{GHGterm|Yôdh}} takes place regularly before ''suffixes'', e.g. {{GHGheb|text=גָּֽלְךָ}} (see ll).
+
+{{GHGmargin-letter|75|i}}
+'''4.''' In the 3rd ''sing. fem. perfect'', the original feminine ending {{GHGheb|text=־ַת}} was appended to the stem; hence, after elision of the {{GHGterm|Yôdh}}, arose properly forms like {{GHGheb|text=גָּלָת}}, with ''ā'', in the final syllable with the tone. This form, however, has been but rarely preserved (see below, m). The analogy of the other forms had so much influence, that the common ending {{GHGheb|text=־ָה}} was added pleonastically to the ending {{GHGheb|text=־ָת}}. Before the {{GHGheb|text=־ָה}} the vowel of the ending {{GHGheb|text=־ָת}}, which thus loses the tone, becomes {{GHGterm|Š<sup>e</sup>wâ}}, and thus there arise such forms as {{GHGheb|text=גָּֽלְתָה}}, {{GHGheb|text=נִגְלְתָה}}, &c. (but in {{GHGterm|pause}} {{GHGheb|text=גָּלָ֫תָה}}, &c.).
+
+For similar cases see {{GHGpar|70|d}}; {{GHGpar|91|m}}.
+<section end=par75 /><noinclude>
+<references/></noinclude>

@@ -1,0 +1,213 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><div align="center">
+{|
+! colspan="3" | M. Weak Verbs, {{GHGheb|text=ע״וּ}}.
+! colspan="3" | N. Weak Verbs, {{GHGheb|text=ע״י}}.
+|-
+! ''Hoph̀al''.|| ''Pôlēl''.|| ''Pôlal''.|| {{GHGterm|Qal}}.|| {{GHGterm|Niphʿal}}.
+
+|-
+| {{GHGheb|text=הוּקַם}}<sup>*</sup>
+| {{GHGheb|text=קוֹמֵם}}<sup>*</sup>
+| {{GHGheb|text=קוֹמַם}}<sup>*</sup>
+| {{GHGheb|text=בָּן}}<sup>*</sup>
+| {{GHGheb|text=נָבוֹן}}<sup>*</sup>
+
+|-
+| {{GHGheb|text=הֽוּקְמָה}}]
+| {{GHGheb|text=קֽוֹמֲמָה}}
+| [{{GHGheb|text=קֽוֹמֲמָה}}]
+| {{GHGheb|text=בָּ֫נָה}}<sup>*</sup>
+| {{GHGheb|text=נָב֫וֹנָה}}]
+
+|-
+| {{GHGheb|text=הוּקַ֫מְתָּ}}
+| {{GHGheb|text=קוֹמַ֫מְתָּ}}
+| {{GHGheb|text=קוֹמַ֫מְתָּ}}
+| {{GHGheb|text=בַּ֫נְתָּ}}<sup>*</sup>
+| {{GHGheb|text=נְבוּנׄוֹתָ}}
+
+|-
+| {{GHGheb|text=הוּקַמְתְּ}}
+| [{{GHGheb|text=קוֹמַמְתְּ}}]
+| [{{GHGheb|text=קוֹמַמְתְּ}}]
+| {{GHGheb|text=בַּ֫נְתְּ}}
+| [{{GHGheb|text=נְבוּנוֹת}}
+
+|-
+| [{{GHGheb|text=הוּקַ֫מְתִּי}}
+| {{GHGheb|text=קוֹמַ֫מְתִּי}}
+| {{GHGheb|text=קוֹמַ֫מְתִּי}}
+| [{{GHGheb|text=בַּ֫נְתִּי}}]
+| {{GHGheb|text=נְבוּנׄוֹתִי}}
+
+|-
+| {{GHGheb|text=הֽוּקְמוּ}}
+| {{GHGheb|text=קֽוֹמֲמוּ}}
+| {{GHGheb|text=קֽוֹמֲמוּ}}
+| {{GHGheb|text=בָּ֫נוּ}}
+|
+
+|-
+| {{GHGheb|text=הֽוּקַמְתֶּם}}]
+| {{GHGheb|text=קֽוֹמַמְתֶּם}}]
+| {{GHGheb|text=קֽוֹמַמְתֶּם}}]
+| {{GHGheb|text=בַּנְתֶּם}}]
+| See
+
+|-
+| {{GHGheb|text=הֽוּקַמְתֶּן}}
+| {{GHGheb|text=קֽוֹמַמְתֶּן}}
+| {{GHGheb|text=קּֽוֹמַמְתֶּן}}
+| [{{GHGheb|text=בַּנְתֶּן}}
+| Verbs {{GHGheb|text=ע״וּ}}.
+
+|-
+| {{GHGheb|text=הוּקַ֫מְנוּ}}
+| [{{GHGheb|text=קוֹמַ֫מְנוּ}}
+| [{{GHGheb|text=קוֹמַ֫מְנוּ}}
+| [{{GHGheb|text=בַּ֫נּוּ}}
+|
+
+|-
+| {{GHGheb|text=הוּקַם}}<sup>*</sup>
+| {{GHGheb|text=קוֹמֵם}}
+|
+| {{GHGheb|text=בִּין}}<sup>*</sup>
+|
+|-
+|
+|
+|
+| {{GHGheb|text=בֹּן}}<sup>*</sup>
+|
+
+|-
+|
+| {{GHGheb|text=קוֹמֵם}}
+|
+| {{GHGheb|text=בִּין}}<sup>*</sup>
+|
+
+|-
+|
+| [{{GHGheb|text=קֽוֹמֲמִי}}]
+| wanting.
+| {{GHGheb|text=בִּ֫ינִי}}
+|
+
+|-
+|
+| {{GHGheb|text=קֽוֹמֲמוּ}}
+|
+| {{GHGheb|text=בִּ֫ינוּ}}
+|
+
+|-
+|
+| [{{GHGheb|text=קוֹמֵ֫מְנָה}}]
+|
+| —
+|
+
+|-
+| {{GHGheb|text=יוּקַם}}<sup>*</sup>
+| {{GHGheb|text=יְקוֹמֵם}}
+| {{GHGheb|text=יְקוֹמַם}}
+| {{GHGheb|text=יָגִיל}}
+|
+
+|-
+| {{GHGheb|text=תּוּקַם}}
+| {{GHGheb|text=תְּקוֹמֵם}}
+| {{GHGheb|text=תְּקוֹמַם}}]
+| {{GHGheb|text=תָּגִיל}}
+|
+
+|-
+| {{GHGheb|text=תּוּקַם}}]
+| {{GHGheb|text=תְּקוֹמֵם}}
+| {{GHGheb|text=תְּקוֹמַם}}
+| {{GHGheb|text=תָּגִיל}}
+|
+
+|-
+| {{GHGheb|text=תּֽוּקְמִי}}
+| [{{GHGheb|text=תְּקֽוֹמֲמִי}}]
+| {{GHGheb|text=תְּקֽוֹמֲמִי}}
+| {{GHGheb|text=תָּגִׄילִי}}
+|
+
+|-
+| [{{GHGheb|text=אוּקַם}}
+| {{GHGheb|text=אֲקוֹמֵם}}
+| [{{GHGheb|text=אֲקוֹמַם}}
+| {{GHGheb|text=אָגִיל}}
+|
+
+|-
+| {{GHGheb|text=יֽוּקְמוּ}}
+| {{GHGheb|text=יְקֽוֹמֲמוּ}}
+| {{GHGheb|text=יְקֽוֹמֲמוּ}}
+| {{GHGheb|text=יָגִ֫ילוּ}}
+|
+|-
+| colspan="2" | {{GHGheb|text=תּוּקַ֫מְנָה}}]
+| {{GHGheb|text=תְּקוֹמֵ֫מְנָה}}
+| {{GHGheb|text=תְּקוֹמַ֫מְנָה}}
+| {{GHGheb|text=תָּגֵ֫לְנָה}}
+
+|-
+| {{GHGheb|text=תּֽוּקְמוּ}}
+| {{GHGheb|text=תְּקֽוֹמֲמוּ}}
+| {{GHGheb|text=תְּקֽוֹמֲמוּ}}
+| {{GHGheb|text=תָּגִ֫ילוּ}}
+
+|
+|-
+| [{{GHGheb|text=תּוּקַ֫מְנָה}}
+| {{GHGheb|text=תְּקוֹמֵ֫מְנָה}}
+| {{GHGheb|text=תְּקוֹמַ֫מְנָה}}
+| {{GHGheb|text=תָּגֵ֫לְנָה}}
+|
+
+|-
+| {{GHGheb|text=נוּקַם}}
+| [{{GHGheb|text=נְקוֹמֵם}}]
+| [{{GHGheb|text=נְקוֹמַם}}
+| {{GHGheb|text=נָגִיל}}
+|
+
+|-
+|
+|
+|
+| {{GHGheb|text=יָגֵל}}
+|
+
+|-
+|
+|
+|
+| {{GHGheb|text=נַיָּ֫גֶל}}
+|
+
+|-
+| colspan="3" |
+| {{GHGheb|text=יְרִיבֵ֫נִי}}
+|
+
+|-
+| {{GHGheb|text=מְקוֹמֵם}}
+|
+| {{GHGheb|text=שָׂב}}, {{GHGheb|text=לֵנִים}}
+| {{GHGheb|text=נָבוֹן}}
+|
+|-
+| colspan="2" | {{GHGheb|text=מְקוֹמָם}}
+| {{GHGheb|text=שׂוּם}}, {{GHGheb|text=שִׂים}}
+|
+|
+
+|}
+</div><noinclude>
+<references/></noinclude>

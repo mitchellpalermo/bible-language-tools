@@ -1,0 +1,29 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par38 />{{center|'''CHAPTER II'''
+
+THE VERB}}
+
+<!-- section begins above -->{{GHGpar-heading|38|General View}}
+
+{{GHGmargin-letter|38|a}}
+Verbal stems are either original or derived. They are usually divided into—
+
+(''a'') Verbal stems proper (''primitive verbs''), which exhibit the stem without any addition, e.g. {{GHGheb|text=מָלַךְ|translate=he has reigned}}.
+
+{{GHGmargin-letter|38|b}}
+(''b'') {{GHGterm|Verbal derivatives}}, i.e. ''secondary'' verbal stems, derived from the pure stem (letter ''a''), e.g. {{GHGheb|text=קִדַּשׁ|translate=to sanctify}}, {{GHGheb|text=הִתְקַדֵּשׁ|translate=to sanctify oneself}}, from {{GHGheb|text=קָדַשׁ|translate=to be holy}}. These are usually called ''conjugations'' (§ 39).
+
+{{GHGmargin-letter|38|c}}
+(''c'') ''Denominatives'',<ref>Cf. W. J. Gerber, ''Die hebr. Verba denom., insbes. im theol. Sprachgebr. des A.T.'', Lpz. 1896.</ref> i.e. verbs derived from nouns (like the Latin ''causari, praedari'', and Eng. to ''skin, to stone''), or even from particles (see d, end) either in a primitive or derivative form, e.g. {{GHGheb|text=אָהַל}}, {{GHGterm|Qal}} and {{GHGterm|Piʿēl}}, ''to pitch a tent'', from {{GHGheb|text=אֹ֫הֶל|translate=tent}}; {{GHGheb|text=הִשְׁרִישׁ}} and {{GHGheb|text=שֹׁרֵשׁ|translate=to take root}}, and {{GHGheb|text=שֵׁרֵשׁ|translate=to root out}}, from {{GHGheb|text=שֹׁרֶשׁ|translate=root}} ({{GHGpar|52|h}}).
+
+{{GHGmargin-letter|38|d}}
+This does not exclude the possibility that, for nouns, from which denominative verbs are derived, the corresponding (original) verbal stem may still be found either in Hebrew or in the dialects. The meaning, however, is sufficient to show that the denominatives have come from the noun, not from the verbal stem, e.g. {{GHGheb|text=לְבֵנָה|translate=a brick}} (verbal stem {{GHGheb|text=לבן|translate=to be white}}), denomin. {{GHGheb|text=לָבַן|translate=to make bricks}}; {{GHGheb|text=דָּג|translate=a fish}} (verbal stem {{GHGheb|text=דָּגָה|translate=to be prolific}}), denomin. {{GHGheb|text=דּוּג|translate=to fish}}; {{GHGheb|text=חָרַף|translate=to winter}} (from {{GHGheb|text=חֹ֫רֶף|translate=autumn, winter}}, stem {{GHGheb|text=חָרַף|translate=to pluck}}); {{GHGheb|text=קוּץ|translate=to pass the summer}} (from {{GHGheb|text=קַ֫יִץ|translate=summer}}, stem {{GHGheb|text=קִיץ|translate=to be hot}}).
+
+On ‘Semitic verbs derived from particles’ see P. Haupt in the {{GHGcite|title=Amer. Journ. of Sem. Lang.}}, xxii (1906), 257 ff.<section end=par38 />
+
+<section begin=par39 />{{GHGpar-heading|39|Ground-form and Derived Stems}}
+
+<div style="font-size: small">{{center|Brockelmann, {{GHGcite|title=Sem. Sprachwiss}}., p. 119 ff.; {{GHGcite|title=Grundriss}}, p. 504 ff.}}</div>
+
+{{GHGmargin-letter|39|a}}
+'''1.''' The 3rd sing. masc. of the {{GHGterm|Perfect}} in the form of the pure stem (i.e. in {{GHGterm|Qal}}, see e) is generally regarded, lexicographically and grammatically, as the ground-form of the verb ({{GHGpar|30|a}}), e.g. {{GHGheb|text=קָטַל|translate=he has killed}}, {{GHGheb|text=כָּבֵד|translate=he was heavy}}, {{GHGheb|text=קָטֹן|translate=he was little}}.<ref>For the sake of brevity, however, the meaning in Hebrew-English Lexicons is usually given in the Infinitive, e.g. {{GHGheb|text=לָמַד|translate=to learn}}, properly ''he has learnt''.</ref> From this form the other<section end=par39 /><noinclude>
+<references/></noinclude>

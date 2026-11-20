@@ -1,0 +1,25 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par99 />such particles cannot stand by themselves, but are united, as prefixes, with the following word (§ 102), very much like the preformatives of the imperfect ({{GHGpar|47|a}}–''d'').
+
+{{GHGmargin-letter|99|d}}
+The view that this shortening of whole words to single letters has actually taken place in the gradual course of linguistic development is rendered highly probable by the fact that similar abbreviations in later Hebrew and in Aramaic, i.e. as the development of the original Semitic speech progresses, become more and more striking and frequent. Thus the Biblical Aramaic {{GHGheb|text=דִּי}} becomes at a later period {{GHGheb|text=דְּ}}; in modern Arabic, e.g. ''hallaq'' (now) is from ''halwaqt''; ''lêš'' (why?) from ''li-ayyi-šaiĭn'', &c. Cf. also the analogous cases mentioned above from the Western languages. Nevertheless, the use of the simplest particles is found already in the earliest periods of the Hebrew language, or, at any rate, in the earliest documents which have come down to us.
+
+{{GHGmargin-letter|99|e}}
+'''3.''' Less frequently particles are formed by ''composition''; as {{GHGheb|text=מַדּוּעַ|translate=wherefore?}} for {{GHGheb|text=מַה־יָּדוּעַ|translate=quid edoctus}}? (τί μαθών;) or ''quid cognitum?''; {{GHGheb|text=בִּלְעֲדֵי}} (from {{GHGheb|text=בַּל}} and {{GHGheb|text=עֲדֵי}}) ''besides''; {{GHGheb|text=מִלְמַ֫עְלָה}} (from {{GHGheb|text=מִן}}, {{GHGheb|text=לְ}}, {{GHGheb|text=מַ֫עְלָה}}) ''from above, above''.
+
+More frequent is the combination of two words into one without contraction, e.g. {{GHGheb|text=אַֽחֲרֵי־כֵן}}, {{GHGheb|text=אַף־כִּי}}, {{GHGheb|text=כִּי־אִם}}, {{GHGheb|text=כִּֽי־עַל־כֵּן}}; cf. also the compounds of {{GHGheb|text=אֵי}} with demonstrative pronouns, as {{GHGheb|text=אֵֽי־מִזֶּה|translate=from what?}}; {{GHGheb|text=אֵי לָזֹאת|translate=wherefore?}} [R.V. ''how'']. See the lexicon under {{GHGheb|text=אֵי}}.<section end=par99 />
+
+<section begin=par100 />{{GHGpar-heading|100|Adverbs}}
+
+On demonstrative adverbs cf. Brockelmann, {{GHGcite|title=Grundriss}}, i. 323; on interrogative adverbs, ''ibid.'', i. 328; on adverbs in general, i. 492 ff.
+
+{{GHGmargin-letter|100|a}}
+'''1.''' The negative {{GHGheb|text=לֹא|translate=not}}, and a few particles of place and time, as {{GHGheb|text=שָׁם|translate=there}}, are of obscure origin.
+
+{{GHGmargin-letter|100|b}}
+'''2.''' Forms of other parts of speech, which are used adverbially without further change, are—
+
+(''a'') Substantives with prepositions, e.g. {{GHGheb|text=בִּמְאֹד}} (with might) ''very''; {{GHGheb|text=לְבַד|translate=alone}} (prop. ''in separation'', Fr. ''à part''), with suffix {{GHGheb|text=לְבַדִּי|translate=I alone}}; {{GHGheb|text=מִבַּ֫יִת|translate=from within, within}}; cf. also {{GHGheb|text=כְּאֶחָד}} (as one) ''together'', {{GHGheb|text=לְעֻמַּת}} and {{GHGheb|text=מִלְּעֻמַּת}} (originally ''in connexion with'') ''near to, corresponding to, like'', &c., cf. {{GHGpar|161|b}}.
+
+{{GHGmargin-letter|100|c}}
+(''b'') Substantives in the accusative (the adverbial case of the Semites, {{GHGpar|118|m}}), cf. τὴν ἀρχήν, δωρεάν, e.g. {{GHGheb|text=מְאֹד}} (might) ''very'', {{GHGheb|text=אֶ֫פֶס}} (cessation) ''no more'', {{GHGheb|text=הַיּוֹם}} (the day) ''to-day'' (cf. {{GHGpar|126|b}}), {{GHGheb|text=מָחָר}}<ref>Generally derived from the ''ptcp. Puʿal'' {{GHGheb|text=מְאָחָר}} ''m<sup>e</sup>ʾŏḥār'' (''=m<sup>e</sup>ʾoḥḥār'') and hence to be read ''mŏḥār'' (cf. {{GHGheb|text=מָֽחֳרָת|translate=morning}}); but according to P. Haupt (notes to Esther, p. 159) from {{GHGheb|text=יוֹם אַחַר}}.</ref> ''to-morrow'', {{GHGheb|text=יַ֫חַד}} (union) ''together''. Several of these continued to be used, though rarely, as substantives, e.g. {{GHGheb|text=סָבִיב}}, plur. {{GHGheb|text=סְבִיבִים}} and {{GHGheb|text=סְבִיבוֹת}}, ''circuit'', as adverb<section end=par100 /><noinclude>
+<references/></noinclude>

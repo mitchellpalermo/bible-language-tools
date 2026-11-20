@@ -1,0 +1,36 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par78 />verb, as in Greek {{polytonic|ἔρχομαι}}, aor. {{polytonic|ἦλθον}}, fut. {{polytonic|ἐλεύσομαι}}, and in Latin ''fero, tuli, latum, ferre'', &c., but with this difference, that in Hebrew the roots of these verbs are almost always closely related.
+
+{{GHGmargin-letter|78|b}}
+The most common verbs of this kind are—
+
+{{GHGheb|text=בּשׁ|translate=to be ashamed}}. {{GHGterm|Hiphʿîl}} {{GHGheb|text=הֵבִישׁ}} (inferred from {{GHGheb|text=הֱבִישׁ֫וֹתָ}}), but also {{GHGheb|text=הֹבִישׁ}}, {{GHGheb|text=הוֹבִישׁ}} as if from {{GHGheb|text=יבשׁ}}, on the analogy of verbs {{GHGheb|text=פ״ו}}; also in {{GHGbible-ref|book=Is|chapter=30|verse=5}} the {{GHGterm|Q<sup>e</sup>rê}} requires {{GHGheb|text=הֹבִישׁ}}, where the {{GHGterm|K<sup>e</sup>thîbh}} has {{GHGheb|text=הִבְאִישׁ}} from {{GHGheb|text=בָּאַשׁ}}.
+
+{{GHGheb|text=טוֹב|translate=to be good}}. {{GHGterm|Perfect}} {{GHGheb|text=טוֹב}}; but {{GHGterm|imperfect}} {{GHGheb|text=יִיטַב}} and {{GHGterm|Hiphʿîl}} {{GHGheb|text=הֵיטִיב}} from {{GHGheb|text=יָטַב}} (but cf. {{GHGheb|text=הֱטִיבֹ֫תָ}} {{GHGbible-ref|book=2 K|chapter=10|verse=30}}).
+
+{{GHGheb|text=יָגֹר|translate=to be afraid}}. {{GHGterm|Imperfect}} {{GHGheb|text=יָגוּר}} (from {{GHGheb|text=גּוּר}}).
+
+{{GHGheb|text=יָקַץ|translate=to awake}}, only in the ''imperf.'' {{GHGheb|text=יִיקַץ}}; for the {{GHGterm|perfect}}, the {{GHGterm|Hiphʿîl}} {{GHGheb|text=הֵקִיץ}} is used (from {{GHGheb|text=קוּץ}}).
+
+{{GHGheb|text=נָפַץ|translate=to break in pieces}}. {{GHGterm|Imperfect}} {{GHGheb|text=יָפוּץ}} (from {{GHGheb|text=פּוּץ}}). {{GHGterm|Imperative}} {{GHGheb|text=פּוּץ}}. {{GHGterm|Niphʿal}} {{GHGheb|text=נָפוֹץ}}. {{GHGterm|Piʿēl}} {{GHGheb|text=נִפֵּץ}} (from {{GHGheb|text=נָפַץ}}). ''Pôlēl'' {{GHGheb|text=פּוֹצֵץ}} (from {{GHGheb|text=פּוּץ}}). {{GHGterm|Reflexive}} {{GHGheb|text=הִתְפּוֹצֵץ}}. {{GHGterm|Hiphʿîl}} {{GHGheb|text=הֵפִיץ}}. Also {{GHGheb|text=פִּצְפֵּץ}} {{GHGbible-ref|book=Jb|chapter=16|verse=12}}.
+
+{{GHGheb|text=נָצַב}} ({{GHGterm|Qal}} in post-biblical Hebrew, in Aramaic and Arabic) ''to place'', whence (possibly) {{GHGterm|Niphʿal}} {{GHGheb|text=נִצַּב}} and ''Hiphʿîl'' {{GHGheb|text=הִצִּיב}} (see above, § 71); but {{GHGterm|Hithpaʿēl}} {{GHGheb|text=הִתְיַצֵּב}}.
+
+{{GHGheb|text=שָׁתָה|translate=to drink}}, used in {{GHGterm|Qal}}; but in ''Hiph.'' {{GHGheb|text=הִשְׁקָה|translate=to give to drink}}, from a {{GHGterm|Qal}} {{GHGheb|text=שָׁקָה}} which is not used in Hebrew.
+
+On {{GHGheb|text=הָלַךְ}} ({{GHGheb|text=יָלַךְ}}) ''to go'', see above, {{GHGpar|69|x}}.
+
+{{GHGmargin-letter|78|c}}
+Rem. 1. To the same category belong also, to a certain extent, those cases where the ''tenses'' or ''moods'' not in use in one conjugation, are supplied by forms having the same meaning in other conjugations of the same verb. Thus:
+
+{{GHGheb|text=יָסַף|translate=to add}}. The {{GHGterm|infinitive}} (but cf. {{GHGpar|69|h}}, note) and {{GHGterm|imperfect}}, unused in {{GHGterm|Qal}}, are supplied by the {{GHGterm|Hiphʿîl}} {{GHGheb|text=הוֹסִיף}}, {{GHGheb|text=יוֹסִיף}} (on {{GHGheb|text=יוֹסֵף}} as {{GHGterm|imperfect indicative}}, see {{GHGpar|109|d}}, cf. also {{GHGpar|109|i}}).
+
+{{GHGheb|text=כָּשַׁל|translate=to stumble}}. {{GHGterm|Perfect}} from {{GHGterm|Qal}}, {{GHGterm|imperfect}} from {{GHGterm|Niphʿal}}.
+
+{{GHGheb|text=נגשׁ|translate=to approach}}, unused in ''perf. Qal'', instead of which {{GHGterm|Niphʿal}} {{GHGheb|text=נִגַּשׁ}} is used; but {{GHGterm|imperfect}} {{GHGheb|text=יִגַּשׁ}}, {{GHGterm|imperative}} {{GHGheb|text=גַּשׁ}}, and {{GHGterm|infinitive}} {{GHGheb|text=גֶּ֫שֶׁת}} from {{GHGterm|Qal}} only are in use.
+
+{{GHGheb|text=נָחָה|translate=to lead}}. {{GHGterm|Perfect}} usually {{GHGheb|text=נָחָה}} in {{GHGterm|Qal}}, so {{GHGterm|imperative}} {{GHGheb|text=נְחֵה}}, but {{GHGterm|imperfect}} and {{GHGterm|infinitive}} always in {{GHGterm|Hiphʿîl}}.
+
+{{GHGheb|text=נתך|translate=to be poured out}}. {{GHGterm|Perfect Niphʿal}} {{GHGheb|text=נִתַּךְ}} with {{GHGterm|imperfect Qal}} {{GHGheb|text=יִתַּךְ}}, but the {{GHGterm|perfect Qal}} and {{GHGterm|imperfect Niphʿal}} are not in use.
+
+2. The early grammarians often speak of ''mixed forms'' (''formae mixtae''), i.e. forms which unite the supposed character and meaning of two different tenses, genders, or conjugations. Most of the examples adduced are at once set aside by accurate grammatical analysis; some others appear to have arisen from misapprehension and inaccuracy, especially from erroneous views of unusual {{GHGterm|plene}} forms. Others, again, are either merely wrong readings or represent an intentional conflation of two different readings.<section end=par78 /><noinclude>
+<references/></noinclude>

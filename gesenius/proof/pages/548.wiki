@@ -1,0 +1,237 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><div align="center">
+{|
+! colspan="8" | M. Weak Verbs, {{GHGheb|text=ע״וּ}}.
+|-
+| colspan="3" |
+! colspan="2" | {{GHGterm|Qal}}.
+! {{GHGterm|Niphʿal}}.
+! ''Hiph̀îl''.
+
+|-
+| ''Perf''.
+| ''Sing''.
+| 3. ''m''.
+| {{GHGheb|text=קָם}}<sup>*</sup>
+| {{GHGheb|text=מֵת}}<sup>*</sup>
+| {{GHGheb|text=נָקוֹם}}<sup>*</sup>
+| {{GHGheb|text=הֵקִים}}<sup>*</sup>
+
+|-
+|
+|
+| 3. ''f''.
+| {{GHGheb|text=קָ֫מָה}}<sup>*</sup>
+| {{GHGheb|text=מֵ֫תָה}}<sup>*</sup>
+| {{GHGheb|text=נָק֫וֹמָה}}<sup>*</sup>
+| {{GHGheb|text=הֵקִ֫ימָה}}<sup>*</sup>
+
+|-
+|
+|
+| 2. ''m''.
+| {{GHGheb|text=קַ֫מְתָּ}}<sup>*</sup>
+| {{GHGheb|text=מַ֫תָּה}}<sup>*</sup>
+| {{GHGheb|text=נְקוּמ֫וֹתָ}}]
+| {{GHGheb|text=הֲקִימ֫וֹתָ}}<sup>*</sup>
+
+|-
+|
+|
+| 2. ''f''.
+| {{GHGheb|text=קַמְתְּ}}
+| [{{GHGheb|text=מַתְּ}}]
+| [{{GHGheb|text=נְקוּמוֹת}}
+| {{GHGheb|text=הֲקִימוֹת}}
+
+|-
+|
+|
+| 1. ''c''.
+| {{GHGheb|text=קַ֫מְתִּי}}
+| {{GHGheb|text=מַ֫תִּי}}
+| {{GHGheb|text=נְקוּמ֫וֹתִי}}
+| {{GHGheb|text=הֲקִימ֫וֹתִי}}
+
+|-
+|
+| ''Plur''.
+| 3. ''c''.
+| {{GHGheb|text=קָ֫מוּ}}
+| {{GHGheb|text=מֵ֫תוּ}}
+| {{GHGheb|text=נָק֫וֹמוּ}}
+| {{GHGheb|text=הֵקִ֫ימוּ}}
+
+|-
+|
+|
+| 2. ''m''.
+| {{GHGheb|text=קַמְתֶּם}}
+| {{GHGheb|text=מַתֶּם}}]
+| {{GHGheb|text=נְקֹֽמוֹתֶם}}
+| {{GHGheb|text=הֲקִֽימוֹתֶם}}
+|-
+|
+|
+| 2. ''f''.
+| [{{GHGheb|text=קַמְתֶּן}}]
+| [{{GHGheb|text=מַתֶּן}}
+| {{GHGheb|text=נְקֽוֹמוֹתֶן}}]
+| [{{GHGheb|text=הֲקִֽימוֹתֶן}}]
+
+|-
+|
+|
+| 1. ''c''.
+| {{GHGheb|text=קַ֫מְנוּ}}
+| {{GHGheb|text=מַ֫תְנוּ}}
+| [{{GHGheb|text=נְקוּמ֫וֹנוּ}}
+| {{GHGheb|text=הֲפִימ֫וֹנוּ}}
+
+|-
+| colspan="3" | ''Inf''.
+| colspan="2" | {{GHGheb|text=קוּם}}<sup>*</sup>
+| {{GHGheb|text=הִקּוֹם}}<sup>*</sup>
+| {{GHGheb|text=הָקִים}}<sup>*</sup>
+
+|-
+| ''Inf''.
+| colspan="2" | ''absol''.
+| colspan="2" | {{GHGheb|text=קוֹם}}<sup>*</sup>
+| {{GHGheb|text=נָסוֹג}}, {{GHGheb|text=הִקּוֹם}}<sup>*</sup>
+| {{GHGheb|text=הָקֵם}}<sup>*</sup>
+
+|-
+| ''Imp''.
+| ''Sing''.
+| ''m''.
+| colspan="2" | {{GHGheb|text=קוּם}}<sup>*</sup>
+| {{GHGheb|text=הִקּוֹם}}<sup>*</sup>
+| {{GHGheb|text=הָקֵם}}<sup>*</sup>
+
+|-
+|
+|
+| ''f''.
+| colspan="2" | {{GHGheb|text=ק֫וּמִי}}<sup>*</sup>
+| [{{GHGheb|text=הִקּ֫וֹמִי}}]
+| {{GHGheb|text=הָקִ֫ימִי}}<sup>*</sup>
+
+|-
+|
+| ''Plur''.
+| ''m''.
+| colspan="2" | {{GHGheb|text=ק֫וּמוּ}}
+| {{GHGheb|text=הִקּ֫וֹמוּ}}
+| {{GHGheb|text=הָקִ֫ימוּ}}
+
+|-
+|
+|
+| ''f''.
+| colspan="2" | {{GHGheb|text=קֹ֫מְנָה}}<sup>*</sup>
+|
+| [{{GHGheb|text=הָקֵ֫מְנָה}}]
+
+|-
+| ''Impf''.
+| ''Sing''.
+| 3. ''m''.
+| colspan="2" | {{GHGheb|text=יָבוֹא}}, {{GHGheb|text=יָקוּם}}<sup>*</sup>
+| {{GHGheb|text=יִקּוֹם}}<sup>*</sup>
+| {{GHGheb|text=יָקִים}}<sup>*</sup>
+
+|-
+|
+|
+| 3. ''f''.
+| colspan="2" | {{GHGheb|text=תָּקוּם}}
+| {{GHGheb|text=תִּקּוֹם}}
+| {{GHGheb|text=תָּקִים}}
+
+|-
+|
+|
+| 2. ''m''.
+| colspan="2" | {{GHGheb|text=תָּקוּם}}
+| {{GHGheb|text=תִּקּוֹם}}
+| {{GHGheb|text=תָּקִים}}
+
+|-
+|
+|
+| 2. ''f''.
+| colspan="2" | {{GHGheb|text=תָּק֫וּמִי}}<sup>*</sup>
+| [{{GHGheb|text=תִּקּ֫וֹמִי}}]
+| {{GHGheb|text=תָּקִ֫ימִי}}<sup>*</sup>
+
+|-
+|
+|
+| 1. ''c''.
+| colspan="2" | {{GHGheb|text=אָקוּם}}
+| {{GHGheb|text=אֶקּוֹם}}
+| {{GHGheb|text=אָקִים}}
+
+|-
+|
+| ''Plur''.
+| 3. ''m''.
+| colspan="2" | {{GHGheb|text=יָק֫וּמוּ}}
+| {{GHGheb|text=יִקּ֫וֹמוּ}}
+| {{GHGheb|text=יָקִ֫ימוּ}}
+
+|-
+|
+|
+| 3. ''f''.
+| colspan="2" | {{GHGheb|text=תָּשֹׁ֫בְנָה}}, {{GHGheb|text=תְּקוּמֶ֫ינָה}}<sup>*</sup>
+|
+| {{GHGheb|text=תְּקִימֶ֫ינָה}}, {{GHGheb|text=תָּקֵ֫מְנָה}}<sup>*</sup>
+|-
+|
+|
+| 2. ''m''.
+| colspan="2" | {{GHGheb|text=תָּק֫וּמוּ}}
+| {{GHGheb|text=תִּקּ֫וֹמוּ}}
+| {{GHGheb|text=תָּקִ֫ימוּ}}
+|-
+|
+|
+| 2. ''f''.
+| colspan="2" | {{GHGheb|text=תְּקוּמֶ֫ינָה}}
+|
+| [{{GHGheb|text=תָּקֵ֫מְנָת}}]
+|-
+|
+|
+| 1. ''c''.
+| colspan="2" | {{GHGheb|text=נָקוּם}}
+| {{GHGheb|text=נִקּוֹם}}
+| {{GHGheb|text=נָקִים}}
+|-
+| colspan="3" | ''Shortened Impf''.
+| colspan="2" | {{GHGheb|text=יָקם}}<sup>*</sup>
+|
+| {{GHGheb|text=יָקֵם}}<sup>*</sup>
+|-
+| colspan="3" | ''Impf. with Wāw consec''.
+| colspan="2" | {{GHGheb|text=וַיָּ֫קָם}}(pause {{GHGheb|text=וַיָּקֹ֫ם}}<sup>*</sup>)
+|
+| {{GHGheb|text=וַיָּ֫קֶם}}<sup>*</sup>
+|-
+| colspan="3" | ''Impf. with Suff''.
+| colspan="2" | {{GHGheb|text=יְשׁוּפֵ֫נִי}}<sup>*</sup>
+| colspan="2" | {{GHGheb|text=יְקִימֵ֫נִי}}<sup>*</sup>
+|-
+| colspan="3" | ''Part. act''.
+| colspan="2" | {{GHGheb|text=קָם}}<sup>*</sup>
+| {{GHGheb|text=נָקוֹם}}<sup>*</sup>
+| {{GHGheb|text=מֵקִים}}<sup>*</sup>
+|-
+|
+| colspan="2" | ''pass''.
+| colspan="2" | {{GHGheb|text=קוּם}}<sup>*</sup>
+| colspan="2" | {{GHGheb|text=מוּקָם}}
+|}
+</div><noinclude>
+<references/></noinclude>

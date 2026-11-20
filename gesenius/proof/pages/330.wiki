@@ -1,0 +1,26 @@
+<noinclude><pagequality level="1" user="ShakespeareFan00" /></noinclude><section begin=par104 />(''in the not yet'') ''earlier, before'', for which {{GHGheb|text=מִטֶ֫רֶם}} is also used. On the combination of two particles to express complex ideas (e.g. {{GHGheb|text=אַף־כִּי}} ''added to this, that=much more''), see the Syntax, {{GHGpar|163|f}}.
+
+{{GHGmargin-letter|104|b}}
+(''c'') Prepositions, which with the addition of the conjunction {{GHGheb|text=אֲשֶׁר}} or {{GHGheb|text=כִּי}} together form one single conjunction, e.g. {{GHGheb|text=יַ֫עַן אֲשֶׁר|translate=because}}, prop. ''on account of the fact that''; {{GHGheb|text=אַחַר אֲשֶׁר}}, and more frequently {{GHGheb|text=אַֽחֲרֵי אֲשֶׁר}}, ''after that''; {{GHGheb|text=כַּֽאֲשֶׁר|translate=according as}} (with {{GHGheb|text=כְּ‍}}); {{GHGheb|text=עֵ֫קֶב כִּי}} and {{GHGheb|text=עֵ֫קֶב אֲשֶׁר|translate=in consequence of the fact that, for the reason that, because}}. Sometimes, however, the conjunction in such cases is omitted, and the preposition itself used as a conjunction, e.g. {{GHGheb|text=עַל־}} (for {{GHGheb|text=עַל־אֲשֶׁר}}) ''although'', {{GHGbible-ref|book=Jb|chapter=16|verse=17}}.
+
+So, at any rate, according to our linguistic principles. It would, however, be more correct to say, that instead of the intermediary {{GHGheb|text=אֲשֶׁר}} the whole of the succeeding sentence is regarded as ''one'' substantival idea, under the immediate government of the preposition. In the same way, all prepositions governing the gerund in English may be paraphrased by conjunctions with the finite verb, see §§ 114 and 115, ''passim''.
+
+{{GHGmargin-letter|104|c}}
+'''2.''' Besides those already mentioned, there are certain other small words now used as conjunctions, of which the derivation or original meaning is altogether obscure, thus {{GHGheb|text=אוֹ|translate=or}}, {{GHGheb|text=אִם־|translate=if}} (also ''or'' before the second member of a double question), {{GHGheb|text=אַף|translate=also}}, {{GHGheb|text=וְ|translate=and}}, and others.
+
+{{GHGmargin-letter|104|d}}
+Rem. The pointing of the {{GHGheb|text=וְ}} (originally {{GHGheb|text=וַ}}, as still before {{GHGterm|Ḥaṭeph Pathaḥ}} and—with a following {{GHGterm|Dageš forte}}—in {{GHGterm|wāw consecutive}} of the imperfect; cf. {{GHGpar|49|f}}) is in many respects analogous to that of the prefixes {{GHGheb|text=בְּ}}, {{GHGheb|text=כְּ‍}}, {{GHGheb|text=לְ}} ({{GHGpar|102|d}}–''i''), but as being a weak consonant, the {{GHGterm|wāw copulative}} has some further peculiarities:
+
+(''a'') Usually it takes simple {{GHGterm|Š<sup>e</sup>wâ}} ({{GHGheb|text=וְ}}).
+
+(''b'') Before words which begin with a guttural having a {{GHGterm|compound Š<sup>e</sup>wâ}}, it takes the vowel with which the {{GHGterm|Š<sup>e</sup>wâ}} is compounded (according to {{GHGpar|28|b}}), e.g. {{GHGheb|text=וַֽחֲכַם|translate=and be thou wise}}, {{GHGheb|text=וַֽעֲבָדִים|translate=and servants}}, {{GHGheb|text=וֶֽעֱזוּז|translate=and strength}}, {{GHGheb|text=וֶֽאֱכֹל|translate=and eat thou}}, {{GHGheb|text=וָֽחֳלִי|translate=and sickness}}. On {{GHGheb|text=וֵאֽלֹהִים}}, {{GHGheb|text=וֵאֽלֹהַי}} &c., see {{GHGpar|102|d}}; on {{GHGheb|text=וַֽאדֹנַי}}, &c., see {{GHGpar|102|m}}; on such cases as {{GHGheb|text=וַעְצֹר}} {{GHGbible-ref|book=Jb|chapter=4|verse=2}}, cf. {{GHGpar|28|b}}.
+
+{{GHGmargin-letter|104|e}}
+(''c'') Before words with simple {{GHGterm|Š<sup>e</sup>wâ}} under the first consonant (except in the cases under ''f''), the {{GHGterm|Wāw}} becomes the vowel ''û'' (cf. {{GHGpar|26|a}}), e.g. {{GHGheb|text=וּלְכֹל|translate=and to all}}, so also (except in the case under ''g'') before the cognate labials {{GHGheb|text=ב}}, {{GHGheb|text=מ‍}}, {{GHGheb|text=פ}}, hence {{GHGheb|text=וּמֶ֫לֶךְ}}. On the cases in which {{GHGterm|simple Š<sup>e</sup>wâ}} has become a {{GHGterm|Ḥaṭeph}} after {{GHGheb|text=וּ}} ''copulative'' (e.g. {{GHGheb|text=וּֽזֲהַב}} {{GHGbible-ref|book=Gn|chapter=2|verse=12}}), cf. {{GHGpar|10|g}}.
+
+{{GHGmargin-letter|104|f}}
+(''d'') With a following {{GHGheb|text=יְ}} the {{GHGheb|text=וְ}} coalesces to form {{GHGheb|text=וִי}} according to {{GHGpar|24|b}}, as {{GHGheb|text=וִיהִי|translate=and let him be}}. On the peculiar punctuation of the {{GHGterm|wāw copulative}} before forms with initial {{GHGterm|Š<sup>e</sup>wâ}} from {{GHGheb|text=הָיָה|translate=to be}} and {{GHGheb|text=חָיָה|translate=to live}} (e.g. {{GHGheb|text=וִֽהְיִיתֶם}} {{GHGbible-ref|book=Jos|chapter=8|verse=4}}, {{GHGheb|text=וֶֽחְיֵה}} {{GHGbible-ref|book=Gn|chapter=20|verse=7}}), cf. {{GHGpar|63|q}}.
+
+{{GHGmargin-letter|104|g}}
+(''e'') Immediately before the tone-syllable it frequently takes {{GHGterm|Qameṣ}}, like {{GHGheb|text=בְּ}}, {{GHGheb|text=כְּ‍}}, {{GHGheb|text=לְ}} (see {{GHGpar|102|f}}), but in most cases only at the end of a sentence or clause (but cf. also {{GHGheb|text=וָבֹא}} {{GHGbible-ref|book=2 K|chapter=22|verse=30}}), e.g. {{GHGheb|text=וָמֵ֖ת}} {{GHGbible-ref|book=Ex|chapter=21|verse=12}} (on the other hand, in verse 20<section end=par104 /><noinclude>
+<references/></noinclude>

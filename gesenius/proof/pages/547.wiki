@@ -1,0 +1,154 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><div align="center">
+{|
+! colspan="2" | K. Weak Verbs, {{GHGheb|text=פ״י}} (for {{GHGheb|text=פ״ו}}.
+! colspan="2" | L. Verbs properly {{GHGheb|text=פ״י}}.
+|-
+! {{GHGterm|Hiphʿîl}}. || {{GHGterm|Hophʿal}}. || {{GHGterm|Qal}}. || {{GHGterm|Hiphʿîl}}.
+|-
+| {{GHGheb|text=הוֹשִׁיב}}<sup>*</sup>
+| {{GHGheb|text=הוּשַׁב}}<sup>*</sup>
+| {{GHGheb|text=יָטַב}}
+| {{GHGheb|text=הֵיטִיב}}<sup>*</sup>
+|-
+| {{GHGheb|text=הוֹשִׁ֫יבָה}}
+| {{GHGheb|text=הֽוּשְׁבָה}}
+|
+| {{GHGheb|text=הֵיטִ֫יבָה}}
+|-
+| {{GHGheb|text=הוֹשַׁ֫בְתָּ}}
+| {{GHGheb|text=הוּשַׁ֫בְתָּ}}
+|
+| {{GHGheb|text=הֵיטַ֫בְתָּ}}
+|-
+| {{GHGheb|text=הוֹשַׁבְתְּ}}
+| {{GHGheb|text=הוּשַׁבְתְּ}}
+|
+| {{GHGheb|text=הֵיטַבְתְּ}}
+|-
+| {{GHGheb|text=הוֹשַׁ֫בְתִּי}}
+| {{GHGheb|text=הוּשַׁ֫בְתִּי}}
+| regular.
+| {{GHGheb|text=הֵיטַ֫בְתִּי}}
+|-
+| {{GHGheb|text=הוֹשִׁ֫יבוּ}}
+| {{GHGheb|text=הֽוּשְׁבוּ}}
+|
+| {{GHGheb|text=הֵיטִ֫יבוּ}}
+|-
+| {{GHGheb|text=הֽוֹשַׁבְתֶּם}}
+| {{GHGheb|text=הֽוּשַׁבְתֶּם}}
+|
+| {{GHGheb|text=הֵֽיטַבְתֶּם}}
+|-
+| {{GHGheb|text=הֽוֹשַׁבְתֶּן}}
+| {{GHGheb|text=הֽוּשַׁבְתֶּן}}
+|
+| {{GHGheb|text=הֵֽיטַבְתֶּן}}
+|-
+| {{GHGheb|text=הוֹשַׁ֫בְנוּ}}
+| {{GHGheb|text=הוּשַׁ֫בְנוּ}}
+|
+| {{GHGheb|text=הֵיטַ֫בְנוּ}}
+|-
+| {{GHGheb|text=הוֹשִׁיב}}<sup>*</sup>
+| {{GHGheb|text=הוּשַׁב}}<sup>*</sup>
+| {{GHGheb|text=יְטֹב}}
+| {{GHGheb|text=הֵיטִיב}}<sup>*</sup>
+|-
+| {{GHGheb|text=הוֹשֵׁב}}<sup>*</sup>
+|
+| {{GHGheb|text=יָטוֹב}}
+| {{GHGheb|text=הֵיטֵב}}<sup>*</sup>
+|-
+| {{GHGheb|text=הוֹשֵׁב}}<sup>*</sup>
+|
+|
+| {{GHGheb|text=הֵיטֵב}}<sup>*</sup>
+|-
+| {{GHGheb|text=הוֹשִׁ֫יבִי}}
+| wanting.
+|
+| {{GHGheb|text=הֵיטִ֫יבִי}}
+|-
+| {{GHGheb|text=הוֹשִׁ֫יבוּ}}
+|
+|
+| {{GHGheb|text=הֵיטִ֫יבוּ}}
+|-
+| [{{GHGheb|text=הוֹשֵׁ֫בְנָה}}]
+|
+|
+| [{{GHGheb|text=הֵיטֵ֫בְנָה}}]
+|-
+| {{GHGheb|text=יוֹשִׁיב}}
+| {{GHGheb|text=יוּשַׁב}}<sup>*</sup>
+| {{GHGheb|text=יִיטַב}}<sup>*</sup>
+| {{GHGheb|text=יֵיטִיב}}<sup>*</sup>
+|-
+| {{GHGheb|text=תּוֹשִׁיב}}
+| {{GHGheb|text=תּוּשַׁב}}
+| {{GHGheb|text=תִּיטַב}}
+| {{GHGheb|text=תֵּיטִיב}}
+|-
+| {{GHGheb|text=תּוֹשִׁיב}}
+| {{GHGheb|text=תּוּשַׁב}}
+| {{GHGheb|text=תִּיטַב}}
+| {{GHGheb|text=תֵּיטִיב}}
+|-
+| {{GHGheb|text=תּוֹשִׁ֫יבִי}}
+| {{GHGheb|text=תּֽוּשְׁבִי}}
+| {{GHGheb|text=תִּֽיטְבִי}}
+| {{GHGheb|text=תֵּיטִ֫יבִי}}
+|-
+| {{GHGheb|text=אוֹשִׁיב}}
+| {{GHGheb|text=אוּשַׁב}}
+| {{GHGheb|text=אִיטַב}}
+| {{GHGheb|text=אֵיטִיב}}
+|-
+| {{GHGheb|text=יוֹשִׁ֫יבוּ}}
+| {{GHGheb|text=יֽוּשְׁבוּ}}
+| {{GHGheb|text=יִיֽטְבוּ}}
+| {{GHGheb|text=יֵיט֫יבוּ}}
+|-
+| [{{GHGheb|text=תּוֹשֵׁ֫בְנָה}}]
+| {{GHGheb|text=תּוּשַׁ֫בְנָה}}
+| {{GHGheb|text=תּיטַבְנָת}}
+| [{{GHGheb|text=תֵּיטֵ֫בְנָה}}]
+|-
+| {{GHGheb|text=תּוֹשִׁ֫יבוּ}}
+| {{GHGheb|text=תּֽוּשְׁבוּ}}
+| {{GHGheb|text=תִּֽיטְבוּ}}
+| {{GHGheb|text=תֵּיטִ֫יבוּ}}
+|-
+| [{{GHGheb|text=תּוֹשֵׁ֫בְנָה}}]
+| [{{GHGheb|text=תּוּשַׁ֫בְנָה}}]
+| [{{GHGheb|text=תִּיטַ֫בְנָה}}]
+| {{GHGheb|text=תֵּיטֵ֫בְנָה}}]
+|-
+| {{GHGheb|text=נוֹשִׁיב}}
+| {{GHGheb|text=נוּשַׁב}}
+| {{GHGheb|text=נִיטַב}}
+| [{{GHGheb|text=נֵיטִיב}}
+|-
+| {{GHGheb|text=יוֹשֵׁב}}<sup>*</sup>
+|
+|
+| {{GHGheb|text=יֵיטֵב}}
+|-
+| {{GHGheb|text=וַיּ֫וֹשֶׁב}}
+|
+| {{GHGheb|text=וַיִּיטַב}}
+| {{GHGheb|text=וַיֵּ֫יטֶב}}
+|-
+| {{GHGheb|text=מוֹשִׁיב}}<sup>*</sup>
+|
+| {{GHGheb|text=יֹטֵב}}
+| {{GHGheb|text=מֵיטִיב}}
+|-
+|
+| {{GHGheb|text=מוּשָׁב}}<sup>*</sup>
+| {{GHGheb|text=יָטוּב}}
+|
+|}
+</div><noinclude>
+<references/></noinclude>

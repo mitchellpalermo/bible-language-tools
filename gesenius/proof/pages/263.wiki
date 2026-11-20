@@ -1,0 +1,27 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><section begin="par85" />{{GHGmargin-letter|85|v}}
+Rem. A large number of proper names now ending in {{GHGheb|text=־ֹה}} or {{GHGheb|text=־וֹ}} used to be classed as nouns originally formed with the affix {{GHGheb|text=־וֹן}}. The subsequent rejection of the final ''Nûn'' seemed to be confirmed by the form {{GHGheb|text=מְגִדּוֹן}}, once used ({{GHGbible-ref|book=Zc|chapter=12|verse=11}}) for {{GHGheb|text=מְגִדּוֹ}} (and conversely in {{GHGbible-ref|book=Pr|chapter=27|verse=20}} {{GHGterm|K<sup>e</sup>thîbh}} {{GHGheb|text=אֲבַדֹּה}}, {{GHGterm|Q<sup>e</sup>rê}} {{GHGheb|text=אֲבַדּוֹ}} for {{GHGheb|text=אֲבַדּוֹן|translate=destruction}}), also by the fact that for {{GHGheb|text=שְׁלֹמֹה}} the LXX give the form {{polytonic|Σολωμών}} or {{polytonic|Σαλωμών}}, and especially that in patronymics and tribal names ({{GHGpar|86|h}}) a ''Nûn'' appears before the termination ''î'', as {{GHGheb|text=גִּֽילֹנִי|translate=Gilonite}} from {{GHGheb|text=גִּלֹה}} and {{GHGheb|text=שִֽׁילֹנִי}} from {{GHGheb|text=שִׁילֹה}} (modern name ''Sailûn''). Wetzstein, however (in Delitzsch’s ''Commentary on Job'', 1st ed., p. 599), explained the ''Nûn'' in {{GHGheb|text=מְגִדּוֹן}} as a secondary addition to the common old-Palestinian termination ''ô'' ({{GHGheb|text=יְרִיחוֹ}}, {{GHGheb|text=עַכּוֹ}}, {{GHGheb|text=רִמּוֹנוֹ}}, &c.), and Barth ({{GHGcite|title=Nominalbildung}}, § 224 ''b'') has since shown the unsoundness of the prevailing view on other grounds: the rejection of the ''Nûn'' would be much more likely to occur in the numerous appellatives in ''ôn'' than in proper names, and {{GHGheb|text=גִּֽילֹנִי}} and {{GHGheb|text=שִֽׁילֹנִי}} are due to the necessity of avoiding, for euphonic reasons, such forms as ''gîlô-î, šîlô-î'', &c.; cf. also {{GHGheb|text=שֵֽׁלָנִי}} from {{GHGheb|text=שֵׁלָה}}.
+
+On the afformatives {{GHGheb|text=־ִי}}, {{GHGheb|text=־ַי}}, {{GHGheb|text=וּת}}, {{GHGheb|text=־ִית}}, see below, {{GHGpar|86|h}}–l.
+
+{{center|XII. ''Quadriliterals and Quinqueliterals.''}}
+
+{{GHGmargin-letter|85|w}}
+55. {{GHGheb|text=גַּלְמוּד|translate=barren}}, {{GHGheb|text=חַלָּמִישׁ|translate=a flint}}, and the fem. {{GHGheb|text=זַלְעָפָה|translate=heat}}, &c., have probably arisen from the insertion of a {{GHGheb|text=ל}}; {{GHGheb|text=חַרְגֹּל|translate=a locust}}, {{GHGheb|text=קַרְדֹּם|translate=an axe}}, {{GHGheb|text=סַרְעַפָּה|translate=a branch}}, {{GHGbible-ref|book=Ez|chapter=31|verse=5}} (verses 6, 8 {{GHGheb|text=סְעַפָּה}}), {{GHGheb|text=שַׂרְעַפִּים}} (also {{GHGheb|text=שְׂעִפִּים}}) ''anxious thoughts'', {{GHGheb|text=שַׁרְבִּיט|translate=sceptre}}, from insertion of a {{GHGheb|text=ר}}, which is common in Aramaic. Cf., moreover, {{GHGheb|text=חֶרְמֵשׁ|translate=a sickle}}, {{GHGheb|text=סְמָדַר|translate=vine-blossom}}; with an initial {{GHGheb|text=ע}}, {{GHGheb|text=עֲטַלֵּף|translate=a bat}}, {{GHGheb|text=עַכָּבִישׁ|translate=a spider}}, {{GHGheb|text=עַכְבָּר|translate=a mouse}}, {{GHGheb|text=עַקְרָב|translate=a scorpion}},<ref>Derenbourg ({{GHGcite|title={{abbr|REJ.|Revue des Études Juives. Paris, 1880 ff.}}}}, 1883, p. 165) infers from the above examples and a comparison of the Arabic ''ʿuṣfûr'', ''sparrow'' (from ''ṣafara'', ''to chirp''), that {{GHGheb|text=ע}} was especially employed to form quadriliteral names of animals.</ref> &c.—Quinqueliteral, {{GHGheb|text=צְפַרְדֵּעַ|translate=a frog}}.
+<section end="par85" />
+<section begin="par86" />{{GHGpar-heading|86|Denominative Nouns}}
+
+{{GHGmargin-letter|86|a}}
+'''1.''' Such are all nouns formed ''immediately'' from another noun, whether the latter be primitive or derived from a verb, e.g. {{GHGheb|text=קַדְמוֹן|translate=eastern}}, immediately from {{GHGheb|text=קֶ֫דֶם|translate=the east}} (verbal stem {{GHGheb|text=קָדַם|translate=to be in front}}).
+
+{{GHGmargin-letter|86|b}}
+'''2.''' Most of the forms which nouns of this class assume have already been given in {{GHGpar|84|doublesign=1}} and {{GHGpar|85|nosign=1}}, since the denominatives, as secondary (although in some cases very old) forms, invariably follow the analogy of the verbal derivatives. As, for instance, the verbals with a prefixed {{GHGheb|text=מ‍}} ({{GHGpar|85|e}} to m) express the place, &c., of an action, so the denominatives with {{GHGheb|text=מ‍|translate=local}} represent the place where a thing is found or its neighbourhood (see e).
+
+The most common forms of denominatives are—
+
+{{GHGmargin-letter|86|c}}
+1. Those like the {{GHGterm|participle Qal}} ({{GHGpar|84|s|a}}), e.g. {{GHGheb|text=שֹׁעֵר|translate=a porter}}, from {{GHGheb|text=שַׁ֫עַר|translate=a gate}}; {{GHGheb|text=בֹּקֵר|translate=a herdsman}}, from {{GHGheb|text=בָּקָר|translate=a herd}}; {{GHGheb|text=כֹּרֵם|translate=a vinedresser}}, from {{GHGheb|text=כֶּ֫רֶם|translate=a vineyard}}.
+
+{{GHGmargin-letter|86|d}}
+2. Those like the form ''qăṭṭāl'' ({{GHGpar|84|b|b}}), e.g. {{GHGheb|text=קַשָּׁת|translate=an archer}}, from {{GHGheb|text=קֶ֫שֶׁת|translate=a bow}}.
+<section end="par86" /><noinclude>
+<references/></noinclude>

@@ -1,0 +1,25 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><section begin="par106" />{{center|
+'''THIRD PART'''
+
+SYNTAX<ref>Recent works on Hebrew syntax are: A. B. Davidson, {{GHGcite|title=Introductory Heb. Gram.}}, vol. ii, {{GHGcite|title=Heb. Syntax}}, Edinburgh, 1894; Ed. König. {{GHGcite|title=Hist.-compar. Syntax der hebr. Sprache}}, Lpz. 1897 (see above, {{GHGpar|3|f}}). Important contributions to Hebrew syntax are also contained in H. Reckendorf’s work {{GHGcite|title=Die syntakt. Verhältnisse des Arab.}}, 2 pts., Leiden, 1895, 1898, of which we have already made use in {{GHGpar|97|a}}. Cf. also the same author’s very instructive discussions {{GHGcite|title=Ueber syntakt. Forschung}}, Munich, 1899.</ref>
+
+'''CHAPTER I'''
+
+THE PARTS OF SPEECH
+
+I. ''Syntax of the Verb.''
+
+A. Use of the Tenses and Moods.<ref>Cf. the sketch of the tenses and moods used in Hebrew in § 40; and on the general characteristics of the perfect and imperfect see the note on {{GHGpar|47|a}}; also Driver, ''A Treatise on the Use of the Tenses in Hebrew'' (Oxford, 1874; 3rd ed. 1892); Bennett, ‘Notes on the Use of the Hebrew Tenses’ ({{GHGcite|title=Hebraica}}, 1886, vols. ii, iii). A partial modification of the accepted definition of the Semitic perfect and imperfect was proposed by J. A. Knudtzon, ''Om det saakaldte Perfektum og Imperfektum i Hebraisk'', Kristiania, 1890; of which a summary entitled ‘Vom sogenannten Perf. und Imperf. im Hebr.’ appeared in the ''Transactions of the Oriental Congress at Stockholm'', section sémitique ''b'', p. 73 ff. (Leiden, 1893). Cf. also Knudtzon’s articles, ‘Zur assyrischen und allgemein semitischen Grammatik’ in the ''Zeitschrift für Assyriologie'', especially vi. 422 ff. and vii. 33 ff.</ref>}}
+
+<!-- section begins above -->{{GHGpar-heading|106|Use of the Perfect}}
+
+{{GHGmargin-letter|106|a}}
+The perfect serves to express actions, events, or states, which the speaker wishes to represent from the point of view of completion, whether they belong to a determinate past time, or extend into the present, or, while still future, are pictured as in their completed state.
+
+The definition formerly given here (‘the perfect serves to express ''completed'' actions’) applies, strictly speaking, only to some of the varieties of the perfect discussed under ''b''–''p'': hence the above modification based on the arguments of Knudtzon (for the title see note 2, and cf. further {{GHGpar|107|a}}).
+
+More particularly the uses of the perfect may be distinguished as follows:—
+
+{{GHGmargin-letter|106|b}}
+'''1.''' To represent actions, events, or states, which, after a shorter<section end="par106" /><noinclude>
+<references/></noinclude>

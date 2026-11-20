@@ -1,0 +1,32 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par32 />(''ʾenûn''), Arab. ''húmû'' (archaic form of ''hum''), and Ethiop. ''hômû'', an ''ô'' or ''û'' is appended, which in Hebrew seems to reappear in the poetical suffixes {{GHGheb|text=־מוֹ}}, {{GHGheb|text=־ָ֫ מוֹ}}, {{GHGheb|text=־ֵ֫ מוֹ}} ({{GHGpar|91|l}}, 3).
+
+{{GHGmargin-letter|32|n}}
+In some passages {{GHGheb|text=הֵ֫מָּה}} stands for the feminine ({{GHGbible-ref|book=Zc|chapter=5|verse=10}}, {{GHGbible-ref|book=Ct|chapter=6|verse=8}}, {{GHGbible-ref|book=Ru|chapter=1|verse=22}}; cf. the use of the suffix of the 3rd masc. for the 3rd fem., {{GHGpar|135|o}} and {{GHGpar|145|t}}). For the quite anomalous {{GHGheb|text=עַד־הֵם}} {{GHGbible-ref|book=2 K|chapter=9|verse=18}} read {{GHGheb|text=עָֽדֵיהֶם}} ({{GHGbible-ref|book=Jb|chapter=32|verse=12}}).
+
+{{GHGmargin-letter|32|o}}
+8. The pronouns of the 3rd person may refer to ''things'' as well as persons. On their meaning as ''demonstratives'' see {{GHGpar|136}}.<section end=par32 />
+
+<section begin=par33 />{{GHGpar-heading|33|Pronominal Suffixes}}
+
+Brockelmann, {{GHGcite|title=Semit. Sprachwiss.}}, p. 100 f.; {{GHGcite|title=Grundriss}}, i. 306 ff. J. Barth, ‘Beiträge zur Suffixlehre des Nordsemit.,’ in the {{GHGcite|title=Amer. Journ. of Sem. Lang.}}, 1901, p. 193 ff.
+
+{{GHGmargin-letter|33|a}}
+'''1.''' The independent principal forms of the personal pronoun (the ''separate pronoun''), given in the preceding section, express only the nominative.<ref>On apparent exceptions see {{GHGpar|135|d}}.</ref> The accusative and genitive are expressed by forms, usually shorter, joined to the end of verbs, nouns, and particles (''pronominal suffixes'' or simply ''suffixes''); e.g. {{GHGheb|text=הוּ}} (toneless) and {{GHGheb|text=וֹ}} (from ''āhû'') ''eum'' and ''eius'', {{GHGheb|text=קְטַלְתִּ֫יהוּ|translate=I have killed him}} (also {{GHGheb|text=קְטַלְתִּיו}}), {{GHGheb|text=קְטַלְתָּ֫הוּ}} or (with ''āhû'' contracted into ''ô'') {{GHGheb|text=קְטַלְתּ֫וֹ|translate=thou hast killed him}}; {{GHGheb|text=אוֹר֫וֹ}} (also {{GHGheb|text=אוֹרֵ֫הוּ}}) ''lux eius''.
+
+The same method is employed in all the other Semitic languages, as well as in the Egyptian, Persian, Finnish, Tartar, and others; in Greek, Latin, and German we find only slight traces of the kind, e.g. German, ''er gab’s'' for ''er gab es''; Greek, πατήρ μου for πατὴρ ἐμοῦ; Latin, ''eccum, eccos'', &c., in Plautus and Terence for ''ecce eum, ecce eos''.
+
+{{GHGmargin-letter|33|b}}
+'''2.''' The case which these suffixes represent is—
+
+(''a'') When joined to verbs, the accusative (cf., however, {{GHGpar|117|x}}), e.g. {{GHGheb|text=קְטַלְתִּ֫יהוּ}} I have killed ''him''.
+
+{{GHGmargin-letter|33|c}}
+(''b'') When affixed to substantives, the genitive (like πατήρ μου, ''pater eius''). They then serve as ''possessive pronouns'', e.g. {{GHGheb|text=אָבִי}} (''ʾābh-î'') ''my father'', {{GHGheb|text=סוּסוֹ|translate=his horse}}, which may be either ''equus eius'' or ''equus suus''.
+
+{{GHGmargin-letter|33|d}}
+(''c'') When joined to particles, either the genitive or accusative, according as the particles originally expressed the idea of a noun or a verb, e.g. {{GHGheb|text=בֵּינִי}}, literally ''interstitium mei'', ''between me'' (cf. ''mea causa''); but {{GHGheb|text=הִנְנִי|translate=behold me}}, ''ecce me''.
+
+{{GHGmargin-letter|33|e}}
+(''d'') Where, according to the Indo-Germanic case-system, the dative or ablative of the pronoun is required, the suffixes in Hebrew are joined to prepositions expressing those cases ({{GHGheb|text=לְ}} sign of the dative, {{GHGheb|text=בְּ|translate=in}}, {{GHGheb|text=מִן|translate=from}}, § 102), e.g. {{GHGheb|text=לוֹ|translate=to him}} (''ei'') and ''to himself'' (''sibi''), {{GHGheb|text=בּוֹ|translate=in him}}, {{GHGheb|text=מִנִּי}} (usually {{GHGheb|text=מִמֶּ֫נִּי}}) ''from me''.
+<section end=par33 /><noinclude>
+<references/></noinclude>

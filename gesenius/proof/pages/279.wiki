@@ -1,0 +1,57 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par91 /><div align="center">
+{| cellspacing="0" cellpadding="0" border="0"
+| Plur. 
+| 1. c. 
+| {{GHGheb|text=נוּ}}
+| {{GHGheb|text=־ֵ֫ נוּ}}
+| ''our.''
+|-
+| 
+| 2. m. 
+| {{GHGheb|text=כֶם}}
+| {{GHGheb|text=־ְכֶם}}
+|''your.''
+|-
+| 
+| f.
+| {{GHGheb|text=כֶן}}
+| {{GHGheb|text=־ְכֶן}}
+|
+|-
+|
+| 3. m. 
+| {{GHGheb|text=הֶם}}
+| {{GHGheb|text=־ָם}}
+| ''eorum.''
+|-
+| 
+|
+| {{GHGheb|text=מוֹ}}
+| (poet. {{GHGheb|text=־ָ֫ מוֹ}})
+| 
+|-
+| 
+| f. 
+| {{GHGheb|text=הֶן}} ({{GHGheb|text=הֵן}})
+| {{GHGheb|text=־ָן}}
+| ''earum''.
+|}
+</div>
+
+{{GHGmargin-letter|91|c}}
+Rem. 1. There is less variety of forms in these than in the verbal suffixes; the particular forms are used as follows:—
+
+(''a'') Those without a connecting vowel (on the derivation of these ‘connecting vowels’ from original stem-vowels, see note on {{GHGpar|58|f}}) are generally joined to nouns of a peculiar form (see § 96), the ''constr. st.'' of which ends in a vowel, as {{GHGheb|text=אָבִ֫יךָ}}, {{GHGheb|text=אָבִ֫יהוּ}} and {{GHGheb|text=אָבִיו}}, {{GHGheb|text=אָבִ֫יהָ}}, {{GHGheb|text=אָבִ֫ינוּ}}, {{GHGheb|text=אֲבִיכֶם}}, {{GHGheb|text=אֲבִיכֶן}}, {{GHGheb|text=אֲבִיהֶם}}, {{GHGheb|text=אֲבִיהֶן}}, sometimes also to segholate forms ending in ''î'' from {{GHGheb|text=ל״ה}} stems (see {{GHGpar|93|x}}, y), e.g. {{GHGheb|text=פְּרִיהֶם|translate=the fruit of them}}, {{GHGbible-ref|book=Am|chapter=9|verse=14}} (also {{GHGheb|text=פִּרְיָם}} {{GHGbible-ref|book=Is|chapter=37|verse=30}}, &c.), {{GHGheb|text=פִּרִיהֶן}} {{GHGbible-ref|book=Jer|chapter=29|verse=28}} (also {{GHGheb|text=פִּרְיָן}} verse 5); cf., moreover, {{GHGheb|text=חֶלְבְּהֶן}} {{GHGbible-ref|book=Lv|chapter=8|verse=16.25}} and similar examples with {{GHGheb|text=הֶן}} ({{GHGbible-ref|book=Is|chapter=3|verse=17}} {{GHGheb|text=הֵן}}) {{GHGbible-ref|book=Gn|chapter=21|verse=28}}, {{GHGbible-ref|book=Ez|chapter=13|verse=17}}, {{GHGbible-ref|book=Ez|chapter=16|verse=53|hidebook=1}}.<ref>Also in {{GHGbible-ref|book=Jer|chapter=15|verse=10}} read (according to {{GHGpar|61|h}}, end) {{GHGheb|text=כֻּלְּהֶם קִלְּלוּנִי}}; in {{GHGbible-ref|book=Ho|chapter=7|verse=6}} probably {{GHGheb|text=אַפְּהֶם}} for {{GHGheb|text=אֹֽפֵהֶם}}.</ref> Also in {{GHGbible-ref|book=Gn|chapter=1|verse=21}}, {{GHGbible-ref|book=Gn|chapter=4|verse=4|hidebook=1}}, {{GHGbible-ref|book=Ez|chapter=10|verse=12}}, {{GHGbible-ref|book=Na|chapter=2|verse=8}}, &c., the {{GHGterm|K<sup>e</sup>th.}} perhaps intends the singular, {{GHGheb|text=לְמִֽינְהֶם}}, &c., but the Masora requires the plural with defective ''ê''.
+
+{{GHGmargin-letter|91|d}}
+(''b'') The forms with connecting vowels ({{GHGpar|58|f}}) are joined to nouns ending in a consonant. The connecting vowel is regularly ''a'' in the ''3rd sing. fem.'' {{GHGheb|text=־ָהּ}} (for ''aha'') and ''3rd plur.'' {{GHGheb|text=־ָם}}, {{GHGheb|text=־ָ֫ מוֹ}}, {{GHGheb|text=־ָן}}, also in the ''3rd sing. masc.'' {{GHGheb|text=(הֹ) וֹ}}, since the ''ô'' is contracted from ''a[h]û'', and in the pausal form of the ''2nd masc.'' {{GHGheb|text=־ֶ֫ ךָ}} (a modification of original {{GHGheb|text=־ַ֫ ךָ}}).
+
+The forms with ''ē'' in the above-mentioned persons are common only with nouns in {{GHGheb|text=־ֶה}} (from stems {{GHGheb|text=ל״ה}}), ''constr. st.'' {{GHGheb|text=־ֵה}} (cf. {{GHGpar|89|f}}), e.g. {{GHGheb|text=שָׂדֵ֫הוּ}} (from ''sadaihû'') ''his field''; {{GHGheb|text=עָלֶ֫הָ|translate=its leaf}}, {{GHGbible-ref|book=Is|chapter=1|verse=30}}; {{GHGheb|text=מַרְאֶ֫הָ|translate=the appearance thereof}}, {{GHGbible-ref|book=Lv|chapter=13|verse=4}} (from ''mar’aihā''; on the {{GHGterm|S<sup>e</sup>ghôl}} see k); but {{GHGheb|text=שָׂדָהּ|translate=her field}}. The orthographic retention of the {{GHGheb|text=י}}, e.g. {{GHGheb|text=מַֽעֲשֶׂ֫יךָ}}, {{GHGheb|text=מַֽעֲשָׂיו}}, gives to many forms the appearance of plurals; see the instances in {{GHGpar|93|ss}}.
+
+Apart from these {{GHGheb|text=ל״ה}} forms the connecting vowel ''ē'' in the 3rd pers. occurs only in isolated cases; {{GHGheb|text=אוֹרֵ֫הוּ|translate=his light}}, {{GHGbible-ref|book=Jb|chapter=25|verse=3}}; {{GHGheb|text=לְמִינֵ֫הוּ|translate=after its kind}}, {{GHGbible-ref|book=Gn|chapter=1|verse=12.25}} [+ 12 times]; {{GHGbible-ref|book=Na|chapter=1|verse=13}}; in {{GHGbible-ref|book=Ju|chapter=19|verse=24}} read {{GHGheb|text=פִּֽילַגְשׁוֹ}} as in vv. 2, 25. On the other hand {{GHGheb|text=־ֵךְ}} in the ''2nd sing. fem.'' and {{GHGheb|text=־ֵ֫ נוּ}} in the ''1st plur.'' are by far the more common forms, while {{GHGheb|text=־ָךְ}}, {{GHGheb|text=־ָ֫ נוּ}} are of rare occurrence; see e.—Instead of {{GHGheb|text=־ְךָ}} ({{GHGheb|text=־ְכָה}} in {{GHGbible-ref|book=Gn|chapter=10|verse=19}}, {{GHGbible-ref|book=Ex|chapter=13|verse=16}}, {{GHGbible-ref|book=Jer|chapter=29|verse=25}}, &c., cf. {{GHGheb|text=בְּכָה}}, {{GHGheb|text=לְכָה}} {{GHGpar|103|g}}), {{GHGheb|text=־ְכֶם}}, {{GHGheb|text=־ְכֶן}} (with {{GHGterm|Š<sup>e</sup>wâ mobile}}), if the last consonant of the noun is a guttural, the forms are {{GHGheb|text=־ֲךָ}}, {{GHGheb|text=־ֲכֶם}}, {{GHGheb|text=־ֲכֶן}}, e.g. {{GHGheb|text=רֽוּחֲךָ|translate=thy spirit}}, {{GHGheb|text=בֹּרַֽאֲךָ|translate=thy creator}}, {{GHGbible-ref|book=Is|chapter=43|verse=1}}, {{GHGheb|text=רֵיֽעֲכֶם|translate=your friend}}, {{GHGbible-ref|book=Jb|chapter=6|verse=27}} (on such cases as {{GHGheb|text=בְּתוֹכְכֶם}} {{GHGbible-ref|book=Hag|chapter=2|verse=5}}, see {{GHGpar|10|g}}).—With ''Nun energicum'' (cf. {{GHGpar|58|i}}, and on {{GHGheb|text=עוֹנֶ֑ךָּ}} {{GHGbible-ref|book=Jb|chapter=5|verse=1}}, &c., cf. {{GHGpar|61|h}}) {{GHGheb|text=דַּיֶּ֑ךָּ}} occurs in {{GHGbible-ref|book=Pr|chapter=25|verse=16}}, in principal pause.
+
+2. Rare or incorrect forms are—
+
+{{GHGmargin-letter|91|e}}
+''Sing.'' 1st pers. {{GHGheb|text=־ֵ֫ נִי}} in {{GHGheb|text=בְּשׁוּבֵ֫נִי}} {{GHGbible-ref|book=Ez|chapter=47|verse=7}} (certainly only a scribal error, caused by {{GHGheb|text=וַיְשִׁבֵ֫נִי}} in verse 6).<section end=par91 /><noinclude>
+<references/></noinclude>

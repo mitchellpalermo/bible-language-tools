@@ -1,0 +1,24 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par110 />{{GHGpar-heading|110|The Imperative}}
+
+<div style="font-size: small; text-align: center;">Mayer Lambert, ‘Sur la syntaxe de l’impératif en hébreu,’ in {{GHGcite|title={{abbr|REJ.|Revue des Études Juives. Paris, 1880 ff.}}}} 1897, p. 106 ff.</div>
+
+{{GHGmargin-letter|110|a}}
+'''1.''' The imperative,<ref>On the close relation between the imperative and jussive (both in meaning and form), cf. {{GHGpar|46}} and {{GHGpar|48|i}}.</ref> which, according to § 46, is restricted to the 2nd pers. sing. and plur., and to ''positive'' commands, &c., may stand either alone, or in simple co-ordination (as in {{GHGbible-ref|book=1 K|chapter=18|verse=44}}, {{GHGbible-ref|book=Is|chapter=56|verse=1}}, {{GHGbible-ref|book=Is|chapter=65|verse=18|hidebook=1}}) with other imperatives:
+
+(''a'') To express real commands, e.g. {{GHGbible-ref|book=Gn|chapter=12|verse=1}} ''get thee out of thy country''; or (like the jussive) mere admonitions ({{GHGbible-ref|book=Ho|chapter=10|verse=12}}) and requests, {{GHGbible-ref|book=2 K|chapter=5|verse=22}}, {{GHGbible-ref|book=Is|chapter=5|verse=3}}; on the addition of {{GHGheb|text=נָא}} see below, Rem. 1. The imperative is used in the sense of an ironical challenge (often including a threat) in {{GHGbible-ref|book=1 K|chapter=2|verse=22}} ''ask for him the kingdom also''; 22:15, {{GHGbible-ref|book=Ju|chapter=10|verse=14}}, {{GHGbible-ref|book=Is|chapter=47|verse=12}} (with {{GHGheb|text=נָא}}), {{GHGbible-ref|book=Jer|chapter=7|verse=21}}, {{GHGbible-ref|book=Ez|chapter=20|verse=39}}, {{GHGbible-ref|book=Am|chapter=4|verse=4}}, {{GHGbible-ref|book=Jb|chapter=38|verse=3}}f., 40:10ff., {{GHGbible-ref|book=La|chapter=4|verse=21}}. The imperative has a concessive sense in {{GHGbible-ref|book=Na|chapter=3|verse=15}} (though thou ''make thyself many'', &c.), and in the cases discussed under ''f'', e.g. {{GHGbible-ref|book=Is|chapter=8|verse=9}} f., 29:9.
+
+{{GHGmargin-letter|110|b}}
+(''b'') To express permission, e.g. {{GHGbible-ref|book=2 S|chapter=18|verse=23}} after previous dissuasion, (then) ''run'' (as far as I am concerned)! {{GHGbible-ref|book=Is|chapter=21|verse=12}}, {{GHGbible-ref|book=Is|chapter=45|verse=11|hidebook=1}}.
+
+{{GHGmargin-letter|110|c}}
+(''c'') To express a distinct assurance (like our expression, ''thou shalt have it'')<ref>Like the threatening formulae in the Latin comic writers, e.g. ''vapula'', Ter. Phorm. v. 6, 10=''vapulare te iubeo'', Plaut. Curc. vi. 4, 12.</ref> or promise, e.g. {{GHGbible-ref|book=Is|chapter=65|verse=18}} ''but be ye glad'', &c. (i.e. ye will have continually occasion to be glad); and {{GHGbible-ref|book=Is|chapter=37|verse=30}}, {{GHGbible-ref|book=Ps|chapter=110|verse=2}}; in a threat, {{GHGbible-ref|book=Jer|chapter=2|verse=19}}. So especially in commands, the fulfilment of which is altogether out of the power of the person addressed, e.g. {{GHGbible-ref|book=Is|chapter=54|verse=14}} ''be far from anxiety'' (meaning, thou needst not fear any more); {{GHGbible-ref|book=Gn|chapter=1|verse=28}}, &c. (for other examples, such as {{GHGbible-ref|book=1 K|chapter=22|verse=12}}, {{GHGbible-ref|book=2 K|chapter=5|verse=13}}, see below, ''f''). Most clearly in the case of the {{GHGterm|imperative Niphʿal}} with a passive meaning, e.g. {{GHGbible-ref|book=Gn|chapter=42|verse=16}} {{GHGheb|text=וְאַתֶּם הֵאָֽסְרוּ|translate=and ye shall be bound}}; {{GHGbible-ref|book=Dt|chapter=32|verse=50}}, {{GHGbible-ref|book=Is|chapter=49|verse=9}} ({{GHGbible-ref|book=Is|chapter=45|verse=22}}, see below, ''f'').
+
+{{GHGmargin-letter|110|d}}
+Rem. 1. The particle {{GHGheb|text=נָא|translate=age!}} (§ 105) is frequently added to the imperative, as to the jussive, sometimes to soften down a command, or to make a request in a more courteous form (see above, ''a''), {{GHGbible-ref|book=Gn|chapter=12|verse=13}}, {{GHGbible-ref|book=Gn|chapter=24|verse=2|hidebook=1}}, sometimes to strengthen an exhortation uttered as a rebuke or threat ({{GHGbible-ref|book=Nu|chapter=16|verse=26}}, {{GHGbible-ref|book=Nu|chapter=20|verse=10|hidebook=1}}) or in ridicule ({{GHGbible-ref|book=Is|chapter=47|verse=12}}).
+
+{{GHGmargin-letter|110|e}}
+2. The imperative after the desiderative particle {{GHGheb|text=לוּ}} {{GHGbible-ref|book=Gn|chapter=23|verse=13}} (at the end of verses 5 and 14 also read {{GHGheb|text=לוּ}} for {{GHGheb|text=לוֹ}} and join it to the following imperative) is due to an anacoluthon. Instead of the imperfect which would be expected here after {{GHGheb|text=לוּ}}, the more forcible imperative is used in a new sentence.
+
+{{GHGmargin-letter|110|f}}
+'''2.''' The imperative in logical dependence upon a preceding imperative, jussive (or cohortative), or an interrogative sentence, serves to<section end=par110 /><noinclude>
+<references/></noinclude>

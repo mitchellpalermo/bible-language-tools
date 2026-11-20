@@ -1,0 +1,178 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><div align="center">
+{|
+|
+! colspan="2" | {{GHGterm|Qal}}.|| {{GHGterm|Niphʿal}}.|| {{GHGterm|Piʿēl}}.
+
+|-
+| ''Perf. Sing''. 3. ''m''.
+| {{GHGhebT|text=מָצָא<sup>*</sup>}}
+| {{GHGhebT|text=מָלֵא}}
+| {{GHGhebT|text=נִמְצָא<sup>*</sup>}}
+| {{GHGhebT|text=מִצֵּא}}, {{GHGhebT|text=דִּכָּא}}
+|-
+| 3. ''f''.
+| {{GHGhebT|text=מָֽצְאָה}}
+| {{GHGhebT|text=מָֽלְאָה}}
+| {{GHGhebT|text=נִמְצְאָה}}
+| {{GHGhebT|text=[מִצְּאָה]}}
+|-
+| 2. ''m''.
+| {{GHGhebT|text=מָצָ֫אתָ<sup>*</sup>}}
+| {{GHGhebT|text=מָלֵ֫אתָ}}
+| {{GHGhebT|text=נִמְצֵ֫אתָ<sup>*</sup>}}
+| {{GHGhebT|text=מִצֵּ֫אתָ<sup>*</sup>}}
+|-
+| 2. ''f''.
+| {{GHGhebT|text=מָצָאת}}
+| {{GHGhebT|text=מָלֵאת}}
+| {{GHGhebT|text=נִמְצֵאת}}
+| {{GHGhebT|text=[מִצֵּאת]}}
+|-
+| 1. ''c''.
+| {{GHGhebT|text=מָצָ֫אתִי}}
+| {{GHGhebT|text=מָלֵ֫אתִי}}
+| {{GHGhebT|text=נִמְצֵ֫אתִי}}
+| {{GHGhebT|text=מִצֵּ֫אתִי}}
+|-
+| ''Plur''. 3. ''c''.
+| {{GHGhebT|text=מָֽצְאוּ}}
+| {{GHGhebT|text=מָֽלְאוּ}}
+| {{GHGhebT|text=נִמְצְאוּ}}
+| {{GHGhebT|text=מִצְּאוּ}}
+|-
+| 2. ''m''.
+| {{GHGhebT|text=מְצָאתֶם}}
+| {{GHGhebT|text=מְלֵאתֶם}}
+| {{GHGhebT|text=נִמְצֵאתֶם}}
+| {{GHGhebT|text=מִצֵּאתֶם}}
+|-
+| 2. ''f''.
+| {{GHGhebT|text=[מְצָאתֶן]}}
+| {{GHGhebT|text=[מְלֵאתֶן]}}
+| {{GHGhebT|text=נִמְצֵאתֶן}}
+| {{GHGhebT|text=[מִצֵּאתֶן]}}
+|-
+| 1. ''c''.
+| {{GHGhebT|text=מָצָ֫אנוּ}}
+| {{GHGhebT|text=מָלֵ֫אנוּ}}
+| {{GHGhebT|text=נִמְצֵ֫אנוּ}}
+| {{GHGhebT|text=מִצֵּ֫אנוּ}}
+|-
+| ''Inf''.
+| colspan="2" | {{GHGhebT|text=מְצֹא}}
+| {{GHGhebT|text=הִמָּצֵא}}
+| {{GHGhebT|text=מַצֵא}}
+
+|-
+| ''Inf. absol''.
+| colspan="2" | {{GHGhebT|text=מָצוֹא}}
+| {{GHGhebT|text=נִמְצֹא}}
+| {{GHGhebT|text=מַצֹא}}
+
+|-
+| ''Imp. Sing. m''.
+| colspan="2" | {{GHGhebT|text=מְצָא<sup>*</sup>}}
+| {{GHGhebT|text=הִמָּצֵא}}
+| {{GHGhebT|text=מַצֵּא}}
+
+|-
+| ''f''.
+| colspan="2" | {{GHGhebT|text=מִצְאִי}}
+| {{GHGhebT|text=הִמָּֽצְאִי]}}
+| {{GHGhebT|text=[מַצְּאִי]}}
+
+|-
+| ''Plur. m''.
+| colspan="2" | {{GHGhebT|text=מִצְאוּ}}
+| {{GHGhebT|text=הִמָּֽצְאוּ}}
+| {{GHGhebT|text=מַצְּאוּ}}
+
+|-
+| ''f''.
+| colspan="2" | {{GHGhebT|text=מְצֶ֫אנָה<sup>*</sup>}}
+| {{GHGhebT|text=[הִמָּצֶ֫אנָה}}
+| {{GHGhebT|text=[מַצֶּ֫אנָה]}}
+
+|-
+| ''Impf. Sing''. 3. ''m''.
+| colspan="2" | {{GHGhebT|text=יִמְצָא<sup>*</sup>}}
+| {{GHGhebT|text=יִמָּצֵא<sup>*</sup>}}
+| {{GHGhebT|text=יְמַצֵּא}}
+
+|-
+| 3. ''f''.
+| colspan="2" | {{GHGhebT|text=תִּמְצָא}}
+| {{GHGhebT|text=תִּפָּצֵא}}
+| {{GHGhebT|text=תְּמַצֵּא}}
+
+|-
+| 2. ''m''.
+| colspan="2" | {{GHGhebT|text=תִּמְצָא}}
+| {{GHGhebT|text=תִּמָּצֵא}}
+| {{GHGhebT|text=תְּמַצֵּא}}
+
+|-
+| 2. ''f''.
+| colspan="2" | {{GHGhebT|text=תִּמְצְאִי}}
+| {{GHGhebT|text=תִּמָּצְאִי}}
+| {{GHGhebT|text=[תְּמַצְּאִי]}}
+
+|-
+| 1. ''c''.
+| colspan="2" | {{GHGhebT|text=אֶמְצָא}}
+| {{GHGhebT|text=אֶמָּצֵא}}
+| {{GHGhebT|text=אֲמַצֵּא}}
+
+|-
+| ''Plur''. 3. ''m''.
+| colspan="2" | {{GHGhebT|text=יִמְצְאוּ}}
+| {{GHGhebT|text=יִמָּֽצְאוּ}}
+| {{GHGhebT|text=יְמַצְּאוּ}}
+
+|-
+| 3. ''f''.
+| colspan="2" | {{GHGhebT|text=תִּמְצֶ֫אנָה<sup>*</sup>}}
+| {{GHGhebT|text=תִּמָּצֶ֫אנָה<sup>*</sup>}}
+| {{GHGhebT|text=תְּמַצֶּ֫אנָה<sup>*</sup>}}
+
+|-
+| 2. ''m''.
+| colspan="2" | {{GHGhebT|text=תִּמְצְאוּ}}
+| {{GHGhebT|text=תִּמָּֽצְאוּ}}
+| {{GHGhebT|text=[תְמַצְּאוּ]}}
+
+|-
+| 2. ''f''.
+| colspan="2" | {{GHGhebT|text=תִּמְצֶ֫אנָה}}
+| {{GHGhebT|text=תִּמָּצֶ֫אנָה}}
+| {{GHGhebT|text=תְּמַצֶּ֫אנָה}}
+
+|-
+| 1. ''c''.
+| colspan="2" | {{GHGhebT|text=נִמְצָא}}
+| {{GHGhebT|text=[נִמָּצֵא]}}
+| {{GHGhebT|text=נְמַצֵּא}}
+
+|-
+| colspan="5" | ''Shortened. Impf''. ({{GHGterm|Jussive}}).
+|-
+| ''Impf. with Suff''.
+| colspan="2" | {{GHGhebT|text=יִמְצָאֵ֫נִי, יִמְצָֽאֲךָ}}
+|
+| {{GHGhebT|text=יְמַצְּאֵ֫נִי}}
+
+|-
+| ''Part. act''.
+| colspan="2" | {{GHGhebT|text=מֹצֵא}}
+| {{GHGhebT|text=נִמְצָא}}
+| {{GHGhebT|text=מְמַצֵּא}}
+
+|-
+| ''pass''.
+| colspan="2" | {{GHGhebT|text=מָצוּא}}
+|
+|
+
+|}
+</div><noinclude>
+<references/></noinclude>

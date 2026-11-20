@@ -1,0 +1,25 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par30 />{{GHGmargin-letter|30|d}}
+2. Others regard the three stem-consonants as a {{GHGterm|root}}, in the sense that, considered as ''vowelless'' and unpronounceable, it represents the common foundation of the verbal and nominal stems developed from it, just as in the vegetable world, from which the figure is borrowed, stems grow from the hidden root, e.g.
+
+{| style="text-align:center; width:95%" cellspacing="0" cellpadding="0" border="0"
+|-valign="top"
+| align="right" | Root:
+| {{GHGheb|text=מלך}},
+| align="left" | the indeterminate idea of ''ruling''.
+|-valign="top"
+| Verb-stem, {{GHGheb|text=מָלַךְ|translate=he has reigned}}.
+| &nbsp;
+| Noun-stem, {{GHGheb|text=מֶ֫לֶךְ|translate=king}}.
+|}
+
+For the historical investigation of the language, however, this hypothesis of unpronounceable roots, with indeterminate meaning, is fruitless. Moreover, the term {{GHGterm|root}}, as it is generally understood by philologists, cannot be applied to the Semitic triliteral stem (see {{GHGpar|30|f|nonumber=1}}).<ref>Cf. Philippi, ‘''Der Grundstamm des starken Verbums'',’ in {{GHGcite|title=Morgenländische Forschungen}}, Leipz. 1875, pp. 69–106.</ref>
+
+{{GHGmargin-letter|30|e}}
+3. The 3rd sing. Perf. Qal, which, according to the above, is usually regarded, both lexicographically and grammatically, as the ground-form, is generally in Hebrew a dissyllable, e.g. {{GHGheb|text=קָטַל}}. The monosyllabic forms have only arisen by contraction (according to the traditional explanation) from stems which had a weak letter ({{GHGheb|text=ו}} or {{GHGheb|text=י}}) for their middle consonant, e.g. {{GHGheb|text=קָם}} from {{GHGpron|qăwăm}}; or from stems whose second and third consonants are identical, e.g. {{GHGheb|text=צַר}} and {{GHGheb|text=צָרַר}} (but see below, {{GHGpar|67||doublesign=1}}, {{GHGpar|72|nosign=1}}). The dissyllabic forms have themselves no doubt arisen, through a loss of the final vowel, from trisyllables, e.g. {{GHGheb|text=קָטַל}} from {{GHGpron|qătălă}}, as it is in literary Arabic.
+
+{{GHGmargin-letter|30|f}}
+'''2.''' The law of the triliteral stem is so strictly observed in the formation of verbs and nouns in Hebrew (and in the Semitic languages generally), that the language has sometimes adopted artificial methods to preserve at least an appearance of triliteralism in monosyllabic stems, e.g. {{GHGheb|text=שֶׁ֫בֶת}} for the inf. constr. of verbs {{GHGheb|text=פ״ו}}; cf. {{GHGpar|69|b}}. Conversely such nouns, as {{GHGheb|text=אָב|translate=father}}, {{GHGheb|text=אֵם|translate=mother}}, {{GHGheb|text=אָח|translate=brother}}, which were formerly all regarded as original monosyllabic forms ({{GHGterm|nomina primitiva}}), may, in some cases at least, have arisen from mutilation of a triliteral stem.
+
+{{GHGmargin-letter|30|g}}
+On the other hand, a large number of triliteral stems really point to a biliteral base, which may be properly called a {{GHGterm|root}} (''radix primaria, bilitteralis''), since it forms the starting-point for several triliteral modifications of the same fundamental idea. Though in themselves unpronounceable, these roots are usually pronounced with ''ă'' between the two consonants, and are represented in writing by the sign √, e.g. √{{GHGheb|text=כר}} as the root of {{GHGheb|text=כָּרַר}}, {{GHGheb|text=כָּרָה}}, {{GHGheb|text=כּוּר}}, {{GHGheb|text=אָכַר}}. The reduction of a stem to the underlying root may generally be accomplished with certainty when the stem exhibits one weak consonant with two strong ones, or when the second and third consonants are identical. Thus e.g. the stems {{GHGheb|text=דָּכַךְ}}, {{GHGheb|text=דּוּךְ}}, {{GHGheb|text=דָּכָא}}, {{GHGheb|text=דָּכָה}} may all be traced to the idea of ''striking, breaking'', and the root common to them all is evidently the two strong consonants {{GHGheb|text=דך}} (''dakh''). Very frequently, however, the development of the root into a stem is effected by the addition of<section end=par30 /><noinclude>
+<references/></noinclude>

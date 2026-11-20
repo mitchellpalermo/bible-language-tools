@@ -1,0 +1,193 @@
+<noinclude><pagequality level="3" user="Amire80" /></noinclude>{| style="width: 100%; hyphens: auto;"
+|style="width: 33%; vertical-align: top; border-right: solid thin black;"|{{GHGheb|text=אַ֫חַר כֵּן|indexitem=1}}{{GHGpar|29|g|nosign=1}}
+
+{{GHGheb|text=אֲחֹֽרַנִּית|indexitem=1}}{{GHGpar|85|u|nosign=1}}
+
+{{GHGheb|text=אִי|indexitem=1}}{{GHGtranslate|island}} {{GHGpar|93|y|nosign=1}}
+
+{{GHGheb|text=אִי|indexitem=1}}{{GHGtranslate|woe!}} {{GHGpar|105|a|nosign=1}}
+
+{{GHGheb|text=אִי|indexitem=1}}{{GHGtranslate|not}} {{GHGpar|152|q|nosign=1}}
+
+{{GHGheb|text=אֵיךְ|indexitem=1}}{{GHGpar|148|nosign=1}}
+
+{{GHGheb|text=אֵיכָה|indexitem=1}}{{GHGpar|100|i|nosign=1}}, {{GHGpar|148||nosign=1}}
+
+{{GHGheb|text=אֵיכָכָה|indexitem=1}}{{GHGpar|100|i|nosign=1}}
+
+{{GHGheb|text=אֲיֵלִיל|indexitem=1}}{{GHGpar|70|d|nosign=1}}
+
+{{GHGheb|text=אֵימָה|indexitem=1}}{{GHGpar|84|g|a|nosign=1}}
+
+{{GHGheb|text=אֵין, אַ֫יִן|indexitem=1}}connecting subj. and predicate {{GHGpar|141|k|nosign=1}}, {{GHGpar|152|i|nosign=1}}-{{GHGpar|52|q|nonumber=1|nosign=1}}
+
+{{GHGheb|text=? אִין|indexitem=1}}{{GHGpar|150|c|nosign=1}}<sup>3</sup>
+
+{{GHGheb|text=אַיְסִירֵם|indexitem=1}}{{GHGpar|24|f|nosign=1}}<sup>2</sup>, {{GHGpar|70|b|nosign=1}}
+
+{{GHGheb|text=אִישׁ|indexitem=1}}{{GHGpar|96|nosign=1}} (and {{GHGheb|text=אִשָּׁה|pron=}}) used distributively {{GHGpar|139|b|nosign=1}}, {{GHGpar|139|c|nonumber=1|nosign=1}}
+
+{{GHGheb|text=אִישׁוֹן|indexitem=1}}{{GHGpar|86|g|nosign=1}}
+
+{{GHGheb|text=אִישַׁי|indexitem=1}}{{GHGpar|47|b|nosign=1}}<sup>1</sup>
+
+{{GHGheb|text=אֲיַשֵּׁר|indexitem=1}}{{GHGpar|70|b|nosign=1}}
+
+{{GHGheb|text=? אֵיתָ֑ם|indexitem=1}}{{GHGpar|67|p|nosign=1}}
+
+{{GHGheb|text=אֵיתָן|indexitem=1}}{{GHGpar|85|b|nosign=1}}, {{GHGpar|133|a|nosign=1}}<sup>1</sup>
+
+{{GHGheb|text=אַךְ|indexitem=1}}{{GHGpar|100|i|nosign=1}}, uses of {{GHGpar|153||nosign=1}}
+
+{{GHGheb|text=אַכְזָב|indexitem=1}}{{GHGpar|85|b|nosign=1}}, {{GHGpar|133|a|nosign=1}}<sup>1</sup>
+
+{{GHGheb|text=אָכַל|indexitem=1}}{{GHGpar|68|b|nosign=1}}
+
+{{GHGheb|text=אֲכָל־|indexitem=1}}{{GHGpar|22|o|nosign=1}}
+
+{{GHGheb|text=אֻכָּל|indexitem=1}}(ptcp.) {{GHGpar|52|s|nosign=1}}
+
+{{GHGheb|text=אָכְלָה|indexitem=1}}{{GHGpar|91|e|nosign=1}}
+
+{{GHGheb|text=אֲכֶלְךָ|indexitem=1}}for {{GHGheb|text=אֲכַלְּךָ|pron=}}{{GHGpar|27|q|nosign=1}}, {{GHGpar|68|f|nosign=1}}, {{GHGpar|75|bb|nosign=1}}
+
+{{GHGheb|text=אֲכָלְךָ|indexitem=1}}{{GHGpar|61|d|nosign=1}}
+
+{{GHGheb|text=אֲכָלְכֶם|indexitem=1}}{{GHGpar|61|d|nosign=1}}
+
+{{GHGheb|text=אָכֵן|indexitem=1}}{{GHGpar|100|i|nosign=1}}
+
+{{GHGheb|text=אֵל|indexitem=1}}<!-- A slight deviation from the book's formatting. It's the only case of such formatting, where the English is on the other side, and it's unnecessarily complicated to set it this way. Putting the parentheses on the right side was probably intended anyway. -->(for {{GHGheb|text=אֵלֶּה}}) {{GHGpar|34|b|nosign=1}}
+
+{{GHGheb|text=אַל־|indexitem=1}}with jussive {{GHGpar|109|c|nosign=1}}, {{GHGpar|152|f|nosign=1}}, forming a negative compound {{GHGpar|152|g|nosign=1}}, not standing immediately before a verb {{GHGpar|152|h|nosign=1}}
+<!--column break-->|style="width: 33%; vertical-align: top; border-right: solid thin black;"|
+{{GHGheb|text=אֶל־, אֱלֵי|indexitem=1}}{{GHGpar|103|o|nosign=1}}, {{GHGpar|119|g|nosign=1}}
+
+{{GHGheb|text=אֶלְגָּבִישׁ|indexitem=1}}{{GHGpar|35|m|nosign=1}}
+
+{{GHGheb|text=אֱלֹהַּ|indexitem=1}}{{GHGpar|9|q|nosign=1}}, {{GHGpar|87|t|nosign=1}}
+
+{{GHGheb|text=אֵלֶּה|indexitem=1}}{{GHGpar|20|k|nosign=1}}
+
+{{GHGheb|text=אֱלֹהִים|indexitem=1}}pluralis majestatis {{GHGpar|124|g|nosign=1}} and note <sup>2</sup>, without article {{GHGpar|125|f|nosign=1}}, with article {{GHGpar|126|e|nosign=1}}<sup>1</sup>, with the singular {{GHGpar|145|h|nosign=1}}; with a plural {{GHGpar|132|h|nosign=1}}<sup>2</sup>, {{GHGpar|145|i|nosign=1}}
+
+{{GHGheb|text=אָלוֹת|indexitem=1}}(inf. abs.) {{GHGpar|75|n|nosign=1}}
+
+{{GHGheb|text=אֲלֵיכֶם|indexitem=1}}{{GHGpar|22|o|nosign=1}}
+
+{{GHGheb|text=אֱלִיל|indexitem=1}}{{GHGpar|84|o|a|nosign=1}}
+
+{{GHGheb|text=אֵלֵימוֹ|indexitem=1}}{{GHGpar|103|p|nosign=1}}<sup>2</sup>
+
+{{GHGheb|text=אַלְמֻגִּים|indexitem=1}}{{GHGpar|35|m|nosign=1}}
+
+{{GHGheb|text=אַלְמוֹדָד|indexitem=1}}{{GHGpar|35|m|nosign=1}}
+
+{{GHGheb|text=? אַלְקוּם|indexitem=1}}{{GHGpar|35|m|nosign=1}}
+
+{{GHGheb|text=אֲלַקֳּטָה|indexitem=1}}{{GHGpar|64|i|nosign=1}}
+
+{{GHGheb|text=אֶל־תַּחַת|indexitem=1}}{{GHGpar|119|e|nosign=1}}<sup>1</sup>
+
+{{GHGheb|text=אָֽלָתִי|indexitem=1}}{{GHGpar|95|n|nosign=1}}
+
+{{GHGheb|text=אִם|indexitem=1}}({{GHGheb|text=אִם־לֹא|pron=}}) in wishes {{GHGpar|151|e|nosign=1}}, in conditional sentences {{GHGpar|159|l|nosign=1}}–{{GHGpar|159|v|nonumber=1}}, {{GHGpar|159|dd|nonumber=1}}, in double questions {{GHGpar|150|c|nosign=1}}–{{GHGpar|150|i|nonumber=1}}, in oaths {{GHGpar|149||nosign=1}}, concessive {{GHGpar|160|a|nosign=1}}
+
+{{GHGheb|text=אֵם|indexitem=1}}{{Polytonic|μητρόπολις}} {{GHGpar|122|h|nosign=1}}<sup>5</sup>
+
+{{GHGheb|text=אָמָה|indexitem=1}}{{GHGpar|96|nosign=1}}
+
+{{GHGheb|text=אֻמָּה|indexitem=1}}{{GHGpar|1|h|nosign=1}} 
+
+{{GHGheb|text=אֵמוּן|indexitem=1}}{{GHGpar|63|p|nosign=1}}
+
+{{GHGheb|text=אֲמִילַֽם׃|indexitem=1}}{{GHGpar|60|d|nosign=1}}
+
+{{GHGheb|text=אֲמִינוֹן|indexitem=1}}{{GHGpar|86|g|nosign=1}}<sup>1</sup>
+
+{{GHGheb|text=אֹמֵן|indexitem=1}}for {{GHGheb|text=אֹמֶנֶת}} {{GHGpar|122|f|nosign=1}}<sup>1</sup>
+
+{{GHGheb|text=אָמַר|indexitem=1}}{{GHGpar|68|b|nosign=1}}
+
+{{GHGheb|text=אֹמַר|indexitem=1}}{{GHGpar|23|f|nosign=1}}, {{GHGpar|68|c|nosign=1}}
+
+{{GHGheb|text=אָמַרְתִּ|indexitem=1}}{{GHGpar|44|f|nosign=1}}
+
+{{GHGheb|text=אֲמֻֽשְׁךָ|indexitem=1}}{{GHGpar|67|r|nosign=1}}, {{GHGpar|67|dd|nonumber=1}}
+
+{{GHGheb|text=אן|indexitem=1}}for {{GHGheb|text=אַיִן}} or {{GHGheb|text=אֵיִן|pron=}} {{GHGpar|7|f|nosign=1}}
+<!--column break-->|style="width: 33%; vertical-align: top"|
+{{GHGheb|text=אָֽנָּ֫ה, אָֽנָּ֫א|indexitem=1}}{{GHGpar|16|f|nosign=1}}<sup>1</sup>, {{GHGpar|105|a|nosign=1}}
+
+and Additions 
+
+{{GHGheb|text=אָ֫נֶה|indexitem=1}}{{GHGpar|80|i|nosign=1}}
+
+{{GHGheb|text=אָנוּ|indexitem=1}}({{GHGbible-ref|book=Jer|chapter=42|verse=6}}) {{GHGpar|32|d|nosign=1}}
+
+{{GHGheb|text=אֲנַֽחֲמֵךְ|indexitem=1}}({{GHGbible-ref|book=Is|chapter=51|verse=19}}) {{GHGpar|47|b|nosign=1}}<sup>1</sup>
+
+{{GHGheb|text=אָנֹכִי, אֲנִי|indexitem=1}}use of, in different books, p. {{GHGpage|105}} note
+
+{{GHGheb|text=אָ֫נִי|indexitem=1}}{{GHGpar|32|c|nosign=1}}
+
+{{GHGheb|text={{lang|obm-hebr|אנכ‍}}|indexitem=1}}(Moab.) {{GHGpar|7|d|nosign=1}}<sup>1</sup>
+
+{{GHGheb|text=אנשׁ|indexitem=1}}{{GHGpar|96|nosign=1}}
+
+{{GHGheb|text=†אֲסִיפֵם|indexitem=1}}{{GHGpar|72|aa|nosign=1}}, {{GHGpar|113|w|nosign=1}}<sup>3</sup>
+
+{{GHGheb|text=אַסִּיר|indexitem=1}}{{GHGpar|84|f|b|nosign=1}}
+
+{{GHGheb|text=אסלוח|indexitem=1}}{{GHGpar|65|b|nosign=1}}
+
+{{GHGheb|text=†אָסֵף|indexitem=1}}{{GHGpar|72|aa|nosign=1}}, {{GHGpar|113|w|nosign=1}}<sup>2</sup>
+
+{{GHGheb|text=†אַסְפֶּה|indexitem=1}}{{GHGpar|69|h|nosign=1}}<sup>1</sup>
+
+{{GHGheb|text=אֶסְפָה|indexitem=1}}{{GHGpar|48|i|nosign=1}}
+
+{{GHGheb|text=אִסְפוּ|indexitem=1}}{{GHGpar|48|i|nosign=1}}
+
+{{GHGheb|text=? אֹסִֽפְךָ|indexitem=1}}{{GHGpar|68|h|nosign=1}}
+
+{{GHGheb|text=אֶסַּק|indexitem=1}}{{GHGpar|19|f|nosign=1}}, {{GHGpar|66|e|nosign=1}}
+
+{{GHGheb|text=אֱסָרֶהָ|indexitem=1}}{{GHGpar|91|k|nosign=1}}
+
+{{GHGheb|text=אֶסֳּרֵם|indexitem=1}}{{GHGpar|71|nosign=1}}
+
+{{GHGheb|text=אַֽעֲנֶה|indexitem=1}}{{GHGpar|63|f|nosign=1}}
+
+{{GHGheb|text=אֵֽעָנֶה|indexitem=1}}{{GHGpar|63|h|nosign=1}}<sup>1</sup>
+
+{{GHGheb|text={{lang|obm-hebr|אענו}}|indexitem=1}}{{GHGpar|75|b|nosign=1}}<sup>1</sup>
+
+{{GHGheb|text=אֶעְשֶׂה|indexitem=1}}{{GHGpar|63|m|nosign=1}}
+
+{{GHGheb|text=אַף|indexitem=1}}{{GHGpar|104|c|nosign=1}}, intensive {{GHGpar|153|nosign=1}}, {{GHGheb|text=(אַף...אַף)}} {{GHGpar|154|a|nosign=1}}<sup>1</sup>(c)
+
+{{GHGheb|text=אַפְאֵיהֶם|indexitem=1}}{{GHGpar|58|a|nosign=1}}<sup>1</sup>, {{GHGpar|75|mm|nosign=1}}
+
+{{GHGheb|text=אָפָה|indexitem=1}}{{GHGpar|68|b|nosign=1}}, {{GHGpar|76|d|nosign=1}}
+
+{{GHGheb|text=אֹֽפֵהֶם|indexitem=1}}{{GHGpar|91|c}}<sup>1</sup>, {{GHGpar|93|ss}}
+
+{{GHGheb|text=אֵפוּ|indexitem=1}}{{GHGpar|63|i}}, {{GHGpar|76|d}}
+
+{{GHGheb|text=אֵפוֹא|indexitem=1}}{{GHGpar|23|i|nosign=1}}
+
+{{GHGheb|text=אַף־כִּי|indexitem=1}}{{GHGpar|154|a|nosign=1}}<sup>1</sup> (c)
+
+{{GHGheb|text=אָפְנָיו|indexitem=1}}{{GHGpar|93|r|nosign=1}}
+
+{{GHGheb|text=אֶפֶס|indexitem=1}}{{GHGpar|152|s|nosign=1}}, {{GHGheb|text=אֶפֶס כִּי}} {{GHGpar|163|c|nosign=1}}
+
+{{GHGheb|text=אֶפְקֹד|indexitem=1}}{{GHGpar|47|b|nosign=1}}<sup>1</sup>
+
+{{GHGheb|text=אֶפְרַ֫יִם|indexitem=1}}{{GHGpar|88|c|nosign=1}}
+
+{{GHGheb|text=אֶפְשְׂעָה|indexitem=1}}{{GHGpar|65|b|nosign=1}}
+
+{{GHGheb|text=†אַצִּיתֶ֫נָּה|indexitem=1}}{{GHGpar|71|nosign=1}}
+|}<noinclude></noinclude>

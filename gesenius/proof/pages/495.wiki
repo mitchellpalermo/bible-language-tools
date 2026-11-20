@@ -1,0 +1,32 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><section begin="par147" />{{GHGbible-ref|book=Jer|chapter=22|verse=18}}; {{GHGheb|text=הוֹי גּוֹי חֹטֵא|translate=ah, sinful nation!}} {{GHGbible-ref|book=Is|chapter=1|verse=4}}, {{GHGbible-ref|book=Is|chapter=5|verse=8.11.18.20.22|hidebook=1}} ({{GHGtranslate|ah! they that...}}).—For {{GHGheb|text=הַס}} cf. {{GHGbible-ref|book=Hb|chapter=2|verse=20}}, {{GHGbible-ref|book=Zp|chapter=1|verse=7}}, {{GHGbible-ref|book=Zc|chapter=2|verse=17}}.
+
+{{GHGmargin-letter|147|e}}
+2. Finally, instances of noun-clauses shortened in an unusual manner may perhaps occur in {{GHGheb|text=יְדֵיהֶם}} and {{GHGheb|text=רַגְלֵיהֶם}} {{GHGbible-ref|book=Ps|chapter=115|verse=7}}, for {{GHGheb|text=יָדַ֫יִם לָהֶם|translate=they have hands}}, &c.; cf. verses 5 and 6 {{GHGheb|text=פֶּֽה־לָהֶם}}, &c. Perhaps also {{GHGheb|text=וּפִֽילַגְשׁוֹ}} {{GHGbible-ref|book=Gn|chapter=22|verse=24}}, and {{GHGheb|text=וְחָלְיוֹ}} {{GHGbible-ref|book=Ec|chapter=5|verse=16}} are to be regarded in the same way, but hardly {{GHGheb|text=נְבִֽיאֲכֶם}} {{GHGbible-ref|book=Nu|chapter=12|verse=6}}; cf. {{GHGpar|128|d}} above.
+<section end="par147" />
+<section begin="par148" />{{center|II. Special Kinds of Sentences.}}
+
+<!-- section begins above -->{{GHGpar-heading|148|Exclamations}}
+
+{{GHGmargin-letter|148|a}}
+The originally interrogative {{GHGheb|text=מָה}} is used to introduce exclamations of wonder or indignation = ''O how!'' or ridicule, ''why! how!'' sometimes strengthened by {{GHGheb|text=זֶה}} or {{GHGheb|text=זֹאת}} according to {{GHGpar|136|c}}.—Astonishment or indignation at something which has happened is introduced by {{GHGheb|text=אֵיךְ|translate=how}} (likewise originally interrogative) with the perfect; the indignant refusal of a demand by {{GHGheb|text=אֵיךְ}} (but also by {{GHGheb|text=מָה}} {{GHGbible-ref|book=Jb|chapter=31|verse=1}}) with the imperfect; an exclamation of lamentation by {{GHGheb|text=אֵיכָה}}, less frequently {{GHGheb|text=אֵיךְ|translate=how!}}; in {{GHGbible-ref|book=Jo|chapter=1|verse=18}} by {{GHGheb|text=מָה}}.
+
+Examples:—
+
+{{GHGmargin-letter|148|b}}
+{{GHGheb|text=מָה}} (or {{GHGheb|text=מַה־}} with a following ''Dagĕš'', see § 37) expressing admiration (or astonishment) before verbal-clauses, e.g. {{GHGbible-ref|book=Gn|chapter=27|verse=20}} ({{GHGheb|text=מַה־זֶּה}}); 38:29, {{GHGbible-ref|book=Nu|chapter=24|verse=5}} (''how goodly are...!''); {{GHGbible-ref|book=Ps|chapter=21|verse=2}}, {{GHGbible-ref|book=Ct|chapter=7|verse=2}}; before the predicate of noun-clauses, e.g. {{GHGbible-ref|book=Gn|chapter=28|verse=17}}, {{GHGbible-ref|book=Ps|chapter=8|verse=2}}; mockingly before the verb, {{GHGbible-ref|book=2 S|chapter=6|verse=20}} (''how glorious was...!''); {{GHGbible-ref|book=Jer|chapter=22|verse=23}}, {{GHGbible-ref|book=Jb|chapter=26|verse=2}} f.; indignantly, {{GHGbible-ref|book=Gn|chapter=3|verse=13}} {{GHGheb|text=מַה־זֹּאת}}; 4:10, 20:9, 31:26 ''what hast thou done!''
+
+{{GHGheb|text=אֵיךְ}} with the perfect, e.g. {{GHGbible-ref|book=Gn|chapter=26|verse=9}}, {{GHGbible-ref|book=Ps|chapter=73|verse=19}}; in scornful exclamation, {{GHGbible-ref|book=Is|chapter=14|verse=4}}, 12; in a lament (usually {{GHGheb|text=אֵיכָה}}), {{GHGbible-ref|book=2 S|chapter=1|verse=25}}, 27; with the imperfect, in a reproachful question, {{GHGbible-ref|book=Gn|chapter=39|verse=9}}, {{GHGbible-ref|book=Gn|chapter=44|verse=8|hidebook=1}}, {{GHGbible-ref|book=Ps|chapter=11|verse=1}}, {{GHGbible-ref|book=Ps|chapter=137|verse=4|hidebook=1}}; in a mocking imitation of lament, {{GHGbible-ref|book=Mi|chapter=2|verse=4}}.
+
+{{GHGheb|text=אֵיכָה}} with the perfect, {{GHGbible-ref|book=Is|chapter=1|verse=21}}, {{GHGbible-ref|book=La|chapter=1|verse=1}}; with the imperfect, {{GHGbible-ref|book=La|chapter=2|verse=1}}, {{GHGbible-ref|book=La|chapter=4|verse=1|hidebook=1}}.
+
+{{GHGmargin-letter|148|c}}
+Rem. 1. The close relation between a question and an exclamation appears also in the interrogative personal pronoun {{GHGheb|text=מִי}} in such cases as {{GHGbible-ref|book=Mi|chapter=7|verse=18}} {{GHGheb|text=מִי־אֵל כָּמ֫וֹךָ|translate=who is a God like unto thee?}} and so in general in ''rhetorical'' questions as the expression of a forcible denial; similarly in the use of an interrogative sentence to express a wish, see {{GHGpar|150|d}}, 151 ''a''.
+
+{{GHGmargin-letter|148|d}}
+2. A weaker form of exclamation is sometimes produced by the insertion of a corroborative {{GHGheb|text=כִּי|translate=verily, surely}}, before the predicate, {{GHGbible-ref|book=Gn|chapter=18|verse=20}}; cf. 33:11, {{GHGbible-ref|book=Is|chapter=7|verse=9}}, and the analogous cases in the apodoses of conditional sentences, § 159 ''ee''.
+<section end="par148" />
+<section begin="par149" />{{GHGpar-heading|149|Sentences which express an Oath or Asseveration}}
+
+{{GHGmargin-letter|149|a}}
+The particle {{GHGheb|text=אִם}}, in the sense of ''certainly not'', and {{GHGheb|text=אִם־לֹא}} (rarely {{GHGheb|text=כִּי}} {{GHGbible-ref|book=Gn|chapter=22|verse=16}}) in the sense of ''certainly'', are used to introduce promises or threats confirmed by an oath (especially after such formulae as {{GHGheb|text=חַי־יְהֹוָה}},<section end="par149" /><noinclude>
+<references/></noinclude>

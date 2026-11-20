@@ -1,0 +1,262 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude>{{center|''E. Verbs mediae gutturalis.''}}
+
+<div align="center">
+{|
+|
+|
+|
+! {{GHGterm|Qal}}.
+! {{GHGterm|Niphʿal}}.
+! {{GHGterm|Piʿēl}}.
+! {{GHGterm|Puʿal}}.
+! {{GHGterm|Hithpaʿēl}}.
+|-
+| ''Perf''.
+| ''Sing''.
+| 3. ''m''.
+| {{GHGheb|text=שָׁחַט}}
+| {{GHGheb|text=נִשְׁחַט}}
+| {{GHGheb|text=בֵּרַךְ}}<sup>*</sup>
+| {{GHGheb|text=בֹּרַךְ}}<sup>*</sup>
+| {{GHGheb|text=הִתְבָּרֵךְ}}<sup>*</sup>
+|-
+|
+|
+| 3. ''f''.
+| {{GHGheb|text=שָֽׁחֲטָה}}<sup>*</sup>
+| {{GHGheb|text=נִשְׁחֲטָה}}<sup>*</sup>
+| {{GHGheb|text=בֵּֽרְכָה}}
+| [{{GHGheb|text=בֹּֽרְכָה}}]
+| {{GHGheb|text=הִתְבָּֽרֲכָה}}
+|-
+|
+|
+| 2. ''m''.
+| {{GHGheb|text=שָׁחַ֫טְתָּ}}
+| {{GHGheb|text=נִשְׁחַ֫טְתָּ}}
+| {{GHGheb|text=בֵּרַ֫כְתָּ}}
+| {{GHGheb|text=בֹּרַ֫כְתָּ}}
+| {{GHGheb|text=הִתְבָּרַ֫כְתָּ}}
+|-
+|
+|
+| 2. ''f''.
+| {{GHGheb|text=שָׁחַטְתְּ}}
+| {{GHGheb|text=נִשְׁחַטְתְּ}}
+| {{GHGheb|text=בֵּרַכְתְּ}}
+| {{GHGheb|text=בֹּרַכְתְּ}}
+| {{GHGheb|text=הִתְבָּרַכְתְּ}}
+|-
+|
+|
+| 1. ''c''.
+| {{GHGheb|text=שָׁחַ֫טְתִּי}}
+| {{GHGheb|text=נִשְׁחַ֫טְתִּי}}
+| {{GHGheb|text=בֵּרַ֫כְתִּי}}
+| {{GHGheb|text=בֹּרַ֫כְתִּי}}
+| {{GHGheb|text=הִתְבָּרַ֫כְתִּי}}
+|-
+|
+| ''Plur''.
+| 3. ''c''.
+| {{GHGheb|text=שָֽׁחֲטוּ}}<sup>*</sup>
+| {{GHGheb|text=נִשְׁחֲטוּ}}<sup>*</sup>
+| {{GHGheb|text=בֵּֽרְכוּ}}
+| {{GHGheb|text=בֹּֽרְכוּ}}
+| {{GHGheb|text=הִתְבָּֽרֲכוּ}}
+|-
+|
+|
+| 2. ''m''.
+| {{GHGheb|text=שְׁחַטְתֶּם}}
+| {{GHGheb|text=נִשְׁחַטְתֶּם}}
+| {{GHGheb|text=בֵּֽרַכְתֶּם}}
+| {{GHGheb|text=בֹּֽרַכְתֶּם}}
+| {{GHGheb|text=הִתְבָּרַכְתֶּם}}
+|-
+|
+|
+| 2. ''f''.
+| {{GHGheb|text=שְׁחַטְתֶּן}}
+| {{GHGheb|text=נִשְׁחַטְתֶּן}}
+| [{{GHGheb|text=בֵּֽרַכְתֶּן}}]
+| {{GHGheb|text=בֹּֽרַכְתֶּן}}
+| {{GHGheb|text=הִתִבָּרַכְתֶּן}}
+|-
+|
+|
+| 1. ''c''.
+| {{GHGheb|text=שָׁחַ֫טְנוּ}}
+| {{GHGheb|text=נִשְׁחַ֫טְנוּ}}
+| {{GHGheb|text=בֵּרַ֫כְנוּ}}
+| {{GHGheb|text=בֹּרַ֫כְנוּ}}
+| {{GHGheb|text=הִתְבָּרַ֫כְנוּ}}
+|-
+| ''Inf''.
+|
+|
+| {{GHGheb|text=שְׁחֹט}}
+| {{GHGheb|text=הִשָּׁחֵט}}
+| {{GHGheb|text=בָּרֵךְ}}<sup>*</sup>
+| wanting.
+| {{GHGheb|text=הִתְבָּרֵךְ}}<sup>*</sup>
+|-
+| ''Inf. ''
+| ''absol''.
+|
+| {{GHGheb|text=שָׁחוֹט}}
+| {{GHGheb|text=נִשְׁחוֹט}}
+| {{GHGheb|text=בָּרֵךְ}}<sup>*</sup>
+|
+|
+|-
+| ''Imp''.
+| ''Sing''.
+| ''m''.
+| {{GHGheb|text=שְׁחַט}}<sup>*</sup>
+| {{GHGheb|text=הִשָּׁחֵט}}
+| {{GHGheb|text=בָּרֵךְ}}<sup>*</sup>
+|
+| {{GHGheb|text=הִתְבָּרֵךְ}}<sup>*</sup>
+|-
+|
+|
+| ''f''.
+| {{GHGheb|text=שַֽׁחֲטִי}}<sup>*</sup>
+| {{GHGheb|text=הִשָּֽׁחֲטִי}}<sup>*</sup>
+| {{GHGheb|text=בָּֽרֲכִּי}}<sup>*</sup>
+| wanting.
+| {{GHGheb|text=הִתְבָּֽרֲכִּי}}]
+|-
+|
+| ''Plur''.
+| ''m''.
+| {{GHGheb|text=שַֽׁחֲטוּ}}
+| {{GHGheb|text=הִשָּֽׁחֲטוּ}}
+| {{GHGheb|text=בָּֽרֲכוּ}}
+|
+| [{{GHGheb|text=הִתְבָּֽרְכוּ}}
+|-
+|
+|
+| ''f''.
+| {{GHGheb|text=שְׁחַ֫טְנָה}}
+| {{GHGheb|text=הִשָּֽׁחַ֫טְנָה}}
+| {{GHGheb|text=בָּרֵ֫כְנָה}}<sup>*</sup>
+|
+| {{GHGheb|text=הִתְבָּרֵ֫כְנָה}}
+|-
+| ''Impf''.
+| ''Sing''.
+| 3. ''m''.
+| {{GHGheb|text=יִשְׁחַט}}<sup>*</sup>
+| {{GHGheb|text=יִשָּׁחֵט}}
+| {{GHGheb|text=יְבָרֵךְ}}<sup>*</sup>
+| {{GHGheb|text=יְבֹרַךְ}}<sup>*</sup>
+| {{GHGheb|text=יִתְבָּרֵךְ}}<sup>*</sup>
+|-
+|
+|
+| 3. ''f''.
+| {{GHGheb|text=תִּשְׁחַט}}
+| {{GHGheb|text=תִּשָּׁחֵט}}
+| {{GHGheb|text=תְּבָרֵךְ}}
+| {{GHGheb|text=תְּבֹרַךְ}}
+| {{GHGheb|text=תִּתְבָּרֵךְ}}
+|-
+|
+|
+| 2. ''m''.
+| {{GHGheb|text=תִּשְׁחַט}}
+| {{GHGheb|text=תִּשָּׁחֵט}}
+| {{GHGheb|text=תְּבָרֵךְ}}
+| {{GHGheb|text=תְּבֹרַךְ}}
+| {{GHGheb|text=תִּתְבָּרֵךְ}}
+|-
+|
+|
+| 2. ''f''.
+| {{GHGheb|text=תִּשְׁחֲטִי}}<sup>*</sup>
+| {{GHGheb|text=תִּשָּֽׁחֲטִי}}<sup>*</sup>
+| {{GHGheb|text=תְּבָֽרֲכִי}}
+| [{{GHGheb|text=תְּבֹֽרְכִי}}]
+| [{{GHGheb|text=תִּתְבָּֽרֲכִי}}]
+|-
+|
+|
+| 1. ''c''.
+| {{GHGheb|text=אֶשְׁחַט}}
+| {{GHGheb|text=אֶשָּׁחֵט}}
+| {{GHGheb|text=אֲבָרֵךְ}}
+| {{GHGheb|text=אֲבֹרַךְ}}
+| {{GHGheb|text=אֶתְבָּרֵךְ}}
+|-
+|
+| ''Plur''.
+| 3. ''m''.
+| {{GHGheb|text=יִשְׁחֲטוּ}}
+| {{GHGheb|text=יִשָּֽׁחֲטוּ}}
+| {{GHGheb|text=יְבָֽרֲכוּ}}
+| {{GHGheb|text=יְבֹֽרְכוּ}}
+| {{GHGheb|text=יִתְּבָּֽרְכוּ}}
+|-
+|
+|
+| 3. ''f''.
+| {{GHGheb|text=תִּשְׁחַ֫טְנָה}}
+| {{GHGheb|text=תִּשָּׁחַ֫טְנָה}}
+| {{GHGheb|text=תְּבָרֵ֫כְנָה}}
+| {{GHGheb|text=תְּבֹרַ֫כְנָה}}
+| {{GHGheb|text=תִּתְבָּרֵ֫כְנָה}}
+|-
+|
+|
+| 2. ''m''.
+| {{GHGheb|text=תִּשְׁחֲטוּ}}
+| {{GHGheb|text=תִּשָּֽׁחֲטוּ}}
+| {{GHGheb|text=תְּבָֽרֲכוּ}}
+| {{GHGheb|text=תְּבֹֽרְכוּ}}
+| {{GHGheb|text=תִּתְבָּֽרְכוּ}}
+|-
+|
+|
+| 2. ''f''.
+| {{GHGheb|text=תִּשְׁחַ֫טְנָה}}
+| {{GHGheb|text=תִּשָּׁחַ֫טְנָה}}
+| {{GHGheb|text=תְּבָרֵ֫כְנָה}}
+| {{GHGheb|text=תְּבֹרַ֫כְנָה}}
+| {{GHGheb|text=תִּתְבָּרֵ֫כְנָה}}
+|-
+|
+|
+| 1. ''c''.
+| {{GHGheb|text=נִשְׁחַט}}
+| {{GHGheb|text=נִשָּׁחֵט}}
+| {{GHGheb|text=נְבָרֵךְ}}
+| {{GHGheb|text=נְבֹרַךְ}}
+| {{GHGheb|text=נִתְבָּרֵךְ}}
+|-
+| colspan="3" | ''Impf. with Suff''.
+| {{GHGheb|text=יִשְׁחָטֵ֫הוּ}}
+| colspan="4" |
+|-
+| ''Part''.
+| ''act''.
+|
+| {{GHGheb|text=שֹׁחֵט}}
+| {{GHGheb|text=נִשְׁחָט}}
+| {{GHGheb|text=מְבָרֵךְ}}<sup>*</sup>
+|
+| {{GHGheb|text=מִתְבָּרֵךְ}}<sup>*</sup>
+|-
+|
+| ''pass''.
+|
+| {{GHGheb|text=שָׁחוּט}}
+|
+|
+| {{GHGheb|text=מְבֹרָךְ}}<sup>*</sup>
+|
+|}
+</div><noinclude>
+<references/></noinclude>

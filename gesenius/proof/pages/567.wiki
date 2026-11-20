@@ -1,0 +1,22 @@
+<!-- scan 567, printed 543, Index of Subjects -->
+{{colbegin}}
+Verb, 38: its syntax, 106–116: its government, 117–121: weak verbs, 41, 66–76, relation to one another, 77: verbs middle ''e'' and ''o'', 43: derivative, ''see'' Conjugations: denominative, 38 ''c'', ''d'', 43 ''c'' (in Qal), 51 ''g'' (Niph.), 52 ''h'' (Pi.), 53 ''g'' (Hiph.), 54 ''i'' (Hithp.): transitive and intransitive, 43, 117 ''u'', ''v'': with suffixes, 57–61: doubly weak, 76: {{GHGheb|text=ל״א}} and {{GHGheb|text=ל״ה}} confused, 75 ''nn''–''rr'': defective, 78: verba induendi et exuendi, 117 ''y'': copiae et inopiae, 117 ''z'', ''aa'': with prepositions, 119: primitive {{GHGheb|text=י}} retained exceptionally in verbs {{GHGheb|text=ל״ה}}, 75 ''u'', ''v'', ''x'', ''dd'', ''gg'' (end), cf. 29 ''t'': verbs {{GHGheb|text=ל״ה}}, 65 N., 75 ''b'' (end): verbs {{GHGheb|text=ל״ו}}, 75 ''b'', ''v'', ''kk'', nouns derived from, 84<sup>a</sup> ''c'' (ε), ''f'' (end), ''g'' (end), 93 ''z''.
+Verbal clauses, 140 ''b'', ''c'', 142: relative, 155 ''f''–''n''.
+Verbal ideas subordinated to a verb, 120 ''a''–''c'': co-ordinated with a verb, 120 ''d''–''h''.
+Verbal suffixes with prepositions (rare), 103 ''d''.
+Verse arrangement of poetic passages, 2 ''r'' (end).
+Vocalization of the text, 7 ''h'', ''i'': Babylonian, 8 ''g'' N., 103 ''m'' N.
+Vocative with and without the article, 126 ''f''.
+Vowel-letters, 7 ''b''–''g'', 8 ''h''–''m''.
+Vowel-signs or points, 7 ''h'', ''i'', 8–10.
+Vowels, 7: influenced by the nature of the syllable, 26: firm or unchangeable, 25: changes in them as regards quantity, 27: impure, 25 ''c'' N.: pretonic, p. 86 N.<sup>1</sup>, § 102 ''f''–''i'', 103 ''c''.
+
+Wāw consecutive, § 49 ''a'', ''b'', before {{GHGheb|text=א}} in 1st pers. impf. Pi. with anomalous pathaḥ, 49 ''c'', with the perfect, 49 ''h''–''l'', with the imperfect, 49 ''c''–''g'': copulative, punctuation of, 104 ''d''–''g'': wāw apodosis introducing the predicate, 143 ''d'': explicative, 154 ''a'' N. (''b''): concomitantiae, 154 ''a'' N. (''b''): adaequationis, 161 ''a'' N. ''See also under'' Perfect ''and'' Imperfect.
+Weak consonants, 6 ''s'': {{GHGheb|text=א}} and {{GHGheb|text=ה}}, 23: {{GHGheb|text=ו}} and {{GHGheb|text=י}}, 24.
+Weak verbs, 41, 66–76: their relation to one another, 77: relation between {{GHGheb|text=ל״א}} and {{GHGheb|text=ל״ה}}, 75 ''nn''–''rr''.
+Weakening (or softening) of consonants, 19 ''o''.
+Wish, expressed by simple impf., 107 ''n'': by cohortative, 108 (with {{GHGheb|text=נָא}}, 108 ''c''): by jussive, 109 (with {{GHGheb|text=נָא}}, 109 ''b''), by imperative, 110 ''a'': by perf. consec., 112 ''aa'': by a noun-clause, 116 ''r'' N., 141 ''g'': by {{GHGheb|text=מִי}}, 151 ''a'': by {{GHGheb|text=מִי יִתֵּן}}, 151 ''b''–''d'': by {{GHGheb|text=אִם}}, {{GHGheb|text=לוּ}}, {{GHGheb|text=אחלי}}, 151 ''e''.
+Writing, Semitic, 1 ''k'', ''l'': old Hebrew, 2 ''d'', ''i'', 5 ''a'': its origin, 5 ''g''.
+
+Zenjirli, inscriptions, 1 ''m'', 32 ''k'' N.
+{{colend}}

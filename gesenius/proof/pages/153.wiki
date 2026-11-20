@@ -1,0 +1,24 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par47 />''ashamed''. All this applies also to the corresponding forms in the Imperfect of the derived conjugations.<ref>It is to be observed that the Chronicles often omit the ''Nûn'', where it is found in the parallel passage in the Books of Kings; cf. {{GHGbible-ref|book=1 K|chapter=8|verse=38.43}} with {{GHGbible-ref|book=2 Ch|chapter=6|verse=29.33}}; {{GHGbible-ref|book=1 K|chapter=12|verse=24}}, {{GHGbible-ref|book=2 K|chapter=11|verse=5}} with {{GHGbible-ref|book=2 Ch|chapter=11|verse=4}}, {{GHGbible-ref|book=2 Ch|chapter=23|verse=4|hidebook=1}}.</ref> In Aramaic and Arabic this earlier {{GHGheb|text=וּן}} (old Arabic ''ûnă'') is the regular termination; but in some dialects of vulgar Arabic it has also become ''û''.
+
+{{GHGmargin-letter|47|n}}
+With an affixed {{GHGheb|text=א}} we find (in the imperf. Niphʿal) {{GHGheb|text=יִנָּשׂוּא}} {{GHGbible-ref|book=Jer|chapter=10|verse=5}}, evidently an error for {{GHGheb|text=יִנָּֽשְׂאוּ}}, caused by the preceding {{GHGheb|text=נָשׂוֹא}}.—In {{GHGheb|text=יְשֻׂשׂוּם}} {{GHGbible-ref|book=Is|chapter=35|verse=1}}, since {{GHGheb|text=מ‍}} follows, the {{GHGheb|text=ם}} is no doubt only due to dittography.
+
+{{GHGmargin-letter|47|o}}
+5. Corresponding to the use of {{GHGheb|text=וּן}} for {{GHGheb|text=וּ}} there occurs in the 2nd sing. fem., although much less frequently, the fuller ending {{GHGheb|text=־ִין}} (as in Aram. and Arab.; old Arab. ''înă''), also always with the tone, for {{GHGheb|text=־ִי}}, generally again in the principal pause, and almost in all cases with retention of the vowel of the penultima; thus {{GHGheb|text=תִּדְבָּקִין}} {{GHGbible-ref|book=Ru|chapter=2|verse=8.21}}, cf. {{GHGbible-ref|book=Ru|chapter=3|verse=4.18|hidebook=1}}, {{GHGbible-ref|book=1 S|chapter=1|verse=14}} ({{GHGheb|text=תִּשְׁתַּכָּרִין}}), {{GHGbible-ref|book=Jer|chapter=31|verse=22}}, {{GHGbible-ref|book=Is|chapter=45|verse=10}}.
+
+{{GHGmargin-letter|47|p}}
+6. On the reappearance in pause of the ''ō'' which had become {{GHGterm|Š<sup>e</sup>wâ}} in the forms {{GHGheb|text=תִּקְטְלִי}}, &c., see above, e; similarly, the imperfects with ''ă'' restore this vowel in pause and at the same time lengthen it (as a tone-vowel) to ''ā'', hence, e.g. {{GHGheb|text=תִּגְדָּ֫לִי}}, {{GHGheb|text=יִגְדָּ֫לוּ}}. This influence of the pause extends even to the forms without afformatives, e.g. {{GHGheb|text=וַיִּגְדַּל}}, in pause {{GHGheb|text=וַיִּגְדָּ֑ל}}. But the fuller forms in ''ûn'' and ''în'' have the tone always on the ultima, since the vowels ''û'' and ''î'' in a closed final syllable never allow of the retraction of the tone.
+
+{{GHGmargin-letter|47|q}}
+7. On the numerous instances of passive forms in the imperfect, mostly treated as Hophʿal, see {{GHGpar|53|u}}.<section end=par47 />
+
+<section begin=par48 />{{GHGpar-heading|48|Shortening and Lengthening of the Imperfect and Imperative. The Jussive and Cohortative}}
+
+{{GHGmargin-letter|48|a}}
+'''1.''' Certain modifications which take place in the form of the imperfect, and express invariably, or nearly so, a distinct shade of meaning, serve to some extent as a compensation for the want of special forms for the ''Tempora relativa'' and for certain ''moods'' of the verb.
+
+{{GHGmargin-letter|48|b}}
+'''2.''' Along with the usual form of the imperfect, there exists also a lengthened form of it (the ''cohortative''), and a shortened form (the {{GHGterm|jussive}}).<ref>The perfect has only ''one'' form, since it cannot be used, like the imperfect, to express mood-relations (see {{GHGpar|106|p}}).</ref> The former occurs (with few exceptions) only in the 1st person, while the latter is mostly found in the 2nd and 3rd persons, and less frequently in the 1st person. The laws of the tone, however, and of the formation of syllables in Hebrew, not infrequently precluded the indication of the jussive by an actual shortening of the form; consequently it often—and, in the imperfect forms with afformatives, always—coincides with the ordinary imperfect (''indicative'') form.
+
+In classical Arabic the difference is almost always evident. That language distinguishes, besides the indicative ''yăqtŭlŭ'', (''a'') a subjunctive, ''yăqtŭlă''; (''b'') a<section end=par48 /><noinclude>
+<references/></noinclude>

@@ -1,0 +1,36 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par58 />1''st pers.'' {{GHGheb|text=־ַ֫ נִּי}} (even in pause, {{GHGbible-ref|book=Jb|chapter=7|verse=14}}, &c.), {{GHGheb|text=־ֶ֫ נִּי}} (for {{GHGheb|text=־ַ֫ נְנִי}}, {{GHGheb|text=־ֶ֫ נְנִי}}).
+
+2''nd pers.'' {{GHGheb|text=־ֶ֫ ךָּ}} ({{GHGbible-ref|book=Jer|chapter=22|verse=24}} in pause {{GHGheb|text=־ֶנְךָּ}}) and, only orthographically different,
+
+{{GHGheb|text=־ֶ֫ כָּה}} ({{GHGbible-ref|book=Is|chapter=10|verse=24}}, {{GHGbible-ref|book=Pr|chapter=2|verse=11}} in {{GHGterm|pause}}).
+
+3''rd pers.'' {{GHGheb|text=־ֶ֫ נּוּ}} (for {{GHGheb|text=־ֶ֫ נְהוּ}}),<ref>On {{GHGheb|text=נוֹ}} = {{GHGheb|text=־ֶנּוּ}} {{GHGbible-ref|book=Nu|chapter=23|verse=13}}, see {{GHGpar|67|o}}.</ref> {{GHGterm|fem.}} {{GHGheb|text=־ֶ֫ נָּה}} for {{GHGheb|text=־ֶ֫ נְהָ}}.
+
+[1''st pers. plur.'' {{GHGheb|text=־ֶ֫ נּוּ}} (for {{GHGheb|text=־ֶ֫ נְנוּ}}), see the Rem.]
+
+In the other persons Nûn energetic does not occur.
+
+{{GHGmargin-letter|58|k}}
+Rem. The uncontracted forms with ''Nûn'' are rare, and occur only in poetic or elevated style ({{GHGbible-ref|book=Ex|chapter=15|verse=2}}, {{GHGbible-ref|book=Dt|chapter=32|verse=10}} [''bis''], {{GHGbible-ref|book=Jer|chapter=5|verse=22}}, {{GHGbible-ref|book=Jer|chapter=22|verse=24|hidebook=1}}); they are never found in the 3''rd fem. sing.'' and 1''st plur.'' On the other hand, the contracted forms are tolerably frequent, even in prose. An example of {{GHGheb|text=־ֶ֫ נּוּ}} as 1''st plur.'' occurs perhaps in {{GHGbible-ref|book=Jb|chapter=31|verse=15}} [but read {{GHGheb|text=־ֵנוּ}} and cf. {{GHGpar|72|cc}}], hardly in {{GHGbible-ref|book=Ho|chapter=12|verse=5}}; cf. {{GHGheb|text=הִנֶּ֫נּוּ|translate=behold us}}, {{GHGbible-ref|book=Gn|chapter=44|verse=16}}, {{GHGbible-ref|book=Gn|chapter=50|verse=18|hidebook=1}}, {{GHGbible-ref|book=Nu|chapter=14|verse=40}} for {{GHGheb|text=הִנְנוּ}} (instead of {{GHGheb|text=הִנְּנוּ}}; see {{GHGpar|20|m}}).—In {{GHGbible-ref|book=Ez|chapter=4|verse=12}} the Masora requires {{GHGheb|text=תְּעֻגֶ֫נָה}}, without Dageš in the Nûn.
+
+{{GHGmargin-letter|58|l}}
+That the forms with ''Nûn energicum'' are intended to give greater emphasis to the verbal form is seen from their special frequency in {{GHGterm|pause}}. Apart from the verb, however, ''Nûn energicum'' occurs also in the union of suffixes with certain particles ({{GHGpar|100|o}}).
+
+This Nûn is frequent in Western Aramaic. In Arabic the corresponding forms are the two ''energetic moods'' (see {{GHGpar|48|b}}) ending in ''an'' and ''anna'', which are used in connexion with suffixes (e.g. ''yaqtulan-ka'' or ''yaqtulanna-ka'') as well as without them.<section end=par58 />
+
+<section begin=par59 />{{GHGpar-heading|59|The Perfect with Pronominal Suffixes}}
+
+{{GHGmargin-letter|59|a}}
+'''1.''' The endings (''afformatives'') of the perfect occasionally vary somewhat from the ordinary form, when connected with pronominal suffixes; viz.:—
+
+(''a'') In the 3''rd sing. fem.'' the original feminine ending {{GHGheb|text=־ַת}} or {{GHGheb|text=־ָת}} is used for {{GHGheb|text=־ָה}}.
+
+(''b'') In the 2''nd sing. masc.'' besides {{GHGheb|text=תָּ}} we find {{GHGheb|text=תּ}}, to which the connecting vowel is directly attached, but the only clear instances of this are with {{GHGheb|text=־ַ֫ נִי}}.<ref>On the ''ă'' as an original element of the verbal form, see {{GHGpar|58|f}}, note.</ref>
+
+(''c'') In the 2''nd sing. fem.'' {{GHGheb|text=תִּי}}, the original form of {{GHGheb|text=תְּ}}, appears; cf. {{GHGheb|text=אַתִּי}}, {{GHGheb|text=קָטַ֫לְתִּי}}, {{GHGpar|32|f}}; {{GHGpar|44|g}}. This form can be distinguished from the 1st pers. only by the context.
+
+(''d'') 2''nd plur. masc.'' {{GHGheb|text=תּוּ}} for {{GHGheb|text=תֶּם}}. The only examples are {{GHGbible-ref|book=Nu|chapter=20|verse=5}}, {{GHGbible-ref|book=Nu|chapter=21|verse=5|hidebook=1}}, {{GHGbible-ref|book=Zc|chapter=7|verse=5}}. The {{GHGterm|fem.}} {{GHGheb|text=קְטַלְתֶּן}} never occurs with suffixes; probably it had the same form as the masculine.
+
+{{GHGmargin-letter|59|b}}
+We exhibit first the forms of the perfect {{GHGterm|Hiphʿîl}}, as used in connexion with suffixes, since here no further changes take place in the stem itself, except as regards the tone (see c).<section end=par59 /><noinclude>
+<references/></noinclude>

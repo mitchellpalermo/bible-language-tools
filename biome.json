@@ -22,7 +22,8 @@
       "!**/src/data/vocabulary-garrett.ts",
       "!**/src/lib/morph-codes.json",
       "!**/greek-tools/src/data/vocabulary.ts",
-      "!**/*.min.js"
+      "!**/*.min.js",
+      "!**/gesenius"
     ]
   },
   "formatter": {

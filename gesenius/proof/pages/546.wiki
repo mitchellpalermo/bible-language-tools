@@ -1,0 +1,229 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><div align="center">
+{|
+! colspan="8" | K. Weak Verbs, {{GHGheb|text=פ״י}} (for {{GHGheb|text=פ״ו}}.
+|-
+| colspan="3" |
+! {{GHGterm|Qal}}.
+|
+! {{GHGterm|Niphʿal}}.
+! {{GHGterm|Hiphʿîl}}.
+! {{GHGterm|Hophʿal}}.
+|-
+| ''Perf''.
+| ''Sing''.
+| colspan="2" | 3. ''m''.
+|
+| {{GHGheb|text=יָשַׁב}}
+|
+| {{GHGheb|text=נוֹשַׁב}}<sup>*</sup>
+|-
+|
+|
+| colspan="2" | 3. ''f''.
+|
+|
+|
+| {{GHGheb|text=נֽוֹשְׁבָה}}<sup>*</sup>
+|-
+|
+|
+| colspan="2" | 2. ''m''.
+|
+|
+|
+| {{GHGheb|text=נוֹשַׁ֫בְתָּ}}
+|-
+|
+|
+| colspan="2" | 2. ''f''.
+|
+|
+|
+| {{GHGheb|text=נוֹשַׁ֫בְתְּ}}
+|-
+|
+|
+| colspan="2" | 1. ''c''.
+|
+| regular.
+|
+| {{GHGheb|text=נוֹשַׁ֫בְתִּי}}
+|-
+|
+| ''Plur''.
+| colspan="2" | 3. ''c''.
+|
+|
+|
+| {{GHGheb|text=נֽוֹשְׁבוּ}}
+|-
+|
+|
+| colspan="2" | 2. ''m''.
+|
+|
+|
+| {{GHGheb|text=נֽוֹשַׁבְתֶּם}}
+|-
+|
+|
+| colspan="2" | 2. ''f''.
+|
+|
+|
+| {{GHGheb|text=נֽוֹשַׁבְתֶּן}}
+|-
+|
+|
+| colspan="2" | 1. ''c''.
+|
+|
+|
+| {{GHGheb|text=נוֹשַׁ֫בְנוּ}}
+|-
+| ''Inf''.
+|
+| colspan="2" |
+| colspan="2" | {{GHGheb|text=שֶׁ֫בֶת}}<sup>*</sup>, {{GHGheb|text=רֶ֫שֶׁת}}, {{GHGheb|text=יְסֹד}}
+| {{GHGheb|text=הִוָּשֵׁב}}<sup>*</sup>
+| {{GHGheb|text=הוֹשִׁיב}}<sup>*</sup>
+|-
+| ''Inf''.
+| ''absol''.
+|
+| colspan="2" | {{GHGheb|text=יָשׁוֹב}}
+| colspan="2" | wanting.
+| 
+|-
+| ''Imp''.
+| ''Sing''.
+| colspan="2" | ''m''.
+|
+| {{GHGheb|text=דַּע}}, {{GHGheb|text=שֵׁב}}<sup>*</sup>
+|
+| {{GHGheb|text=הִוָּשֵׁב}}<sup>*</sup>
+|-
+|
+|
+| colspan="2" | ''f''.
+|
+| {{GHGheb|text=שְׁבִי}}
+|
+| {{GHGheb|text=הִוָּֽשְׁבִי}}
+|-
+|
+| ''Plur''.
+| colspan="2" | ''m''.
+|
+| {{GHGheb|text=שְׁבוּ}}
+|
+| {{GHGheb|text=הִוָּֽשְׁבוּ}}
+|-
+|
+|
+| colspan="2" | ''f''.
+|
+| {{GHGheb|text=שֵׁ֫בְנָה}}
+|
+| [{{GHGheb|text=הִוָּשַׁ֫בְנָה}}]
+|-
+| ''Impf''.
+| ''Sing''.
+| colspan="2" | 3. ''m''.
+| {{GHGheb|text=יֵשֵׁב}}<sup>*</sup>
+|
+| {{GHGheb|text=יִירַשׁ}}<sup>*</sup>
+| {{GHGheb|text=יִוָּשֵׁב}}<sup>*</sup>
+|-
+|
+|
+| colspan="2" | 3. ''f''.
+| {{GHGheb|text=תֵּשֵׁב}}
+|
+| {{GHGheb|text=תִּירַשׁ}}
+| {{GHGheb|text=תִּוָּשֵׁב}}
+|-
+|
+|
+| colspan="2" | 2. ''m''.
+| {{GHGheb|text=תֵּשֵׁב}}
+|
+| {{GHGheb|text=תִּירַשׁ}}
+| {{GHGheb|text=תִּוָּשֵׁב}}
+|-
+|
+|
+| colspan="2" | 2. ''f''.
+| {{GHGheb|text=תֵּֽשְׁבִי}}
+|
+| {{GHGheb|text=תִּֽירְשִׁי}}
+| {{GHGheb|text=תִּוָּֽשְׁבִי}}
+|-
+|
+|
+| colspan="2" | 1. ''c''.
+| {{GHGheb|text=אֵשֵׁב}}
+|
+| {{GHGheb|text=אִירַשׁ}}
+| {{GHGheb|text=אִוָּשֵׁב}}<sup>*</sup>
+|-
+|
+| ''Plur''.
+| colspan="2" | 3. ''m''.
+| {{GHGheb|text=יֵֽשְׁבוּ}}
+|
+| {{GHGheb|text=יִיֽרְשׁוּ}}
+| {{GHGheb|text=יִוָּֽשְׁבוּ}}
+|-
+|
+|
+| colspan="2" | 3. ''f''.
+| {{GHGheb|text=תֵּשַׁבְנָה}}
+|
+| [{{GHGheb|text=תִּירַ֫שְׁנָה}}]
+| [{{GHGheb|text=תִּוָּשַׁ֫בְנָה}}]
+|-
+|
+|
+| colspan="2" | 2. ''m''.
+| {{GHGheb|text=תֵּֽשְׁבוּ}}
+|
+| {{GHGheb|text=תִּֽירְשׁוּ}}
+| {{GHGheb|text=תִּוָּֽשְׁבוּ}}
+|-
+|
+|
+| colspan="2" | 2. ''f''.
+| [{{GHGheb|text=תֵּשַׁ֫בְנָה}}]
+|
+| [{{GHGheb|text=תִּירַ֫שְׁנָה}}]
+| [{{GHGheb|text=תִּוָּשַׁ֫בְנָה}}]
+|-
+|
+|
+| colspan="2" | 1. ''c''.
+| {{GHGheb|text=נֵשֵׁב}}
+|
+| {{GHGheb|text=נִירַשׁ}}
+| {{GHGheb|text=נִוָּשֵׁב}}
+|-
+| colspan="6" | ''Shortened Impf''. ({{GHGterm|Jussive}}).
+| 
+|
+|-
+| colspan="3" | ''Impf. with Wāw consec''.
+| {{GHGheb|text=וַיֵּ֫שֶׁב}}<sup>*</sup>
+| colspan="4" | 
+|-
+| ''Part''.
+| ''act''.
+| colspan="2" | {{GHGheb|text=ישֵׁב}}
+| colspan="5" | {{GHGheb|text=נוֹשָׁב}}<sup>*</sup>
+|-
+|
+| ''pass''.
+| colspan="2" | {{GHGheb|text=יָשׁוּב}}
+| colspan="6" | 
+|}
+</div><noinclude>
+<references/></noinclude>

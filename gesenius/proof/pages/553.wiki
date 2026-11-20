@@ -1,0 +1,144 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><div align="center">
+{|
+! {{GHGterm|Puʿal}}. || {{GHGterm|Hiphʿîl}}. || colspan="2" | {{GHGterm|Hophʿal}}. || {{GHGterm|Hithpaʿēl}}.
+|-
+| {{GHGhebT|text=גֻּלָּה<sup>*</sup>}}
+| {{GHGhebT|text=הִגְלָה<sup>*</sup>}}
+| colspan="2" | {{GHGhebT|text=הָגְלָה<sup>*</sup>}}
+| {{GHGhebT|text=הִתְגַּלָּה<sup>*</sup>}}
+|-
+| {{GHGhebT|text=גֻּלְּתָה<sup>*</sup>}}
+| {{GHGhebT|text=הִגְלְתָה<sup>*</sup>}}
+| colspan="2" | {{GHGhebT|text=הָגְלְתָה<sup>*</sup>}}
+| {{GHGhebT|text=[הִתְגַּלְּתָה]}}
+|-
+| {{GHGhebT|text=גֻּלֵּ֫יתָ<sup>*</sup>}}
+| {{GHGhebT|text=־ֵ֫ יתָ, הִגְלִ֫יתָ<sup>*</sup>}}
+| colspan="2" | {{GHGhebT|text=הָגְלֵ֫יתָ<sup>*</sup>}}
+| {{GHGhebT|text=הִתְגַּלִּ֫יתָ<sup>*</sup>}}
+|-
+| {{GHGhebT|text=[גֻּלֵּית]}}
+| {{GHGhebT|text=־ִית, הִגְלֵית}}
+| colspan="2" | {{GHGhebT|text=[הָגְלֵית]}}
+| {{GHGhebT|text=[הִתְגַּלִּית]}}
+|-
+| {{GHGhebT|text=גֻּלֵּ֫יתִי}}
+| {{GHGhebT|text=־ִ֫ יתִי, הִגְלֵ֫יתִי}}
+| colspan="2" | {{GHGhebT|text=הָגְלֵ֫יתִי}}
+| {{GHGhebT|text=הִתְגַּלֵּ֫יתִי}}
+|-
+| {{GHGhebT|text=גֻּלּוּ}}
+| {{GHGhebT|text=הִגְלוּ}}
+| colspan="2" | {{GHGhebT|text=הָגְלוּ}}
+| {{GHGhebT|text=הִתְגַּלּוּ}}
+|-
+| {{GHGhebT|text=גֻּלֵּיתֶם]}}
+| {{GHGhebT|text=־ִיתֶם, הִגְלֵיתֶם}}
+| colspan="2" | {{GHGhebT|text=הָגְלֵיתֶם]}}
+| {{GHGhebT|text=הִתְגַּלִּיתֶם}}
+|-
+| {{GHGhebT|text=גֻּלֵּיתֶן}}
+| {{GHGhebT|text=[הִגְלֵיתֶן]}}
+| colspan="2" | {{GHGhebT|text=הָגְלֵיתֶן}}
+| {{GHGhebT|text=הִתְגַּלִּיתֶן]}}
+|-
+| {{GHGhebT|text=[גֻּלֵּ֫ינוּ}}
+| {{GHGhebT|text=הִגְלִ֫ינוּ}}
+| colspan="2" | {{GHGhebT|text=[הָגְלֵ֫ינוּ}}
+| {{GHGhebT|text=[הִתְגַּלִּ֫ינוּ}}
+|-
+| {{GHGhebT|text=גֻּלּוֹת<sup>*</sup>}}
+| {{GHGhebT|text=הַגְלוֹת<sup>*</sup>}}
+| colspan="2" |
+| {{GHGhebT|text=הִתְגַּלּוֹה<sup>*</sup>}}
+|-
+|
+| {{GHGhebT|text=הַגְלֵה}}
+| colspan="2" | {{GHGhebT|text=הָגְלֵה<sup>*</sup>}}
+|
+|-
+|
+| {{GHGhebT|text=הַגְלֵה<sup>*</sup>}}
+| colspan="2" |
+| {{GHGhebT|text=הִתְגָּל}} {{GHGhebT|text=[הִתְגַּלֵּה]}}
+|-
+| wanting.
+| {{GHGhebT|text=הַגְלִי<sup>*</sup>}}
+| colspan="2" | wanting.
+| {{GHGhebT|text=הִתְגַּלִּי}}
+|-
+|
+| {{GHGhebT|text=הַגְלוּ}}
+| colspan="2" |
+| {{GHGhebT|text=הִתְגַּלּוּ}}
+|-
+|
+| {{GHGhebT|text=[הַגְלֶ֫ינָה]}}
+| colspan="2" |
+| {{GHGhebT|text=[הִתְגַּלֶּ֫ינָה]}}
+|-
+| {{GHGhebT|text=יְגֻלֶּה<sup>*</sup>}}
+| {{GHGhebT|text=יַגְלֶה<sup>*</sup>}}
+| colspan="2" | {{GHGhebT|text=יָגְלֶה]}}<sup>*</sup>
+| {{GHGhebT|text=יִתְגַּלֶּה<sup>*</sup>}}
+|-
+| {{GHGhebT|text=תְּגֻלֶּה}}
+| {{GHGhebT|text=תַּגְלֶה}}
+| colspan="2" | {{GHGhebT|text=תָּגְלֶה}}
+| {{GHGhebT|text=[תִּתְגַּלֶּה]}}
+|-
+| {{GHGhebT|text=תְּגֻלֶּה}}
+| {{GHGhebT|text=תַּגְלֶה}}
+| colspan="2" | {{GHGhebT|text=תָּגְלֶה}}
+| {{GHGhebT|text=תִּתְגַּלֶּה}}
+|-
+| {{GHGhebT|text=תְּגֻלִּי]}}
+| {{GHGhebT|text=תַּגְלִי<sup>*</sup>}}
+| colspan="2" | {{GHGhebT|text=תָּגְלִי<sup>*</sup>}}
+| {{GHGhebT|text=תִּתְגַּלִּי<sup>*</sup>}}
+|-
+| {{GHGhebT|text=[אֲגֻלֶּה}}
+| {{GHGhebT|text=אַגְלֶה}}
+| colspan="2" | {{GHGhebT|text=אָגְלֶה<sup>*</sup>}}
+| {{GHGhebT|text=אֶתְגַּלֶּה}}
+|-
+| {{GHGhebT|text=יְגֻלּוּ}}
+| {{GHGhebT|text=יַגְלוּ}}
+| colspan="2" | {{GHGhebT|text=יָגְלוּ}}
+| {{GHGhebT|text=יִתְגַּלּוּ}}
+|-
+| {{GHGhebT|text=תְּגֻלֶּ֫ינָה]}}<sup>*</sup>
+| {{GHGhebT|text=תַּגְלֶ֫ינָה<sup>*</sup>}}
+| colspan="2" | {{GHGhebT|text=תָּגְלֶ֫ינָה<sup>*</sup>}}
+| {{GHGhebT|text=[תִּתְגַּלֶ֫ינָה]}}
+|-
+| {{GHGhebT|text=תְּגֻלּוּ}}
+| {{GHGhebT|text=תַּגְלוּ}}
+| colspan="2" | {{GHGhebT|text=תָּגְלוּ}}
+| {{GHGhebT|text=תִּתְגַּלּוּ}}
+|-
+| {{GHGhebT|text=תְּגֻלֶּ֫ינָה}}
+| {{GHGhebT|text=תַּגְלֶ֫ינָה}}
+| colspan="2" | {{GHGhebT|text=תָּגְלֶ֫ינָה}}
+| {{GHGhebT|text=[תִּתְגַּלֶּ֫ינָה]}}
+|-
+| {{GHGhebT|text=[נִגֻלֶּה}}
+| {{GHGhebT|text=נַגְלֶה}}
+| colspan="2" | {{GHGhebT|text=[נָגְלֶה}}
+| {{GHGhebT|text=נִתְגַּלֶּה}}
+|-
+| colspan="2" | {{GHGhebT|text=יֶ֫גֶל<sup>*</sup>}}
+| colspan="3" | {{GHGhebT|text=יִתְגַּל<sup>*</sup>}}
+|-
+| colspan="2" | {{GHGhebT|text=יַגְלֵ֫נִי<sup>*</sup>, יַגְלְךָ}}
+| colspan="3" |
+|-
+| colspan="2" | {{GHGhebT|text=מַגְלֶה<sup>*</sup>}}
+| colspan="3" | {{GHGhebT|text=מִתְגַּלָּה<sup>*</sup>}}
+|-
+| colspan="3" | {{GHGhebT|text=מְגֻלֶּה<sup>*</sup>}}
+| colspan="3" | {{GHGhebT|text=מָגְלֶה<sup>*</sup>}}
+
+|}
+</div><noinclude>
+<references/></noinclude>

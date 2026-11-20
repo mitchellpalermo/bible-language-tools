@@ -1,0 +1,96 @@
+<!-- scan 572, printed 548, Index of Hebrew Words and Forms -->
+{{colbegin}}
+tuation 35, syntax 126: ''see'' Article in Index I
+{{GHGheb|text=הֲ}} interrog. 100, origin and pointing 100 ''i''–''n'', uses of 150; {{GHGheb|text=הֲ ... (וְ)אִם}} 150 ''h''
+{{GHGheb|text=־ָה}} (with the tone), ending of fem. nouns 80 ''c''
+{{GHGheb|text=־ָה}} (toneless), ending of the Cohortative and Imperative 48 ''c'', ''d'', ''i''; an old case-ending 90 ''a''–''i''
+{{GHGheb|text=־ֹה}} 3rd masc. sing. pronominal suffix 91 ''e''
+{{GHGheb|text=־ָה}} (without Mappîq) anomalous 3rd fem. sing. pronom. suff. 91 ''e''
+{{GHGheb|text=הֵא}} 105 ''b''
+{{GHGheb|text=הַֽאֲזִנָה}} (Mi 6<sup>11</sup>) 47 ''b''<sup>1</sup>
+{{GHGheb|text=הֶֽאֱזִ֫יחוּ}} 53 ''g''
+{{GHGheb|text=הָֽאוֹקִים}} 35 ''d''
+{{GHGheb|text=הֶאָח}} 105 ''a''
+{{GHGheb|text=הָאִישׁ}} ''one'', 144 ''d''<sup>1</sup>
+{{GHGheb|text=הָאֵל בֵּית־אֵל}} 127 ''f''<sup>1</sup>
+{{GHGheb|text=הָֽאָנְחָה}} 65 ''e''
+{{GHGheb|text=הָֽאָרוֹן}} 35 ''o''
+{{GHGheb|text=הַבָּאת}} 74 ''g''
+{{GHGheb|text=הֲבֵאתָה}} 74 ''d''
+{{GHGheb|text=הֵבֵאתָ}} 72 ''w''
+{{GHGheb|text=הָ֫בָה}} 105 ''b''
+{{GHGheb|text=הֵבִיא}} 72 ''y'', 74 ''l''
+{{GHGheb|text=הֲבִֽישׁוֹתָה}} 78 ''b''
+{{GHGheb|text=הֹבִישׁ}} 72 ''x'', 78 ''b''
+{{GHGheb|text=הבמת זאת}} (Moab.) 80 ''f''<sup>1</sup>
+{{GHGheb|text=הִבָּרוּ}} 67 ''t''
+{{GHGheb|text=הַֽבְרֵכָה}} 10 ''g'' (end)
+{{GHGheb|text=הַבְּרֵכָה}} 16 ''g''
+{{GHGheb|text=הַגָּ֫דָה}} Q<sup>e</sup>rê for {{GHGheb|text=הַגָּד}} 118 ''e''<sup>2</sup>
+{{GHGheb|text=הֹגַח}} 69 ''w''
+{{GHGheb|text=הֹגוּ}} 75 ''n'', ''aa''
+{{GHGheb|text=הַגִּרְנוֹת}} 93 ''r''
+{{GHGheb|text=הִדּוּשׁ}} 72 ''v''
+{{GHGheb|text=הַדֶּ֫רֶךְ חֶתְלוֹן}} 127 ''f''<sup>1</sup>
+{{GHGheb|text=הֻדַּ֫שְׁנָה}} 54 ''h''
+? {{GHGheb|text=הֲהֵימִיר}} 72 ''e''
+† {{GHGheb|text=ההלכתי}} 90 ''n''
+{{GHGheb|text=הֻהַ֫לָּלָה}} 52 ''s''
+{{GHGheb|text=הוּא}}, {{GHGheb|text=הִיא}} 32 ''k''; {{GHGheb|text=הוא}} with Q<sup>e</sup>rê {{GHGheb|text=הִיא}} 17 ''c'', {{GHGheb|text=הוא}} as fem., not an archaism 32 ''l''
+{{GHGheb|text=הוּא}} ({{GHGheb|text=הִיא}}, {{GHGheb|text=הֵ֫מָּה}}) = ''ipse'' or ''idem'' 135 ''a''<sup>1</sup>, demonstrative 136, for the copula 141 ''h'', resuming the subject 145 ''u''<sup>3</sup>, in questions 136 ''e'' (end), 150 ''l''
+{{GHGheb|text=הֱוֵא}} 75 ''hh''
+{{GHGheb|text=הוֹבִישׁ}} 72 ''x''
+{{GHGheb|text=הוֹדַע}} 69 ''w''
+{{GHGheb|text=הוֹי}} 105 ''a''
+{{GHGheb|text=הוֹכַח}} 65 ''f''
+{{GHGheb|text=הוּלֶּ֫דֶת}} 71
+{{GHGheb|text=הוֹלֵלוֹת}} 86 ''l''
+{{GHGheb|text=הוֹלֵם פָּ֫עַם}} 29 ''f''
+? {{GHGheb|text=הוּנַח}} 72 ''ee''<sup>1</sup>
+? {{GHGheb|text=הוֹפִיעַ}} 69 ''v''
+{{GHGheb|text=הוֹצִיא}} 74 ''l''
+{{GHGheb|text=הוֹרַדְתָּ֫נוּ}} 59 ''h''
+{{GHGheb|text=הוֹשֵׁעַ}} 65 ''f''
+? {{GHGheb|text=הַזּוּרֶ֫ה}} 80 ''i''
+{{GHGheb|text=הֵזִ֫ילוּהָ}} 67 ''y'', 72 ''ee''
+{{GHGheb|text=הִזַּכּוּ}} 54 ''d''
+{{GHGheb|text=הַזְכִּרְכֶם}} 53 ''l''
+{{GHGheb|text=הֶחְבֵּ֫אתָה}} 75 ''oo''
+{{GHGheb|text=הֶחְבָּה}} 75 ''pp''
+{{GHGheb|text=הֶחְדַּ֫לְתִּי}} 63 ''k''
+{{GHGheb|text=הֶחָי}}, {{GHGheb|text=הָחַי}} 35 ''f'', 27 ''q''
+{{GHGheb|text=הֵחֵל}} 67 ''t''
+{{GHGheb|text=הֶחֱלִי}} 74 ''k'', 75 ''ii''
+{{GHGheb|text=הֶחָמָנִים}} 35 ''f''
+{{GHGheb|text=הֶחֳרִיטִים}} 35 ''f''
+{{GHGheb|text=הַחַ֫רְסָה}} 90 ''f''
+{{GHGheb|text=הַחִתֹּ֫תָ}} 67 ''w''
+{{GHGheb|text=הִטֶּהָ֫רוּ}} 27 ''q''
+{{GHGheb|text=הָיָא}} 32 ''k''
+{{GHGheb|text=הָיָה}} 16 ''f'', 63 ''q'', 75 with participle 116 ''r'', with {{GHGheb|text=לְ}} before infin. 114 ''h''–''k'', as copula 141 ''g''–''i''. Cf. {{GHGheb|text=חָיָה}}
+{{GHGheb|text=הֱיֵה}} 75 ''n''
+{{GHGheb|text=הַיּוֹם}} = ''one day'' 126 ''s''
+{{GHGheb|text=הַיּוֹם שְׁלֹשָׁה}} 134 ''o''<sup>1</sup>
+{{GHGheb|text=הֵיטֵב}} 113 ''k''
+{{GHGheb|text=הֵיכָל}} 9 ''i'', 85 ''c''
+? {{GHGheb|text=הֵילִ֫יכִי}} 69 ''x'', 78 ''b''
+? {{GHGheb|text=הַיָּ֫מָּה}} 90 ''f''
+{{GHGheb|text=הֵיצָא}} 69 ''v''
+{{GHGheb|text=הֵיקִיץ}} 70 ''e''
+{{GHGheb|text=הֵישַׁר}} 24 ''f''<sup>2</sup>, 70 ''b''
+{{GHGheb|text=הית}} 75 ''m''<sup>1</sup>
+{{GHGheb|text=הַכּוֹת}} (inf. abs.) 75
+{{GHGheb|text=הֲכִי}} 150 ''d'', ''e''
+{{GHGheb|text=הָכִין}} 72 ''z''
+{{GHGheb|text=הַכֵּ֫ינִי}} 75 ''mm''
+{{GHGheb|text=הִכְלַ֫מְנוּ}} 53 ''p''
+{{GHGheb|text=הֲכִּ֫נוּ}} 72 ''w''
+{{GHGheb|text=הֲלֹא}} expressing assurance 150 ''e''
+{{GHGheb|text=הַלֶּ֫דֶת}} 69 ''w'', 71
+{{GHGheb|text=הַלָּז}} 34 ''f''
+{{GHGheb|text=הַלָּזֶה}} 34 ''f''
+{{GHGheb|text=הַלֵּ֫זוּ}} 34 ''f''
+{{GHGheb|text=הָלַךְ}} inflexion 69 ''x'', use of, to express continuance 113 ''u''
+{{GHGheb|text=הֲלֹךְ}} 69 ''m''<sup>2</sup>
+? {{GHGheb|text=הָלְכוּא}} 23 ''i''
+{{colend}}

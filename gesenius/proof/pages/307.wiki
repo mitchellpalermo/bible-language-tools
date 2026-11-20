@@ -1,0 +1,176 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par96 /><div align="center">
+{| cellspacing="0" cellpadding="0" border="0"
+| {{GHGheb|text=אָמָה}}
+| {{GHGheb|text=בַּ֫יִת}}
+| {{GHGheb|text=בֵּן}}
+| {{GHGheb|text=בַּת}}
+| {{GHGheb|text=יוֹם}}
+| {{GHGheb|text=כְּלִי}}
+|-
+| (''handmaid'')
+| (''house'')
+| (''son'')
+| (''daughter'')
+| (''day'')
+| (''vessel'')
+|-
+|
+| {{GHGheb|text=בֵּית}}
+| {{GHGheb|text=בֶּן־}}
+| {{GHGheb|text=בַּת}}
+| {{GHGheb|text=יוֹם}}
+| {{GHGheb|text=כְּלִי}}
+|-
+| {{GHGheb|text=אֲמָתִי}}
+| {{GHGheb|text=בֵּיתִי}}
+| {{GHGheb|text=בְּנִי}}
+| {{GHGheb|text=בִּתִּי}}
+|
+|
+|-
+| {{GHGheb|text=אֲמָֽתְךָ}}
+| {{GHGheb|text=בֵּֽיתְךָ}}
+| {{GHGheb|text=בִּנְךָ}}, {{GHGterm|pause}} {{GHGheb|text=בִּנֶ֫ךָ}}
+| {{GHGheb|text=בִּתְּךָ}}, {{GHGterm|pause}} {{GHGheb|text=בִּתֶּ֫ךָ}}
+|
+| {{GHGheb|text=כֶּלְיְךָ}}
+|-
+|
+| {{GHGheb|text=בֵּיתֵךְ}}
+| {{GHGheb|text=בְּנֵךְ}}
+|
+|
+|
+|-
+| {{GHGheb|text=אֲמָתוֹ}}
+| {{GHGheb|text=בֵּיתוֹ}}
+| {{GHGheb|text=בְּנוֹ}}
+| {{GHGheb|text=בִּתּוֹ}}
+| {{GHGheb|text=יוֹמוֹ}}
+|
+|-
+| {{GHGheb|text=אֲמָתָהּ}}
+| {{GHGheb|text=בֵּיתָהּ}}
+| {{GHGheb|text=בְּנָהּ}}
+| {{GHGheb|text=בִּתָּהּ}}
+|
+|
+|-
+|
+|
+| {{GHGheb|text=בְּנֵ֫נוּ}}
+|
+|
+|
+|-
+|
+| {{GHGheb|text=בֵּֽיתְכֶם}}
+|
+| {{GHGheb|text=בִּתְּכֶם}}
+|
+|
+|-
+|
+|
+|
+|
+|
+|
+|-
+|
+| {{GHGheb|text=בֵּיתָם}}
+|
+|
+| {{GHGheb|text=יוֹמָם}}
+|
+|-
+|
+|
+|
+|
+|
+|
+|-
+| {{GHGheb|text=אֲמָהוֹת}}
+| {{GHGheb|text=בָּֽתִּים}}
+| {{GHGheb|text=בָּנִים}}
+| {{GHGheb|text=בָּנוֹת}}
+| {{GHGheb|text=יָמִים}}
+| {{GHGheb|text=כֵּלִים}}
+|-
+| {{GHGheb|text=אַמְהוֹת}}
+| {{GHGheb|text=בָּֽתֵּי}}
+| {{GHGheb|text=בְּנֵי}}
+| {{GHGheb|text=בְּנוֹת}}
+| {{GHGheb|text=יְמֵי}}
+| {{GHGheb|text=כְּלֵי}}
+|-
+| {{GHGheb|text=אַמְהֹתַי}}
+|
+| {{GHGheb|text=בָּנַי}}
+| {{GHGheb|text=בְּנֹתַי}}
+| {{GHGheb|text=יָמַי}}
+| {{GHGheb|text=כֵּלַי}}
+|-
+|
+| {{GHGheb|text=בָּֽתֶּ֫יךָ}}
+| {{GHGheb|text=בָּנֶ֫יךָ}}
+| {{GHGheb|text=בְּנֹתֶ֫יךָ}}
+| {{GHGheb|text=יָמֶ֫יךָ}}
+| {{GHGheb|text=כֵּלֶ֫יךָ}}
+|-
+|
+| {{GHGheb|text=בָּֽתַּ֫יִךְ}}
+| {{GHGheb|text=בָּנַ֫יִךְ}}
+| {{GHGheb|text=בְּנֹתַ֫יִךְ}}
+| {{GHGheb|text=יָמַ֫יִךְ}}
+|
+|-
+| {{GHGheb|text=אַמְהֹתָיו}}
+|
+| {{GHGheb|text=בָּנָיו}}
+| {{GHGheb|text=בְּנֹתָיו}}
+| {{GHGheb|text=יָמָיו}}
+| {{GHGheb|text=כֵּלָיו}}
+|-
+| {{GHGheb|text=אַמְהֹתֶ֫יהָ}}
+|
+| {{GHGheb|text=בָּנֶ֫יהָ}}
+| {{GHGheb|text=בְּנֹתֶ֫יהָ}}
+| {{GHGheb|text=יָמֶ֫יהָ}}
+| {{GHGheb|text=כֵּלֶ֫יהָ}}
+|-
+|
+| {{GHGheb|text=בָּֽתֵּ֫ינוּ}}
+| {{GHGheb|text=בָּנֵ֫ינוּ}}
+| {{GHGheb|text=בְּנֹתֵ֫ינוּ}}
+| {{GHGheb|text=יָמֵ֫ינוּ}}
+| {{GHGheb|text=כֵּלֵ֫ינוּ}}
+|-
+| {{GHGheb|text=אַמְהֹֽתֵיכֶם}}
+| {{GHGheb|text=בָּֽתֵּיכֶם}}
+| {{GHGheb|text=בְּנֵיכֶם}}
+| {{GHGheb|text=בְּנֹֽתֵיכֶם}}
+| {{GHGheb|text=יְמֵיכֶם}}
+| {{GHGheb|text=כְּלֵיכֶם}}
+|-
+|
+| {{GHGheb|text=בָּֽתֵּיהֶם}}
+| {{GHGheb|text=בְּנֵיהֶם}}
+| {{GHGheb|text=בְּנֹֽתֵיהֶם}}
+| {{GHGheb|text=יְמֵיהֶם}}
+| {{GHGheb|text=כְּלֵיהֶם}}
+|-
+| {{GHGheb|text=אַמְהֹֽתֵיהֶן}}
+| {{GHGheb|text=בָּֽתֵּיהֶן}}
+| {{GHGheb|text=בְּנֵיהֶן}}
+|
+|
+|
+|}
+</div>
+
+{{GHGbible-ref|book=Zc|chapter=11|verse=7}}; and especially before {{GHGheb|text=מִן}} ({{GHGheb|text=מֵ‍}}) {{GHGbible-ref|book=Gn|chapter=3|verse=22}}, {{GHGbible-ref|book=Ex|chapter=30|verse=14}}, {{GHGbible-ref|book=Nu|chapter=16|verse=15}}, {{GHGbible-ref|book=Ju|chapter=17|verse=5}}, {{GHGbible-ref|book=1 S|chapter=9|verse=3}}, {{GHGbible-ref|book=Ez|chapter=18|verse=10}}; fem. {{GHGheb|text=אַחַת|translate=una}} (for {{GHGheb|text=אַחַדְתְּ}}, according to {{GHGpar|19|d}}), in {{GHGterm|pause}} {{GHGheb|text=אֶחָֽת}}. Once {{GHGheb|text=חַד}} masc. (by aphaeresis, {{GHGpar|19|h}}), {{GHGbible-ref|book=Ez|chapter=33|verse=30}}, as in Aramaic; plur. {{GHGheb|text=אֲחָדִים|translate=some}}, but also ''iidem''.
+
+{{GHGheb|text=אָחוֹת|translate=sister}}, from ''ʾăḥăwăt'' or ''ʾăḥăyăt'', with elision of the {{GHGheb|text=ו}} or {{GHGheb|text=י}}, and with the ''â'', which has arisen from ''ăă'', obscured to ''ô''.<ref>This explanation of {{GHGheb|text=אָחוֹת}} (and {{GHGheb|text=חָמוֹת}} q. v.) still seems to us more probable than the assumption that the fem. ending ''ăth'' is lengthened to compensate for the loss of the 3rd radical (so Wellhausen, ''Skizzen'', vi. 258), or that the form is derived from ''ʾaḥâ'', the old-semitic ''constr. st.'' of the accusative, with {{GHGheb|text=ת}} feminine (so Barth, {{GHGcite|title={{abbr|ZDMG.|Zeitschrift der deutschen morgenländischen Gesellschaft, Lpz. 1846 ff., since 1903 ed. by A. Fischer.}}}} 1899, p. 598).</ref> In {{GHGbible-ref|book=Nu|chapter=6|verse=7}} {{GHGheb|text=אַחֹתוֹ}} stands for {{GHGheb|text=אֲחֹתוֹ}} (with virtual sharpening of the {{GHGheb|text=ח}}). The plur. {{GHGterm|absol.}} ({{GHGheb|text=אֲחָיוֹת}}) does not happen<section end=par96 /><noinclude>
+<references/></noinclude>

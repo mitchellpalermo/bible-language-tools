@@ -1,0 +1,28 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><section begin="par84b" />''crooked'', {{GHGheb|text=חֲלַקְלַקּוֹת|translate=slippery places}}, {{GHGheb|text=עֲקַלְקַלּוֹת|translate=crooked}} ({{GHGtranslate|ways}}); {{GHGheb|text=פְּתַלְתֹּל|translate=tortuous}}; also words denoting colours, {{GHGheb|text=אֲדַמְדָּם}} ({{GHGbible-ref|book=Lv|chapter=13|verse=42.49}} in pause) ''reddish'', fem. {{GHGheb|text=אֲדַמְדֶּ֫מֶת}}, plur. {{GHGheb|text=אֲדַמְדַּמֹּת}}; {{GHGheb|text=יְרַקְרַק|translate=greenish}}, plur. fem. {{GHGheb|text=יְרַקְרַקֹּת}}; ''q<sup>e</sup>ṭalṭĭl'', {{GHGheb|text=יְפֵיפִיָּה|translate=very fair}} (to be read in {{GHGbible-ref|book=Jer|chapter=46|verse=20}} for {{GHGheb|text=יפהפיה}}); ''q<sup>e</sup>ṭalṭŭl'', {{GHGheb|text=שְׁחַרְחֹ֫רֶת}} (fem.) ''blackish''; {{GHGheb|text=אֲסַפְסֻף|translate=a rabble}} (augmented from {{GHGheb|text=אָסוּף|translate=collected}}). From a verb {{GHGheb|text=פ״י}} with aphaeresis of the initial syllable {{GHGheb|text=צֶֽאֱצָאִים|translate=offspring}}. Moreover, of the same form, probably, is {{GHGheb|text=חֲצֽוֹצְרָה|translate=a trumpet}} (for {{GHGheb|text=חֲצַרְצְרָה}}, cf. {{GHGpar|55|e}}). Also in {{GHGbible-ref|book=Is|chapter=2|verse=20}} {{GHGheb|text=לַֽחֲפַרְפָּרוֹת}} is to be read instead of {{GHGheb|text=לַחְפֹּר פֵּרוֹת}} (from the ''sing.'' {{GHGheb|text=חֲפַרְפָּרָה}} a ''digging'' or ''burrowing'' animal, perhaps the ''mole''). But {{GHGheb|text=פְּקַחְקוֹחַ|translate=opening}}, {{GHGbible-ref|book=Is|chapter=61|verse=1}} (ed. Mant., Baer, Ginsb. {{GHGheb|text=פְּקַח־קוֹחַ}}), is an evident mistake due to dittography; read {{GHGheb|text=פְּקֹחַ}} as in {{GHGbible-ref|book=Is|chapter=42|verse=7|hidebook=1}}.
+
+{{center|IX. ''Nouns in which the Whole (Biliteral) Stem is repeated.''}}
+
+{{GHGmargin-letter|84|o|b}}
+Naturally this class includes only isolated forms of the stems {{GHGheb|text=ע״וּ}} and {{GHGheb|text=ע״ע}} (on {{GHGheb|text=פִּֽיפִיּוֹת}} see {{GHGpar|96}} under {{GHGheb|text=פֶּה}}). Thus:—
+
+40. {{GHGheb|text=גַּלְגַּל|translate=a wheel}}, and, with attenuation of the first ''ă'' to ''ĭ'', {{GHGheb|text=גִּלְגָּל}} (from {{GHGheb|text=גלל}}); fem. {{GHGheb|text=חַלְחָלָה|translate=anguish}} (from {{GHGheb|text=חוּל}} or {{GHGheb|text=חִיל}}); {{GHGheb|text=כִּכָּר}} (for ''kirkar'') ''a talent''; cf. also {{GHGheb|text=כּוֹכָב|translate=a star}} (from ''kăwkăb'', Arabic ''kaukăb'', for {{GHGheb|text=כַּבְכַּב}}), {{GHGheb|text=טֽוֹטָפֹת|translate=bands}}, for {{GHGheb|text=טַפְטָפֹת}}; {{GHGheb|text=צְלָצַל}} probably ''a whirring locust''.
+
+{{GHGmargin-letter|84|p|b}}
+41. {{GHGheb|text=כַּלְכֵּל}} infin. ''Pilpēl'' (prop. ''Palpĭl'') from {{GHGheb|text=כּוּל}}; fem. {{GHGheb|text=טַלְטֵלָה|translate=a hurling}} (from {{GHGheb|text=טוּל}}).
+
+42. {{GHGheb|text=כַּדְכֹּד}} perhaps a ''ruby'' (for ''kădkŭd''), from {{GHGheb|text=כדד}}.
+
+43. {{GHGheb|text=קָדְקֹד|translate=the crown of the head}} (for ''qŭdqŭd''), from {{GHGheb|text=קדד}}; fem. {{GHGheb|text=גֻּלְגֹּ֫לֶת|translate=a skull}} (for ''gŭlgŭlt''), from {{GHGheb|text=גלל}}.
+
+44. {{GHGheb|text=זַרְזִיר|translate=girded}}, from {{GHGheb|text=זרר}}; {{GHGheb|text=בַּקְבּוּק|translate=a bottle}}, from {{GHGheb|text=בקק}}; {{GHGheb|text=בַּרְבֻּרִים|translate=fattened birds}}(?).
+<section end="par84b" />
+<section begin="par85" />{{GHGpar-heading|85|Nouns with Preformatives and Afformatives}}
+
+{{GHGmargin-letter|85|a}}
+These include nouns which are directly derived from verbal forms having preformatives (''Hiphʿîl, Hophʿal, Hithpaʿēl, Niphʿal'', &''c.''), as well as those which are formed with other preformatives ({{GHGheb|text=א}}, {{GHGheb|text=י}}, {{GHGheb|text=מ‍}}, {{GHGheb|text=נ‍}}, {{GHGheb|text=ת}}), and finally those which are formed with afformatives. The quadriliterals and quinqueliterals also are taken in connexion with these formations, inasmuch as they arise almost always by the addition or insertion of one or two consonants to the triliteral stem.
+
+{{center|X. ''Nouns with Preformatives.''}}
+
+{{GHGmargin-letter|85|b}}
+45. Nouns with {{GHGheb|text=א}} prefixed. Cf. the substantives with {{GHGheb|text=א|translate=prosthetic}} ({{GHGpar|19|m}}), such as {{GHGheb|text=אֶזְרוֹעַ|translate=arm}} ({{GHGbible-ref|book=Jer|chapter=32|verse=21}}, {{GHGbible-ref|book=Jb|chapter=31|verse=22}}; elsewhere always {{GHGheb|text=זְרוֹעַ}}); {{GHGheb|text=אֶצְבַּע|translate=a finger}}, {{GHGheb|text=אַרְבֶּה|translate=a locust}}, {{GHGheb|text=אֶגְרוֹף|translate=fist}} (others ''mattock'', or ''clod''), {{GHGheb|text=אַשְׁמוּרָה}} or {{GHGheb|text=אַשְׁמֹ֫רֶת|translate=a watch}}. In these examples the {{GHGheb|text=א}} is a ‘euphonic’ prefix (Barth, ''ibid.'', §&nbsp;150&nbsp;b); in other cases it is ‘essential’; cf. especially the adjectives, {{GHGheb|text=אַכְזָב|translate=deceitful}}, {{GHGheb|text=אַכְזָר|translate=cruel}}, {{GHGheb|text=אֵיתָן|translate=perennial}} (for ''ʾaitan'') [=the Arab. ‘elative’, used for expressing the compar. and superl. degrees]. The fem. {{GHGheb|text=אַזְכָּרָה|translate=fragrant part}}<ref>Or perhaps more correctly with Jacob, {{GHGcite|title={{abbr|ZAW.|Zeitschrift für die alttestamentliche Wissenschaft, ed. by B. Stade, Giessen, 1881 ff., and since 1907 by K. Marti.}}}} 1897, p. 79, ‘''declaration'',’ i.e. the part of the meal-offering which ‘announces the sacrifice and its object’.</ref> (of the {{Hyphenated word start|s=meal-|hyph=|e=offering}}<section end="par85" /><noinclude>
+<references/></noinclude>

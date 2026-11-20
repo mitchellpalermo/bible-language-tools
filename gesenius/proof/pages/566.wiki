@@ -1,0 +1,39 @@
+<!-- scan 566, printed 542, Index of Subjects -->
+{{colbegin}}
+South Semitic, 1 ''b'' (i).
+Spirants, 6 ''n'', 13, 21.
+Square character, 5 ''a''.
+Status absolutus of the noun, 89 ''a''.
+Status constructus, its form, 89: vowel-changes marking it in many nouns, 91–6: its use, 128: before an adjective treated as a subst., 128 ''w'', 133 ''h'' (end), 134 ''p'' (end): wider use of it, 130: before prepositions, 130 ''a'': before relative clauses, 130 ''c'', ''d'': in apposition with another constr. st., 130 ''e'', ''f'': before numerals, 134 ''o'', ''p'': anomalously with the article, 127 ''f''–''i'': before {{GHGheb|text=זוּ}}, used as a relative, 138 ''g'' (''a'').
+Stem-consonants, or radicals, 30 ''c''.
+Stems, distinguished from roots, 30 ''a'', ''d'', ''g''–''k''.
+Strengthening (doubling or sharpening) of consonants, 12, 20: in gutturals, 22 ''b'': virtual, 22 ''c'': to intensify the idea of the stem, 52 ''a'', ''d'': of 3rd radical in fem. and plur. of nouns of the forms {{GHGheb|text=אָדֹם}}, {{GHGheb|text=גָּמָל}}, 84<sup>a</sup> ''h'', 93 ''s'', ''ee'', ''kk'', 94 ''c'', 95 ''g'', cf. 93 ''pp'': virtual sharpening of {{GHGheb|text=א}}, 64 ''e'': sharpening sometimes omitted in 2nd radical of verbs {{GHGheb|text=ע״ע}}, 67 ''g'', ''dd''.
+Subject, omitted in participial clauses, 116 ''s'', ''t'': impersonal, 144 ''b'', ''c'': indefinite, 144 ''d''–''k'': two subjects in a verbal clause, 144 ''l'', ''m'': construction of compound subjects, 146.
+Substantive, its construction with the adjective, 132: as predicate of a noun-clause, 141 ''b'': used as predicate where we should use an adjective, 141 ''c''–''d''.
+Suffixes, (pronominal) attached to verbs, 58: rare, irregular, or poetic, with verb, 58 ''g'', ''i'', ''k'' (cf. 59 ''e''–''h'', 60 ''d''–''h'', 61 ''b''–''e'', ''g'', ''h''): with noun in sing., 91 ''e'', ''f'': in plur. 91 ''l'': the sing. form after {{GHGheb|text=־וֹת}}, 91 ''n'': with prepositions, 103: 3rd sing. masc. in {{GHGheb|text=־ֹה}}, 7 ''c'', 58 ''g'', 91 ''e'': 3rd sing. fem. without Mappîq, 58 ''g'', 91 ''e'', 103 ''g'': omission of {{GHGheb|text=־ָת}} in fem. nouns before suffix, 91 ''e'' (end): 3rd plur. in {{GHGheb|text=מוֹ}}, 58 ''g'', 91 ''f'', ''l'', 103 ''f'' N.<sup>3</sup>: omission of {{GHGheb|text=י}} in plur. nouns before suffix, 91 ''k'': original {{GHGheb|text=י}} of sing. nouns from {{GHGheb|text=ל״ה}} stems retained before suffix, 93 ''ss'': denoting the remoter object, 117 ''x'': use of 3rd fem. sing. and 3rd plur. to express ‘it’, 135 ''p'': anticipating the object (as in Aram.), 131 ''m'', ''o'': apparent verbal forms attached to nouns used as adverbs, 100 ''o'', ''p'': anticipating the genitive, 131 ''n'': syntax of, 135 ''m''–''r'': heavy (or grave) and light, 59 ''e'', 91 ''o'', 93 ''b'': masculine suffixes referring to feminines, 135 ''o'': fem. suff. with collective force, 135 ''p'': suffixes which have lost their meaning ({{GHGheb|text=אֲדֹנָי}}, {{GHGheb|text=יַחְדָּו}}), 135 ''q'', ''r'': omitted sometimes with infinitive, 115 ''e'' N.
+Superlative, expression of, 132 ''c'', 133 ''g''–''l''.
+Šureq, 8 ''c'', 9 ''n''.
+‘Surface’-plurals, 124 ''b'', ''c''.
+Suspended genitive, 130 ''e'', ''f''.
+Syllables, theory of, 26.
+Syncope and elision, 19 ''k'', 35 ''d'': of the article, 35 ''n'': of {{GHGheb|text=ה}} in Hiphʿîl and Hophʿal, 53 ''a'', ''b'', in infin. Niph., 51 ''l'', in infin. Hiph., 53 ''q'', in infin. Hoph., 67 ''y'' (end).
+Syriac language, 1 ''c''.
+Syriasms in pronunciation, 24 ''e'': cf. Aramaisms.
+
+Talmud, 3 ''a''.
+‘Tam’-character, 5 ''a'' (end).
+Targums, 1 ''c'', 3 ''a''.
+Tell-el-Amarna tablets, 2 ''f''.
+Temporal clauses, 106 ''f'', 111 ''d'', 112 ''oo'', 164: expressed by infin. constr. with a preposition, 164 ''g''.
+Tenses, 40: their use, 106–9, 111, 112: tempus historicum, 106 ''d''.
+Text of the O. T. probably derived from a single archetype, 3 ''c''.
+Textual criticism, 3 ''g'': intentional and unintentional changes in the text, 3 ''g''.
+Tiphʿel, 55 ''h''.
+Titles indicated by the feminine form, 122 ''r''.
+Tone of Hebrew words, 29: marks of, 15 ''b'', ''c'', ''k'', ''l'': thrown forward, 29 ''e'': retrocession of, 29 ''d''–''g'': incomplete retrocession, 29 ''f'': tone in pause, 29 ''i''–''r'': concurrence of two tone-syllables avoided, 29 ''e'', ''f'', ''h''. Tone in perfect thrown forward after wāw consec., 49 ''h''–''l'': in imperf. often thrown back in jussive and after wāw consec., 48 ''f'', 49 ''d'', 67 ''x'', 68 ''d'', ''e'', 69 ''p'', 71, 72 ''t'', ''aa'', 73 ''e''.
+Transitions in poetry from one person to another, 144 ''p'', cf. 135 ''r''.
+Translations of the O. T., 3 ''a''.
+Transposition (metathesis) of consonants, 19 ''n'', 54 ''b''.
+
+U-sounds, 8 ''c'', 9 ''n'', ''o''.
+{{colend}}

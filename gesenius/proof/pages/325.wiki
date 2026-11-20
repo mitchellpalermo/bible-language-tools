@@ -1,0 +1,51 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par103 />Less common are the ''plene'' forms {{GHGheb|text=אוֹתִי}}, {{GHGheb|text=אֽוֹתְךָ}} ({{GHGbible-ref|book=Nu|chapter=22|verse=33}} {{GHGheb|text=אֹֽתְכָה}} before {{GHGheb|text=ה}}), {{GHGheb|text=אוֹתָךְ}} ({{GHGbible-ref|book=Ex|chapter=29|verse=35}}, {{GHGheb|text=אֹתָ֫כָה}}), {{GHGheb|text=אוֹתוֹ}}, {{GHGheb|text=אוֹתָהּ}}, {{GHGheb|text=אוֹתָ֫נוּ}}, {{GHGheb|text=אוֹתָם}}. Moreover, for {{GHGheb|text=אֶתְכֶם}} we find {{GHGheb|text=אֽוֹתְכֶם}} {{GHGbible-ref|book=Jos|chapter=23|verse=15}}; for {{GHGheb|text=אֹתָם}}, five times {{GHGheb|text=אֶתְהֶם}} ({{GHGbible-ref|book=Gn|chapter=32|verse=1}}, {{GHGbible-ref|book=Ex|chapter=18|verse=20}}, &c.), and in {{GHGbible-ref|book=Ez|chapter=23|verse=45}} {{GHGheb|text=אֽוֹתְהֶם}}; for {{GHGheb|text=אֶתְהֶן}} ({{GHGbible-ref|book=Gn|chapter=19|verse=8}}, &c. [13 times]), {{GHGheb|text=אֹתָן}} (only found in {{GHGbible-ref|book=Ez|chapter=16|verse=54}}; {{GHGbible-ref|book=Ex|chapter=35|verse=26}} {{GHGheb|text=אֹתָ֫נָה}}; {{GHGbible-ref|book=Ez|chapter=34|verse=21}} {{GHGheb|text=אוֹתָ֫נָה}}), and {{GHGheb|text=אֽוֹתְהֶן}} {{GHGbible-ref|book=Ez|chapter=23|verse=47}}.—No instance of the 2nd fem. plur. {{GHGheb|text=אֶתְכֶן}} occurs in the O.T.; in {{GHGbible-ref|book=Cant|chapter=2|verse=7}}, &c., {{GHGheb|text=אֶתְכֶם}} is used instead.
+
+{{GHGmargin-letter|103|c}}
+2. The preposition {{GHGheb|text=עִם־|translate=with}} (with suffixes on the model of stems {{GHGheb|text=ע״ע}}, {{GHGheb|text=עִמִּי}}, {{GHGheb|text=עִמְּךָ}} [{{GHGbible-ref|book=1 S|chapter=1|verse=26}} {{GHGheb|text=עִמְּכָה}}], in {{GHGterm|pause}} {{GHGheb|text=עִמָּךְ}}; 2nd fem. {{GHGheb|text=עִמָּךְ}}; {{GHGheb|text=עִמּוֹ}}, {{GHGheb|text=עִמָּהּ}}) is united with the suffixes {{GHGheb|text=נוּ}}, {{GHGheb|text=כֶם}}, and {{GHGheb|text=הֶם}} by a (pretonic) {{GHGterm|Qameṣ}}, which causes the sharpening of the ''Mêm'' to be distinctly audible: {{GHGheb|text=עִמָּ֫נוּ}}, {{GHGheb|text=עִמָּכֶם}}, {{GHGheb|text=עִמָּהֶם}} (so in {{GHGbible-ref|book=Nu|chapter=22|verse=12}}, {{GHGbible-ref|book=Dt|chapter=29|verse=16}}, both in principal pause, and often in very late passages, otherwise {{GHGheb|text=עִמָּם}} is generally used). In the first person, besides {{GHGheb|text=עִמִּי}}, we also find {{GHGheb|text=עִמָּדִי}} (probably from original {{GHGheb|text=ענדי}}; cf. Arab. ''ʿinda'', beside, with).
+
+{{GHGmargin-letter|103|d}}
+3. It is but seldom that prepositions occur with verbal suffixes, as {{GHGheb|text=תַּחְתֵּ֫נִי}} {{GHGbible-ref|book=2 S|chapter=22|verse=37.40.48}} (for which {{GHGbible-ref|book=Ps|chapter=18|verse=37.40.48}} {{GHGheb|text=תַּחְתַּי}}), {{GHGheb|text=תַּחְתֶּ֫נָּה}} {{GHGbible-ref|book=Gn|chapter=2|verse=21}} and {{GHGheb|text=בַּֽעֲדֵ֫נִי}} {{GHGbible-ref|book=Ps|chapter=139|verse=11}} (here probably for the sake of the rhyme with {{GHGheb|text=יִשׁוּפֵּ֫נִי}}).<ref>''Fînî'' and ''bînî'' (in me), in vulgar Arabic for ''fiyya'' and ''bî'', are compared by Socin. Brockelmann, {{GHGcite|title={{abbr|ZA.|Zeitschrift für Assyriologie und verwandte Gebiete, ed. by C. Bezold. Lpz. 18S6 ff.}}}} xiv. 347, note 1, suggests that {{GHGheb|text=תחתני}}, {{GHGheb|text=תחתנה}}, {{GHGheb|text=בעדני}} are later formations on the model of {{GHGheb|text=מִמֶּ֫נִּי}} when its origin from the reduplication of the preposition had become obscured, but see below, ''m''.</ref>
+
+{{GHGmargin-letter|103|e}}
+'''2.''' When pronominal suffixes are added to the prefixes (§ 102), there appears occasionally, especially in the case of the shorter suffixes, an endeavour to lengthen the preposition, so as to give it more strength and body. Hence to {{GHGheb|text=בְּ}} is appended the syllable {{GHGheb|text=מוֹ}} (see below, ''k''), and {{GHGheb|text=בְּ}} and {{GHGheb|text=לְ}} take at least a full vowel, {{GHGheb|text=בָּ}} and {{GHGheb|text=לָ}} ({{GHGpar|102|d}}, ''f'').—The following deviations from the analogy of the noun with suffixes are to be noticed (''a'') in the pausal forms {{GHGheb|text=בָּךְ}}, {{GHGheb|text=לָךְ}}, {{GHGheb|text=אֹתְךְ}}, {{GHGheb|text=אִתָּךְ}}, {{GHGheb|text=עִמָּךְ}} (not ''bèkhā'', &c.); (''b'') in the similar forms with the suffix of the 2nd sing. fem. (not ''bēkh'', &c.) and in {{GHGheb|text=בָּ֫נוּ}}, {{GHGheb|text=לָ֫נוּ}}, {{GHGheb|text=עִמָּ֫נוּ}}, &c. (not ''bēnû'', &c.).
+
+{{GHGmargin-letter|103|f}}
+(''a'') ''{{GHGheb|text=לְ}} with Pronominal Suffixes''.
+
+<div align="center">
+{| cellspacing="0" cellpadding="0" border="0"
+|
+| Sing.
+| colspan="2" | Plur.
+|-
+| 1. c. ''to me''.
+| {{GHGheb|text=לִי}}
+| ''to us''.
+| {{GHGheb|text=לָ֫נוּ}}
+|-
+| 2. m. ''to thee''.
+| {{GHGheb|text=לְךָ}} ({{GHGheb|text=לְכָה}}), in {{GHGterm|pause}} {{GHGheb|text=לָךְ}}
+| ''to you''.
+| {{GHGheb|text=לָכֶם}}
+|-
+| f.
+| {{GHGheb|text=לָךְ}}.........
+|
+| [{{GHGheb|text=לָכֶן}}<ref>{{GHGheb|text=לָכֶן}} does not occur in the O.T., by a mere accident, no doubt; {{GHGbible-ref|book=Ez|chapter=13|verse=18}} {{GHGheb|text=לָכֶ֫נָה}}.</ref>] {{GHGheb|text=לָכֶ֫נָה}}
+|-
+| 3. m. ''to him''.
+| {{GHGheb|text=לוֹ}}
+| ''to them''
+| {{GHGheb|text=לָהֶם}}, {{GHGheb|text=לָהֵ֫מָּה}} poet. {{GHGheb|text=לָ֫מוֹ}}
+|-
+|
+|
+|
+| [53 times]<ref>The question whether {{GHGheb|text=לָ֫מוֹ}} can also stand for the sing. {{GHGheb|text=לוֹ}}, which Rödiger and recently W. Diehl (''Das Pronomen pers. suff.... des Hebr.'', p. 20 f.) and P. Haupt ({{GHGcite|title={{abbr|SBOT.|Sacred Books of the Old Testament, ed. by P. Haupt. Lpz. and Baltimore, 1893 ff.}}}} on {{GHGbible-ref|book=Pr|chapter=23|verse=20}}, a contraction of ''la-humû'') have altogether denied, must be answered in the affirmative unless we conclude with Diehl and Haupt that ''all'' the instances concerned are due to corruptions of the text. It is true that in such places as {{GHGbible-ref|book=Gn|chapter=9|verse=26.27}}, {{GHGbible-ref|book=Dt|chapter=33|verse=2}}, {{GHGbible-ref|book=Is|chapter=30|verse=5}}, {{GHGbible-ref|book=Ps|chapter=73|verse=10}} (all ''in'' or immediately before the principal pause; in {{GHGbible-ref|book=Dt|chapter=33|verse=2}} with {{GHGterm|Zaqeph qaṭon}} at least) {{GHGheb|text=לָ֫מוֹ}} can be better explained as plural (in reference to collective nouns); and in {{GHGbible-ref|book=Is|chapter=53|verse=8}} for {{GHGheb|text=נֶ֫גַע לָ֫מוֹ}} we should read with the LXX {{GHGheb|text=נִגַּע לַמָּ֫וֶת}}. On the other hand, in {{GHGbible-ref|book=Is|chapter=44|verse=15}} its explanation as plural would be extremely forced. Even then there would remain—presuming the traditional text to be correct—{{GHGheb|text=פָּנֵ֫ימוֹ}} {{GHGbible-ref|book=Ps|chapter=11|verse=7}} and {{GHGheb|text=כַּפֵּ֫ימוֹ}} {{GHGbible-ref|book=Jb|chapter=27|verse=23}}, as well as {{GHGheb|text=עָלֵ֫ימוֹ}}, three times, {{GHGbible-ref|book=Jb|chapter=20|verse=23}}, {{GHGbible-ref|book=Jb|chapter=27|verse=23|hidebook=1}} (beside {{GHGheb|text=עָלָיו}}), and especially {{GHGbible-ref|book=Jb|chapter=22|verse=2}}. In all these places the most extreme exegetical artifices can only be avoided by simply admitting a singular suffix (={{GHGheb|text=פָּנָיו}}, {{GHGheb|text=כַּפָּיו}}, {{GHGheb|text=עָלָיו}}).—On the question of the antiquity of the suffixes in {{GHGheb|text=מוֹ}} see {{GHGpar|91|l}}.</ref>
+|-
+| f. ''to her''.
+| {{GHGheb|text=לָהּ}}
+|
+| {{GHGheb|text=לָהֶן}},<ref>The form {{GHGheb|text=לָהֵן}} in {{GHGbible-ref|book=Ru|chapter=1|verse=13}} is Aramaic (=''therefore'').</ref>{{GHGheb|text=לָהֵ֫נָּה}}
+|}</div><section end=par103 /><noinclude>
+<references/></noinclude>

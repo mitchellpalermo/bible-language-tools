@@ -1,0 +1,55 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par103 />{{GHGmargin-letter|103|i}}
+(''c'') ''{{GHGheb|text=מִן־}} with Pronominal Suffixes.''
+
+<div align="center">
+{| cellspacing="0" cellpadding="0" border="0"
+|
+| Sing.
+| colspan="2" | Plur.
+|-
+| 1. c. ''from me''.
+| {{GHGheb|text=מִמֶּ֫נִּי}} poet. {{GHGheb|text=מִנִּי}} [4 times], in {{GHGterm|pause}}
+| ''from us''.
+| {{GHGheb|text=מִמֶּ֫נּוּ}}
+|-
+|
+| also {{GHGheb|text=מֶ֫נִּי}} [6 times]
+|
+|
+|-
+| 2. m. ''from thee''.
+| {{GHGheb|text=מִמְּךָ}}, in {{GHGterm|pause}} {{GHGheb|text=מִמֶּ֫ךָּ}}
+| ''from you''.
+| {{GHGheb|text=מִכֶּם}}
+|-
+| f.
+| {{GHGheb|text=מִמֵּךְ}}
+|
+| {{GHGheb|text=מִכֶּן}}
+|-
+| 3. m. ''from him''.
+| {{GHGheb|text=מִמֶּ֫נּוּ}}, {{GHGbible-ref|book=Jb|chapter=4|verse=12}} in {{GHGterm|pause}} {{GHGheb|text=מֶ֫נְהוּ}}, [{{GHGheb|text=מִנֵּ֫הוּ}}
+| ''from them''
+| {{GHGheb|text=מֵהֶם}}, {{GHGheb|text=מֵהֵ֫מָּה}} [twice],
+|-
+|
+| or {{GHGheb|text=מִנֶּ֫הוּ}}: see below]
+|
+| {{GHGbible-ref|book=Jb|chapter=11|verse=20}} {{GHGheb|text=מִנְּהֶם}}
+|-
+| f. ''from her''.
+| {{GHGheb|text=מִמֶּ֫נָּה}}
+|
+| {{GHGheb|text=מֵהֶן}}, {{GHGheb|text=מֵהֵ֫נָה}} [7 times]
+|}
+</div>
+
+{{GHGmargin-letter|103|k}}
+The syllable {{GHGheb|text=מוֹ}} (in Arabic ''mâ'' {{GHGheb|text=מָא}}=Heb. {{GHGheb|text=מָה|translate=what}}) in {{GHGheb|text=כָּמ֫וֹנִי}} (probably from {{GHGheb|text=כְּמָה אֲנִי}}, prop. ''according to what I'', for ''as I'') is, in poetry, appended to the three simple prefixes {{GHGheb|text=בְּ}}, {{GHGheb|text=כְּ‍}}, {{GHGheb|text=לְ}}, even without suffixes, so that {{GHGheb|text=בְּמוֹ}}, {{GHGheb|text=כְּמוֹ}}, {{GHGheb|text=לְמוֹ}} appear as independent words, equivalent in meaning to {{GHGheb|text=בְּ}}, {{GHGheb|text=כְּ‍}}, {{GHGheb|text=לְ}}. Poetry is here distinguished from prose by the use of longer forms; in the case of {{GHGheb|text=מִן}}, on the other hand, it prefers the shorter, which resemble the Syriac and Arabic.
+
+{{GHGmargin-letter|103|l}}
+The form {{GHGheb|text=כָּהֶם}}, enclosed in brackets above, occurs only in {{GHGbible-ref|book=2 K|chapter=17|verse=15}} (in {{GHGterm|pause}}), {{GHGheb|text=כָּהֵ֫מָּה}} only in {{GHGbible-ref|book=Jer|chapter=36|verse=32}} (in {{GHGterm|pause}}); {{GHGheb|text=כָּהֵן}} (Baer following Qimḥi {{GHGheb|text=כָּהֶן}}) only in {{GHGbible-ref|book=Ez|chapter=18|verse=14}}. Cf. Frensdorff, ''Massora Magna'', p. 234 ff.—For {{GHGheb|text=כָּכֶם|translate=as ye}}, Qimḥi requires {{GHGheb|text=כָּכֵם}} (invariably or only in {{GHGbible-ref|book=Jb|chapter=16|verse=4}}?); in {{GHGbible-ref|book=Jos|chapter=1|verse=15}}, {{GHGbible-ref|book=Ju|chapter=8|verse=2}}, {{GHGbible-ref|book=Ezr|chapter=4|verse=2}} Baer gives {{GHGheb|text=כָּכֶם}}.
+
+{{GHGmargin-letter|103|m}}
+With regard to {{GHGheb|text=מִן}} with suffixes, {{GHGheb|text=מִמֶּ֫נִּי|translate=from me}} is usually explained as arising, by a reduplication of {{GHGheb|text=מִן}}, from an original {{GHGheb|text=מנמני}}, just as {{GHGheb|text=מִמֶּ֫נּוּ|translate=from him}}, from {{GHGheb|text=מנמנ-הו}}, identical in form with {{GHGheb|text=מִמֶּ֫נּוּ}}<ref>The Babylonian Masora writes {{GHGheb|text=מִמֵּ֫נוּ}} (to distinguish it from the 3rd sing.), which is justly blamed by Ibn Ezra.</ref> ''from us'', from {{GHGheb|text=מנמנ-נו}}, while {{GHGheb|text=מִמֶּ֫נָּה|translate=from her}}, goes back to {{GHGheb|text=מנמנה}}. Far simpler, however, is Mayer Lambert’s explanation ({{GHGcite|title={{abbr|REJ.|Revue des Études Juives. Paris, 1880 ff.}}}} xxiii. 302 ff.), that {{GHGheb|text=מִמֶּ֫נִּי}}, &c., have arisen from {{GHGheb|text=מִנֶּנִּי}}, &c., and that the forms of the suffixes are to be explained on the analogy of {{GHGheb|text=אֵינֶ֫נִּי}}, {{GHGheb|text=עוֹדֶ֫נּוּ}}, {{GHGheb|text=תַּחְתֶּ֫נָּה}}, {{GHGpar|100|o}}.—The bracketed form {{GHGheb|text=מִנֵּ֫הוּ}}, for which Baer, following Qimḥi and others, writes {{GHGheb|text=מִנֶּ֫הוּ}}, occurs only in {{GHGbible-ref|book=Ps|chapter=68|verse=24}}, and is there regarded by Delitzsch, Hupfeld, and others (following Simonis) as a substantive ({{GHGheb|text=מֵן}}=''portion''). The expression {{GHGheb|text=מִן־הוּא}} (for {{GHGheb|text=מִמֶּ֫נּוּ}}?) {{GHGbible-ref|book=Is|chapter=18|verse=2.7}} is very strange.—{{GHGheb|text=מֵהֵ֫מָּה}} occurs only in {{GHGbible-ref|book=Jer|chapter=10|verse=2}}, {{GHGbible-ref|book=Ec|chapter=12|verse=12}} ({{GHGbible-ref|book=Jb|chapter=11|verse=20}} {{GHGheb|text=מִנְּהֶ֑ם}}); {{GHGheb|text=מֵהֶן}} (so Baer and Ginsburg, following the best authorities, instead of the ordinary reading {{GHGheb|text=מֵהֵן}}) only in {{GHGbible-ref|book=Ez|chapter=16|verse=47.52}}.<section end=par103 /><noinclude>
+<references/></noinclude>

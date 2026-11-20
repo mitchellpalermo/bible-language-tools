@@ -1,0 +1,21 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><section begin="par107" />{{GHGmargin-letter|107|v}}
+Rem. In passages like {{GHGbible-ref|book=1 S|chapter=11|verse=5}}, {{GHGbible-ref|book=Ps|chapter=8|verse=5}}, {{GHGbible-ref|book=Ps|chapter=114|verse=5|hidebook=1}}, the context shows that the imperfect corresponds rather to our present. In such sentences the perfect also is naturally used in referring to completed actions, e.g. {{GHGbible-ref|book=Gn|chapter=20|verse=10}}, {{GHGbible-ref|book=Ju|chapter=18|verse=23}}, {{GHGbible-ref|book=2 S|chapter=7|verse=18}}, {{GHGbible-ref|book=Is|chapter=22|verse=1}}.
+
+{{GHGmargin-letter|107|w}}
+(4) In ''negative sentences'' to express actions, &c., which cannot or should not happen, e.g. {{GHGbible-ref|book=Gn|chapter=32|verse=13}} {{GHGheb|text=אֲשֶׁר לֹא־יִסָּפֵר מֵרֹב|translate=which cannot be numbered for multitude}}; {{GHGbible-ref|book=Gn|chapter=20|verse=9|hidebook=1}} ''deeds'' ({{GHGheb|text=אֲשֶׁר לֹא־יֵֽעָשׂוּ}}) ''that ought not to be done'' (cf. above, ''g''); {{GHGbible-ref|book=Ps|chapter=5|verse=5}}.
+
+{{GHGmargin-letter|107|x}}
+(5) In ''conditional clauses'' (the ''modus conditionalis'' corresponding to the Latin present or imperfect conjunctive) both in the protasis and apodosis, or only in the latter, {{GHGbible-ref|book=Ps|chapter=23|verse=4}} {{GHGheb|text=גַּם כִּֽי־אֵלֵךְ... לֹֽא־אִירָא רָע|translate=yea, though I walk}} (or ''had to walk'')... ''I fear'' (or ''I would fear'') ''no evil''; {{GHGbible-ref|book=Jb|chapter=9|verse=20}} ''though I be righteous, mine own mouth shall condemn me''. After a perfect in the protasis, e.g. {{GHGbible-ref|book=Jb|chapter=23|verse=10}}. Very frequently also in an apodosis, the protasis to which must be supplied from the context, e.g. {{GHGbible-ref|book=Jb|chapter=5|verse=8}} ''but as for me, I would seek unto God'' (were I in thy place); {{GHGbible-ref|book=Jb|chapter=3|verse=13|hidebook=1}}, 16, {{GHGbible-ref|book=Jb|chapter=14|verse=14|hidebook=1}} f., {{GHGbible-ref|book=Ps|chapter=55|verse=13}}, {{GHGbible-ref|book=Ru|chapter=1|verse=12}}. However, some of the imperfects in these examples are probably intended as jussive forms. Cf. {{GHGpar|109|h}}.
+<section end="par107" />
+<section begin="par108" />{{GHGpar-heading|108|Use of the Cohortative}}
+
+{{GHGmargin-letter|108|a}}
+The cohortative, i.e. according to {{GHGpar|48|c}}, the 1st pers.<ref>For the few examples of cohortatives in the 3rd sing., see {{GHGpar|48|d}}.</ref> sing. or plur. of the imperfect lengthened by the ending {{GHGheb|text=־ָה}},<ref>But verbs {{GHGheb|text=ל״ה}}, according to {{GHGpar|75|l}}, even in the cohortative, almost always have the ending {{GHGheb|text=־ֶה}}; cf. e.g. in {{GHGbible-ref|book=Dt|chapter=32|verse=20}} {{GHGheb|text=אֶרְאֶה}} after {{GHGheb|text=אַסְתִּ֫ירָה}}.</ref> represents in general an endeavour directed expressly towards a definite object. While the corresponding forms of the indicative rather express the mere announcement that an action will be undertaken, the cohortative lays stress on the determination underlying the action, and the personal interest in it.
+
+Its uses may be divided into—
+
+{{GHGmargin-letter|108|b}}
+'''1.''' The cohortative standing alone, or co-ordinated with another cohortative, and frequently strengthened by the addition of the particle {{GHGheb|text=נָא}}:
+
+(''a'') To express self-encouragement, e.g. {{GHGbible-ref|book=Ex|chapter=3|verse=3}} {{GHGheb|text=אָסֻ֫רָה־נָּא וג׳|translate=I will turn aside now, and see...!}} So especially as the result of inward deliberation (in soliloquies), e.g. {{GHGbible-ref|book=Gn|chapter=18|verse=21}}, {{GHGbible-ref|book=Gn|chapter=32|verse=21|hidebook=1}} (rarely so used after {{GHGheb|text=אַל־}}, {{GHGbible-ref|book=Gn|chapter=21|verse=16}} ''let me not look''...''!'' {{GHGbible-ref|book=Jer|chapter=18|verse=18}}), and also as a more or less emphatic statement of a fixed determination, e.g. {{GHGbible-ref|book=Is|chapter=5|verse=1}} ''I will sing''<ref>R.V. ''let me sing''.]</ref>...''!'' {{GHGbible-ref|book=Is|chapter=5|verse=6|hidebook=1}}, {{GHGbible-ref|book=Is|chapter=31|verse=8|hidebook=1}}. Cf. also {{GHGbible-ref|book=Gn|chapter=46|verse=30}} ''now let me die'' (''I am willing to die''),<section end="par108" /><noinclude>
+<references/></noinclude>

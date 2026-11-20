@@ -1,0 +1,123 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><div align="center">
+{|
+! Accusative of the Pronoun, or ''Suffixum Verbi''.
+! colspan="4" | Genitive of the Pronoun, or ''Suffixum Nominis'' (''Pron. posessivum'').
+|-
+! ''B''.
+! colspan="2" | ''A''.
+! colspan="2" | ''B''.
+
+|-
+! With ''Nûn energicum''.
+! colspan="2" | Attached to a sing. noun.
+! colspan="2" | Attached to a noun plur. or dual.
+
+|-
+| {{GHGheb|text=־ַ֫ נִּי}}; {{GHGheb|text=־ֶ֫ נִּי}}
+| ''my'' (prop. gen.
+| {{GHGheb|text=־ִי}}
+| ''my''.
+| {{GHGheb|text=־ַי}}
+
+|-
+|
+| ''mei'').
+|
+|
+|
+
+|-
+| {{GHGheb|text=־ֶ֫ ךָּ}}, ({{GHGheb|text=־ֶ֫ נָךָּ}})
+| ''thy''
+| {{GHGheb|text=ךָ}}, {{GHGheb|text=אְךָ}}, in
+| ''thy''.
+| {{GHGheb|text=־ֶ֫ יךָ}}
+
+|-
+|
+| (prop.
+| pause {{GHGheb|text=־ֶ֫ ךָ}}
+|
+|
+
+|-
+| not found.
+| ''tui'').
+| {{GHGheb|text=ךְ}}, {{GHGheb|text=־ֵךְ}}, ({{GHGheb|text=־ָךְ}})
+|
+| {{GHGheb|text=־ַ֫ יִךְ}}
+
+|-
+| ({{GHGheb|text=־ֶ֫ נָהוּ}}), {{GHGheb|text=־ֶ֫ נּוּ}}; ({{GHGheb|text=נוֹ}})
+| ''his'' (''eius''
+| {{GHGheb|text=הוּ}}, {{GHGheb|text=ו}}; {{GHGheb|text=־ֵ֫ הוּ}}, {{GHGheb|text=וֹ}} ({{GHGheb|text=הׄ}})
+| ''his''.
+| {{GHGheb|text=־ָיו}}, {{GHGheb|text=־ָו}}, ({{GHGheb|text=־ֵ֫ יהוּ}}<sup>*</sup>)
+
+|-
+|
+| and ''suus'').
+|
+|
+|
+
+|-
+| {{GHGheb|text=־ֶ֫ נָּה}}
+| ''her''.
+| {{GHGheb|text=הָ}}; {{GHGheb|text=־ָהּ}}; {{GHGheb|text=־ֶ֫ הָ}}
+| ''her''.
+| {{GHGheb|text=־ֶ֫ יהָ}}
+
+|-
+| {{GHGheb|text=־ֶ֫ נּוּ}} ? (see {{GHGpar|58|k}})
+| ''our''.
+| {{GHGheb|text=נוּ}}; {{GHGheb|text=־ֵ֫ נוּ}}; ({{GHGheb|text=־ָ֫ נוּ}})
+| ''our''.
+| {{GHGheb|text=־ֵ֫ ינוּ}}
+
+|-
+|&nbsp;
+|
+|
+|
+|
+
+|-
+| these forms are
+| ''your''.
+| {{GHGheb|text=כֶם}}; {{GHGheb|text=־ְכֶם}}
+| ''your''.
+| {{GHGheb|text=־ֵיכֶם}}
+
+|-
+| not found.
+|
+| {{GHGheb|text=כֶן}}; {{GHGheb|text=־ְכֶן}}
+|
+| {{GHGheb|text=־ֵיכֶן}}
+
+|-
+|
+| ''their''.
+| {{GHGheb|text=הֶם}}; {{GHGheb|text=־ָם}},
+| ''their''.
+| {{GHGheb|text=־ֵיהֶם}}, {{GHGheb|text=־ֵ֫ ימוֹ}}<sup>*</sup>
+
+|-
+|
+|
+| {{GHGheb|text=־ָ֫ מוֹ}}<sup>*</sup>
+|
+|
+
+|-
+|
+|
+| {{GHGheb|text=הֶן}}, {{GHGheb|text=הֵן}}, {{GHGheb|text=־ָן}}
+|
+| {{GHGheb|text=־ֵיהֶן}}
+
+
+|}
+</div><noinclude>
+<references/></noinclude>

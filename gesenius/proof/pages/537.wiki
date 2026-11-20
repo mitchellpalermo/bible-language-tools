@@ -1,0 +1,176 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><div align="center">
+{|
+! 3 ''Sing. f''.|| 1 ''Plur''. || 2 ''Plur. m''.|| 2 ''Plur. f''. || 3 ''Plur. m''.|| 3 ''Plur. f''.
+|-
+| {{GHGhebT|text=קְטָלָהּ}}
+| {{GHGhebT|text=קְטָלָ֫נוּ}}
+| wanting.
+| wanting.
+| {{GHGhebT|text=קְטָלָם}}
+| {{GHGhebT|text=קְטָלָן}}
+|-
+|
+|
+|
+|
+| {{GHGhebT|text=לְבֵשָׁם}}
+|
+|-
+| {{GHGhebT|text=קְטָלַ֫תָּה}}
+| {{GHGhebT|text=קְטָלַ֫תְנוּ}}
+| —
+| —
+| {{GHGhebT|text=קְטָלָ֫תַם}}
+| wanting.
+|-
+|
+|
+|
+|
+|
+|
+|-
+| {{GHGhebT|text=קְטַלְתָּהּ}}
+| {{GHGhebT|text=קְטַלְתָּ֫נוּ}}
+| —
+| —
+| {{GHGhebT|text=קְטַלְתָּם}}
+| wanting.
+|-
+|
+|
+|
+|
+|
+|
+|-
+| {{GHGhebT|text=קְטַלְתִּ֫יהָ}}
+| {{GHGhebT|text=קְטַלְתִּ֫ינוּ}}
+| —
+| —
+| {{GHGhebT|text=קְטַלְתִּים}}
+| wanting.
+|-
+| {{GHGhebT|text=קְטַלְתִּ֫יהָ}}
+| —
+| {{GHGhebT|text=קְטַלְתִּיכֶם}}
+| wanting.
+| {{GHGhebT|text=קְטַלְתִּים}}
+| {{GHGhebT|text=קְטַלְתִּין}}
+|-
+|
+|
+|
+|
+|
+|
+|-
+| {{GHGhebT|text=קָטָל֫וּהָ}}
+| {{GHGhebT|text=קָטָל֫וּנוּ}}
+| wanting.
+| wanting.
+| {{GHGhebT|text=קְטָלוּם}}
+| {{GHGhebT|text=קְטָלוּן}}
+|-
+|
+|
+|
+|
+|
+|
+|-
+| wanting.
+| {{GHGhebT|text=קְטַלְתּ֫וּנוּ}}
+| —
+| —
+| wanting.
+| wanting.
+|-
+| {{GHGhebT|text=קְטַלְנ֫וּהָ}}
+| —
+| {{GHGhebT|text=קְטַלְנוּכֶם}}
+| wanting.
+| {{GHGhebT|text=קְטַלְנוּם}}
+| wanting.
+|-
+| {{GHGhebT|text=קָטְלָהּ}}
+| {{GHGhebT|text=קָטְלֵ֫נוּ}}
+| {{GHGhebT|text=כָּתְבְּכֶם}}
+| wanting.
+| {{GHGhebT|text=קָטְלָם}}
+| {{GHGhebT|text=קָטְלָן}}
+|-
+|
+|
+| {{GHGhebT|text=קְטָלְכֶם}}
+|
+|
+|
+|-
+| {{GHGhebT|text=קָטְלֶ֫הָ}}
+| {{GHGhebT|text=קָטְלֵ֫נוּ}}
+| —
+| —
+| {{GHGhebT|text=קָטְלֵם}}
+| —
+|-
+| colspan="6" |
+|-
+| {{GHGhebT|text=יִקְטְלֶ֫הָ}}
+| {{GHGhebT|text=יִקְטְלֵ֫נוּ}}
+| {{GHGhebT|text=יִקְטָלְכֶם}}
+| wanting.
+| {{GHGhebT|text=יִקְטְלֵם}}
+| wanting.
+|-
+| {{GHGhebT|text=יִלְבָּשֶׁ֫הָ}}
+| {{GHGhebT|text=יִלְבָּשֵׁ֫נוּ}}
+|
+|
+|
+|
+|-
+| {{GHGhebT|text=יִקְטְלָהּ}}
+|
+|
+|
+|
+|
+|-
+| {{GHGhebT|text=יִקְטְלֶ֫נָּה}}
+| {{GHGhebT|text=יִקְטְלֶ֫נּוּ}}
+| —
+| —
+| —
+| —
+|-
+|
+|
+|
+|
+|
+|
+|-
+| {{GHGhebT|text=יִקְטְל֫וּהָ}}
+| {{GHGhebT|text=יִקְטְל֫וּנוּ}}
+| {{GHGhebT|text=יִקְטְלוּכֶם}}
+| wanting.
+| {{GHGhebT|text=יִקְטְלוּם}}
+| wanting.
+|-
+|
+|
+|
+|
+|
+|
+|-
+| {{GHGhebT|text=קִטְּלָהּ}}
+| {{GHGhebT|text=קִטְּלָ֫נוּ}}
+| wanting.
+| wanting.
+| {{GHGhebT|text=קִטְּלָם}}
+| {{GHGhebT|text=קִטְּלָן}}
+|}
+</div><noinclude>
+<references/></noinclude>

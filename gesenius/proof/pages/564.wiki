@@ -1,0 +1,43 @@
+<!-- scan 564, printed 540, Index of Subjects -->
+{{colbegin}}
+Permutative, 131 ''k''–''o''.
+Person, abrupt changes of, in poetry, 144 ''p''.
+Personification of countries or peoples, 122 ''i''.
+Phoenician and Punic language, 1 ''a'', ''b'' (ii), 2 ''f'', 10 ''e'' N.<sup>1</sup>, p. 106 N., § 34 N.<sup>4</sup>, 36 N., 49 ''a'' N., 80 ''f'', 87 ''d'': writing, 1 ''l'', 7 ''d'' N.
+Phonetic system of Hebrew, 6 ''o'', ''p''.
+Phonetics, 6 ''a'', ''b''.
+Piʿēl, 52: privativum, 52 ''h'': intensive sense of, 52 ''f'', ''k'': rare in verbs {{GHGheb|text=ע״וּ}}, 72 ''m''.
+Piʿlēl, 55 ''d'': in verbs {{GHGheb|text=ע״וּ}}, 72 ''m''.
+Pilpēl, 55 ''f'': in verbs {{GHGheb|text=ע״ע}}, 67 ''l'': in verbs {{GHGheb|text=ע״וּ}}, 72 ''m''.
+Pleonastic use of the pronoun, 135 ''a'', ''b'': of the negative, 152 ''y''.
+Pluperfect, 106 ''f'', 111 ''q'': pluperf. subjunctive, 106 ''p''.
+Plural, terminations of, 87: in {{GHGheb|text=־ִין}}, 87 ''e'': {{GHGheb|text=־ִי}}, {{GHGheb|text=־ַי}}, {{GHGheb|text=־ָם}} not plural endings, 87 ''f''–''h'': double plural ending in constr. st. of certain words, 87 ''s'': double plur. of subst. and following genitive, 124 ''q'': uses and senses of, 124: unusual constructions of, 145 ''h''–''m'': plur. forms of prepositions, 103 ''n'', ''o'': plur. suffix referring to collective singular, 135 ''p'': plur. predicate of a collective singular, 145 ''b''–''g''.
+Pluralia tantum, 124 ''f'' N.
+Pluralis excellentiae or majestatis, 124 ''g''–''i'' and N.: its construction, 132 ''h'': pl. of extension, 124 ''a''–''c'': intensive pl., 124 ''a'', ''d'', ''e'': of the result or product, 124 ''m'': amplifying plur., 124 ''b'', ''d''–''f'': expressing abstract ideas, 124 ''d'', ''f'': pl. of pronoun to denote a group of actions (= ''it''), 135 ''p''.
+Plurals of compound ideas, 124 ''p''–''r'': of names of animals or things construed with a fem. sing., 145 ''k''.
+Pôʿēl, 55 ''b'', ''c'': in verbs {{GHGheb|text=ע״ע}}, 67 ''l''.
+Poetic style, 2 ''q''–''s''.
+Point used to divide words, 3 ''g'' N.
+Polpal, 55 ''f''.
+Polysyndeton, 154 ''a'' N.
+Potential sense of the imperfect, 107 ''r''–''w''.
+Precative, 109 ''b'', ''c''.
+Predicate, without the article, 126 ''i'', ''k'': agreeing (or not) with the subject, 145: with compound subj., 146: attracted to the principal idea of a compound subject, 146 ''a'': subst. as predicate where we should use an adjective, 141 ''c'', ''d''.
+Prefixes, ''see'' Prepositions.
+Preformatives of the imperfect, 47: of the noun, 85.
+Pregnant construction with prepositions, 119 ''ee'': with {{GHGheb|text=מִן}}, 119 ''x'', ''y'', ''ff'': with {{GHGheb|text=אַחֲרֵי}}, {{GHGheb|text=אֶל}}, {{GHGheb|text=לִקְרַאת}}, {{GHGheb|text=בְּ}}, {{GHGheb|text=לְ}}, 119 ''gg''.
+Prepositions, 101: prefixed, 102: with suffixes, 103: under the government of the verb, 119: compound prepositions, 119 ''b''–''e'': chief meanings of, {{GHGheb|text=אֶל}}, {{GHGheb|text=ב}}, {{GHGheb|text=ל}}, {{GHGheb|text=מִן}}, {{GHGheb|text=עַל}}, 119 ''g''–''dd'': pregnant uses of, 119 ''ee''–''gg'': force of, extending over parallel clause, 119 ''hh'': with adverbs (rare), 119 ''ii'': prep. (esp. {{GHGheb|text=בְּ}}) not used after {{GHGheb|text=כְּ}}, 118 ''s''–''w'', found exceptionally, 118 ''s'' N.
+Present expressed by the Perfect, 106 ''g'', ''h''.
+Preterite, ''see'' Perfect.
+Pretonic vowels, 26 ''e'': with {{GHGheb|text=ב}}, {{GHGheb|text=כ}}, {{GHGheb|text=ל}}, 102 ''f''–''k'': with {{GHGheb|text=עִם}} before suffix, 103 ''c'': with {{GHGheb|text=וְ}}, 104 ''g''.
+Printed texts, earliest Hebrew, 3 ''e'' N.
+Prohibitions, expressed by {{GHGheb|text=אַל}} or {{GHGheb|text=לֹא}} with jussive or imperfect, 107 ''o'', 109 ''c'', ''d'', 152 ''f''.
+Pronominal ideas expressed by substantives, 139.
+Pronominal suffix anticipating noun, attached to verb, 131 ''m'', ''o''; to subst. or prep., 131 ''n''.
+Pronouns, 32: syntax of, 135–8: personal, 32, 135: oblique cases of, 135 ''i''–''k'': suffixes, 33, with the verb, 58, with the noun, 91, with adverbs, 100 ''o'', ''p'', with prepositions, 103: suffix of 3rd fem. sing. referring to entire sentences, 135 ''p'': demonstrative, 34, 136, used relatively, 138 ''g'', ''h'': relative, 36, 138: indefinite, 37 ''g'', 137 ''c'': interrogative, 37 ''a''–''f'', 137 ''a''–''c'': suffix reflexive, 135 ''i'', ''k'': suffix possessive, 33, 135 ''m''–''o'': suffix as genitive, subjective or objective, 135 ''m'': separate pronoun in nominative emphasizing a suffix, 135 ''d''–''h'': reciprocal, 139 ''c'' with N., ''e''.
+Pronunciation of Hebrew, 6 ''a'', ''b'', 48 ''f''.
+Prosthetic Aleph, 19 ''m''.
+Puʿal, 52 ''b''–''d'', ''h'' (end), ''q''–''s'': as passive of Qal, 52 ''e''.
+Puʿlal, 55 ''d''.
+Puncta extraordinaria, 6 ''n''.
+{{colend}}

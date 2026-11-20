@@ -1,0 +1,30 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par22/>final it necessarily takes Mappîq), but e.g. {{GHGheb|text=רוּחִי}}, &c., since here the rapidly uttered ''ă'' is no longer heard.
+
+{{GHGmargin-letter|22|g}}
+''I<sup>a</sup>ch'' for ''ich'', &c., in some Swiss dialects of German, is analogous; a ''furtive Pathaḥ'' is here involuntarily intruded before the deep guttural sound. In Arabic the same may be heard in such words as ''mesîaḥ'', although it is not expressed in writing. The LXX (and Jerome, cf. {{GHGcite|ZAW.}} iv. 79) write {{polytonic|ε}}, sometimes {{polytonic|α}}, instead of ''furtive Pathaḥ'', e.g. {{GHGheb|text=נֹחַ}} {{polytonic|Νῶε}}, {{GHGheb|text=יַדּוּעַ}} {{polytonic|Ἰεδδούα}} (also {{polytonic|Ἰαδδού}}).
+
+{{GHGmargin-letter|22|h}}
+Rem. 1. The guttural may also have an influence upon the ''following'' vowel, especially in Segholate forms, e.g. {{GHGheb|text=נַ֫עַר}} (not ''naʿĕr'') ''a youth'', {{GHGheb|text=פֹּ֫עַל}} (not ''pōʿĕl'') ''deed''. The only exceptions are {{GHGheb|text=אֹהֶל}}, {{GHGheb|text=בֹּהֶן}}, {{GHGheb|text=לֶחֶם}}, {{GHGheb|text=רֶחֶם}}.
+
+{{GHGmargin-letter|22|i}}
+2. Where in the present form of the language an ''ĭ'', whether original or attenuated from {{GHGterm|Pathaḥ}}, would stand before or after a guttural in the first syllable of a word, a {{GHGterm|S<sup>e</sup>ghôl}} as being between ''ă'' and ''ĭ'' is frequently used instead, e.g. {{GHGheb|text=יֶחְבַּשׁ}} (also {{GHGheb|text=יַֽחֲבֹשׁ}}), {{GHGheb|text=יֶהְגּוּ}}, {{GHGheb|text=חֶבְלֵי}}, {{GHGheb|text=נֶאְדָּר}}, {{GHGheb|text=עֶזְרִי}}, &c.
+
+{{GHGmargin-letter|22|k}}
+On the other hand, the slighter and sharper {{GHGterm|Ḥireq}} is retained even under gutturals when the following consonant is sharpened by {{GHGterm|Dageš forte}}, e.g. {{GHGheb|text=הִלֵּל}}, {{GHGheb|text=הִנֵּה}}, {{GHGheb|text=חִטָּה}}; but when this sharpening is removed, S<sup>e</sup>ghôl is again apt to appear, e.g. {{GHGheb|text=הִגָּיוֹן}} constr. {{GHGheb|text=הֶגְיוֹן}}, {{GHGheb|text=חִזָּיוֹן}} constr. {{GHGheb|text=חֶזְיוֹן}}.
+
+{{GHGmargin-letter|22|l}}
+'''3.''' Instead of ''simple Š<sup>e</sup>wâ mobile'', the gutturals take without exception a compound {{GHGterm|Š<sup>e</sup>wâ}}, e.g. {{GHGheb|text=שָֽׁחֲטוּ}}, {{GHGheb|text=אֲקַטֵּל}}, {{GHGheb|text=אֱמֹר}}, {{GHGheb|text=אֳנִי}}, &c.
+
+{{GHGmargin-letter|22|m}}
+'''4.''' When a guttural with {{GHGterm|quiescent Š<sup>e</sup>wâ}} happens to close a syllable in the middle of a word, the strongly closed syllable (with {{GHGterm|quiescent Š<sup>e</sup>wâ}}) may remain; necessarily so with {{GHGheb|text=ח}}, {{GHGheb|text=ע}}, and {{GHGheb|text=ה}} at the end of the tone-syllable, e.g. {{GHGheb|text=שָׁלַ֫חְתָּ}}, {{GHGheb|text=יָדַ֫עְתָּ}}, but also ''before'' the tone (see examples under i), even with {{GHGheb|text=א}}.
+
+But in the syllable before the tone and further back, the closed syllable is generally opened artificially by a {{GHGterm|Ḥaṭeph}} (as being suited to the guttural) taking the place of the {{GHGterm|quiescent Š<sup>e</sup>wâ}}, and in particular that {{GHGterm|Ḥaṭeph}} which repeats the sound of the preceding vowel, e.g. {{GHGheb|text=יַֽחֲשֹׁב}} (also {{GHGheb|text=יַחְשֹׁב}}); {{GHGheb|text=יֶחֱֽזַק}} (also {{GHGheb|text=יֶחְזַק}}); {{GHGheb|text=פָּֽעֳלוֹ}} ''pŏ<sup>o</sup>lô'' (for ''pŏʿlô''). But when, owing to a flexional change, the strong vowel following the {{GHGterm|Ḥaṭeph}} is weakened into {{GHGterm|Š<sup>e</sup>wâ mobile}}, then instead of the {{GHGterm|Ḥaṭeph}} its full vowel is written, e.g. {{GHGheb|text=יַֽעַמְדוּ}} (from {{GHGheb|text=יַֽעֲמֹד}}), {{GHGheb|text=נֶֽעֶרְמוּ}}, {{GHGheb|text=פָּֽעָלְךָ}} (from {{GHGheb|text=פֹּעַל}}). The original forms, according to {{GHGpar|28|c}}, were ''yaʿm<sup>e</sup>dhû, neʿr<sup>e</sup>mû, pŏʿl<sup>e</sup>khā''. Hence {{GHGheb|text=יַֽעַמְדוּ}}, &c., are really only different orthographic forms of {{GHGheb|text=יַֽעֲמְדוּ}}, &c., and would be better transcribed by ''yaʿ<sup>a</sup>m<sup>e</sup>dhû'', &c.
+
+{{GHGmargin-letter|22|n}}
+Rem. 1. On the use of simple or compound Š<sup>e</sup>wâ in guttural verbs, see further §§ 62–65.
+
+{{GHGmargin-letter|22|o}}
+2. Respecting the choice between the three {{GHGterm|Ḥaṭephs}}, it may be remarked:
+
+(''a'') {{GHGheb|text=ח}}, {{GHGheb|text=ה}}, {{GHGheb|text=ע}} at the beginning of a syllable prefer {{GHGheb|text=־ֲ}}, but {{GHGheb|text=א}} prefers {{GHGheb|text=־ֱ}}, e.g. {{GHGheb|text=חֲמוֹר|translate=ass}}, {{GHGheb|text=הֲרֹג|translate=to kill}}, {{GHGheb|text=אֱמֹר|translate=to say}}; when farther from the tone syllable, however, the {{GHGheb|text=־ֱ}} even under {{GHGheb|text=א}} changes into the lighter {{GHGheb|text=־ֲ}}, e.g. {{GHGheb|text=אֱלֵי}} (poetic for {{GHGheb|text=אֶל־}}) ''to'', but {{GHGheb|text=אֲלֵיכֶ֫ם|translate=to you}}, {{GHGheb|text=אֱכֹל|translate=to eat}}, but {{GHGheb|text=אֲכָל־}} (''ʾ<sup>a</sup>khŏl'', toneless on account<section end=par22/><noinclude>
+<references/></noinclude>

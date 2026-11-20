@@ -1,0 +1,27 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><section begin="par77"/>{{GHGpar-heading|77|Relation of the Weak Verbs to one another}}
+
+{{GHGmargin-letter|77|a}}
+The close relation which exists between some classes of the weak verbs (e.g. between {{GHGheb|text=פ״ו}} and {{GHGheb|text=פ״י}}, {{GHGheb|text=ל״א}} and {{GHGheb|text=ל״ה}}, {{GHGheb|text=ע״ע}} and {{GHGheb|text=ע״וּ}}, {{GHGheb|text=ע״ע}} and {{GHGheb|text=ל״ה}}) appears not only in their similarity or identity of inflexion, or their mutual interchange of certain forms, but especially from the fact that frequently the same root (''radix bilittera'', see {{GHGpar|30|g}}) recurs in various weak stems of similar meaning. The meaning accordingly is inherent in the two constant root-consonants, while the third consonant, which is weak (and the particular class of weak verbs with it), does not establish any difference in the meaning. Thus from the root {{GHGheb|text=דךְ}} there occur with the same meaning {{GHGheb|text=דָּכַךְ}}, {{GHGheb|text=דּוּךְ}}, {{GHGheb|text=דָּכָא|translate=to strike, to crush}}; and from the root {{GHGheb|text=נד}} there are {{GHGheb|text=נוּד}}, {{GHGheb|text=נָדַד}}, {{GHGheb|text=נָדָה|translate=to flee}}.
+
+{{GHGmargin-letter|77|b}}
+In this manner the following classes are related in form and meaning:
+
+1. Verbs {{GHGheb|text=ע״וּ}} and {{GHGheb|text=ע״ע}} in which the first and third consonants are the same in both, as being essential to the meaning; e.g. {{GHGheb|text=מוּךְ}} and {{GHGheb|text=מָכַךְ|translate=to become poor}}; {{GHGheb|text=מוּשׁ}} and {{GHGheb|text=מָשַׁשׁ|translate=to feel}}; {{GHGheb|text=נוּד}} and {{GHGheb|text=נָדַד|translate=to flee}}.
+
+{{GHGmargin-letter|77|c}}
+2. Verbs {{GHGheb|text=פ״י}} and {{GHGheb|text=פ״ן}}; e.g. {{GHGheb|text=יָצַב}} and {{GHGheb|text=נָצַב|translate=to place}}, {{GHGheb|text=נָקַשׁ}} and {{GHGheb|text=יָקשׁ}} (''yāqōš'') ''to lay snares''. Moreover, stems belonging to the classes mentioned in 1 (especially {{GHGheb|text=ע״וּ}}) are frequently related also to verbs {{GHGheb|text=פ״י}} and {{GHGheb|text=פ״ן}}, e.g. {{GHGheb|text=גּוּר}} and {{GHGheb|text=יָגֹר|translate=to fear}}; {{GHGheb|text=טוֹב}} and {{GHGheb|text=יָטַב|translate=to be good}}; {{GHGheb|text=נָפַח}} and {{GHGheb|text=פּוּחַ|translate=to blow}}; {{GHGheb|text=נָפַץ}} and {{GHGheb|text=פּוּץ|translate=to dash to pieces}}. Verbs {{GHGheb|text=פ״א}} are less frequently connected with these classes, e.g. {{GHGheb|text=אָדַשׁ}} and {{GHGheb|text=דּוּשׁ|translate=to thresh}}, &c.
+
+{{GHGmargin-letter|77|d}}
+3. Verbs {{GHGheb|text=ל״א}} and {{GHGheb|text=ל״ה}} (in which the first two consonants form the real body of the stem) are sometimes related to each other, and sometimes to the above classes. To each other, in {{GHGheb|text=דָּכָא}} and {{GHGheb|text=דָּכָה|translate=to crush}}, {{GHGheb|text=קָרָא}} and {{GHGheb|text=קָרָה|translate=to meet}} (cf. {{GHGpar|75|nn}}); to verbs of the other classes, in {{GHGheb|text=מָצָה}} and {{GHGheb|text=מָצַץ|translate=to suck}}, {{GHGheb|text=דָּחָה}} and {{GHGheb|text=דּוּחַ|translate=to thrust}}, &c.
+
+{{GHGmargin-letter|77|e}}
+4. Verbs {{GHGheb|text=ע״ע}} and {{GHGheb|text=ל״ה}}, on which cf. Grimm, ''Journal of Bibl. Lit.'', 1903, p. 196; e.g. {{GHGheb|text=אָנָה}} and {{GHGheb|text=אָנַן|translate=to sigh}}, {{GHGheb|text=דָּמָה}} and {{GHGheb|text=דָּמַם|translate=to be quiet}}, {{GHGheb|text=חָנָה}} and {{GHGheb|text=חָנַן|translate=to incline}}, {{GHGheb|text=כָּלָה}} and {{GHGheb|text=כָּלַל|translate=to end}}, {{GHGheb|text=קָלָה}} and {{GHGheb|text=קָלַל|translate=to despise}}, {{GHGheb|text=שָׁגָה}} and {{GHGheb|text=שָׁגַג|translate=to err}}, {{GHGheb|text=שָׁחָה}} and {{GHGheb|text=שָׁחַח|translate=to bend down}}, {{GHGheb|text=שָׁסָה}} and {{GHGheb|text=שָׁסַס|translate=to plunder}}.
+
+{{GHGmargin-letter|77|f}}
+5. Verbs {{GHGheb|text=ע״וּ}} and {{GHGheb|text=ע״ה}}; e.g. {{GHGheb|text=מוּל}} and {{GHGheb|text=מָהַל}} (New Hebrew; in O.T. only {{GHGheb|text=מָהוּל}} {{GHGbible-ref|book=Is|chapter=1|verse=22}}) ''to circumcise'', {{GHGheb|text=מוּר}} and {{GHGheb|text=מָהַר|translate=to exchange}}, {{GHGheb|text=נוּר}} (in {{GHGheb|text=מְנוֹרָה|translate=a light}}) and {{GHGheb|text=נָהַר|translate=to shine}}; cf. also {{GHGheb|text=לְהָטִים|translate=secret arts}}, {{GHGbible-ref|book=Ex|chapter=7|verse=11}} with {{GHGheb|text=לָט|translate=secret}}, from {{GHGheb|text=לוּט}}.
+<section end="par77"/>
+<section begin="par78"/>{{GHGpar-heading|78|Verba Defectiva}}
+
+{{GHGmargin-letter|78|a}}
+It often happens, when two kindred weak verbs are in use with the same meaning, that both are ''defective'', i.e. do not occur in all the forms. Since, however, those tenses and forms which are not in use in the one verb are generally supplied by the other, they mutually complete one another, and thus form together, as it were, an entire<section end="par78"/><noinclude>
+<references/></noinclude>

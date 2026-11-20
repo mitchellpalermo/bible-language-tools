@@ -1,0 +1,21 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par99 />{{center|'''CHAPTER IV'''
+
+THE PARTICLES}}
+
+<!-- section begins above -->{{GHGpar-heading|99|General View}}
+
+<div style="font-size: small; text-align: center;">Brockelmann, {{GHGcite|title=Grundriss}}, i. 492 f.</div>
+
+{{GHGmargin-letter|99|a}}
+'''1.''' The particles, which in general express the secondary modifications of thought in speech, the closer relation of words to one another, and the mutual connexion of sentences, are for the most part either borrowed or derived from noun-forms, sometimes also from pronouns and verbs ({{GHGpar|30|s}}). ''Primitive'' particles (apart from a few demonstrative forms, see {{GHGpar|100|i}}) can only be so called in the sense defined in {{GHGpar|81|f}}.
+
+{{GHGmargin-letter|99|b}}
+'''2.''' So far as the origin of the particles can be discovered with certainty, they are either (1) ''borrowed'' from other parts of speech; i.e. certain forms of the noun, pronoun, or verb, with more or less loss of their original meaning, have come to be employed as particles; cf. in the Indo-Germanic languages, e.g. the Latin ''certo, falso, partim, verum, causa'', the German ''statt, anstatt, wegen, weg'', and the English ''instead, away''; or (2) ''derived'' from other parts of speech, either (''a'') by the ''addition'' of formative syllables, as {{GHGheb|text=יוֹמָם|translate=by day}}, from {{GHGheb|text=יוֹם}} (cf., however, {{GHGpar|100|g}}); or most commonly (''b'') by ''abbreviations'' effected in various ways, the extent of their mutilation being in proportion to the frequency of their use, so that in some cases (see below) the original stem has become wholly unrecognizable.
+
+Cf. in German ''gen'', from ''gegen, Gegend; seit'', from ''Seite; weil'' (originally a particle of time, like our ''while''), from ''Weile''.
+
+Still more violent abbreviations occur in Greek, Latin, and the Romance languages, e.g. ἀπό, ''ab'', ''a''; ἐξ, ''ex, e; ad'', Fr. ''à''; ''aut'', Fr. ''ou'', Ital. ''o''; ''super'', Ital. ''su''.<ref>Even short phrases are contracted into one word: Lat. ''forsitan'', from ''fors sit an'', {{polytonic|δηλονότι}}, {{polytonic|δηλαδή}}, Fr. ''peut-être'', Eng. ''prithee'' from ''I pray thee''.—In Chinese most of the particles are verbs or nouns; e.g. ''iù'' (to give), also the sign of the dative; ''ı̀'' (to make use of), ''to, for''; ''nëi'' (the interior), ''in''.</ref>
+
+{{GHGmargin-letter|99|c}}
+The greatest shortening occurs in those particles which have entirely lost the character of an independent word, by being reduced to a single consonant with its vowel (generally short) or {{GHGterm|Š<sup>e</sup>wâ}}. According to the laws of syllable formation in Hebrew ({{GHGpar|26|m}}),<section end=par99 /><noinclude>
+<references/></noinclude>

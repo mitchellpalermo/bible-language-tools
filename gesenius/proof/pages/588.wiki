@@ -1,0 +1,163 @@
+<noinclude><pagequality level="3" user="Amire80" /></noinclude>
+{| style="width: 100%; hyphens: auto;"
+|style="width: 33%; vertical-align: top; border-right: solid thin black;"|
+{{GHGheb|text=תַּֽחֲנוֹתִי|indexitem=1}}<!-- The printed text actually says תַּֽחֲנוּתִי or even חַּֽחֲנוּתִי. The whole thing is quite confusing. -->{{GHGpar|91|n|nosign=1}}
+
+{{GHGheb|text=תַּ֫חַת|indexitem=1}}{{GHGpar|103|o|nosign=1}}
+
+{{GHGheb|text=תֵּ֫חַת|indexitem=1}}{{GHGpar|66|f|nosign=1}}
+
+{{GHGheb|text=תַּחְתֶּ֫נָּה|indexitem=1}}{{GHGpar|103|d|nosign=1}}
+
+{{GHGheb|text=תַּחְתֵּ֫נִי|indexitem=1}}{{GHGpar|103|d|nosign=1}}
+
+{{GHGheb|text=תִּטְעִי|indexitem=1}}({{GHGbible-ref|book=Is|chapter=17|verse=10}})? {{GHGpar|20|m|nosign=1}}<sup>3</sup>
+
+{{GHGheb|text=תֵּֽיטְבִי|indexitem=1}}{{GHGpar|70|e|nosign=1}}
+
+{{GHGheb|text=תִּיכוֹן|indexitem=1}}{{GHGpar|27|w|nosign=1}}
+
+{{GHGheb|text=†תֵּֽיעָשֶׂה|indexitem=1}}{{GHGpar|63|h|nosign=1}}
+
+{{GHGheb|text=תִּֽירְאוּ|indexitem=1}}({{GHGbible-ref|book=Jb|chapter=6|verse=21}}†) {{GHGpar|75|t|nosign=1}}
+
+{{GHGheb|text=תִּישָׁ֑מְנָה|indexitem=1}}({{GHGbible-ref|book=Ez|chapter=6|verse=6}})? {{GHGpar|67|p|nosign=1}}<sup>2</sup>, {{GHGpar|67|dd|nonumber=1|nosign=1}}
+
+{{GHGheb|text=†תְּכַבֶּדְךָ|indexitem=1}}<!-- In the actual page and in Qoren תְּכַבֵּ֫דְךָ with Tsere. -->{{GHGpar|60|f|nosign=1}}
+
+{{GHGheb|text=תִּכּוֹנֵן|indexitem=1}}{{GHGpar|19|d|nosign=1}}
+
+{{GHGheb|text=תֻּכִּיִּים|indexitem=1}}{{GHGpar|1|i|nosign=1}}
+
+{{GHGheb|text=תִּכְלָה|indexitem=1}}{{GHGpar|77|rr|nosign=1}}
+
+{{GHGheb|text=תֵּֽל־|indexitem=1}}{{GHGpar|20|g|nosign=1}}
+
+{{GHGheb|text=תְּלָאוּם|indexitem=1}}{{GHGpar|75|rr|nosign=1}}
+
+{{GHGheb|text=תְּלֻאִים|indexitem=1}}{{GHGpar|75|rr|nosign=1}}
+
+{{GHGheb|text=תִּלְבַּ֫שְׁןָ|indexitem=1}}{{GHGpar|47|l|nosign=1}}
+
+{{GHGheb|text=תִּלּ֫וֹנוּ|indexitem=1}}{{GHGpar|72|ee|nosign=1}}
+
+{{GHGheb|text=תָּלַן|indexitem=1}}{{GHGpar|29|q|nosign=1}}, {{GHGpar|73|e|nosign=1}}
+
+{{GHGheb|text=תִּֽלֲעַג|indexitem=1}}{{GHGpar|10|g|nosign=1}}<sup>3</sup>
+
+{{GHGheb|text=תְּמוּתֶ֫נָה|indexitem=1}}{{GHGpar|72|k|nosign=1}}
+
+{{GHGheb|text=? אַל־תֶּ֑מְחִי|indexitem=1}}{{GHGpar|75|ii|nosign=1}}
+
+{{GHGheb|text=תִּֽמֲחַץ|indexitem=1}}{{GHGpar|10|g|nosign=1}}<sup>3</sup>
+
+{{GHGheb|text=תַּ֫מְנוּ|indexitem=1}}{{GHGpar|67|e|nosign=1}}, {{GHGpar|67|dd|nosign=1}}
+
+{{GHGheb|text=תָּֽמְנוֹ|indexitem=1}}({{GHGbible-ref|book=Lam|chapter=3|verse=22}})? {{GHGpar|20|o|nosign=1}}
+
+{{GHGheb|text=תֶּמֶס|indexitem=1}}{{GHGpar|85|p|nosign=1}}
+<!--column break-->|style="width: 33%; vertical-align: top; border-right: solid thin black;"|
+{{GHGheb|text=תִּמַּ֫קְנָה|indexitem=1}}{{GHGpar|67|dd|nosign=1}}
+
+{{GHGheb|text=†אַל־תַּמֵּר|indexitem=1}}{{GHGpar|67|y|nosign=1}}
+
+{{GHGheb|text=? תִּנְדֹּף|indexitem=1}}{{GHGpar|66|f|nosign=1}}
+
+{{GHGheb|text=תִּנַּשֵּׂא|indexitem=1}}{{GHGpar|19|d|nosign=1}}
+
+{{GHGheb|text=†תִּנָּתֵן אֶת־|indexitem=1}}<!-- The passage actually talks about יִנָּתֵן. -->{{GHGpar|121|b|nosign=1}}<sup>1</sup>
+
+{{GHGheb|text=תְּסֻבֶּ֫ינָה|indexitem=1}}{{GHGpar|67|d|nosign=1}}<sup>1</sup>
+
+{{GHGheb|text=תָּֽעָבְדֵם|indexitem=1}}{{GHGpar|60|b|nosign=1}}
+
+{{GHGheb|text=תַּֽעֲבוּרִי|indexitem=1}}{{GHGpar|47|g|nosign=1}}
+
+{{GHGheb|text=תֵּֽעָגֵ֫נָה|indexitem=1}}{{GHGpar|51|m|nosign=1}}
+
+{{GHGheb|text=תְּעֻגֶ֫נָה|indexitem=1}}{{GHGpar|58|k|nosign=1}}
+
+{{GHGheb|text=? תֵּֽעֲלוּ|indexitem=1}}{{GHGpar|75|y|nosign=1}}
+
+{{GHGheb|text=תַּֽעֲנֶ֑נָּה|indexitem=1}}({{GHGbible-ref|book=Ju|chapter=5|verse=29}}) {{GHGpar|75|w|nosign=1}}
+
+{{GHGheb|text=תָּעֻ֫פָה|indexitem=1}}{{GHGpar|48|d|nosign=1}}
+
+{{GHGheb|text=אַל־תַּֽעֲשֵׂה|indexitem=1}}{{GHGpar|75|hh|nosign=1}}
+
+{{GHGheb|text=תַּעְשְׁרֶ֫נָּה|indexitem=1}}{{GHGpar|60|g|nosign=1}}
+
+{{GHGheb|text=? תְּפוֹצֽוֹתִיכֶם|indexitem=1}}{{GHGpar|91|l|nosign=1}}
+
+{{GHGheb|text=תְּצִלֶּ֫ינָה|indexitem=1}}{{GHGpar|67|p|nosign=1}}
+
+{{GHGheb|text=תִּצַּ֫לְנָה|indexitem=1}}{{GHGpar|67|g|nosign=1}}
+
+{{GHGheb|text=תֵּֽצְרִי|indexitem=1}}{{GHGpar|67|dd|nosign=1}}
+
+{{GHGheb|text=תִּקֳּבֶ֫נּוּ|indexitem=1}}{{GHGpar|67|g|nosign=1}}
+
+{{GHGheb|text=†תְּקֽוֹמֲמֶ֫יךָ|indexitem=1}}<!-- Actually בִּֽתְקֽוֹמֲמֶ֫יךָ, which is quite different. -->{{GHGpar|72|cc|nosign=1}}
+
+{{GHGheb|text=תִּקְטֹל|indexitem=1}}{{GHGpar|47|k|nosign=1}}
+
+{{GHGheb|text=? תָּקִ֫ימְנָה|indexitem=1}}{{GHGpar|72|k|nosign=1}}
+
+{{GHGheb|text=תִּקְרֶ֫אנָה|indexitem=1}}{{GHGpar|47|k|nosign=1}}, {{GHGpar|75|rr|nosign=1}}
+
+{{GHGheb|text=תֵּרֵ֫א|indexitem=1}}{{GHGpar|75|p|nosign=1}}
+
+{{GHGheb|text=תִּרְאֵה|indexitem=1}}{{GHGpar|75|hh|nosign=1}}
+
+{{GHGheb|text=תִּרְאֶ֫ינָּה|indexitem=1}}{{GHGpar|75|w|nosign=1}}
+<!--column break-->|style="width: 33%; vertical-align: top;"|
+{{GHGheb|text=תֵּרַד|indexitem=1}}{{GHGpar|69|p|nosign=1}}
+
+{{GHGheb|text=תַּרְדֵּמָה|indexitem=1}}{{GHGpar|85|q|nosign=1}}
+
+{{GHGheb|text=תְּרוֹמֵם|indexitem=1}}<!-- Actually תְּרֹמֵם on the page. -->({{GHGbible-ref|book=Jb|chapter=17|verse=4}}) {{GHGpar|72|cc|nosign=1}}
+
+{{GHGheb|text=תָּרֹ֫נָּה|indexitem=1}}<!-- There's a Dagesh in the book, and it probably really should be here. -->{{GHGpar|47|k|nosign=1}}
+
+{{GHGheb|text=תְּרַנֵּ֫נָה|indexitem=1}}{{GHGpar|44|o|nosign=1}}
+
+{{GHGheb|text=תְּרָפִים|indexitem=1}}{{GHGpar|124|h|nosign=1}}, {{GHGpar|132|h|nosign=1}}
+
+{{GHGheb|text=תִּרְפֶּ֫ינָה|indexitem=1}}{{GHGpar|75|qq|nosign=1}}
+
+{{GHGheb|text=? תְּרָצְּחוּ|indexitem=1}}{{GHGpar|52|q|nosign=1}}
+
+{{GHGheb|text=תִּשְּׂאֶ֫ינָה|indexitem=1}}({{GHGbible-ref|book=Ez|chapter=23|verse=49}})? {{GHGpar|76|b|nosign=1}}
+
+{{GHGheb|text=תִּשֶּׂ֫נָה|indexitem=1}}({{GHGbible-ref|book=Ru|chapter=1|verse=14}}) {{GHGpar|74|k|nosign=1}}, {{GHGpar|76|b|nosign=1}}
+
+{{GHGheb|text=תָּשֹׁ֫בְןָ|indexitem=1}}{{GHGpar|72|k|nosign=1}}
+
+{{GHGheb|text=תָּשֵׁ֫בְנָה|indexitem=1}}{{GHGpar|72|k|nosign=1}}
+
+{{GHGheb|text=? תֶּ֑שִׁי|indexitem=1}}{{GHGpar|75|s|nosign=1}}
+
+{{GHGheb|text=תִּשְׁלַ֫חְנָה|indexitem=1}}(anomalously) {{GHGpar|47|k|nosign=1}}
+
+{{GHGheb|text=תִּשְׁמוּרֵם|indexitem=1}}{{GHGpar|47|g|nosign=1}}
+
+{{GHGheb|text=תִּשְׁתָּע|indexitem=1}}{{GHGpar|75|bb|nosign=1}}
+
+{{GHGheb|text=תִּתְאָו|indexitem=1}}{{GHGpar|75|bb|nosign=1}}
+
+{{GHGheb|text=? תְּתָאוּ|indexitem=1}}{{GHGpar|75|bb|nosign=1}}<sup>1</sup>
+
+{{GHGheb|text=תִּתָּבָר|indexitem=1}}{{GHGpar|67|l|nosign=1}}
+
+{{GHGheb|text=תִּתְגָּר|indexitem=1}}{{GHGpar|75|bb|nosign=1}}
+
+{{GHGheb|text=תַּ֫תָּה|indexitem=1}}{{GHGpar|19|i|nosign=1}}, {{GHGpar|66|k|nosign=1}}
+
+{{GHGheb|text=תַּתֵּם|indexitem=1}}{{GHGpar|67|y|nosign=1}}
+
+{{GHGheb|text=תִּתֻּם|indexitem=1}}{{GHGpar|67|p|nosign=1}}
+
+{{GHGheb|text=תִּתְצוּ|indexitem=1}}{{GHGpar|20|m|nosign=1}}
+
+{{GHGheb|text=תֻּתַּשׁ|indexitem=1}}{{GHGpar|53|u|nosign=1}}
+|}<noinclude></noinclude>

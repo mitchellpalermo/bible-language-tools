@@ -1,0 +1,45 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par97 />may precede (''two and twenty'', as in Arabic and English), e.g. {{GHGbible-ref|book=Nu|chapter=3|verse=39}}, {{GHGbible-ref|book=Nu|chapter=26|verse=14|hidebook=1}}. Very frequently, however, the reverse order is found (''twenty and two'', as in Syriac, cf. French and English ''twenty-two''), e.g. {{GHGbible-ref|book=1 Ch|chapter=12|verse=28}}, {{GHGbible-ref|book=1 Ch|chapter=18|verse=5|hidebook=1}}.<ref>According to the conclusions of König ({{GHGcite|title=De Criticae Sacrae Argumento}}, p. 61, and {{GHGcite|title=Lehrgeb.}}, ii. p. 215 ff.), the smaller number more commonly precedes in Ezek. and the Priestly Code, but the larger always elsewhere. S. Herner ({{GHGcite|title=Syntax der Zahlwörter im A.T.}}, Lund, 1893, p. 71 ff.) arrives at the same conclusion by a full examination of the statistics; cf. also his remarks on König in {{GHGcite|title={{abbr|ZAW.|Zeitschrift für die alttestamentliche Wissenschaft, ed. by B. Stade, Giessen, 1881 ff., and since 1907 by K. Marti.}}}} 1896, p. 123, and König’s reply, ''ibid.'', p. 328 f.</ref> In all cases the units and tens are connected by the ''copula'', ordinarily {{GHGheb|text=וְ}}, but {{GHGheb|text=וָ}} before numerals with the tone on the penultima, {{GHGheb|text=וַ}} before {{GHGheb|text=־ֲ}}, {{GHGheb|text=וּ}} before {{GHGterm|Š<sup>e</sup>wâ}}; see {{GHGpar|104|d}}, ''e'', ''g''.
+
+{{GHGmargin-letter|97|g}}
+The remaining numerals are the substantives—
+
+<div align="center">
+{| cellspacing="0" cellpadding="0" border="0"
+| 100
+| {{GHGheb|text=מֵאָה}} fem., {{GHGterm|constr.}} {{GHGheb|text=מְאַת}}.
+|-
+| 200
+| {{GHGheb|text=מָאתַ֫יִם}} dual (contracted from {{GHGheb|text=מְאָתַ֫יִם}}; cf. {{GHGpar|23|c}}).
+|-
+| 300
+| {{GHGheb|text=שְׁלשׁ מֵאוֹת}} plur. (but in {{GHGbible-ref|book=2 K|chapter=11|verse=4.9.10.15}}, {{GHGterm|K<sup>e</sup>th.}} {{GHGheb|text=הַמְּאָיוֹת}}).
+|-
+| 1000
+| {{GHGheb|text=אֶ֫לֶף}} masc.
+|-
+| 2000
+| {{GHGheb|text=אַלְפַּ֫יִם}} dual.
+|-
+| 3000
+| {{GHGheb|text=שְׁל֫שֶׁת אֲלָפִים}} plur., and so on (except {{GHGheb|text=עֲשָׂרָה אֲלָפִים}} in {{GHGbible-ref|book=2 S|chapter=18|verse=3}}, {{GHGbible-ref|book=2 K|chapter=24|verse=14}} {{GHGterm|K<sup>e</sup>th.}}; elsewhere always {{GHGheb|text=עֲשֶׂ֫רֶת אֲלָפִים}}).
+|-
+| 10000
+| {{GHGheb|text=רְבָבָה}}, in the later books the aramaising<ref>Cf. Kautzsch, ''Die Aramaismen im A.T.'' (Halle, 1902), p. 79 f.</ref> forms {{GHGheb|text=רִבּוֹ}}, {{GHGheb|text=רִבּוֹא}}, {{GHGheb|text=רִבּוֹת}} (properly ''multitude'', cf. μυριάς).
+|-
+| 20000
+| {{GHGheb|text=רִבֹּתַ֫יִם}} dual (see below, h); but {{GHGheb|text=שְׁתֵּי רִבּוֹת}} {{GHGbible-ref|book=Neh|chapter=7|verse=70}} (also {{GHGheb|text=שְׁתֵּי רִבּוֹא}} {{GHGbible-ref|book=Neh|chapter=7|verse=71}}).
+|-
+| 40000
+| {{GHGheb|text=אַרְבַּע רִבּוֹא}} {{GHGbible-ref|book=Neh|chapter=7|verse=66}}.
+|-
+| 60000
+| {{GHGheb|text=שֵֽׁשׁ־רִבּאֹות}} {{GHGbible-ref|book=Ezr|chapter=2|verse=69}} (Baer and Ginsburg {{GHGheb|text=רִבֹּאוֹת}}, as in {{GHGbible-ref|book=Dn|chapter=11|verse=12}}). {{GHGheb|text=אַלְפֵי רְבָבָה|translate=thousands of myriads}}, {{GHGbible-ref|book=Gn|chapter=24|verse=60}}.
+|}
+</div>
+
+{{GHGmargin-letter|97|h}}
+Rem. 1. The dual form which occurs in some of the units has the meaning of our ending -''fold'', e.g. {{GHGheb|text=אַרְבַּעְתַּ֫יִם|translate=fourfold}}, {{GHGbible-ref|book=2 S|chapter=12|verse=6}}; {{GHGheb|text=שִׁבְעָתַ֫יִם|translate=sevenfold}}, {{GHGbible-ref|book=Gn|chapter=4|verse=15.24}}, {{GHGbible-ref|book=Is|chapter=30|verse=26}}, {{GHGbible-ref|book=Ps|chapter=12|verse=7}}, {{GHGbible-ref|book=Ps|chapter=79|verse=12|hidebook=1}} (cf. {{GHGpar|134|r}}). The dual {{GHGheb|text=רִבֹּתַ֫יִם}} {{GHGbible-ref|book=Ps|chapter=68|verse=18}} (explained by {{GHGheb|text=אַלְפֵי שִׁנְאָן|translate=thousands of duplication}}) is not meant to be taken in the sense of ''two myriads'' or ''twice the number of myriads'', but in a multiplicative sense.<ref>Cf. D. H. Müller, ‘Die numeralia multiplicativa in den Amarnatafeln u. im Hebr.,’ ''Semitica'', i, Wien, 1906, p. 13 ff.</ref>—Besides the plural which denotes the tens, there are also the plurals {{GHGheb|text=אֲחָדִים|translate=some}}, also ''iidem'', and {{GHGheb|text=עֲשָׂרוֹת|translate=decades}} (not ''decem'') {{GHGbible-ref|book=Ex|chapter=18|verse=21.25}}.
+
+{{GHGmargin-letter|97|i}}
+2. The ''suffixes'' to numerals are, as with other nouns, properly genitives, although they are translated in English as nominatives, e.g. {{GHGheb|text=שְׁלָשְׁתְּכֶם|translate=your triad}}, i.e. ''you three'', {{GHGbible-ref|book=Nu|chapter=12|verse=4}}; {{GHGheb|text=חֲמִשָּׁיו|translate=his fifty}} (i.e. the 50 belonging to him) {{GHGbible-ref|book=2 K|chapter=1|verse=9–13}}, and {{GHGheb|text=חֲמִשֶּׁ֫יךָ}} {{GHGbible-ref|book=2 K|chapter=1|verse=10.12}}.<section end=par97 /><noinclude>
+<references/></noinclude>

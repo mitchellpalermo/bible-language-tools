@@ -1,0 +1,49 @@
+<!-- scan 559, printed 535, Index of Subjects -->
+{{colbegin}}
+Concessive clauses, 160.
+Concord of subject and object in gender and number, 145 ''a''–''t'': cases of false concord, 145 ''u''.
+Conditional sentences, perfect in, 106 ''p'': imperf. in, 107 ''x'': cohortative in, 108 ''e'', ''f'': jussive in, 109 ''h'': imperat. in, 110 ''f'': ptcp. in, 159 ''v'': ptcp. without {{GHGheb|text=אִם}}, 116 ''w'', 159 ''i'': perf. consec. in apodosis, 112 ''ff''–''mm'': different types of, 159: without conditional particle, 112 ''kk'', ''ll'', 159 ''b''–''k''.
+Conjugations, or verba derivata, 38 ''b'', 39 ''c'', ''d'': number and arrangement of, 39 ''e''–''f'': Niphʿal, 51: Piʿēl and Puʿal, 52: Hiphʿîl and Hophʿal, 53: Hithpaʿēl, 54: the less common conjugations, 39 ''g'', 55: conjugation of aim or attack (Pôʿēl), 55 ''c''.
+Conjunctions, 104.
+Conjunctive accents, 15 ''g'', ''i''.
+Consecutio temporum, perf. and imperf. with wāw consec., 49: perf. with wāw consec., 112.
+Consecutive clauses, 107 ''u'': syntax of, 166.
+Consonants, 5: changes of, 19: pronunciation and division of, 6: transcription of their names, 5 ''f'' N.: weak consonants, 7 ''a''–''g'': softening of, 19 ''o''.
+Constructio ad sensum, 132 ''g'', 145 ''a''–''l'': asyndetos, 120 ''g'', ''h'', 154 ''a'' N. (''a''): praegnans, 119 ''x'', ''y'', ''ff'', ''gg''.
+Continuous action expressed by infin. abs., 113 ''s''–''u''.
+Continuous progress expressed by duplication of a word, 133 ''k''.
+Contraction of vowels, 7 ''a''.
+Co-ordination of verbal ideas instead of subordination, 120.
+Copula, ''see'' Wāw copulativum: verbal, how expressed, 141 ''f''–''h''.
+Cuneiform inscriptions, 1 ''d'', ''m'' N.<sup>1</sup>, 5 ''g'' (''b''), 6 ''b''.
+
+Dageš forte, 12: in place of a letter assimilated, 19 ''b''–''f'': orthophonicum, 20 ''g'', 13 ''c'': necessarium, compensativum, characteristicum, 20 ''a'': euphonicum, 20 ''c'': conjunctivum, 20 ''c''–''f'': dirimens, 20 ''h'': affectuosum, 20 ''i'': firmativum, 20 ''k'': implicitum, 20 ''m'', 22 ''c'': omission of, 20 ''l'', ''m'': in gutturals, 22 ''b'', ''s'': occasionally in {{GHGheb|text=ר}}, 22 ''q'' (''a''), ''s'': four times in {{GHGheb|text=א}} (acc. to others Mappîq), 14 ''d'': omitted sometimes in 2nd radical of verbs {{GHGheb|text=ע״ע}}, 67 ''g'', ''dd''. ''See also'' Strengthening.
+Dageš lene, 13, 21: after {{GHGheb|text=יהוה}} (i.e. {{GHGheb|text=אֲדֹנָי}}), 21 ''c'': omitted anomalously after consonantal {{GHGheb|text=ו}} and {{GHGheb|text=י}}, 21 ''c'': exceptional cases of ({{GHGheb|text=בְּב}}, {{GHGheb|text=כְּכ}}, {{GHGheb|text=בְּפ}}, {{GHGheb|text=פְּמ}}), 21 ''d''.
+Dative, 119 ''s''.
+Dativus ethicus, 119 ''s'', 135 ''i'': dative expressed by a suffix, 117 ''x''.
+Decalogue, double accentuation of, 15 ''p''.
+Dehîq, 20 ''c''.
+Denominative nouns, ''see'' Nouns: verbs, ''see'' Verb.
+Desiderative sentences, 151.
+Determination of nouns, 125: omission of it, 117 ''q'', 126 ''p'': determination of proper names, 125 ''c''–''f'': determination by the article, 126: by a following determinate genitive, 127: determination of numerals, 134 ''k''.
+Diacritical points, ''see'' Puncta extraordinaria.
+Dialects in the O. T., 2 ''w''.
+Diminutives, 86 ''g'' and N.
+Diphthongs, 7 ''a'', 8 ''m'', 24 ''f''.
+Disjunctive accents, 15 ''f'', ''h''.
+Disjunctive questions, 150 ''f''–''i''.
+Dissimilation of vowels, 27 ''x''.
+Distributive numerals, 134 ''q''.
+Doubling of consonants, ''see'' Strengthening.
+Dual, 88: with the plural of the adjective, 132 ''f'': with predicate in the plur., 145 ''n'': in numerals, 97 ''g'', ''h'', 134 ''r'': place-names doubtfully so explained, 88 ''c''.
+
+E-sounds, 7 ''a'', ''b'', ''e'', 8 ''b'', 9 ''i''–''m''.
+Each, every, how expressed, 139 ''b'', ''c''.
+East Semitic, 1 ''d''.
+Elatives, 85 ''b'', 133 ''a'' N.
+Elegy, rhythm of, in Hebrew, 2 ''r''.
+Elision, ''see'' Syncope and elision.
+Ellipse of the pronominal object, 117 ''f'': other cases of ellipse (real or apparent), 116 ''s'', 118 ''s'' N. (in comparisons), 134 ''n'' (of names of measures, weights, &c.), 144 ''o'' (due to corruption).
+‘Emblematic Mashal,’ 161 ''a'' N.
+Emphasis expressed by infin. abs., 114 ''l''–''r'', ''v''–''x'': by cognate accus., 113 ''w'' (end): by cognate accus. with defining adjective, 117 ''q'': by duplication of a word, 123 ''e'', 133 ''k'', ''l'': by combination of different derivatives from the same root, 133 ''l'': by
+{{colend}}

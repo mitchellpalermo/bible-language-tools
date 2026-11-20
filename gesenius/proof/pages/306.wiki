@@ -1,0 +1,180 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par96 /><div align="center">
+{| cellspacing="0" cellpadding="0" border="0"
+| ''Sing. absolute''
+| {{GHGheb|text=אָב}}
+| {{GHGheb|text=אָח}}
+| {{GHGheb|text=אָחוֹת}}
+| {{GHGheb|text=אִישׁ}}
+| {{GHGheb|text=אִשָּׁה}}
+|-
+|
+| (''father'')
+| (''brother'')
+| (''sister'')
+| (''man'')
+| (''woman'')
+|-
+| " ''construct''
+| {{GHGheb|text=אֲבִי}}
+| {{GHGheb|text=אֲחִי}}
+| {{GHGheb|text=אֲחוֹת}}
+| {{GHGheb|text=אִישׁ}}
+| {{GHGheb|text=אֵ֫שֶׁת}}
+|-
+| " ''with suff. of'' 1 ''sing.''
+| {{GHGheb|text=אָבִי}}
+| {{GHGheb|text=אָחִי}}
+| {{GHGheb|text=אֲחֹתִי}}
+| {{GHGheb|text=אִישִׁי}}
+| {{GHGheb|text=אִשְׁתִּי}}
+|-
+| " 2 {{GHGterm|masc.}}
+| {{GHGheb|text=אָבִ֫יךָ}}
+| {{GHGheb|text=אָחִ֫יךָ}}
+| {{GHGheb|text=אֲחֽוֹתְךָ}}
+|
+| {{GHGheb|text=אִשְׁתְּךָ}}
+|-
+| " 2 {{GHGterm|fem.}}
+| {{GHGheb|text=אָבִיךְ}}
+| {{GHGheb|text=אָחִיךְ}}
+| {{GHGheb|text=אֲחוֹתֵךְ}}
+| {{GHGheb|text=אִישֵׁךְ}}
+|
+|-
+| " 3 {{GHGterm|masc.}}
+| {{GHGheb|text=אָבִיו (אָבִ֫יהוּ)}}
+| {{GHGheb|text=אָחִיו (אָחִ֫יהוּ)}}
+| {{GHGheb|text=אֲחֹתוֹ}}
+| {{GHGheb|text=אִישׁוֹ}}
+| {{GHGheb|text=אִשְׁתּוֹ}}
+|-
+| " 3 {{GHGterm|fem.}}
+| {{GHGheb|text=אָבִ֫יהָ}}
+| {{GHGheb|text=אָחִ֫יהָ}}
+| {{GHGheb|text=אֲחֹתָהּ}}
+| {{GHGheb|text=אִישָׁהּ}}
+|
+|-
+| " 1 ''Pl.''
+| {{GHGheb|text=אָבִ֫ינוּ}}
+| {{GHGheb|text=אָחִ֫ינוּ}}
+| {{GHGheb|text=אֲחֹתֵ֫נוּ}}
+|
+|
+|-
+| " 2 {{GHGterm|masc.}}
+| {{GHGheb|text=אֲבִיכֶם}}
+| {{GHGheb|text=אֲחִיכֶם}}
+| {{GHGheb|text=[אֲחֽוֹתְכֶם]}}
+|
+|
+|-
+| " 2 {{GHGterm|fem.}}
+| {{GHGheb|text=אֲבִיכֶן}}
+|
+|
+|
+|
+|-
+| " 3 {{GHGterm|masc.}}
+| {{GHGheb|text=אֲבִיהֶם}}
+| {{GHGheb|text=אֲחִיהֶם}}
+| {{GHGheb|text=אֲחֹתָם}}
+|
+|
+|-
+| " 3 {{GHGterm|fem.}}
+| {{GHGheb|text=אֲבִיהֶן}}
+|
+|
+|
+|
+|-
+| ''Plur. absolute''.
+| {{GHGheb|text=אָבוֹת}}
+| {{GHGheb|text=אַחִים}}
+|
+| {{GHGheb|text=אֲנָשִׁים}}
+| {{GHGheb|text=נָשִׁים}}
+|-
+| " ''construct''
+| {{GHGheb|text=אֲבוֹת}}
+| {{GHGheb|text=אֲחֵי}}
+|
+| {{GHGheb|text=אַנְשֵׁי}}
+| {{GHGheb|text=נְשֵׁי}}
+|-
+| " ''with suff. of'' 1 ''sing.''
+| {{GHGheb|text=אֲבֹתַי}}
+| {{GHGheb|text=אַחַי}}, {{GHGterm|pause}} {{GHGheb|text=אֶחָי}}
+| {{GHGheb|text=אַחְיוֹתַי}}
+| {{GHGheb|text=אֲנָשַׁי}}
+| {{GHGheb|text=נָשַׁי}}
+|-
+| " 2 {{GHGterm|masc.}}
+| {{GHGheb|text=אֲבֹתֶ֫יךָ}}
+| {{GHGheb|text=אַחֶ֫יךָ}}
+|
+| {{GHGheb|text=אֲנָשֶׁ֫יךָ}}
+| {{GHGheb|text=נָשֶׁ֫יךָ}}
+|-
+| " 2 {{GHGterm|fem.}}
+|
+| {{GHGheb|text=אַחַ֫יִךְ}}
+| {{GHGheb|text=אֲחוֹתַ֫יִךְ}}
+|
+|
+|-
+| " 3 {{GHGterm|masc.}}
+| {{GHGheb|text=אֲבֹתָיו}}
+| {{GHGheb|text=אֶחָיו}}
+| {{GHGheb|text=אַחְיֹתָיו}}
+| {{GHGheb|text=אֲנָשָׁיו}}
+| {{GHGheb|text=נָשָׁיו}}
+|-
+| " 3 {{GHGterm|fem.}}
+|
+| {{GHGheb|text=אַחֶ֫יהָ}}
+|
+| {{GHGheb|text=אֲנָשֶׁ֫יהָ}}
+|
+|-
+| " 1 ''Pl.''
+| {{GHGheb|text=אֲבֹתֵ֫ינוּ}}
+| {{GHGheb|text=אַחֵ֫ינוּ}}
+|
+| {{GHGheb|text=אֲנָשֵׁ֫ינוּ}}
+| {{GHGheb|text=נָשֵׁ֫ינוּ}}
+|-
+| " 2 {{GHGterm|masc.}}
+| {{GHGheb|text=אֲבֹֽתֵיכֶם}}
+| {{GHGheb|text=אֲחֵיכֶם}}
+| {{GHGheb|text=אֲחֽוֹתֵיכֶם}}
+|
+| {{GHGheb|text=נְשֵׁיכֶם}}
+|-
+| " 3 {{GHGterm|masc.}}
+| {{GHGheb|text=אֲבֹתָם (אֲבֹֽתֵיהֶם)}}
+| {{GHGheb|text=אֲחֵיהֶם}}
+| {{GHGheb|text=אַחְיֹֽתֵיהֶם}}
+| {{GHGheb|text=אַנְשֵׁיהֶם}}
+| {{GHGheb|text=נְשֵׁיהֶם}}
+|-
+| " 3 {{GHGterm|fem.}}
+|
+|
+|
+| {{GHGheb|text=אַנְשֵׁיהֶן}}
+|
+|}
+</div>
+
+{{center|{{Small-caps|Remarks.}}}}
+
+{{GHGheb|text=אָב|translate=father}}; the {{GHGterm|constr.}} {{GHGheb|text=אֲבִי}}, like {{GHGheb|text=אֲחִי}} and {{GHGheb|text=בְּנִי}} (which occurs once), belongs to the connective forms discussed in {{GHGpar|90|k}}, which serve as the model for the ''Ḥireq compaginis''. However, {{GHGheb|text=אַב}} also occurs in compound proper names, e.g. {{GHGheb|text=אַבְשָׁלוֹם}}, beside {{GHGheb|text=אֲבִֽישָׁלוֹם}}, &c.; also {{GHGbible-ref|book=Gn|chapter=17|verse=4 f.}} {{GHGheb|text=אַב־הֲמוֹן}} for the purpose of explaining the name {{GHGheb|text=אב[ר]הם}}. On the plur. {{GHGheb|text=אָבוֹת}} see {{GHGpar|87|p}}.
+
+{{GHGheb|text=אָח|translate=brother}}. The plur. {{GHGterm|absol.}} {{GHGheb|text=אַחִים}} has ''Dageš forte implicitum'' ({{GHGpar|22|c}}); {{GHGheb|text=אֶחָיו}} stands for {{GHGheb|text=אַחָיו}} according to the phonetic law stated in {{GHGpar|27|q}}, and so also {{GHGheb|text=אֶחָֽי}} in {{GHGterm|pause}} for {{GHGheb|text=אַחָֽי}}. The sharpening of the {{GHGheb|text=ח}} merely serves to keep the preceding {{GHGterm|Pathaḥ}} short, as in {{GHGheb|text=גְּמַלִּים}}, &c. ({{GHGpar|93|ee}}).
+
+{{GHGheb|text=אֶחָד|translate=one}} (for {{GHGheb|text=אַחָד}}, likewise with ''Dageš forte implicitum'', {{GHGpar|22|c}}, cf. {{GHGpar|27|q}}), {{GHGterm|constr.}} and otherwise in close connexion, {{GHGheb|text=אַחַד}}, {{GHGbible-ref|book=Gn|chapter=48|verse=22}}, {{GHGbible-ref|book=2 S|chapter=17|verse=22}}, {{GHGbible-ref|book=Is|chapter=27|verse=12}},<section end=par96 /><noinclude>
+<references/></noinclude>

@@ -1,0 +1,46 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par90/>requires for it {{GHGheb|text=יוֹשֶׁ֫בֶת}} (or {{GHGheb|text=ישׁ׳}}), except in {{GHGbible-ref|book=Jer|chapter=22|verse=23}} {{GHGheb|text=ישַׁבְתְּ}}; cf. ibid. {{GHGheb|text=מקננתי}} {{GHGterm|K<sup>e</sup>th.}}, {{GHGheb|text=מְקֻנַּנְתְּ}} ''Q<sup>e</sup>re'', and finally {{GHGbible-ref|book=Jer|chapter=51|verse=13}} {{GHGheb|text=שׁכנתי}} {{GHGterm|K<sup>e</sup>th.}}, {{GHGheb|text=שֹׁכַנְתְּ}} ''Q<sup>e</sup>re''. Perhaps {{GHGheb|text=ישַׁבְתִּי}} and {{GHGheb|text=שֹׁכַנְתִּי}} are ''formae mixtae'', combining the readings {{GHGheb|text=ישֶׁ֫בֶת}}, &c. and {{GHGheb|text=יָשַׁבְתְּ}} (''2nd fem. perf.''), &c., but {{GHGheb|text=מְקֻנַּנְתִּי}} may be merely assimilated to {{GHGheb|text=ישַׁבְתִּי}} which immediately precedes it.
+
+The following are simply textual errors: {{GHGbible-ref|book=2 K|chapter=4|verse=23}} {{GHGheb|text=ההלכתי}} {{GHGterm|K<sup>e</sup>th.}}, due to the preceding {{GHGheb|text=אתי}}, and to be read {{GHGheb|text=הַֽהֹלֶ֫כֶת}} as in the ''Q<sup>e</sup>re''; {{GHGbible-ref|book=Ps|chapter=30|verse=8}} (read {{GHGheb|text=הַֽרֲרֵי}}), {{GHGbible-ref|book=Ps|chapter=113|verse=8|hidebook=1}} (read {{GHGheb|text=לְהֽוֹשִׁיבוֹ}}), {{GHGbible-ref|book=Ps|chapter=116|verse=1|hidebook=1}} (read {{GHGheb|text=קוֹל תח׳}}, as in five other places). On {{GHGheb|text=בְּרִיתִי}}, thrice, in {{GHGbible-ref|book=Lv|chapter=26|verse=42}}, cf. {{GHGpar|128|d}}.
+
+{{GHGmargin-letter|90|o}}
+(''b'') Of the ending {{GHGheb|text=וֹ}}<ref>Cf. Kaila, l. c., p. 59 ff.</ref> (always with the tone): in prose only in the Pentateuch, but in elevated style, {{GHGbible-ref|book=Gn|chapter=1|verse=24}} {{GHGheb|text=חַיְתוֹ־אֶרֶץ|translate=the beast of the earth}} (={{GHGheb|text=חַיַּת הָאָרֶץ}} ver. 25); similarly in {{GHGbible-ref|book=Ps|chapter=50|verse=10}}, {{GHGbible-ref|book=Ps|chapter=79|verse=2|hidebook=1}}, {{GHGbible-ref|book=Ps|chapter=104|verse=11.20|hidebook=1}}, {{GHGbible-ref|book=Is|chapter=56|verse=9}} (twice), {{GHGbible-ref|book=Zp|chapter=2|verse=14}}; otherwise only in {{GHGheb|text=בְּנוֹ צִפֹּר|translate=son of Zippor}}, {{GHGbible-ref|book=Nu|chapter=23|verse=18}}; {{GHGheb|text=בְּנוֹ בְעֹר|translate=son of Beor}}, {{GHGbible-ref|book=Nu|chapter=24|verse=3.15}}; and {{GHGheb|text=מַעְיְנוֹ מַ֫יִם|translate=a fountain of waters}}, {{GHGbible-ref|book=Ps|chapter=114|verse=8}}.
+<section end=par90/>
+<section begin=par91/>{{GHGpar-heading|91|The Noun with Pronominal Suffixes}}
+
+W. Diehl, ''Das Pronomen pers. suffixum 2 u. 3 pers. plur. des Hebr.'', Giessen, 1895; A. Ungnad, ‘Das Nomen mit Suffixen im Semit.,’ ''Vienna Oriental Journal'', xx, p. 167 ff.
+
+{{GHGmargin-letter|91|a}}
+With regard to the connexion of the noun with pronominal suffixes, which then stand in a genitive relation ({{GHGpar|33|c}}) and are, therefore, necessarily appended to the {{GHGterm|construct state}} of the noun, we shall first consider, as in the verb (§ 57 ff.), the forms of the suffixes themselves, and then the various changes in the form of the noun to which they are attached. The nouns are also tabulated in the Paradigms of the flexion of the noun in § 92 ff. Cf. also Paradigm A in the Appendix. We are here primarily concerned with the different forms of the suffixes when added to the singular, plural, and dual.
+
+{{GHGmargin-letter|91|b}}
+'''1.''' The Suffixes of the singular are—
+
+With nouns ending in a—
+
+<div align="center">
+{| cellspacing="0" cellpadding="0" border="0"
+| colspan="2" | ''Vowel''.
+| ''Consonant''.
+|-
+| ''Sing''. 1. c. ''my.''
+| {{GHGheb|text=י}}
+| {{GHGheb|text=־ִי}}
+|-
+| 2. m. ''thy.''
+| {{GHGheb|text=ךָ}}
+| {{GHGheb|text=־ְךָ}} ({{GHGterm|pause}} {{GHGheb|text=־ֶ֫ ךָ}})
+|-
+| f.
+| {{GHGheb|text=ךְ}}
+| {{GHGheb|text=־ֵךְ}}
+|-
+| 3. m. ''his.''
+| {{GHGheb|text=הוּ}}, {{GHGheb|text=ו}}
+| {{GHGheb|text=וֹ}} ({{GHGheb|text=הֹ}}), {{GHGheb|text=־ֵ֫ הוּ}}
+|-
+| f. ''her.''
+| {{GHGheb|text=הָ}}
+| {{GHGheb|text=־ָהּ}}, {{GHGheb|text=־ֶ֫ הָ}}
+|}
+</div><section end=par91/><noinclude>
+<references/></noinclude>
