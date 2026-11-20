@@ -18,7 +18,8 @@ lowercase `bible language.tools` wordmark with amber ".tools", an indigo header 
 five-colour gradient hairline, and cards like each app's homepage cards (white, rounded, a 6px
 top strip in the app's colour, a tinted glyph badge, a coloured title, "Open →" on hover). The
 apps keep their own colours (greek `#1D4ED8`, hebrew `#15803D`). Considered and left out: a
-flat variant with a white header and no card strip, which is a small CSS change if wanted.
+"Pick a language" pill (above the headline it is a call to action with no action; as buttons it
+duplicates the cards), and a flat variant with a white header and no card strip, which is a small CSS change if wanted.
 
 - **The apps are data.** `src/data/apps.ts` is the only place a card's name, glyph, blurb, tags
   and URL live. A third app is one entry; the cards, nav and footer all read the list.
@@ -27,7 +28,7 @@ flat variant with a white header and no card strip, which is a small CSS change 
   import them here. Dark mode is `prefers-color-scheme` plus a `data-theme` override saved in
   `localStorage` (`blt-theme`, in try/catch: storage can be unavailable). The inline script in
   `Layout.astro` applies it before first paint, which is why it is `is:inline`.
-- **The tilt, the pill, the glyph wobble and the arrow are decoration, kept light on purpose (Mitch wanted a little fun back, not the first blend).** `prefers-reduced-motion` turns the transitions off, and the arrow stays visible where there is no hover.
+- **The tilt, the glyph wobble and the arrow are decoration, kept light on purpose (Mitch wanted a little fun back, not the first blend).** `prefers-reduced-motion` turns the transitions off, and the arrow stays visible where there is no hover.
 - **No copy that praises itself.** Mitch cut "small, careful" from the lede as silly; keep the
   text plain and descriptive.
 
