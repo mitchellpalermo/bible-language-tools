@@ -6,10 +6,12 @@ All state lives on disk in this folder; nothing depends on any earlier
 conversation. Work from this folder (`gesenius/` in the
 `gesenius-grammar-modernize-ac64c1` worktree). Each run commits its work
 with `tools/proof_commit.py` (Mitch asked for this, 2026-10-16), which also
-pushes the branch to the private `backup` remote,
-github.com/mitchellpalermo/Genesius-grammar (Mitch asked for this,
-2026-10-23). Never push to `origin` (the public bible-language-tools repo —
-not public yet) and never open a pull request.
+pushes the branch to `origin`, github.com/mitchellpalermo/bible-language-tools.
+The edition lives in that repo now: on 2026-11-20 Mitch said he does not need
+it kept private and that the whole thing can live there, replacing the private
+`backup` remote (github.com/mitchellpalermo/Genesius-grammar) he chose on
+2026-10-23. Never push to `main` and never open a pull request; merging the
+branch is Mitch's call.
 
 ## What Mitch asked for (decisions already made — do not re-ask)
 
