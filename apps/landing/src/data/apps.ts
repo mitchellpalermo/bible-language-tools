@@ -37,7 +37,8 @@ export const apps: AppEntry[] = [
     glyph: 'א',
     glyphLang: 'he',
     dir: 'rtl',
-    description: 'Vocabulary, verb tables and handwriting, built for the first-year student.',
+    description:
+      'Flashcards, verb tables, handwriting and a reader, all built on the text of the Hebrew Bible.',
     features: ['Flashcards', 'Paradigms', 'Handwriting', 'Reader'],
     url: 'https://hebrew.tools',
   },
