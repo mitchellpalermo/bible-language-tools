@@ -25,8 +25,7 @@ export const apps: AppEntry[] = [
     glyph: 'α',
     glyphLang: 'grc',
     dir: 'ltr',
-    description:
-      'Read the Greek New Testament, and drill the vocabulary, paradigms and parsing behind it.',
+    description: 'Read the Greek New Testament, and learn how its words and forms fit together.',
     features: ['Flashcards', 'Paradigms', 'Parsing', 'Reader'],
     url: 'https://greek.tools',
   },
@@ -38,8 +37,7 @@ export const apps: AppEntry[] = [
     glyph: 'א',
     glyphLang: 'he',
     dir: 'rtl',
-    description:
-      'Read the Hebrew Bible, and practice the vocabulary, verb tables and handwriting that go with it.',
+    description: 'Read the Hebrew Bible, and learn the verb forms and script it is written in.',
     features: ['Flashcards', 'Paradigms', 'Handwriting', 'Reader'],
     url: 'https://hebrew.tools',
   },
