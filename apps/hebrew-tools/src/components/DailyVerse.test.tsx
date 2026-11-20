@@ -13,6 +13,9 @@ import {
 } from '../data/morphhb';
 import { newCard, saveSRSStore } from '../data/srs';
 import { cardKey, vocabulary } from '../data/vocabulary';
+import { loadAttempts } from '../lib/attempt-log';
+import { saveParseSettings } from '../lib/parse-settings';
+import { DEFAULT_PARSE_SETTINGS } from '../lib/verb-parse';
 import DailyVerse from './DailyVerse';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
@@ -59,6 +62,7 @@ const LEMMAS: LemmaIndex = {
   '7225': { count: 51, gloss: 'first, firstfruit' },
   '430': { count: 2598, pos: 'N', gloss: 'gods, God, magistrates' },
   '3478': { count: 2514, pos: 'Np', xlit: 'yiśrāʾēl', gloss: 'he will rule as God, Jisraël' },
+  '1254a': { count: 54, hebrew: 'בָּרָא', pos: 'V', root: 'ברא', gloss: 'to create' },
 };
 
 // Genesis 1:1 as glosses.json has it. אֱלֹהִים is pinned; בָּרָא has a Qal sense.
@@ -78,6 +82,7 @@ let feed: unknown[] | 'offline';
 let corpusDown: boolean;
 let booksDown: boolean;
 let glossesDown: boolean;
+let lemmasDown: boolean;
 
 beforeEach(() => {
   localStorage.clear();
@@ -89,6 +94,7 @@ beforeEach(() => {
   corpusDown = false;
   booksDown = false;
   glossesDown = false;
+  lemmasDown = false;
 
   vi.stubGlobal(
     'fetch',
@@ -100,6 +106,9 @@ beforeEach(() => {
       if (url.endsWith('glosses.json')) {
         if (glossesDown) return Promise.resolve({ ok: false, status: 404 } as Response);
         return Promise.resolve({ ok: true, json: async () => GLOSSES } as Response);
+      }
+      if (url.endsWith('lemmas.json') && lemmasDown) {
+        return Promise.resolve({ ok: false, status: 404 } as Response);
       }
       if (url.endsWith('books.json') && booksDown) {
         return Promise.resolve({ ok: false, status: 404 } as Response);
@@ -368,5 +377,120 @@ describe('the streak', () => {
     render(<DailyVerse />);
     await verseText();
     expect(localStorage.getItem('hebrew-tools-stats-v1')).toBeNull();
+  });
+});
+
+// ─── Parsing the verse ────────────────────────────────────────────────────────
+
+describe('parsing the verse', () => {
+  const fetched = (file: string) =>
+    vi.mocked(fetch).mock.calls.some(([url]) => String(url).endsWith(file));
+
+  /** Answer בָּרָא's stem, conjugation, person, gender and number. */
+  async function parseBara(user: ReturnType<typeof userEvent.setup>, stem = 'qal') {
+    await user.selectOptions(screen.getByLabelText('Stem'), stem);
+    await user.selectOptions(screen.getByLabelText('Conjugation'), 'qatal');
+    await user.selectOptions(screen.getByLabelText('Person'), '3');
+    await user.selectOptions(screen.getByLabelText('Gender'), 'm');
+    await user.selectOptions(screen.getByLabelText('Number'), 's');
+  }
+
+  it('is not offered for a verse with no verb in it', async () => {
+    feed = 'offline';
+    render(<DailyVerse />);
+    await verseText();
+    expect(screen.queryByRole('button', { name: 'Parse this verse' })).not.toBeInTheDocument();
+  });
+
+  it('asks the verse’s verb in place, highlights it, and logs the answer', async () => {
+    saveParseSettings({ ...DEFAULT_PARSE_SETTINGS, askRoot: false });
+    const user = userEvent.setup();
+    render(<DailyVerse />);
+    const text = await verseText();
+
+    await user.click(screen.getByRole('button', { name: 'Parse this verse' }));
+    expect(await screen.findByText('Parse this form')).toBeInTheDocument();
+    expect(screen.getByText('1 / 1')).toBeInTheDocument();
+    expect(within(text).getByText('בָּרָ֣א').closest('[class~="bg-accent/15"]')).not.toBeNull();
+    // With the root off, nothing waits on the lemma index.
+    expect(screen.queryByLabelText('Root')).not.toBeInTheDocument();
+    expect(fetched('lemmas.json')).toBe(false);
+
+    await parseBara(user);
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+    expect(screen.getByRole('status')).toHaveTextContent('Correct!');
+    expect(loadAttempts()).toEqual([
+      expect.objectContaining({ concept: 'parse/verb/qal-qatal', correct: true }),
+    ]);
+    expect(posthog.capture).toHaveBeenCalledWith('hebrew_daily_parse_answered', {
+      verse_reference: 'Genesis 1:1',
+      stem: 'qal',
+      conjugation: 'qatal',
+      all_correct: true,
+    });
+
+    await user.click(screen.getByRole('button', { name: 'See Results' }));
+    expect(screen.getByText('Session Score')).toBeInTheDocument();
+    expect(posthog.capture).toHaveBeenCalledWith('hebrew_daily_parse_finished', {
+      verse_reference: 'Genesis 1:1',
+      correct: 1,
+      total: 1,
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Close quiz' }));
+    expect(screen.queryByText('Session Score')).not.toBeInTheDocument();
+    expect(within(text).getByText('בָּרָ֣א').closest('[class~="bg-accent/15"]')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Parse this verse' })).toBeInTheDocument();
+  });
+
+  it('marks a miss against the verse’s reading and keeps the word popup shut', async () => {
+    saveParseSettings({ ...DEFAULT_PARSE_SETTINGS, askRoot: false });
+    const user = userEvent.setup();
+    render(<DailyVerse />);
+    const text = await verseText();
+    await user.click(screen.getByRole('button', { name: 'Parse this verse' }));
+    await screen.findByText('Parse this form');
+
+    // The popup would show the parse.
+    await user.click(within(text).getByText('בָּרָ֣א'));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    await parseBara(user, 'piel');
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+    expect(screen.getByRole('status')).toHaveTextContent('Not quite');
+    expect(loadAttempts()).toEqual([
+      expect.objectContaining({ concept: 'parse/verb/qal-qatal', correct: false }),
+    ]);
+  });
+
+  it('asks the root when /parse does, from the lemma index fetched on opening', async () => {
+    const user = userEvent.setup();
+    render(<DailyVerse />);
+    await verseText();
+    expect(fetched('lemmas.json')).toBe(false);
+
+    await user.click(screen.getByRole('button', { name: 'Parse this verse' }));
+    const root = await screen.findByLabelText('Root');
+    expect(fetched('lemmas.json')).toBe(true);
+
+    await parseBara(user);
+    await user.type(root, "br'");
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+    expect(screen.getByRole('status')).toHaveTextContent('Correct!');
+  });
+
+  it('leaves the root out when the lemma index will not load', async () => {
+    lemmasDown = true;
+    const user = userEvent.setup();
+    render(<DailyVerse />);
+    await verseText();
+
+    await user.click(screen.getByRole('button', { name: 'Parse this verse' }));
+    expect(await screen.findByText('Parse this form')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Root')).not.toBeInTheDocument();
+    expect(posthog.capture).toHaveBeenCalledWith(
+      'hebrew_daily_parse_started',
+      expect.objectContaining({ ask_root: false }),
+    );
   });
 });

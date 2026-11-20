@@ -20,7 +20,7 @@ interface Props {
   isReview?: boolean;
 }
 
-const PROPERTIES: ParseProperty<Exclude<keyof ParseResult, 'allCorrect'>>[] = [
+export const PARSE_PROPERTIES: ParseProperty<Exclude<keyof ParseResult, 'allCorrect'>>[] = [
   { key: 'tense', label: 'Tense' },
   { key: 'voice', label: 'Voice' },
   { key: 'mood', label: 'Mood' },
@@ -29,5 +29,5 @@ const PROPERTIES: ParseProperty<Exclude<keyof ParseResult, 'allCorrect'>>[] = [
 ];
 
 export default function ParseResults(props: Props) {
-  return <SharedParseResults {...props} properties={PROPERTIES} />;
+  return <SharedParseResults {...props} properties={PARSE_PROPERTIES} />;
 }

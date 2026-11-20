@@ -333,6 +333,16 @@ function marks(
 
 const score = (m: ParseFieldResults) => Object.values(m).filter(Boolean).length;
 
+export interface GradeOptions {
+  /**
+   * The form is read in its verse (/daily), so the verse's reading is the
+   * answer: no other reading the text gives the spelling elsewhere, and no
+   * reading only the shape allows (`readingsOf`). A 2ms answer to a וַתֹּאמֶר
+   * whose subject is a woman is wrong in context, however it looks alone.
+   */
+  inContext?: boolean;
+}
+
 /**
  * Grade an answer field by field against the closest reading the form allows.
  * `lemmas` gives each reading's root; pass `askRoot: false` to leave it out.
@@ -342,11 +352,12 @@ export function gradeParse(
   answer: ParseAnswer,
   lemmas: Record<string, ParseLemma>,
   askRoot: boolean,
+  { inContext = false }: GradeOptions = {},
 ): ParseGrade {
   const own = new Set(item.readings.map(readingKey));
   const typed = rootSearchKey(answer.root);
   let best: { reading: VerbReading; marks: ParseFieldResults } | null = null;
-  for (const reading of readingsOf(item)) {
+  for (const reading of inContext ? item.readings : readingsOf(item)) {
     const root = askRoot ? rootKeys(lemmas[reading.lemma]).includes(typed) : undefined;
     const m = marks(reading, answer, root);
     if (!best || score(m) > score(best.marks)) best = { reading, marks: m };

@@ -563,6 +563,29 @@ verse when the feed cannot be used. Things to know before changing it:
   gloss line" below.
 - **The streak is marked on mount.** Opening the page is the reading, and
   `markReadToday` is idempotent within a day.
+- **"Parse this verse" asks the verse's verbs, in context.** The quiz is
+  `DailyVerseParse.tsx`: `/parse`'s two screens (`VerbParseScreens.tsx`, moved out
+  of `VerbParse.tsx` for this) over the shared `InlineParseQuiz` (see "Parsing
+  practice" in the repo CLAUDE.md). Things to know:
+  - **Which words are asked is `/parse`'s rule**, copied in `src/lib/verse-parse.ts`
+    (`isAskableVerb`, pinned to `poolVerbCode` by its test) without the
+    50-occurrence floor. So a jussive or cohortative, a verb with an object
+    suffix or a paragogic letter, a ketiv and Aramaic are not asked. A verse
+    with no askable verb has no button.
+  - **The verse's reading is the answer** (`gradeParse(..., { inContext: true })`).
+    Out of context `/parse` accepts every reading the text gives a spelling and
+    what the shape cannot tell apart (2ms or 3fs); in the verse those are wrong
+    when the verse says otherwise.
+  - **The root is asked when `/parse` asks it** (`loadParseSettings().askRoot`).
+    Its lemma table is built from `lemmas.json`, fetched when the quiz opens and
+    never on page load; if that fails the quiz opens without the root.
+  - **The asked word is the popup's active word**, so it takes the same tint, and
+    the popup stays shut while a word is asked.
+  - **Answers go to the attempt log** as `parse/verb/<stem>-<conjugation>`, the
+    same concepts as `/parse`. Events: `hebrew_daily_parse_started`,
+    `_answered`, `_finished`.
+  - **Nothing is stored**: every visit starts in reading mode, so the first
+    render matches the server's and `hydration.test.tsx` needs no new seed.
 
 #### The gloss line
 
@@ -1147,6 +1170,7 @@ the repo CLAUDE.md); what is here is the Hebrew.
 | `src/lib/verb-parse.ts` | Pure: reading an OSHB code, the fields per conjugation, what else a form may be read as, grading, concept ids, sessions |
 | `src/lib/parse-settings.ts` | The stored settings (`hebrew-tools-parse-settings-v1`) |
 | `src/components/VerbParse.tsx` | The page |
+| `src/components/VerbParseScreens.tsx` | A form's question and feedback screens, shared with `/daily` |
 | `src/data/parse-forms.corpus.test.ts` | Every form in the built pool reads, and has an answer among the choices for every field it asks |
 
 Things that will bite if changed carelessly:
