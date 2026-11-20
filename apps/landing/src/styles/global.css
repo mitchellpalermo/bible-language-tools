@@ -10,6 +10,7 @@
   --greek: #1d4ed8;
   --hebrew: #15803d;
   --accent: #fcd34d;
+  --mark: #fde68a;
   --gradient: linear-gradient(90deg, #1d4ed8 0%, #7c3aed 30%, #f43f5e 55%, #f59e0b 75%, #059669 100%);
   --shadow: rgba(30, 27, 75, 0.25);
   color-scheme: light;
@@ -17,13 +18,13 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0f0e1f; --surface: #1a1838; --fg: #f1f0ff; --muted: #a1a1b5; --line: #2a2850;
-    --header: #14122e; --greek: #7ea2ff; --hebrew: #3ecf7f; --shadow: rgba(0, 0, 0, 0.6);
+    --header: #14122e; --mark: #78350f; --greek: #7ea2ff; --hebrew: #3ecf7f; --shadow: rgba(0, 0, 0, 0.6);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0f0e1f; --surface: #1a1838; --fg: #f1f0ff; --muted: #a1a1b5; --line: #2a2850;
-  --header: #14122e; --greek: #7ea2ff; --hebrew: #3ecf7f; --shadow: rgba(0, 0, 0, 0.6);
+  --header: #14122e; --mark: #78350f; --greek: #7ea2ff; --hebrew: #3ecf7f; --shadow: rgba(0, 0, 0, 0.6);
   color-scheme: dark;
 }
 
@@ -55,8 +56,8 @@ h1 {
   font-size: clamp(2.2rem, 6vw, 3.6rem); line-height: 1.08; margin: 0 auto 1rem; max-width: 16ch;
 }
 h1 em {
-  font-style: normal; background: linear-gradient(90deg, var(--greek), var(--hebrew));
-  -webkit-background-clip: text; background-clip: text; color: transparent;
+  font-style: normal; padding: 0 0.1em;
+  background: linear-gradient(transparent 58%, var(--mark) 58% 92%, transparent 92%);
 }
 .lede { max-width: 34rem; margin: 0 auto; font-size: 1.1rem; color: var(--muted); }
 
