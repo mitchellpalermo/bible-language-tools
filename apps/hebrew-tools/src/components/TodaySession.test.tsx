@@ -18,6 +18,7 @@ import {
   type TodayItem,
   vocabSrsKey,
 } from '../lib/today';
+import { workloadStore } from '../lib/workload';
 import TodaySession, { planSteps } from './TodaySession';
 
 vi.mock('posthog-js', () => ({
@@ -80,6 +81,26 @@ describe('the plan screen', () => {
   it('invites a first session when there is no streak', () => {
     render(<TodaySession />);
     expect(screen.getByTestId('today-streak')).toHaveTextContent('Finish a session to start');
+  });
+});
+
+describe('the workload guard', () => {
+  it('shows today’s reviews on the plan screen, and the pause it sets is /flashcards’ own', async () => {
+    const user = userEvent.setup();
+    seedDueWords(150);
+    render(<TodaySession />);
+    const guard = screen.getByTestId('workload-guard');
+    expect(guard.textContent).toContain('(150 cards)');
+    expect(screen.getByTestId('workload-advice').textContent).toMatch(/past your 20-minute limit/);
+    await user.click(screen.getByRole('button', { name: 'Pause new cards' }));
+    expect(workloadStore.load().pauseNew).toBe(true);
+  });
+
+  it('leaves paradigm forms out of the estimate: they are not flashcards', () => {
+    seedDueWords(3);
+    saveSRSStore({ ...loadSRSStore(), [paradigmCardKey('qal-perfect:3ms')]: card('p', 0) });
+    render(<TodaySession />);
+    expect(screen.getByTestId('workload-guard').textContent).toContain('(3 cards)');
   });
 });
 

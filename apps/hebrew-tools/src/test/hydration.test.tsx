@@ -49,6 +49,7 @@ import { markSessionComplete } from '../lib/study-streak';
 import { saveLadderProgress } from '../lib/suffix-ladder';
 import { setLastSyncedAt } from '../lib/sync-manager';
 import { saveBudget } from '../lib/today';
+import { workloadStore } from '../lib/workload';
 
 vi.mock('posthog-js', () => ({
   default: { capture: vi.fn(), captureException: vi.fn() },
@@ -88,6 +89,8 @@ function seedReturningStudent() {
   // Two suffix-ladder rungs climbed, so the ladder tab has open rungs past the first.
   saveLadderProgress({ suffixes: 2, sus: 2 });
   saveFlashcardSettings({ showPartOfSpeech: true, showVerse: false });
+  // A paused, over-limit guard: the panel and the New count both differ from the defaults.
+  workloadStore.save({ pauseNew: true, limitMinutes: 10, paceSeconds: Array(20).fill(30) });
   saveSelection({
     deck: 'garrett-derouchie',
     customDeckId: null,

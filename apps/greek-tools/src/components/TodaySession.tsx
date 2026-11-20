@@ -26,6 +26,7 @@
 import DrillButtons from '@tools/shared/components/DrillButtons';
 import GradeButtons from '@tools/shared/components/GradeButtons';
 import { BudgetPicker, SessionSummaryCard } from '@tools/shared/components/TodaySession';
+import { WorkloadGuard } from '@tools/shared/components/WorkloadGuard';
 import { currentStudyStreak, emptyStudyStreak, studiedToday } from '@tools/shared/study-streak';
 import {
   type ActiveClock,
@@ -44,6 +45,7 @@ import {
   useFlashcardSession,
 } from '@tools/shared/use-flashcard-session';
 import { useHydrated, useStoredState } from '@tools/shared/use-stored-state';
+import { useWorkload } from '@tools/shared/use-workload';
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { loadFocusPassages, loadParseHistoryStore } from '../data/focusPassages';
@@ -69,6 +71,7 @@ import {
   weakestPassage,
 } from '../lib/today';
 import { emptyAnswer, gradeAnswer, type ParseAnswer, type ParseItem } from '../lib/verb-parse';
+import { workloadStore } from '../lib/workload';
 import ErrorBoundary from './ErrorBoundary';
 import ParseFeedback from './ParseFeedback';
 import ParseQuestion from './ParseQuestion';
@@ -414,8 +417,17 @@ function TodaySessionInner() {
   const [budget, setBudget] = useStoredState(loadBudget, DEFAULT_BUDGET, saveBudget);
   const [streakData, setStreakData] = useStoredState(loadStudyStreak, emptyStudyStreak());
   const [phase, setPhase] = useState<Phase>({ name: 'pick' });
+  // The workload guard (#190, #203). Today deals no new vocabulary itself; the
+  // pause set here is the one /flashcards' SRS Review honours.
+  const workload = useWorkload(workloadStore);
   // Bumped after a session, so the preview is rebuilt from the updated stores.
   const [version, setVersion] = useState(0);
+  // The store as it stands before a session; reread after one, like the plan.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `version` rereads it
+  const pickStore = useMemo(
+    () => (hydrated && phase.name === 'pick' ? loadSRSStore() : null),
+    [hydrated, phase.name, version],
+  );
   const clock = useRef(createActiveClock());
   const outcomes = useRef<Outcome[]>([]);
 
@@ -565,6 +577,7 @@ function TodaySessionInner() {
           </h2>
           <BudgetPicker value={budget} onChange={setBudget} accent={ACCENT} />
         </div>
+        {pickStore && <WorkloadGuard workload={workload} srsStore={pickStore} accent={ACCENT} />}
         {preview ? (
           <PlanPreview plan={preview.plan} weak={preview.weak} />
         ) : (

@@ -564,3 +564,68 @@ describe('keyboard', () => {
     expect(result.current.flipped).toBe(before);
   });
 });
+
+// ─── The workload guard ───────────────────────────────────────────────────────
+
+describe('pausing new cards', () => {
+  const store: SRSStore = { w0: newCard('w0'), w1: { ...newCard('w1'), dueDate: daysFromNow(2) } };
+
+  it('leaves never-studied cards out of SRS Review', () => {
+    expect(buildQueue(deckOf(4), 'srs', store, getKey, Math.random, true).map(getKey)).toEqual([
+      'w0',
+    ]);
+  });
+
+  it('leaves drills whole', () => {
+    expect(buildQueue(deckOf(4), 'all', store, getKey, Math.random, true)).toHaveLength(4);
+  });
+
+  it('deals again when the pause changes, and only then', () => {
+    const { result, rerender, onEvent } = setup({ words: deckOf(4) }, { store });
+    expect(result.current.queue).toHaveLength(3);
+    rerender({ pauseNew: true });
+    expect(result.current.queue.map(getKey)).toEqual(['w0']);
+    expect(onEvent).toHaveBeenCalledTimes(2);
+    rerender({ pauseNew: false });
+    expect(result.current.queue).toHaveLength(3);
+  });
+});
+
+describe('timing answers', () => {
+  function timed(overrides: Partial<Options<never>> = {}) {
+    let clock = 1_000;
+    const onAnswerTimed = vi.fn();
+    const s = setup({ now: () => clock, onAnswerTimed, ...overrides });
+    const wait = (seconds: number) => {
+      clock += seconds * 1000;
+    };
+    return { ...s, onAnswerTimed, wait };
+  }
+
+  it('times each SRS grade from the moment its card appeared', () => {
+    const { result, onAnswerTimed, wait } = timed();
+    wait(7);
+    act(() => result.current.review('good'));
+    wait(4);
+    act(() => result.current.review('again'));
+    expect(onAnswerTimed.mock.calls).toEqual([[7], [4]]);
+  });
+
+  it('times only the first attempt at a drill card', () => {
+    const { result, onAnswerTimed, wait } = timed({ studyMode: 'all', words: deckOf(1) });
+    wait(9);
+    act(() => result.current.drill('missed'));
+    wait(2);
+    act(() => result.current.drill('got-it'));
+    expect(onAnswerTimed.mock.calls).toEqual([[9]]);
+  });
+
+  it('starts the clock over on a new session', () => {
+    const { result, onAnswerTimed, wait } = timed();
+    wait(30);
+    act(() => result.current.startSession());
+    wait(5);
+    act(() => result.current.review('good'));
+    expect(onAnswerTimed).toHaveBeenLastCalledWith(5);
+  });
+});

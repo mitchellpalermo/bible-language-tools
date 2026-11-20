@@ -1103,6 +1103,16 @@ Things that will bite if changed carelessly:
 - **Every unaided paradigm answer is logged** to the attempt log as
   `paradigm/<cellId>`, ladder or not. A peeked attempt logs nothing.
 
+### The workload guard (issue #190)
+
+`/flashcards` (SRS Review) and `/today` show today's review estimate and the
+pause on new cards. The rules are in the repo CLAUDE.md, "The workload guard".
+What is specific here: the binding is `src/lib/workload.ts`
+(`hebrew-tools-workload-v1`), and its `isVocabularyCard` keeps paradigm forms
+out of the estimate, since they share the SRS store. Pausing leaves new
+paradigm forms in Today's Session alone; they have their own daily cap
+(`MAX_NEW`).
+
 ### Today's Session (issue #184)
 
 `/today` runs one session sized to a time budget: due vocabulary, then due

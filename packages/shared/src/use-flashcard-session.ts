@@ -116,6 +116,20 @@ export interface FlashcardSessionOptions<T, R> {
   checkAnswer?: (input: string, card: T) => R;
   /** Defaults to true. Off, the app wires its own keys. */
   keyboard?: boolean;
+  /**
+   * Leaves never-studied cards out of SRS Review: the workload guard's pause
+   * (`@tools/shared/workload`). Changing it deals a new session. Drills are
+   * unaffected; they schedule nothing.
+   */
+  pauseNew?: boolean;
+  /**
+   * Seconds from a card appearing to its answer, for the workload guard's
+   * pace. Called for SRS grades and a drill card's first attempt in a round;
+   * a re-ask comes straight after the answer was shown, so it would read fast.
+   */
+  onAnswerTimed?: (seconds: number) => void;
+  /** The clock, in milliseconds. Defaults to `Date.now`; tests pass their own. */
+  now?: () => number;
   /** Injectable for tests; defaults to `Math.random`. */
   random?: () => number;
 }
@@ -130,7 +144,8 @@ export interface SessionScore {
 /**
  * The opening queue of a session. A drill is the whole deck shuffled; SRS
  * Review is the due cards, then the never-seen ones, each group shuffled.
- * Cards that are scheduled and not yet due are left out.
+ * Cards that are scheduled and not yet due are left out, and so are the
+ * never-seen ones while `pauseNew` is set.
  */
 export function buildQueue<T>(
   words: readonly T[],
@@ -138,6 +153,7 @@ export function buildQueue<T>(
   store: SRSStore,
   getKey: (word: T) => string,
   random: () => number = Math.random,
+  pauseNew = false,
 ): T[] {
   if (isDrillMode(mode)) return shuffle(words, random);
   const due: T[] = [];
@@ -147,7 +163,7 @@ export function buildQueue<T>(
     if (!c) fresh.push(w);
     else if (isDue(c)) due.push(w);
   }
-  return [...shuffle(due, random), ...shuffle(fresh, random)];
+  return pauseNew ? shuffle(due, random) : [...shuffle(due, random), ...shuffle(fresh, random)];
 }
 
 // ─── The hook ─────────────────────────────────────────────────────────────────
@@ -164,6 +180,13 @@ export function useFlashcardSession<T, R = never>(options: FlashcardSessionOptio
   const latest = useRef(options);
   latest.current = options;
   const random = useCallback(() => (latest.current.random ?? Math.random)(), []);
+  const now = useCallback(() => (latest.current.now ?? Date.now)(), []);
+  const pauseNew = options.pauseNew ?? false;
+  /** When the card on screen appeared, for `onAnswerTimed`. */
+  const shownAtRef = useRef(0);
+  const timeAnswer = useCallback(() => {
+    latest.current.onAnswerTimed?.((now() - shownAtRef.current) / 1000);
+  }, [now]);
 
   // Persistent state
   const [srsStore, setSrsStore] = useState<SRSStore>(() => storage.loadStore());
@@ -194,16 +217,17 @@ export function useFlashcardSession<T, R = never>(options: FlashcardSessionOptio
 
   /** Per-card state, cleared on every move to another card. */
   const clearCard = useCallback(() => {
+    shownAtRef.current = now();
     setFlipped(false);
     setTypedAnswer('');
     setAnswerResult(null);
-  }, []);
+  }, [now]);
 
   // ─── Session lifecycle ──────────────────────────────────────────────────────
 
   const startSession = useCallback(() => {
-    const { words, studyMode: mode, getKey: keyOf } = latest.current;
-    const next = buildQueue(words, mode, srsStoreRef.current, keyOf, random);
+    const { words, studyMode: mode, getKey: keyOf, pauseNew: paused } = latest.current;
+    const next = buildQueue(words, mode, srsStoreRef.current, keyOf, random, paused);
     setQueue(next);
     setDeck(next);
     setIndex(0);
@@ -221,7 +245,7 @@ export function useFlashcardSession<T, R = never>(options: FlashcardSessionOptio
   // biome-ignore lint/correctness/useExhaustiveDependencies: these are the restart triggers
   useEffect(() => {
     startSession();
-  }, [restartKey, studyMode, startSession]);
+  }, [restartKey, studyMode, pauseNew, startSession]);
 
   const finish = useCallback(() => setSessionDone(true), []);
 
@@ -295,9 +319,10 @@ export function useFlashcardSession<T, R = never>(options: FlashcardSessionOptio
         intervalDays: srsStore[k]?.interval ?? 0,
       });
       score(correct, isNewCard);
+      timeAnswer();
       advance(queue);
     },
-    [card, getKey, studyMode, srsStore, queue, advance, emit, score],
+    [card, getKey, studyMode, srsStore, queue, advance, emit, score, timeAnswer],
   );
 
   /** A drill answer. Never touches the SRS store. */
@@ -319,12 +344,15 @@ export function useFlashcardSession<T, R = never>(options: FlashcardSessionOptio
         studyMode,
         firstAttempt,
       });
-      if (firstAttempt) score(correct);
+      if (firstAttempt) {
+        score(correct);
+        timeAnswer();
+      }
 
       if (!correct) setMissedKeys((prev) => (prev.has(k) ? prev : new Set(prev).add(k)));
       advance(correct ? queue : requeueMissed(queue, index, random));
     },
-    [card, getKey, studyMode, queue, index, advance, emit, score, random],
+    [card, getKey, studyMode, queue, index, advance, emit, score, random, timeAnswer],
   );
 
   const flip = useCallback(() => setFlipped((f) => !f), []);

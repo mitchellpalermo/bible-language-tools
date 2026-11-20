@@ -68,7 +68,10 @@
     "./components/ParseDrill": "./src/components/ParseDrill.tsx",
     "./components/InlineParseQuiz": "./src/components/InlineParseQuiz.tsx",
     "./components/Ladder": "./src/components/Ladder.tsx",
-    "./components/TodaySession": "./src/components/TodaySession.tsx"
+    "./components/TodaySession": "./src/components/TodaySession.tsx",
+    "./workload": "./src/workload.ts",
+    "./use-workload": "./src/use-workload.ts",
+    "./components/WorkloadGuard": "./src/components/WorkloadGuard.tsx"
   },
   "dependencies": {
     "@pdf-lib/fontkit": "^1.1.1",

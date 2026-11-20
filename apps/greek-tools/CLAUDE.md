@@ -361,6 +361,13 @@ Rules worth keeping:
 - **The corpus is gitignored.** `pnpm --filter greek-tools exec node scripts/build-morphgnt.mjs` builds it; CI does so before the tests, and `src/test/corpus.test.ts` fails there if it is missing, so the checks cannot quietly skip.
 - **A Greek instructor still needs to review** the order and the forms the corpus cannot vouch for (see the PR for the list).
 
+## The workload guard (#203)
+
+`/flashcards` (SRS Review) and `/today` show today's review estimate and the
+pause on new cards. The rules are in the repo CLAUDE.md, "The workload guard";
+the binding is `src/lib/workload.ts` (`greek-tools-workload-v1`). Every card in
+greek.tools' SRS store is vocabulary, so the estimate counts the whole store.
+
 ## Today's Session (#197)
 
 `/today` runs one session sized to a time budget (20, 45 or 90 minutes): due

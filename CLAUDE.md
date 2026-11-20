@@ -86,6 +86,9 @@ import NumberToggle from '@tools/shared/components/NumberToggle';
 | `@tools/shared/today` | Today's Session (#184): `buildTodayPlan` (fill a time budget, due before weak before new), `canStartNext` and `createActiveClock` (the budget while it runs), `summarizeSession`. See "Today's Session" below |
 | `@tools/shared/study-streak` | `createStudyStreak(storageKey)` — days with a finished Today session — and `mergeStudyStreak` for sync |
 | `@tools/shared/components/TodaySession` | `BudgetPicker` (20 / 45 / 90 minutes) and `SessionSummaryCard` (React) |
+| `@tools/shared/workload` | The workload guard (#190, #203): `countDue`, `estimateWorkload`, `workloadAdvice`, the pace (`recordPace`, `secondsPerReview`) and `createWorkloadStore(storageKey)`. See "The workload guard" below |
+| `@tools/shared/use-workload` | `useWorkload(store)` — the stored pause and limit, the pace, and `recordAnswer` |
+| `@tools/shared/components/WorkloadGuard` | Today's review estimate, the pause or resume suggestion, the one-tap toggle and the limit (React; inline-styled, accent passed in) |
 | `@tools/shared/test/hydration` | `hydrationErrors(ui, { seed })` — test helper: server-render with storage hidden, seed, hydrate, return every mismatch React reports |
 | `@tools/shared/apple-sign-in` | Sign in with Apple's settings and client secret: `readAppleConfig(env)` (null unless all four `APPLE_*` values are set), `resolveAppleCredentials(env)` for the auth route, the ES256 signing and its per-isolate cache. See "Sign in with Apple" below |
 | `@tools/shared/origin-check` | `crossSiteRefusal(request)` — Astro's cross-site form check, run by each app's middleware with Apple's callback exempt; `CROSS_SITE_POST_PATHS`. See "Sign in with Apple" below |
@@ -417,6 +420,44 @@ at the previous schema with `createTestDbAt('<previous>')` from
 its own `describe` there. Both deploy workflows apply migrations *before* the
 new code ships, so a migration must also leave the previous code working: add
 columns with a constant default, never rename or drop in the same release.
+
+### The workload guard
+
+Both apps' `/flashcards` (in SRS Review) and Today's Session show how long
+today's reviews will take, and past a limit suggest pausing new cards (#190 on
+hebrew.tools, #203 on greek.tools). Every new card studied today is a review
+owed later, so new cards are the lever a student controls when the pile grows.
+The estimate, the advice, the pace and the panel are shared; each app binds a
+storage key (`greek-tools-workload-v1`, `hebrew-tools-workload-v1`, in
+`src/lib/workload.ts`) and says where the panel goes.
+
+- **The estimate is due cards times the student's pace.** The pace is the
+  median of their last 50 answer times on `/flashcards` (SRS grades, and a
+  drill card's first attempt), timed by `useFlashcardSession`'s
+  `onAnswerTimed`. Until there are 10, it is 10 seconds a card, the figure
+  Today's Session plans with. An answer over 2 minutes is a student who looked
+  away and is not counted. The median, so one slow card does not move it.
+- **Due counts the whole store, not the open deck.** A due card is owed
+  whichever deck it is studied through. hebrew.tools passes `countsCard` to
+  leave out its paradigm forms (`paradigm:` keys), which share the store but
+  are reviewed in the paradigm quiz, at their own pace, and the pause does not
+  touch them.
+- **Pausing leaves never-studied cards out of SRS Review** (`buildQueue`'s
+  `pauseNew`, the hook's `pauseNew` option, which deals a new session when it
+  changes). Drills are untouched: they schedule nothing. Today's Session
+  already deals no new vocabulary, so its panel sets the same pause for
+  `/flashcards`.
+- **Resuming is suggested, never automatic.** Once the estimate is back under
+  the limit, the panel says so and the button goes primary; new cards do not
+  reappear on a day the student did not expect them. Pausing and resuming are
+  one tap each, and the button is always there, whatever the estimate.
+- **The limit is the student's**: 20 minutes by default, chosen from 10 to 60.
+- **Local, never synced.** The pace is this device's (a phone and a laptop are
+  not answered at the same speed), and the pause is a setting, like the card
+  face.
+- **The panel draws nothing until hydration is over**, since everything in it
+  comes from storage. It shows on the "all caught up" screen too: a pause is
+  the one reason a deck can look done when it is not.
 
 ### Drill modes answer Missed / Got it
 

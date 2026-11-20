@@ -11,6 +11,7 @@ import { loadAttempts } from '../lib/attempt-log';
 import { loadStudyStreak } from '../lib/study-streak';
 import { BUDGET_KEY, type TodayDrill, type TodayItem, vocabSrsKey } from '../lib/today';
 import type { ParseItem } from '../lib/verb-parse';
+import { workloadStore } from '../lib/workload';
 import TodaySession, { planSteps } from './TodaySession';
 
 vi.mock('posthog-js', () => ({
@@ -121,6 +122,19 @@ describe('the plan screen', () => {
     render(<TodaySession />);
     expect(screen.getByTestId('weak-passage')).toHaveTextContent('Prologue is at 25%');
     expect(screen.getByRole('link', { name: 'Prologue' })).toHaveAttribute('href', '/focus/p1');
+  });
+});
+
+describe('the workload guard', () => {
+  it('shows today’s reviews on the plan screen, and the pause it sets is /flashcards’ own', async () => {
+    const user = userEvent.setup();
+    seedDueWords(150);
+    render(<TodaySession />);
+    const guard = screen.getByTestId('workload-guard');
+    expect(guard.textContent).toContain('(150 cards)');
+    expect(screen.getByTestId('workload-advice').textContent).toMatch(/past your 20-minute limit/);
+    await user.click(screen.getByRole('button', { name: 'Pause new cards' }));
+    expect(workloadStore.load().pauseNew).toBe(true);
   });
 });
 

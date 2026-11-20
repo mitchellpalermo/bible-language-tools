@@ -43,6 +43,7 @@ import { saveQuizSettings } from '../lib/quiz-settings';
 import { saveStudyStreak } from '../lib/study-streak';
 import { setLastSyncedAt } from '../lib/sync-manager';
 import { saveBudget } from '../lib/today';
+import { workloadStore } from '../lib/workload';
 
 vi.mock('posthog-js', () => ({
   default: { capture: vi.fn(), captureException: vi.fn() },
@@ -64,6 +65,8 @@ function seedReturningStudent() {
 
   saveQuizSettings({ accentStrict: true, density: 'hard' });
   saveFlashcardSettings({ showPartOfSpeech: true, showVerse: false });
+  // A paused, over-limit guard: the panel and the New count both differ from the defaults.
+  workloadStore.save({ pauseNew: true, limitMinutes: 10, paceSeconds: Array(20).fill(30) });
   // Textbook chapter decks (#228): a stored textbook and chapters. Flashcards
   // reads them through `useStoredState`, so its first render deals none of them.
   saveSelection({ ...DEFAULT_SELECTION, deck: 'beginning-with-nt-greek', chapters: [1, 2] });

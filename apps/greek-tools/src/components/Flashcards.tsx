@@ -2,6 +2,7 @@ import ChapterPicker from '@tools/shared/components/ChapterPicker';
 import DrillButtons from '@tools/shared/components/DrillButtons';
 import GradeButtons from '@tools/shared/components/GradeButtons';
 import ToggleSwitch from '@tools/shared/components/ToggleSwitch';
+import { WorkloadGuard } from '@tools/shared/components/WorkloadGuard';
 import { findDeck } from '@tools/shared/custom-decks';
 import { describeSource } from '@tools/shared/deck-source';
 import { checkGlossAnswer } from '@tools/shared/gloss-answer';
@@ -14,6 +15,7 @@ import {
 } from '@tools/shared/use-flashcard-session';
 import { useSourcedDeck } from '@tools/shared/use-sourced-deck';
 import { useStoredState } from '@tools/shared/use-stored-state';
+import { useWorkload } from '@tools/shared/use-workload';
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { type CustomDeck, loadCustomDecks } from '../data/customDecks';
@@ -32,6 +34,7 @@ import { loadGreekSource } from '../lib/book-deck';
 import { deckChapterMemory } from '../lib/deck-chapters';
 import { DEFAULT_SELECTION, loadSelection, saveSelection, textbookOf } from '../lib/deck-selection';
 import { loadFlashcardSettings, saveFlashcardSettings } from '../lib/flashcard-settings';
+import { workloadStore } from '../lib/workload';
 import DeckBuilder from './DeckBuilder';
 import DeckVerse, { bookName } from './DeckVerse';
 import ErrorBoundary from './ErrorBoundary';
@@ -102,11 +105,16 @@ const ALL_POS = [
   'article',
 ];
 
+/** The flashcards' accent, for the shared inline-styled controls. */
+const ACCENT = 'var(--color-grape, #7C3AED)';
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 function FlashcardsInner() {
   // Mode / direction
   const [studyMode, setStudyMode] = useState<StudyMode>('srs');
+  // The workload guard (#203): the pause on new cards, and the pace it is timed at.
+  const workload = useWorkload(workloadStore);
   const [answerMode, setAnswerMode] = useState<AnswerMode>('flip');
   const [direction, setDirection] = useState<Direction>('gr-en');
 
@@ -282,6 +290,8 @@ function FlashcardsInner() {
     // Read at Check time, so the direction toggle applies to the card on screen.
     // The marking rule is shared with hebrew.tools: `@tools/shared/gloss-answer`.
     checkAnswer: (input, word) => checkGlossAnswer(input, expectedAnswer(word, direction)),
+    pauseNew: workload.pauseNew,
+    onAnswerTimed: workload.recordAnswer,
   });
 
   // Keep the type input focused on every new card, so a typed session never
@@ -300,6 +310,12 @@ function FlashcardsInner() {
   const hasActiveFilters =
     freqFilter !== 'all' || posFilter.length > 0 || activeDeckId !== null || textbookId !== null;
   const activePreset = FREQ_PRESETS.find((p) => p.filter === freqFilter) ?? FREQ_PRESETS[0];
+
+  // Pausing touches SRS Review only, so the guard shows only there.
+  const guard =
+    studyMode === 'srs' ? (
+      <WorkloadGuard workload={workload} srsStore={srsStore} accent={ACCENT} />
+    ) : null;
 
   // ─── Session complete screen ─────────────────────────────────────────────────
 
@@ -378,6 +394,9 @@ function FlashcardsInner() {
   if (!card) {
     return (
       <div className="text-center py-16 space-y-4">
+        {/* Paused new cards are the one reason a deck can look done when it is
+            not, so the way back is on this screen too. */}
+        {guard && <div className="text-left">{guard}</div>}
         <p className="text-lg text-text-muted">
           {studyMode === 'srs'
             ? "You're all caught up — no cards due for review."
@@ -477,7 +496,7 @@ function FlashcardsInner() {
               checked={showPartOfSpeech}
               onChange={() => toggleSetting('showPartOfSpeech')}
               label="Part of speech"
-              accent="var(--color-grape, #7C3AED)"
+              accent={ACCENT}
               title="Show the part of speech on the front of the card. It is always shown with the answer."
             />
           </div>
@@ -489,7 +508,7 @@ function FlashcardsInner() {
                 checked={showVerse}
                 onChange={() => toggleSetting('showVerse')}
                 label="Verse"
-                accent="var(--color-grape, #7C3AED)"
+                accent={ACCENT}
                 title="Show a verse from the deck's text with the answer."
               />
             </div>
@@ -620,7 +639,7 @@ function FlashcardsInner() {
           selected={sourced.chapters}
           onChange={sourced.setChapters}
           wordCount={filteredVocab.length}
-          accent="var(--color-grape, #7C3AED)"
+          accent={ACCENT}
         />
       )}
 
@@ -724,6 +743,8 @@ function FlashcardsInner() {
         />
       )}
 
+      {guard}
+
       {/* ── Stats bar ─────────────────────────────────────────────────────── */}
       <div className="bg-bg-card rounded-2xl border-2 border-indigo-100 px-4 py-2.5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm text-text-muted">
@@ -735,7 +756,10 @@ function FlashcardsInner() {
                 </span>
                 <span className="hidden sm:inline text-indigo-200">|</span>
                 <span>
-                  New: <strong className="text-primary">{newCount}</strong>
+                  New:{' '}
+                  <strong className="text-primary">
+                    {workload.pauseNew ? 'paused' : newCount}
+                  </strong>
                 </span>
                 <span className="hidden sm:inline text-indigo-200">|</span>
               </>
