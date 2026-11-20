@@ -1,0 +1,49 @@
+<!-- scan 560, printed 536, Index of Subjects -->
+{{colbegin}}
+the article or a genitive (the superlative degree), 133 ''g''–''i'': by a personal pronoun added to the subject, 135 ''a'', ''c'': by the pronoun annexed in the nominative to the suffix or to a noun, 135 ''d''–''h'': by {{GHGheb|text=אֵת}} with the suffix, 135 ''k'': by position, 142 ''f'', ''g'', 152 ''e'' (after {{GHGheb|text=לֹא}}), 152 ''w'' (after {{GHGheb|text=פֶּן}}).
+Emphasis on indeterminate nouns, 117 ''q'', 125 ''c''.
+Enallage of gender, 135 ''o'', 144 ''a''.
+Epicene nouns, 122 ''b'', ''e''–''g''.
+Epithets, poetical, used as substantives, 132 ''a'' N.
+Era, Jewish, 5 ''l''.
+Ethical dative, 119 ''s'', 135 ''i''.
+Ethiopic, 1 ''b'' (i), 30 ''p'' N.
+Exceptive clauses, 163 ''c''.
+Exclamations, 146 ''b'' ({{GHGheb|text=קוֹל}} = ''hark''): with {{GHGheb|text=הִנֵּה}}, 147 ''b'': without {{GHGheb|text=הִנֵּה}}, 147 ''c'': with other interjections, 147 ''d'': expressing a wish, 148 ''a''–''d'': in form of a question expressing irony or indignation, 148 ''a'', ''b''; expressed by {{GHGheb|text=כִּי}}, 148 ''d'', 151.
+Extension of influence of a preposition over a parallel clause, 119 ''hh'': of a negative, 152 ''z'': of an interrogative, 150 ''m'': of a conjunction, 150 ''m'' N.
+Extension, plurals of, 124 ''a''–''g''.
+
+Feminine, forms of, 80, 94: ending in {{GHGheb|text=־ַת}}, 80 ''f'', {{GHGheb|text=־ָה}}, 80 ''g'', {{GHGheb|text=־ַי}}, 80 ''l'': in the constr. state, 89 ''e'': in the plural, 87 ''i''–''l'': paradigms, 95: of a land or people, 122 ''h'', ''i'': of abstract ideas, 122 ''q'': of holders of offices<ref>Cf. Driver, ''Introd.''<sup>8</sup>, p. 466: Segal, ''Mišn. Hebr.'', p. 63.</ref>, 122 ''r'': of collectives, 122 ''s'': in verb or pronoun to express ''it'', 135 ''p'': in impersonal verbs (''it'' rains), 144 ''b'', ''c'': in the predicate of collective plurals, 145 ''k'' (cf. fem. of pronoun referring to collectives, 135 ''p''): dislike of the fem. form, 132 ''d'', 145 ''p'', ''t'': fem. forms of the infinitive, 45 ''d'', 66 ''b'', ''g'', ''h'', 69 ''b'' (C), ''c'': fem. nouns with plur. in {{GHGheb|text=־ִים}}, 87 ''q'': fem. denoting artificial (as opposed to natural) objects, 122 ''u'', in plur. (as opp. to dual), 87 ''o''.
+Feminine pronoun = English ''it'', 135 ''p'', 144 ''b'', ''c''.
+Figura etymologica, ''see'' Schema etymologicum.
+Final clauses, 107 ''q'' (imperf.), 109 ''f'', ''g'' (jussive): syntax of, 165.
+Final letters, 5 ''c''.
+Formae mixtae, 78 ''d''.
+Formative letters, or serviles, 30 ''c'': in formation of nouns, 81 ''b'', 85.
+Frequentative force of imperf., 107 ''b''–''g'': of perf. with wāw consec., 112 ''e''–''o'', cf. ''kk'', ''ll''.
+Fulcra, 8 ''h'' N.
+Future tense, 47 ''a'' N.: futurum exactum, 106 ''o'', 107 ''l'': futurum instans, 116 ''p''.
+
+Gaʿya, 16 ''c'', ''g'', ''h''.
+Geʿez, 1 ''b'' (i).
+Gemara, 1 ''c'', 3 ''a''.
+Gender of nouns, 122: in the construction of subject and predicate, 145: irregularities in use of, 110 ''k'', 135 ''o'', 144 ''a'', 145 ''p'', ''t'', ''u''.
+Genitive, expression of, 89, 127 ''a'', 128: epexegetical or explicative, 128 ''k''–''q'', ''x'', ''y'': subjective, 128 ''g'', 135 ''m'': objective, 128 ''h'', 135 ''m'': partitive, 128 ''i'', ''r'': expressing the genus, ''l'', the species, ''m'': expressed periphrastically by {{GHGheb|text=לְ}}, 129 ''a''–''f'': by {{GHGheb|text=אֲשֶׁר לְ}}, 129 ''a'', ''h''.
+Gentilic names, in {{GHGheb|text=־ִי}}, 86 ''h'': determination of, 125 ''e'': of compounds (as {{GHGheb|text=בֶּן־יְמִינִי}}), 127 ''d''.
+Geographical names with a following genitive, 125 ''h'': with the article (appellatives), 125 ''e''.
+Germanic languages, 1 ''e''.
+Gerund, 45 ''f'', ''g''.
+Grammarians, early, p. 20 N.<sup>1</sup>
+Gutturals, pronunciation of, 6 ''c''–''f'', ''o'', ''r'': peculiarities of, 22: in verbal stems, 62–65.
+
+Hadad inscription, 1 ''m''.
+Ḥaṭeph-Pathaḥ, 10 ''f'', ''g'': shorter than Ḥaṭeph-S<sup>e</sup>ghôl, 27 ''r'', 63 ''f''.
+Ḥaṭeph-Qameṣ, 10 ''f'', ''h''.
+Ḥaṭeph-S<sup>e</sup>ghôl, 10 ''f''.
+He interrogative, pointing of, 100 ''k''–''n''.
+He locale, 90 ''c''–''i''.
+Hebrew language, 1 ''a'', ''b'' (ii): history of, 2: remains of the literature, 2 ''d'', ''l'', ''o'': dialects of, 2 ''w'': grammatical treatment of, 3: system of writing, 2 ''i'', 5.
+Hebrews, 2 ''b''.
+Helping vowels, 9 ''h'', ''m'', 28 ''e'' (to keep a syllable open), 84<sup>a</sup> ''a'', 93 ''c'' (in segholates).
+{{colend}}
+<references/>

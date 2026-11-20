@@ -1,0 +1,20 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par103 />{{GHGmargin-letter|103|n}}
+'''3.''' Several prepositions, especially those which express relations of space and time, are (like the German ''wegen'') properly plural nouns (for the reason, see {{GHGpar|124|a}}), and are, therefore, joined with the pronominal suffixes in the form of the plural {{GHGterm|construct state}}, just like other plural nouns ({{GHGpar|91|g}}). On the other hand, the apparent connexion of {{GHGheb|text=אֶל־}}, {{GHGheb|text=עַד־}}, {{GHGheb|text=עַל־}} with plural suffixes is explained from the ground-forms of those prepositions (from stems {{GHGheb|text=ל״ה}}) {{GHGheb|text=אֱלַי}} ({{GHGheb|text=אֲלַי}}), {{GHGheb|text=עֲדַי}}, {{GHGheb|text=עֲלַי}} (contracted to {{GHGheb|text=אֱלֵי}}, {{GHGheb|text=אֲלֵי}}, &c.).<ref>The reference of these forms to original plurals has been again expressly supported by De Lagarde, {{GHGcite|title=Symmicta}}, ii. 101 ff.; {{GHGcite|title=Nachrichten der G. g. G.}}, 1881, p. 376, cf. {{GHGcite|title=Mittheilungen}}, 1884, p. 63; also {{GHGcite|title=GGA}}. 1884, p. 280 f. According to Barth, {{GHGcite|title={{abbr|ZDMG.|Zeitschrift der deutschen morgenländischen Gesellschaft, Lpz. 1846 ff., since 1903 ed. by A. Fischer.}}}} xlii. p. 348 ff., and {{GHGcite|title=Nominalbildung}}, p. 375 ff., {{GHGheb|text=תַּחְתֶּ֫יךָ}}, &c., was only formed on the analogy of {{GHGheb|text=עָלֶ֫יךָ}}, &c., and {{GHGheb|text=אַֽחֲרֶ֫יךָ}} &c., only on the analogy of {{GHGheb|text=לִפְנֵי}}, &c., since the real plural forms ought to be {{GHGheb|text=תְּחָתֶ֫יךָ}}, {{GHGheb|text=אֲחָרֶ֫יךָ}}, &c.; cf., however, König, {{GHGcite|title=Lehrgebäude}}, ii. 305 f.</ref>
+
+{{GHGmargin-letter|103|o}}
+Without suffixes these prepositions are—
+
+{{GHGheb|text=אַחַר}}, more frequently {{GHGheb|text=אַֽחֲרֵי}} (prop. ''hinder parts'') ''behind, after''.
+
+{{GHGheb|text=אֶל־}},<ref>On the use of this particle see {{GHGpar|119|g}}.</ref> poet. [4 times in Job] also {{GHGheb|text=אֱלֵי}} (''region, direction''), ''towards, to, according to''.
+
+{{GHGheb|text=בֵּין}} (''interval'') ''between''; the suffixes indicating the singular are added to the singular {{GHGheb|text=בֵּין}}, thus {{GHGheb|text=בֵּינִי}}, {{GHGheb|text=בֵּינְךָ}}, &c. ({{GHGbible-ref|book=Gn|chapter=16|verse=5}} {{GHGheb|text=בֵּינֶ֫יךָ}}, the second {{GHGterm|Yôdh}} is, however, marked with a point as critically doubtful; {{GHGheb|text=בֵּינָיו}}, which occurs three times, is only the Masoretic {{GHGterm|Q<sup>e</sup>rê}} for {{GHGheb|text=בֵּינוֹ}}, which is found e.g. in {{GHGbible-ref|book=Gn|chapter=30|verse=36}}). On the other hand, the suffixes indicating a plural are attached to the plural forms {{GHGheb|text=בֵּינֵי}} or {{GHGheb|text=בֵּינוֹת}}.
+
+{{GHGheb|text=סָבִיב}} (''circuit'') ''around'', as a preposition, always has the plural form, sometimes masc. {{GHGheb|text=סְבִיבֶ֫יךָ}}, &c. [10 times], but much more frequently in the fem. {{GHGheb|text=סְבִיבוֹת}} (''surroundings''). In {{GHGbible-ref|book=Ez|chapter=43|verse=17}} {{GHGheb|text=סָבִיב אוֹתָהּ}} is a corruption of {{GHGheb|text=סְבִיבֹתֶ֫יהָ}}; [in {{GHGbible-ref|book=1 K|chapter=6|verse=5}} {{GHGheb|text=סָבִיב אֶת}} also is so contrary to usage, that it must be due to some textual error].
+
+{{GHGheb|text=עַד־}} (''continuation, duration'', from {{GHGheb|text=עָדָה}}) ''as far as, unto'', poet. {{GHGheb|text=עֲדֵי}} [12 times]. In {{GHGbible-ref|book=Jb|chapter=32|verse=12}} {{GHGheb|text=עָֽדֵיכֶם}}, with the ''ā'' retained in the secondary tone, is abnormal. Also in {{GHGbible-ref|book=2 K|chapter=9|verse=18}} for {{GHGheb|text=עַד־הֵם}} read {{GHGheb|text=עָֽדֵיהֶם}}.
+
+{{GHGheb|text=עַל־|translate=upon, over}} (cf. the rare subst. {{GHGheb|text=עָל|translate=height}} [see Lexicon], from {{GHGheb|text=עָלָה|translate=to ascend}}), poet. {{GHGheb|text=עֲלֵי}} [40 times, and 2 {{GHGterm|Q<sup>e</sup>rê}}].
+
+{{GHGheb|text=תַּ֫חַת|translate=under}} (prop. ''what is beneath''). On {{GHGheb|text=תַּחְתֵּ֫נִי}}, &c.; cf. above, ''d''.<section end=par103 /><noinclude>
+<references/></noinclude>

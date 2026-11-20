@@ -1,0 +1,31 @@
+<noinclude><pagequality level="1" user="132.76.81.221" /></noinclude><section begin="par128"/>rectum only adds a nearer definition of the nomen regens, whether by giving the name, the genus or species, the measure, the material, or finally an attribute of it (''genit. epexegeticus'' or ''appositionis'',<ref>The latter term is preferred especially by König, {{GHGcite|title=Theol. Stud. und Krit.}}, 1898, p. 528 ff.</ref> see the examples under ''k''–''q'').
+
+Examples. The ''nomen rectum'' represents—
+
+{{GHGmargin-letter|128|g}}
+(''a'') A ''subjective genitive'', specifying the possessor, author, &c., e.g. {{GHGheb|text=בֵּית־הַמֶּ֫לֶךְ}} ''the king’s house''; {{GHGheb|text=דְּבַר יְהֹוָה|translate=the word of the Lord}}.
+
+{{GHGmargin-letter|128|h}}
+(''b'') An ''objective genitive'', e.g. {{GHGbible-ref|book=Ob|chapter=1|verse=10}} {{GHGheb|text=מֵֽחֲמַס אָחִיךָ|translate=for the violence done to thy brother}}<ref>Cf. in Latin a similar use of the genitive after ''iniuria'' (Caes. ''B. G.'' 1, 30), ''metus (hostium, Pompeii'', &c.), ''spes'', and other words. In Greek, cf. εὔνοια τῶν φίλων, πίστις τοῦ θεοῦ, ὁ λόγος ὁ τοῦ σταυροῦ, 1 Cor. 1:18.</ref> (but in {{GHGbible-ref|book=Ez|chapter=12|verse=19}} {{GHGheb|text=מֵֽחֲמַס}} is followed by a subjective genitive); {{GHGbible-ref|book=Pr|chapter=20|verse=2}} {{GHGheb|text=אֵימַת מֶ֫לֶךְ|translate=the terror of a king}}; {{GHGbible-ref|book=Gn|chapter=18|verse=20}} {{GHGheb|text=זַֽעֲקַת סְדֹם|translate=the cry concerning Sodom}}; {{GHGbible-ref|book=Is|chapter=23|verse=5}} {{GHGheb|text=שֵׁמַע צֹר|translate=the report of}} (''about'') ''Tyre'', cf. {{GHGbible-ref|book=2 S|chapter=4|verse=4}}; {{GHGbible-ref|book=Am|chapter=8|verse=10}} {{GHGheb|text=אֵ֫בֶל יָחִיד|translate=the mourning for an only son}}; {{GHGbible-ref|book=Dt|chapter=20|verse=14}} {{GHGheb|text=שְׁלַל אֹֽיְבֶיךָ|translate=praeda hostibus tuis erepta}}; cf. {{GHGbible-ref|book=Is|chapter=3|verse=14}}. In a wider sense this includes such examples as {{GHGheb|text=דֶּ֫רֶךְ עֵץ הַֽחַיִּים|translate=the way of}} (i.e. ''to'') ''the tree of life'', {{GHGbible-ref|book=Gn|chapter=3|verse=24}}; cf. {{GHGbible-ref|book=Pr|chapter=7|verse=27}}, {{GHGbible-ref|book=Jb|chapter=38|verse=20}}; {{GHGheb|text=דֶּ֫רֶךְ הַיָּם|translate=the way of}} (''by'') ''the sea'', {{GHGbible-ref|book=Is|chapter=8|verse=23}}; {{GHGheb|text=זִבְחֵי אֱלֹהִים|translate=the sacrifices of}} (i.e. ''pleasing to'') ''God'', {{GHGbible-ref|book=Ps|chapter=51|verse=19}}; {{GHGheb|text=שְׁבֻעַת יְהֹוָה|translate=the oath of}} (i.e. ''sworn before'') ''the Lord'', {{GHGbible-ref|book=1 K|chapter=2|verse=48}}; {{GHGheb|text=דִּבְרֵי לְמוּאֵל|translate=the words of}} (i.e. ''addressed to'') L., {{GHGbible-ref|book=Pr|chapter=31|verse=1}}.
+
+{{GHGmargin-letter|128|i}}
+(''c'') A ''partitive genitive''; this includes especially the cases in which an adjective in the construct state is followed by a general term, e.g. {{GHGheb|text=חַכְמוֹת שָֽׂרוֹתֶיהָ|translate=the wisest of her ladies}}, {{GHGbible-ref|book=Ju|chapter=5|verse=29}}; cf. for this way of expressing the superlative, {{GHGpar|133|h}}, and also ''r'' below.
+
+{{GHGmargin-letter|128|k}}
+Merely formal genitives (''genit. explicativus'' or ''epexegeticus, genit. appositionis'') are those added to the construct state as nearer definitions—
+
+(''d'') Of the ''name'', e.g. {{GHGheb|text=נְהַר פְּרָת|translate=the river Euphrates}}; {{GHGheb|text=אֶ֫רֶץ כְּנַ֫עַן|translate=the land of Canaan}}; {{GHGheb|text=בְּתוּלַת יִשְׂרָאֵל|translate=the virgin Israel}} (not ''of Israel''), {{GHGbible-ref|book=Am|chapter=5|verse=2}}.
+
+{{GHGmargin-letter|128|l}}
+(''e'') Of the ''genus'', e.g. {{GHGbible-ref|book=Pr|chapter=15|verse=20}} (21:20) {{GHGheb|text=כְּסִיל אָדָם|translate=a fool of a man}} (=''a foolish man''); cf. {{GHGbible-ref|book=Gn|chapter=16|verse=12}}, {{GHGbible-ref|book=Is|chapter=1|verse=4}}, {{GHGbible-ref|book=Is|chapter=29|verse=19|hidebook=1}}, {{GHGbible-ref|book=Ho|chapter=13|verse=2}}, {{GHGbible-ref|book=Mi|chapter=5|verse=4}}, &c.
+
+{{GHGmargin-letter|128|m}}
+(''f'') Of the ''species'', e.g. {{GHGheb|text=אֲחֻזַּת קֶ֫בֶר|translate=a possession of a burying-place}}, i.e. ''hereditary sepulchre'', {{GHGbible-ref|book=Gn|chapter=23|verse=4}}, &c.; {{GHGheb|text=תְּאֵנֵי הַבַּכֻּרוֹת|translate=the early figs}}, {{GHGbible-ref|book=Jer|chapter=24|verse=2}}; {{GHGheb|text=אֹ֫הֶל בֵּיתִי|translate=the tabernacle of my house}}, i.e. my dwelling-place, {{GHGbible-ref|book=Ps|chapter=132|verse=3}}.
+
+{{GHGmargin-letter|128|n}}
+(''g'') Of the ''measure, weight, extent, number'', e.g. {{GHGheb|text=מְתֵי מִסְפָּר|translate=people of number}}, i.e. ''few in number'', {{GHGbible-ref|book=Gn|chapter=34|verse=30}}, {{GHGbible-ref|book=Dt|chapter=26|verse=5}}; cf. also {{GHGbible-ref|book=Ez|chapter=47|verse=3}}–5 ''waters of the ankles, waters of the loins, waters of swimming'', i.e. which reached up to the ankles, or loins, or necessitated swimming; but in verse 4 in apposition (?) {{GHGheb|text=מַ֫יִם בִּרְכַּ֫יִם}}.
+
+{{GHGmargin-letter|128|o}}
+(''h'') Of the ''material''<ref>In the almost entire absence of corresponding adjectives ({{GHGheb|text=אָרוּז|translate=made of cedar}}, a denominative from {{GHGheb|text=אֶ֫רֶז}}, and {{GHGheb|text=נָחוּשׁ|translate=brazen}} are the only examples), the language regularly has recourse to the above periphrasis. On the form ''qāṭûl'', as expressing an inherent property, cf. {{GHGpar|50|f}}; cf. also the proper name, {{GHGheb|text=בַּרְזִלַּי|translate=ferreus}}.</ref> of which something consists, e.g. {{GHGheb|text=כְּלִי חָ֑רֶשׂ|translate=a vessel of earthenware}}, {{GHGbible-ref|book=Nu|chapter=5|verse=17}}; {{GHGheb|text=כְּלֵי כֶ֫סֶף|translate=vessels of silver}} (cf. the French ''des vases d’or''); {{GHGheb|text=אֲרוֹן עֵץ|translate=an ark of wood}}, {{GHGheb|text=שֵׁ֫בֶט בַּרְזֶל|translate=a rod of iron}}, {{GHGbible-ref|book=Ps|chapter=2|verse=9}}; cf. {{GHGbible-ref|book=Gn|chapter=3|verse=21}}, {{GHGbible-ref|book=Gn|chapter=6|verse=14|hidebook=1}}, {{GHGbible-ref|book=Ju|chapter=7|verse=13}}, &c.
+<section end="par128"/><noinclude>
+<references/></noinclude>

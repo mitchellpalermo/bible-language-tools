@@ -1,0 +1,23 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par140 />{{center|'''CHAPTER II'''
+
+THE SENTENCE
+
+I. The Sentence in General.}}
+
+<!-- section begins above -->{{GHGpar-heading|140|Noun-clauses, Verbal-clauses, and the Compound Sentence}}
+
+{{GHGmargin-letter|140|a}}
+'''1.''' Every sentence, the subject and predicate of which are nouns or their equivalents (esp. participles), is called a ''noun-clause'', e.g. {{GHGheb|text=יְהוָֹה מַלְכֵּנוּ|translate=the Lord is our king}}, {{GHGbible-ref|book=Is|chapter=33|verse=22}}; {{GHGheb|text=וְאַנְשֵׁי סְדֹם רָעִים וְחַטָּאִים|translate=now the men of Sodom were wicked and sinners}}, {{GHGbible-ref|book=Gn|chapter=13|verse=13}}; {{GHGheb|text=פֶּה לָהֶם|translate=a mouth is theirs}}, {{GHGbible-ref|book=Ps|chapter=115|verse=5}}; see further, § 141.
+
+{{GHGmargin-letter|140|b}}
+'''2.''' Every sentence, the subject of which is a noun (or pronoun included in a verbal-form) and its predicate a finite verb, is called a ''verbal-clause'', e.g. {{GHGheb|text=וַיֹּא֫מֶר אֱלֹהִים|translate=and God said}}, {{GHGbible-ref|book=Gn|chapter=1|verse=3}}; {{GHGheb|text=וַיַּבְדֵּל|translate=and he divided}}, 1:7; see further, § 142.
+
+{{GHGmargin-letter|140|c}}
+Rem. In the last example the pronominal subject is at least indicated by the preformative ({{GHGheb|text=י}}), and in almost all forms of the perfect by afformatives. The 3rd pers. sing. perf. however, which contains no indication of the subject, must also be regarded as a full verbal-clause.
+
+{{GHGmargin-letter|140|d}}
+'''3.''' Every sentence, the subject or predicate of which is itself a full clause, is called a ''compound sentence'', e.g. {{GHGbible-ref|book=Ps|chapter=18|verse=31}} {{GHGheb|text=הָאֵל תָּמִים דַּרְכּוֹ}} ''God—his way is perfect'', equivalent to ''God’s way is perfect''; {{GHGbible-ref|book=Gn|chapter=34|verse=8}} {{GHGheb|text=שְׁכֶם בְּנִי חָֽשְׁקָה נַפְשׁוֹ בְּבִתְּכֶם}} ''my son Shechem—his soul longeth for your daughter''; see further, § 143.
+
+{{GHGmargin-letter|140|e}}
+'''4.''' The above distinction between different kinds of sentences—especially between noun- and verbal-clauses—is indispensable to the more delicate appreciation of Hebrew syntax (and that of the Semitic languages generally), since it is by no means merely external or formal, but involves fundamental differences of meaning. Noun-clauses with a substantive as predicate, represent something ''fixed, a state'' or in short, ''a being'' so and so; verbal-clauses on the other hand, something ''moveable'' and ''in progress'', an ''event'' or ''action''. The latter description is indeed true in a certain sense also of noun-clauses<section end=par140 /><noinclude>
+<references/></noinclude>

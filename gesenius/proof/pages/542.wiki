@@ -1,0 +1,197 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude>{{center|''G. Verbs mediae geminatae or double ''{{GHGheb|text=ע}}.}}
+
+<div align="center">
+{|
+|
+|
+|
+
+! colspan="2" | {{GHGterm|Qal}}.|| {{GHGterm|Niphʿal}}.
+|-
+| ''Perf''.
+| ''Sing''.
+| 3. ''m''.
+| colspan="2" | {{GHGheb|text=תַּם}}, {{GHGheb|text=סָבַב}}<sup>*</sup>
+| {{GHGheb|text=נָמֵס}}, {{GHGheb|text=נָסַב}}<sup>*</sup>
+|-
+|
+|
+| 3. ''f''.
+| colspan="2" | {{GHGheb|text=תַּ֫מָּה}}, {{GHGheb|text=סָֽבֲבָה}}<sup>*</sup>
+| {{GHGheb|text=נָסַ֫בָּה}}<sup>*</sup>
+|-
+|
+|
+| 2. ''m''.
+| colspan="2" | {{GHGheb|text=סַבּ֫וֹתָ}}<sup>*</sup>
+| {{GHGheb|text=נְסַבּ֫וֹתָ}}<sup>*</sup>
+|-
+|
+|
+| 2. ''f''.
+| colspan="2" | {{GHGheb|text=סַבּוֹת}}
+| {{GHGheb|text=נְסַבּוֹת}}
+|-
+|
+|
+| 1. ''c''.
+| colspan="2" | {{GHGheb|text=סַבּ֫וֹתִי}}
+| {{GHGheb|text=נְסַבּ֫וֹתִי}}
+|-
+|
+| ''Plur''.
+| 3. ''c''.
+| colspan="2" | {{GHGheb|text=תַּ֫מּוּ}}, {{GHGheb|text=סָֽבֲבוּ}}
+| {{GHGheb|text=נָסַ֫בּוּ}}
+|-
+|
+|
+| 2. ''m''.
+| colspan="2" | {{GHGheb|text=סַבּוֹתֶם}}
+| {{GHGheb|text=נְסַבּוֹתֶם}}
+|-
+|
+|
+| 2. ''f''.
+| colspan="2" | {{GHGheb|text=סַבּוֹתֶן}}
+| {{GHGheb|text=נְסַבּוֹתֶן}}
+|-
+|
+|
+| 1. ''c''.
+| colspan="2" | {{GHGheb|text=סַבּ֫וֹנוּ}}
+| {{GHGheb|text=נְסַבּ֫וֹנוּ}}
+|-
+| ''Inf''.
+|
+|
+| colspan="2" | {{GHGheb|text=סֹב}}<sup>*</sup>
+| {{GHGheb|text=הִסֵּב}}<sup>*</sup>
+|-
+| ''Inf. absol''.
+|
+|
+| colspan="2" | {{GHGheb|text=סָבוֹב}}
+| {{GHGheb|text=הִסּוֹב}}, {{GHGheb|text=הִמֵּס}}
+|-
+| ''Imp''.
+| ''Sing''.
+| ''m''.
+| colspan="2" | {{GHGheb|text=סֹב}}<sup>*</sup>
+| {{GHGheb|text=הִסַּב}}
+|-
+|
+|
+| ''f''.
+| colspan="2" | {{GHGheb|text=סֹ֫בִּי}}<sup>*</sup>
+| {{GHGheb|text=הִסַ֫בִּי}}
+|-
+|
+| ''Plur''.
+| ''m''.
+| colspan="2" | {{GHGheb|text=סֹ֫בּוּ}}
+| {{GHGheb|text=הִסַּ֫בּוּ}}
+|-
+|
+|
+| ''f''.
+| colspan="2" | [{{GHGheb|text=סֻבֶּ֫ינָה}}]
+| [{{GHGheb|text=הִסַּבֶּ֫ינָה}}]
+|-
+| ''Impf''.
+| ''Sing''.
+| 3. ''m''.
+| {{GHGheb|text=יָסֹב}}<sup>*</sup>
+| ({{GHGheb|text=יֵקַל}} {{GHGpar|67|p}}) {{GHGheb|text=יִסֹּב}}<sup>*</sup>
+| {{GHGheb|text=יִסַּב}}<sup>*</sup>
+|-
+|
+|
+| 3. ''f''.
+| {{GHGheb|text=תָּסֹב}}
+| {{GHGheb|text=תִּסֹּב}}
+| {{GHGheb|text=תִּסַּב}}
+|-
+|
+|
+| 2. ''m''.
+| {{GHGheb|text=תָּסֹב}}
+| {{GHGheb|text=תִּסֹּב}}
+| {{GHGheb|text=תִּסַּב}}
+|-
+|
+|
+| 2. ''f''.
+| {{GHGheb|text=תָּסֹ֫בִּי}}<sup>*</sup>
+| {{GHGheb|text=תִּסְּבִי}}
+| {{GHGheb|text=תִּסַּ֫בִּי}}<sup>*</sup>
+|-
+|
+|
+| 1. ''c''.
+| {{GHGheb|text=אָסֹב}}
+| {{GHGheb|text=אֶסֹּב}}
+| {{GHGheb|text=אֶסַּב}}
+|-
+|
+| ''Plur''.
+| 3. ''m''.
+| {{GHGheb|text=יָסֹ֫בּוּ}}
+| {{GHGheb|text=יִסְּבוּ}}
+| {{GHGheb|text=יִסַּ֫בּוּ}}
+|-
+|
+|
+| 3. ''f''.
+| {{GHGheb|text=תְּסֻבֶּ֫ינָה}}<sup>*</sup>
+| [{{GHGheb|text=תִּסֹּ֫בְנָה}}]
+| [{{GHGheb|text=תִּסַּבֶּ֫ינָה}}]
+|-
+|
+|
+| 2. ''m''.
+| {{GHGheb|text=תָּסֹ֫בּוּ}}
+| {{GHGheb|text=תִּסְּבוּ}}
+| {{GHGheb|text=תִּסַּ֫בּוּ}}
+|-
+|
+|
+| 2. ''f''.
+| [{{GHGheb|text=תְּסֻבֶּ֫ינָה}}]
+| [{{GHGheb|text=תִּסֹּ֫בְנָה}}]
+| [{{GHGheb|text=תִּסַּבֶּ֫ינָה}}]
+|-
+|
+|
+| 1. ''c''.
+| {{GHGheb|text=נָסֹב}}
+| {{GHGheb|text=נִסֹּב}}
+| {{GHGheb|text=נִסַּב}}
+|-
+|colspan="2"| ''Impf. with Wāw consec.''
+|
+| {{GHGheb|text=וַיָּ֫סָב}}<sup>*</sup>
+| (pause {{GHGheb|text=וַיָּסֹב}})
+|
+|-
+|colspan="2"| ''Impf. with Suff''.
+|
+| {{GHGheb|text=יְסֻבֵּ֫נִי}}<sup>*</sup>
+| colspan="5" | {{GHGheb|text=<br />}}
+|-
+| ''Part''.
+| ''act''
+|
+| {{GHGheb|text=סֹבֵב}}
+|
+| נָסָב
+|-
+|
+| ''pass''.
+|
+| {{GHGheb|text=סָבוּב}}<sup>*</sup>
+|
+| (''fem'' {{GHGheb|text=נְסַבָּה}})
+|}
+</div><noinclude>
+<references/></noinclude>

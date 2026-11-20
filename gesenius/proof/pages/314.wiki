@@ -1,0 +1,40 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par97 />connected with {{GHGheb|text=עָשָׂר}} and {{GHGheb|text=עֶשְׂרֵה}}, and that the contraction is founded on an early and correct tradition. The second explanation is supported by the large number of examples of {{GHGheb|text=שנים}} (66) and {{GHGheb|text=שתים}} (34). It would be strange if the Masora required the alteration of the far commoner forms on account of isolated instances of {{GHGheb|text=שְׁנֵי}} and {{GHGheb|text=שְׁתֵּי}}. As a matter of fact even in regard to the latter forms the tradition often varies between {{GHGheb|text=שְׁנֵי}} and {{GHGheb|text=שְׁנַ֫יִם}}, &c., cf. e.g. Ginsburg on {{GHGbible-ref|book=Jos|chapter=3|verse=12}}. We cannot therefore assume a ''Q<sup>e</sup>rê perpetuum''.
+
+{{GHGmargin-letter|97|e}}
+Accordingly the numbers from 11 upwards are—
+
+<div align="center">
+{| cellspacing="0" cellpadding="0" border="0"
+|
+| ''Masculine''.
+| ''Feminine''.
+|-
+| 11.
+| {{GHGheb|text=אַחַד עָשָׂר}}
+| {{GHGheb|text=אַחַת עֶשְׂרֵה}}
+|-
+|
+| {{GHGheb|text=עַשְׁתֵּי}}<ref>{{GHGheb|text=עַשְׁתֵּי}}, which remained for a long time unexplained, was recognized (first by J. Oppert) in the Assyro-Babylonian inscriptions in the form ''ištin'' or ''ištên''; cf. Friedr. Delitzsch, ''Assyrische Grammatik'', p. 203, and P. Haupt, in the ''American Journal of Philology'', viii. 279. Accordingly, {{GHGheb|text=עַשְׁתֵּי עָשָׂר}} is a compound, like the Sansk. ''êkâdaçan'', ἕνδεκα, ''undecim'' (analogous to the combination of units and tens in the numerals from 12 to 19), and is used at the same time in the composition of the feminine numeral eleven. On the gradual substitution of {{GHGheb|text=עַשְׁתֵּי ע׳}} for {{GHGheb|text=אַחַד ע׳}} and {{GHGheb|text=אַחַת ע׳}} see Giesebrecht in {{GHGcite|title={{abbr|ZAW.|Zeitschrift für die alttestamentliche Wissenschaft, ed. by B. Stade, Giessen, 1881 ff., and since 1907 by K. Marti.}}}} 1881, p. 226; {{GHGheb|text=עַשְׁתֵּי ע׳}} occurs only in Jer., Ez., in the prologue to Deuteronomy (1:3), in the Priestly Code, and in passages undoubtedly post-exilic, so that it may very well be a loan-word from the Babylonian.</ref> {{GHGheb|text=עָשָׂר}}
+| {{GHGheb|text=עַשְׁתֵּי עֶשְׂרֵה}}
+|-
+| 12.
+| {{GHGheb|text=שְׁנֵים עָשָׂר}}
+| {{GHGheb|text=שְׁתֵּים עֶשְׂרֵה}}
+|-
+|
+| {{GHGheb|text=שְׁנֵי עָשָׂר}}
+| {{GHGheb|text=שְׁתֵּי עֶשְׂרֵה}}
+|-
+| 13.
+| {{GHGheb|text=שְׁלשָׁה עָשָׂר}}
+| {{GHGheb|text=שְׁלשׁ עֶשְׂרֵה}}
+|}
+</div>
+
+&c., on the analogy of the last. These numerals regularly have only the above form. In regard to their syntax, cf. {{GHGpar|134|f}}.
+
+Very rarely the units appear in the {{GHGterm|masc.}} in the ''constr. st.'', as {{GHGheb|text=חֲמֵ֫שֶׁת עָשָׂר|translate=fifteen}}, {{GHGbible-ref|book=Ju|chapter=8|verse=10}}, {{GHGbible-ref|book=2 S|chapter=19|verse=18}}; {{GHGheb|text=שְׁמנַת עָשָׂר|translate=eighteen}}, {{GHGbible-ref|book=Ju|chapter=20|verse=25}}.—Connected by {{GHGheb|text=וְ}} we find {{GHGheb|text=עֲשָׂרָה וַֽחֲמִשָּׁה}} in {{GHGbible-ref|book=Ex|chapter=45|verse=12}}.
+
+{{GHGmargin-letter|97|f}}
+'''3.''' The tens from 30 to 90 are expressed by the plural forms of the units (so that the plural here always stands for ''ten times'' the unit), thus, {{GHGheb|text=שְׁלשִׁים}} 30, {{GHGheb|text=אַרְבָּעִים}} 40, {{GHGheb|text=חֲמִשִּׁים}} 50, {{GHGheb|text=שִׁשִּׁים}} 60, {{GHGheb|text=שִׁבְעִים}} 70, {{GHGheb|text=שְׁמֹנִים}} 80, {{GHGheb|text=תִּשְׁעִים}} 90. But ''twenty'' is expressed by {{GHGheb|text=עֶשְׂרִים}}, plur. of {{GHGheb|text=עֶ֫שֶׂר|translate=ten}}.<ref>For {{GHGheb|text=עֶשְׂרִים}}, {{GHGheb|text=שִׁבְעִים}}, {{GHGheb|text=תִּשְׁעִים}} (from the ''segholates'' {{GHGheb|text=עֶ֫שֶׂר}}, {{GHGheb|text=שֶׁ֫בַע}}, {{GHGheb|text=תֵּ֫שַׁע}}), we should expect ''ʿ<sup>a</sup>sārîm, š<sup>e</sup>bhāʿîm, t<sup>e</sup>šāʿîm''. Is this very unusual deviation from the common formation (see above, {{GHGpar|93|l}}, ''o'', ''r'') connected with the special meaning of these plurals, or are these survivals of an older form of the plural of segholates?</ref> These numerals are all of common gender, and do not admit of the {{GHGterm|construct state}}.—In compound numerals, like 22, 23, 44, &c., the units<section end=par97 /><noinclude>
+<references/></noinclude>

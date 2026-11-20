@@ -1,0 +1,183 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><div align="center">
+{|
+! {{GHGterm|Puʿal}}.
+! {{GHGterm|Hiphʿîl}}.
+! {{GHGterm|Hophʿal}}.
+! {{GHGterm|Hithpaʿēl}}.
+
+|-
+| {{GHGheb|text=שֻׁלַּח}}
+| {{GHGheb|text=הִשְׁלִיחַ}}<sup>*</sup>
+| {{GHGheb|text=הָשְׁלַח}}
+| {{GHGheb|text=הִשְׁתַּלַּח}}<sup>*</sup>
+
+|-
+| {{GHGheb|text=שֻׁלְּחָה}}
+| {{GHGheb|text=הִשְׁלִ֫יחָה}}
+| {{GHGheb|text=הָשְׁלְחָה}}
+| {{GHGheb|text=הִשְׁתַּלְּחָה}}
+
+|-
+| {{GHGheb|text=שֻׁלַּ֫חְתָּ}}
+| {{GHGheb|text=הִשְׁלַ֫חְתָּ}}
+| {{GHGheb|text=הִשְׁלַ֫חְתָּ}}
+| {{GHGheb|text=הִשְׁתַּלַּ֫חְתָּ}}
+
+|-
+| {{GHGheb|text=שֻׁלַּ֫חַתְּ}}<sup>*</sup>
+| {{GHGheb|text=הִשְׁלַ֫חַתְּ}}<sup>*</sup>
+| {{GHGheb|text=הָשְׁלַ֫חַתְּ}}<sup>*</sup>
+| {{GHGheb|text=הִשְׁתַּלַּ֫חַתְּ}}<sup>*</sup>
+
+|-
+| {{GHGheb|text=שֻׁלַּ֫חְתִּי}}
+| {{GHGheb|text=הִשְׁלַ֫חְתִּי}}
+| {{GHGheb|text=הָשְׁלַ֫חְתִּי}}
+| {{GHGheb|text=הִשְׁתַּלַּ֫חְתִּי}}
+
+|-
+| {{GHGheb|text=שֻׁלְּחוּ}}
+| {{GHGheb|text=הִשְׁלִ֫יהוּ}}
+| {{GHGheb|text=הָשְׁלְחוּ}}
+| {{GHGheb|text=הִשְׁתַּלְּחוּ}}
+
+|-
+| {{GHGheb|text=שֻׁלַּחְתֶּם}}
+| {{GHGheb|text=הִשְׁלַחְתֶּם}}
+| {{GHGheb|text=הָשְׁלַחְתֶּם}}
+| {{GHGheb|text=הִשְׁתַּלַּחְתֶּם}}
+
+|-
+| {{GHGheb|text=שֻׁלַּחְתֶּן}}
+| {{GHGheb|text=הִשְׁלַחְתֶּן}}
+| {{GHGheb|text=הָשְׁלַחְתֶּן}}
+| {{GHGheb|text=הִשְׁתַּלַּחְתֶּן}}
+
+|-
+| {{GHGheb|text=שֻׁלַּ֫חְנוּ}}
+| {{GHGheb|text=הִשְׁלַ֫חְנוּ}}
+| {{GHGheb|text=הָשְׁלַ֫חְנוּ}}
+| {{GHGheb|text=הִשְׁתַּלַּ֫חְנוּ}}
+
+|-
+|
+| {{GHGheb|text=הַשְׁלִיהַ}}<sup>*</sup>
+|
+| {{GHGheb|text=הִשְׁתַּלַּה}}<sup>*</sup>
+
+|-
+|
+| {{GHGheb|text=הַשְׁלֵחַ}}<sup>*</sup>
+| {{GHGheb|text=הָשְׁלֵחַ}}<sup>*</sup>
+|
+
+|-
+|
+| {{GHGheb|text=הַשְׁלַח}}
+|
+| {{GHGheb|text=הִשְׁתַּלַּח}}<sup>*</sup>
+
+|-
+| wanting.
+| {{GHGheb|text=הַשְׁלִ֫יחִי}}
+| wanting.
+| {{GHGheb|text=הִשְׁתִּלְּתִי}}
+
+|-
+|
+| {{GHGheb|text=הַשְׁלִ֫יחוּ}}
+|
+| {{GHGheb|text=הִשְׁתַּלְּחוּ}}
+
+|-
+|
+| {{GHGheb|text=הַשְׁלַ֫חְנָה}}
+|
+| {{GHGheb|text=הִשְׁתַּלַּ֫חְנָה}}<sup>*</sup>
+
+|-
+| {{GHGheb|text=יְשֻׁלַּח}}
+| {{GHGheb|text=יַשְׁלִיחַ}}<sup>*</sup>
+| {{GHGheb|text=יָשְׁלַח}}
+| {{GHGheb|text=יִשְׁתַּלַּח}}
+
+|-
+| {{GHGheb|text=תְּשֻׁלַּח}}
+| {{GHGheb|text=תַּשְׁלִיחַ}}
+| {{GHGheb|text=תָּשְׁלַח}}
+| {{GHGheb|text=תִּשְׁתַּלַּח}}
+
+|-
+| {{GHGheb|text=תְּשֻׁלַּח}}
+| {{GHGheb|text=תַּשְׁלִּיחַ}}
+| {{GHGheb|text=תָּשְׁלַח}}
+| {{GHGheb|text=תִּשְׁתַּלַּח}}
+
+|-
+| {{GHGheb|text=תְּשֻׁלְּחִי}}
+| {{GHGheb|text=תַּשְׁלִ֫יחִי}}
+| {{GHGheb|text=תָּשְׁלְחִי}}
+| {{GHGheb|text=תִּשְׁתַּלְּחִי}}
+
+|-
+| {{GHGheb|text=אֲשֻׁלַּח}}
+| {{GHGheb|text=אַשְׁלִיחַ}}
+| {{GHGheb|text=אָשְׁלַח}}
+| {{GHGheb|text=אֶשְׁתַּלַּח}}
+
+|-
+| {{GHGheb|text=יְשֻׁלְּחוּ}}
+| {{GHGheb|text=יַשְׁלִ֫יחוּ}}
+| {{GHGheb|text=יָשְׁלְחוּ}}
+| {{GHGheb|text=יִשְׁתַּלְּחוּ}}
+
+|-
+| {{GHGheb|text=תְּשֻׁלַּ֫חְנָה}}
+| {{GHGheb|text=תַּשְׁלַ֫חְנָה}}
+| {{GHGheb|text=תָּשְׁלַ֫חְנָה}}
+| {{GHGheb|text=תִּשְׁתַּלַּ֫חְנָה}}<sup>*</sup>
+
+|-
+| {{GHGheb|text=תְּשֻׁלְּחוּ}}
+| {{GHGheb|text=תַּשְׁלִ֫יחוּ}}
+| {{GHGheb|text=תָּשְׁלְחוּ}}
+| {{GHGheb|text=תִּשְׁתַּלְּחוּ}}
+
+|-
+| {{GHGheb|text=תְּשֻׁלַּ֫חְנָה}}
+| {{GHGheb|text=תַּשְׁלַ֫חְנָה}}
+| {{GHGheb|text=תָּשְׁלַ֫חְנָה}}
+| {{GHGheb|text=תִּשְׁתַּלַּ֫חְנָה}}
+
+|-
+| {{GHGheb|text=נְּשֻׁלַּח}}
+| {{GHGheb|text=נַשְׁלִיחַ}}
+| {{GHGheb|text=נָשְׁלַח}}
+| {{GHGheb|text=נִשְׁתַּלַּח}}
+
+|-
+|
+| {{GHGheb|text=יִשְׁלַח}}
+| 
+| 
+|-
+| &nbsp;
+|
+| 
+|
+|-
+
+|
+| {{GHGheb|text=מַשְׁלִיחַ}}<sup>*</sup>
+|
+| {{GHGheb|text=מִשְׁתַּלֵּחַ}}<sup>*</sup>
+
+|-
+| {{GHGheb|text=מְשֻׁלָּח}}
+|
+| {{GHGheb|text=מָשְׁלָח}}
+
+|
+|}
+</div><noinclude>
+<references/></noinclude>

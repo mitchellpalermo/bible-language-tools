@@ -1,0 +1,289 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude>{{center|''B. Strong Verb.''}}
+
+<div align="center">
+{|
+
+| colspan="4" |
+ 
+ 
+! colspan="3" | {{GHGterm|Qal}}.
+! {{GHGterm|Niphʿal}}.
+! {{GHGterm|Piʿēl}}.
+
+|-
+| ''Perf''.
+| ''Sing''.
+| 3.
+| ''m''.
+|{{GHGheb|text=קָטַל}}<sup>*</sup>
+|{{GHGheb|text=כָּבֵד}}<sup>*</sup>
+|{{GHGheb|text=קָטֹן}}<sup>*</sup>
+|{{GHGheb|text=נִקְטַל}}<sup>*</sup>
+|{{GHGheb|text=קִטַּל}}, {{GHGheb|text=קִטֵּל}}<sup>*</sup>
+|-
+|
+|
+| 3.
+| ''f''.
+|{{GHGheb|text=קָֽטְלָה}}<sup>*</sup>
+|{{GHGheb|text=כָּֽבְדָה}}<sup>*</sup>
+|{{GHGheb|text=קָֽטְנָה}}<sup>*</sup>
+|{{GHGheb|text=נִקְטְלָה}}<sup>*</sup>
+|{{GHGheb|text=קִטְּלָה}}<sup>*</sup>
+|-
+|
+|
+| 2.
+| ''m''.
+|{{GHGheb|text=קָטַ֫לְתָּ}}<sup>*</sup>
+|{{GHGheb|text=כָּבַ֫דְתָּ}}<sup>*</sup>
+|{{GHGheb|text=קָטֹ֫נְתָּ}}<sup>*</sup>
+|{{GHGheb|text=נִקְטַ֫לְתָּ}}<sup>*</sup>
+|{{GHGheb|text=קִטַּ֫לְתָּ}}<sup>*</sup>
+|-
+|
+|
+| 2.
+| ''f''.
+|{{GHGheb|text=קָטַלְתְּ}}
+|{{GHGheb|text=כָּבַדְתְּ}}
+|{{GHGheb|text=קָטֹנְתְּ}}
+|{{GHGheb|text=נִקְטַ֫לְתְּ}}
+|{{GHGheb|text=קִטַּלְתְּ}}
+|-
+|
+|
+| 1.
+| ''c''.
+|{{GHGheb|text=קָטַ֫לְתִּי}}
+|{{GHGheb|text=כָּבַ֫דְתִּי}}
+|{{GHGheb|text=קָטֹ֫נְתִּי}}
+|{{GHGheb|text=נִקְטַ֫לְתִּי}}
+|{{GHGheb|text=קִטַּ֫לְתִּי}}
+|-
+|
+| ''Plur''.
+| 3.
+| ''c''.
+|{{GHGheb|text=קָֽטְלוּ}}
+|{{GHGheb|text=כָּֽבְדוּ}}
+|{{GHGheb|text=קָֽטְנוּ}}
+|{{GHGheb|text=נִקְטְלוּ}}
+|{{GHGheb|text=קִטְּלוּ}}
+|-
+|
+|
+| 2.
+| ''m''.
+|{{GHGheb|text=קְטַלְתֶּם}}<sup>*</sup>
+|{{GHGheb|text=כְּבַדְתֶּם}}<sup>*</sup>
+|{{GHGheb|text=קְטָנְתֶּם}}<sup>*</sup>
+|{{GHGheb|text=נִקְטַלְתֶּם}}
+|{{GHGheb|text=קִטַּלְתֶּם}}
+|-
+|
+|
+| 2.
+| ''f''.
+|{{GHGheb|text=קְטַלְתֶּן}}
+|{{GHGheb|text=כְּבַדְתֶּן}}
+|{{GHGheb|text=קְטָנְתֶּן}}
+|{{GHGheb|text=נִקְטַלְתֶּן}}
+|{{GHGheb|text=קִטַּלְתֶּן}}
+|-
+|
+|
+| 1.
+| ''c''.
+|{{GHGheb|text=קָטַ֫לְנוּ}}
+|{{GHGheb|text=כָּבַ֫דְנוּ}}
+|{{GHGheb|text=קָטֹ֫נּוּ}}
+|{{GHGheb|text=נִקְטַ֫לְנוּ}}
+|{{GHGheb|text=קִטַּ֫לְנוּ}}
+|-
+| ''Inf''.
+| 
+|
+|
+|{{GHGheb|text=קְטֹל}}, {{GHGheb|text=שְׁכַב}}<sup>*</sup>
+|
+|
+| {{GHGheb|text=הִקָּטֵל}}<sup>*</sup>
+|{{GHGheb|text=קַטֵּל}}<sup>*</sup>
+
+|-
+| ''Inf''.
+|''absol''.
+|
+|
+|{{GHGheb|text=קָטוֹל}}<sup>*</sup>
+|
+|
+| {{GHGheb|text=נִקְטֹל}}, {{GHGheb|text=הִקָּטֹל}}<sup>*</sup>
+|{{GHGheb|text=קַטֵּל}}, {{GHGheb|text=קַטֹּל}}<sup>*</sup>
+
+|-
+| ''Imp''.
+| ''Sing''.
+| 2.
+| ''m''.
+|{{GHGheb|text=קְטֹל}}<sup>*</sup>
+| |
+|{{GHGheb|text=כְּבַד}}<sup>*</sup>
+|{{GHGheb|text=הִקָּטֵל}}<sup>*</sup>
+|{{GHGheb|text=קַטֵּל}}<sup>*</sup>
+|-
+|
+|
+| 2.
+| ''f''.
+|{{GHGheb|text=קִטְלִי}}<sup>*</sup>
+| |
+|{{GHGheb|text=כִּבְדִי}}<sup>*</sup>
+|{{GHGheb|text=הִקָּֽטְלִי}}<sup>*</sup>
+|{{GHGheb|text=קַטְּלִי}}<sup>*</sup>
+|-
+|
+| ''Plur''.
+| 2.
+| ''m''.
+|{{GHGheb|text=קִטְלוּ}}
+| |
+|{{GHGheb|text=כִּבְדוּ}}
+|{{GHGheb|text=חִקָּֽטְלוּ}}
+|{{GHGheb|text=קַטְּלוּ}}
+|-
+|
+|
+| 2.
+| ''f''.
+|{{GHGheb|text=קְטֹ֫לְנָה}}<sup>*</sup>
+| |
+|{{GHGheb|text=כְּבַ֫דְנָה}}<sup>*</sup>
+|{{GHGheb|text=הִקָּטַ֫לְנָה}}<sup>*</sup>
+|{{GHGheb|text=קַטֵּ֫לְנָה}}<sup>*</sup>
+|-
+| ''Impf''.
+| ''Sing''.
+| 3.
+| ''m''.
+|{{GHGheb|text=יִקְטֹל}}<sup>*</sup>
+|{{GHGheb|text=יִכְבַּד}}<sup>*</sup>
+|{{GHGheb|text=יִקְטַן}}<sup>*</sup>
+|{{GHGheb|text=יִקָּטֵל}}<sup>*</sup>
+|{{GHGheb|text=יְקַטֵּל}}<sup>*</sup>
+|-
+|
+|
+| 3.
+| ''f''.
+|{{GHGheb|text=תִּקְטֹל}}
+|{{GHGheb|text=תִּכְבַּד}}
+| |
+|{{GHGheb|text=תִּקָּטֵל}}
+|{{GHGheb|text=תְּקַטֵּל}}
+|-
+|
+|
+| 2.
+| ''m''.
+|{{GHGheb|text=תִּקְטֹל}}
+|{{GHGheb|text=תִּכְבַּד}}
+| |
+|{{GHGheb|text=תִּקָּטֵל}}
+|{{GHGheb|text=תְּקַטֵּל}}
+|-
+|
+|
+| 2.
+| ''f''.
+|{{GHGheb|text=תִּקְטְלִי}}<sup>*</sup>
+|{{GHGheb|text=תִּכְבְּדִי}}<sup>*</sup>
+| |
+|{{GHGheb|text=תִּקָּֽטְלִי}}<sup>*</sup>
+|{{GHGheb|text=תְּקַטְּלִי}}<sup>*</sup>
+|-
+|
+|
+| 1.
+| ''c''.
+|{{GHGheb|text=אֶקְטֹל}}
+|{{GHGheb|text=אֶכְבַּד}}
+| |
+|{{GHGheb|text=אֶקָּטֵל}}
+|{{GHGheb|text=אֲקַטֵּל}}
+|-
+|
+| ''Plur''.
+| 3.
+| ''m''.
+|{{GHGheb|text=יִקְטְלוּ}}
+|{{GHGheb|text=יִכְבְּדוּ}}
+| |
+|{{GHGheb|text=יִקָּֽטְלוּ}}
+|{{GHGheb|text=יְקַטְּלוּ}}
+|-
+|
+|
+| 3.
+| ''f''.
+|{{GHGheb|text=תִּקְטֹ֫לְנָה}}<sup>*</sup>
+|{{GHGheb|text=תִּכְבַּ֫דְנָה}}<sup>*</sup>
+| |
+|{{GHGheb|text=תִּקָּטַ֫לְנָה}}<sup>*</sup>
+|{{GHGheb|text=תְּקַטֵּ֫לְנָה}}<sup>*</sup>
+|-
+|
+|
+| 2.
+| ''m''.
+|{{GHGheb|text=תִּקְטְלוּ}}
+|{{GHGheb|text=תִּכְבְּדוּ}}
+| |
+|{{GHGheb|text=תִּקָּֽטְלוּ}}
+|{{GHGheb|text=תְּקַטְּלוּ}}
+|-
+|
+|
+| 2.
+| ''f''.
+|{{GHGheb|text=תִּקְטֹ֫לְנָה}}
+|{{GHGheb|text=תִּכְבַּ֫דְנָה}}
+| |
+|{{GHGheb|text=תִּקָּטַ֫לְנָה}}
+|{{GHGheb|text=תְּקַטֵּ֫לְנָה}}
+|-
+|
+|
+| 1.
+| ''c''.
+|{{GHGheb|text=נִקְטֹל}}
+|{{GHGheb|text=נִכְבַּד}}
+| |
+|{{GHGheb|text=נִקָּטֵל}}
+|{{GHGheb|text=נְקַטֵּל}}
+|-
+| colspan="16" | ''Shortened Impf''. ({{GHGterm|Jussive}})
+|-
+| ''Part''.
+| ''act''.
+|
+|
+|{{GHGheb|text=קֹטֵל}}<sup>*</sup>
+|{{GHGheb|text=כָּבֵד}}
+|{{GHGheb|text=קָטֹן}}
+|{{GHGheb|text=נִקְטָל}}<sup>*</sup>
+|{{GHGheb|text=מְקַטֵּל}}<sup>*</sup>
+|-
+|
+| ''pass''.
+|
+|
+|{{GHGheb|text=קָטוּל}}<sup>*</sup>
+| |
+| |
+| |
+| |
+|}
+</div><noinclude>
+<references/></noinclude>

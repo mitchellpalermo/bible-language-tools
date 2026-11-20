@@ -1,0 +1,37 @@
+<!-- scan 561, printed 537, Index of Subjects -->
+{{colbegin}}
+Himyaritic, 1 ''b'' (i): writing, 1 ''k'' N.<sup>2</sup>
+Hiphʿîl, 53: ‘internal,’ 53 ''d'': infinitive pointed {{GHGheb|text=הַ־}}, 53 ''l'': the {{GHGheb|text=ה}} in infin. elided after preposition, 53 ''q'': imperf. with ''ĕ'' for ''ă'' (as {{GHGheb|text=יְבָרְכוּ}}), 53 ''n'': with {{GHGheb|text=ה}} retained in imperf. after preformatives, 53 ''q'': denominatives in Hiph., 53 ''g''.
+Ḥireq, different kinds of, 8 ''b'', 9 ''g'', ''h'': compaginis, 90 ''k''–''n''.
+Hithpaʿēl, 54: sometimes construed with an accusative, 54 ''f'', 117 ''w''.
+Hithpaʿlēl, 55 ''d'', 72 ''m'', 75 ''kk''.
+Hithpalpel, 55 ''g'', 67 ''l''.
+Hithpôʿēl, 55 ''b'', 67 ''l''.
+Ḥolem, 8 ''c''–''g'': written defectively, 8 ''i''–''l'': its origin, 9 ''p''–''s'': changed to qameṣ in pause, 29 ''u''.
+Homogeneous consonants, 6 ''q'': vowels, 24 ''b'', ''f''.
+Homorganic consonants, 6 ''q''.
+Hophʿal, 53 ''b'', ''h'', ''s'', ''t'': {{GHGheb|text=ה}} retained once in ptcp., 53 ''s''.
+Hothpaʿal, 54 ''b'', ''h'', ''l''.
+Hypothetical sentences, ''see'' Conditional sentences.
+
+I-sounds, 8 ''b'', 9 ''g'', ''h'': from ''a'' 27 ''s'', ''t'': in impf., 47 ''b'': in Niph., 51 ''a'': in Pi., 52 ''a'': in Hiph., 53 ''a'': in nouns with preformative {{GHGheb|text=מ}}, 85 ''f'': lengthened to ''ē'', 93 ''c''.
+Imperative, forms in Qal, 46: shortened and lengthened forms of, 48 ''i''–''l'', 75 ''k'': with suffixes, 61 ''f''–''h'': syntax of, 110: infinitive absolute used with force of imperative, 113 ''bb''.
+Imperfect, the name, 47 ''a'' N.: formation and inflexion of, 47: unusual forms of, 47 ''k'': form {{GHGheb|text=תקטלנה}} as 3rd fem. sing. or 2nd masc. sing., 47 ''k'': 3rd pl. masc. in {{GHGheb|text=וּן}}, 47 ''m'': jussive and cohortative forms of, 48: with wāw consecutive, 49 ''c''–''g'', 111: with suffixes, 60: its syntax (alone), 107: expressing custom or habit, 107 ''e'', ''g'': with wāw consec., 111: subordinated to another verb, 120 ''c''.
+Imperfect Hiphʿîl with ''ĕ'' for ''ă'' (as {{GHGheb|text=יְבָרְכוּ}}), 53 ''n'': with {{GHGheb|text=ה}} retained after preformatives, 53 ''q''.
+Impersonal construction of {{GHGheb|text=הָיָה}}, &c., 144 ''b'': impersonal passive, 121 ''a''.
+Imprecation, formulae of, 149 ''d''.
+Incomplete retrocession of the tone, 29 ''f''.
+Indefinite subject of verb, expressed by 3rd masc. sing., 144 ''d'', ''e'', by 3rd plur., 144 ''f'', ''g'', by 2nd sing. masc. (rare), 144 ''h'', by ptcp. plur., 144 ''i'', by passive, ''k''.
+Indeterminateness expressing amplification, 125 ''c''.
+Indogermanic languages compared, 1 ''e'', ''g'', ''h'', ''i'' (loan-words in), 10 ''e'' N.<sup>1</sup>, 20 ''l'' N., 22 ''c'' N., 27 ''t'' N., 31 ''a'', 33 ''a'', 51 ''c''–''e'', 52 ''f'' N., 53 ''g'' N., 55 ''f'' N., 99 ''b'' and N., 132 ''a'' N., 133 ''b'' N.<sup>1</sup>, 135 ''i'' N., ''q'' N., 145 ''k'' N.<sup>1</sup>, 155 ''b'' N.
+Infinitive, 45: with suffixes, 61 ''a''–''e'': use of the infinitive absolute, 113: as a casus adverbialis, 113 ''h''–''k'': to strengthen the idea of the verb, 113 ''l''–''r'': in place of the finite verb, 113 ''y''–''gg'': infinitive construct, unusual forms in Qal, 45 ''c''–''e'', in Piʿēl, 52 ''p'' (cf. 84<sup>b</sup> ''e''), in Hiphʿîl, 53 ''l'', 86 ''k'', in Hithpaʿēl, 54 ''k'': of {{GHGheb|text=נָתַן}}, 66 ''i'': in verbs {{GHGheb|text=ע״ע}}, 67 ''o'': in {{GHGheb|text=פ״י}}, 69 ''m'' with N.: in {{GHGheb|text=ע״וּ}} (Hiph.), 72 ''z'', cf. 85 ''c'': {{GHGheb|text=ל״א}} 74 ''h'', 75 ''qq'': {{GHGheb|text=ל״ה}}, 75 ''n'' (cf. 69 ''m'' N.), ''ff'', ''kk'': syntax of the infin. constr., 114: with {{GHGheb|text=לְ}} to express a future, 114 ''h''–''k'', obligation, 114 ''l'', as object of another verb, 114 ''m'', gerundial, 114 ''o'': after {{GHGheb|text=וְלְ}}, 114 ''p'': infinitive construct continued by a finite verb, 114 ''r'': how negatived, 114 ''s'': construction with subject and object, 115: infinitive Hiphʿîl pointed {{GHGheb|text=הַ־}}, 53 ''l'', with {{GHGheb|text=ה}} elided after preposition, 53 ''q'': Niphʿal with {{GHGheb|text=ה}} elided, 51 ''l''.
+Instrument, introduced by {{GHGheb|text=בְּ}}, 119 ''o'': accusative as a supposed casus instrumentalis, 144 ''m'' N.
+Interjections, 30 ''s'', 105: syntax of, 148.
+Interpunctuation, the accents as marks of, 15 ''d'', ''m''–''o''.
+Interrogative sentences, 107 ''t'', 150: disjunctive, 150 ''c'', ''g'': indirect, 150 ''i'': expressing a wish, 151 ''a'', ''b'': expressed without an interrog. particle, 150 ''a'', ''b''.
+Interrogative words and particles, 150 ''c'', ''d''.
+Involved series of sentences, 167 ''c''.
+
+Jews, Jewish, 2 ''a''.
+Jussive, forms of, 48 ''a''–''c'', ''f''–''h'': syntax of, 109: used absolutely, 109 ''b'', ''c'': depending on another verb, 109 ''f'', ''g'', ''i'': in conditional sentences, 109 ''h'', 159 ''d'': jussive forms in poetry without jussive force, 109 ''k''.
+{{colend}}

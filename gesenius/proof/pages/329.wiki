@@ -1,0 +1,144 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par103 />''With Suffixes.''
+
+{{GHGmargin-letter|103|p}}
+<div align="center">
+{| cellspacing="0" cellpadding="0" border="0"
+| 1
+| ''Sing''.
+| {{GHGheb|text=אַֽחֲרַי}}
+
+(''after me'')
+| {{GHGheb|text=בֵּינִי}}
+
+(''between me'')
+| {{GHGheb|text=סְבִֽיבוֹתַי}}
+
+(''around me'')
+| {{GHGheb|text=תַּחְתַּי}}
+
+(''beneath me'')
+| {{GHGheb|text=אֵלַי}}
+
+(''to me'')
+| {{GHGheb|text=עָדַי}}
+
+(''unto me'')
+| {{GHGheb|text=עָלַי}}
+
+(''on me'')
+|-
+| 2
+| ''S. m.''
+| {{GHGheb|text=אַֽחֲרֶ֫יךָ}}
+| {{GHGheb|text=בֵּֽינְךָ}}
+| {{GHGheb|text=סְבִֽיבוֹתֶ֫יךָ}}
+
+& {{GHGheb|text=סְבִיבֶ֫יךָ}}
+| {{GHGheb|text=תַּחְתֶּ֫יךָ}}
+| {{GHGheb|text=אֵלֶ֫יךָ}}
+| {{GHGheb|text=עָדֶ֫יךָ}}
+| {{GHGheb|text=עָלֶ֫יךָ}}
+|-
+| 2
+| ''S. f.''
+| {{GHGheb|text=אַֽחֲרַ֫יִךְ}}
+|
+| {{GHGheb|text=סְבִֽיבוֹתַ֫יִךְ}}
+
+& {{GHGheb|text=סְבִיבַ֫יִךְ}}
+|
+| {{GHGheb|text=אֵלַ֫יִךְ}}
+|
+| {{GHGheb|text=עָלַ֫יִךְ}}
+|-
+| 3
+| ''S. m.''
+| {{GHGheb|text=אַֽחֲרָיו}}
+| {{GHGheb|text=בֵּינוֹ}}
+| {{GHGheb|text=סְבִֽיבוֹתָיו}}
+
+& {{GHGheb|text=סְבִיבָיו}}
+| {{GHGheb|text=תַּחְתָּיו}}
+| {{GHGheb|text=אֵלָיו}}
+| {{GHGheb|text=עָדָיו}}
+| {{GHGheb|text=עָלָיו}}
+|-
+| 3
+| ''S. f.''
+| {{GHGheb|text=אַֽחֲרֶ֫יהָ}}
+|
+| {{GHGheb|text=סְבִֽיבוֹתֶ֫יהָ}}
+
+& {{GHGheb|text=סְבִיבֶ֫יהָ}}
+| {{GHGheb|text=תַּחְתֶּ֫יהָ}}
+| {{GHGheb|text=אֵלֶ֫יהָ}}
+| {{GHGheb|text=עָדֶ֫יהָ}}
+| {{GHGheb|text=עָלֶ֫יהָ}}
+|-
+| 1
+| ''Plur''.
+| {{GHGheb|text=אַֽחֲרֵ֫ינוּ}}
+| {{GHGheb|text=בֵּינֵ֫ינוּ}}
+
+& {{GHGheb|text=בֵּינוֹתֵ֫ינוּ}}<ref>As Mayer Lambert observes, usage (cf. esp. {{GHGbible-ref|book=Gn|chapter=26|verse=28}}) distinguishes between the two forms: {{GHGheb|text=בינותינו}} means ''between us and you'', whereas {{GHGheb|text=בינינו}} ({{GHGbible-ref|book=Jos|chapter=22|verse=25.27.28}} before {{GHGheb|text=וביניכם}}) means ''between us on the one side''.</ref>
+| {{GHGheb|text=סְבִֽיבוֹתֵ֫ינוּ}}
+| {{GHGheb|text=תַּחְתֵּ֫ינוּ}}
+| {{GHGheb|text=אֵלֵ֫ינוּ}}
+|
+| {{GHGheb|text=עָלֵ֫ינוּ}}
+|-
+| 2
+| ''Pl. m.''
+| {{GHGheb|text=אַֽחֲרֵיכֶם}}
+| {{GHGheb|text=בֵּֽינֵיכֶם}}
+| {{GHGheb|text=סְבִיבֽוֹתֵיכֶם}}
+| {{GHGheb|text=תַּחְתֵּיכֶם}}
+| {{GHGheb|text=אֲלֵיכֶם}}
+| {{GHGheb|text=עָֽדֵיכֶם}}
+| {{GHGheb|text=עֲלֵיכֶם}}
+|-
+| 3
+| ''Pl. m.''
+| {{GHGheb|text=אַֽחֲרֵיהֶם}}
+| {{GHGheb|text=בֵּֽינֵיהֶם}}
+
+& {{GHGheb|text=בֵּֽינוֹתָם}}
+| {{GHGheb|text=סְבִיבֽוֹתֵיהֶם}}
+
+& {{GHGheb|text=סְבִֽיבוֹתָם}}
+| {{GHGheb|text=תַּחְתֵּיהֶם}}
+
+usually {{GHGheb|text=תַּחְתָּם}}
+| {{GHGheb|text=אֲלֵיהֶם}}
+
+& {{GHGheb|text=אֲלֵהֶם}}
+
+[<ref>The poetical form {{GHGheb|text=אֵלֵ֫ימוֹ}} only in {{GHGbible-ref|book=Ps|chapter=2|verse=5}}; {{GHGheb|text=עָלֵ֫ימוֹ}}, on which see note 3 on ''f'', 12 times [viz. {{GHGbible-ref|book=Dt|chapter=32|verse=23}}, {{GHGbible-ref|book=Ps|chapter=5|verse=12}}, {{GHGbible-ref|book=Ps|chapter=55|verse=16|hidebook=1}}, {{GHGbible-ref|book=Ps|chapter=64|verse=9|hidebook=1}}, {{GHGbible-ref|book=Jb|chapter=6|verse=16}}, {{GHGbible-ref|book=Jb|chapter=20|verse=23|hidebook=1}}, {{GHGbible-ref|book=Jb|chapter=21|verse=17|hidebook=1}}, {{GHGbible-ref|book=Jb|chapter=22|verse=2|hidebook=1}}, {{GHGbible-ref|book=Jb|chapter=27|verse=23|hidebook=1}}, {{GHGbible-ref|book=Jb|chapter=29|verse=22|hidebook=1}}, {{GHGbible-ref|book=Jb|chapter=30|verse=2.5|hidebook=1}}].</ref>{{GHGheb|text=אֵלֵ֫ימוֹ}}]
+| [{{GHGheb|text=עָֽדֵיהֶם}}]
+| {{GHGheb|text=עֲלֵיהֶם}}
+
+[<sup>2</sup>{{GHGheb|text=עָלֵ֫ימוֹ}}]
+|-
+| 3
+| ''Pl. f.''
+| {{GHGheb|text=אַֽחֲרֵיהֶן}}
+|
+|
+| {{GHGheb|text=תַּחְתֵּיהֶן}}
+| {{GHGheb|text=אֲלֵיהֶן}}
+
+& {{GHGheb|text=אֲלֵהֶן}}
+|
+| {{GHGheb|text=עֲלֵיהֶן}}
+|}
+</div><section end=par103 />
+
+<section begin=par104 />{{GHGpar-heading|104|Conjunctions}}
+
+{{GHGmargin-letter|104|a}}
+'''1.''' The conjunctions serve to connect sentences, and to express their relations one to another. They may be either—
+
+(''a'') Original pronouns, e.g. the demonstrative {{GHGheb|text=כִּי|translate=that, because, for}}.
+
+(''b'') Original substantives, which afterwards were reduced to the rank of pronouns, adverbs, or conjunctions; so perhaps {{GHGheb|text=אֲשֶׁר}} (see § 36), which is sometimes used to express the general idea of relation, sometimes as a relative pronoun (properly a demonstrative), but in many cases stands simply for {{GHGheb|text=כִּי}}; also {{GHGheb|text=אַל־}} (''nothing''), ''that not''; {{GHGheb|text=פֶּן־|translate=that not}} (the Greek μή of ''prohibition''), &c. To these may be added the adverbial combination of substantives with prepositions, e.g. {{GHGheb|text=בְּטֶ֫רֶם}}<section end=par104 /><noinclude>
+<references/></noinclude>

@@ -1,0 +1,178 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par91 />{{GHGheb|text=אַֽחֲיוֹתֵךְ}} {{GHGbible-ref|book=Ez|chapter=16|verse=52}}. On the other hand {{GHGheb|text=מִצְוֹתֶ֑ךָ}} (so Baer, Ginsb.; but Opit. {{GHGheb|text=־ֶ֫ יךָ}}) {{GHGbible-ref|book=Ps|chapter=119|verse=98}}, {{GHGbible-ref|book=Dn|chapter=9|verse=5}} is merely written defectively, like {{GHGheb|text=גַּרְגְּרֹתֶ֫ךָ}} according to Baer (not Ginsb.) in {{GHGbible-ref|book=Pr|chapter=1|verse=9}}, &c. In the ''3rd plur.'' the use of the singular suffix is even the rule in the earlier Books (see the instances in Diehl, l. c., p. 8), e.g. {{GHGheb|text=אֲבוֹתָם}} (''their fathers'') oftener than {{GHGheb|text=אֲבֹֽתֵיהֶם}} (this only in {{GHGbible-ref|book=1 K|chapter=14|verse=15}}, and in Jer, Ezr, Neh, and Ch [in 1 K, Jer, Ezr, however, {{GHGheb|text=אֲבוֹתָם}} is more common]); so always {{GHGheb|text=שְׁמוֹתָם}}, {{GHGheb|text=שְׁמוֹתָן|translate=their names}}, {{GHGheb|text=דּוֹרוֹתָם|translate=their generations}}. From parallel passages like {{GHGbible-ref|book=2 S|chapter=22|verse=46}} compared with {{GHGbible-ref|book=Ps|chapter=18|verse=46}}, {{GHGbible-ref|book=Is|chapter=2|verse=4}} with {{GHGbible-ref|book=Mi|chapter=4|verse=3}}, it appears that in many cases the longer form in {{GHGheb|text=־ֵיהֶם}} can only subsequently have taken the place of {{GHGheb|text=־ָם}}.
+
+{{GHGmargin-letter|91|o}}
+'''4.''' The following Paradigm of a masculine and feminine noun with suffixes is based upon a monosyllabic noun with one unchangeable vowel. With regard to the ending {{GHGheb|text=־ַת}} in the ''constr. st.'' of the fem. it should be further remarked that the short ''ă'' of this ending is only retained before the ''grave'' suffixes {{GHGheb|text=כֶם}} and {{GHGheb|text=כֶן}}; before all the others (the ''light'' suffixes) it is lengthened to ''ā''.
+
+{{GHGmargin-letter|91|p}}
+{| cellspacing="0" cellpadding="0" border="0"
+|+ ''' ''Singular.'' '''
+|-
+|
+|
+! colspan="2" | ''Masculine''.
+! colspan="2" | ''Feminine''.
+|-
+|
+|
+| {{GHGheb|text=סוּס}}
+| ''a horse''.
+| {{GHGheb|text=סוּסָה}}
+| ''a mare''.
+|-
+| Sing. 1.
+| ''com.''
+| {{GHGheb|text=סוּסִי}}
+| ''my horse''.
+| {{GHGheb|text=סֽוּסָתִי}}
+| ''my mare''.
+|-
+| 2.
+| ''m''.
+| {{GHGheb|text=סֽוּסְךָ}}
+| ''thy horse''.
+| {{GHGheb|text=סוּסָֽתְךָ}}
+| ''thy mare''.
+|-
+|
+| ''f''.
+| {{GHGheb|text=סוּסֵךְ}}
+| ''thy horse''.
+| {{GHGheb|text=סֽוּסָתֵךְ}}
+| ''thy mare''.
+|-
+| 3.
+| ''m''.
+| {{GHGheb|text=סוּסוֹ}}
+| ''equus eius'' (''suus'').
+| {{GHGheb|text=סֽוּסָתוֹ}}
+| ''equa eius'' (''sua'').
+|-
+|
+| ''f''.
+| {{GHGheb|text=סוּסָהּ}}
+| ''equus eius'' (''suus'').
+| {{GHGheb|text=סֽוּסָתָהּ}}
+| ''equa eius'' (''sua'').
+|-
+| Plur. I.
+| ''com''.
+| {{GHGheb|text=סוּסֵ֫נוּ}}
+| ''our horse''.
+| {{GHGheb|text=סֽוּסָתֵ֫נוּ}}
+| ''our mare''.
+|-
+| 2.
+| ''m''.
+| {{GHGheb|text=סֽוּסְכֶם}}
+| ''your horse''.
+| {{GHGheb|text=סֽוּסַתְכֶם}}
+| ''your mare''.
+|-
+|
+| ''f''.
+| {{GHGheb|text=סֽוּסְכֶן}}
+| ''your horse''.
+| {{GHGheb|text=סֽוּסַתְכֶן}}
+| ''your mare''.
+|-
+| 3.
+| ''m''.
+| {{GHGheb|text=סוּסָם}}
+| ''equus eorum'' (''suus'').
+| {{GHGheb|text=סֽוּסָתָם}}
+| ''equa eorum'' (''sua'').
+|-
+|
+| ''f''.
+| {{GHGheb|text=סוּסָן}}
+| ''equus earum'' (''suus'').
+| {{GHGheb|text=סֽוּסָתָן}}
+| ''equa earum'' (''sua'').
+|}
+
+{{GHGmargin-letter|91|q}}
+{| cellspacing="0" cellpadding="0" border="0"
+|+ ''' ''Plural.'' '''
+|-
+| colspan="2" |
+! colspan="2" | ''Masculine''.
+! colspan="2" | ''Feminine''.
+|-
+|
+|
+| {{GHGheb|text=סוּסִים}}
+| ''horses''.
+| {{GHGheb|text=סוּסוֹת}}
+| ''mares''.
+|-
+| Sing. 1.
+| ''com.''
+| {{GHGheb|text=סוּסַי}}
+| ''my horses''.
+| {{GHGheb|text=סֽוּסוֹתַי}}
+| ''my mares''.
+|-
+| 2.
+| ''m''.
+| {{GHGheb|text=סוּסֶ֫יךָ}}
+| ''thy horses''.
+| {{GHGheb|text=סֽוּסוֹתֶ֫יךָ}}
+| ''thy mares''.
+|-
+|
+| ''f''.
+| {{GHGheb|text=סוּסַ֫יִךְ}}
+| ''thy horses''.
+| {{GHGheb|text=סֽוּסוֹתַ֫יִךְ}}
+| ''thy mares''.
+|-
+| 3.
+| ''m''.
+| {{GHGheb|text=סוּסָיו}}
+| ''equi eius'' (''sui'').
+| {{GHGheb|text=סֽוּסוֹתָיו}}
+| ''equae eius'' (''suae'').
+|-
+|
+| ''f''.
+| {{GHGheb|text=סוּסֶ֫יהָ}}
+| ''equi eius'' (''sui'').
+| {{GHGheb|text=סֽוּסוֹתֶ֫יהָ}}
+| ''equae eius'' (''suae'').
+|-
+| Plur. 1.
+| ''com''.
+| {{GHGheb|text=סוּסֵ֫ינוּ}}
+| ''our horses''.
+| {{GHGheb|text=סֽוּסוֹתֵ֫ינוּ}}
+| ''our mares''.
+|-
+| 2.
+| ''m''.
+| {{GHGheb|text=סֽוּסֵיכֶם}}
+| ''your horses''.
+| {{GHGheb|text=סוּסֽוֹתֵיכֶם}}
+| ''your mares''.
+|-
+|
+| ''f''.
+| {{GHGheb|text=סֽוּסֵיכֶן}}
+| ''your horses''.
+| {{GHGheb|text=סוּסֽוֹתֵיכֶן}}
+| ''your mares''.
+|-
+| 3.
+| ''m''.
+| {{GHGheb|text=סֽוּסֵיהֶם}}
+| ''equi eorum'' (''sui'').
+| {{GHGheb|text=סוּסֽוֹתֵיהֶם}}
+| ''equae eorum'' (''suae'').
+|-
+|
+| ''f''.
+| {{GHGheb|text=סֽוּסֵיהֶן}}
+| ''equi earum'' (''sui'').
+| {{GHGheb|text=סוּסֽוֹתֵיהֶן}}
+| ''equae earum'' (''suae'').
+|}<section end=par91 /><noinclude>
+<references/></noinclude>

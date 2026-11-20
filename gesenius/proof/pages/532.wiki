@@ -1,0 +1,107 @@
+<noinclude><pagequality level="1" user="" /></noinclude><!-- no section needed -->{{center|''A. The Personal Pronoun.''<ref>Forms with an asterisk are exclusively poetic, those in parentheses () are rare, those in brackets [] do not occur (cf. {{GHGpar|58|a}}, note).</ref>}}
+
+<div align="center">
+{|
+!
+! colspan="2" | Nominative of the Pronoun, or ''Pronomen separatum''.
+! colspan="2" | Accusative of the Pronoun, or ''Suffixum Verbi''.
+ 
+|-
+!
+! colspan="2" |
+! colspan="2" | ''A''. Simple form.
+
+|-
+| Sing. 1. c.
+| ''I''.
+| {{GHGheb|text=אָֽנֹכִי}} in pause {{GHGheb|text=אָנֹ֫כִי}};
+| ''me''.
+| {{GHGheb|text=נִי}}; {{GHGheb|text=־ַ֫ נִי}}; {{GHGheb|text=־ֵ֫ נִי}}
+|-
+|
+|
+| {{GHGheb|text=אֲנִי}}, in pause {{GHGheb|text=אָ֫נִי}}
+|
+|
+|-
+| 2. m.
+| ''thou''.
+| {{GHGheb|text=אַתָּה}} ({{GHGheb|text=אַתָּ}}), in pause
+| ''thee''.
+| {{GHGheb|text=ךָ}}; {{GHGheb|text=־ְךָ}}, in pause {{GHGheb|text=־ֶ֫ ךָ}}
+|-
+|
+|
+| {{GHGheb|text=אָ֫תָּה}}
+|
+| {{GHGheb|text=־ָךְ}}
+|-
+| f.
+|
+| {{GHGheb|text=אַתְּ}} ({{GHGheb|text=אַתְּי}})
+|
+| {{GHGheb|text=ךְ}}; {{GHGheb|text=־ָךְ}}; {{GHGheb|text=־ֵךְ}}, {{GHGheb|text=־ֶ֫ ךְ}}
+|-
+| 3. m.
+| ''he''.
+| {{GHGheb|text=הוּא}}
+| ''him''.
+| {{GHGheb|text=הוּ}}, {{GHGheb|text=ו}}; {{GHGheb|text=(הֹ)־ָ֫הוּ}}, {{GHGheb|text=וֹ}}; {{GHGheb|text=־ֵ֫ הוּ}}
+|-
+|
+|
+|
+|
+|
+|-
+| f.
+| ''she''.
+| {{GHGheb|text=הִיא}}
+| ''her'' (''eam'').
+| {{GHGheb|text=הָ}}; {{GHGheb|text=־ָהּ}}; {{GHGheb|text=־ֶ֫ הָ}}
+|-
+| Plur. 1. c.
+| ''we''.
+| {{GHGheb|text=אֲנַ֫חְנוּ}} ({{GHGheb|text=נַ֫חְנוּ}}), in
+| ''us''.
+| {{GHGheb|text=נוּ}}; {{GHGheb|text=־ָ֫ נוּ}}; {{GHGheb|text=־ֵ֫ נוּ}}
+|-
+|
+|
+| pause {{GHGheb|text=אֲנָ֫חְנוּ}} ({{GHGheb|text=נָ֫חְנוּ}})
+|
+|
+|-
+| 2. m.
+| ''you''.
+| {{GHGheb|text=אַתֶּם}}
+| ''you''.
+| {{GHGheb|text=כֶם}}; {{GHGheb|text=־ְכֶם}}
+|-
+| f.
+|
+| {{GHGheb|text=אַתֵּן}}, {{GHGheb|text=אַתֵּ֫נָה}}
+|
+| [{{GHGheb|text=כֶן}}; {{GHGheb|text=־ְכֶן}}]
+|-
+| 3. m.
+| ''they''.
+| {{GHGheb|text=הֵם}}, {{GHGheb|text=הֵ֫מָּה}}
+| ''them'' (''eos'').
+| ({{GHGheb|text=הֶם}}), {{GHGheb|text=ם}}; {{GHGheb|text=־ָם}}, {{GHGheb|text=־ַם}}, {{GHGheb|text=־ֶ֫ מוֹ}}<sup>*</sup>; {{GHGheb|text=־ֵם}},
+|-
+|
+|
+|
+|
+| ({{GHGheb|text=־ֶ֫ ם}}), {{GHGheb|text=־ֵ֫ מוֹ}}<sup>*</sup>
+|-
+| f.
+|
+| {{GHGheb|text=הֵ֫נָּה}}
+| ''them'' (''eas'').
+| [{{GHGheb|text=הֶן}}], {{GHGheb|text=ן}}; {{GHGheb|text=־ָן}}, ({{GHGheb|text=־ַ֫ ן}}); [{{GHGheb|text=־ֵן}}]
+|}
+</div>
+<!-- no section needed --><noinclude>
+<references/></noinclude>

@@ -1,0 +1,72 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><section begin="par32" />{{center|'''CHAPTER I'''
+
+THE PRONOUN.}}
+
+Brockelmann, {{GHGcite|title=Semit. Sprachwiss.}}, p. 98 ff.; {{GHGcite|title=Grundriss}}, i. 296 ff. L. Reinisch, ‘Das persönl. Fürwort u. die Verbalflexion in den chamito-semit. Sprachen’ ({{GHGcite|title=Wiener Akad. der Wiss.}}, 1909).
+
+<!-- section begins above -->{{GHGpar-heading|32|The Personal Pronoun. The Separate Pronoun}}
+
+{{GHGmargin-letter|32|a}}
+'''1.''' The personal pronoun (as well as the pronoun generally) belongs to the oldest and simplest elements of the language ({{GHGpar|30|s}}). It must be discussed ''before'' the verb, since it plays an important part in verbal inflexion (§§ 44, 47).
+
+{{GHGmargin-letter|32|b}}
+'''2.''' The independent principal forms of the personal pronoun serve (like the Gk. ἐγώ, σύ, Lat. ''ego, tu'', and their plurals) almost exclusively to emphasize the nominative-subject (see, however, {{GHGpar|135|d}}). They are as follows:
+
+<div align="center">
+{|
+!colspan="2" | ''Singular.''
+!colspan="2" | ''Plural.''
+
+|-
+| 1st Com. ''I.''
+| {{GHGheb|text=אָֽנֹכִ֫י}} in {{GHGterm|pause}} {{GHGheb|text=אָנֹ֫כִי}};
+| ''we.''
+| {{GHGheb|text=אֲנַ֫חְנוּ}} in {{GHGterm|pause}} {{GHGheb|text=אֲנָ֫חְנוּ}}
+|-
+|
+| {{GHGheb|text=אֲנִי}}, in {{GHGterm|pause}} {{GHGheb|text=אָ֫נִי}}
+|
+| ({{GHGheb|text=נַ֫חְנוּ}}, in {{GHGterm|pause}} {{GHGheb|text=נָ֫חְנוּ}}), ({{GHGheb|text=אנו}})
+|-
+| 2nd m ''thou.''
+| {{GHGheb|text=(אַתָּ) אַתָּ֫ה}}, in {{GHGterm|pause}}
+| ''ye.''
+| ''m.'' {{GHGheb|text=אַתֶּם}}
+|-
+|
+| {{GHGheb|text=אָ֫תָּה}} or {{GHGheb|text=אַ֫תָּה}}
+|
+|
+|-
+| 2nd f ''thou''
+| {{GHGheb|text=אַתְּ}} ({{GHGheb|text=אַתְּי}} properly {{GHGheb|text=אַתִּי}}),
+|
+| {{GHGheb|text=(אַתֵּ֫נָּה) אַתֵּ֫נָה}}; {{GHGheb|text=(אַתֶּן) אַתֵּן}}
+|-
+|
+| in {{GHGterm|pause}} {{GHGheb|text=אָתְּ}}
+|
+|
+|-
+| 3rd m ''he (it)''
+| {{GHGheb|text=הוּא}}
+| ''they.''
+| {{GHGheb|text=הֵם}} ({{GHGheb|text=הֶם־}}), {{GHGheb|text=הֵ֫מָּה}}
+|-
+| 3rd f ''she (it)''
+| {{GHGheb|text=הִיא}}
+|
+| {{GHGheb|text=הֵ֫נָּה}} after ''prefixes'' {{GHGheb|text=הֵן}}, {{GHGheb|text=הֶן}}
+|}
+</div>
+
+The forms enclosed in parentheses are the less common. A table of these pronouns with their shortened forms (''pronominal suffixes'') is given in Paradigm A at the end of this Grammar.
+
+{{center|Remarks.
+
+''First Person.''}}
+
+{{GHGmargin-letter|32|c}}
+1. The form {{GHGheb|text=אָֽנֹכִי}} is less frequent than {{GHGheb|text=אֲנִי}}.<ref>On the prevalence of {{GHGheb|text=אָנֹכִי}} in the earlier Books compare the statistics collected by Giesebrecht in {{GHGcite|title={{abbr|ZAW.|Zeitschrift für die alttestamentliche Wissenschaft, ed. by B. Stade, Giessen, 1881 ff., and since 1907 by K. Marti.}}}} 1881, p. 251 ff., partly contested by Driver in the {{GHGcite|title=Journal of Philology}}, 1882, vol. xi. p. 222 ff. (but cf. his ''Introduction'', ed. 6, p. 135, line 1 f.), but thoroughly established by König in {{GHGcite|title=Theol. Stud. u. Krit.}}, 1893, pp. 464 ff. and 478, and in his {{GHGcite|title=Einleitung in das A.T.}}, p. 168, &c. In some of the latest books {{GHGheb|text=אנכי}} is not found at all, and hardly at all in the Talmud. [For details see the {{GHGcite|title={{abbr|Lexicon|A Hebrew and English Lexicon of the Old Testament, based on the Thesaurus and Lexicon of Gesenius, by F. Brown, S. R. Driver, and C. A. Briggs, Oxford, 1906.}}}}, s. v. {{GHGheb|text=אֲנִי}} and {{GHGheb|text=אָנֹכִי}}.]</ref>
+The former occurs in<section end="par32" /><noinclude>
+<references/></noinclude>

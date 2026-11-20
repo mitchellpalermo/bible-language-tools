@@ -1,0 +1,72 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><section begin="par102" />{{GHGbible-ref|book=Ps|chapter=49|verse=6}}, before {{GHGheb|text=א}}); {{GHGheb|text=לָ֫מָּה}}, however, remains before {{GHGheb|text=ח}}. Before letters which are not gutturals, {{GHGheb|text=לָמָ֫ה}} is found in {{GHGbible-ref|book=Ps|chapter=42|verse=10}}, {{GHGbible-ref|book=Ps|chapter=43|verse=2|hidebook=1}} (immediately after a tone-syllable).
+
+{{GHGmargin-letter|102|m}}
+Rem. The divine name {{GHGheb|text=יְהֹוָה}}, which has not its original vowels ({{GHGheb|text=יַהְוֶה}}) but those of {{GHGheb|text=אֲדֹנָי}} (see {{GHGpar|17|c}}), except that the {{GHGheb|text=י}} has simple not compound {{GHGterm|Š<sup>e</sup>wâ}}, takes the prefixes also, after the manner of {{GHGheb|text=אֲדֹנָי}}, thus {{GHGheb|text=וַֽיהוָֹה}}, {{GHGheb|text=לַֽיהוָֹה}}, {{GHGheb|text=בַּֽיהוָֹה}}, {{GHGheb|text=מֵֽיְהֹוָה}} (since they are to be read {{GHGheb|text=וַֽאדֹנָי}}, {{GHGheb|text=לַֽאדֹנָי}}, {{GHGheb|text=בַּֽאדֹנָי}}, {{GHGheb|text=מֵֽאֲדֹנָי}}); for the {{GHGheb|text=א}} of {{GHGheb|text=אֲדֹנָי}}, as of {{GHGheb|text=אֲדֹנִי}}, {{GHGheb|text=אֲדֹנִים}}, &c. (see below), {{GHGterm|quiesces}} after the prefixes {{GHGheb|text=בַּ}}, {{GHGheb|text=כַּ‍}}, {{GHGheb|text=לַ}}, {{GHGheb|text=וַ}}, but is ''audible'' after {{GHGheb|text=מֵ‍}} (for {{GHGheb|text=מִן}}), {{GHGheb|text=שֶׁ}} (no instance in the O.T.), and {{GHGheb|text=הָ}} (in {{GHGheb|text=הָֽאֲדֹנִים}} {{GHGbible-ref|book=Dt|chapter=10|verse=17}}, {{GHGbible-ref|book=Ps|chapter=136|verse=3}}, the article, not {{GHGheb|text=הַ}} interrog., is intended; the only example with {{GHGheb|text=ה}} interrog., {{GHGbible-ref|book=Jer|chapter=8|verse=19}}, is to be pointed {{GHGheb|text=הַֽיהוָֹה}}, i.e. {{GHGheb|text=הַֽאדֹנָי}}, not {{GHGheb|text=הַיְהֹוָה}}). Hence the rule, {{GHGheb|text=משֶׁה מוֹצִיא|translate=Moses brought out}} (i.e. {{GHGheb|text=מ‍}}, {{GHGheb|text=שׁ}}, {{GHGheb|text=ה}} make the {{GHGheb|text=א}} audible), {{GHGheb|text=וְכָלֵב מַכְנִיס|translate=and Caleb brought in}}, (i.e. {{GHGheb|text=ו}}, {{GHGheb|text=כ‍}}, {{GHGheb|text=ל}}, {{GHGheb|text=ב}} allow it to quiesce).<ref>Another ''vox memor.'' is {{GHGheb|text=כָּל־בּוֹ נֶֽעֶלָם|translate=all is hidden in him}}.</ref>—As regards the other plural forms of {{GHGheb|text=אָדוֹן}}, elision of the {{GHGheb|text=א}} always takes place after {{GHGheb|text=בַּ}}, {{GHGheb|text=וַ}}, {{GHGheb|text=כַּ‍}}, {{GHGheb|text=לַ}}, except in the form {{GHGheb|text=אֲדֹנֵי}}, thus {{GHGheb|text=לַֽאדֹנָיו}}, {{GHGheb|text=לַֽאדֹנֶ֫יךָ}}, &c.; but {{GHGheb|text=לַֽאֲדֹנֵי}}, &c., {{GHGheb|text=לַֽאֲדֹנֵ֫ינוּ}}, &c., {{GHGheb|text=לַֽאֲדֹֽנֵיהֶם}}.
+<section end="par102" />
+<section begin="par103" />{{GHGpar-heading|103|Prepositions with Pronominal Suffixes and in the Plural Form}}
+
+{{GHGmargin-letter|103|a}}
+'''1.''' As all prepositions were originally nouns ({{GHGpar|101}}) in the accusative, they may be united with the noun-suffixes ({{GHGpar|91|b}}–''l''), e.g. {{GHGheb|text=אֶצְלִי}} (prop. at my side) ''by me'', {{GHGheb|text=אִתִּי}} (in my proximity) ''with me'', {{GHGheb|text=תַּחְתָּם}} (in their place) ''instead of them'', like the Latin ''mea causa'', ''for my sake''.
+
+{{GHGmargin-letter|103|b}}
+Rem. 1. The preposition {{GHGheb|text=אֵת}} (usually {{GHGheb|text=אֶת־}}) ''near, with'', is distinguished from {{GHGheb|text=אֵת}} (see below, and {{GHGpar|117|a}}, note 4), the sign of the definite accusative ({{GHGpar|117|a}}), in its connexion with suffixes, by a difference of pointing, the former making {{GHGheb|text=אִתִּי}}, {{GHGheb|text=אִתְּךָ}}, in {{GHGterm|pause}} {{GHGheb|text=אִתָּךְ}}, 2nd fem. {{GHGheb|text=אִתָּךְ}} ({{GHGbible-ref|book=Is|chapter=54|verse=10}} {{GHGheb|text=אִתֵּךְ}}), {{GHGheb|text=אִתּוֹ}}, {{GHGheb|text=אִתָּהּ}}, {{GHGheb|text=אִתָּ֫נוּ}}, {{GHGheb|text=אִתְּכֶם}}, {{GHGheb|text=אִתָּם}} (also in the later books, especially in Kings, and always in Jer. and Ezek., incorrectly {{GHGheb|text=אוֹתִי|translate=with me}}; {{GHGheb|text=מֵֽאוֹתָךְ|translate=from thee}}, {{GHGbible-ref|book=1 K|chapter=20|verse=25}}; {{GHGheb|text=מֵֽאֹתוֹ|translate=from him}}, {{GHGbible-ref|book=1 K|chapter=22|verse=7}}; {{GHGheb|text=אֹתָם|translate=with them}}), while the latter retains its ''ô'' (obscured from ''â'') before the light suffixes, but before grave suffixes is pointed with {{GHGterm|S<sup>e</sup>ghôl}}. This S<sup>e</sup>ghôl is to be explained, with Praetorius, {{GHGcite|title={{abbr|ZDMG.|Zeitschrift der deutschen morgenländischen Gesellschaft, Lpz. 1846 ff., since 1903 ed. by A. Fischer.}}}} lv. 369 f., as the modification of an ''ă'' which again was shortened from original ''â'' (in ''ʾâthî'', ''ʾâthô'', &c.) in a closed syllable (''ʾăth-hem'', &c.). The same shortening and modification of the original ''â'' takes place before words in close connexion, hence {{GHGheb|text=אֶת־כֹּל}}, &c. When not in close connexion, the toneless {{GHGheb|text=אֶת}} becomes tone-long {{GHGheb|text=אֵת}}, e.g. {{GHGheb|text=אֵת הַשָּׁמַ֫יִם}} {{GHGbible-ref|book=Gn|chapter=1|verse=1}}. Hence the following forms arise:—
+
+<div align="center">
+{| cellspacing="0" cellpadding="0" border="0"
+|
+|
+| Sing.
+|
+| Plur.
+|
+|
+|-
+| 1.
+|
+| {{GHGheb|text=אֹתִי|translate=me}}.
+|
+| {{GHGheb|text=אֹתָ֫נוּ|translate=us}}.
+|
+|-
+|
+| ''m.''
+| {{GHGheb|text=אֹֽתְךָ}}, {{GHGterm|pause}} {{GHGheb|text=אֹתָךְ}}
+|
+| {{GHGheb|text=אֶתְכֶם|translate=you}}.
+|-
+| 2.
+|
+|
+| &nbsp;{{GHGtranslate|thee}}&nbsp;&nbsp;&nbsp;&nbsp;
+|
+|
+|-
+|
+| ''f.''
+| {{GHGheb|text=אֹתָךְ}} . . . . .
+|
+| . . . . . .
+|
+|-
+|
+| ''m.''
+| {{GHGheb|text=אֹתוֹ|translate=him}}.
+|
+| {{GHGheb|text=אֹתָם}}, rarely {{GHGheb|text=אֶתְהֶם}}
+| {{GHGtranslate|them}}
+|-
+| 3.
+|
+|
+|
+|
+|
+|-
+|
+| ''f.''
+| {{GHGheb|text=אֹתָהּ|translate=her}}.
+|
+| {{GHGheb|text=אֶתְהֶן}}, rarely {{GHGheb|text=אֹתָן}}
+|
+|}</div><section end="par103" /><noinclude>
+<references/></noinclude>

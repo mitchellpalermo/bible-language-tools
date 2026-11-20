@@ -1,0 +1,256 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude>{{center|''H. Verbs'' {{GHGheb|text=פ״ן}}.}}
+
+<div align="center">
+{|
+| colspan="3" |
+! colspan="2" | {{GHGterm|Qal}}.|| {{GHGterm|Niphʿal}}.|| {{GHGterm|Hiphʿîl}}.|| {{GHGterm|Hophʿal}}.
+|-
+| ''Perf''.
+| ''Sing''.
+| 3. ''m''.
+| [{{GHGheb|text=נָגַשׁ}}]
+| {{GHGheb|text=נָפַל}}
+| {{GHGheb|text=נִגַּשׁ}}<sup>*</sup>
+| {{GHGheb|text=הִגִּישׁ}}<sup>*</sup>
+| {{GHGheb|text=הֻגַּשׁ}}<sup>*</sup>
+|-
+|
+|
+| 3. ''f''.
+|
+|
+| {{GHGheb|text=נִגְּשָׁה}}
+| {{GHGheb|text=הִגִּ֫ישָׁה}}
+| {{GHGheb|text=הֻגְּשָׁה}}
+|-
+|
+|
+| 2. ''m''.
+|
+|
+| {{GHGheb|text=נִגַּ֫שְׁתָּ}}
+| {{GHGheb|text=הִגַּ֫שְׁתָּ}}
+| {{GHGheb|text=הֻגַּ֫שְׁתָּ}}
+|-
+|
+|
+| 2. ''f''.
+|
+|
+| {{GHGheb|text=נִגַּשְׁתְּ}}
+| {{GHGheb|text=הִגַּ֫שְׁתְּ}}
+| {{GHGheb|text=הֻגַּשְׁתְּ}}
+|-
+|
+|
+| 1. ''c''.
+| regular.
+|
+| {{GHGheb|text=נִגַּ֫שְׁתִּי}}
+| {{GHGheb|text=הִגַּ֫שְׁתִּי}}
+| {{GHGheb|text=הֻגַּ֫שְׁתִּי}}
+|-
+|
+| ''Plur''.
+| 3. ''c''.
+|
+|
+| {{GHGheb|text=נִגְּשׁוּ}}
+| {{GHGheb|text=הִגִּ֫ישׁוּ}}
+| {{GHGheb|text=הֻגְּשׁוּ}}
+|-
+|
+|
+| 2. ''m''.
+|
+|
+| {{GHGheb|text=נִגַּשְׁתֶּם}}
+| {{GHGheb|text=הִגַּשְׁתֶּם}}
+| {{GHGheb|text=הֻגַּשְׁתֶּם}}
+|-
+|
+|
+| 2. ''f''.
+|
+|
+| {{GHGheb|text=נִגַּשְׁתֶּן}}
+| {{GHGheb|text=הִגַּשְׁתֶּן}}
+| {{GHGheb|text=הֻגַּשְׁתֶּן}}
+|-
+|
+|
+| 1. ''c''.
+|
+|
+| {{GHGheb|text=נִגַּ֫שֲׁנוּ}}
+| {{GHGheb|text=הִגַּ֫שְׁנוּ}}
+| {{GHGheb|text=הֻגַּ֫שְׁנוּ}}
+|-
+| ''Inf''.
+|
+|
+| {{GHGheb|text=גֶּ֫שֶׁת}}<sup>*</sup>
+| {{GHGheb|text=נְפֹל}}<sup>*</sup>
+| {{GHGheb|text=הִנָּגֵשׁ}}
+| {{GHGheb|text=הַגִּישׁ}}<sup>*</sup>
+| {{GHGheb|text=הֻגַּשׁ}}<sup>*</sup>
+|-
+| ''Inf''.
+| ''absol''.
+|
+| {{GHGheb|text=נָגוֹשׁ}}
+|
+| {{GHGheb|text=הִנָּגֵשׁ}}, {{GHGheb|text=נִגּוֹף}}
+| {{GHGheb|text=הַגֵּשׁ}}<sup>*</sup>
+| {{GHGheb|text=הֻגֵּשׁ}}<sup>*</sup>
+|-
+| ''Imp''.
+| ''Sing''.
+| ''m''.
+| {{GHGheb|text=גַּשׁ}}<sup>*</sup>
+| {{GHGheb|text=נְפֹל}}<sup>*</sup>
+| {{GHGheb|text=הִנָּגֵשׁ}}
+| {{GHGheb|text=הַגֵּשׁ}}<sup>*</sup>
+|
+|-
+|
+|
+| ''f''.
+| {{GHGheb|text=גְּשִׁי}}
+| {{GHGheb|text=נִפְלִי}}
+| {{GHGheb|text=הִנָּֽגְשִׁי}}
+| {{GHGheb|text=הַגִּ֫ישִׁי}}
+| wanting.
+|-
+|
+| ''Plur''.
+| ''m''.
+| {{GHGheb|text=גְּשׁוּ}}
+| {{GHGheb|text=נִפְלוּ}}
+| {{GHGheb|text=הִנָּֽגְשׁוּ}}
+| {{GHGheb|text=הַגִּ֫ישׁוּ}}
+|
+|-
+|
+|
+| ''f''.
+| {{GHGheb|text=גַּ֫שְׁנָה}}
+| {{GHGheb|text=נְפֹלְנָה}}
+| {{GHGheb|text=הִנָּגַ֫שְׁנָה}}
+| {{GHGheb|text=הַגֵּ֫שְׁנָה}}
+|
+|-
+| ''Impf''.
+| ''Sing''.
+| 3. ''m''.
+| {{GHGheb|text=יִגַּשׁ}}<sup>*</sup>
+| {{GHGheb|text=יִפֹּל}}<sup>*</sup>
+| [{{GHGheb|text=יִנָּגֵשׁ}}]
+| {{GHGheb|text=יַגִּישׁ}}<sup>*</sup>
+| {{GHGheb|text=יֻגַּשׁ}}<sup>*</sup>
+|-
+|
+|
+| 3. ''f''.
+| {{GHGheb|text=תִּגַּשׁ}}
+| {{GHGheb|text=תִּפֹּל}}
+|
+| {{GHGheb|text=תַּגִּישׁ}}
+| {{GHGheb|text=תֻּגַּשׁ}}
+|-
+|
+|
+| 2. ''m''.
+| {{GHGheb|text=תִּגַּשׁ}}
+| {{GHGheb|text=תִּפֹּל}}
+|
+| {{GHGheb|text=תַּגִּישׁ}}
+| {{GHGheb|text=תֻּגַּשׁ}}
+|-
+|
+|
+| 2. ''f''.
+| {{GHGheb|text=תִּגְּשִׁי}}
+| {{GHGheb|text=תִּפְּלִי}}
+|
+| {{GHGheb|text=תַּגִּ֫ישׁי}}
+| {{GHGheb|text=תֻּגְּשִׁי}}
+|-
+|
+|
+| 1. ''c''.
+| {{GHGheb|text=אֶגַּשׁ}}
+| {{GHGheb|text=אֶפֹּל}}
+|
+| {{GHGheb|text=אַגִּישׁ}}
+| {{GHGheb|text=אֻגַּשׁ}}
+|-
+|
+| ''Plur''.
+| 3. ''m''.
+| {{GHGheb|text=יִגְּשׁוּ}}
+| {{GHGheb|text=יִפְּלוּ}}
+| regular.
+| {{GHGheb|text=יַגִּ֫ישׁוּ}}
+| {{GHGheb|text=יֻגְּשׁוּ}}
+|-
+|
+|
+| 3. ''f''.
+| {{GHGheb|text=תִּגַּ֫שְׁנָה}}
+| {{GHGheb|text=תִּפּ֫לְנָה}}
+|
+| {{GHGheb|text=תַּגֵּ֫שְׁנָה}}
+| {{GHGheb|text=תֻּגַּ֫שְׁנָה}}
+|-
+|
+|
+| 2. ''m''.
+| {{GHGheb|text=תִּגְּשׁוּ}}
+| {{GHGheb|text=תִּפְּלוּ}}
+|
+| {{GHGheb|text=תַּגִּ֫ישׁוּ}}
+| {{GHGheb|text=תֻּגְּשׁוּ}}
+|-
+|
+|
+| 2. ''f''.
+| [{{GHGheb|text=תִּגַּ֫שְׁנָה}}
+| {{GHGheb|text=תִּפֹּ֫לְנָה}}
+|
+| [{{GHGheb|text=תַּגֵּ֫שְׁנָה}}]
+| [{{GHGheb|text=תֻּגַּ֫שְׁנָה}}]
+|-
+|
+|
+| 1. ''c''.
+| {{GHGheb|text=נִגַּשׁ}}
+| {{GHGheb|text=נִפֹּל}}
+|
+| {{GHGheb|text=נַגִּישׁ}}
+| {{GHGheb|text=נֻגַּשׁ}}
+|-
+| colspan="6" | ''Shortened Impf''. ({{GHGterm|Jussive}}).
+| {{GHGheb|text=יַגֵּשׁ}}<sup>*</sup>
+|
+|-
+| ''Part''.
+| ''act''.
+|
+| {{GHGheb|text=נֹגֵשׁ}}
+|
+| {{GHGheb|text=נִגָּשׁ}}<sup>*</sup>
+| {{GHGheb|text=מַגִּישׁ}}<sup>*</sup>
+|
+|-
+|
+| ''pass''.
+|
+| {{GHGheb|text=נָגוּשׁ}}
+|
+|
+|
+| {{GHGheb|text=מֻגָּשׁ}}
+|}
+</div><noinclude>
+<references/></noinclude>

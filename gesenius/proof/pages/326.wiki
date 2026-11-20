@@ -1,0 +1,39 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par103 />{{GHGmargin-letter|103|g}}
+{{GHGheb|text=בְּ}} takes suffixes in the same manner: {{GHGheb|text=בִּי}}, {{GHGheb|text=בְּךָ}} ({{GHGbible-ref|book=Ex|chapter=7|verse=29}}, {{GHGbible-ref|book=2 S|chapter=22|verse=30}}, {{GHGbible-ref|book=Ps|chapter=141|verse=8}} {{GHGheb|text=בְּכָה}}, as in {{GHGbible-ref|book=Gn|chapter=27|verse=37}}, {{GHGbible-ref|book=2 S|chapter=18|verse=22}}, {{GHGbible-ref|book=Is|chapter=3|verse=6}} {{GHGheb|text=לְכָה}} [for 2nd fem. {{GHGheb|text=לָךְ}} the {{GHGterm|K<sup>e</sup>thîbh}} {{GHGheb|text=לכי}} occurs in {{GHGbible-ref|book=2 K|chapter=4|verse=2}}, {{GHGbible-ref|book=Ct|chapter=2|verse=13}}, cf. {{GHGpar|91|e}}]), {{GHGheb|text=בּוֹ}}, &c.; except that for the 3rd plur., besides {{GHGheb|text=בָּהֶם}} (especially in the later books) and {{GHGheb|text=בָּהֵ֫מָּה}} (only in {{GHGbible-ref|book=Ex|chapter=30|verse=4}}, {{GHGbible-ref|book=Ex|chapter=36|verse=1|hidebook=1}}, {{GHGbible-ref|book=Hb|chapter=1|verse=16}}; {{GHGheb|text=לָהֵ֫מָּה}} only in {{GHGbible-ref|book=Jer|chapter=14|verse=16}}), the form {{GHGheb|text=בָּם}} is also used; and for the feminine, besides {{GHGheb|text=בָּהֵ֫נָּה}} (three times), {{GHGheb|text=בָּהֵן}} is found fifteen times, and {{GHGheb|text=בָּהֶן}} only in {{GHGbible-ref|book=1 S|chapter=31|verse=7}}, {{GHGbible-ref|book=Is|chapter=38|verse=16}}, {{GHGbible-ref|book=Ez|chapter=42|verse=14}}.—According to the Masora, {{GHGheb|text=לֹא}} is found fifteen times for {{GHGheb|text=לוֹ}} (as conversely in {{GHGbible-ref|book=1 S|chapter=2|verse=16}}, {{GHGbible-ref|book=1 S|chapter=20|verse=2|hidebook=1}} {{GHGheb|text=לוֹ}} for {{GHGheb|text=לֹא}}), e.g. {{GHGbible-ref|book=Ex|chapter=21|verse=8}}, {{GHGbible-ref|book=1 S|chapter=2|verse=3}}, {{GHGbible-ref|book=Is|chapter=9|verse=2}}, {{GHGbible-ref|book=Ps|chapter=100|verse=3}} (and, as has been conjectured, also {{GHGbible-ref|book=Jb|chapter=41|verse=4}}); cf. Delitzsch on {{GHGbible-ref|book=Ps|chapter=100|verse=3}}.—In {{GHGbible-ref|book=Nu|chapter=32|verse=42}}, {{GHGbible-ref|book=Zc|chapter=5|verse=11}}, {{GHGbible-ref|book=Ru|chapter=2|verse=14}}, the Masora requires {{GHGheb|text=לָהֿ}} instead of {{GHGheb|text=לָהּ}} (in all three places before a following tone-syllable; cf. {{GHGpar|23|k}}, and the analogous cases of the loss of {{GHGterm|Mappîq}} in {{GHGpar|58|g}}, {{GHGpar|91|e}}).
+
+{{GHGmargin-letter|103|h}}
+(''b'') ''{{GHGheb|text=כְּ}} with Pronominal Suffixes''.
+
+<div align="center">
+{| cellspacing="0" cellpadding="0" border="0"
+|
+| Sing.
+| colspan="2" | Plur.
+|-
+| 1. c. ''as I''.
+| {{GHGheb|text=כָּמ֫וֹני}}<ref>The use of {{GHGheb|text=נִי}} here for {{GHGheb|text=־ִי}} (cf. above, ''d'') might be due to euphonic reasons.—{{GHGheb|text=כָּמֹ֫נִי}} (defectively) only in the Pentateuch, {{GHGheb|text=כָּמֹ֫ךָ}} {{GHGbible-ref|book=Ex|chapter=15|verse=11}}.</ref>
+| ''as we''.
+| {{GHGheb|text=כָּמ֫וֹנוּ}}
+|-
+| 2. m. ''as thou''.
+| {{GHGheb|text=כָּמ֫וֹךָ}}<sup>5</sup>
+| ''as ye''.
+| {{GHGheb|text=כָּכֶם}}, {{GHGheb|text=כָּכֵם}}, rarely {{GHGheb|text=כְּמוֹכֶם}}
+|-
+| f.
+| ...
+|
+| .........
+|-
+| 3. m. ''as he''.
+| {{GHGheb|text=כָּמ֫וֹהוּ}}
+| ''as they''
+| {{GHGheb|text=כָּהֵם}}, [{{GHGheb|text=כָּהֶם}}, {{GHGheb|text=כָּהֵ֫מָּה}}], {{GHGheb|text=כְּמוֹהֶם}}
+|-
+| f. ''as she''.
+| {{GHGheb|text=כָּמ֫וֹהָ}}
+|
+| [{{GHGheb|text=כָּהֵן}}], {{GHGheb|text=כָּהֵ֫נָּה}}
+|}
+</div><section end=par103 /><noinclude>
+<references/></noinclude>

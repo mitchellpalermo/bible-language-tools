@@ -1,0 +1,42 @@
+<!-- scan 557, printed 533, Index of Subjects -->
+{{center|I}}
+
+{{larger|{{center|INDEX OF SUBJECTS}}}}
+
+{{c|The numbers refer to the sections, except where otherwise indicated.}}
+
+{{c|N. {{=}} note.}}
+
+{{colbegin}}
+A-sounds, 8 ''a'', 9 ''a'' ff.
+Abbreviations, 5 ''m''.
+Absolute cases, 143 ''c'' N.
+Abstract, for concrete, 83 ''c'': abstr. ideas expressed by the feminine, 122 ''q'', ''r'': by fem. in {{GHGheb|text=־וּת}}, 86 ''k'': by the plural, 124 ''a'', ''d''–''f'': with the article, 126 ''n''.
+Accents, 3 ''b'': names and laws of, 15: of the poetical books, 15 ''h'', ''i''.
+Accentuation, 3 ''b'': double accentuation in certain passages, 15 ''p''.
+Accusative expressed by {{GHGheb|text=אֵת}}, 117: as direct object of verb, 117: syntax of pronominal object and second accus., 117 ''e'': introduced by {{GHGheb|text=לְ}} (esp. late), 117 ''n'': cognate accus., 117 ''p''–''r'': pronominal suffix with dative force, 117 ''x'': with verbs of putting on and off, 117 ''y'', being filled, 117 ''z'', dwelling (rare) 117 ''bb'': double accus. (to clothe, present, support, meet, &c. ''with''), 117 ''cc''–''gg'': accus. of material (to make ''of''), 117 ''hh'': of product (make ''into''), 117 ''ii'': of the part affected, 117 ''ll'': of place, 118 ''d''–''g'': of nearer definition, 118 ''h'': of time, 118 ''i''–''k'': of cause, 118 ''l'': defining the manner of an action, 118 ''m''–''r'', 120 ''b'': construed with passive verb, 121 ''a'', ''b''.
+Accusative and infinitive construction, 157 ''b'' N.
+Acrophony, 5 ''e''.
+Acrostic poems, 5 ''h''.
+Adjectival idea expressed by a substantive in the genitive, 128 ''o'', ''p'', 135 ''n''; by a substantive as predicate, 141 ''c'', ''d'': adjective used as a substantive in the genitive, 128 ''w'', 133 ''h'', cf. with ordinal numerals, 134 ''p'', end: used poetically for a substantive, 132 ''a'' N.<sup>2</sup>: rarely stands before the subst., 132 ''b''. See also Attributive ideas.
+Adjectives, construction of, with substantives, 132: with the article, 126 ''u'', ''v'': with art. when subst. is without it, 126 ''w'', ''x'' and N.: without the article when subst. definite, 126 ''z'': syntax of, as predicate in a noun-clause, 145 ''r''.
+Adverbs, 100: with suffixes, 100 ''o'', ''p'': adverbial ideas expressed by the infin. abs., 113 ''h''–''k'': by infin. constr., 114 ''n'' and N.: by finite verb, 120 ''d''–''h''.
+Adversative clauses, 163.
+Afformatives of the perfect, 40 ''c'', 44: of the imperfect, 40 ''c'', 47: of the noun, 85 ''s''–''v'', 86 ''h''–''l''.
+Agreement of members of a sentence in gender and number, 145.
+Aleph four times with Mappîq, 14 ''d'': affixed to 3rd plur. perf. (rare), 23 ''i'', 44 ''l'': verbs {{GHGheb|text=פ״א}}, 68.
+Aleph prostheticum, 19 ''m'' and N.
+Alphabet, old Hebrew, 5 ''a'': origin of, 5 ''g''.
+Alphabetic poems, 5 ''h''.
+Amarna letters, 2 ''b'' N.<sup>3</sup>, 2 ''f'' and N.<sup>4</sup>
+Anacoluthon, 167 ''b''.
+Answers, affirmative, 150 ''n'': negative, 150 ''n''.
+Any one, 139 ''d''.
+Aphaeresis, 19 ''h'', ''i'', 66 ''a''–''c'', 69 ''b'', ''c'', ''f''–''h''.
+Apocope, 19 ''l'': in verbs {{GHGheb|text=ל״ה}}, 75 ''k''.
+Aposiopesis, 117 ''l'', 167 ''a''.
+Appellatives, 125 ''e''–''g''.
+Apposition, 127 ''h'', 130 ''e'': in the wider sense, 131: to express attribute, material, contents, measure, &c., 131 ''c''–''e''.
+Arabic language and Arabisms, 1 ''b'', ''m'', 22 ''s'', 24 ''g'' N., 35 ''l'' and N.<sup>2</sup>, 44 ''a'', 47 ''a'' N., 48 ''b'', 58 ''l''.
+Aramaic language and Aramaisms,
+{{colend}}

@@ -1,0 +1,27 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par101 />i.e. the command of*) ''according to''; {{GHGheb|text=בִּגְלַל}} (in the concern of) ''on account of''; {{GHGheb|text=לְמַ֫עַן}} (for the purpose of) ''on account of''.
+
+{{GHGmargin-letter|101|c}}
+'''2.''' Substantives used adverbially very frequently become prepositions in this way, e.g. {{GHGheb|text=בְּלִי}}, {{GHGheb|text=בִּבְלִי}}, {{GHGheb|text=מִבְּלִי}}, {{GHGheb|text=בִּלְתִּי}}, {{GHGheb|text=בְּאֵין}}, {{GHGheb|text=בְּאֶ֫פֶס}} (with cessation) ''without'', {{GHGheb|text=בְּעוֹד}} (in the duration of) ''during''; {{GHGheb|text=בְּדֵי}}, {{GHGheb|text=כְּדֵי}} (according to the requirement of) ''for, according to''.<section end=par101 />
+
+<section begin=par102 />{{GHGpar-heading|102|Prefixed Prepositions}}
+
+{{GHGmargin-letter|102|a}}
+'''1.''' Of the words mentioned in § 101, {{GHGheb|text=מִן־|translate=from, out of}}, frequently occurs as a prefix ({{GHGpar|99|c}}), with its ''Nûn'' assimilated to the following consonant (by means of {{GHGterm|Dageš forte}}), e.g. {{GHGheb|text=מִיַּ֫עַר|translate=out of a forest}}.
+
+{{GHGmargin-letter|102|b}}
+Rem. The separate {{GHGheb|text=מִן־}} (always with a following {{GHGterm|Maqqeph}}) is usual (but not necessary, cf. {{GHGbible-ref|book=Ju|chapter=20|verse=14}} with verse 15, {{GHGbible-ref|book=Ez|chapter=43|verse=6}}, &c.) only before the article, e.g. {{GHGheb|text=מִן־הָאָ֫רֶץ}}, and sometimes occurs before the softer consonants, e.g. {{GHGheb|text=מִן־אָז}} {{GHGbible-ref|book=Jer|chapter=44|verse=18}}, {{GHGheb|text=מִן־בְּנֵי}} {{GHGbible-ref|book=Jo|chapter=1|verse=12}}, {{GHGbible-ref|book=1 Ch|chapter=5|verse=18}}; cf. {{GHGbible-ref|book=Ex|chapter=18|verse=14}}, {{GHGbible-ref|book=Lv|chapter=1|verse=14}}, {{GHGbible-ref|book=Lv|chapter=14|verse=30|hidebook=1}}, {{GHGbible-ref|book=Ju|chapter=7|verse=23}}, {{GHGbible-ref|book=Ju|chapter=10|verse=11|hidebook=1}}, {{GHGbible-ref|book=Ju|chapter=19|verse=16|hidebook=1}}, {{GHGbible-ref|book=Ps|chapter=104|verse=7}} ({{GHGbible-ref|book=2 K|chapter=23|verse=36}} before {{GHGheb|text=ר}}; also before {{GHGheb|text=ק}} in {{GHGbible-ref|book=Ps|chapter=18|verse=49}}), and elsewhere in the later books (as in Aramaic)<ref>König, ''Einleitung ins A.T.'', p. 393 (cf. also the almost exhaustive statistics in his {{GHGcite|title=Lehrgebäude}}, ii. 292 ff.), enumerates eight instances of {{GHGheb|text=מִן}} before a word without the article in 2 Samuel and Kings, and forty-five in Chronicles.</ref>; there is besides a poetic by-form {{GHGheb|text=מִנִּי}} (cf. {{GHGpar|90|m}}) and {{GHGheb|text=מִנֵּי}} {{GHGbible-ref|book=Is|chapter=30|verse=11}}. Its form is most commonly {{GHGheb|text=מִ‍·|translate=with a following Dageš}}, which may, however, be omitted in letters which have {{GHGterm|Š<sup>e</sup>wâ}} (cf. {{GHGpar|20|m}}). With a following {{GHGheb|text=י}} the {{GHGheb|text=מִ‍}} is, as a rule, contracted to {{GHGheb|text=מִי}}, e.g. {{GHGheb|text=מִידֵי}}={{GHGheb|text=מִיְּדֵי}} or {{GHGheb|text=מִֽיְדֵי}} (but cf. {{GHGheb|text=מִיְּשֵׁנֵי}} {{GHGbible-ref|book=Dn|chapter=12|verse=2}}; {{GHGheb|text=מִיְּרֻשָּֽׁתְךָ}} {{GHGbible-ref|book=2 Ch|chapter=20|verse=11}}); before gutturals it becomes {{GHGheb|text=מֵ‍}} (according to {{GHGpar|22|c}}), e.g. {{GHGheb|text=מֵֽאָדָם}}, {{GHGheb|text=מֵעָם}}; before {{GHGheb|text=ח}} the {{GHGheb|text=מִ‍}} occurs with the guttural virtually sharpened in {{GHGheb|text=מִחוּץ|translate=on the outside}}, and in {{GHGheb|text=מִחוּט}} {{GHGbible-ref|book=Gn|chapter=14|verse=23}}; before {{GHGheb|text=ה}} in {{GHGheb|text=מִֽהְיוֹת}} (cf. {{GHGpar|28|b}} and {{GHGpar|63|q}}. The closed syllable here is inconsistent with the required virtual sharpening of the {{GHGheb|text=ה}}; probably {{GHGheb|text=מִֽהְיוֹת}} is merely due to the analogy of {{GHGheb|text=לִֽהְיוֹת}}); similarly {{GHGbible-ref|book=Is|chapter=14|verse=3}} before {{GHGheb|text=ר}}; but in {{GHGbible-ref|book=1 S|chapter=23|verse=28}}, {{GHGbible-ref|book=2 S|chapter=18|verse=16}} {{GHGheb|text=מִרְּדֹף}} is to be read, according to {{GHGpar|22|s}}.
+
+{{GHGmargin-letter|102|c}}
+'''2.''' There are also three other particles, the most commonly used prepositions and the particle of comparison, which have been reduced by abbreviation ({{GHGpar|99|c}}) to a single prefixed consonant with {{GHGterm|Š<sup>e</sup>wâ}} (but see below, and {{GHGpar|103|e}}), viz.:
+
+{{GHGheb|text=בְּ}} [poet. {{GHGheb|text=בְּמוֹ}}] ''in, at, with''.
+
+{{GHGheb|text=לְ}} [poet. {{GHGheb|text=לְמוֹ}}] ''towards'', (belonging) ''to, for'', Lat. ''ad.''
+
+{{GHGheb|text=כְּ‍}} [poet. {{GHGheb|text=כְּמוֹ}}] ''like, as, according to'' (no doubt the remnant of a substantive with the meaning of ''matter, kind, instar'').
+
+{{GHGmargin-letter|102|d}}
+With regard to the pointing it is to be observed that—
+
+(''a'') The {{GHGterm|Š<sup>e</sup>wâ mobile}}, with which the above prefixes are usually pronounced, has resulted from the weakening of a short vowel (an original ''ă'', according to ''f'')<ref>Jerome (see Siegfried, {{GHGcite|title={{abbr|ZAW.|Zeitschrift für die alttestamentliche Wissenschaft, ed. by B. Stade, Giessen, 1881 ff., and since 1907 by K. Marti.}}}} iv. 79) almost always represents {{GHGheb|text=בְּ}} by ''ba.''</ref>; the short vowel is regularly retained before {{GHGterm|Š<sup>e</sup>wâ}}: before {{GHGterm|Š<sup>e</sup>wâ simplex}}<section end=par102 /><noinclude>
+<references/></noinclude>

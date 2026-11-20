@@ -1,0 +1,256 @@
+<noinclude><pagequality level="1" user="OrhanCharles" /></noinclude><section begin=par93 /><div align="center">
+Paradigms of Masculine Nouns.
+<section begin=para-masc-1 />
+{| cellspacing="0" cellpadding="0" border="0"
+|
+|
+| colspan="6" style="text-align: center; font-style: xx-large; font-family: serif; border-bottom: 1px solid" | I.
+|- align="center"
+|
+|
+| ''a''.
+| ''b''.
+| ''c''.
+| ''d''.
+| ''e''.
+| ''f''.
+|- align="right"
+{{GHGparad-sg-abs}}
+| {{GHGheb|text=מֶ֫לֶךְ}}
+| {{GHGheb|text=סֵ֫פֶר}}
+| {{GHGheb|text=קֹ֫דֶשׁ}}
+| {{GHGheb|text=נַ֫עַר}}
+| {{GHGheb|text=נֵ֫צַח}}
+| {{GHGheb|text=פֹּ֫עַל}}
+|- align="right"
+|
+|
+| (''king'')
+| (''book'')
+| (''sanctuary'')
+| {{nowrap|(''a youth'')}}
+| (''perpetuity'')
+| (''work'')
+|- align="right"
+{{GHGparad-q-cstr}}
+| {{GHGheb|text=מֶ֫לֶךְ}}
+| {{GHGheb|text=סֵ֫פֶר}}
+| {{GHGheb|text=קֹ֫דֶשׁ}}
+| {{GHGheb|text=נַ֫עַר}}
+| {{GHGheb|text=נֵ֫צַח}}
+| {{GHGheb|text=פֹּ֫עַל}}
+|- align="right"
+{{GHGparad-q-light-suff}}
+| {{GHGheb|text=מַלְכִּי}}
+| {{GHGheb|text=סִפְרִי}}
+| {{GHGheb|text=קָדְשִׁי}}
+| {{GHGheb|text=נַֽעֲרִי}}
+| {{GHGheb|text=נִצְחִי}}
+| {{GHGheb|text=פָּֽעֳלִי}}
+|- align="right"
+|
+|
+| {{GHGheb|text=מַלְכְּךָ}}
+| {{GHGheb|text=סִפְרְךָ}}
+| {{GHGheb|text=קָדְשְׁךָ}}
+| {{GHGheb|text=נַֽעַרְךָ}}
+| {{GHGheb|text=נִצְחֲךָ}}
+| {{GHGheb|text=פָּֽעָלְךָ}}
+|- align="right"
+{{GHGparad-q-grave-suff}}
+| {{GHGheb|text=מַלְכְּכֶם}}
+| {{GHGheb|text=סִפְרְכֶם}}
+| {{GHGheb|text=קָדְשְׁכֶם}}
+| {{GHGheb|text=נַעַֽרְכֶם}}
+| {{GHGheb|text=נִצְחֲכֶם}}
+| {{GHGheb|text=פָּֽעָלְכֶם}}
+|- align="right"
+{{GHGparad-pl-abs}}
+| {{GHGheb|text=מְלָכִים}}
+| {{GHGheb|text=סְפָרִים}}
+| {{GHGheb|text=[קֳדָשִׁים]}}
+| {{GHGheb|text=נְעָרִים}}
+| {{GHGheb|text=נְצָחִים}}
+| {{GHGheb|text=פְּעָלִים}}
+|- align="right"
+{{GHGparad-q-cstr}}
+| {{GHGheb|text=מַלְכֵי}}
+| {{GHGheb|text=סִפְרֵי}}
+| {{GHGheb|text=קָדְשֵׁי}}
+| {{GHGheb|text=נַֽעֲרֵי}}
+| {{GHGheb|text=נִצְחֵי}}
+| {{GHGheb|text=פָּֽעֳלֵי}}
+|- align="right"
+{{GHGparad-q-light-suff}}
+| {{GHGheb|text=מְלָכַי}}
+| {{GHGheb|text=סְפָרַי}}
+| {{GHGheb|text=[קֳדָשַׁי]}}
+| {{GHGheb|text=נְעָרַי}}
+| {{GHGheb|text=נְצָחַי}}
+| {{GHGheb|text=פְּעָלַי}}
+|- align="right"
+{{GHGparad-q-grave-suff}}
+| {{GHGheb|text=מַלְכֵיכֶם}}
+| {{GHGheb|text=סִפְרֵיכֶם}}
+| {{GHGheb|text=קָדְשֵׁיכֶם}}
+| {{GHGheb|text=נַֽעֲרֵיכֶם}}
+| {{GHGheb|text=נִצְחֵיכֶם}}
+| {{GHGheb|text=פָּֽעֳלֵיכֶם}}
+|- align="right"
+{{GHGparad-dual-abs}}
+| {{GHGheb|text=רַגְלַ֫יִם}}
+| {{GHGheb|text=קִבְצַ֫יִם}}
+| {{GHGheb|text=מָתְנַ֫יִם}}
+| {{GHGheb|text=נַֽעֲלַ֫יִם}}
+|
+|
+|- align="right"
+|
+|
+| (''feet'')
+| {{nowrap|(''two heaps'')}}
+| (''loins'')
+| (''sandals'')
+|
+|
+|- align="right"
+|
+|
+|
+| {{nowrap|<nowiki>[proper name.]</nowiki>}}
+|
+|
+|
+|
+|- align="right"
+{{GHGparad-q-cstr}}
+| {{GHGheb|text=רַגְלֵי}}
+|
+| {{GHGheb|text=מָתְנֵי}}
+| {{GHGheb|text=נַֽעֲלֵי}}
+|
+|
+|-
+|
+|
+| colspan="6" style="text-align: center; font-style: xx-large; font-family: serif; border-bottom: 1px solid" | II.
+|- align="center"
+|
+|
+| ''a''.
+| ''b''.
+| ''c''.
+| ''d''.
+| ''e''.
+| ''f''.
+|- align="right"
+{{GHGparad-sg-abs}}
+| {{GHGheb|text=דָּבָר}}
+| {{GHGheb|text=חָכָם}}
+| {{GHGheb|text=זָקֵן}}
+| {{GHGheb|text=כָּתֵף}}
+| {{GHGheb|text=חָצֵר}}
+| {{GHGheb|text=שָׂדֶה}}
+|- align="right"
+|
+|
+| (''word'')
+| (''wise'')
+| {{nowrap|(''an old man'')}}
+| (''shoulder'')
+| (''court'')
+| (''field'')
+|- align="right"
+{{GHGparad-q-cstr}}
+| {{GHGheb|text=דְּבַר}}
+| {{GHGheb|text=חֲכַם}}
+| {{GHGheb|text=זְקַן}}
+| {{GHGheb|text=כֶּ֫תֶף}}
+| {{GHGheb|text=חֲצַר}}
+| {{GHGheb|text=שְׂדֵה}}
+|- align="right"
+{{GHGparad-q-light-suff}}
+| {{GHGheb|text=דְּבָרִי}}
+| {{GHGheb|text=חֲכָמִי}}
+| {{GHGheb|text=זְקֵנִי}}
+| {{GHGheb|text=כְּתֵפִי}}
+| {{GHGheb|text=חֲצֵרִי}}
+| {{GHGheb|text=שָׂדִי}}
+|- align="right"
+|
+|
+| {{GHGheb|text=דְּבָֽרְךָ}}
+| {{GHGheb|text=חֲכָֽמְךָ}}
+|
+|
+|
+| {{GHGheb|text=שָֽׂדְךָ}}
+|- align="right"
+{{GHGparad-q-grave-suff}}
+| {{GHGheb|text=דְּבַרְכֶם}}
+| {{GHGheb|text=חֲכַמְכֶם}}
+|
+|
+|
+|
+|- align="right"
+{{GHGparad-pl-abs}}
+| {{GHGheb|text=דְּבָרִים}}
+| {{GHGheb|text=חֲכָמִים}}
+| {{GHGheb|text=זְקֵנִים}}
+|
+| {{GHGheb|text=חֲצֵרִים}}
+| {{GHGheb|text=פָּנִים}}
+|- align="right"
+{{GHGparad-q-cstr}}
+| {{GHGheb|text=דִּבְרֵי}}
+| {{GHGheb|text=חַכְמֵי}}
+| {{GHGheb|text=זִקְנֵי}}
+|
+| {{GHGheb|text=חַצְרֵי}}
+| {{GHGheb|text=פְּנֵי}}
+|- align="right"
+{{GHGparad-q-light-suff}}
+| {{GHGheb|text=דְּבָרַי}}
+| {{GHGheb|text=חֲכָמַי}}
+| {{GHGheb|text=זְקֵנַי}}
+|
+| {{GHGheb|text=חֲצֵרַי}}
+| {{GHGheb|text=פָּנַי}}
+|- align="right"
+{{GHGparad-q-grave-suff}}
+| {{GHGheb|text=דִּבְרֵיכֶם}}
+| {{GHGheb|text=חַכְמֵיכֶם}}
+| {{GHGheb|text=זִקְנֵיכֶם}}
+|
+| {{GHGheb|text=חַצְרֵיכֶם}}
+| {{GHGheb|text=פְּנֵיכֶם}}
+|- align="right"
+{{GHGparad-dual-abs}}
+| {{GHGheb|text=כְּנָפַ֫יִם}}
+| {{GHGheb|text=חֲלָצַ֫יִם}}
+| {{GHGheb|text=יְרֵכַ֫יִם}}
+|
+|
+|
+|- align="right"
+|
+|
+| (''wings'')
+| (''loins'')
+| (''thighs'')
+|
+|
+| (''face'')
+|- align="right"
+{{GHGparad-q-cstr}}
+| {{GHGheb|text=כַּנְפֵי}}
+|
+|
+|
+|
+|
+|}
+<section end=para-masc-1 />
+</div><section end=par93 /><noinclude>
+<references/></noinclude>

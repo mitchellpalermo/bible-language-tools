@@ -1,0 +1,55 @@
+<!-- scan 558, printed 534, Index of Subjects -->
+{{colbegin}}
+1 ''c'', ''m'', 2 ''q'', ''t'', 24 ''e'', 44 ''c'', 47 ''a'' N., ''c'' N.: Piʿēl, 52 ''a'': Nûn epentheticum, 58 ''i''–''l'': Aram. forms of verbs {{GHGheb|text=ע״ע}}, 67 ''g'': of verbs {{GHGheb|text=ע״וּ}}, 72 ''ee'': of verbs {{GHGheb|text=ל״ה}}, 75 ''hh'': Aram. termination of the feminine, 80 ''h'': of the plural, 87 ''e''.
+Araq al-Emir, inscription of, 5 ''a''.
+Archaisms, 2 ''k'', ''q'': supposed, in the Pentateuch, 2 ''n''.
+Article, 35: syntax of, 126: with demonstrative force, 126 ''a'', ''b'': before names of classes, 126 ''l''–''n'': in comparisons, 126 ''o'', cf. ''p'': with the attributive, 126 ''u''–''x'': used as a relative, 138 ''i'', ''k'': punctuation of, 35, ''a''–''k'', ''o'': rarely retained after prepositions, 35 ''n'': original form of, 35 ''l'': {{GHGheb|text=א}} elided after it, 35 ''d'': omitted with {{GHGheb|text=זֶה}}, {{GHGheb|text=זֹאת}}, {{GHGheb|text=אֵלֶּה}} after a subst. with pronom. suff., 126 ''y'': found anomalously with a noun in constr. st., 127 ''f''–''i''.
+Ashdod, language of, 2 ''w''.
+Asher, ben, 7 ''h'' N.<sup>2</sup>
+Aspirates, 6 ''n''.
+Asseverations, 149.
+Assimilation, 19 ''b''–''f'', 54 ''c'', ''d'', 66 ''d''–''g'': of {{GHGheb|text=ו}} and {{GHGheb|text=י}} 71: ‘backward-assimilation,’ 19 ''f'' N.
+Assuan papyri, 1 ''m''.
+Assyrian language, 1 ''d''.
+Asyndeton, cases of, 120 ''g'', ''h'', 154 ''a'' N. (''a'').
+Athê merahîq, 20 ''f'', ''g''.
+Athnâh, chief divider of verse in prose, 15 ''f'': secondary divider in poetry, 15 ''h''.
+Attraction, cases of, 145 ''u'' N.<sup>3</sup>, 146 ''a''.
+Attribute, ''see'' Adjective.
+Attributive ideas expressed by {{GHGheb|text=אִישׁ}}, {{GHGheb|text=בַּעַל}}, {{GHGheb|text=בֶּן־}}, followed by a genitive, 128 ''s''–''v'': by the genitive, 128 ''o'', ''p'', 135 ''m'': by a substantive in apposition, 131 ''c''–''e'': by a subst. as predicate, 141 ''c'', ''d'': negative expressed by a noun-clause, 152 ''u'', ''v''. ''See also'' Adjectival idea.
+
+Babylonian language, 1 ''a'', ''d'', ''e'', ''i''.
+Babylonian punctuation, 42 N.<sup>3</sup>
+B<sup>e</sup>gadk<sup>e</sup>phath letters, 3 ''d'', 6 ''n'', 12 ''a'', 13 ''c'': aspiration of, 21.
+Ben Asher's recension of the text, 7 ''h'' N.<sup>2</sup>
+Ben Naphthali's recension of the text, 7 ''h'' N.<sup>2</sup>
+Beth essentiae, 119 ''i'': pretii, 119 ''p''.
+Bodily and mental defects denoted by adjectives of the form {{GHGheb|text=קִטֵּל}}, 84<sup>b</sup> ''d''.
+Boustrophedon, 1 ''k'' N.<sup>2</sup>, 5 ''d'' N.<sup>3</sup>
+
+Canaanite branch of the Semitic languages, 1 ''b'' (ii).
+Canaanite glosses in the cuneiform tablets of Tell el-Amarna, 2 ''f'' N.<sup>1</sup>
+Cardinal numbers, 97.
+Case-endings, remains of early, 90: {{GHGheb|text=־ָה}} as locative, 90 ''c''–''e'', of time, 90 ''h'', in place-names and as a poetical form without meaning, 90 ''f'', ''g'' with N.: punctuation and tone, 90 ''i'': {{GHGheb|text=־ִי}}, 90 ''k''–''m'', ''o'': {{GHGheb|text=־וֹ}} and {{GHGheb|text=־וּ}}, 90 ''k'', ''n'', ''o''.
+Cases, absolute, 143 ''c'' N.: instrumental, 144 ''m'' N.
+Casus pendens, various uses of, 111 ''h'', 112 ''n'', ''t'', ''mm'', ''oo'', 116 ''u'', 143, 159 ''i''.
+Causal clauses, 106 ''f'', 112 ''nn'': syntax of, 158.
+Chaldee, incorrect use of the term, 1 ''c'' N.
+Changes of consonants, 19.
+Chiasmus in the arrangement of words in parallel members of a verse, 114 ''r'' N., 142 ''f'' N.
+Circumstantial clauses, 156: expressing negative qualities, 152 ''u'': noun-clauses, 156 ''c'': verbal, 156 ''d''.
+Citation, formulae of, 150 ''e''.
+Cognate accusative, 117 ''p''–''r''.
+Cohortative, 48 ''b'': form of, 48 ''c'', ''d'': meaning, 48 ''e'': syntax of, 108: very rare in verbs {{GHGheb|text=ל״ה}}, 75 ''l''.
+Coins, Hebrew, 2 ''d'' (4).
+Collective nouns, 123 ''a'', ''b'': in fem. sing., 122 ''s'': names of classes used collectively, 126 ''l''–''p'': with the plural of the adj. or ptcp., 132 ''g'': with the predicate in the plur. masc., 145 ''b''–''e'', in 3rd pl. fem., 145 ''c'' ({{GHGheb|text=צֹאן}}), in masc. sing., 145 ''f'', in sing. followed by plur., 145 ''g'', in fem. sing., 145 ''k'' (cf. 135 ''p'').
+Common gender, 122 ''b'', ''d''.
+Comparatio decurtata, 118 ''r'' N., 133 ''e'' N.
+Comparative, expression of, 133 ''a''–''f''.
+Comparative clauses, 161.
+Comparison, use of article in, 126 ''o'', ''p''.
+Compensatory lengthening, 25 ''a'', 27 ''c'', ''e''–''h''.
+Composition of words, 30 ''p'', (''b''), ''r'', 81 ''d'', 152 ''a'' N.: of particles, 99 ''e''.
+Compound ideas, how thrown into the plural, 124 ''p''–''r'': with the article, 127 ''e'': with suffixes, 135 ''n''.
+Compounds formed by {{GHGheb|text=לֹא}} with a substantive or adjective, 152 ''a'' N.
+{{colend}}

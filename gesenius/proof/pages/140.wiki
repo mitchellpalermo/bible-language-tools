@@ -1,0 +1,37 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par39 />old grammatical terms, prevents any misunderstanding. The simple form is called {{GHGterm|Qal}} ({{GHGheb|text=קַל|translate=light}}, because it has no formative additions); the others ({{GHGheb|text=כְּבֵדִים|translate=heavy}}, being weighted, as it were, with the strengthening of consonants or with formative additions) take their names from the paradigm of {{GHGheb|text=פָּעַל|translate=he has done}},<ref>This paradigm was borrowed from the Arabic grammarians, and, according to Bacher, probably first adopted throughout by Abulwalîd. It was, however, unsuitable on account of the guttural, and was, therefore, usually exchanged in later times for {{GHGheb|text=פָּקַד}}, after the example of Moses Qimḥi. This verb has the advantage, that all its conjugations are actually found in the Old Testament. On the other hand, it has the disadvantage of indistinctness in the pronunciation of some of its forms, e.g. {{GHGheb|text=פָּקַדְתָּ}}, {{GHGheb|text=פְּקַדְתֶּם}}. The paradigm of {{GHGheb|text=קָטַל}}, commonly used since the time of Danz, avoids this defect, and is especially adapted for the comparative treatment of the Semitic dialects, inasmuch as it is found with slight change (Arab. and Ethiop. {{GHGheb|text=קתל}}) in all of them. It is true that in Hebrew it occurs only three times in {{GHGterm|Qal}}, and even then only in poetic style ({{GHGbible-ref|book=Ps|chapter=139|verse=19}}, {{GHGbible-ref|book=Jb|chapter=13|verse=15}}, {{GHGbible-ref|book=Jb|chapter=24|verse=14|hidebook=1}}); yet it is worth retaining as a model which has been sanctioned by usage. More serious is the defect, that a number of forms of the paradigm of {{GHGheb|text=קטל}} leave the beginner in doubt as to whether or not there should be a {{GHGterm|Dageš}} in the {{GHGterm|B<sup>e</sup>gadk<sup>e</sup>phath}} letters, and consequently as to the correct division of the syllables.</ref> which was used in the earliest Jewish grammatical works. Several of these have passives which are distinguished from their actives by more obscure vowels. The common conjugations (including {{GHGterm|Qal}} and the passives) are the seven following, but very few verbs exhibit them all:
+
+{{GHGmargin-letter|39|f}}
+{| width="100%" cellspacing="0" cellpadding="1m" border="0"
+|
+! {{GHGterm|Active}}.
+! {{GHGterm|Passive}}.
+|-valign="top"
+| 1. Qal
+| {{GHGheb|text=קָטַל|translate=to kill}}.
+| (Cf. {{GHGpar|52|e}}.)
+|-valign="top"
+| 2. Niphʿal
+| {{GHGheb|text=נִקְטַל|translate=to kill oneself}} (rarely passive).
+|
+|-valign="top"
+| 3. Piʿēl
+| {{GHGheb|text=קִטֵּל|translate=to kill many, to massacre}}.
+| 4. Puʿal 
+| {{GHGheb|text=קֻטַּל}}.
+|-valign="top"
+| 5. Hiphʿîl
+| {{GHGheb|text=הִקְטִיל|translate=to cause to kill}}.
+| 6. Hophʿal
+| {{GHGheb|text=הָקְטַל}}.
+|-valign="top"
+| 7. Hithpaʿēl
+| {{GHGheb|text=הִתְקַטֵּל|translate=to kill oneself}}.
+| [Very rare, Hothpaʿal
+| {{GHGheb|text=הָתְקַטַּל}}.]
+|}
+
+{{GHGmargin-letter|39|g}}
+There are besides several less frequent conjugations, some of which, however, are more common in the kindred languages, and even in Hebrew (in the weak verb) regularly take the place of the usual conjugations (§ 55).
+
+In Arabic there is a greater variety of conjugations, and their arrangement is more appropriate. According to the Arabic method, the Hebrew conjugations would stand thus: 1. {{GHGterm|Qal}}; 2. {{GHGterm|Piʿēl}} and {{GHGterm|Puʿal}}; 3. ''Pôʿēl'' and ''Pôʿal'' (see {{GHGpar|55|b}}); 4. {{GHGterm|Hiphʿîl}} and {{GHGterm|Hophʿal}}; 5. {{GHGterm|Hithpaʿēl}} and {{GHGterm|Hothpaʿal}}; 6. ''Hithpôʿēl'' (see {{GHGpar|55|b}}); 7. {{GHGterm|Niphʿal}}; 8. {{GHGterm|Hithpaʿēl}} (see {{GHGpar|54|l}}); 9. ''Piʿlēl'' (see {{GHGpar|55|d}}). A more satisfactory division would be into three classes: (1) The intensive {{GHGterm|Piʿēl}} with the derived and analogous forms {{GHGterm|Puʿal}} and {{GHGterm|Hithpaʿēl}}. (2) The causative {{GHGterm|Hiphʿîl}} with its passive {{GHGterm|Hophʿal}}, and the analogous forms (''Šaphʿēl'' and ''Tiphʿēl''). (3) The reflexive or passive {{GHGterm|Niphʿal}}.<section end=par39 /><noinclude>
+<references/></noinclude>

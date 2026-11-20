@@ -1,0 +1,212 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude>{{center|''F. Verbs tertiae gutturalis.''}}
+
+<div align="center">
+{|
+|
+|
+|
+! {{GHGterm|Qal}}. || {{GHGterm|Niphʿal}}. || {{GHGterm|Piʿēl}}.
+|-
+| ''Perf''.
+| ''Sing''.
+| 3. ''m''.
+| {{GHGheb|text=שָׁלַח}}
+| {{GHGheb|text=נִשְׁלַח}}
+| {{GHGheb|text=שִׁלַּח}}<sup>*</sup>
+|-
+|
+|
+| 3. ''f''.
+| {{GHGheb|text=שָֽׁלְחָה}}
+| {{GHGheb|text=נִשְׁלְחָה}}
+| {{GHGheb|text=שִׁלְּחָה}}
+|-
+|
+|
+| 2. ''m''.
+| {{GHGheb|text=שָׁלַ֫חְתָּ}}
+| {{GHGheb|text=נִשְׁלַ֫חְתָּ}}
+| {{GHGheb|text=שִׁלַּ֫חְתָּ}}
+|-
+|
+|
+| 1. ''f''.
+| {{GHGheb|text=שָׁלַ֫חַתְּ}}<sup>*</sup>
+| {{GHGheb|text=נִשְׁלַ֫חַתְּ}}<sup>*</sup>
+| {{GHGheb|text=שִׁלַּ֫חַתְּ}}<sup>*</sup>
+|-
+|
+|
+| 1. ''c''.
+| {{GHGheb|text=שָׁלַ֫חְתִּי}}
+| {{GHGheb|text=נִשְׁלַ֫חְתִּי}}
+| {{GHGheb|text=שִׁלַּ֫חְתִּי}}
+|-
+|
+| ''Plur''.
+| 3. ''c''.
+| {{GHGheb|text=שָֽׁלְחוּ}}
+| {{GHGheb|text=נִשְׁלְחוּ}}
+| {{GHGheb|text=שִׁלְּחוּ}}
+|-
+|
+|
+| 2. ''m''.
+| {{GHGheb|text=שְׁלַחְתֶּם}}
+| {{GHGheb|text=נִשְׁלַחְתֶּם}}
+| {{GHGheb|text=שִׁלַּחְתֶּם}}
+|-
+|
+|
+| 2. ''f''.
+| {{GHGheb|text=שְׁלַחְתֶּן}}
+| {{GHGheb|text=נִשְׁלַחְתֶּן}}
+| {{GHGheb|text=שִׁלַחְתֶּן}}
+|-
+|
+|
+| 1. ''c''.
+| {{GHGheb|text=שָׁלַ֫חְנוּ}}
+| {{GHGheb|text=נִשְׁלַ֫חְנוּ}}
+| {{GHGheb|text=שִׁלַּ֫חְנוּ}}
+|-
+| ''Inf''.
+|
+|
+| {{GHGheb|text=שְׁלֹהַ}}<sup>*</sup>
+| {{GHGheb|text=הִשָּׁלַה}}<sup>*</sup>
+| {{GHGheb|text=שַׁלַּה}}<sup>*</sup>
+|-
+| ''Inf. absol''.
+|
+|
+| {{GHGheb|text=שָׁלוֹחַ}}
+| {{GHGheb|text=נִשְׁלוֹחַ}}
+| {{GHGheb|text=שַׁלֵּחַ}}
+|-
+| ''Imp''.
+| ''Sing''.
+| ''m''.
+| {{GHGheb|text=שְׁלַח}}<sup>*</sup>
+| {{GHGheb|text=הִשָּׁלַה}}<sup>*</sup>
+| {{GHGheb|text=שַׁלַּה}}<sup>*</sup>
+|-
+|
+|
+| ''f''.
+| {{GHGheb|text=שִׁלְחִי}}
+| {{GHGheb|text=הִשָּֽׁלְחִי}}
+| {{GHGheb|text=שַׁלְּחִי}}<sup>*</sup>
+|-
+|
+| ''Plur''.
+| ''m''.
+| {{GHGheb|text=שִׁלְחוּ}}
+| {{GHGheb|text=הִשָּֽׁלְחוּ}}
+| {{GHGheb|text=שַׁלְּחוּ}}
+|-
+|
+|
+| ''f''.
+| {{GHGheb|text=שְׁלַ֫חְנָה}}<sup>*</sup>
+| {{GHGheb|text=הִשָּׁלַ֫חְנָה}}
+| {{GHGheb|text=שַׁלַּ֫חְנָה}}<sup>*</sup>
+|-
+| ''Impf''.
+| ''Sing''.
+| 3. ''m''.
+| {{GHGheb|text=יִשְׁלַח}}<sup>*</sup>
+| {{GHGheb|text=יִשָּׁלַח}}<sup>*</sup>
+| {{GHGheb|text=יְשַׁלַּח}}<sup>*</sup>
+|-
+|
+|
+| 3. ''f''.
+| {{GHGheb|text=תִּשְׁלַח}}
+| {{GHGheb|text=תִּשָּׁלַח}}
+| {{GHGheb|text=תְּשַׁלַּח}}<sup>*</sup>
+|-
+|
+|
+| 2. ''m''.
+| {{GHGheb|text=תִּשְׁלַח}}
+| {{GHGheb|text=תִּשָּׁלַח}}
+| {{GHGheb|text=תְּשַׁלַּח}}
+|-
+|
+|
+| 2. ''f''.
+| {{GHGheb|text=תִּשְׁלְחִי}}
+| {{GHGheb|text=תִּשָּֽׁלְחִי}}
+| {{GHGheb|text=תְּשַׁלְּחִי}}
+|-
+|
+|
+| 1. ''c''.
+| {{GHGheb|text=אֶשְׁלַח}}
+| {{GHGheb|text=אֶשָּׁלַח}}
+| {{GHGheb|text=אֲשַׁלַּח}}
+|-
+|
+| ''Plur''.
+| 3. ''m''.
+| {{GHGheb|text=יִשְׁלְחוּ}}
+| {{GHGheb|text=יִשָּֽׁלְחוּ}}
+| {{GHGheb|text=יְשַׁלְּחוּ}}
+|-
+|
+|
+| 3. ''f''.
+| {{GHGheb|text=תִּשְׁלַ֫חְנָה}}<sup>*</sup>
+| {{GHGheb|text=תִּשָּׁלַ֫חְנָה}}<sup>*</sup>
+| {{GHGheb|text=תְּשַׁלַּ֫חְנָה}}<sup>*</sup>
+|-
+|
+|
+| 2. ''m''.
+| {{GHGheb|text=תִּשְׁלְחוּ}}
+| {{GHGheb|text=תִּשָּֽׁלְחוּ}}
+| {{GHGheb|text=תְּשַׁלְּחוּ}}
+|-
+|
+|
+| 2. ''f''.
+| {{GHGheb|text=תִּשְׁלַ֫חְנָה}}
+| {{GHGheb|text=תִּשָּׁלַ֫חְנָה}}
+| {{GHGheb|text=תְּשַׁלַּ֫הְנָה}}
+|-
+|
+|
+| 1. ''c''.
+| {{GHGheb|text=נִשְׁלַח}}
+| {{GHGheb|text=נִשָּׁלַח}}
+| {{GHGheb|text=נְשַׁלַּח}}
+|-
+|colspan="2" | ''Shortened Impf''. ({{GHGterm|Jussive}}).
+|
+|
+|
+|
+|-
+| colspan="2" | ''Impf. with Suff''.
+|
+| {{GHGheb|text=יִשְׁלָחֵ֫נִי}}
+|
+|
+|-
+| ''Part''.
+| ''act''.
+|
+| {{GHGheb|text=שֹׁלֵחַ}}<sup>*</sup>
+| {{GHGheb|text=נִשְׁלָח}}
+| {{GHGheb|text=מְשַׁלֵּחַ}}<sup>*</sup>
+|-
+|
+| ''pass''.
+|
+| {{GHGheb|text=שָׁלוּחַ}}<sup>*</sup>
+|
+|
+|}
+</div><noinclude>
+<references/></noinclude>

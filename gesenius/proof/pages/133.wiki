@@ -1,0 +1,35 @@
+<noinclude><pagequality level="1" user="Xover" /></noinclude><section begin="par33" />{{GHGmargin-letter|33|f}}
+'''3.''' The suffixes of the 2nd person ({{GHGheb|text=־ְךָ}}, &c.) are all formed with a ''k''-sound, not, like the ''separate'' pronouns of the 2nd person, with a ''t''-sound.
+
+So in all the Semitic languages, in Ethiopic even in the verbal form (''qatalka'', ''thou hast killed''=Hebr. {{GHGheb|text=קָטַ֫לְתָּ}}).
+
+{{GHGmargin-letter|33|g}}
+'''4.''' The ''suffix of the verb'' (the accusative) and the ''suffix of the noun'' (the genitive) coincide in most forms, but some differ, e.g. {{GHGheb|text=־נִי|translate=me}}, {{GHGheb|text=־ִי|translate=my}}.
+
+Paradigm A at the end of the Grammar gives a table of all the forms of the ''separate pronoun'' and the ''suffixes''; a fuller treatment of the {{GHGterm|verbal suffix}} and the mode of attaching it to the verb will be found in {{GHGpar|58|ff}}., of the ''noun-suffix'' in {{GHGpar|91}}, of the prepositions with suffixes in {{GHGpar|103}}, of adverbs with suffixes {{GHGpar|100|o}}.
+<section end="par33" />
+<section begin="par34" />{{GHGpar-heading|34|The Demonstrative Pronoun}}
+
+{{GHGmargin-letter|34|a}}
+<div align="center">
+{|
+|rowspan=2| Sing. ''this'' 
+|m.
+| {{GHGheb|text=זֶה}}<ref>In many languages the demonstratives begin with a ''d''-sound (hence called the ''demonstrative sound'') which, however, sometimes interchanges with a sibilant. Cf. Aram. {{GHGheb|text=דֵּן}}, {{GHGheb|text=דֵּךְ}} {{GHGterm|masc.}}, {{GHGheb|text=דָּא}}, {{GHGheb|text=דָּךְ}} {{GHGterm|fem.}} (this); Sansk. ''sa, sā, tat''; Gothic ''sa, sô, thata''; Germ. ''da, der, die, das''; and Eng. ''the, this, that'', &c. Cf. J. Barth, ‘''Zum semit. Demonstr''. ''ḏ'',’ in {{GHGcite|title={{abbr|ZDMG.|Zeitschrift der deutschen morgenländischen Gesellschaft, Lpz. 1846 ff., since 1903 ed. by A. Fischer.}}}} 59, 159 ff., and 633 ff.; {{GHGcite|title=Sprachwiss. Untersuchungen zum Semit.}}, Lpz. 1907, p. 30 ff. [See the {{GHGcite|title={{abbr|Lexicon|A Hebrew and English Lexicon of the Old Testament, based on the Thesaurus and Lexicon of Gesenius, by F. Brown, S. R. Driver, and C. A. Briggs, Oxford, 1906.}}}}, s. v. {{GHGheb|text=זֶה}}, and Aram. {{GHGheb|text=דא}}, {{GHGheb|text=די}}.]</ref>
+| Plur. com. ''these''
+| {{GHGheb|text=אֵ֫לֶּה}} (rarely {{GHGheb|text=אֵל}})
+|-
+| f.
+| {{GHGheb|text=זֹאת}} ({{GHGheb|text=זֹה}}, {{GHGheb|text=זוֹ}})<ref>That {{GHGheb|text=זֶה}} may stand for the feminine, cannot be proved either from {{GHGbible-ref|book=Ju|chapter=16|verse=28}} or from the certainly corrupt passage in {{GHGbible-ref|book=Jos|chapter=2|verse=17}}.</ref>
+|
+|
+|}
+</div>
+
+{{GHGmargin-letter|34|b}}
+Rem. 1. The feminine form {{GHGheb|text=זֹאת}} has undoubtedly arisen from {{GHGheb|text=זָאת}}, by obscuring of an original ''â'' to ''ô'' (for {{GHGheb|text=זָא}} = {{GHGheb|text=זֶה}} cf. the Arab. ''hâ-ḏâ'', ''this'', masc.; for {{GHGheb|text=ת}} as the feminine ending, § 80), and the forms {{GHGheb|text=זֹה}}, {{GHGheb|text=זוֹ}}, both of which are rare,<ref>{{GHGheb|text=זֹה}} {{GHGbible-ref|book=2 K|chapter=6|verse=19}}, and in seven other places; {{GHGheb|text=זוֹ}} only in {{GHGbible-ref|book=Hos|chapter=7|verse=16}}, {{GHGbible-ref|book=Ps|chapter=132|verse=12}}.</ref> are shortened from {{GHGheb|text=זֹאת}}. In {{GHGbible-ref|book=Ps|chapter=132|verse=12}} {{GHGheb|text=זוֹ}} is used as a ''relative'', cf. {{GHGheb|text=זוּ}} below. In {{GHGbible-ref|book=Jer|chapter=26|verse=6}}, {{GHGterm|K<sup>e</sup>thîbh}}, {{GHGheb|text=הַזּאֹתָה}} (with the article and the demonstrative termination {{GHGheb|text=־ָה}}) is found for {{GHGheb|text=זֹאת}}. The forms {{GHGheb|text=אֵלֶּה}} and {{GHGheb|text=אֵל}} are the plurals of {{GHGheb|text=זֶה}} and {{GHGheb|text=זֹאת}} by usage, though not etymologically. The form {{GHGheb|text=אֵל}} occurs only in the Pentateuch (but not in the Samaritan text), {{GHGbible-ref|book=Gn|chapter=19|verse=8.25}}, {{GHGbible-ref|book=Gn|chapter=26|verse=3.4|hidebook=1}}, &c. (8 times), always with the article, {{GHGheb|text=הָאֵל}} [as well as {{GHGheb|text=אֵלֶּה}}, {{GHGheb|text=הָאֵלֶּה}} frequently], and in {{GHGbible-ref|book=1 Ch|chapter=20|verse=8}} without the article [cf. Driver on {{GHGbible-ref|book=Dt|chapter=4|verse=42}}].<ref>According to Kuenen (cf. above, {{GHGpar|2|n}}) and Driver, on {{GHGbible-ref|book=Lv|chapter=18|verse=27}} in Haupt’s Bible, this {{GHGheb|text=אֵל}} is due to an error of the punctuators. It goes back to a time when the vowel of the second syllable was not yet indicated by a vowel letter, and later copyists wrongly omitted the addition of the {{GHGheb|text=ה}}. In Phoenician also it was written {{GHGheb|text=אל}}, but pronounced ''ily'' according to Plautus, ''Poen'', v, 1, 9.</ref> Both the singular and the plural may refer to things as well as persons.
+
+{{GHGmargin-letter|34|c}}
+2. In combination with prepositions to denote the oblique case we find {{GHGheb|text=לָזֶה|translate=to this}} (cf. for {{GHGheb|text=לָ}}, {{GHGpar|102|g}}), {{GHGheb|text=לְזֹאת}}, {{GHGheb|text=לָזֹאת|translate=to this}} (fem.), {{GHGheb|text=לְאֵ֫לֶּה}}, {{GHGheb|text=לָאֵ֫לֶּה|translate=to these}}; {{GHGheb|text=אֶת־זֶה|translate=hunc}}, {{GHGheb|text=אֶת־זֹאת|translate=hanc}}, {{GHGheb|text=אֶת־אֵ֫לֶּה|translate=hos}}, also without {{GHGheb|text=אֶת־}}, even ''before'' the verb {{GHGbible-ref|book=Ps|chapter=75|verse=8}}, &c. Note also {{GHGheb|text=מְחִיר זֶה|translate=pretium huius}} ({{GHGbible-ref|book=1 K|chapter=21|verse=2}}), &c.
+<section end="par34" /><noinclude>
+<references/></noinclude>

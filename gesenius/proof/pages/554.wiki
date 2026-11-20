@@ -1,0 +1,129 @@
+<noinclude><pagequality level="1" user="Hesperian" /></noinclude>{{center|''Q. Verbs {{GHGheb|text=ל״ה}} with Suffixes.''}}
+
+<div align="center">
+{|
+|
+! 1. ''Sing''. || 2. ''Sing. m''. || 2. ''Sing. f''.
+|-
+| ''Perf. Qal''. 3. ''m''.
+| {{GHGheb|text=נָחַ֫נִי}}
+| {{GHGheb|text=עָֽשְׂךָ}}, {{GHGheb|text=רָֽאֲךָ}}
+|
+|-
+|
+| ''P''. {{GHGheb|text=עָשָׂ֫נִי}}
+| ''P''. {{GHGheb|text=עָנָךְ}}, {{GHGheb|text=קָנֶ֫ךָ}}
+|
+|-
+| 3. ''f''.
+| {{GHGheb|text=עָשׂ֫תְנִי}}
+|
+|
+|-
+| 2. ''m''.
+| {{GHGheb|text=רְאִיתַ֫נִי}}
+|
+|
+|-
+|
+| ''P''. {{GHGheb|text=עֲנִיתָ֫נִי}}
+|
+|
+|-
+| 2. ''f''.
+| ''Pi''. {{GHGheb|text=רִמִּיתִ֫נָי}}
+|
+|
+|-
+| 1. ''c''.
+|
+| {{GHGheb|text=רְאִתִ֫יךָ}}
+| {{GHGheb|text=עִנִּתִךְ}}
+|-
+|&nbsp;
+|
+|
+|
+|-
+| ''Plur''. 3. ''c''.
+| {{GHGheb|text=עָשׂ֫וּנִי}}
+| {{GHGheb|text=רָא֫וּךָ}}
+| ''Pi''. {{GHGheb|text=כִּסּוּךְ}}
+|-
+| 1. ''c''.
+|
+| ''Pi''. {{GHGheb|text=קִוִּינ֫וּךָ}}
+|
+|-
+| ''Imper''. 2. ''m''.
+| {{GHGheb|text=נְחֵ֫נִי}}
+|
+|
+|-
+|
+| {{GHGheb|text=עֲנֵ֫נִי}}
+|
+|
+|-
+| 2. ''f''.
+| ''Hiph''. {{GHGheb|text=הַרְאִ֫ינִי}}
+|
+|
+|-
+| ''Plur''. 2. ''m''.
+| ''Pi''. {{GHGheb|text=כַּסּ֫וּנִי}}
+|
+|
+|-
+| ''Impf''. 3. ''m''.
+| {{GHGheb|text=יִרְאֵ֫נִי}}
+| {{GHGheb|text=יִפְדְּךָ}}
+|
+|-
+|
+|
+| {{GHGheb|text=יַחְתְּךָ}}
+|
+|-
+| 3. ''f''.
+|
+| {{GHGheb|text=תִּשְׁבֶּךָּ}}
+|
+|-
+| 2. ''m''.
+| {{GHGheb|text=תִּרְאֵ֫נִי}}
+|
+|
+|-
+| 2. ''f''.
+|
+|
+|
+|-
+| 1. ''c''.
+|
+| {{GHGheb|text=אֶרְאֶ֫ךָּ}}
+| {{GHGheb|text=אֶעְדֵךְ}}
+|-
+|
+|
+| {{GHGheb|text=אֶֽעֶנְךָ}}
+|
+|-
+| ''Plur''. 3. ''m''.
+| {{GHGheb|text=יַֽעֲשׂ֫וּנִי}}
+| ''Pi''. {{GHGheb|text=יְפַתּ֫וּךָ}}
+|
+|-
+| 2. ''m''.
+| {{GHGheb|text=תְּצַוֻּ֫נִי}}
+|
+|
+|-
+| 1. ''c''.
+|
+|
+|
+|}
+</div><noinclude>
+<references/></noinclude>

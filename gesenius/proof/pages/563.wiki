@@ -1,0 +1,47 @@
+<!-- scan 563, printed 539, Index of Subjects -->
+{{colbegin}}
+Number of words in the O. T., 2 ''w'' N.
+Numeral adverbs, 124 ''r''.
+Numerals, 97: syntax of, 134: order of compound numerals in different books, 134 ''c'' N., ''h'', ''i''.
+Numeration, ascending (rhetorical figure), cases of, 134 ''s''.
+Numerical signs, 5 ''k''.
+Nûn paragogicum, in imperf., 47 ''m'': in perf. (?), 44 ''l'': assimilation of Nûn, 19 ''b'', ''c'', 66 ''d'': Nûn energicum (demonstrativum, epentheticum), 58 ''i''–''l'': inversum, 5 ''n''.
+
+O-sounds, 8 ''c'', ''d'', 9 ''p''–''s''.
+Oaths, formulae of, 149.
+Object, in the accusative, 117: introduced by {{GHGheb|text=לְ}}, 143 ''e'': introduced by {{GHGheb|text=בְּ}} instrumenti, 119 ''q'': absolute or internal (cognate accusative), 117 ''p'', ''q'': dative expressed by accus. suffixes, 117 ''x''.
+Object of verb anticipated by pronom. suffix, as in Aram., 131 ''m'', ''o''.
+Object-clauses, 157.
+Occupations denoted by nouns of the form {{GHGheb|text=קַטָּל}}, 84<sup>b</sup> ''b''.
+Old Hebrew, 1 ''k'', 2 ''a''.
+ʿÔlè w<sup>e</sup>yôrēdh, principal divider of verse in poetry, 15 ''b''.
+One, indefinite, how expressed, 144 ''d''–''k''.
+Onomatopoetica, 1 ''h'', 30 ''h''.
+Optative, 109 ''b'', ''c''.
+Oratio obliqua, how expressed, 157.
+Order of the alphabet, 5 ''h'', ''i''.
+Order of words, 114 ''r'' N. (chiasmus): in noun-clauses, 141 ''l''–''n'': varieties of, in verbal clauses, 142 ''a'', ''f'', ''g'': with the infinitive constr., 115 ''e''–''k''.
+Ordinal numbers, 98, 134 ''o'', ''p''.
+Oriental and Occidental texts, 7 ''h'' N.
+Orthography of Hebrew in the masoretic text and previously, 7.
+
+Paʿlēl, 55 ''d'': in three {{GHGheb|text=ל״ה}} verbs, 75 ''kk''.
+Panammu inscription, 1 ''m''.
+Papyri of Assuan, 1 ''m''.
+Parallel texts, 3 ''g''.
+Parallelism of members, 2 ''q'', 150 ''h''.
+Participle, forms of, in Qal, 50: Niphʿal, 51 ''a'': Piʿēl and Puʿal, 52 ''a''–''c'': with aphaeresis of {{GHGheb|text=מ}}, 52 ''s'': Hiphʿîl and Hophʿal, 53 ''a'', ''b'': anomalous forms in Hiph., 53 ''o'': with suffix, 61 ''h'': fem. in {{GHGheb|text=־ָה}}, 84<sup>a</sup> ''s'', 94 ''d'': plur. in {{GHGheb|text=־ִים}} 93 ''qq''; force of, 107 ''d'': syntax of, 116: construed as verb or noun, 116 ''f''–''i'': passive ptcp. construed with accus. or genitive, 116 ''k'', ''l'': of imminent future, 116 ''p'': subject with {{GHGheb|text=הָיָה}} (of continuous action), 116 ''r'': subject omitted, 116 ''s'', ''t'': participle absolute, 116 ''w'': continued by finite verb, 116 ''x''.
+Particles, 99.
+Partitive sense of {{GHGheb|text=בְּ}}, 119 ''m'': of {{GHGheb|text=מִן}}, 119 ''w'' N.
+Paseq, p. 59 N.<sup>2</sup>
+Passive, 39 ''e'', 51 ''f'' (Niphʿal): probable passives of Qal, 52 ''e'', 53 ''u'': construction of passives, 121: expressed by the 3rd plur. active, 144 ''f'', ''g'', by the active participle, 144 ''i'': impersonal passive, 121 ''a'': passive verbs construed with {{GHGheb|text=אֵת}}, 121 ''a'', ''b'': agent after passive expressed by {{GHGheb|text=לְ}}, {{GHGheb|text=מִן}}, and (rarely) {{GHGheb|text=בְּ}}, 121 ''f''.
+Pathaḥ, 8 ''a'', 9 ''e'': preferred with gutturals, 22 ''d'': furtive, 8 ''f'', 22 ''f'', ''g'', 65 ''a''–''e'': as a helping vowel, 27 ''r'', 28 ''c'', ''e'' N.<sup>2</sup>, 65 ''g'', 84<sup>a</sup> ''a'': in the imperfect of verbs {{GHGheb|text=ל״ה}}, 75 ''bb'': in pause for Ṣere, 29 ''q'', 51 ''m'': before a guttural (esp. {{GHGheb|text=ח}}) with Qameṣ changed to S<sup>e</sup>ghôl, 27 ''q'', 29 ''v'': in perf. Piʿēl for Ṣere, 52 ''a'', ''l''.
+Patronymics, 86 ''h''.
+Pause, 29 ''i''–''v'': pausal forms with lesser distinctive accents, 29 ''i''.
+P<sup>e</sup>ʿalʿal, 55 ''e''.
+Pentateuch, linguistic character of, 2 ''m'', ''n''.
+Perfect, 40: flexion of, 44: 3rd fem. sing. in {{GHGheb|text=־ַת}}, 44 ''f'', 72 ''o'': 2nd fem. sing. in {{GHGheb|text=־תִּי}}, 44 ''h'': 1st sing. in {{GHGheb|text=ת}}, 44 ''i'': 3rd plur. in {{GHGheb|text=וּן}} (?), 44 ''l'': did Hebrew possess a 3rd pl. fem. in {{GHGheb|text=־ָה}}? 44 ''m'': contraction of last radical with afformative of perfect, 44 ''o'': meaning of, 47 ''a'' N.: with suffixes, 59: syntax of, 106: not precative, 106 ''n'' N.<sup>2</sup>: perfectum confidentiae, 106 ''n'': propheticum, 106 ''n'': with {{GHGheb|text=וְ}} consec., 49 ''a'', change of tone, ''h''–''l'', syntax, 112: with {{GHGheb|text=וְ}} consec. as a frequentative, 112 ''e''–''o'', ''dd'', ''ee'': carrying on the protasis, 112 ''p'', introducing the apodosis, 112 ''ff''–''ii'': with simple {{GHGheb|text=וְ}} of a single act, in narrative, 112 ''pp''–''uu''.
+Periphrastic expression of qualities by means of {{GHGheb|text=אִישׁ}}, {{GHGheb|text=בֶּן־}}, {{GHGheb|text=בַּעַל}}, 128 ''s''–''v''.
+Periphrastic future, 114 ''p'' N.
+Permutation, 131 ''k''.
+{{colend}}

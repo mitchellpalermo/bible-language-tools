@@ -1,0 +1,79 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><section begin="par97" />So long as it was felt that {{GHGheb|text=שְׁלשׁ עֶשְׂרֵה}} simply meant ''the three of the decade'', the gender of the noun numbered made no difference. When, however, the consciousness of this meaning became weakened and the combination of units and tens came to be felt as a copulative rather than a genitive relation, it seemed suitable to connect only feminine nouns with the feminine form {{GHGheb|text=עֶשְׂרֵה}}. New forms were therefore invented, both of the units and the tens, for use with masculine nouns. The former, however, no longer had the form of the {{GHGterm|constr.}} but of the absolute state, clearly showing that the consciousness of the original syntactical relation in {{GHGheb|text=שְׁלשׁ עֶשְׂרֵה}}, &c., was lost. On the other hand, after the extension of these new formations to the first decade, the new feminine forms readily came to be used also in the genitive construction (and therefore in the ''constr. st.'') on the analogy of the earlier masculine forms.
+
+Of the first two numerals, {{GHGheb|text=אֶחָד}}, ''one'', with its fem. {{GHGheb|text=אַחַת}} (see § 96), may be recognized, from its form and use, as an adjective, although even so it admits of such combinations as {{GHGheb|text=אַחַד הֶֽהָרִים|translate=unus e montibus}}. The numeral two, as would be expected, appears as an abstract in the ''dual'', but, like the other numerals, can also stand in apposition to the noun numbered. In form it always agrees with the gender of its noun. Accordingly, the numerals from 1 to 10 are as follows:
+
+{{GHGmargin-letter|97|b}}
+<div align="center">
+{| cellspacing="0" cellpadding="0" border="0"
+|
+| colspan="2" | ''With the Masculine''.
+| colspan="2" | ''With the Feminine''.
+|-
+|
+| {{GHGterm|Absol.}}
+| {{GHGterm|Constr.}}
+| {{GHGterm|Absol.}}
+| {{GHGterm|Constr.}}
+|-
+| 1.
+| {{GHGheb|text=אֶחָד}}
+| {{GHGheb|text=אַחַד}}
+| {{GHGheb|text=אַחַת}}
+| {{GHGheb|text=אַחַת}}
+|-
+| 2.
+| {{GHGheb|text=שְׁנַ֫יִם}}
+| {{GHGheb|text=שְׁנֵי}}
+|<ref>Shortened from {{GHGheb|text=שְׁנָתַ֫יִם}}, which would be the regular feminine form of {{GHGheb|text=שְׁנַ֫יִם}}. Nevertheless, the {{GHGterm|Dageš}} in {{GHGheb|text=שְׁתַּ֫יִם}}, &c. (even after {{GHGheb|text=מִן}}; {{GHGheb|text=מִֽשְׁתֵּים}} {{GHGbible-ref|book=Jon|chapter=4|verse=11}}; cf., however, {{GHGheb|text=מִשְּׁתֵי}} {{GHGbible-ref|book=Ju|chapter=16|verse=28}}), can by no means be regarded as a {{GHGterm|Dageš forte}} arising from assimilation of the ''Nûn'', for in that case the word could only be {{GHGheb|text=שִׁתַּ֫יִם}} (cf. Arab. ''ṯintāni''). This form does occur in the Codex Babylonicus of {{smaller|A.D.}} 916, but it is only a later correction for {{GHGheb|text=שְׁתַּ֫יִם}}, while in the Berlin MS. or. qu. 680 described by Kahle (Lpz. 1902) there is no trace of the Dageš. It is rather to be read ''štáyîm, štê'' (with {{GHGterm|Dageš lene}}), cf. {{GHGheb|text=אֶשְׁתַּ֫יִם}}, representing the later Palestinian pronunciation (Philippi, {{GHGcite|title={{abbr|ZDMG.|Zeitschrift der deutschen morgenländischen Gesellschaft, Lpz. 1846 ff., since 1903 ed. by A. Fischer.}}}} xlix, p. 206), and Arab. ''ʾiṯnătāni'' (with a kind of prosthetic {{GHGheb|text=א}}; cf. {{GHGpar|19|m}}), as a further feminine form of ''ʾiṯnāni'', ''duo''. According to Barth (''Orient. Studien... Th. Nöldeke'', ii. 792 f.) the irregularity of {{GHGheb|text=שְׁתַּ֫יִם}} (he takes the Dageš as {{GHGterm|Dageš forte}}) is due to the complete assimilation of its vowels to those of the masc. {{GHGheb|text=שְׁנַ֫יִם}} where the {{GHGterm|Š<sup>e</sup>wâ mobile}} is normal.</ref>{{GHGheb|text=שְׁתַּ֫יִם}}
+| {{GHGheb|text=שְׁתֵּי}}
+|-
+| 3.
+| {{GHGheb|text=שְׁלשָׁה}}
+| {{GHGheb|text=שְׁל֫שֶׁת}}
+| {{GHGheb|text=שָׁלשׁ}}
+| {{GHGheb|text=שְׁלשׁ}}
+|-
+| 4.
+| {{GHGheb|text=אַרְבָּעָה}}
+| {{GHGheb|text=אַרְבַּ֫עַת}}
+| {{GHGheb|text=אַרְבַּע}}
+| {{GHGheb|text=אַרְבַּע}}
+|-
+| 5.
+|<ref>With Dageš probably on the analogy of {{GHGheb|text=שִׁשָּׁה}}, as {{GHGheb|text=שֵׁ֫שֶׁת}} on the analogy of {{GHGheb|text=חֲמֵ֫שֶׁת}}. Cf. also J. K. Blake on {{GHGheb|text=חֲמִשָּׁה}}, {{GHGheb|text=חֲמִשִּׁים}} in{{GHGcite|title=&nbsp;}}<!-- Hmm, should it be italic or not?.. Hence empty GHGcite, for possible future fixing -->{{abbr|JAOS|Journal of the American Oriental Society}}. 1905, p. 117 ff.</ref>{{GHGheb|text=חֲמִשָּׁה}}
+| {{GHGheb|text=חֲמֵ֫שֶׁת}}
+| {{GHGheb|text=חָמֵשׁ}}
+| {{GHGheb|text=חֲמֵשׁ}}
+|-
+| 6
+| {{GHGheb|text=שִׁשָּׁה}}
+| {{GHGheb|text=שֵׁ֫שֶׁת}}
+| {{GHGheb|text=שֵׁשׁ}}
+| {{GHGheb|text=שֵׁשׁ}}
+|-
+| 7.
+| {{GHGheb|text=שִׁבְעָה}}
+| {{GHGheb|text=שִׁבְעַת}}
+| {{GHGheb|text=שֶׁ֫בַע}}
+|<ref>{{GHGheb|text=שְׁבַע}} and {{GHGheb|text=תְּשַׁע}} appear only as connective forms before {{GHGheb|text=עֶשְׂרֵה}} and {{GHGheb|text=מֵאוֹת}}.</ref>{{GHGheb|text=[שְׁבַע]}}
+|-
+| 8.
+| {{GHGheb|text=שְׁמֹנָה}}
+| {{GHGheb|text=שְׁמֹנַת}}
+| {{GHGheb|text=שְׁמֹנֶה}}
+| {{GHGheb|text=שְׁמֹנֶה}}
+|-
+| 9.
+| {{GHGheb|text=תִּשְׁעָה}}
+| {{GHGheb|text=תִּשְׁעַת}}
+| {{GHGheb|text=תֵּ֫שַׁע}}
+| <sup>[3]</sup>{{GHGheb|text=[תְּשַׁע]}}
+|-
+| 10.
+| {{GHGheb|text=עֲשָׂרָה}}
+| {{GHGheb|text=עֲשֶׂ֫רֶת}}
+| {{GHGheb|text=עֶ֫שֶׂר}}
+| {{GHGheb|text=עֶ֫שֶׂר}}
+|}
+</div><section end="par97" /><noinclude>
+<references/></noinclude>

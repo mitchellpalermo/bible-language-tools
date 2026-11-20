@@ -1,0 +1,90 @@
+<!-- scan 579, printed 555, Index of Hebrew Words and Forms -->
+{{colbegin}}
+{{GHGheb|text=יֵרֹ֫עוּ}} 67 ''dd''
+{{GHGheb|text=יִשָּׂא}} 75 ''rr''
+{{GHGheb|text=יִשֹּׁם}} 75 ''q''
+{{GHGheb|text=יַשִּׁיק}} 66 ''e''
+? {{GHGheb|text=יִשְׁשׁוּם}} 47 ''n''
+{{GHGheb|text=יִשָּׂשכָר}} 47 ''b''<sup>1</sup>
+{{GHGheb|text=יֵשׁ}} meaning 152 ''i''; with suffixes 100 ''o'', ''p''; in hypothetical sentences 116 ''q'' (with ptcp.), {{GHGheb|text=וְיֵשׁ}} hypoth. 159 ''dd''; in questions 141 ''k'' (with ptcp.)
+{{GHGheb|text=יַשָּׁא}} 74 ''l''
+† {{GHGheb|text=יִשַּׁב בַּשֶּׁ֫בֶת}} 47 ''b''<sup>1</sup>
+{{GHGheb|text=יְשָׁדְדֵם}} 20 ''b'', 67 ''cc''
+{{GHGheb|text=יָשׁוּד}} 67 ''p''
+{{GHGheb|text=יִשְׁוִי}} 47 ''b''<sup>1</sup>
+{{GHGheb|text=יְשׁוּעַ}} 27 ''w''
+{{GHGheb|text=יָשִׂים}} 67 ''y''
+{{GHGheb|text=יָשֹׁךְ}} 67 ''g''
+{{GHGheb|text=יַשְׁלִם}} 53 ''n''
+{{GHGheb|text=יִשֹּׁם}} 67 ''g'' (Addit.)
+{{GHGheb|text=יִשְׁמָעֵאל}} 23 ''c''
+{{GHGheb|text=יִשְׁנָא}} 75 ''rr''
+{{GHGheb|text=יְשַׁנֵּא}} 75 ''rr''
+{{GHGheb|text=יֶשְׁנוֹ}} its suffix 67 ''o''<sup>1</sup>; doubtful form 100 ''o''<sup>2</sup>
+{{GHGheb|text=יִשְׁפּוּטוּ הֵם}} 47 ''g''
+{{GHGheb|text=יְשֻׁרוּן}} 86 ''g''
+{{GHGheb|text=יְשָֽׁרְתֻ֫נְךָ}} 60 ''e''
+{{GHGheb|text=־ִית}} nouns ending in 86 ''l'', 94 ''f'', 95 ''t''
+{{GHGheb|text=יִתְאָו}} 75 ''bb''
+{{GHGheb|text=יְתָֽאֲרֵ֫הוּ}} 64 ''i''
+{{GHGheb|text=יִתַּם}} 67 ''g''
+{{GHGheb|text=יִתֹּם}} 67 ''g''
+{{GHGheb|text=יִתַּ֫מּוּ}} 67 ''g''
+{{GHGheb|text=יֻתַּן}} 53 ''u'', 66 ''k''
+{{GHGheb|text=יִתְנֶחָם}} 27 ''q'', 29 ''v''
+{{GHGheb|text=יִתְפָּקֵד}} 54 ''l''
+{{GHGheb|text=יֻתַּץ}} 53 ''u''
+{{GHGheb|text=יִתְרָת}} 80 ''g''
+
+{{GHGheb|text=כ}} for {{GHGheb|text=כִּי}} (Moab.) 7 ''d''<sup>1</sup>
+{{GHGheb|text=כְּ}} its meaning 102 ''c''; with suff. 103 ''h''; construction of 118 ''s''–''x'', prepositions often omitted after 118 ''s''–''w''; exceptionally with prep. 118 ''s''<sup>2</sup>; {{GHGheb|text=כ}} veritatis 118 ''x''; omitted in comparisons 141 ''d''; not = {{GHGheb|text=כַּאֲשֶׁר}} 155 ''g''
+† {{GHGheb|text=כָּאֹר}} 19 ''k''<sup>2</sup>
+{{GHGheb|text=כַּאֲשֶׁר}} 161 ''b'', ''c''
+{{GHGheb|text=כְּבַחֲצִי}} 118 ''s''<sup>2</sup>
+{{GHGheb|text=כִּבֵּס}} 52 ''l''
+{{GHGheb|text=כְּבָרִאשֹׁנָה}} 118 ''s''<sup>2</sup>
+{{GHGheb|text=כְּבַתְּחִלָּה}} 118 ''s''<sup>2</sup>
+{{GHGheb|text=כַּדְרְכֹר}} 21 ''d''
+{{GHGheb|text=כְּהַיּוֹם}} 35 ''n''
+? {{GHGheb|text=כְּהִנָּדֹף}} 51 ''k'', 66 ''f''
+{{GHGheb|text=כּוֹכָב}} 19 ''o'', 84<sup>b</sup> ''o''
+{{GHGheb|text=כִּי}} for {{GHGheb|text=כְּוִי}} 24 ''b'', cf. 93 ''y''
+{{GHGheb|text=כִּי}} omitted in obj.-clause 157 ''a'', introducing obj.-clause 157 ''b'', introducing direct narration 157 ''b'', causal 158 ''b'', in conditional clauses 159 ''aa'', ''bb'', asseverative 159 ''ee'', adversative and exceptive 163, temporal 164 ''d'', consecutive 107 ''u'', 166 ''b''
+{{GHGheb|text=כִּי אִם}} 163 ''a''–''d''
+{{GHGheb|text=כִּילַי}} 86 ''i''
+{{GHGheb|text=כִּי־עַל־כֵּן}} 158 ''b''<sup>1</sup>
+{{GHGheb|text=כִּיעֻנִים}} 35 ''b''
+{{GHGheb|text=כִּיתְרוֹן}} 24 ''e''
+{{GHGheb|text=כָּכָה}} 100 ''i''
+{{GHGheb|text=כִּכָּרִים}} 88 ''b'', 131 ''d''<sup>2</sup>
+{{GHGheb|text=כָּל}} (verb {{GHGheb|text=ע״י}}) 73 ''b''
+{{GHGheb|text=כֹּל}} used absolutely 117 ''c'', with a following genitive 117 ''c'', 127 ''b'', ''c''; construction of its predicate, 146 ''c''; with a participle absol. 116 ''w''; with a negative 152 ''b''
+{{GHGheb|text=כָּלָ֫אתִי}} 75 ''oo''
+{{GHGheb|text=כֻּלֹּה}} 91 ''e''
+† {{GHGheb|text=כֻּלֹּה מְקַלְלַ֫וְנִי}} 61 ''h''
+{{GHGheb|text=כָּלוּ}} (= {{GHGheb|text=כָּלְאוּ}}) 75 ''qq''
+{{GHGheb|text=כְּלִי}} 96
+{{GHGheb|text=כִּלְכֵּל}} 72 ''m''
+{{GHGheb|text=כֻּלָּ֫נוּ}} 91 ''f''
+{{GHGheb|text=כְּמוֹ}} 103 ''k''
+{{GHGheb|text=כָּמ֫וֹנִי}} 103 ''h''<sup>5</sup>, ''k''
+{{GHGheb|text=כְּמִמֶּ֫נִּי}} 118 ''s''<sup>2</sup>
+? {{GHGheb|text=כִּמְרִירִים}} 84<sup>b</sup> ''m''
+{{GHGheb|text=כֵּן}} 100 ''i''
+{{GHGheb|text=כֶּן־הִיא}} 20 ''g''
+{{GHGheb|text=כְּנַגְלוֹת}} 20 ''h'', 53 ''q''
+{{GHGheb|text=כִּנָּם}} 85 ''t'', 87 ''h''
+{{GHGheb|text=כְּנָפוֹת}} 93 ''ee''
+{{GHGheb|text=כְּסִיל}} 84<sup>a</sup> ''o''
+{{GHGheb|text=כָּעֶ֫בֶד}} 35 ''g''
+{{GHGheb|text=כָּעוֹפֶ֫רֶת}} 35 ''g''
+{{GHGheb|text=כְּעַל}} 118 ''s''<sup>2</sup>
+† {{GHGheb|text=כֶּעָפָר}} 35 ''n''
+{{GHGheb|text=כַּפֵּימוֹ}} 103 ''f''<sup>3</sup>
+{{GHGheb|text=כַּפֶּ֫כָה}} 91 ''e''
+{{GHGheb|text=כִּפְלַ֫יִם}} 134 ''r''<sup>2</sup>
+{{GHGheb|text=כַּרְמֶל}} 85 ''s''
+{{GHGheb|text=כָּרַת}} 22 ''s'', 64 ''e''
+{{GHGheb|text=כֹּרְתָה}} 64 ''e''
+{{GHGheb|text=כָּרֹ֫תִי}} 44 ''o''
+{{colend}}

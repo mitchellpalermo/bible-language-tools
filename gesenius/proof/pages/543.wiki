@@ -1,0 +1,150 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><div align="center">
+{|
+! ''Hiʿphʿîl''. || {{GHGterm|Hophʿal}}.|| ''Poʿēl''.|| ''Poʿal''.
+|-
+| {{GHGheb|text=הֵסַב}}, {{GHGheb|text=הֵסֵב}}<sup>*</sup>
+| {{GHGheb|text=הוּסַב}}<sup>*</sup>
+| {{GHGheb|text=סוֹבֵב}}<sup>*</sup>
+| {{GHGheb|text=סוֹבַב}}<sup>*</sup>
+|-
+| {{GHGheb|text=הֵסֵ֫בָּה}}<sup>*</sup>
+| {{GHGheb|text=הוּסַ֫בָּה}}
+| {{GHGheb|text=סֽוֹבֲבָה}}
+| {{GHGheb|text=סֽוֹבֲבָה}}]
+|-
+| {{GHGheb|text=הֲסִבּ֫וֹתָ}}<sup>*</sup>
+| {{GHGheb|text=הֽוּסַבּ֫וֹתָ}}]<sup>*</sup>
+| {{GHGheb|text=סוֹבַ֫בְתָּ}}
+| {{GHGheb|text=סוֹבַ֫בְתָּ}}
+|-
+| {{GHGheb|text=הֲסִבּוֹתּ}}
+| {{GHGheb|text=הֽוּסַבּוֹת}}
+| {{GHGheb|text=סוֹבַבְתְּ}}
+| {{GHGheb|text=סוֹבַבְתְּ}}
+|-
+| {{GHGheb|text=הֲסִבּ֫וֹתִי}}
+| [{{GHGheb|text=הֽוּסַבּ֫וֹתִי}}
+| {{GHGheb|text=סוֹבַ֫בְתִּי}}
+| {{GHGheb|text=סוֹבַ֫בְתִּי}}
+|-
+| {{GHGheb|text=הֵחֵ֫לּוּ}}, {{GHGheb|text=הֵסַ֫בּוּ}}
+| {{GHGheb|text=הוּסַ֫בּוּ}}
+| {{GHGheb|text=סֽוֹבֲבוּ}}
+| {{GHGheb|text=סֽוֹבֲבוּ}}
+|-
+| {{GHGheb|text=הֲסִבּוֹתֶם}}
+| {{GHGheb|text=הֽוּסַבּוֹתֶם}}]
+| {{GHGheb|text=סֽוֹבַבְתֶּם}}
+| {{GHGheb|text=סֽוֹבַבְתֶּם}}
+|-
+| {{GHGheb|text=הֲסִבּוֹתֶן}}
+| {{GHGheb|text=הֽוּסַבּוֹתֶן}}
+| {{GHGheb|text=סֽוֹבַבְתֶּן}}
+| {{GHGheb|text=סֽוֹבַבְתֶּן}}
+|-
+| {{GHGheb|text=הֲסִבּ֫וֹנוּ}}
+| [{{GHGheb|text=הֽוּסַבּ֫וֹנוּ}}
+| {{GHGheb|text=סוֹבַ֫בְנוּ}}
+| [{{GHGheb|text=סוֹבַ֫בְנוּ}}
+|-
+| {{GHGheb|text=הָסֵב}}<sup>*</sup>
+| 
+| {{GHGheb|text=סוֹבֵב}}
+| 
+|-
+| {{GHGheb|text=הָסֵב}}
+| {{GHGheb|text=הָשַּׁמָּה}}
+| {{GHGheb|text=סוֹבֵב}}
+| [{{GHGheb|text=סוֹבַב}}]
+|-
+| {{GHGheb|text=הָסֵב}}<sup>*</sup>
+| 
+| {{GHGheb|text=סוֹבֵב}}
+| 
+|-
+| {{GHGheb|text=הָסֵ֫בִּי}}
+| wanting.
+| {{GHGheb|text=סֽוֹבֲנִי}}
+| wanting.
+|-
+| {{GHGheb|text=הָסֵ֫בּוּ}}
+| 
+| {{GHGheb|text=סוֹבֲבוּ}}
+| 
+|-
+| [{{GHGheb|text=הֲסִבֶּ֫ינָה}}]
+| 
+| [{{GHGheb|text=סוֹבֵ֫בְנָח}}
+| 
+|-
+| {{GHGheb|text=יַסֵּב}}, {{GHGheb|text=יָסֵב}}<sup>*</sup>
+| {{GHGheb|text=יֻסַּב}}, {{GHGheb|text=יוּסַב}}<sup>*</sup>
+| {{GHGheb|text=יְסוֹבֵב}}
+| {{GHGheb|text=יְסוֹבַב}}]
+|-
+| {{GHGheb|text=תָּסֵב}}
+| {{GHGheb|text=תּוּסַב}}]
+| {{GHGheb|text=תְּסוֹבֵב}}
+| {{GHGheb|text=תְּסוֹבַב}}
+|-
+| {{GHGheb|text=תָּסֵב}}
+| {{GHGheb|text=תּוּסַב}}
+| {{GHGheb|text=תְּסוֹבֵב}}
+| {{GHGheb|text=תְּסוֹבַב}}
+|-
+| [{{GHGheb|text=תָּסֵ֫בִּי}}]
+| {{GHGheb|text=תּוּסַ֫בִּי}}<sup>*</sup>
+| {{GHGheb|text=תְּסֽוֹבֲבִי}}]
+| {{GHGheb|text=תְּסֽוֹבֲבִי}}
+|-
+| {{GHGheb|text=אָסֵב}}
+| [{{GHGheb|text=אוּסַב}}
+| [{{GHGheb|text=אֲסוֹבֵב}}
+| {{GHGheb|text=אֲסוֹבַב}}
+|-
+| {{GHGheb|text=יַסֵּ֫בּוּ}}, {{GHGheb|text=יָסֵ֫בּוּ}}
+| {{GHGheb|text=יוּסַ֫בּוּ}}<sup>*</sup>
+| {{GHGheb|text=יְסֽוֹבֲבוּ}}
+| {{GHGheb|text=יְסֽוֹבֲבוּ}}
+|-
+| {{GHGheb|text=תְּסִבֶּ֫ינָה}}
+| {{GHGheb|text=תּֽוּסַבֶּ֫ינָה}}]
+| [{{GHGheb|text=תְּסוֹבֵ֫בְנָה}}]
+| {{GHGheb|text=תְּסוֹבֵ֫בְנָה}}
+|-
+| {{GHGheb|text=תָּסֵ֫בּוּ}}
+| {{GHGheb|text=תּוּסַ֫בּוּ}}
+| {{GHGheb|text=תְּסֽוֹבֲבוּ}}
+| {{GHGheb|text=תְּסֽוֹבֲבוּ}}
+|-
+| {{GHGheb|text=תְּסִבֶּ֫ינָה}}
+| {{GHGheb|text=תּֽוּסַבֶּ֫ינָה}}
+| {{GHGheb|text=תְּסוֹבֵ֫בְנָה}}
+| {{GHGheb|text=תְּסוֹבַ֫בְנָה}}
+|-
+| {{GHGheb|text=נָסֵב}}
+| [{{GHGheb|text=נוּסַב}}
+| [{{GHGheb|text=נְסוֹבֵב}}
+| [{{GHGheb|text=נְסוֹבַב}}
+|-
+| {{GHGheb|text=וַיָּ֫סֶב}}
+| 
+| 
+|-
+| {{GHGheb|text=יְסִבֵּ֫נִי}}<sup>*</sup>
+| ({{GHGheb|text=יְסִבְּכֶס}})
+| {{GHGheb|text=יְסֽוֹבֲבֵ֫נִי}}
+|
+|-
+| {{GHGheb|text=מֵסֵב}}<sup>*</sup>
+| 
+| {{GHGheb|text=מְסוֹבֵב}}
+| 
+|-
+| 
+| {{GHGheb|text=מוּסָב}}
+| 
+| {{GHGheb|text=מְסוֹבָב}}
+|}
+</div><noinclude>
+<references/></noinclude>

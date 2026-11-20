@@ -1,0 +1,29 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><section begin="par35" />orthographically retained), for {{GHGheb|text=הָֽאֲז׳}} {{GHGbible-ref|book=Jer|chapter=40|verse=4}} (cf. {{GHGheb|text=בָּֽאז׳}} verse 1); {{GHGheb|text=הָֽסוּרִים}} {{GHGbible-ref|book=Ec|chapter=4|verse=14}} for {{GHGheb|text=הָֽאֲס׳}}; {{GHGheb|text=הָֽרַמִּים}} {{GHGbible-ref|book=2 Ch|chapter=22|verse=5}} for {{GHGheb|text=הָֽאֲר׳}} (cf. {{GHGbible-ref|book=2 K|chapter=8|verse=28}}).
+
+{{GHGmargin-letter|35|e}}
+(2) In the case of the other gutturals either the virtual strengthening takes place ({{GHGpar|22|c}})—especially with the stronger sounds {{GHGheb|text=ח}} and {{GHGheb|text=ה}}, less often with {{GHGheb|text=ע}}—or the strengthening is wholly omitted. In the former case, the {{GHGterm|Pathaḥ}} of the article remains, because the syllable is still regarded as closed; in the second case, the {{GHGterm|Pathaḥ}} is either modified to {{GHGterm|S<sup>e</sup>ghôl}} or fully lengthened to {{GHGterm|Qameṣ}}. That is to say:—
+
+{{GHGmargin-letter|35|f}}
+''A''. When the guttural has any other vowel than ''ā'' ({{GHGheb|text=־ָ}}) or ''ŏ'' ({{GHGheb|text=־ֳ}}), then
+
+(1) before the stronger sounds {{GHGheb|text=ח}} and {{GHGheb|text=ה}} the article regularly remains {{GHGheb|text=הַ}}; e.g. {{GHGheb|text=הַהוּא|translate=that}}, {{GHGheb|text=הַחֹ֫דֶשׁ|translate=the month}}, {{GHGheb|text=הַחַ֫יִל|translate=the force}}, {{GHGheb|text=הַחָכְמָה|translate=the wisdom}}. Before {{GHGheb|text=ח}}, ''ā'' occurs only in {{GHGheb|text=הָחַי}} {{GHGbible-ref|book=Gn|chapter=6|verse=19}} [not elsewhere], {{GHGheb|text=הָֽחֲרִיטִים}} {{GHGbible-ref|book=Is|chapter=3|verse=22}}, {{GHGheb|text=הָֽחַמָּנִים}} {{GHGbible-ref|book=Is|chapter=17|verse=8}} [not elsewhere]; before {{GHGheb|text=ה}}, always in {{GHGheb|text=הָהֵ֫מָּה}}, {{GHGheb|text=הָהֵם}}.
+
+{{GHGmargin-letter|35|g}}
+(2) before {{GHGheb|text=ע}} the {{GHGterm|Pathaḥ}} is generally lengthened to {{GHGterm|Qameṣ}}, e.g. {{GHGheb|text=הָעַ֫יִן|translate=the eye}}, {{GHGheb|text=הָעִיר|translate=the city}}, {{GHGheb|text=הָעֶ֫בֶד|translate=the servant}}, plur. {{GHGheb|text=הָֽעֲבָדִים}}; {{GHGheb|text=לָֽעֲגָלִים}} {{GHGbible-ref|book=1 K|chapter=12|verse=32}}; also in {{GHGbible-ref|book=Gn|chapter=10|verse=17}} {{GHGheb|text=הָֽעַרְקִי}} is the better reading. Exceptions are {{GHGheb|text=כַּֽעוֹפֶ֫רֶת}} {{GHGbible-ref|book=Ex|chapter=15|verse=10}}, {{GHGheb|text=הַֽעִוְרִים}} {{GHGbible-ref|book=2 S|chapter=5|verse=6.8}}, {{GHGbible-ref|book=Is|chapter=42|verse=18}}, {{GHGheb|text=כַּעֶ֫בֶד}} {{GHGbible-ref|book=Is|chapter=24|verse=2}}, {{GHGheb|text=הַעֹֽרְכִים}} {{GHGbible-ref|book=Is|chapter=65|verse=11}}, {{GHGheb|text=בַּע֫שֶׁק}} {{GHGbible-ref|book=Ez|chapter=22|verse=7}}, {{GHGheb|text=הַעֹֽזְבִים}} {{GHGbible-ref|book=Pr|chapter=2|verse=13}} and {{GHGheb|text=הַעֹזֶ֫בֶת}} {{GHGbible-ref|book=Pr|chapter=2|verse=17}}, {{GHGheb|text=לַֽעֵינַיִם}} {{GHGbible-ref|book=1 S|chapter=16|verse=7}}, {{GHGbible-ref|book=Ec|chapter=11|verse=7}}; but {{GHGheb|text=לָֽעֵינ׳}} {{GHGbible-ref|book=Gn|chapter=3|verse=6}}, {{GHGbible-ref|book=Pr|chapter=10|verse=26}}. Cf. Baer on {{GHGbible-ref|book=Is|chapter=42|verse=18}}.
+
+{{GHGmargin-letter|35|h}}
+''B''. When the guttural has ''ā'' ({{GHGheb|text=־ָ}}) then
+
+(1) immediately before a tone-bearing {{GHGheb|text=הָ}} or {{GHGheb|text=עָ}} the article is always {{GHGheb|text=הָ}}, otherwise it is {{GHGheb|text=הֶ}}; e.g. {{GHGheb|text=הָעָם|translate=the people}}, {{GHGheb|text=הָהָר|translate=the mountain}}, {{GHGheb|text=הָעָ֑יִן}} (in {{GHGterm|pause}}) ''the eye'', {{GHGheb|text=הָהָ֫רָה|translate=towards the mountain}}; but (according to {{GHGpar|22|c}}) {{GHGheb|text=הֶֽהָרִ֫ים|translate=the mountains}}, {{GHGheb|text=הֶֽעָוֹן|translate=the iniquity}}.
+
+{{GHGmargin-letter|35|i}}
+(2) before {{GHGheb|text=חָ}} the article is invariably {{GHGheb|text=הֶ}} without regard to the tone; e.g. {{GHGheb|text=הֶֽחָכָם|translate=the wise man}}, {{GHGheb|text=הֶחָ֫ג|translate=the festival}}.
+
+{{GHGmargin-letter|35|k}}
+''C''. When the guttural has {{GHGvowel-holder|&#x5b3;}} the article is {{GHGheb|text=הֶ}} before {{GHGheb|text=חֳ}}; e.g. {{GHGheb|text=הֶֽחֳדָשִׁים|translate=the months}}; {{GHGheb|text=בֶּֽחֳרָבוֹת|translate=in the waste places}} (without the article {{GHGheb|text=בָּֽחֳ׳}} ''bŏḥ<sup>o</sup>rābhôth'') {{GHGbible-ref|book=Ez|chapter=33|verse=27}}, {{GHGheb|text=הֶֽחֳרֵבוֹת}} {{GHGbible-ref|book=Ez|chapter=36|verse=35.38}}, cf. {{GHGbible-ref|book=2 Ch|chapter=27|verse=4}}; but {{GHGheb|text=הָ}} before {{GHGheb|text=עֳ}}, as {{GHGheb|text=הָֽעֳמָרִים|translate=the sheaves}} {{GHGbible-ref|book=Ru|chapter=2|verse=15}}.
+
+The gender and number of the noun have no influence on the form of the article.
+
+{{GHGmargin-letter|35|l}}
+Rem. 1. The original form of the Hebrew (and the Phoenician) article {{GHGheb|text=הַ}} is generally considered to have been {{GHGheb|text=הַל}}, the {{GHGheb|text=ל}} of which (owing to the proclitic nature of the article) has been invariably assimilated to the following consonant, as in {{GHGheb|text=יִקַּח}} from ''yilqaḥ'', {{GHGpar|19|d}}. This view was supported by the form of the Arabic article {{GHGheb|text=אַל}} (pronounced ''hal'' by some modern Beduin), the {{GHGheb|text=ל}} of which is also assimilated at least before all letters like ''s'' and ''t'' and before ''l'', ''n'', and ''r'', e.g. ''ʾal-Qurʾân'' but ''ʾas-s{{GHGtranslit|a-brev-acut}}nă'' (Beduin ''has-sana'')=Hebr. {{GHGheb|text=הַשָּׁנָה|translate=the year}}.<section end="par35" /><noinclude>
+<references/></noinclude>

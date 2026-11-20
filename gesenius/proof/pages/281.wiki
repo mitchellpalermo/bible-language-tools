@@ -1,0 +1,41 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par91 />{{GHGmargin-letter|91|h}}
+<div align="center">
+{| cellspacing="0" cellpadding="0" border="0"
+! colspan="4" | Suffixes of Plural Nouns.
+|-
+! colspan="2" | ''Singular''.
+! colspan="2" | ''Plural''.
+|-
+| 1. c. ''my.''
+| {{GHGheb|text=־ַי}}, {{GHGterm|pause}} {{GHGheb|text=־ָי}}
+| 1. c. ''our.''
+| {{GHGheb|text=־ֵ֫ ינוּ}}
+|-
+| 2. m. ''thy.''
+| {{GHGheb|text=־ֶ֫ יךָ}}
+| 2. m. ''your.''
+| {{GHGheb|text=־ֵיכֶם}}
+|-
+| f.
+| {{GHGheb|text=־ַ֫ יִךְ|translate=pause}} {{GHGheb|text=־ָ֫ יִךְ}}
+| f.
+| {{GHGheb|text=־ֵיכֶן}}
+|-
+| 3. m. ''his.''
+| {{GHGheb|text=־ָיו}}, poet. {{GHGheb|text=־ֵ֫ יהוּ}}
+| 3. m. ''their.''
+| {{GHGheb|text=־ֵיהֶם}}, poet. {{GHGheb|text=־ֵ֫ ימוֹ}}
+|-
+| f. ''her.''
+| {{GHGheb|text=־ֶ֫ יהָ}}
+| f.
+| {{GHGheb|text=־ֵיהֶן}}
+|}
+</div>
+
+{{GHGmargin-letter|91|i}}
+Thus the original {{GHGheb|text=־ַי}} is (''a'') contracted in the ''3rd sing. masc.'' {{GHGheb|text=־ֵ֫ יהוּ}} and throughout the ''plural'', as {{GHGheb|text=סוּסֵ֫יהוּ}}, {{GHGheb|text=סוּסֵ֫ינוּ}}, &c.; (''b'') retained unchanged in the ''1st sing.'' {{GHGheb|text=סוּסַי}}, the real suffix-ending {{GHGheb|text=י}} (see b) being united with the final {{GHGterm|Yôdh}} of the ending {{GHGheb|text=־ַי}}; and in the ''2nd fem. sing.'' {{GHGheb|text=סוּסַ֫יִךְ}}, with a ''helping''-{{GHGterm|Ḥireq}} after the {{GHGterm|Yôdh}}. On the other hand (''c'') the {{GHGterm|Yôdh}} of {{GHGheb|text=־ַי}} is lost in pronunciation and the ''ă'' lengthened to ''ā'' in the ''3rd masc. sing.'' {{GHGheb|text=סוּסָיו}}, i.e. ''sûsāw'' (pronounced ''susā-u'').<ref>In the papyrus of the decalogue from the Fayyûm, line 16, {{GHGheb|text=ויקדשיו}} occurs for {{GHGheb|text=ויקדשהו}} {{GHGbible-ref|book=Ex|chapter=20|verse=11}}. Gall, {{GHGcite|title={{abbr|ZAW.|Zeitschrift für die alttestamentliche Wissenschaft, ed. by B. Stade, Giessen, 1881 ff., and since 1907 by K. Marti.}}}} 1903, p. 349, takes this as an indication that the traditional forms of the noun-suffix {{GHGheb|text=יו}} or {{GHGheb|text=ו}} represent ''aiŭ'' or ''eŭ''. P. Haupt aptly compares the Greek use of the ''iota subscript'' (ᾷ).</ref> The ''2nd masc. sing.'' {{GHGheb|text=סוּסֶ֫יךָ}} and the ''3rd fem. sing.'' {{GHGheb|text=סוּסֶ֫יהָ}} were formerly also explained here as having really lost the {{GHGheb|text=י}}, and modified the ''a'' of ''sûsakā, sûsahā'' to {{GHGterm|S<sup>e</sup>ghôl}}; but cf. the view now given in ''g'' and ''k''.
+
+{{GHGmargin-letter|91|k}}
+Rem. 1. As {{GHGheb|text=סוּסֵ֫ינוּ}} represents ''sûsai-nû'', so {{GHGheb|text=סוּסֶ֫יךָ}} and {{GHGheb|text=סוּסֶ֫יהָ}} represent ''sûsai-kā, sûsai-hā'', and the use of {{GHGterm|S<sup>e</sup>ghôl}} instead of the more regular {{GHGterm|Ṣere}} is to be explained from the character of the following syllable,—so P. Haupt who points to {{GHGheb|text=יִקְטְלֶ֫הָ}} as compared with {{GHGheb|text=יִקְטְלֵ֫הוּ}}. In support of the view formerly adopted by us that the {{GHGheb|text=י}} is only orthographically retained, too much stress must not be laid on the fact that it is sometimes omitted,<ref>So in the Mêšaʿ inscription, l. 22 {{GHGheb|text=מגדלתה|translate=its towers}} (along with {{GHGheb|text=שעריה|translate=its gates}}). Can it have been the rule to omit {{GHGheb|text=י}} after the termination ''ôth''? Cf. below, n.</ref> thereby causing confusion in an unpointed text with the singular noun. A number of the examples which follow may be due to an erroneous assumption that the noun is a plural, where in reality it is a singular, and others may be incorrect readings. Cf. {{GHGheb|text=דְרָכֶ֫ךָ|translate=thy ways}} (probably {{GHGheb|text=דַּרְכְּךָ}} is intended), {{GHGbible-ref|book=Ex|chapter=33|verse=13}}, {{GHGbible-ref|book=Jos|chapter=1|verse=8}}, {{GHGbible-ref|book=Ps|chapter=119|verse=37}}; for other examples, see {{GHGbible-ref|book=Jos|chapter=21|verse=11}} ff. ({{GHGheb|text=מִגְרָשֶׁ֫הָ}}; but in {{GHGbible-ref|book=1 Ch|chapter=6|verse=40}} ff. always {{GHGheb|text=־ֶ֫ יהָ}}), {{GHGbible-ref|book=Ju|chapter=19|verse=9}}, {{GHGbible-ref|book=1 K|chapter=8|verse=29}}, {{GHGbible-ref|book=Is|chapter=58|verse=13}}, {{GHGbible-ref|book=Ps|chapter=119|verse=41.43.98}} (probably, however, in all these cases the ''sing.'' is intended); {{GHGheb|text=אֱסָרֶ֫הָ}} {{GHGbible-ref|book=Nu|chapter=30|verse=8}} (cf. v. 5); {{GHGheb|text=מַכֹּתֶ֫הָ}} {{GHGbible-ref|book=Jer|chapter=19|verse=8}}, {{GHGbible-ref|book=Jer|chapter=49|verse=17|hidebook=1}}; {{GHGheb|text=מְבִיאֶ֫הָ}} {{GHGbible-ref|book=Dn|chapter=11|verse=6}}. For the orthographic omission of {{GHGheb|text=י}} before suffixes cf. {{GHGheb|text=רֵעִ֫הוּ}} for {{GHGheb|text=רֵעֵ֫יהוּ|translate=his friends}} {{GHGbible-ref|book=1 S|chapter=30|verse=26}}, {{GHGbible-ref|book=Pr|chapter=29|verse=18}}; {{GHGbible-ref|book=Jb|chapter=42|verse=10}} (but it is possible to explain it here as a ''collective'' singular); {{GHGheb|text=עֲוֹנֵ֫נוּ|translate=our iniquities}}, {{GHGbible-ref|book=Is|chapter=64|verse=5.6}}, {{GHGbible-ref|book=Jer|chapter=14|verse=7}}; {{GHGbible-ref|book=Ex|chapter=10|verse=9}}, {{GHGbible-ref|book=Neh|chapter=10|verse=1}} ({{GHGheb|text=לְוִיֵּ֫נוּ}} from {{GHGheb|text=לְוִיִּם}} which is always written defectively); {{GHGheb|text=נִסְכֵּכֶם}} {{GHGbible-ref|book=Nu|chapter=29|verse=33}}; {{GHGheb|text=רָעֹֽתֵכֶם}} {{GHGbible-ref|book=Jer|chapter=44|verse=9}}; {{GHGheb|text=יְדֵכֶם}} {{GHGbible-ref|book=Ps|chapter=134|verse=2}}; {{GHGheb|text=לְמִֽינֵהֶם|translate=after their kinds}}, {{GHGbible-ref|book=Gn|chapter=1|verse=21}} (but see c), cf. {{GHGbible-ref|book=Gn|chapter=4|verse=4|hidebook=1}} and {{GHGbible-ref|book=Na|chapter=2|verse=8}}. The<section end=par91 /><noinclude>
+<references/></noinclude>

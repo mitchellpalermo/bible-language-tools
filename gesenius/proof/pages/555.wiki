@@ -1,0 +1,133 @@
+<noinclude><pagequality level="1" user="Hesperian" /></noinclude><div align="center">
+
+
+
+{| 
+
+
+! 3. ''Sing. m''. || 3. ''Sing. f''. || 1. ''Plur''. || 3. ''Plur. m''.
+|-
+| {{GHGheb|text=עָשָׂ֫הוּ}}
+| {{GHGheb|text=רָאָהּ}}
+| {{GHGheb|text=עָשָׂ֫נוּ}}
+| {{GHGheb|text=עָשָׂם}}
+|-
+|&nbsp;
+|
+|
+|
+|-
+| ''Pi''. {{GHGheb|text=כִּלַּ֫תּוּ}}
+| ''Pi''. {{GHGheb|text=צִוַּ֫תָּה}}
+|
+| ''Hiph''. {{GHGheb|text=הֶֽעֱלָ֫תַם}}
+|-
+|&nbsp;
+|
+|
+|
+|-
+| ''Pi''. {{GHGheb|text=כִּסִּיתוֹ}}
+| {{GHGheb|text=עֲשִׂיתָהּ}}
+| ''Pi''. {{GHGheb|text=דִּכִּיתָ֫נוּ}}
+| {{GHGheb|text=עֲנִיתָם}}
+|-
+|&nbsp;
+|
+|
+|
+|-
+| {{GHGheb|text=עֲשִׂיתִ֫יהוּ}}
+| {{GHGheb|text=רְאִיתִ֫יהָ}}
+|
+| {{GHGheb|text=רְעִיתִים}}
+|-
+| {{GHGheb|text=רְאִיתִיו}}
+|
+|
+|
+|-
+| {{GHGheb|text=עָשׂ֫וּהוּ}}
+| {{GHGheb|text=רָא֫וּהָ}}
+|
+| {{GHGheb|text=שָׁבוּם}}
+|-
+| ''Pi''. {{GHGheb|text=קִוִּינֻ֫הוּ}}
+|
+|
+|
+|-
+|
+|
+| ''Hiph''.
+
+{{GHGheb|text=הַרְאֵ֫נוּ}}
+| {{GHGheb|text=רְעֵם}}
+|-
+|&nbsp;
+|
+|
+|
+|-
+|&nbsp;
+|
+|
+|
+|-
+| {{GHGheb|text=תְּל֫וּהוּ}}
+|
+|
+| ''Hiph''. {{GHGheb|text=הַכּוּם}}
+|-
+| {{GHGheb|text=יִרְאֵ֫הוּ}}
+| {{GHGheb|text=יִרְאֶ֫הָ}}
+| ''Pi''. {{GHGheb|text=יְצַוֵּ֫נוּ}}
+| {{GHGheb|text=יֶֽחֱצֵם}}
+|-
+| {{GHGheb|text=יִלְוֶ֫נּוּ}}
+| {{GHGheb|text=יִרְאֶ֫נָּה}}
+|
+| {{GHGheb|text=יַֽעֲשֵׂם}}
+|-
+| ''Hiph''. {{GHGheb|text=תַּשְׁקֵ֫הוּ}}
+|
+|
+|
+|-
+| {{GHGheb|text=תַּֽעֲשֶׂ֫נּוּ}}
+| {{GHGheb|text=תַּֽעֲשֶׂ֫הָ}}
+| ''Hiph''. {{GHGheb|text=תַּתְעֵ֫נוּ}}
+| {{GHGheb|text=תִּזְרֵם}}
+|-
+|
+|
+|
+| ''Pi''. {{GHGheb|text=תְּכַסִּים}}
+|-
+| {{GHGheb|text=אֶרְאֶ֫נּוּ}}
+| {{GHGheb|text=אֶֽעֱשֶׂ֫נָּה}}
+|
+| {{GHGheb|text=אֶפְדֵּם}}
+|-
+| {{GHGheb|text=אֶֽעֱנֵ֫הוּ}}
+|
+|
+|
+|-
+| ''Pi''. {{GHGheb|text=יְפַתּ֫וּהוּ}}
+| {{GHGheb|text=יַעֲשׂ֫וּהָ}}
+| ''Pi''. {{GHGheb|text=יְעַנּ֫וּנוּ}}
+|
+|-
+|&nbsp;
+|
+|
+|
+|-
+| {{GHGheb|text=נַשְׁקֶ֫נּוּ}}
+| {{GHGheb|text=נַֽעֲשֶׂ֫נָּה}}
+|
+| {{GHGheb|text=תְּצַוֻּם}}
+|}
+</div><noinclude>
+<references/></noinclude>

@@ -12,6 +12,8 @@ apps/
 packages/
   shared/        — language-agnostic utilities shared by both apps
   dev-tasks/     — `pnpm shots` and `pnpm checks`: PR screenshots and the repo's checks, as scripts
+gesenius/        — the modernized edition of Gesenius' Hebrew Grammar (1910): proofread
+                   source, converter and Typst book. Not a workspace package; see gesenius/HANDOFF.md
 ```
 
 ## Running the apps
@@ -1105,6 +1107,10 @@ Things to know before changing it:
   `!apps/*/src/styles` matched nothing; `!**/src/styles` matched. Every negation
   in the root config is written that way, and adding one without it will look
   like it worked while the files stay in the sweep.
+- **`gesenius/` is excluded as `!gesenius`, with no `**` prefix**, because it
+  is a root folder of Python, Typst and proofread text, not workspace code. The
+  prefixed form would also exclude `apps/hebrew-tools/src/pages/gesenius` once
+  Phase 10 builds it, and the app's own code there must stay linted.
 - **Generated files that are committed must be excluded, or a `--check` script
   starts failing.** `apps/hebrew-tools/scripts/build-vocabulary.mjs --check` and
   `extract-morph-codes.mjs --check` compare their output to the committed file

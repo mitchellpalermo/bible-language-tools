@@ -1,0 +1,171 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude><div align="center">
+{|
+! {{GHGterm|Puʿal}}. || {{GHGterm|Hiphʿîl}}. || {{GHGterm|Hophʿal}}. || {{GHGterm|Hithpaʿēl}}.
+
+|-
+| {{GHGheb|text=קֹרָא [מֻצָּא}}
+| {{GHGheb|text=הִמְצִיא}}
+| [{{GHGheb|text=הֻמְצָא}}]
+| {{GHGheb|text=הִתְמַצֵּא}}]
+|-
+| {{GHGheb|text=מֻצְּאָה}}
+| {{GHGheb|text=הִמְצִ֫יאָה}}
+| {{GHGheb|text=הֻמְצְאָה}}
+| {{GHGheb|text=הִתְמַצְּאָה}}
+|-
+| {{GHGheb|text=מֻצֵּ֫אתָ}}
+| {{GHGheb|text=הִמְצֵּ֫אתָ}}<sup>*</sup>
+| {{GHGheb|text=הֻּמְצֵ֫אתָ}}]<sup>*</sup>
+| {{GHGheb|text=הִתְמַצֵּ֫אתָ}}
+|-
+| {{GHGheb|text=מֻצֵּאת}}
+| {{GHGheb|text=הִמְצֵאת}}
+| {{GHGheb|text=הֻמְצֵאת}}
+| [{{GHGheb|text=הִתְמַצֵּאת}}]
+|-
+| {{GHGheb|text=מֻצֵּ֫אתִי}}
+| {{GHGheb|text=הִמְצֵ֫אתִי}}
+| {{GHGheb|text=הֻמְצֵ֫אתִי}}
+| {{GHGheb|text=הִתְמַצֵּ֫אתִי}}
+|-
+| {{GHGheb|text=מֻצְּאוּ}}
+| {{GHGheb|text=הִמְצִ֫יאוּ}}
+| {{GHGheb|text=הֻמְצְאוּ}}
+| {{GHGheb|text=הִתְמַצְּאוּ}}
+|-
+| {{GHGheb|text=מֻצֵּאתֶם}}
+| {{GHGheb|text=הִמְצֵאתֶם}}
+| {{GHGheb|text=הֻמְצֵאתֶם}}
+| {{GHGheb|text=הִתְמַצֵּאתֶם}}]
+|-
+| {{GHGheb|text=מֻצֵּאתֶן}}
+| {{GHGheb|text=הִמְצֵאתֶן}}]
+| {{GHGheb|text=הֻמְצֵאתֶן}}
+| {{GHGheb|text=הִתְמַצֵּאתֶן}}
+|-
+| [{{GHGheb|text=מֻצֵּ֫אנוּ}}
+| [{{GHGheb|text=הִמְצֵ֫אנוּ}}
+| [{{GHGheb|text=הֻמְצֵ֫אנוּ}}
+| [{{GHGheb|text=הִתְמַצֵּ֫אנוּ}}
+|-
+| wanting.
+| {{GHGheb|text=הַמְצִיא}}
+| wanting.
+| {{GHGheb|text=הִתְמַצֵּא}}
+
+|-
+|
+| {{GHGheb|text=הַמְצֵא}}
+|
+| wanting.
+
+|-
+|
+| {{GHGheb|text=הַמְצֵא}}
+|
+| {{GHGheb|text=הִתְמַצֵּא}}]
+
+|-
+| wanting.
+| {{GHGheb|text=הַמְצִ֫ינִי}}
+| wanting.
+| {{GHGheb|text=הִתְמַצְּאִי}}
+
+|-
+|
+| {{GHGheb|text=הַמְצִ֫יאוּ}}
+|
+| {{GHGheb|text=הִתְמַצְּאוּ}}
+
+|-
+|
+| [{{GHGheb|text=הַמְצֶ֫אנָה}}]
+|
+| [{{GHGheb|text=הִתְמַצֶּ֫אנָה}}]
+
+|-
+| {{GHGheb|text=יְמֻצָּא}}
+| {{GHGheb|text=יַמְצִיא}}
+| {{GHGheb|text=יֻמְצָא}}]
+| {{GHGheb|text=יִתְמַצֵּא}}
+
+|-
+| {{GHGheb|text=תְּמֻצָּא}}]
+| {{GHGheb|text=תַּמְצִיא}}
+| {{GHGheb|text=תֻּמְצָא}}
+| {{GHGheb|text=תִּתְמַצֵּא}}
+
+|-
+| {{GHGheb|text=תְּמֻצָּא}}
+| {{GHGheb|text=תַּמְצִיא}}
+| {{GHGheb|text=תֻּמְצָא}}
+| {{GHGheb|text=תִּתְמַצֵּא}}
+
+|-
+| {{GHGheb|text=תְּמֻצְּאִי}}
+| {{GHGheb|text=תַּמְצִ֫יאִי}}
+| {{GHGheb|text=תֻּמְצְאִי}}
+| {{GHGheb|text=תִּתְמַצְּאִי}}]
+
+|-
+| {{GHGheb|text=אֲמֻצָּא}}
+| {{GHGheb|text=אַמְצִיא}}
+| {{GHGheb|text=אֻמְצָא}}
+| [{{GHGheb|text=אֶתְמַצֵּא}}
+
+|-
+| {{GHGheb|text=יְמֻצְּאוּ}}
+| {{GHGheb|text=יַמְצִ֫יאוּ}}
+| {{GHGheb|text=יֻמְצְאוּ}}
+| {{GHGheb|text=יִתְמַצְּאוּ}}
+
+|-
+| {{GHGheb|text=תְּמֻצֶּ֫אנָה}}<sup>*</sup>
+| {{GHGheb|text=תַּמְצֶ֫אנָה}}<sup>*</sup>
+| {{GHGheb|text=תֻּמְצֶ֫אנָה}}<sup>*</sup>
+| [{{GHGheb|text=תִּתְמַצֶּ֫אנָה}}]
+
+|-
+| {{GHGheb|text=תְּמֻצְּאוּ}}
+| {{GHGheb|text=תַּמְצִ֫יאוּ}}
+| {{GHGheb|text=תֻּמְצְאוּ}}
+| {{GHGheb|text=תִּתְמַצְּאוּ}}
+
+|-
+| {{GHGheb|text=תְּמֻצֶּ֫אנָה}}
+| {{GHGheb|text=תַּמְצֶ֫אנָה}}
+| {{GHGheb|text=תֻּמְצֶ֫אנָה}}
+| {{GHGheb|text=תִּתְמַצֶּ֫אנָה}}]
+
+|-
+| [{{GHGheb|text=נְמֻצָּא}}
+| {{GHGheb|text=נַמְצִיא}}
+| {{GHGheb|text=נֻמְצָא}}
+| [{{GHGheb|text=נִתְמַצֵּא}}
+
+|-
+| 
+| {{GHGheb|text=יַמְצֵא}}
+|
+|
+|-
+|
+| {{GHGheb|text=יַמְצִיאֵ֫נִי}}
+|
+|
+
+|-
+|
+| {{GHGheb|text=מַמְצִיא}}
+|
+| {{GHGheb|text=מִתְמַצֵּא}}
+
+|-
+| {{GHGheb|text=מְמֻצָּא}}
+|
+| {{GHGheb|text=מֻמְצָא}}
+|
+
+|}
+</div><noinclude>
+<references/></noinclude>

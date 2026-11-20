@@ -1,0 +1,26 @@
+<noinclude><pagequality level="1" user="ShakespeareFan00" /></noinclude><section begin="par89" />{{GHGmargin-letter|89|b}}
+Very frequently such interdependent words are also united by {{GHGterm|Maqqeph}} ({{GHGpar|16|a}}); this, however, is not necessary, but depends on the accentuation in the particular case. On the wider uses of the ''constr. st''. see the Syntax, § 130.
+
+{{GHGmargin-letter|89|c}}
+'''2.''' The ''vowel'' changes which are occasioned in many nouns by the {{GHGterm|construct state}} are more fully described in §§ 92–5. But besides these, the ''terminations'' of the noun in the construct state sometimes assume a special form. Thus:
+
+(''a'') In the {{GHGterm|construct state}}, plural and dual, the termination is {{GHGheb|text=־ֵי}}, e.g. {{GHGheb|text=סוּסִים|translate=horses}}, {{GHGheb|text=סוּסֵי פַרְעֹה|translate=the horses of Pharaoh}}; {{GHGheb|text=עֵינַ֫יִם|translate=eyes}}, {{GHGheb|text=עֵינֵי הַמֶּ֫לֶךְ|translate=the eyes of the king}}.
+
+{{GHGmargin-letter|89|d}}
+Rem. The {{GHGheb|text=־ֵי}} of the dual has evidently arisen from {{GHGheb|text=־ַי}} (cf. {{GHGheb|text=יָדַ֫יִם}}), but the origin of the termination {{GHGheb|text=־ֵי}} in the ''constr. st''. plur. is disputed. The Syriac ''constr. st''. in ''ay'' and the form of the plural noun before suffixes ({{GHGheb|text=סוּסַי}}, {{GHGheb|text=סוּסַ֫יִךְ}}, &c., {{GHGpar|91|h}}) would point to a contraction of an original {{GHGheb|text=־ַי}}, as in the dual. But whether this ''ay'' was only transferred from the dual to the plural (so Olshausen, and Nöldeke, ''Beitr. zur sem. Sprachwiss.'', Strassb. 1904, p. 48 ff.), or is to be regarded as the ''abstract, collective'' termination, as in {{GHGheb|text=אִשֶּׁה}} (see f) and {{GHGheb|text=חוֹרַי}} (so Philippi, {{GHGcite|title={{abbr|ThLZ.|Theologische Literaturzeitung, ed. by E. Schürer. Lpz. 1876 ff.}}}} 1890, col. 419; Barth, {{GHGcite|title={{abbr|ZDMG.|Zeitschrift der deutschen morgenländischen Gesellschaft, Lpz. 1846 ff., since 1903 ed. by A. Fischer.}}}} 1904, p. 431 ff.), must be left undecided.
+
+{{GHGmargin-letter|89|e}}
+(''b'') The original {{GHGheb|text=־ַת}} is regularly retained as the feminine termination in the {{GHGterm|construct state}} sing. of those nouns which in the ''absolute'' state end in {{GHGheb|text=־ָה}}, e.g. {{GHGheb|text=מַלְכָּה|translate=queen}}, {{GHGheb|text=מַלְכַּת שְׁבָא|translate=the queen of Sheba}}. But the feminine endings {{GHGheb|text=־֫ ־ֶת}}, {{GHGheb|text=־֫ ־ַת}}, and also the plural {{GHGheb|text=־וֹת}}, remain unchanged in the {{GHGterm|construct state}}.
+
+{{GHGmargin-letter|89|f}}
+(''c'') Nouns in {{GHGheb|text=־ֶה}} (cf. {{GHGpar|75|e}}) from verbs {{GHGheb|text=ל״ה}} (§ 93, Paradigm III ''c'') form their ''constr. st''. in {{GHGheb|text=־ֵה}}, e.g. {{GHGheb|text=רֹאֶה|translate=seer}}, constr. {{GHGheb|text=רֹאֵה}}. If this {{GHGheb|text=־ֵה}} is due to contraction of the original {{GHGheb|text=־ַי}}, with {{GHGheb|text=ה}} added as a vowel letter, we may compare {{GHGheb|text=דַּי}}, constr. {{GHGheb|text=דֵּי|translate=sufficiency}}; {{GHGheb|text=חַי}}, constr. {{GHGheb|text=חֵי|translate=life}}; {{GHGheb|text=(גַּי) גַּיְא}}, constr. {{GHGheb|text=(גֵּי) גֵּיא|translate=valley}}.
+
+On the terminations {{GHGheb|text=וֹ}} and {{GHGheb|text=־ִי}} in the ''constr. st''. see § 90.
+<section end="par89" />
+<section begin="par90" />{{GHGpar-heading|90|Real and Supposed Remains of Early Case-endings. {{GHGheb|text=־ָה}} local, {{GHGheb|text=וּ}} in compound proper names, {{GHGheb|text=־ִי}} and {{GHGheb|text=וֹ}} in the Construct State}}
+
+<div style="font-size: small; text-align: center;">K. U. Nylander, ''Om Kasusändelserna i Hebräiskan'', Upsala, 1882; J. Barth, ‘Die Casusreste im Hebr.,’ {{GHGcite|title={{abbr|ZDMG.|Zeitschrift der deutschen morgenländischen Gesellschaft, Lpz. 1846 ff., since 1903 ed. by A. Fischer.}}}} liii. 593 ff.</div>
+
+{{GHGmargin-letter|90|a}}
+'''1.''' As the Assyrian and old Arabic distinguish three cases by special endings, so also in the Hebrew noun there are three endings which, in the main, correspond to those of the Arabic. It is, however, a question whether they are all to be regarded as real remnants of former case-endings, or are in some instances to be explained {{hws|other|otherwise}}<section end="par90" /><noinclude>
+<references/></noinclude>

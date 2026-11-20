@@ -1,0 +1,55 @@
+<!-- scan 565, printed 541, Index of Subjects -->
+{{colbegin}}
+Punctuation, Babylonian, 8 ''g'' N.
+Punic, ''see'' Phoenician.
+
+Qal, form and meaning of, 43: probable passives of, 52 ''e'', 53 ''u''.
+Qameṣ, 8 ''a'', 9 ''a''–''d'': its pronunciation, 8 ''d'': Qameṣ impurum, 25 ''c''.
+Qameṣ-ḥaṭûph, 8 ''c'', 9 ''s'': how distinguished from Qameṣ, 9 ''u'', ''v''.
+Q<sup>e</sup>rê, 17 ''a'', ''b'': perpetuum, 17 ''c''.
+Qibbuṣ, 8 ''c'', 9 ''n'', ''o''.
+Qina-metre, 2 ''r''.
+Quadriliterals, 30 ''p'', ''q'': nouns, 85 ''w'': verbs, 56.
+Quantity of vowels, p. 40 (Preliminary remark).
+Questions indicated by tone, 150 ''a'', ''b'': disjunctive, 150 ''g'': double, 150 ''h'': indirect, 150 ''i'': expressing rhetorically a denial, 148 ''c'', 150 ''d'', 151 ''a'', ''b''.
+Quiescent letters, ''see'' Letters.
+Quinqueliterals, 30 ''p'', ''r'', 85 ''w''.
+
+Radical letters, 30 ''c''–''e''.
+Raphe, 6 ''n'', 14 ''e''.
+Reciprocity expressed by {{GHGheb|text=אִישׁ}} . . . {{GHGheb|text=אחיו}} ({{GHGheb|text=רעהו}}): by Niphʿal, 51 ''d'': by Hithpaʿēl, 54 ''f''.
+Reduplication of letters, in verbs, 55 ''d''–''g'', in nouns, 84<sup>b</sup> ''k''–''p''.
+Reflexive use of {{GHGheb|text=לְ}} (ethical dative), 119 ''s'': of Niphʿal, 51 ''c'': of Hithp., 54 ''e'': of pronouns, 57 N., 135 ''i'', ''k''.
+Relative sentences, 138 ''a''–''f'', 155: expressed without {{GHGheb|text=אֲשֶׁר}}, 155 ''f''–''m'', 156 ''b'': in genitive after constr. st., 130 ''c'', without {{GHGheb|text=אֲשֶׁר}}, 130 ''d'', 152 ''a'' N. (end), ''u'' (2nd part), ''v'', 155 ''e'': expressed by {{GHGheb|text=זֶה}}, {{GHGheb|text=זוֹ}}, {{GHGheb|text=זוּ}}, 138 ''g'': by article (in late Hebrew), 138 ''i'' (cases due to false vocalization or accentuation, 138 ''k''): independent rel. clause as subject or object of verb, or genitive of a noun, or governed by a preposition, 155 ''n''.
+Relative pronoun, 36, 138.
+Repetition of words, without {{GHGheb|text=וְ}}, to express distribution (= ‘every’), 123 ''c'', ''d'': emphasis, 123 ''e'': the superlative, 133 ''l'': with {{GHGheb|text=וְ}}, to express summation, 123 ''c'', to express difference ({{GHGheb|text=אבן ואבן}}), 123 ''f''.
+Resh occasionally with Dageš, 22 ''s''.
+Rhythm of Hebrew poetry, 2 ''q'', ''r''.
+Roots, 30 ''c'', ''d''.
+
+Sabaean, 1 ''b'' (i), ''k'' N.
+Samaritan, 1 ''c''.
+Šaphʿel, 55 ''i'', cf. 30 ''p''.
+Schema etymologicum, 117 ''p''–''r''.
+Scriptio continua, 3 ''g'' N.
+Scriptio plena and defectiva, 8 ''i''–''l'', 25 ''b''.
+Seal-stones, engraved, 2 ''d''.
+S<sup>e</sup>ghôl, 8 ''b'', 9 ''m'', 27 ''p''–''r'': as a helping vowel, 27 ''r'', 28 ''e'', 84<sup>a</sup> ''a'': rarely after gutturals, 22 ''h'': before gutturals (esp. {{GHGheb|text=ח}}) with Qameṣ, for Pathaḥ, 27 ''q'', 29 ''v'': in pause for Ṣere in Piʿēl, 52 ''n''.
+‘Segholate’ nouns, forms of, 84<sup>a</sup> ''a''–''d'': in constr. st. and with suffixes (paradigms), § 93 ''c''–''e'', ''g''–''r'', feminine forms, 95 ''d''–''f'': of the form {{GHGheb|text=זְרַע}} in constr. st., 93 ''h'': of the form {{GHGheb|text=כַּסְפֵּי}} (dageš in 3rd radical) in constr. st. plur., 93 ''m'': explanation of forms from verbs {{GHGheb|text=ל״ה}} (as {{GHGheb|text=פְּרִי}}), 84<sup>a</sup> ''c'' (ε), 93 ''x''–''z'', 95 ''d''–''f'': constr. st. of nouns of the form {{GHGheb|text=אָרֹךְ}} sometimes segholate in form, 93 ''hh''.
+Self, idea of, how expressed, 135 ''a'', ''i'', ''k'', 139 ''f'', with N., cf. ''g''.
+Semitic languages, 1: their grammatical structure, 1 ''f'': their relation to one another, 1 ''e'', ''m'', ''n'': and to other languages, 1 ''g''–''i'': their age, 1 ''m'', ''n'': writing, 1 ''k'', ''l''.
+Sentences, 140: compound, 140 ''d'', 143: incomplete, 147: restrictive and intensive, 153: connected by {{GHGheb|text=וְ}}, 154: divided by Paseq, 15 ''f'' N.<sup>2</sup>
+Separating vowels, 67 ''d'' N., 72 ''i''.
+Septuagint, 3 ''a'', 6 ''b'', p. 35 N.
+Ṣere, 8 ''b'', 9 ''i''–''l'': in pause for S<sup>e</sup>ghôl in verbs {{GHGheb|text=ל״ה}}, 75 ''hh'' N.: changed to pathaḥ in pause, 29 ''q'': in Hithpaʿēl changed to qameṣ in pause, 29 ''s'', 55 ''k''.
+Serviles, ''see'' Formative letters.
+Š<sup>e</sup>wâ, simple and compound, 10, 21 ''e'', ''f'', 22 ''l''–''p'', 24 ''b''–''d'', 63 ''ff'': mobile, 10 ''b'', ''c'', ''l'', 20 ''m'', 21 ''e'', ''f'', 22 ''l'', 27 ''e'', ''i''–''m'': simple, under gutturals, 22 ''m'', ''n'', 63 ''a'', ''c'', 65 ''g'': quiescent (silent, syllable divider), 10 ''i'', 22 ''m'', 24 ''b''.
+Sibilants, 6 ''h''–''l'': transposition of, 19 ''n'', 54 ''b''.
+Sillûq with Sôph pasûq, 15 ''f''.
+Siloam inscription, 2 ''d'' N.: orthography of, 7 ''f''.
+Simultaneity of actions expressed by noun-clauses, 141 ''e'', 164 ''a''.
+Singular with distributive force, 145 ''l'', ''m''.
+Softening of consonants (rare), 19 ''o''.
+Some, how expressed, 139 ''h'' with N.
+Sonants, 6 ''o'', ''p''.
+{{colend}}

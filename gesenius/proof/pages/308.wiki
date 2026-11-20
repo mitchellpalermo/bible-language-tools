@@ -1,0 +1,176 @@
+<noinclude><pagequality level="1" user="" /></noinclude><section begin=par96 /><div align="center">
+{| cellspacing="0" cellpadding="0" border="0"
+| {{GHGheb|text=[מַי]}}
+| {{GHGheb|text=עִיר}}
+| {{GHGheb|text=פֶּה}}
+| {{GHGheb|text=רֹאשׁ}}
+| {{GHGheb|text=שֵׁם}}
+| {{GHGheb|text=[שָׁמַי]}}
+|-
+| (''water'')
+| (''city'')
+| (''mouth'')
+| (''head'')
+| (''name'')
+| (''heaven'')
+|-
+|
+| {{GHGheb|text=עִיר}}
+| {{GHGheb|text=פִּי}}
+| {{GHGheb|text=רֹאשׁ}}
+| {{GHGheb|text=שֵׁם}}, {{GHGheb|text=שֶׁם־}}
+|
+|-
+|
+| {{GHGheb|text=עִירִי}}
+| {{GHGheb|text=פִּי}}
+| {{GHGheb|text=רֹאשִׁי}}
+| {{GHGheb|text=שְׁמִי}}
+|
+|-
+|
+| {{GHGheb|text=עִֽירְךָ}}
+| {{GHGheb|text=פִּ֫יךָ}}
+| {{GHGheb|text=רֹֽאשְׁךָ}}
+| {{GHGheb|text=שִׁמְךָ}}, {{GHGterm|pause}} {{GHGheb|text=שְׁמֶ֫ךָ}}
+|
+|-
+|
+|
+|
+| {{GHGheb|text=רֹאשֵׁךְ}}
+| {{GHGheb|text=שְׁמֵךְ}}
+|
+|-
+|
+| {{GHGheb|text=עִירוֹ}}
+| {{GHGheb|text=פִּיו}}, {{GHGheb|text=פִּ֫יהוּ}}
+| {{GHGheb|text=רֹאשׁוֹ}}
+| {{GHGheb|text=שְׁמוֹ}}
+|
+|-
+|
+| {{GHGheb|text=עִירָהּ}}
+| {{GHGheb|text=פִּ֫יהָ}}
+| {{GHGheb|text=רֹאשָׁהּ}}
+| {{GHGheb|text=שְׁמָהּ}}
+|
+|-
+|
+|
+| {{GHGheb|text=פִּ֫ינוּ}}
+| {{GHGheb|text=רֹאשֵׁ֫נוּ}}
+| {{GHGheb|text=שְׁמֵ֫נוּ}}
+|
+|-
+|
+|
+| {{GHGheb|text=פִּיכֶם}}
+| {{GHGheb|text=רֹֽאשְׁכֶם}}
+| {{GHGheb|text=שִׁמְכֶם}}
+|
+|-
+|
+|
+|
+|
+|
+|
+|-
+|
+| {{GHGheb|text=עִירָם}}
+| {{GHGheb|text=פִּיהֶם}}
+| {{GHGheb|text=רֹאשָׁם}}
+| {{GHGheb|text=שְׁמָם}}
+|
+|-
+|
+|
+| {{GHGheb|text=פִּיהֶן}}
+| {{GHGheb|text=רֹאשָׁן}}
+|
+|
+|-
+| {{GHGheb|text=מַ֫יִם}}
+| {{GHGheb|text=עָרִים}}
+| {{GHGheb|text=פִּיּוֹת}}
+| {{GHGheb|text=רָאשִׁים}}
+| {{GHGheb|text=שֵׁמוֹת}}
+| {{GHGheb|text=שָׁמַ֫יִם}}
+|-
+| {{GHGheb|text=מֵי}}, {{GHGheb|text=מֵימֵי}}
+| {{GHGheb|text=עָרֵי}}
+|
+| {{GHGheb|text=רָאשֵׁי}}
+| {{GHGheb|text=שְׁמוֹת}}
+| {{GHGheb|text=שְׁמֵי}}
+|-
+| {{GHGheb|text=מֵימַי}}
+| {{GHGheb|text=עָרַי}}
+|
+|
+|
+|
+|-
+| {{GHGheb|text=מֵימֶ֫יךָ}}
+| {{GHGheb|text=עָרֶ֫יךָ}}
+|
+|
+|
+| {{GHGheb|text=שָׁמֶ֫יךָ}}
+|-
+|
+| {{GHGheb|text=עָרַ֫יִךְ}}
+|
+|
+|
+|
+|-
+| {{GHGheb|text=מֵימָיו}}
+| {{GHGheb|text=עָרָיו}}
+|
+| {{GHGheb|text=רָאשָׁיו}}
+|
+| {{GHGheb|text=שָׁמָיו}}
+|-
+| {{GHGheb|text=מֵימֶ֫יהָ}}
+| {{GHGheb|text=עָרֶ֫יהָ}}
+|
+| {{GHGheb|text=רָאשֶׁ֫יהָ}}
+|
+|
+|-
+| {{GHGheb|text=מֵימֵ֫ינוּ}}
+| {{GHGheb|text=עָרֵ֫ינוּ}}
+|
+| {{GHGheb|text=רָאשֵׁ֫ינוּ}}
+|
+|
+|-
+|
+| {{GHGheb|text=עָֽרֵיכֶם}}
+|
+| {{GHGheb|text=רָֽאשֵׁיכֶם}}
+|
+| {{GHGheb|text=שְׁמֵיכֶם}}
+|-
+| {{GHGheb|text=מֵֽימֵיהֶם}}
+| {{GHGheb|text=עָֽרֵיהֶם}}
+|
+| {{GHGheb|text=רָֽאשֵׁיהֶם}}
+| {{GHGheb|text=שְׁמוֹתָם}}
+|
+|-
+|
+|
+|
+| {{GHGheb|text=רָֽאשֵׁיהֶן}}
+| {{GHGheb|text=שְׁמוֹתָן}}
+|
+|}
+</div>
+
+to occur. In {{GHGbible-ref|book=Ez|chapter=16|verse=52}} {{GHGheb|text=אַֽחֲיוֹתֵךְ}} occurs (for {{GHGheb|text=אַחְיֹתַ֫יִךְ}}). In the forms {{GHGheb|text=אֲחוֹתַי}} {{GHGbible-ref|book=Jos|chapter=2|verse=13}} {{GHGterm|K<sup>e</sup>th.}}, {{GHGheb|text=אֲחוֹתַ֫יִךְ}} {{GHGbible-ref|book=Ez|chapter=16|verse=51.55.61}} (to be read also in verse 45 for {{GHGheb|text=אֲחוֹתֵךְ}}, which has been erroneously assimilated to the singular occurring in vv. 48, 49, 56), and {{GHGheb|text=אֲחֽוֹתֵיכֶם}} {{GHGbible-ref|book=Ho|chapter=2|verse=3}} (for which, however, read {{GHGheb|text=אֲחֽוֹתְכֶם}}), the third radical has been entirely lost.
+
+{{GHGheb|text=אִישׁ|translate=man}}, according to the common opinion either incorrectly lengthened for {{GHGheb|text=אֵשׁ}} (from ''ʾišš'', with assimilation of the ''Nûn'' of the ground-form ''ʾinš'', which again has been attenuated from ''ʾanš'' from the stem {{GHGheb|text=אָנַשׁ}}), or softened directly from ''ʾinš''. It is, however, probable that a separate stem ({{GHGheb|text=אישׁ|translate=to be strong}}?) is to be assumed for the singular<ref>So already Gesenius in his {{GHGcite|title=Thes. linguae Hebr.}}, i. 83 f., and recently again Friedr. Delitzsch, ''Prolegg.'', p. 160 ff., Praetorius in Kuhn’s ''Orient. L.-B.'', 1884, p. 196; König, ''Lehrgeb''., ii. 38; while Nöldeke ({{GHGcite|title={{abbr|ZDMG.|Zeitschrift der deutschen morgenländischen Gesellschaft, Lpz. 1846 ff., since 1903 ed. by A. Fischer.}}}} 1886, p. 739 f.), against Delitzsch, would connect both {{GHGheb|text=אִישׁ}} and {{GHGheb|text=נָשִׁים}} with the stem {{GHGheb|text=אנשׁ}}.</ref>; consequently the stem {{GHGheb|text=אָנַשׁ|translate=to be sociable}}, <section end=par96 /><noinclude>
+<references/></noinclude>

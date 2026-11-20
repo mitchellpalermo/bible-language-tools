@@ -1,0 +1,192 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude>{{center|''C. Strong Verb with Suffixes.''}}
+
+<div align="center">
+{|
+|
+|
+! ''Suffixes''|| 1 ''Sing''.|| 2 ''Sing. m''.|| 2 ''Sing. f''.|| 3 ''Sing. m''.
+|-
+| ''Perf''.
+| {{GHGterm|Qal}}
+| 3. ''m''.
+| {{GHGhebT|text=קְטָלַ֫נִי}}
+| {{GHGhebT|text=קְטָֽלְךָ}}
+| {{GHGhebT|text=קְטָלֵךְ}}
+| {{GHGhebT|text=קְטָלָ֫הוּ}}
+|-
+|
+|
+|
+| {{GHGhebT|text=שְׁכֵחַ֫נִי}}
+|
+|
+| {{GHGhebT|text=קְטָלוֹ}}
+|-
+|
+|
+| 3. ''f''.
+| {{GHGhebT|text=קְטָלַ֫תְנִי}}
+| {{GHGhebT|text=קְטָלַ֫תְךָ}}
+| {{GHGhebT|text=קְטָלָ֫תֶךְ}}
+| {{GHGhebT|text=קְטָלַ֫תְהוּ}}
+|-
+|
+|
+|
+|
+|
+|
+| {{GHGhebT|text=קְטָלַ֫תּוּ}}
+|-
+|
+|
+| 2. ''m''.
+| {{GHGhebT|text=קְטַלְתַּ֫נִי}}
+| —
+| —
+| {{GHGhebT|text=קְטַלְתָּ֫הוּ}}
+|-
+|
+|
+|
+|
+|
+|
+| {{GHGhebT|text=קְטַלְתּוֹ}}
+|-
+|
+|
+| 2. ''f''.
+| {{GHGhebT|text=קְטַלְתִּ֫ינִי}}
+| —
+| —
+| {{GHGhebT|text=קְטַלְתִּ֫יהוּ}}
+|-
+|
+|
+| 1. ''c''.
+| —
+| {{GHGhebT|text=קְטַלְתִּ֫יךָ}}
+| {{GHGhebT|text=קְטַלְתִּיךְ}}
+| {{GHGhebT|text=קְטַלְתִּיו}}
+|-
+|
+|
+|
+|
+|
+|
+| {{GHGhebT|text=קְטַלְתִּ֫יהוּ}}
+|-
+|
+| ''Plur''.
+| 3. ''c''.
+| {{GHGhebT|text=קְטָל֫וּנִי}}
+| {{GHGhebT|text=קְטָל֫וּךָ}}
+| {{GHGhebT|text=קְטָלוּךְ}}
+| {{GHGhebT|text=קְטָל֫וּהוּ}}
+|-
+|
+|
+|
+|
+| {{GHGhebT|text=אֲהֵב֫וּךָ}}
+|
+|
+|-
+|
+|
+| 2. ''m''.
+| {{GHGhebT|text=קְטַלְתּ֫וּנִי}}
+| —
+| —
+| {{GHGhebT|text=קְטַלְתּ֫וּהוּ}}
+|-
+|
+|
+| 1. ''c''.
+| —
+| {{GHGhebT|text=קְטַלְנ֫וּךָ}}
+| {{GHGhebT|text=קְטַלְנוּךְ}}
+| {{GHGhebT|text=קְטַלְנ֫וּהוּ}}
+|-
+| ''Inf''.
+| {{GHGterm|Qal}}.
+|
+| {{GHGhebT|text=קָטְלִי}}
+| {{GHGhebT|text=כָּתְבְּךָ}}
+| {{GHGhebT|text=קָטְלֵךְ}}
+| {{GHGhebT|text=קָטְלוֹ}}
+|-
+|
+|
+|
+| {{GHGhebT|text=קָטְלֵ֫נִי}}
+| {{GHGhebT|text=קְטָלְךָ}}
+|
+|
+|-
+| ''Imp''.
+| {{GHGterm|Qal}}.
+| 2.
+| {{GHGhebT|text=קָטְלֵ֫נִי}}
+| —
+| —
+| {{GHGhebT|text=קָטְלֵ֫הוּ}}
+|-
+|
+| colspan="5" | (from an ''Imperf''. in ''a'' {{GHGheb|text=שְׁלָחֵנִי}}, {{GHGheb|text=שְׁמָע֫וּנִי}})
+| {{GHGhebT|text=קָטְלָהּ}}
+|-
+| ''Impf''.
+| {{GHGterm|Qal}}
+| 3. ''m''.
+| {{GHGhebT|text=יִקְטְלֵ֫נִי}}
+| {{GHGhebT|text=יִקְטָלְךָ}}
+| {{GHGhebT|text=יִקְטְלֵךְ}}
+| {{GHGhebT|text=יִקְטְלֵ֫הוּ}}
+|-
+|
+|
+|
+| {{GHGhebT|text=יִלְבָּשֵׁ֫נִי}}
+| {{GHGhebT|text=יִלְבָּֽשְׁךָ}}
+| {{GHGhebT|text=יִלְבָּשֵׁךְ}}
+| {{GHGhebT|text=יִלְבָּשֵׁ֫הוּ}}
+ 
+|-
+|
+|
+| 3. ''m''. with ''Nûn energ''.
+| {{GHGhebT|text=יִקְטְלֶ֫נִּי}}
+| {{GHGhebT|text=יִקְטְלֶ֫ךָּ}}
+| —
+| {{GHGhebT|text=יִקְטְלֶ֫נּוּ}}
+
+|-
+|
+| ''Plur''.
+| 3. ''m''.
+| {{GHGhebT|text=יִקְטְל֫וּנִי}}
+| {{GHGhebT|text=יִקְטְל֫וּךָ}}
+| {{GHGhebT|text=יִקְטְלוּךְ}}
+| {{GHGhebT|text=יִקְטְלוּ֫הוּ}}
+|-
+|
+|
+|
+|
+|
+|
+| {{GHGhebT|text=יִגְאָלוּ֫הוּ}}
+|-
+| ''Perf''.
+| {{GHGterm|Piʿēl}}
+| 3. ''m''.
+| {{GHGhebT|text=קִטְּלַ֫נִי}}
+| {{GHGhebT|text=קִטֶּלְךָ}}
+| {{GHGhebT|text=קִטְּלֵךְ}}
+| {{GHGhebT|text=קִטְּלוֹ}}
+|}
+</div><noinclude>
+<references/></noinclude>

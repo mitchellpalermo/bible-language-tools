@@ -1,0 +1,178 @@
+<noinclude><pagequality level="1" user="Amire80" /></noinclude>{{center|''I. Weak Verbs,'' {{GHGheb|text=פ״א}}.}}
+
+<div align="center">
+{|
+! colspan="4" | {{GHGterm|Qal}}.
+! colspan="2" | {{GHGterm|Niphʿal}}.
+! {{GHGterm|Hiphʿîl}}.
+! {{GHGterm|Hophʿal}}.
+|-
+| ''Perf''.
+| colspan="3" | {{GHGheb|text=אָכַל}}
+| colspan="2" | {{GHGheb|text=נֶֽאֱכַל}}<sup>*</sup>
+| {{GHGheb|text=הֶֽאֱכִיל}}<sup>*</sup>
+| {{GHGheb|text=הָֽאֳכַל}}<sup>*</sup>
+|-
+| colspan="8" | Like Verbs ''primae gutturalis''.
+|-
+| ''Inf''.
+| colspan="3" | {{GHGheb|text=אֲכֹל}}, {{GHGheb|text=אֱכֹל}}<sup>*</sup>
+| colspan="2" | {{GHGheb|text=הֵֽאָכֵל}}
+| {{GHGheb|text=הַֽאֲכִיל}}
+| {{GHGheb|text=הָֽאֳכַל}}
+|-
+| colspan="2" | ''Inf''. ''absol''.
+| colspan="2" | {{GHGheb|text=אָכוֹל}}
+| colspan="2" | {{GHGheb|text=הֵֽאָכֹל}}
+| wanting.
+| wanting.
+|-
+| ''Imp''.
+| ''Sing''.
+| ''m''.
+| {{GHGheb|text=אֱכֹל}}<sup>*</sup>
+| colspan="2" | {{GHGheb|text=הֵֽאָכֵל}}
+| {{GHGheb|text=הַֽאֲכֵל}}
+|
+|-
+| colspan="2" |
+| ''f''.
+| {{GHGheb|text=אִכְלִי}}
+| colspan="2" | &c.
+| &c.
+| wanting.
+|-
+|
+| ''Plur''.
+| ''m''.
+| {{GHGheb|text=אִכְלוּ}}
+| colspan="4" |
+|-
+| colspan="2" |
+| ''f''.
+| [{{GHGheb|text=אֱכֹ֫לְנָה}}]
+| colspan="4" |
+|-
+| ''Impf''.
+| ''Sing''.
+| 3. ''m''.
+| {{GHGheb|text=יֹאכַל}}<sup>*</sup>
+| (in pause
+| {{GHGheb|text=יֵֽאָכֵל}}<sup>*</sup>
+| {{GHGheb|text=יַֽאֲכִיל}}<sup>*</sup>
+| {{GHGheb|text=יָֽאֳכַל}}<sup>*</sup>
+|-
+|
+|
+| 3. ''f''.
+| {{GHGheb|text=תֹּאכַל}}
+| {{GHGheb|text=יֹאכֵל}})
+| &c
+| &c
+| &c
+|-
+|
+|
+| 2. ''m''.
+| {{GHGheb|text=תֹּאכַל}}
+|
+|
+|
+|
+|-
+|
+|
+| 2. ''f''.
+| {{GHGheb|text=תֹּֽאכְלִי}}
+|
+|
+|
+|
+|-
+|
+|
+| 1. ''c''.
+| {{GHGheb|text=אֹכַל}}<sup>*</sup>
+|
+|
+|
+|
+|-
+|
+| ''Plur''.
+| 3. ''m''.
+| {{GHGheb|text=יֹֽאכְלוּ}}
+|
+|
+|
+|
+|-
+|
+|
+| 3. ''f''.
+| {{GHGheb|text=תֹּאכַ֫לְנָה}}
+|
+|
+|
+|
+|-
+|
+|
+| 2. ''m''.
+| {{GHGheb|text=תֹּֽאכְלוּ}}
+|
+|
+|
+|
+|-
+|
+|
+| 2. ''f''.
+| [{{GHGheb|text=תֹּאכֵ֫לְנָה}}]
+|
+|
+|
+|
+|-
+|
+|
+| 1. ''c''.
+| {{GHGheb|text=נֹאכַל}}
+|
+|
+|
+|
+|-
+| ''Impf''.
+| ''with''
+| {{GHGterm|Wāw}}
+| {{GHGheb|text=וַיֹּ֫אמֶר}}<sup>*</sup>
+|
+|
+|
+|
+|-
+| colspan="3" | ''consec''.
+| {{GHGheb|text=וַיֹּ֫אכַל}}<sup>*</sup>
+| colspan="4" |
+|-
+| ''Part''.
+| ''act''.
+|
+| {{GHGheb|text=אֹכֵל}}
+|
+| {{GHGheb|text=נֶֽאֱכָל}}
+| {{GHGheb|text=מַֽאֲכִיל}}
+|
+|-
+|
+| ''pass''.
+|
+| {{GHGheb|text=אָכוּל}}
+|
+|
+|
+| {{GHGheb|text=מָֽאֳכָל}}
+|}
+</div><noinclude>
+<references/></noinclude>

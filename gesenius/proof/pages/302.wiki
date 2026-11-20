@@ -1,0 +1,104 @@
+<noinclude><pagequality level="1" user="Mudbringer" /></noinclude><section begin=par95 />{{GHGmargin-letter|95|c}}
+<div align="center">
+{| cellspacing="0" cellpadding="0" border="0"
+|
+| colspan="3" | II.
+| colspan="2" | III.
+|-
+|
+| ''a''.
+| ''b''.
+| ''c''.
+| ''a''.
+| ''b''.
+|-
+| ''Sing. absolute''
+| {{GHGheb|text=צְדָקָה}}
+| {{GHGheb|text=זְעָקָה}}
+| {{GHGheb|text=שָׁנָה}}
+| {{GHGheb|text=יוֹנֶ֫קֶת}}
+| {{GHGheb|text=גֻּלְגֹּ֫לֶת}}
+|-
+|
+| (''righteousness'')
+| (''outcry'')
+| (''year'')
+| (''sprout'')
+| (''skull'')
+|-
+| Sing. ''construct''
+| {{GHGheb|text=צִדְקַת}}
+| {{GHGheb|text=זַֽעֲקַת}}
+| {{GHGheb|text=שְׁנַת}}
+| {{GHGheb|text=יוֹנֶ֫קֶת}}
+| {{GHGheb|text=גֻּלְגֹּ֫לֶת}}
+|-
+| Sing. ''with light suff.''
+| {{GHGheb|text=צִדְקָתִי}}
+| {{GHGheb|text=זַֽעֲקָתִי}}
+| {{GHGheb|text=שְׁנָתִי}}
+| {{GHGheb|text=יֽוֹנַקְתִּי}}
+| {{GHGheb|text=גֻּלְגָּלְתִּי}}
+|-
+| Sing. ''with grave suff.''
+| {{GHGheb|text=צִדְקַתְכֶם}}
+| {{GHGheb|text=זַֽעֲקַתְכֶם}}
+| {{GHGheb|text=שְׁנַתְכֶם}}
+| {{GHGheb|text=יֽוֹנַקְתְּכֶם}}
+| {{GHGheb|text=גֻּלְגָּלְתְּכֶם}}
+|-
+| ''Plur. absolute''
+| {{GHGheb|text=צְדָקוֹת}}
+|
+|<ref>On {{GHGheb|text=שָׁנוֹת}} as a less frequent (poetic) form for {{GHGheb|text=שָׁנִים}} see {{GHGpar|87|n}}.</ref>{{GHGheb|text=שָׁנוֹת}}
+| [{{GHGheb|text=יֽוֹנְקוֹת}}]
+|
+|-
+| Plur. ''construct''
+| {{GHGheb|text=צִדְקוֹת}}
+|
+| {{GHGheb|text=שְׁנוֹת}}
+| {{GHGheb|text=יֽוֹנְקוֹת}}
+| {{GHGheb|text=גֻּלְגְּלוֹת}}
+|-
+| Plur. ''with suff.''
+| {{GHGheb|text=צִדְקוֹתַי}}
+|
+| {{GHGheb|text=שְׁנוֹתַי}}
+| {{GHGheb|text=יֽוֹנְקוֹתַי}}
+| {{GHGheb|text=גֻּלְגְּלוֹתַי}}
+|-
+| ''Dual absolute''
+| [{{GHGheb|text=נְחֻשְׁתַּ֫יִם}}]
+|
+| {{GHGheb|text=שְׂפָתַ֫יִם}}
+|
+|
+|-
+|
+| (''fetters of brass'')
+|
+| (''lips'')
+|
+|
+|-
+| Dual ''construct''
+|
+|
+| {{GHGheb|text=שִׂפְתֵי}}
+|
+|
+|}
+</div>
+
+{{center|{{Small-caps|Remarks.}}}}
+
+{{GHGmargin-letter|95|d}}
+1. Paradigm '''I''': feminines of segholate forms. (''a'') The locative of this class has the form {{GHGheb|text=גִּבְעָ֫תָה|translate=towards Gibeah}} (masc. {{GHGheb|text=גֶּ֫בַע}}). In some cases, especially with an initial guttural, there is no means of deciding whether the form in question is to be referred to a ''qăṭl'' or a ''qĭṭl'' base, e.g. {{GHGheb|text=חֶזְקָה|translate=strength}} (cf. {{GHGheb|text=חֶרְפָּה}} under ''b''). A ''dual'' of this form occurs in {{GHGheb|text=שִׁבְעָתַ֫יִם|translate=seven times}} (cf. {{GHGheb|text=שֶׁ֫בַע|translate=seven}}, fem.). Analogous to masculine forms like {{GHGheb|text=דְּבַשׁ}} ({{GHGpar|93|s}}) is {{GHGheb|text=הֲדַסָּה|translate=myrtle}}.—From masculines of the form {{GHGheb|text=פְּרִי}} ({{GHGheb|text=ל״ה}}, cf. {{GHGpar|93|I}}, k) arise feminines sometimes like {{GHGheb|text=גַּֽאֲוָה}}, {{GHGheb|text=שַׁלְוָה}}, {{GHGheb|text=אַלְיָה}} (see above, {{GHGpar|94|b}}), sometimes like {{GHGheb|text=בְּכִית}} ({{GHGpar|94|f}}); occasionally the final {{GHGheb|text=ת}} is retained before the plural ending, as if it belonged to the stem (cf. {{GHGpar|87|k}}), e.g. {{GHGheb|text=חֲנִיתוֹת|translate=spears}}. Forms like {{GHGheb|text=גְּדִיָּה}} (cf. {{GHGheb|text=אֳנִיָּה}}, a ''qŭṭl'' form) are derived directly from the masculine forms {{GHGheb|text=גְּדִי|translate=kid}}, {{GHGheb|text=אֳנִי}}, ''a fleet''.—(''b'') From a stem {{GHGheb|text=ע״ן}}, {{GHGheb|text=חִטָּה|translate=wheat}} (for {{GHGheb|text=חִנְטָה}}), ''plur.'' {{GHGheb|text=חִטִּים}}.—(''c'') From {{GHGheb|text=עָרְלָה|translate=foreskin}}, the ''plur. absol.'' is {{GHGheb|text=עֲרָלוֹת}} (cf. {{GHGheb|text=פְּעָלִים}}, § 93, Paradigm '''I''', ''f''), {{GHGterm|constr.}} {{GHGheb|text=עָרְלוֹת}}.—(''d'') Example of a feminine segholate form from a stem {{GHGheb|text=ע״ע}} (ground-form ''qŭṭl'', like {{GHGheb|text=חַיָּה}} of the form ''qăṭl,'', {{GHGheb|text=זִמָּה}} of the form ''qĭṭl''), with ''ŏ'' for ''ŭ'', {{GHGheb|text=חָגָּא|translate=terror}}, {{GHGbible-ref|book=Is|chapter=19|verse=17}} (Aramaic orthography for {{GHGheb|text=חָגָּה}}).
+
+{{GHGmargin-letter|95|e}}
+(''e'') To the list of segholate forms with {{GHGheb|text=ת}} fem. belong also the infinitives of verbs {{GHGheb|text=פ״ו}} and {{GHGheb|text=פ״ן}}, which have rejected the weak consonant at the beginning, as {{GHGheb|text=שֶׁ֫בֶת}} (from {{GHGheb|text=יָשַׁב}}), {{GHGheb|text=דַּ֫עַת}} (from {{GHGheb|text=יָדַע}}), {{GHGheb|text=גֶּ֫שֶׁת}} (from {{GHGheb|text=נָגַשׁ}}), as well as {{GHGheb|text=קַ֫חַת}} (from {{GHGheb|text=לָקַח}}); cf. {{GHGpar|69|m}} and {{GHGpar|66|b}} and g. The infinitives of verbs {{GHGheb|text=פ״ו}} are, however, also found in the form {{GHGheb|text=דֵּעָה}}, {{GHGheb|text=לֵדָה}}, {{GHGheb|text=צֵאָה}}, and of the same origin also are {{GHGheb|text=עֵדָה|translate=congregation}} (from {{GHGheb|text=יָעַד}}), {{GHGheb|text=עֵצָה|translate=counsel}} (from {{GHGheb|text=יָעַץ}}), {{GHGheb|text=שֵׁנָה|translate=sleep}} (from {{GHGheb|text=יָשֵׁן}}), {{GHGterm|constr.}} {{GHGheb|text=עֲדַת}}, {{GHGheb|text=שְׁנַת}}, while in the {{GHGterm|constr.}} forms {{GHGheb|text=זֵעַת|translate=sweat}}, {{GHGbible-ref|book=Gn|chapter=3|verse=19}} (from {{GHGheb|text=יָזַע|translate=to flow}}), and {{GHGheb|text=צֵאַת|translate=excrement}}, {{GHGbible-ref|book=Ez|chapter=4|verse=12}}, the Ṣere has remained firm.
+
+{{GHGmargin-letter|95|f}}
+From a stem {{GHGheb|text=ע״וּ}} (cf. {{GHGheb|text=בּוֹשׁ|translate=to be ashamed}}) is {{GHGheb|text=בּ֫שֶׁת|translate=shame}}, with ''suffix'' {{GHGheb|text=בָּשְׁתִּי}}.<section end=par95 /><noinclude>
+<references/></noinclude>

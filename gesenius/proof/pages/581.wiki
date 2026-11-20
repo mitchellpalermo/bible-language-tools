@@ -1,0 +1,105 @@
+<!-- scan 581, printed 557, Index of Hebrew Words and Forms -->
+{{colbegin}}
+{{GHGheb|text=לְמַ֫עַן}} 119 ''c''
+{{GHGheb|text=לַמְרוֹת}} 53 ''q''
+{{GHGheb|text=לְמַשָּׂאוֹת}} 45 ''e''
+{{GHGheb|text=לִנְגּוֹעַ}} 66 ''b''
+{{GHGheb|text=לָ֫נֶה}} 80 ''i''
+{{GHGheb|text=לַנְחוֹתָם}} 53 ''q''
+† {{GHGheb|text=לַנְפִּל}} 53 ''q'', 66 ''f''
+{{GHGheb|text=לָנֶ֫פֶשׁ}} 102 ''i''
+{{GHGheb|text=לַסְתִּר}} 53 ''q''
+{{GHGheb|text=לַעֲבִיר}} 53 ''q''
+{{GHGheb|text=לָעוֹ}} 72 ''q''
+{{GHGheb|text=לָֽעֲוִנִים}} 35 ''g''
+{{GHGheb|text=לְעֻמַּת}} 100 ''b'', 101 ''a''
+{{GHGheb|text=לְעַנּוֹת}} 51 ''l''
+? {{GHGheb|text=לַעְשֵׂר}} 53 ''k''
+{{GHGheb|text=לִפְנֵי}} 119 ''c'', 130 ''a''<sup>3</sup>
+{{GHGheb|text=לִצְבֹּא}} 45 ''g''
+{{GHGheb|text=לַצְבּוֹת}} 53 ''q''
+{{GHGheb|text=לְצַ֫חֶק בָּ֫נוּ}} 29 ''g''
+{{GHGheb|text=לֵצִים}} 55 ''f''
+{{GHGheb|text=לָקַח}} 66 ''g''
+{{GHGheb|text=לֻקַּח}} 66 ''g''
+{{GHGheb|text=לֻקָּח}} 52 ''s'' (ptcp.)
+{{GHGheb|text=לֻקְּחָה}} 10 ''h'', 52 ''d''
+{{GHGheb|text=לְקָחִי}} 66 ''g''
+† {{GHGheb|text=לָקַ֫חַתְּ}} 65 ''g''
+{{GHGheb|text=לִקְרַאת}} 19 ''k'', 74 ''h''
+? {{GHGheb|text=לֵרֹא}} 69 ''n''
+{{GHGheb|text=לֵרָאוֹת}} 51 ''l''
+{{GHGheb|text=לַרְאֹתְכֶם}} 53 ''q''
+{{GHGheb|text=לְשָׂטְנוֹ}} 61 ''b''
+{{GHGheb|text=לִשְׁאוֹל}} 10 ''g''<sup>3</sup>
+{{GHGheb|text=לַשְׁבִּית}} 53 ''q''
+{{GHGheb|text=לְשַׁלַּח}} 65 ''e''
+{{GHGheb|text=לִשְׁלֹ֫שֶׁת יָמִים}} 134 ''o''<sup>1</sup>
+{{GHGheb|text=לַשְׁמִד}} 53 ''q''
+{{GHGheb|text=לַשְׁמִעַ}} 53 ''q''
+{{GHGheb|text=לְשָׁ֫רֶת שָׁם}} 64 ''g''
+? {{GHGheb|text=לֵת}} 69 ''m''
+{{GHGheb|text=לָתֶת־חֹ֫רֶב}} 102 ''f''
+? {{GHGheb|text=לְתִתֵּן}} 66 ''i''
+
+{{GHGheb|text=מ}} as preformative of participles 52 ''c'', sometimes dropped 52 ''s''; of infin. (rare) 45 ''e''; of nouns 85 ''e''–''m''
+{{GHGheb|text=מַ·}}, {{GHGheb|text=מַה־}} for {{GHGheb|text=מָה}} 20 ''d'', 37
+{{GHGheb|text=מְאוּמָה}} 90 ''f''
+{{GHGheb|text=מָאֵן}} (ptcp.) 52 ''s''
+{{GHGheb|text=מְאַסְּכֶם}} 61 ''d''
+† {{GHGheb|text=מְאַסְפָיו}} 52 ''p''
+{{GHGheb|text=מֵאֵת שֶׁ֫מֶר}} 29 ''f''
+{{GHGheb|text=מִבְטָח}} 92 ''g''
+{{GHGheb|text=מֵבִי}} with final {{GHGheb|text=א}} dropped 72 ''z'', 74 ''k'', 76 ''h''
+{{GHGheb|text=מְבִיאָ֫הּ}} 91 ''k''
+{{GHGheb|text=מִבֵּית לְ}} 130 ''a''<sup>3</sup>
+{{GHGheb|text=מִבְּלִי}} 119 ''c''<sup>2</sup>
+{{GHGheb|text=מִבַּלְעֲדֵי}} 119 ''c''<sup>2</sup>
+{{GHGheb|text=מִבַּעֲתֶךָ}} 80 ''d''
+{{GHGheb|text=מִבְצִיר}} for {{GHGheb|text=מִבְּ׳}} 20 ''m''
+{{GHGheb|text=מִגְבוּרָתָם}} 20 ''m''
+{{GHGheb|text=מְגִדּוֹן}} 85 ''v''
+{{GHGheb|text=מגדלתה}} (Moab.) 91 ''k''<sup>2</sup>
+{{GHGheb|text=מָגִנֵּי}} 85 ''f''
+{{GHGheb|text=מְגָרֵשׁ}} infin. 45 ''e''
+? {{GHGheb|text=מִגְרָשֶׁ֫הָ}} 91 ''k''
+{{GHGheb|text=מִדַּבֵּר}} 19 ''d'', 54 ''c''
+{{GHGheb|text=מִדְבָּ֫רָה}} 26 ''h'', 67 ''o''
+? {{GHGheb|text=מִדָּהּ}} 91 ''e''
+{{GHGheb|text=מִדּוֹ}} 27 ''s''
+{{GHGheb|text=מַדּוּעַ}} 99 ''e''
+{{GHGheb|text=מָה}}, {{GHGheb|text=מַה־}}, {{GHGheb|text=מַ·}} 20 ''d'', 37; its uses 137; in exclamations 148
+{{GHGheb|text=מִֽהְיוֹת}} 102 ''b''
+? {{GHGheb|text=מַהְלְכִים}} 53 ''o''
+{{GHGheb|text=מַהְפֵּכָה}} followed by {{GHGheb|text=אֵת}} 115 ''d'', cf. 45 ''e''
+{{GHGheb|text=מְהֻקְצָעוֹת}} 53 ''q''
+{{GHGheb|text=מַהֵר}} (ptcp.) 52 ''s''
+{{GHGheb|text=־מוֹ}} verbal suffix 58 ''g''; noun suff. 91 ''f'', ''l'', 103 ''f''<sup>2</sup>
+{{GHGheb|text=מוּט}} 72 ''q''
+{{GHGheb|text=מוּל}} 72 ''p''
+{{GHGheb|text=מוּסָד}} 71
+{{GHGheb|text=מוֹסֵרוֹת}} ''see'' Additions
+† {{GHGheb|text=מוּעֶ֫דֶת}} 52 ''s''
+{{GHGheb|text=מוֹצִא}} 53 ''o''
+{{GHGheb|text=מוֹצֵא}} 75 ''oo''
+{{GHGheb|text=מוֹצָאָה}} 95 ''p''
+{{GHGheb|text=מוֹצֵאת}} 74 ''i'', 94 ''f''
+{{GHGheb|text=מוֹרִגִּים}} 93 ''pp''
+{{GHGheb|text=מ֫וֹתָה}} 90 ''f''
+{{GHGheb|text=מֵזִין}} 68 ''i''
+† {{GHGheb|text=מָחֹה וְהָפֵךְ}} 113 ''h''<sup>2</sup>
+{{GHGheb|text=מִחוּץ}} 119 ''c''
+† {{GHGheb|text=מַחְלְמִים}} 53 ''o''
+{{GHGheb|text=מַחֲנֶה}} fem. 122 ''l''<sup>1</sup>
+{{GHGheb|text=מַחֲנֶ֫יךָ}} 93 ''ss''
+{{GHGheb|text=מַחְסִי}} 13 ''b''
+† {{GHGheb|text=מַחְצְרִים}} 53 ''o''
+{{GHGheb|text=מַחֲרֵשׁוֹת}} 95 ''q''
+{{GHGheb|text=מָחֳרָת}} 80 ''g''
+{{GHGheb|text=מִטְּחֵוֵי}} 75 ''kk''
+{{GHGheb|text=מִי}} 37; its uses 137
+{{GHGheb|text=מִי יִתֵּן}} in wishes 151 ''a'', ''d''
+{{GHGheb|text=מִיהוָֹה}} 102 ''m''
+{{GHGheb|text=מַ֫יִם}} 88 ''d'', 96
+{{GHGheb|text=מֵימִינִים}} 24 ''f''<sup>2</sup>, 70 ''b''
+{{colend}}

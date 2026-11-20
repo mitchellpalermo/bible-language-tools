@@ -1,0 +1,50 @@
+<!-- scan 562, printed 538, Index of Subjects -->
+{{colbegin}}
+Kaph veritatis, 118 ''x''.
+K<sup>e</sup>thîbh, 17 ''a''–''c''.
+
+Lamed auctoris, 129 ''c''.
+Lamentation metre, 2 ''r''.
+Letters, forms and names of, 5 ''a'', ''b'', ''e'', ''f'': final, 5 ''c'': order of, 5 ''h'', ''i'': numerical value, 5 ''k''.
+Litterae dilatabiles, 5 ''d'': maiusculae, minusculae, suspensae, 5 ''n'': spirantes, 6 ''n'': quiescibiles, 8 ''h'' N., 23: incompatibiles, 30 ''m'' N.: serviles, 30 ''g'', 81 ''b'': compaginis, 90 ''k''–''o''.
+Loan-words in Hebrew and Greek, 1 ''i''.
+Locative, 90 ''a'', ''c''–''i''.
+
+Mandaeans, 1 ''c''.
+Mappîq, 8 ''m'' N.<sup>1</sup>, 14 ''a''–''d'': omitted in 3rd fem. sing. suffix of verb, 58 ''g'': of noun, 91 ''e'': in {{GHGheb|text=לָהּ}}, 103 ''g'' (end): found four times in {{GHGheb|text=א}}, 14 ''d''.
+Maqqēph, 9 ''u'' (c, d), 16 ''a'', ''b''.
+Masculine as prior gender, 122 ''g'', 146 ''d'': masc. nouns with plur. in {{GHGheb|text=־וֹת}}, 87 ''m''–''p''.
+Masora and Masoretic text, 3 ''b'', ''c'': masora marginalis (magna and parva) and finalis, 17 ''d'', ''e''.
+Masoretic terms explained, 17 ''e''.
+Material expressed by the genitive, 128 ''o'', 135 ''n''.
+Matres lectionis, 8 ''h'' N.
+Mešaʿ inscription, 1 ''b'' (ii), ''k'', 2 ''d'', final vowels in, 7 ''b''–''d'' N.<sup>1</sup>: {{GHGheb|text=אנך}} = {{GHGheb|text=אָנֹכִי}}, p. 105 N.: {{GHGheb|text=הא}} = {{GHGheb|text=הוּא}}, 32 ''k'' N.: wāw consecutive, 49 ''a'' N.: the forms {{GHGheb|text=הלתחם}}, &c., 54 ''l'': {{GHGheb|text=לספת}}, 69 ''h'' N.: {{GHGheb|text=ואענו}}, 75 ''b'' N.: fem. sing. abs. in {{GHGheb|text=ת־}}, 80 ''f'' N.: plur. masc. in {{GHGheb|text=ן־}}, 87 ''e'' N.: suffixes, 91 ''k'' N.: the imperfect, 107 ''b'' N.<sup>1</sup>: impf. consec. 111 ''h'' N.: article omitted with {{GHGheb|text=זאת}} though the noun has it, 126 ''y'': use of the separate pronoun, 135 ''a'' N.: casus pendens, 143 ''b'' N.
+Metathesis, ''see'' Transposition.
+Metheg, distinguishing ''ā'' from ''ŏ'', 9 ''u'', ''v'': marks secondary tone, 15 ''c'', 29 ''b'', 20 ''f'': various kinds of, 16 ''c''–''i'': with short vowel in open syllable, 26 ''i''–''l'' (but cf. ''o'' N.): with ṣere in closed ultima, 29 ''f'': in perf. consec. 49 ''i''.
+Metre in Hebrew, 2 ''r''.
+Milʿēl and Milraʿ, 15 ''c'', 20 ''f''.
+Mishna, 3 ''a''.
+Mixed forms, 78 ''d''.
+Moods, expression of, 40 ''a'', 106 ''p'', 107 ''m''–''x'': modus rei repetitae (imperf. as frequentative), 107 ''e''.
+Multiplicatives (''once'', ''twice'', &c.), how expressed, 134 ''r''.
+
+Nabataean inscriptions, 1 ''c''.
+Naphthali, ben, 7 ''h'' N.
+Names of countries, peoples, and towns, fem., 122 ''i'': of places and peoples with the article, 125 ''d'' N., ''e'': with a following genitive, 125 ''h''.
+Nasog aḥor, 29 ''e''.
+Negative sentences, 152.
+Negatives, 152: two negatives intensify negation, 152 ''y'': influence extending over a following clause, 152 ''z''.
+Neuter, wanting in Hebrew, 80 ''a'': expressed by feminine, 122 ''q'' with N., 135 ''p'': by plur. of adjectives, 122 ''q'': by suffix of 3rd plur., 135 ''p'': in pronoun, 136 ''b'', in verb, 144 ''b'', ''c''.
+Niphʿal, 51: tolerativum, 51 ''c'': reflexive and reciprocal senses of, 51 ''c''–''e'': infin. with {{GHGheb|text=ה}} elided after a preposition, 51 ''l''.
+Nithqaṭṭēl, 55 ''k'' (9).
+Nomen regens and rectum, 89 ''a''.
+Nomen unitatis, 122 ''t''.
+Nominativus pendens resumed by a pronoun, 143.
+North Semitic, 1 ''c''.
+Nota accusativi, 57: when used, 117 ''a''–''e''.
+Nothing, no one, how expressed, 139 ''d''.
+Noun-clauses, ptcp. in, 116 ''m''–''r'': defined, 140 ''a'': syntax of, 141: shortened unusually (rare), 147 ''e'': negatived by {{GHGheb|text=אַיִן}} and {{GHGheb|text=לֹא}}, 152 ''a'', ''d'', ''i''–''m'': relative, 155 ''e''.
+Noun-forms with verbal force (nomina verbi), 45 ''e'' (with prefixed {{GHGheb|text=מ}}), 115 ''d''.
+Nouns, derivation and various kinds of, 81: primitive, 30 ''f'', 79 ''a'', 82: on nouns in general, 83: forms derived from the simple stem, 84<sup>a</sup>, from intensive stems, 84<sup>b</sup>: nouns formed with preformatives ({{GHGheb|text=א}}, {{GHGheb|text=ה}}, {{GHGheb|text=מ}}, &c.), 85 ''b''–''r'', with afformatives, 85 ''s''–''v'': quadriliterals and quinqueliterals, 85 ''w'': denominatives, 86: with pronominal suffixes, 91: paradigms of, 93: forms with peculiar flexion ({{GHGheb|text=אָב}}, {{GHGheb|text=אָח}}, &c.), 96: distinctions of gender in, 122: collectives, 123 ''a'', ''b'': with the article, 126: appellatives, 125 ''e''–''g'': nomina unitatis, 122 ''s'', ''t'', 123 ''b'': abstracts, ''see'' Abstract. ''See also'' Names.
+Number in the construction of subject and predicate, 145.
+{{colend}}

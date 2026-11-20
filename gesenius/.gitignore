@@ -1,0 +1,8 @@
+scan/
+proof/strips/
+build/*.pdf
+build/pg-*.png
+ws/html/
+__pycache__/
+.venv/
+proof/run.lock
