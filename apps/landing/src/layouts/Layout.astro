@@ -22,7 +22,7 @@ const year = new Date().getFullYear();
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600&family=Noto+Sans+Hebrew:wght@500;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans:wght@400;700&family=Noto+Sans+Hebrew:wght@400;700&display=swap"
       rel="stylesheet"
     />
     <script is:inline>
@@ -35,7 +35,7 @@ const year = new Date().getFullYear();
   <body>
     <header>
       <nav class="col">
-        <a class="wordmark" href="/"><span class="dot" aria-hidden="true">α</span>Bible Language Tools</a>
+        <a class="wordmark" href="/" aria-label="Bible Language Tools home">bible language<span>.tools</span></a>
         <div class="links">
           {apps.map((app) => <a href={app.url}>{app.navLabel}</a>)}
           <button id="theme" type="button" aria-label="Toggle dark mode">
