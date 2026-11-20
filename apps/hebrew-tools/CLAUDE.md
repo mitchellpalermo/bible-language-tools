@@ -99,9 +99,10 @@ CI that check is a gate: `hebrew-tools.yml` runs `build:data` before `test:run`.
 
 | File | Role |
 |---|---|
-| `src/test/corpus.ts` | `hasCorpus`, `corpusForms()`, `isAttested()` — the one implementation |
-| `src/test/corpus.test.ts` | Fails when `CI` is set and the corpus is missing |
-| `src/data/verb-paradigms.test.ts` | Checks כתב, בנה and היה; gaps listed in `UNATTESTED` |
+| `src/test/corpus.ts` | `hasCorpus`, `corpusForms()`, `isAttested()`, and for verb cells `attestation()` — the one implementation |
+| `src/test/corpus.test.ts` | Fails when `CI` is set and the corpus is missing; pins `attestation`'s rules |
+| `src/data/verb-paradigms.test.ts` | Checks every verb cell *with its parse*; two named lists, `AS_ANOTHER_FORM` and `UNATTESTED` |
+| `src/data/grammar-verbal.test.ts` | Checks every Hebrew word in the Qal and Waw Consecutive notes |
 | `src/data/grammar-nominal.test.ts` | Checks every noun form, example and Hebrew word in a note |
 | `src/data/dailyVerses.corpus.test.ts` | Resolves every Daily Verse reference; see "Daily Verse" |
 
@@ -118,6 +119,29 @@ CI that check is a gate: `hebrew-tools.yml` runs `build:data` before `test:run`.
 
 New hand-entered Hebrew — a paradigm, a table, an example — should get the same
 check: collect the forms, call `isAttested`, list the gaps by name.
+
+**A verb cell gets the parse-aware check, `attestation()`** (6d, #153), because a
+spelling check is weak for a table that is also the quiz's answer key: one
+spelling can fill two cells, so a form typed into the wrong cell passes. It
+looks the form up with the OSHB parse it occurs under and answers
+`as-this-form`, `as-another-form` (what a wrong-cell slip looks like) or
+`unattested`. Things to know:
+
+- **The app's terms map to OSHB's letters in one place**, `OSHB_STEM` and
+  `OSHB_CONJUGATION` in `corpus.ts`. A conjugation may list more than one
+  letter where the spellings coincide: a strong yiqtol cell is attested by the
+  jussive (`i`, `j`). 6e adds the derived stems there.
+- **A wayyiqtol or weqatal is read whole, never as its verb without the waw.**
+  The bare morpheme of וַ/תִּבְנִי is no form at all, and indexed under the
+  wayyiqtol's parse it vouched for the yiqtol 2fs. The corpus stores the waw as
+  its own morpheme (`HC/Vqw…`), so the index skips the verb morpheme of `w` and
+  `q` words.
+- **The leniency is `isAttested`'s**: no stress mark, an optional leading
+  dagesh lene. A participle's state is ignored; the spelling already says it.
+- **`AS_ANOTHER_FORM` lists only shared spellings**, and a test checks that
+  each entry's twin in the same table is spelled the same (the 3fs and 2ms of
+  the prefixed conjugations, the infinitive construct and 2ms imperative). The
+  retro-check of the transcribed Qal tables found no form in a wrong cell.
 
 ### Writing new tests
 
@@ -968,7 +992,8 @@ Things that will bite if changed carelessly:
 
 | File | Role |
 |---|---|
-| `src/data/verb-paradigms.ts` | The answer key — forms transcribed from Garrett & DeRouchie's tables, keyed by person-gender-number (PGN) |
+| `src/data/verb-paradigms.ts` | The answer key — the Qal qatal, yiqtol and wayyiqtol transcribed from Garrett & DeRouchie's tables, the rest general grammar (6d), each form keyed by `FormKey`. Also the Qal groups and grids (`qalGrid`) both pages draw |
+| `src/lib/fixtures/paradigm-tables-pre-6d.json` | Every table and cell id as they were before #153, captured from `main`; `paradigm-quiz.test.ts` pins them |
 | `src/data/pronominal-suffixes.ts` | The suffix tables' answer key — Type 1 and Type 2 on model nouns (#159) |
 | `src/data/stem-patterns.ts` | The Stems tab's answer key — Table 20.1: each stem's qatal 3ms on פעל and קטל |
 | `src/lib/paradigm-quiz.ts` | Table builders, cell ids, `gradeCell`. Blanking comes from `@tools/shared/paradigm-quiz` |
@@ -980,14 +1005,27 @@ Things that will bite if changed carelessly:
 
 Things that will bite if changed carelessly:
 
-- **The textbook is the authority, and the corpus only a witness.** Same split
-  as the vocabulary: a quiz is marked against the page. The forms cannot come
-  from OSHB anyway — קטל is barely attested — and a paradigm cell is the regular
-  form whether or not Scripture uses it. `verb-paradigms.test.ts` looks each form
-  of כתב, בנה and היה up in the corpus when `public/data/morphhb/` exists (CI
-  builds it before the tests; a fresh local checkout skips), and the forms the Bible never uses are
-  listed by name in `UNATTESTED`. **A new unattested form is what a typo looks
-  like** — check the page before adding to that list.
+- **Two sources, named on each paradigm.** The Qal qatal, yiqtol and wayyiqtol
+  are transcribed from the textbook (`source` names the table), because a quiz
+  is marked against the page. The weqatal, imperative, infinitives and
+  participles (6d, #153) are general grammar (`source: GENERAL_GRAMMAR`), as
+  the rest of the reference is, and the pull request that added them lists the
+  cells where grammars disagree for Mitch to check against the textbook. The
+  forms cannot come from OSHB in any case — קטל is barely attested — and a
+  paradigm cell is the regular form whether or not Scripture uses it.
+  `verb-paradigms.test.ts` looks every cell up with its parse (see "The corpus
+  gate"); the cells it cannot vouch for are listed by name. **A new entry on
+  either list is what a typo looks like** — check before adding one.
+- **A form is keyed by what it inflects for** (`FormKey`): a PGN for a finite
+  form, gender-number (`ms`) for a participle, `inf` for an infinitive. The
+  cell id is `<paradigm>:<key>`, the SRS key and the attempt-log concept, so
+  neither part may be renamed. Tables that existed before 6d are pinned to
+  `main`'s ids by a fixture.
+- **The quiz's Qal tabs are the reference's groups** (`QalGroup`): one per
+  finite conjugation, and the two infinitives and two participles as one table
+  each (`buildGridTable` over `qalGrid`), since a one-form infinitive table
+  would be a table of one. A finite conjugation keeps its verb tables and its
+  summary; the imperative's verb table has only the 2m and 2f rows.
 - **The suffix tables follow the nominal grammar's authority, not the verbs'.**
   `pronominal-suffixes.ts` is general grammar on conventional model nouns
   (דָּבָר, דְּבָרִים, חָכְמָה), not Garrett & DeRouchie's tables, written out in
@@ -1006,7 +1044,7 @@ Things that will bite if changed carelessly:
   form is a qatal 3ms, so there is no person to key on. Qal קָטַל repeats
   `qal-qatal-strong:3ms`'s spelling but keeps its own card. Not corpus-checked
   (קטל is barely attested), so `stem-patterns.test.ts` checks shape only.
-  `isConjugation()` is the test for "this tab holds Qal verb tables"; do not
+  `isQalGroup()` is the test for "this tab holds Qal verb tables"; do not
   write `!== 'suffixes' && !== 'ladder'` again.
 - **A cell is identified by `<paradigm>:<pgn>`, never by row and column.** The
   textbook prints one paradigm two ways: one verb as person × number, and verb
@@ -1270,7 +1308,7 @@ Things that will bite if changed carelessly:
 
 `/grammar` is being built a section at a time — see `ROADMAP.md` Phase 6 for the
 6a–6g breakdown. Alphabet, Vowels, Nouns, The Article, Prepositions, Pronouns,
-Pronominal Suffixes and Qal Verb are live.
+Pronominal Suffixes, Qal Verb (every conjugation, 6d) and Waw Consecutive are live.
 
 | File | Role |
 |---|---|
@@ -1279,7 +1317,8 @@ Pronominal Suffixes and Qal Verb are live.
 | `src/data/grammar-pronominal.ts` | Pronouns (personal, demonstrative, interrogative, relative) and pronominal suffixes (Type 1/2 paradigms, feminine ־ָה → ־ָת / ־ַת, suffixes on prepositions) |
 | `src/test/corpus.ts` | Test helper: looks a hand-entered form up in the WLC. Shared with `verb-paradigms.test.ts` |
 | `src/components/GrammarReference.tsx` | The page. `NAV_SECTIONS` drives both the sidebar and the pill row |
-| `src/data/verb-paradigms.ts` | The verb tables' source — shared with the paradigm quiz, not copied |
+| `src/data/verb-paradigms.ts` | The verb tables' source — shared with the paradigm quiz, not copied. `qalGrid(group)` is what both draw |
+| `src/data/grammar-verbal.ts` | The notes under the Qal groups and the Waw Consecutive section; every Hebrew word corpus-checked |
 
 Things that will bite if changed carelessly:
 
@@ -1307,7 +1346,7 @@ Things that will bite if changed carelessly:
 - **The reference shows a form as stored; the quiz grades `answerForm()`.** Do
   not route the verb tables through `buildVerbTable` to save code: those
   answers have the stress mark stripped.
-- **Only the verb forms are transcribed from Garrett & DeRouchie.** They are an
+- **Only the Qal qatal, yiqtol and wayyiqtol are transcribed from Garrett & DeRouchie.** They are an
   answer key, so they match the page. Nothing else on `/grammar` is quizzed and
   nothing else is copied: the alphabet, vowel, noun, article and preposition
   content is general first-year grammar in this app's own wording, on the

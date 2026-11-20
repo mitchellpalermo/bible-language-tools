@@ -319,3 +319,84 @@ describe('Qal verb', () => {
     expect(panel().getByText(/Qal qatal 3cp — 3rd common plural, from קטל/)).toBeInTheDocument();
   });
 });
+
+describe('the rest of the Qal (6d)', () => {
+  const panel = () => within(screen.getByRole('tabpanel'));
+
+  it('has a tab for every conjugation, the infinitives and participles grouped', () => {
+    render(<GrammarReference />);
+    expect(screen.getAllByRole('tab', { name: /./ }).map((t) => t.textContent)).toEqual([
+      'Qatal (Perfect)',
+      'Yiqtol (Imperfect)',
+      'Wayyiqtol',
+      'Weqatal',
+      'Imperative',
+      'Infinitives',
+      'Participles',
+    ]);
+  });
+
+  it('heads the participle columns active and passive, a row per gender and number', async () => {
+    const user = userEvent.setup();
+    render(<GrammarReference />);
+    await user.click(screen.getByRole('tab', { name: 'Participles' }));
+
+    expect(panel().getAllByText('Active')).toHaveLength(2);
+    expect(panel().getAllByText('Passive')).toHaveLength(2);
+    expect(panel().getByRole('rowheader', { name: 'fp' })).toBeInTheDocument();
+    expect(panel().getByText('קֹטֶ֫לֶת')).toBeInTheDocument();
+    expect(posthog.capture).toHaveBeenCalledWith('hebrew_grammar_conjugation_viewed', {
+      conjugation: 'participles',
+    });
+  });
+
+  it('describes a participle and an infinitive, naming general grammar as the source', async () => {
+    const user = userEvent.setup();
+    render(<GrammarReference />);
+    await user.click(screen.getByRole('tab', { name: 'Participles' }));
+    await user.click(panel().getByRole('button', { name: /^כְּתוּבָה/ }));
+    expect(
+      panel().getByText(
+        'Qal passive participle fs — feminine singular, from כתב (write). General grammar.',
+      ),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole('tab', { name: 'Infinitives' }));
+    expect(panel().getByRole('rowheader', { name: 'Absolute' })).toBeInTheDocument();
+    await user.click(panel().getByRole('button', { name: /^כָּתוֹב/ }));
+    expect(
+      panel().getByText('Qal infinitive absolute, from כתב (write). General grammar.'),
+    ).toBeInTheDocument();
+  });
+
+  it('notes what a group needs explaining under its table', async () => {
+    const user = userEvent.setup();
+    render(<GrammarReference />);
+    await user.click(screen.getByRole('tab', { name: 'Imperative' }));
+    expect(panel().getByText(/A prohibition never uses the imperative/)).toBeInTheDocument();
+  });
+});
+
+describe('Waw Consecutive', () => {
+  it('sets the wayyiqtol and the weqatal out, with the stress shift marked', () => {
+    render(<GrammarReference />);
+    const waw = within(section('Waw Consecutive'));
+    expect(waw.getByRole('heading', { name: 'Qal Wayyiqtol' })).toBeInTheDocument();
+    expect(waw.getByRole('heading', { name: 'Qal Weqatal' })).toBeInTheDocument();
+    expect(waw.getAllByText('וְכָתַבְתָּ֫').length).toBeGreaterThan(0);
+    expect(waw.getByText(/the stress moves to the last syllable/)).toBeInTheDocument();
+  });
+
+  it('describes a form in its own table without touching the other', async () => {
+    const user = userEvent.setup();
+    render(<GrammarReference />);
+    const waw = within(section('Waw Consecutive'));
+    await user.click(waw.getByRole('button', { name: /^וּקְטַלְתֶּם/ }));
+    expect(
+      waw.getByText(
+        /Qal weqatal 2mp — 2nd masculine plural, from קטל \(kill\)\. General grammar\./,
+      ),
+    ).toBeInTheDocument();
+    expect(waw.getAllByText(/Tap or hover over a form/)).toHaveLength(1);
+  });
+});

@@ -494,7 +494,7 @@ six sections; each later step is a data module, a `<section>`, and one entry in
 | 6a | `/grammar` shell and section nav; Alphabet (consonants, letter groups, dagesh); Vowels (chart, sheva); Qal Verb rendered from `verb-paradigms.ts` | ✅ Done | #149 (PR) |
 | 6b | Nouns — endings, absolute and construct, vowel reduction, segolates, the dual; The Article; Prepositions (inseparable, מִן, independent) | ✅ Done | #149 (PR) |
 | 6c | Pronouns — independent personal, demonstrative, interrogative, relative; Pronominal Suffixes on nouns and prepositions | ✅ Done | #152 |
-| 6d | Rest of the Qal — imperative, infinitives, participles; Waw Consecutive notes. Data goes in `verb-paradigms.ts` so the quiz gets it too | Queued | #153 |
+| 6d | Rest of the Qal — weqatal, imperative, infinitives, participles; Waw Consecutive section. Data in `verb-paradigms.ts`, so the quiz has every form too; the corpus gate checks each cell's parse | ✅ Done | #153 |
 | 6e | Derived stems — Niphal, Piel, Pual, Hiphil, Hophal, Hithpael | Queued | #154 |
 | 6f | Weak verbs as an overlay on the strong paradigm, with diverging cells highlighted; suffixes on verbs | Queued | #155 |
 | 6g | Numerals | Queued | #156 |
@@ -523,6 +523,24 @@ Two things 6a settled that the later steps inherit:
   where grammars commonly disagree (alternate forms, forms some tables omit,
   how weak classes are grouped), and Mitch checks just those cells against
   Garrett & DeRouchie so the quiz expects the forms his exams do.
+
+What 6d settled for 6e and 6f:
+
+- **A form is keyed by what it inflects for** (`FormKey` in
+  `verb-paradigms.ts`): a PGN, a participle's gender-number (`ms`), or `inf`.
+  The quiz's cell id stays `<paradigm>:<key>`. A new conjugation adds its keys
+  to `CONJUGATION_KEYS`, and every table that existed before is pinned to
+  `main`'s ids by a fixture in `paradigm-quiz.test.ts`.
+- **The Qal is shown in groups** (`QalGroup`, `qalGrid`): a finite conjugation
+  each, the two infinitives together and the two participles together. The
+  Grammar Reference's tabs and the paradigm quiz's tabs are the same groups,
+  drawn from the same grids. 6e will need the same per stem.
+- **The new conjugations have a strong (קטל) and a begadkephat (כתב) column**,
+  as the qatal and yiqtol do. כתב is common in the text, so the parse-aware
+  gate has something to check; קטל is barely attested and is listed as such.
+- **The parse-aware gate is `attestation()` in `src/test/corpus.ts`**, with the
+  app-to-OSHB mapping beside it (`OSHB_STEM`, `OSHB_CONJUGATION`). 6e adds the
+  derived stems' letters there.
 
 ### What ports directly
 - Section-nav sidebar pattern
@@ -889,10 +907,10 @@ The following modules from greek.tools can be copied with minimal or zero change
 | 8c | 4c | Reader: shell — book/chapter nav, RTL verses | Medium | OSHB pipeline | ✅ Done | #119 |
 | 8d | 4d | Reader: word popup — morphemes, parse, gloss | Medium | 4a, 4b, 4c | ✅ Done | #120 |
 | 8e | 4e | Reader: cantillation toggle + studied-word highlighting | Low | 4c | ✅ Done | #121 |
-| 9 | 6 | Grammar Reference | High (content-heavy) — broken into 6a–6g by section | None | In progress — 6a, 6b, 6c done | #79 |
+| 9 | 6 | Grammar Reference | High (content-heavy) — broken into 6a–6g by section | None | In progress — 6a–6d done | #79 |
 | 9c | 6c | Grammar: pronouns + pronominal suffixes | Medium | 6b | ✅ Done | #152 |
-| 9d | 6d | Grammar: rest of the Qal + waw consecutive | Medium | 6a | Next | #153 |
-| 9e | 6e | Grammar: derived stems | High | 6d | Queued | #154 |
+| 9d | 6d | Grammar: rest of the Qal + waw consecutive | Medium | 6a | ✅ Done | #153 |
+| 9e | 6e | Grammar: derived stems | High | 6d | Next | #154 |
 | 9f | 6f | Grammar: weak-verb overlay + suffixes on verbs | High | 6d, 6e | Queued | #155 |
 | 9g | 6g | Grammar: numerals | Low | 6b | Queued | #156 |
 | 10 | 7 | Paradigm Quiz | Medium | Phase 1, Phase 6 | ✅ Done (7a–7d); stems added as the course reaches them | #80 |

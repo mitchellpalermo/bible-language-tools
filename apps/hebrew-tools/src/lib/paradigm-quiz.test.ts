@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { BARE_SUFFIXES, SUFFIX_PGNS, suffixParadigms } from '../data/pronominal-suffixes';
 import { LADDER_RUNG_IDS, ladderRungs } from '../data/suffix-ladder';
 import { getParadigm, type VerbParadigm, verbParadigms } from '../data/verb-paradigms';
+import PRE_6D_TABLES from './fixtures/paradigm-tables-pre-6d.json';
 import {
   ALL_CATEGORIES,
+  buildGridTable,
   buildLadderTable,
   buildStemTable,
   buildSummaryTable,
@@ -15,7 +17,7 @@ import {
   countsAsCorrect,
   getQuizCells,
   gradeCell,
-  isConjugation,
+  isQalGroup,
 } from './paradigm-quiz';
 
 function paradigm(id: string): VerbParadigm {
@@ -128,12 +130,70 @@ function fail(): never {
 describe('buildTableModels', () => {
   const tables = buildTableModels();
 
-  it('builds a verb table for every paradigm and a summary per conjugation', () => {
-    const verbTables = tables.filter((t) => isConjugation(t.category));
-    expect(verbTables.filter((t) => t.layout === 'verb')).toHaveLength(verbParadigms.length);
+  it('builds a verb table for every finite paradigm, and a summary per Qal group', () => {
+    const verbTables = tables.filter((t) => isQalGroup(t.category));
+    const finite = verbParadigms.filter((p) => !/^(infinitive|participle)-/.test(p.conjugation));
+    expect(verbTables.filter((t) => t.layout === 'verb')).toHaveLength(finite.length);
     expect(verbTables.filter((t) => t.layout === 'summary').map((t) => t.category)).toEqual(
-      ALL_CATEGORIES.filter(isConjugation),
+      ALL_CATEGORIES.filter(isQalGroup),
     );
+  });
+
+  it('leaves every table that existed before 6d exactly as it was, cell ids and all', () => {
+    // Captured from main before #153. A cell id is an SRS key and an attempt-log
+    // concept: a changed one strands a student's progress on that form.
+    const byId = new Map(tables.map((t) => [t.id, t]));
+    for (const before of PRE_6D_TABLES) {
+      const now = byId.get(before.id);
+      expect(now, before.id).toBeDefined();
+      expect(
+        {
+          category: now?.category,
+          label: now?.label,
+          cols: now?.cols,
+          ids: now ? getQuizCells(now).map((c) => c.id) : [],
+        },
+        before.id,
+      ).toEqual({
+        category: before.category,
+        label: before.label,
+        cols: before.cols,
+        ids: before.ids,
+      });
+    }
+  });
+
+  it('gives the imperative its two second-person rows', () => {
+    const table = buildVerbTable(paradigm('qal-imperative-strong'));
+    expect(table.category).toBe('imperative');
+    expect(table.rows.map((r) => r.label)).toEqual(['2m', '2f']);
+    expect(table.rows[0].ids).toEqual(['qal-imperative-strong:2ms', 'qal-imperative-strong:2mp']);
+  });
+
+  it('sets the infinitives and the participles out as one table each', () => {
+    const infinitives = buildGridTable('infinitives');
+    expect(infinitives.id).toBe('qal-infinitives');
+    expect(infinitives.cols).toEqual(['Strong (קטל)', 'Begadkephat (כתב)']);
+    expect(infinitives.rows.map((r) => r.label)).toEqual(['Construct', 'Absolute']);
+    expect(infinitives.rows[1].ids).toEqual([
+      'qal-infinitive-absolute-strong:inf',
+      'qal-infinitive-absolute-begadkephat:inf',
+    ]);
+    expect(infinitives.rows[0].answers).toEqual(['קְטֹל', 'כְּתֹב']);
+
+    const participles = buildGridTable('participles');
+    expect(participles.cols[0]).toBe('Active · Strong (קטל)');
+    expect(participles.cols[3]).toBe('Passive · Begadkephat (כתב)');
+    expect(participles.rows[1].ids?.[0]).toBe('qal-participle-active-strong:fs');
+    // The stress mark is a teaching aid, never part of the answer.
+    expect(participles.rows[1].answers[0]).toBe('קֹטֶלֶת');
+    expect(getQuizCells(participles)).toHaveLength(16);
+  });
+
+  it('calls the new tabs Qal ones', () => {
+    expect(categoryTabLabel('weqatal')).toBe('Qal Weqatal');
+    expect(categoryTabLabel('infinitives')).toBe('Qal Infinitives');
+    expect(categoryTabLabel('participles')).toBe('Qal Participles');
   });
 
   it('builds one stems table: a row per stem name, a column per root', () => {

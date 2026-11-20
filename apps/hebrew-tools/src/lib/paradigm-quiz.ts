@@ -30,11 +30,17 @@ import {
 import { type LadderRung, ladderRungs } from '../data/suffix-ladder';
 import {
   answerForm,
+  CONJUGATION_KEYS,
   CONJUGATION_LABELS,
-  CONJUGATION_PGNS,
-  type Conjugation,
+  type FiniteConjugation,
+  type FormKey,
+  groupOf,
   type Pgn,
   paradigmsFor,
+  QAL_GROUP_LABELS,
+  QAL_GROUPS,
+  type QalGroup,
+  qalGrid,
   STEM_LABELS,
   VERB_CLASS_LABELS,
   type VerbClass,
@@ -59,36 +65,30 @@ export {
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 /**
- * Tables are grouped by conjugation, which is how the course meets them. The
- * pronominal suffixes on nouns sit in a group of their own, and the suffix
- * ladder (#186) in another.
+ * Tables are grouped as the Grammar Reference groups the Qal (`QalGroup`): a
+ * finite conjugation each, and the infinitives and the participles each as
+ * one. The pronominal suffixes on nouns sit in a group of their own, and the
+ * suffix ladder (#186) in another.
  */
-export type Category = Conjugation | 'stems' | 'suffixes' | 'ladder';
+export type Category = QalGroup | 'stems' | 'suffixes' | 'ladder';
 
-export const ALL_CATEGORIES: Category[] = [
-  'qatal',
-  'yiqtol',
-  'wayyiqtol',
-  'stems',
-  'suffixes',
-  'ladder',
-];
+export const ALL_CATEGORIES: Category[] = [...QAL_GROUPS, 'stems', 'suffixes', 'ladder'];
 
-/** A conjugation tab holds Qal verb tables; the other tabs hold something else. */
-export function isConjugation(category: Category): category is Conjugation {
+/** A Qal tab holds Qal verb tables; the other tabs hold something else. */
+export function isQalGroup(category: Category): category is QalGroup {
   return category !== 'stems' && category !== 'suffixes' && category !== 'ladder';
 }
 
 export const CATEGORY_LABELS: Record<Category, string> = {
-  ...CONJUGATION_LABELS,
+  ...QAL_GROUP_LABELS,
   stems: 'Stem names',
   suffixes: 'Noun suffixes',
   ladder: 'Suffix ladder',
 };
 
-/** The tab text: a conjugation is a Qal one, the suffix groups are not. */
+/** The tab text: a Qal group says so, the suffix groups do not. */
 export function categoryTabLabel(category: Category): string {
-  return isConjugation(category) ? `Qal ${CATEGORY_LABELS[category]}` : CATEGORY_LABELS[category];
+  return isQalGroup(category) ? `Qal ${CATEGORY_LABELS[category]}` : CATEGORY_LABELS[category];
 }
 
 /**
@@ -110,9 +110,13 @@ export type CellResult = AnswerResult;
 
 // ─── Cell identity ────────────────────────────────────────────────────────────
 
-/** A form's identity across every table it appears in. */
-export function cellId(paradigmId: string, pgn: Pgn): string {
-  return `${paradigmId}:${pgn}`;
+/**
+ * A form's identity across every table it appears in: `<paradigm>:<key>`,
+ * where the key is a PGN, a participle's gender-number or `inf`. SRS cards and
+ * the attempt log are keyed by it, so neither part may ever be renamed.
+ */
+export function cellId(paradigmId: string, key: FormKey): string {
+  return `${paradigmId}:${key}`;
 }
 
 // ─── Table builders ───────────────────────────────────────────────────────────
@@ -149,9 +153,16 @@ function verbLabel(p: VerbParadigm): string {
   return `${p.root} (${/^[A-Z][a-z]+$/.test(className) ? className.toLowerCase() : className})`;
 }
 
-/** One verb as person × number: rows 3m–1c, columns Singular and Plural. */
+/**
+ * One finite verb as person × number: rows 3m–1c, columns Singular and Plural.
+ * A row the conjugation has no form for is left out, so the imperative is its
+ * two second-person rows.
+ */
 export function buildVerbTable(paradigm: VerbParadigm): TableModel {
-  const rows: TableRow[] = PERSON_ROWS.map((row) => {
+  const personRows = PERSON_ROWS.filter((row) =>
+    [row.singular, ...row.plural].some((pgn) => paradigm.forms[pgn] !== undefined),
+  );
+  const rows: TableRow[] = personRows.map((row) => {
     const pgns: (Pgn | undefined)[] = [
       row.singular,
       row.plural.find((pgn) => paradigm.forms[pgn] !== undefined),
@@ -166,7 +177,7 @@ export function buildVerbTable(paradigm: VerbParadigm): TableModel {
   return {
     id: paradigm.id,
     label: `${conjugationLabel(paradigm)} — ${verbLabel(paradigm)}`,
-    category: paradigm.conjugation,
+    category: groupOf(paradigm.conjugation),
     layout: 'verb',
     detail: `“${paradigm.gloss}”`,
     cols: ['Singular', 'Plural'],
@@ -179,7 +190,7 @@ export function buildVerbTable(paradigm: VerbParadigm): TableModel {
  * order, one column per class. Undefined when fewer than two classes have the
  * conjugation — a one-column summary is just the verb table over again.
  */
-export function buildSummaryTable(conjugation: Conjugation): TableModel | undefined {
+export function buildSummaryTable(conjugation: FiniteConjugation): TableModel | undefined {
   const paradigms = SUMMARY_CLASSES.map((verbClass) =>
     paradigmsFor(conjugation).find((p) => p.verbClass === verbClass),
   ).filter((p): p is VerbParadigm => p !== undefined);
@@ -192,7 +203,7 @@ export function buildSummaryTable(conjugation: Conjugation): TableModel | undefi
     layout: 'summary',
     detail: 'All classes side by side',
     cols: paradigms.map((p) => `${VERB_CLASS_LABELS[p.verbClass]} (${p.root})`),
-    rows: CONJUGATION_PGNS[conjugation].map((pgn) => ({
+    rows: CONJUGATION_KEYS[conjugation].map((pgn) => ({
       label: pgn,
       answers: paradigms.map((p) => formAt(p, pgn)),
       ids: paradigms.map((p) => (p.forms[pgn] ? cellId(p.id, pgn) : null)),
@@ -200,7 +211,7 @@ export function buildSummaryTable(conjugation: Conjugation): TableModel | undefi
   };
 }
 
-function formAt(paradigm: VerbParadigm, pgn: Pgn | undefined): string | null {
+function formAt(paradigm: VerbParadigm, pgn: FormKey | undefined): string | null {
   const form = pgn ? paradigm.forms[pgn] : undefined;
   return form ? answerForm(form) : null;
 }
@@ -288,13 +299,41 @@ export function buildLadderTable(rung: LadderRung, index: number): TableModel {
 }
 
 /**
- * Build all available TableModels: each conjugation's summary, then its verbs;
- * then the stem names; then suffixes; then the ladder, in rung order.
+ * The infinitives or the participles as one table: the Grammar Reference's
+ * grid (`qalGrid`), with every column's verb named in its header.
+ */
+export function buildGridTable(group: 'infinitives' | 'participles'): TableModel {
+  const grid = qalGrid(group);
+  return {
+    id: `qal-${group}`,
+    label: `Qal ${CATEGORY_LABELS[group]}`,
+    category: group,
+    layout: 'summary',
+    detail: group === 'infinitives' ? 'Construct and absolute' : 'Active and passive',
+    cols: grid.columns.map(
+      ({ paradigm, heading }) =>
+        `${heading ? `${heading} · ` : ''}${VERB_CLASS_LABELS[paradigm.verbClass]} (${paradigm.root})`,
+    ),
+    rows: grid.rows.map((row) => ({
+      label: row.label,
+      answers: row.cells.map((cell) => (cell ? formAt(cell.paradigm, cell.key) : null)),
+      ids: row.cells.map((cell) =>
+        cell && cell.paradigm.forms[cell.key] ? cellId(cell.paradigm.id, cell.key) : null,
+      ),
+    })),
+  };
+}
+
+/**
+ * Build all available TableModels: each finite Qal conjugation's summary, then
+ * its verbs; the infinitives and the participles as one table each; then the
+ * stem names; then suffixes; then the ladder, in rung order.
  */
 export function buildTableModels(): TableModel[] {
-  const verbTables = ALL_CATEGORIES.filter(isConjugation).flatMap((conjugation) => {
-    const summary = buildSummaryTable(conjugation);
-    const verbs = verbParadigms.filter((p) => p.conjugation === conjugation).map(buildVerbTable);
+  const verbTables = QAL_GROUPS.flatMap((group) => {
+    if (group === 'infinitives' || group === 'participles') return [buildGridTable(group)];
+    const summary = buildSummaryTable(group);
+    const verbs = verbParadigms.filter((p) => p.conjugation === group).map(buildVerbTable);
     return summary ? [summary, ...verbs] : verbs;
   });
   return [

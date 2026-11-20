@@ -977,9 +977,15 @@ function ParadigmQuizInner({ session }: { session?: ParadigmSession }) {
         register={register}
       />
 
-      {table.layout === 'verb' && table.category === 'qatal' && (
+      {table.layout === 'verb' && (table.category === 'qatal' || table.category === 'weqatal') && (
         <p className="text-xs text-text-muted">
-          The qatal has one third-person plural, the 3cp, written on the 3m row.
+          The {table.category} has one third-person plural, the 3cp, written on the 3m row.
+        </p>
+      )}
+
+      {table.category === 'participles' && (
+        <p className="text-xs text-text-muted">
+          A participle inflects like a noun, for gender and number only.
         </p>
       )}
 
