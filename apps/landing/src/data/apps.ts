@@ -25,7 +25,8 @@ export const apps: AppEntry[] = [
     glyph: 'α',
     glyphLang: 'grc',
     dir: 'ltr',
-    description: 'Vocabulary, paradigms and parsing, drilled against the Greek New Testament.',
+    description:
+      'Flashcards, paradigms, parsing and a reader, all built on the text of the Greek New Testament.',
     features: ['Flashcards', 'Paradigms', 'Parsing', 'Reader'],
     url: 'https://greek.tools',
   },
