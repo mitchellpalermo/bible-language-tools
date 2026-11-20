@@ -73,15 +73,19 @@ import {
   suffixNotes,
   suffixParadigms,
 } from '../data/grammar-pronominal';
+import { QAL_GROUP_NOTES, wawConsecutiveNotes } from '../data/grammar-verbal';
 import {
   CONJUGATION_LABELS,
-  CONJUGATION_PGNS,
-  type Conjugation,
-  type Pgn,
-  paradigmsFor,
+  type FormKey,
+  formKeyLabel,
   pgnLabel,
+  QAL_GROUP_LABELS,
+  QAL_GROUPS,
+  type QalGroup,
+  qalGrid,
   STEM_LABELS,
   VERB_CLASS_LABELS,
+  type VerbGrid,
   type VerbParadigm,
 } from '../data/verb-paradigms';
 import ErrorBoundary from './ErrorBoundary';
@@ -98,11 +102,10 @@ export const NAV_SECTIONS = [
   { id: 'pronouns', label: 'Pronouns' },
   { id: 'suffixes', label: 'Pronominal Suffixes' },
   { id: 'qal-verb', label: 'Qal Verb' },
+  { id: 'waw-consecutive', label: 'Waw Consecutive' },
 ] as const;
 
 type SectionId = (typeof NAV_SECTIONS)[number]['id'];
-
-const CONJUGATIONS = Object.keys(CONJUGATION_LABELS) as Conjugation[];
 
 // ─── Building blocks ──────────────────────────────────────────────────────────
 
@@ -859,11 +862,16 @@ function SuffixesSection() {
 
 // ─── Qal verb ─────────────────────────────────────────────────────────────────
 
-/** "קטל (strong)" over "kill" — or just the root, for a verb that is its own class. */
-function ParadigmHeader({ paradigm }: { paradigm: VerbParadigm }) {
+/**
+ * A column's verb: "קטל (strong)" over "kill", or just the root for a verb that
+ * is its own class, under a heading ("Active") where the root does not tell
+ * two columns apart.
+ */
+function ParadigmHeader({ paradigm, heading }: { paradigm: VerbParadigm; heading?: string }) {
   const className = VERB_CLASS_LABELS[paradigm.verbClass];
   return (
     <th scope="col" className={`${TH} normal-case tracking-normal`}>
+      {heading && <span className="block uppercase tracking-wider">{heading}</span>}
       <Hebrew className="text-base font-bold">{paradigm.root}</Hebrew>
       <span className="block font-normal">
         {className === paradigm.root ? (
@@ -879,18 +887,91 @@ function ParadigmHeader({ paradigm }: { paradigm: VerbParadigm }) {
   );
 }
 
-function describeForm(paradigm: VerbParadigm, pgn: Pgn): string {
-  return `${STEM_LABELS[paradigm.stem]} ${paradigm.conjugation} ${pgn} — ${pgnLabel(pgn)}, from ${paradigm.root} (${paradigm.gloss}). ${paradigm.source}.`;
+/** "Qal qatal 1cs — 1st common singular, from היה (be). Table 10.8." */
+export function describeForm(paradigm: VerbParadigm, key: FormKey): string {
+  // "Qatal (Perfect)" reads as "qatal" in a sentence.
+  const name = CONJUGATION_LABELS[paradigm.conjugation].replace(/ \(.*\)$/, '').toLowerCase();
+  const what = key === 'inf' ? name : `${name} ${key} — ${formKeyLabel(key)}`;
+  return `${STEM_LABELS[paradigm.stem]} ${what}, from ${paradigm.root} (${paradigm.gloss}). ${paradigm.source}.`;
+}
+
+/**
+ * One grid of Qal forms (`qalGrid`), with the line that says what a tapped or
+ * hovered form is. The Qal Verb tabs and the Waw Consecutive section both
+ * draw these.
+ */
+function VerbGridCard({ title, grid, notes }: { title: string; grid: VerbGrid; notes?: string[] }) {
+  const [description, setDescription] = useState<string | null>(null);
+  return (
+    <Card title={title}>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-primary/5">
+              <th scope="col" className={TH}>
+                <span className="sr-only">Form</span>
+              </th>
+              {grid.columns.map(({ paradigm, heading }) => (
+                <ParadigmHeader key={paradigm.id} paradigm={paradigm} heading={heading} />
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {grid.rows.map((row) => (
+              <tr key={row.label} className="border-t border-primary/5">
+                <th
+                  scope="row"
+                  title={row.title}
+                  className={`${TD} text-left text-xs font-semibold text-text-muted w-12`}
+                >
+                  {row.label}
+                </th>
+                {row.cells.map((cell, i) => {
+                  const form = cell ? cell.paradigm.forms[cell.key] : undefined;
+                  return (
+                    <td key={grid.columns[i].paradigm.id} className={`${TD} whitespace-nowrap`}>
+                      {cell && form && (
+                        <button
+                          type="button"
+                          aria-label={`${form} — ${row.title}`}
+                          onClick={() => setDescription(describeForm(cell.paradigm, cell.key))}
+                          onMouseEnter={() => setDescription(describeForm(cell.paradigm, cell.key))}
+                          className="rounded px-1 -mx-1 hover:bg-accent/15 transition-colors"
+                          style={{ touchAction: 'manipulation' }}
+                        >
+                          <Hebrew className="text-lg sm:text-xl leading-tight">{form}</Hebrew>
+                        </button>
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p
+        aria-live="polite"
+        className={`px-4 py-2 text-xs text-text-muted border-t border-primary/5 min-h-8 ${
+          description ? '' : 'opacity-60'
+        }`}
+      >
+        {description ?? 'Tap or hover over a form to see what it is.'}
+      </p>
+      {notes && (
+        <div className="border-t border-primary/5">
+          <Notes notes={notes} />
+        </div>
+      )}
+    </Card>
+  );
 }
 
 function QalVerbSection() {
-  const [conjugation, setConjugation] = useState<Conjugation>('qatal');
-  const [description, setDescription] = useState<string | null>(null);
-  const paradigms = paradigmsFor(conjugation);
+  const [group, setGroup] = useState<QalGroup>('qatal');
 
-  const select = (next: Conjugation) => {
-    setConjugation(next);
-    setDescription(null);
+  const select = (next: QalGroup) => {
+    setGroup(next);
     posthog.capture('hebrew_grammar_conjugation_viewed', { conjugation: next });
   };
 
@@ -898,91 +979,61 @@ function QalVerbSection() {
     <section id="qal-verb" aria-labelledby="qal-verb-heading" className="mb-16 scroll-mt-16">
       <SectionHeading id="qal-verb">Qal Verb</SectionHeading>
       <p className="text-sm mb-6 text-text-muted">
-        The strong verb beside the classes that depart from it. Forms are printed with the
-        textbook&rsquo;s stress mark where the accent falls before the last syllable.
+        The strong verb beside the classes that depart from it. Forms are printed with a stress mark
+        wherever the accent is not on the last syllable.
       </p>
 
       <div role="tablist" aria-label="Conjugation" className="flex flex-wrap gap-2 mb-4">
-        {CONJUGATIONS.map((id) => (
+        {QAL_GROUPS.map((id) => (
           <button
             key={id}
             type="button"
             role="tab"
             id={`conjugation-tab-${id}`}
-            aria-selected={conjugation === id}
+            aria-selected={group === id}
             aria-controls="conjugation-panel"
             onClick={() => select(id)}
             className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              conjugation === id
+              group === id
                 ? 'bg-primary text-white'
                 : 'bg-primary/10 text-text-muted hover:bg-primary/15'
             }`}
           >
-            {CONJUGATION_LABELS[id]}
+            {QAL_GROUP_LABELS[id]}
           </button>
         ))}
       </div>
 
-      <div
-        role="tabpanel"
-        id="conjugation-panel"
-        aria-labelledby={`conjugation-tab-${conjugation}`}
-      >
-        <Card title={`${STEM_LABELS.qal} ${CONJUGATION_LABELS[conjugation]}`}>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-primary/5">
-                  <th scope="col" className={TH}>
-                    <span className="sr-only">Person, gender, number</span>
-                  </th>
-                  {paradigms.map((paradigm) => (
-                    <ParadigmHeader key={paradigm.id} paradigm={paradigm} />
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {CONJUGATION_PGNS[conjugation].map((pgn) => (
-                  <tr key={pgn} className="border-t border-primary/5">
-                    <th
-                      scope="row"
-                      title={pgnLabel(pgn)}
-                      className={`${TD} text-left text-xs font-semibold text-text-muted w-12`}
-                    >
-                      {pgn}
-                    </th>
-                    {paradigms.map((paradigm) => {
-                      const form = paradigm.forms[pgn];
-                      return (
-                        <td key={paradigm.id} className={`${TD} whitespace-nowrap`}>
-                          {form && (
-                            <button
-                              type="button"
-                              aria-label={`${form} — ${pgnLabel(pgn)}`}
-                              onClick={() => setDescription(describeForm(paradigm, pgn))}
-                              onMouseEnter={() => setDescription(describeForm(paradigm, pgn))}
-                              className="rounded px-1 -mx-1 hover:bg-accent/15 transition-colors"
-                              style={{ touchAction: 'manipulation' }}
-                            >
-                              <Hebrew className="text-lg sm:text-xl leading-tight">{form}</Hebrew>
-                            </button>
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p
-            aria-live="polite"
-            className={`px-4 py-2 text-xs text-text-muted border-t border-primary/5 min-h-8 ${
-              description ? '' : 'opacity-60'
-            }`}
-          >
-            {description ?? 'Tap or hover over a form to see what it is.'}
-          </p>
+      <div role="tabpanel" id="conjugation-panel" aria-labelledby={`conjugation-tab-${group}`}>
+        {/* Keyed, so a new tab starts with no form described. */}
+        <VerbGridCard
+          key={group}
+          title={`${STEM_LABELS.qal} ${QAL_GROUP_LABELS[group]}`}
+          grid={qalGrid(group)}
+          notes={QAL_GROUP_NOTES[group]}
+        />
+      </div>
+    </section>
+  );
+}
+
+function WawConsecutiveSection() {
+  return (
+    <section
+      id="waw-consecutive"
+      aria-labelledby="waw-consecutive-heading"
+      className="mb-16 scroll-mt-16"
+    >
+      <SectionHeading id="waw-consecutive">Waw Consecutive</SectionHeading>
+      <p className="text-sm mb-6 text-text-muted">
+        Two conjugations made by joining a waw to the verb. They are how a run of events is told in
+        sequence, the wayyiqtol in past narrative and the weqatal in what is still to come.
+      </p>
+      <div className="space-y-6">
+        <VerbGridCard title={`${STEM_LABELS.qal} Wayyiqtol`} grid={qalGrid('wayyiqtol')} />
+        <VerbGridCard title={`${STEM_LABELS.qal} Weqatal`} grid={qalGrid('weqatal')} />
+        <Card title="How they work">
+          <Notes notes={wawConsecutiveNotes} />
         </Card>
       </div>
     </section>
@@ -1057,6 +1108,7 @@ function GrammarReferenceInner() {
         <PronounsSection />
         <SuffixesSection />
         <QalVerbSection />
+        <WawConsecutiveSection />
       </div>
     </div>
   );
